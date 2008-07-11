@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
+	<classpathentry kind="src" output="target/classes" path="src/main/resources"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-2.1.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-sources-2.1.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.apache.log4j/com.springsource.org.apache.log4j/1.2.15/com.springsource.org.apache.log4j-1.2.15.jar" sourcepath="/IVY_CACHE/org.apache.log4j/com.springsource.org.apache.log4j/1.2.15/com.springsource.org.apache.log4j-sources-1.2.15.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar" sourcepath="/IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-sources-2.3.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.jboss.el/com.springsource.org.jboss.el/2.0.0.GA/com.springsource.org.jboss.el-2.0.0.GA.jar" sourcepath="/IVY_CACHE/org.jboss.el/com.springsource.org.jboss.el/2.0.0.GA/com.springsource.org.jboss.el-sources-2.0.0.GA.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.junit/3.8.2/com.springsource.junit-3.8.2.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.junit/3.8.2/com.springsource.junit-sources-3.8.2.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.springframework/org.springframework.beans/2.5.4.A/org.springframework.beans-2.5.4.A.jar" sourcepath="/IVY_CACHE/org.springframework/org.springframework.beans/2.5.4.A/org.springframework.beans-sources-2.5.4.A.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.springframework/org.springframework.context/2.5.4.A/org.springframework.context-2.5.4.A.jar" sourcepath="/IVY_CACHE/org.springframework/org.springframework.context/2.5.4.A/org.springframework.context-sources-2.5.4.A.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.springframework/org.springframework.core/2.5.4.A/org.springframework.core-2.5.4.A.jar" sourcepath="/IVY_CACHE/org.springframework/org.springframework.core/2.5.4.A/org.springframework.core-sources-2.5.4.A.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.ognl/com.springsource.org.ognl/2.7.3/com.springsource.org.ognl-2.7.3.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-3.3.0.ga.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
