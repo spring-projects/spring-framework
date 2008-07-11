@@ -1,0 +1,6 @@
+SPRING FRAMEWORK
+=========================
+http://www.springframework.org
+
+Changes in version 3.0.0.M1 ()
+-------------------------------------

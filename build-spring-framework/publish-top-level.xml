@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="publish-top-level">
+
+	<target name="publish" depends="publish-multi-bundle.publish, publish-package"
+			description="Publish package, Ivy, and Maven artifacts"/>
+
+</project>
