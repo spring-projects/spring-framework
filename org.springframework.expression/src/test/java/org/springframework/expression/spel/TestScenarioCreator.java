@@ -108,7 +108,7 @@ public class TestScenarioCreator {
 	/**
 	 * Create a context configuration that tests can reference into using the
 	 * @() language construct.
-	 * @(context:objectName) will index a particular object within a particular context. The 'root' context will be used
+	 * at(context:objectName) will index a particular object within a particular context. The 'root' context will be used
 	 * for references where no context is specified, eg.
 	 * @(orange).
 	 * 

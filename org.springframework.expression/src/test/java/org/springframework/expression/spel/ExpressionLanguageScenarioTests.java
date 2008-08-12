@@ -389,6 +389,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 
 			Expression expr = parser.parseExpression("#functionTakesColour('orange')");
 			try {
+				@SuppressWarnings("unused")
 				Object value = expr.getValue(ctx);
 				fail("Should have failed, no type converter registered");
 			} catch (EvaluationException ee) {}
