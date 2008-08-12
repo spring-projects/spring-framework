@@ -86,7 +86,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		while (st.hasMoreTokens()) {
 			String element = st.nextToken();
 			try {
-				urls.add(new File(element).toURL());
+				urls.add(new File(element).toURI().toURL());
 			} catch (MalformedURLException e) {
 				throw new RuntimeException("Invalid element in classpath " + element);
 			}
