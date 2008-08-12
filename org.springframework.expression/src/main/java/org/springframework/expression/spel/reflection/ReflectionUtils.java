@@ -79,9 +79,6 @@ public class ReflectionUtils {
 					if (matchInfo.kind == ArgsMatchKind.EXACT) {
 						return new DiscoveredMethod(method, null);
 					} else if (matchInfo.kind == ArgsMatchKind.CLOSE) {
-						if (matchRequiringConversion!=null) {
-							int stop = 1;
-						}
 						closeMatch = method;
 					} else if (matchInfo.kind == ArgsMatchKind.REQUIRES_CONVERSION) {
 						if (matchRequiringConversion!=null) {
