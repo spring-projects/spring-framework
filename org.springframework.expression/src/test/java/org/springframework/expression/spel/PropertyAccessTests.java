@@ -17,8 +17,8 @@ package org.springframework.expression.spel;
 
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.spel.reflection.ReflectionPropertyResolver;
 import org.springframework.expression.spel.standard.StandardEvaluationContext;
@@ -69,7 +69,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 		int flibbles = 7;
 		
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[]{String.class};
 		}
 
