@@ -16,8 +16,8 @@
 package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
 import org.springframework.expression.spel.ast.SpelNode;
 import org.springframework.expression.spel.standard.StandardEvaluationContext;
 
@@ -114,7 +114,6 @@ public class SpelExpression implements Expression {
 	 * 
 	 * @param context the context in which to evaluate the expression
 	 * @param value the new value
-	 * @return the previous value
 	 * @throws SpelException if there is a problem with evaluation of the expression.
 	 */
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
