@@ -72,10 +72,10 @@ public class SpringExpressionsLexerExtender extends SpringExpressionsLexer {
 		// by the recover() method above.
 	}
 
-	private String getTokenForId(int id) {
-		if (id == -1)
-			return "EOF";
-		return getTokenNames()[id];
-	}
+//	private String getTokenForId(int id) {
+//		if (id == -1)
+//			return "EOF";
+//		return getTokenNames()[id];
+//	}
 
 }
