@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>spring-binding</name>
+	<name>org.springframework.expression</name>
 	<comment></comment>
 	<projects>
 		<project>common-build</project>
