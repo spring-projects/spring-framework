@@ -20,8 +20,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.springframework.expression.Expression;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.StandardEvaluationContext;
 
@@ -94,7 +94,7 @@ public abstract class ExpressionTestCase extends TestCase {
 
 	public void evaluateAndAskForReturnType(String expression, Object expectedValue, Class<?> expectedResultType) {
 		try {
-			SpelExpression expr = (SpelExpression) parser.parseExpression(expression);
+			SpelExpression expr = parser.parseExpression(expression);
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -142,7 +142,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	 */
 	public void eval(String expression, Object expectedValue, Class<?> expectedClassOfResult, boolean shouldBeWritable) {
 		try {
-			SpelExpression e = (SpelExpression) parser.parseExpression(expression);
+			SpelExpression e = parser.parseExpression(expression);
 			if (e == null) {
 				fail("Parser returned null for expression");
 			}
@@ -192,7 +192,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	 */
 	protected void evaluateAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
 		try {
-			Expression expr = (Expression) parser.parseExpression(expression);
+			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
