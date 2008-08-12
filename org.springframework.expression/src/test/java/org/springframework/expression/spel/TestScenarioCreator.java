@@ -20,7 +20,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -97,7 +97,9 @@ public class TestScenarioCreator {
 	 * @param testContext the evaluation context in which to set the root object
 	 */
 	private static void setupRootContextObject(StandardEvaluationContext testContext) {
-		Inventor tesla = new Inventor("Nikola Tesla", new Date(1856, 7, 9), "Serbian");
+		GregorianCalendar c = new GregorianCalendar();
+		c.set(1856, 7, 9);
+		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
 		tesla.setInventions(new String[] { "Telephone repeater", "Rotating magnetic field principle",
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
