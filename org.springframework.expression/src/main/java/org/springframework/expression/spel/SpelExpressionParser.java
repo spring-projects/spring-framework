@@ -18,7 +18,6 @@ package org.springframework.expression.spel;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
@@ -60,7 +59,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	 * @param expressionString the expression to parse
 	 * @param context the parser context in which to perform the parse
 	 * @return a parsed expression object
-	 * @throws EvaluationException if the expression is invalid
+	 * @throws ParseException if the expression is invalid
 	 */
 	protected Expression doParseExpression(String expressionString, ParserContext context)
 			throws ParseException {
