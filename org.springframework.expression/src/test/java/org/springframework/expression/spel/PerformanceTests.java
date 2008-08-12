@@ -42,7 +42,7 @@ public class PerformanceTests extends TestCase {
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("getPlaceOfBirth().getCity()");
+			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 			if (expr == null)
 				fail("Parser returned null for expression");
 			Object value = expr.getValue(eContext);
@@ -50,7 +50,7 @@ public class PerformanceTests extends TestCase {
 		endtime = System.currentTimeMillis();
 		long freshParseTime = endtime - starttime;
 
-		Expression expr = (Expression) parser.parseExpression("getPlaceOfBirth().getCity()");
+		Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 		if (expr == null)
 			fail("Parser returned null for expression");
 		starttime = System.currentTimeMillis();
@@ -82,7 +82,7 @@ public class PerformanceTests extends TestCase {
 
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("new Integer(5)");
+			Expression expr = parser.parseExpression("new Integer(5)");
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -92,7 +92,7 @@ public class PerformanceTests extends TestCase {
 		// ITERATIONS calls, parsing fresh each time
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("new Integer(5)");
+			Expression expr = parser.parseExpression("new Integer(5)");
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -102,7 +102,7 @@ public class PerformanceTests extends TestCase {
 		long freshParseTime = endtime - starttime;
 
 		// ITERATIONS calls, parsing once and using cached executor
-		Expression expr = (Expression) parser.parseExpression("new Integer(5)");
+		Expression expr =  parser.parseExpression("new Integer(5)");
 		if (expr == null) {
 			fail("Parser returned null for expression");
 		}
@@ -119,7 +119,7 @@ public class PerformanceTests extends TestCase {
 		long cachingOffReuseTime = endtime - starttime;
 
 		// ITERATIONS calls, parsing once and using cached executor
-		expr = (Expression) parser.parseExpression("new Integer(5)");
+		expr =  parser.parseExpression("new Integer(5)");
 		if (expr == null) {
 			fail("Parser returned null for expression");
 		}
@@ -157,7 +157,7 @@ public class PerformanceTests extends TestCase {
 
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("getPlaceOfBirth().city");
+			Expression expr =  parser.parseExpression("getPlaceOfBirth().city");
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -167,7 +167,7 @@ public class PerformanceTests extends TestCase {
 		// ITERATIONS calls, parsing fresh each time
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("getPlaceOfBirth().city");
+			Expression expr =  parser.parseExpression("getPlaceOfBirth().city");
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -177,7 +177,7 @@ public class PerformanceTests extends TestCase {
 		long freshParseTime = endtime - starttime;
 
 		// ITERATIONS calls, parsing once and using cached executor
-		Expression expr = (Expression) parser.parseExpression("getPlaceOfBirth().city");
+		Expression expr =  parser.parseExpression("getPlaceOfBirth().city");
 		if (expr == null) {
 			fail("Parser returned null for expression");
 		}
@@ -194,7 +194,7 @@ public class PerformanceTests extends TestCase {
 		long cachingOffReuseTime = endtime - starttime;
 
 		// ITERATIONS calls, parsing once and using cached executor
-		expr = (Expression) parser.parseExpression("getPlaceOfBirth().city");
+		expr =  parser.parseExpression("getPlaceOfBirth().city");
 		if (expr == null) {
 			fail("Parser returned null for expression");
 		}
@@ -231,7 +231,7 @@ public class PerformanceTests extends TestCase {
 
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("randomField='Andy'");
+			Expression expr =  parser.parseExpression("randomField='Andy'");
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -241,7 +241,7 @@ public class PerformanceTests extends TestCase {
 		// ITERATIONS calls, parsing fresh each time
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
-			Expression expr = (Expression) parser.parseExpression("randomField='Andy'");
+			Expression expr = parser.parseExpression("randomField='Andy'");
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -251,7 +251,7 @@ public class PerformanceTests extends TestCase {
 		long freshParseTime = endtime - starttime;
 
 		// ITERATIONS calls, parsing once and using cached executor
-		Expression expr = (Expression) parser.parseExpression("randomField='Andy'");
+		Expression expr = parser.parseExpression("randomField='Andy'");
 		if (expr == null) {
 			fail("Parser returned null for expression");
 		}
@@ -268,7 +268,7 @@ public class PerformanceTests extends TestCase {
 		long cachingOffReuseTime = endtime - starttime;
 
 		// ITERATIONS calls, parsing once and using cached executor
-		expr = (Expression) parser.parseExpression("randomField='Andy'");
+		expr = parser.parseExpression("randomField='Andy'");
 		if (expr == null) {
 			fail("Parser returned null for expression");
 		}
