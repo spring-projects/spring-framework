@@ -19,8 +19,8 @@ import java.lang.reflect.Method;
 
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.PropertyAccessor;
@@ -136,7 +136,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 				throws AccessException {
 		}
 
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 		
@@ -164,7 +164,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 				throws AccessException {
 		}
 
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
