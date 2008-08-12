@@ -16,7 +16,6 @@
 package org.springframework.expression.spel.internal;
 
 import org.antlr.runtime.BitSet;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.IntStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
@@ -36,11 +35,11 @@ public class SpringExpressionsParserExtender extends SpringExpressionsParser {
 	@Override
 	public void recoverFromMismatchedToken(IntStream input, RecognitionException re, int ttype, BitSet follow)
 			throws RecognitionException {
-		CommonTokenStream tokStream = (CommonTokenStream) input;
-		int prevToken = tokStream.LA(-1);
-		int nextToken = tokStream.LA(1);
-		String prevTokenText = tokStream.LT(-1).getText();
-		String expectedToken = getTokenForId(ttype);
+//		CommonTokenStream tokStream = (CommonTokenStream) input;
+//		int prevToken = tokStream.LA(-1);
+//		int nextToken = tokStream.LA(1);
+//		String prevTokenText = tokStream.LT(-1).getText();
+//		String expectedToken = getTokenForId(ttype);
 		// Use token knowledge to log a more appropriate error:
 		// logger.error(ParserMessage.ERROR_NO_LEADING_ZERO, re.line, re.charPositionInLine);
 		throw re;
