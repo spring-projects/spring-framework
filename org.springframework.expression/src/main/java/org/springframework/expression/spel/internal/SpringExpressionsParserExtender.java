@@ -68,10 +68,10 @@ public class SpringExpressionsParserExtender extends SpringExpressionsParser {
 		return super.getTokenErrorDisplay(t);
 	}
 
-	private String getTokenForId(int id) {
-		if (id == -1)
-			return "EOF";
-		return getTokenNames()[id];
-	}
+//	private String getTokenForId(int id) {
+//		if (id == -1)
+//			return "EOF";
+//		return getTokenNames()[id];
+//	}
 
 }
