@@ -267,7 +267,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		/**
 		 * Null means you might be able to read any property, if an earlier property resolver hasn't beaten you to it
 		 */
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 		
@@ -344,7 +344,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		/**
 		 * Null means you might be able to read any property, if an earlier property resolver hasn't beaten you to it
 		 */
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
