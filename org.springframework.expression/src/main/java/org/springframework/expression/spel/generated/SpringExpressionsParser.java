@@ -20,7 +20,7 @@ import org.antlr.runtime.tree.RewriteRuleSubtreeStream;
 import org.antlr.runtime.tree.RewriteRuleTokenStream;
 import org.antlr.runtime.tree.TreeAdaptor;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","cast"})
 public class SpringExpressionsParser extends Parser {
 	public static final String[] tokenNames = new String[] { "<invalid>", "<EOR>", "<DOWN>", "<UP>", "EXPRESSIONLIST",
 			"INTEGER_LITERAL", "EXPRESSION", "QUALIFIED_IDENTIFIER", "REFERENCE", "PROPERTY_OR_FIELD", "INDEXER",
@@ -1566,6 +1566,7 @@ public class SpringExpressionsParser extends Parser {
 	// $ANTLR start primaryExpression
 	// /Users/aclement/spring-pieces/spring-el/trunk/org.springframework.el/src/main/java/org/springframework/el/generated/SpringExpressions.g:99:1:
 	// primaryExpression : startNode ( node )? -> ^( EXPRESSION startNode ( node )? ) ;
+	@SuppressWarnings("cast")
 	public final primaryExpression_return primaryExpression() throws RecognitionException {
 		primaryExpression_return retval = new primaryExpression_return();
 		retval.start = input.LT(1);
