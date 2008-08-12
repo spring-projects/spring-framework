@@ -82,7 +82,7 @@ public class TestScenarioCreator {
 	 */
 	private static void createTestClassloader(StandardEvaluationContext testContext) {
 		try {
-			ClassLoader cl = new URLClassLoader(new URL[] { new File("target/test-classes/testcode.jar").toURL() },
+			ClassLoader cl = new URLClassLoader(new URL[] { new File("target/test-classes/testcode.jar").toURI().toURL() },
 					Thread.currentThread().getContextClassLoader());
 			testContext.setClassLoader(cl);
 		} catch (MalformedURLException mue) {
