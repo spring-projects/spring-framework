@@ -1,11 +1,16 @@
 // $ANTLR 3.0.1 /Users/aclement/el/spring3/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g 2008-08-11 16:02:48
 package org.springframework.expression.spel.generated;
 
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
+import org.antlr.runtime.BaseRecognizer;
+import org.antlr.runtime.CharStream;
+import org.antlr.runtime.DFA;
+import org.antlr.runtime.EarlyExitException;
+import org.antlr.runtime.Lexer;
+import org.antlr.runtime.MismatchedSetException;
+import org.antlr.runtime.NoViableAltException;
+import org.antlr.runtime.RecognitionException;
 
+@SuppressWarnings({"unused","cast"})
 public class SpringExpressionsLexer extends Lexer {
     public static final int GREATER_THAN_OR_EQUAL=79;
     public static final int COMMA=51;
