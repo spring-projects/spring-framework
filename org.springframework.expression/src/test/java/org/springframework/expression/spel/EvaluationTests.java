@@ -27,98 +27,6 @@ import org.springframework.expression.spel.ast.Lambda;
  */
 public class EvaluationTests extends ExpressionTestCase {
 
-	// literals: boolean, integer, string, hex, real, null, date
-	public void testLiteralBoolean01() {
-		evaluate("false", "false", Boolean.class);
-	}
-
-	public void testLiteralBoolean02() {
-		evaluate("true", "true", Boolean.class);
-	}
-
-	public void testLiteralInteger01() {
-		evaluate("1", "1", Integer.class);
-	}
-
-	public void testLiteralInteger02() {
-		evaluate("1415", "1415", Integer.class);
-	}
-
-	public void testLiteralString01() {
-		evaluate("'Hello World'", "Hello World", String.class);
-	}
-
-	public void testLiteralString02() {
-		evaluate("'joe bloggs'", "joe bloggs", String.class);
-	}
-
-	public void testLiteralString03() {
-		evaluate("'hello'", "hello", String.class);
-	}
-
-	public void testLiteralString04() {
-		evaluate("'Tony''s Pizza'", "Tony's Pizza", String.class);
-	}
-
-	public void testLiteralString05() {
-		evaluate("\"Hello World\"", "Hello World", String.class);
-	}
-
-	public void testLiteralString06() {
-		evaluate("\"Hello ' World\"", "Hello ' World", String.class);
-	}
-
-	public void testLiteralHex01() {
-		evaluate("0x7FFFFFFF", "2147483647", Integer.class);
-	}
-
-	public void testLiteralReal01() {
-		evaluate("6.0221415E+23", "6.0221415E23", Double.class);
-	}
-
-	public void testLiteralNull01() {
-		evaluate("null", null, null);
-	}
-
-	// TODO 3 'default' format for date varies too much, we need to standardize on a format for EL
-	// public void testLiteralDate01() {
-	// eval("date('3-Feb-2008 4:50:20 PM').getTime()>0", "true", Boolean.class);
-	// }
-
-	public void testLiteralDate02() {
-		evaluate("date('19740824131030','yyyyMMddHHmmss').getHours()", "13", Integer.class);
-	}
-
-	// boolean operators: and or not
-	public void testBooleanOperators01() {
-		evaluate("false or false", "false", Boolean.class);
-	}
-
-	public void testBooleanOperators02() {
-		evaluate("false or true", "true", Boolean.class);
-	}
-
-	public void testBooleanOperators03() {
-		evaluate("true or false", "true", Boolean.class);
-	}
-
-	public void testBooleanOperators04() {
-		evaluate("true or true", "true", Boolean.class);
-	}
-
-	public void testBooleanOperators05() {
-		evaluate("false or true and false", "false", Boolean.class);
-	}
-
-	public void testBooleanErrors01() {
-		evaluateAndCheckError("1 or false", SpelMessages.TYPE_CONVERSION_ERROR, 0);
-		evaluateAndCheckError("false or 39", SpelMessages.TYPE_CONVERSION_ERROR, 9);
-		evaluateAndCheckError("true and 'hello'", SpelMessages.TYPE_CONVERSION_ERROR, 9);
-		evaluateAndCheckError(" 'hello' and 'goodbye'", SpelMessages.TYPE_CONVERSION_ERROR, 1);
-		evaluateAndCheckError("!35", SpelMessages.TYPE_CONVERSION_ERROR, 1);
-		evaluateAndCheckError("! 'foob'", SpelMessages.TYPE_CONVERSION_ERROR, 2);
-	}
-
 	// relational operators: lt, le, gt, ge, eq, ne
 	public void testRelOperatorGT01() {
 		evaluate("3 > 6", "false", Boolean.class);
@@ -246,14 +154,16 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	// property access
 	public void testPropertyField01() {
-		eval("name", "Nikola Tesla", String.class, false); // not writable because (1) name is private (2) there is no setter, only a getter
+		evaluate("name", "Nikola Tesla", String.class, false); // not writable because (1) name is private (2) there is
+		// no
+		// setter, only a getter
 		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 0, "madeup",
 				"org.springframework.expression.spel.testresources.Inventor");
 	}
 
 	// nested properties
 	public void testPropertiesNested01() {
-		eval("placeOfBirth.city", "SmilJan", String.class, true);
+		evaluate("placeOfBirth.city", "SmilJan", String.class, true);
 	}
 
 	public void testPropertiesNested02() {
@@ -284,7 +194,8 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testInlineMapCreation02() {
-		evaluate("#{1:'January', 2:'February', 3:'March'}.size()", 3, Integer.class);//"{2=February, 1=January, 3=March}", HashMap.class);
+		evaluate("#{1:'January', 2:'February', 3:'March'}.size()", 3, Integer.class);// "{2=February, 1=January,
+		// 3=March}", HashMap.class);
 	}
 
 	public void testInlineMapCreation03() {
@@ -444,7 +355,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testAssignmentToVariables02() {
-		eval("(#var1='value1';#var1)", "value1", String.class, true);
+		evaluate("(#var1='value1';#var1)", "value1", String.class, true);
 	}
 
 	// Property setting
@@ -480,11 +391,11 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	// Bean references
 	public void testReferences01() {
-		eval("@(apple).name", "Apple", String.class, true);
+		evaluate("@(apple).name", "Apple", String.class, true);
 	}
 
 	public void testReferences02() {
-		eval("@(fruits:banana).name", "Banana", String.class, true);
+		evaluate("@(fruits:banana).name", "Banana", String.class, true);
 	}
 
 	public void testReferences03() {
@@ -492,7 +403,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	} // null - no context, a.b.c treated as name
 
 	public void testReferences05() {
-		eval("@(a/b/c:orange).name", "Orange", String.class, true);
+		evaluate("@(a/b/c:orange).name", "Orange", String.class, true);
 	}
 
 	// TODO 4 automatic/default imports for next line?
@@ -507,11 +418,11 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testReferences07() {
 		evaluate("@(apple).color.getRGB().equals(T(java.awt.Color).green.getRGB())", "true", Boolean.class);
 	}
-	
-// value is not public, it is accessed through getRGB()
-//	public void testStaticRef01() {
-//		evaluate("T(Color).green.value!=0", "true", Boolean.class);
-//	}
+
+	// value is not public, it is accessed through getRGB()
+	// public void testStaticRef01() {
+	// evaluate("T(Color).green.value!=0", "true", Boolean.class);
+	// }
 
 	public void testStaticRef02() {
 		evaluate("T(Color).green.getRGB()!=0", "true", Boolean.class);
@@ -519,7 +430,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	// variables and functions
 	public void testVariableAccess01() {
-		eval("#answer", "42", Integer.class, true);
+		evaluate("#answer", "42", Integer.class, true);
 	}
 
 	public void testFunctionAccess01() {
@@ -536,7 +447,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testLambdaNoArgsReferenced() {
-		eval("(#fn={|| false };#fn)", "{|| false }", Lambda.class, true);
+		evaluate("(#fn={|| false };#fn)", "{|| false }", Lambda.class, true);
 	}
 
 	public void testLambda01() {
@@ -612,8 +523,8 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testVariableReferences() {
-		eval("(#answer=42;#answer)", "42", Integer.class, true);
-		eval("($answer=42;$answer)", "42", Integer.class, true);
+		evaluate("(#answer=42;#answer)", "42", Integer.class, true);
+		evaluate("($answer=42;$answer)", "42", Integer.class, true);
 	}
 
 	// type references
@@ -636,15 +547,15 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("T(String)", "class java.lang.String", Class.class);
 	}
 
-  	public void testStringType() {
-  		evaluateAndAskForReturnType("getPlaceOfBirth().getCity()", "SmilJan", String.class);
+	public void testStringType() {
+		evaluateAndAskForReturnType("getPlaceOfBirth().getCity()", "SmilJan", String.class);
 	}
-  	
-  	public void testNumbers01() {
-  		evaluateAndAskForReturnType("3*4+5",17,Integer.class);
-  		evaluateAndAskForReturnType("3*4+5",17L,Long.class);
-  		evaluateAndAskForReturnType("65",'A',Character.class);
-  		evaluateAndAskForReturnType("3*4+5",(short)17,Short.class);
-  		evaluateAndAskForReturnType("3*4+5","17",String.class);
-  	}
+
+	public void testNumbers01() {
+		evaluateAndAskForReturnType("3*4+5", 17, Integer.class);
+		evaluateAndAskForReturnType("3*4+5", 17L, Long.class);
+		evaluateAndAskForReturnType("65", 'A', Character.class);
+		evaluateAndAskForReturnType("3*4+5", (short) 17, Short.class);
+		evaluateAndAskForReturnType("3*4+5", "17", String.class);
+	}
 }
