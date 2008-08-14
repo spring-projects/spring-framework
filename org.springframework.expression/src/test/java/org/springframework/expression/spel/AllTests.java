@@ -30,7 +30,9 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Spring Expression Language tests");
 		// $JUnit-BEGIN$
 		suite.addTestSuite(BooleanExpressionTests.class);
+		suite.addTestSuite(LiteralTests.class);
 		suite.addTestSuite(ParsingTests.class);
+		suite.addTestSuite(ParserErrorMessagesTests.class);
 		suite.addTestSuite(EvaluationTests.class);
 		suite.addTestSuite(OperatorTests.class);
 		suite.addTestSuite(ConstructorInvocationTests.class);

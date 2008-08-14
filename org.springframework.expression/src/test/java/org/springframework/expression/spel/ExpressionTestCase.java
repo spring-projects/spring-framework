@@ -140,7 +140,8 @@ public abstract class ExpressionTestCase extends TestCase {
 	 * @param expectedClassOfResult the expected class of the evaluation result
 	 * @param shouldBeWritable should the parsed expression be writable?
 	 */
-	public void eval(String expression, Object expectedValue, Class<?> expectedClassOfResult, boolean shouldBeWritable) {
+	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult,
+			boolean shouldBeWritable) {
 		try {
 			SpelExpression e = parser.parseExpression(expression);
 			if (e == null) {
@@ -191,13 +192,33 @@ public abstract class ExpressionTestCase extends TestCase {
 	 * @param otherProperties The expected inserts within the message
 	 */
 	protected void evaluateAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
+		evaluateAndCheckError(expression, null, expectedMessage, otherProperties);
+	}
+
+	/**
+	 * Evaluate the specified expression and ensure the expected message comes out. The message may have inserts and
+	 * they will be checked if otherProperties is specified. The first entry in otherProperties should always be the
+	 * position.
+	 * @param expression The expression to evaluate
+	 * @param expectedReturnType Ask the expression return value to be of this type if possible (null indicates don't
+	 * ask for conversion)
+	 * @param expectedMessage The expected message
+	 * @param otherProperties The expected inserts within the message
+	 */
+	protected void evaluateAndCheckError(String expression, Class<?> expectedReturnType, SpelMessages expectedMessage,
+			Object... otherProperties) {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
-			@SuppressWarnings("unused")
-			Object value = expr.getValue(eContext);
+			if (expectedReturnType != null) {
+				@SuppressWarnings("unused")
+				Object value = expr.getValue(eContext, expectedReturnType);
+			} else {
+				@SuppressWarnings("unused")
+				Object value = expr.getValue(eContext);
+			}
 			fail("Should have failed with message " + expectedMessage);
 		} catch (EvaluationException ee) {
 			SpelException ex = (SpelException) ee;
@@ -236,9 +257,56 @@ public abstract class ExpressionTestCase extends TestCase {
 		}
 	}
 
+	/**
+	 * Parse the specified expression and ensure the expected message comes out. The message may have inserts and they
+	 * will be checked if otherProperties is specified. The first entry in otherProperties should always be the
+	 * position.
+	 * @param expression The expression to evaluate
+	 * @param expectedMessage The expected message
+	 * @param otherProperties The expected inserts within the message
+	 */
+	protected void parseAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
+		try {
+			Expression expr = parser.parseExpression(expression);
+			fail("Parsing should have failed!");
+		} catch (ParseException pe) {
+			SpelException ex = (SpelException) pe.getCause();
+			if (ex.getMessageUnformatted() != expectedMessage) {
+				System.out.println(ex.getMessage());
+				ex.printStackTrace();
+				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
+			}
+			if (otherProperties != null && otherProperties.length != 0) {
+				// first one is expected position of the error within the string
+				int pos = ((Integer) otherProperties[0]).intValue();
+				assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
+				if (otherProperties.length > 1) {
+					// Check inserts match
+					Object[] inserts = ex.getInserts();
+					if (inserts == null) {
+						inserts = new Object[0];
+					}
+					if (inserts.length < otherProperties.length - 1) {
+						ex.printStackTrace();
+						fail("Cannot check " + (otherProperties.length - 1)
+								+ " properties of the exception, it only has " + inserts.length + " inserts");
+					}
+					for (int i = 1; i < otherProperties.length; i++) {
+						if (!inserts[i - 1].equals(otherProperties[i])) {
+							ex.printStackTrace();
+							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
+									+ inserts[i - 1] + "'");
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public static String stringValueOf(Object value) {
 		// do something nice for arrays
-		if (value==null) return "null";
+		if (value == null)
+			return "null";
 		if (value.getClass().isArray()) {
 			StringBuilder sb = new StringBuilder();
 			if (value.getClass().getComponentType().isPrimitive()) {

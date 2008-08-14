@@ -29,6 +29,7 @@ public class ParsingTests extends TestCase {
 
 	private SpelExpressionParser parser;
 
+	@Override
 	public void setUp() {
 		parser = new SpelExpressionParser();
 	}
@@ -37,9 +38,9 @@ public class ParsingTests extends TestCase {
 	public void testLiteralBoolean01() {
 		parseCheck("false");
 	}
-	
+
 	public void testLiteralLong01() {
-		parseCheck("37L","37");
+		parseCheck("37L", "37");
 	}
 
 	public void testLiteralBoolean02() {
@@ -412,20 +413,6 @@ public class ParsingTests extends TestCase {
 	public void testExpressionLists07() {
 		parseCheck("((3;4;)+(5;6;))", "((3;4) + (5;6))");
 	}
-
-	// TODO 3 too many close brackets - parser recover
-	// public void testExpressionLists07a() { parseCheck("((3;4;)+(5;6;)))","((3;4)
-	// + (5;6))");}
-
-	
-	// parser warnings/errors
-//	public void testBrokenExpression01() {
-//		parseCheck("1 + ");
-//		
-//	}
-	
-	
-	// ---
 
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the same
