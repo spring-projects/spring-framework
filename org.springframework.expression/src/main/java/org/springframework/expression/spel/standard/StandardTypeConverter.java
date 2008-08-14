@@ -70,7 +70,8 @@ public class StandardTypeConverter implements TypeConverter {
 
 	// TODO 3 Q In case of a loss in information with coercion to a narrower type, should we throw an exception?
 	public Object convertValue(Object value, Class<?> targetType) throws SpelException {
-		if (value==null || value.getClass()==targetType) return value;
+		if (value == null || value.getClass() == targetType)
+			return value;
 		Map<Class<?>, StandardIndividualTypeConverter> possibleConvertersToTheTargetType = converters.get(targetType);
 		if (possibleConvertersToTheTargetType == null && targetType.isPrimitive()) {
 			if (targetType == Integer.TYPE)
@@ -95,12 +96,12 @@ public class StandardTypeConverter implements TypeConverter {
 			StandardIndividualTypeConverter aConverter = possibleConvertersToTheTargetType.get(value.getClass());
 			if (aConverter != null) {
 				try {
-				result = aConverter.convert(value);
+					result = aConverter.convert(value);
 				} catch (EvaluationException ee) {
 					if (ee instanceof SpelException) {
-						throw (SpelException)ee;
+						throw (SpelException) ee;
 					} else {
-						throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,ee.getMessage());
+						throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, ee.getMessage());
 					}
 				}
 			}
@@ -265,9 +266,14 @@ public class StandardTypeConverter implements TypeConverter {
 		public Object convert(Object value) throws SpelException {
 			if (value instanceof Integer)
 				return ((Integer) value).intValue();
-			else if (value instanceof Long)
-				return ((Long) value).intValue();
-			else
+			else if (value instanceof Long) {
+				try {
+					return Integer.parseInt(((Long) value).toString());
+				} catch (NumberFormatException nfe) {
+					throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "long value '" + value
+							+ "' cannot be represented as an int");
+				}
+			} else
 				return null;
 		}
 
@@ -276,7 +282,7 @@ public class StandardTypeConverter implements TypeConverter {
 		}
 
 		public Class<?> getTo() {
-			return Integer.TYPE;
+			return Integer.class;
 		}
 	}
 
