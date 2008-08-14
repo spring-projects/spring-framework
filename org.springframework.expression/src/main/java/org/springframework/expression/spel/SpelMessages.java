@@ -45,10 +45,9 @@ public enum SpelMessages {
 			"Method call: Method {0} cannot be found on {1} type"), ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT(
 			Kind.ERROR, 1007, "Method call: Attempted to call method {0} on null context object"), ATTEMPTED_PROPERTY_FIELD_REF_ON_NULL_CONTEXT_OBJECT(
 			Kind.ERROR, 1008,
-			"Field or property reference: Attempted to refer to field or property ''{0}'' on null context object"),
-			PROPERTY_OR_FIELD_NOT_FOUND(Kind.ERROR, 1009, "Field or property ''{0}'' cannot be found on object of type ''{1}''"), 
-			PROPERTY_OR_FIELD_SETTER_NOT_FOUND(Kind.ERROR, 1010, "Field or property ''{0}'' cannot be set on object of type ''{1}''"), 
-			MULTIPLY_NOT_DEFINED(
+			"Field or property reference: Attempted to refer to field or property ''{0}'' on null context object"), PROPERTY_OR_FIELD_NOT_FOUND(
+			Kind.ERROR, 1009, "Field or property ''{0}'' cannot be found on object of type ''{1}''"), PROPERTY_OR_FIELD_SETTER_NOT_FOUND(
+			Kind.ERROR, 1010, "Field or property ''{0}'' cannot be set on object of type ''{1}''"), MULTIPLY_NOT_DEFINED(
 			Kind.ERROR, 1011, "Multiply not defined between operands of type {0} and {1}"), NOT_COMPARABLE(Kind.ERROR,
 			1012, "Cannot compare instances of {0} and {1}"), NOT_COMPARABLE_CANNOT_COERCE(Kind.ERROR, 1013,
 			"Cannot compare instances of {0} and {1} because they cannot be coerced to the same type"), VARIABLE_NOT_FOUND(
@@ -72,9 +71,8 @@ public enum SpelMessages {
 			"Recognition error: {0}"), // TODO 2 poor message
 	PROJECTION_NOT_SUPPORTED_ON_TYPE(Kind.ERROR, 1031, "Projection is not supported on the type ''{0}''"), ARGLIST_SHOULD_NOT_BE_EVALUATED(
 			Kind.ERROR, 1032, "The argument list of a lambda expression should never have getValue() called upon it"), MAPENTRY_SHOULD_NOT_BE_EVALUATED(
-			Kind.ERROR, 1033, "A map entry should never have getValue() called upon it"), 
-			EXCEPTION_DURING_PROPERTY_READ(Kind.ERROR, 1034, "A problem occurred whilst attempting to access the property ''{0}'': ''{1}''"), 
-			EXCEPTION_DURING_CONSTRUCTOR_INVOCATION(
+			Kind.ERROR, 1033, "A map entry should never have getValue() called upon it"), EXCEPTION_DURING_PROPERTY_READ(
+			Kind.ERROR, 1034, "A problem occurred whilst attempting to access the property ''{0}'': ''{1}''"), EXCEPTION_DURING_CONSTRUCTOR_INVOCATION(
 			Kind.ERROR, 1035, "A problem occurred whilst attempting to construct ''{0}'': ''{1}''"), DATE_CANNOT_BE_PARSED(
 			Kind.ERROR, 1036, "Unable to parse date ''{0}'' using format ''{1}''"), FUNCTION_REFERENCE_CANNOT_BE_INVOKED(
 			Kind.ERROR, 1037, "The function ''{0}'' mapped to an object of type ''{1}'' which cannot be invoked"), FUNCTION_NOT_DEFINED(
@@ -100,13 +98,14 @@ public enum SpelMessages {
 			Kind.ERROR, 1056,
 			"A problem occurred whilst attempting to construct an object of type ''{0}'' using arguments ''{1}''"), INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR(
 			Kind.ERROR, 1057, "First operand to like operator must be a string. ''{0}'' is not"), INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR(
-			Kind.ERROR, 1058, "Second operand to like operator must be a string (regex). ''{0}'' is not"), 
-			SETVALUE_NOT_SUPPORTED(Kind.ERROR, 1059, "setValue(ExpressionState, Object) not implemented for ''{0}''  (''{1}''"), 
-			TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION(Kind.ERROR, 1060, "Expected the type of the new array to be specified as a String but found ''{0}''"),
-			PROBLEM_DURING_TYPE_CONVERSION(Kind.ERROR,1061,"Problem occurred during type conversion: {0}"),
-			MULTIPLE_POSSIBLE_METHODS(Kind.ERROR,1062,"Method call of ''{0}'' is ambiguous, supported type conversions allow multiple variants to match"),
-			EXCEPTION_DURING_PROPERTY_WRITE(Kind.ERROR,1063,"A problem occurred whilst attempting to set the property ''{0}'': ''{1}''"),
-			;
+			Kind.ERROR, 1058, "Second operand to like operator must be a string (regex). ''{0}'' is not"), SETVALUE_NOT_SUPPORTED(
+			Kind.ERROR, 1059, "setValue(ExpressionState, Object) not implemented for ''{0}''  (''{1}''"), TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION(
+			Kind.ERROR, 1060, "Expected the type of the new array to be specified as a String but found ''{0}''"), PROBLEM_DURING_TYPE_CONVERSION(
+			Kind.ERROR, 1061, "Problem occurred during type conversion: {0}"), MULTIPLE_POSSIBLE_METHODS(Kind.ERROR,
+			1062, "Method call of ''{0}'' is ambiguous, supported type conversions allow multiple variants to match"), EXCEPTION_DURING_PROPERTY_WRITE(
+			Kind.ERROR, 1063, "A problem occurred whilst attempting to set the property ''{0}'': ''{1}''"), NOT_AN_INTEGER(
+			Kind.ERROR, 1064, "The value ''{0}'' cannot be parsed as an int"), NOT_A_LONG(Kind.ERROR, 1065,
+			"The value ''{0}'' cannot be parsed as a long"), ;
 
 	private Kind kind;
 	private int code;
@@ -148,7 +147,7 @@ public enum SpelMessages {
 		if (pos != -1) {
 			formattedMessage.append("(pos ").append(pos).append("): ");
 		}
-		formattedMessage.append(MessageFormat.format(this.message, inserts));
+		formattedMessage.append(MessageFormat.format(message, inserts));
 		return formattedMessage.toString();
 	}
 }

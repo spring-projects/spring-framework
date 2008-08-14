@@ -263,7 +263,7 @@ dateLiteral: 'date' LPAREN d=STRING_LITERAL (COMMA f=STRING_LITERAL)? RPAREN -> 
 INTEGER_LITERAL
 	: (DECIMAL_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;
 
-HEXADECIMAL_INTEGER_LITERAL : '0x' (HEX_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;
+HEXADECIMAL_INTEGER_LITERAL : ('0x' | '0X') (HEX_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;
 
 relationalOperator
     :   EQUAL 
@@ -366,7 +366,7 @@ REAL_LITERAL :
 
 fragment APOS : '\''! '\'';
 fragment DECIMAL_DIGIT : '0'..'9' ;
-fragment INTEGER_TYPE_SUFFIX : ( 'UL' | 'LU' | 'ul' | 'lu' | 'uL' | 'lU' | 'U' | 'L' | 'u' | 'l' );
+fragment INTEGER_TYPE_SUFFIX : ( 'L' | 'l' );
 fragment HEX_DIGIT : '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'A'|'B'|'C'|'D'|'E'|'F'|'a'|'b'|'c'|'d'|'e'|'f';		
 	
 fragment EXPONENT_PART : 'e'  (SIGN)*  (DECIMAL_DIGIT)+ | 'E'  (SIGN)*  (DECIMAL_DIGIT)+ ;	

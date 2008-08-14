@@ -24,7 +24,7 @@ import org.springframework.expression.spel.SpelException;
  */
 public class InternalELException extends RuntimeException {
 
-	InternalELException(SpelException e) {
+	public InternalELException(SpelException e) {
 		super(e);
 	}
 
