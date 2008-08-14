@@ -28,9 +28,9 @@ import org.springframework.expression.spel.ast.ExpressionListNode;
 import org.springframework.expression.spel.ast.FunctionReference;
 import org.springframework.expression.spel.ast.Identifier;
 import org.springframework.expression.spel.ast.Indexer;
-import org.springframework.expression.spel.ast.IntLiteral;
 import org.springframework.expression.spel.ast.Lambda;
 import org.springframework.expression.spel.ast.ListInitializer;
+import org.springframework.expression.spel.ast.Literal;
 import org.springframework.expression.spel.ast.LocalFunctionReference;
 import org.springframework.expression.spel.ast.LocalVariableReference;
 import org.springframework.expression.spel.ast.MapEntry;
@@ -94,9 +94,9 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 			case SpringExpressionsLexer.REAL_LITERAL:
 				return new RealLiteral(payload);
 			case SpringExpressionsLexer.INTEGER_LITERAL:
-				return new IntLiteral(payload);
+				return Literal.getIntLiteral(payload, 10);
 			case SpringExpressionsLexer.HEXADECIMAL_INTEGER_LITERAL:
-				return new IntLiteral(payload, 16/* HEX */);
+				return Literal.getIntLiteral(payload, 16);
 
 			case SpringExpressionsLexer.NOT_EQUAL:
 				return new OperatorInequality(payload);

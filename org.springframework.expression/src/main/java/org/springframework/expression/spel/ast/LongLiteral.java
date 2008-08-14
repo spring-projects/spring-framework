@@ -18,21 +18,21 @@ package org.springframework.expression.spel.ast;
 import org.antlr.runtime.Token;
 
 /**
- * Expression language AST node that represents an integer literal.
+ * Expression language AST node that represents a long integer literal.
  * 
  * @author Andy Clement
  */
-public class IntLiteral extends Literal {
+public class LongLiteral extends Literal {
 
-	private final Integer value;
+	private final Long value;
 
-	IntLiteral(Token payload, int value) {
+	LongLiteral(Token payload, long value) {
 		super(payload);
 		this.value = value;
 	}
 
 	@Override
-	public Integer getLiteralValue() {
+	public Long getLiteralValue() {
 		return value;
 	}
 
