@@ -105,7 +105,8 @@ public enum SpelMessages {
 			1062, "Method call of ''{0}'' is ambiguous, supported type conversions allow multiple variants to match"), EXCEPTION_DURING_PROPERTY_WRITE(
 			Kind.ERROR, 1063, "A problem occurred whilst attempting to set the property ''{0}'': ''{1}''"), NOT_AN_INTEGER(
 			Kind.ERROR, 1064, "The value ''{0}'' cannot be parsed as an int"), NOT_A_LONG(Kind.ERROR, 1065,
-			"The value ''{0}'' cannot be parsed as a long"), ;
+			"The value ''{0}'' cannot be parsed as a long"), PARSE_PROBLEM(Kind.ERROR, 1066,
+			"Error occurred during expression parse: {0}"), ;
 
 	private Kind kind;
 	private int code;
