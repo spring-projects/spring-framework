@@ -267,10 +267,19 @@ public abstract class ExpressionTestCase extends TestCase {
 	 */
 	protected void parseAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
 		try {
-			Expression expr = parser.parseExpression(expression);
+			SpelExpression expr = parser.parseExpression(expression);
+			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			fail("Parsing should have failed!");
 		} catch (ParseException pe) {
-			SpelException ex = (SpelException) pe.getCause();
+			Throwable t = pe.getCause();
+			if (t == null) {
+				fail("ParseException caught with no defined cause");
+			}
+			if (!(t instanceof SpelException)) {
+				t.printStackTrace();
+				fail("Cause of parse exception is not a SpelException");
+			}
+			SpelException ex = (SpelException) t;
 			if (ex.getMessageUnformatted() != expectedMessage) {
 				System.out.println(ex.getMessage());
 				ex.printStackTrace();
