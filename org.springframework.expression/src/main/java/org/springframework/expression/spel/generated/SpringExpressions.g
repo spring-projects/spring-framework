@@ -46,9 +46,14 @@ tokens {
 // applies only to the lexer:
 @lexer::header {package org.springframework.expression.spel.generated;}
 
+@members {
+  // For collecting info whilst processing rules that can be used in messages
+  protected Stack<String> paraphrase = new Stack<String>();
+}
+  
 @rulecatch {
         catch(RecognitionException e) {
-                //reportError(e);
+                reportError(e);
                 throw e;
         }
 }
@@ -70,9 +75,12 @@ expression :
 parenExpr : LPAREN! expression RPAREN!;// (ROGUE! | RPAREN!);
 
 	
-logicalOrExpression : logicalAndExpression (OR^ logicalAndExpression)*;
+logicalOrExpression 
+// possible extra info we could use for better error messages
+: logicalAndExpression (OR^ logicalAndExpression)*;
                         
-logicalAndExpression : relationalExpression (AND^ relationalExpression)*;
+logicalAndExpression 
+: relationalExpression (AND^ relationalExpression)*;
 	
 relationalExpression : sumExpression (relationalOperator^ sumExpression)?;
 
@@ -121,17 +129,22 @@ startNode
 //  | attribute
     ;
     
-node:	
-	( methodOrProperty 
+node
+	: ((DOT dottedNode) | nonDottedNode)+;
+	
+nonDottedNode
+	:	indexer;
+
+dottedNode
+	:	
+	((methodOrProperty 
 	| functionOrVar
-    | indexer
     | projection 
     | selection 
     | firstSelection 
     | lastSelection 
     | exprList
-    | DOT
-    )+
+    ))
 	;
 	
 functionOrVar 
