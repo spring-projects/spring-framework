@@ -61,27 +61,31 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	 * @return a parsed expression object
 	 * @throws ParseException if the expression is invalid
 	 */
-	protected Expression doParseExpression(String expressionString, ParserContext context)
-			throws ParseException {
+	@Override
+	protected Expression doParseExpression(String expressionString, ParserContext context) throws ParseException {
 		try {
 			lexer.setCharStream(new ANTLRStringStream(expressionString));
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			parser.setTokenStream(tokens);
 			expr_return exprReturn = parser.expr();
-			return new SpelExpression(expressionString, (SpelNode) exprReturn.getTree());
+			SpelExpression newExpression = new SpelExpression(expressionString, (SpelNode) exprReturn.getTree());
+			return newExpression;
 		} catch (RecognitionException re) {
-			ParseException exception = new ParseException(expressionString, "Recognition error at position: "+re.charPositionInLine+": "+re.getMessage(), re);
+			ParseException exception = new ParseException(expressionString, "Recognition error at position: "
+					+ re.charPositionInLine + ": " + re.getMessage(), re);
 			throw exception;
 		} catch (InternalELException e) {
 			SpelException wrappedException = e.getCause();
-			throw new ParseException(expressionString,"Parsing problem: "+wrappedException.getMessage(),wrappedException);
+			throw new ParseException(expressionString, "Parsing problem: " + wrappedException.getMessage(),
+					wrappedException);
 		}
 	}
-	
+
 	/**
 	 * Simple override with covariance to return a nicer type
 	 */
+	@Override
 	public SpelExpression parseExpression(String expressionString) throws ParseException {
-		return (SpelExpression)super.parseExpression(expressionString, DefaultNonTemplateParserContext.INSTANCE);
+		return (SpelExpression) super.parseExpression(expressionString, DefaultNonTemplateParserContext.INSTANCE);
 	}
 }
