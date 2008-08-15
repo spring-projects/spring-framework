@@ -20,6 +20,8 @@ import org.antlr.runtime.IntStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
+import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.generated.SpringExpressionsParser;
 
 public class SpringExpressionsParserExtender extends SpringExpressionsParser {
@@ -29,35 +31,50 @@ public class SpringExpressionsParserExtender extends SpringExpressionsParser {
 	}
 
 	/**
-	 * This method does not actually recover but can attempt to produce better error messages than a generic Antlr
-	 * parser because it knows about grammar specifics. would do
+	 * Override super type implementation and just include the character position rather than the line number since the
+	 * expressions are nearly all going to be just one line.
 	 */
 	@Override
-	public void recoverFromMismatchedToken(IntStream input, RecognitionException re, int ttype, BitSet follow)
-			throws RecognitionException {
-//		CommonTokenStream tokStream = (CommonTokenStream) input;
-//		int prevToken = tokStream.LA(-1);
-//		int nextToken = tokStream.LA(1);
-//		String prevTokenText = tokStream.LT(-1).getText();
-//		String expectedToken = getTokenForId(ttype);
-		// Use token knowledge to log a more appropriate error:
-		// logger.error(ParserMessage.ERROR_NO_LEADING_ZERO, re.line, re.charPositionInLine);
-		throw re;
+	public String getErrorHeader(RecognitionException e) {
+		StringBuilder retval = new StringBuilder();
+		retval.append("(pos ").append(e.charPositionInLine).append("): ");
+		return retval.toString();
 	}
 
-	//    
-	// /**
-	// * Similar to the BaseRecognizer getErrorMessage() but uses the ParserMessages class to get the text of the
-	// message
-	// */
-	// public void logError(RecognitionException re, String[] tokenNames) {
-	// logger.error(ELMessages.RECOGNITION_ERROR, re.line, re.charPositionInLine, re);
-	// }
-
 	@Override
-	public void recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow)
+	public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
+		String message = getErrorMessage(e, tokenNames);
+		// TODO would something like this be worthwhile to improve messages?
+		// if (message.equals("no viable alternative at input '<EOF>'") && !paraphrase.isEmpty()) {
+		// // This means we ran out of input building something, that something is named in paraphrase
+		// message = "no more input data to process whilst constructing " + paraphrase.peek();
+		// }
+		SpelException parsingProblem = new SpelException(e.charPositionInLine, e, SpelMessages.PARSE_PROBLEM, message);
+		throw new InternalELException(parsingProblem);
+	}
+
+	/**
+	 * Overridden purely because the base implementation does a System.err.println()
+	 */
+	@Override
+	public void recoverFromMismatchedToken(IntStream input, RecognitionException e, int ttype, BitSet follow)
 			throws RecognitionException {
-		throw e;
+		// if next token is what we are looking for then "delete" this token
+		if (input.LA(2) == ttype) {
+			reportError(e);
+			/*
+			 * System.err.println("recoverFromMismatchedToken deleting "+input.LT(1)+ " since "+input.LT(2)+" is what we
+			 * want");
+			 */
+			beginResync();
+			input.consume(); // simply delete extra token
+			endResync();
+			input.consume(); // move past ttype token as if all were ok
+			return;
+		}
+		if (!recoverFromMismatchedElement(input, e, follow)) {
+			throw e;
+		}
 	}
 
 	@Override
@@ -67,11 +84,4 @@ public class SpringExpressionsParserExtender extends SpringExpressionsParser {
 		}
 		return super.getTokenErrorDisplay(t);
 	}
-
-//	private String getTokenForId(int id) {
-//		if (id == -1)
-//			return "EOF";
-//		return getTokenNames()[id];
-//	}
-
 }
