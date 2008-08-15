@@ -21,19 +21,39 @@ package org.springframework.expression.spel;
  * @author Andy Clement
  */
 public class ParserErrorMessagesTests extends ExpressionTestCase {
+	// TODO (asc) extract expected insert messages into constants (just in case of changes)?
+	// TODO (asc) review poor messages, marked // POOR below
 
 	public void testBrokenExpression01() {
-		// Expression: 0xCAFEBABE - too big to be processed as an int, needs the L suffix
+		// will not fit into an int, needs L suffix
 		parseAndCheckError("0xCAFEBABE", SpelMessages.NOT_AN_INTEGER);
+		evaluate("0xCAFEBABEL", 0xCAFEBABEL, Long.class);
 	}
 
-	// parseCheck("true or ");
-	// parseCheck("tru or false");
-	// parseCheck("1 + ");
-	// parseCheck("0xCAFEBABEG");
-	// TODO 3 too many close brackets - parser recover
-	// public void testExpressionLists07a() { parseCheck("((3;4;)+(5;6;)))","((3;4)
-	// + (5;6))");}
-	// }
-	// ---
+	public void testBrokenExpression02() {
+		// rogue 'G' on the end
+		parseAndCheckError("0xB0BG", SpelMessages.PARSE_PROBLEM, 5, "mismatched input 'G' expecting EOF");
+	}
+
+	public void testBrokenExpression03() {
+		// too many closing brackets
+		parseAndCheckError("((3;4;)+(5;6;)))", SpelMessages.PARSE_PROBLEM, 15, "mismatched input ')' expecting EOF");
+		evaluate("((3;4;)+(5;6;))", 10 /* 4+6 */, Integer.class);
+	}
+
+	public void testBrokenExpression04() {
+		// missing right operand
+		parseAndCheckError("true or ", SpelMessages.PARSE_PROBLEM, -1, "no viable alternative at input '<EOF>'"); // POOR
+	}
+
+	public void testBrokenExpression05() {
+		// missing right operand
+		parseAndCheckError("1 + ", SpelMessages.PARSE_PROBLEM, -1, "no viable alternative at input '<EOF>'"); // POOR
+	}
+
+	public void testBrokenExpression06() {
+		// expression list missing surrounding parentheses
+		parseAndCheckError("1;2;3", SpelMessages.PARSE_PROBLEM, 1, "mismatched input ';' expecting EOF"); // POOR
+		evaluate("(1;2;3)", 3, Integer.class);
+	}
 }
