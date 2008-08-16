@@ -49,7 +49,6 @@ public class OperatorMultiply extends Operator {
 	 */
 	@Override
 	public Object getValue(ExpressionState state) throws EvaluationException {
-		// TODO could have an 'int only' arithmetic mode for super fast expression evaluation
 		Object operandOne = getLeftOperand().getValue(state);
 		Object operandTwo = getRightOperand().getValue(state);
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
