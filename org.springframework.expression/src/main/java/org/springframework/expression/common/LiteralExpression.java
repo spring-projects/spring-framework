@@ -17,7 +17,7 @@ public class LiteralExpression implements Expression {
 	/**
 	 * Fixed literal value of this expression
 	 */
-	private String literalValue;
+	private final String literalValue;
 
 	public LiteralExpression(String literalValue) {
 		this.literalValue = literalValue;
@@ -40,7 +40,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
-		throw new EvaluationException(this.literalValue, "Cannot call setValue() on a LiteralExpression");
+		throw new EvaluationException(literalValue, "Cannot call setValue() on a LiteralExpression");
 	}
 
 	public Object getValue(EvaluationContext context, Class<?> expectedResultType) throws EvaluationException {
@@ -51,6 +51,14 @@ public class LiteralExpression implements Expression {
 	public Object getValue(Class<?> expectedResultType) throws EvaluationException {
 		Object value = getValue();
 		return ExpressionUtils.convert(null, value, expectedResultType);
+	}
+
+	public boolean isWritable(EvaluationContext context) throws EvaluationException {
+		return false;
+	}
+
+	public Class getValueType() throws EvaluationException {
+		return String.class;
 	}
 
 }
