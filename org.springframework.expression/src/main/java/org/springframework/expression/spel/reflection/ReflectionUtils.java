@@ -303,7 +303,7 @@ public class ReflectionUtils {
 	}
 
 
-	// TODO optimize impl
+	// TODO optimize implementation of areBoxingCompatible
 	private static boolean areBoxingCompatible(Class class1, Class class2) {
 		if (class1 == Integer.class && class2 == Integer.TYPE)
 			return true;
