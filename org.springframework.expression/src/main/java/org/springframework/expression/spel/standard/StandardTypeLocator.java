@@ -23,7 +23,12 @@ import org.springframework.expression.TypeLocator;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
 
-// TODO 3 promote import prefix support and classloader setting to the interface?
+/**
+ * A default implementation of a TypeLocator that uses the context classloader (or any classloader set upon it). It
+ * supports 'well known' packages so if a type cannot be found it will try the registered imports to locate it.
+ * 
+ * @author Andy Clement
+ */
 public class StandardTypeLocator implements TypeLocator {
 
 	private ClassLoader loader;
@@ -35,44 +40,67 @@ public class StandardTypeLocator implements TypeLocator {
 		registerImport("java.util");
 	}
 
-	// OPTIMIZE I'm sure this *could* be more inefficient if I tried really hard...
-	public Class<?> findType(String type) throws EvaluationException {
-		String nameToLookup = type;
+	/**
+	 * Find a (possibly unqualified) type reference - first using the typename as is, then trying any registered
+	 * prefixes if the typename cannot be found.
+	 * 
+	 * @param typename the type to locate
+	 * @return the class object for the type
+	 * @throws EvaluationException if the type cannot be found
+	 */
+	public Class<?> findType(String typename) throws EvaluationException {
+		String nameToLookup = typename;
 		try {
 			Class<?> c = loader.loadClass(nameToLookup);
 			return c;
 		} catch (ClassNotFoundException e) {
-			// might need a prefix...
+			// try any registered prefixes before giving up
 		}
-		// try prefixes
 		for (String prefix : knownPackagePrefixes) {
 			try {
-				nameToLookup = new StringBuilder().append(prefix).append(".").append(type).toString();
-				Class<?> c = loader.loadClass(nameToLookup);
-				return c;
+				nameToLookup = new StringBuilder().append(prefix).append(".").append(typename).toString();
+				Class<?> clazz = loader.loadClass(nameToLookup);
+				return clazz;
 			} catch (ClassNotFoundException e) {
+				// might be a different prefix
 			}
 		}
-		// TODO should some of these common messages be promoted to top level exception types?
-		throw new SpelException(SpelMessages.TYPE_NOT_FOUND, type);
+		throw new SpelException(SpelMessages.TYPE_NOT_FOUND, typename);
 	}
 
 	/**
 	 * Register a new import prefix that will be used when searching for unqualified types. Expected format is something
-	 * like "java.lang"
+	 * like "java.lang".
+	 * 
+	 * @param prefix the prefix to register
 	 */
 	public void registerImport(String prefix) {
 		knownPackagePrefixes.add(prefix);
 	}
 
+	/**
+	 * Unregister an import prefix.
+	 * 
+	 * @param prefix the prefix to unregister
+	 */
 	public void unregisterImport(String prefix) {
 		knownPackagePrefixes.add(prefix);
 	}
 
-	public List<String> getImports() {
+	/**
+	 * Return a list of all the import prefixes registered with this StandardTypeLocator.
+	 * 
+	 * @return list of registered import prefixes
+	 */
+	public List<String> getImportPrefixes() {
 		return knownPackagePrefixes;
 	}
 
+	/**
+	 * Set the classloader that should be used (otherwise the context class loader will be used).
+	 * 
+	 * @param loader the classloader to use from now on
+	 */
 	public void setClassLoader(ClassLoader loader) {
 		this.loader = loader;
 	}
