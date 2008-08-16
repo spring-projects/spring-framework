@@ -15,7 +15,6 @@
  */
 package org.springframework.expression;
 
-// TODO (asc) This class needs a better name? I might have used EvaluationException if it wasn't also used for parsing issues
 /**
  * Base class for exceptions occurring during expression parsing and evaluation.
  * 
