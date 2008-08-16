@@ -11,3 +11,7 @@ Low Importance
 
 - For the ternary operator, should isWritable() return true/false depending on evaluating the condition and check isWritable() of whichever branch it
 would have taken?  At the moment ternary expressions are just considered NOT writable.
+
+Syntax
+
+- are distanceto or soundslike any use?
