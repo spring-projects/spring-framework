@@ -21,8 +21,8 @@ package org.springframework.expression.spel;
  * @author Andy Clement
  */
 public class ParserErrorMessagesTests extends ExpressionTestCase {
-	// TODO (asc) extract expected insert messages into constants (just in case of changes)?
-	// TODO (asc) review poor messages, marked // POOR below
+	// TODO extract expected insert messages into constants (just in case of changes)?
+	// TODO review poor messages, marked // POOR below
 
 	public void testBrokenExpression01() {
 		// will not fit into an int, needs L suffix
