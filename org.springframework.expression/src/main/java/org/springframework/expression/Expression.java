@@ -15,9 +15,6 @@
  */
 package org.springframework.expression;
 
-import org.springframework.expression.spel.SpelException;
-
-
 /**
  * An expression capable of evaluating itself against context objects. Encapsulates the details of a previously parsed
  * expression string. Provides a common abstraction for expression evaluation independent of any language like OGNL or
@@ -30,27 +27,28 @@ public interface Expression {
 
 	/**
 	 * Evaluate this expression in the default standard context.
+	 * 
 	 * @return the evaluation result
-	 * @throws EvaluationException an exception occurred during expression evaluation
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	public Object getValue() throws EvaluationException;
 
 	/**
-	 * Evaluate the expression in the default standard context.  If the result of the evaluation
-	 * does not match (and cannot be converted to) the expected result type then an 
-	 * exception will be returned.
+	 * Evaluate the expression in the default standard context. If the result of the evaluation does not match (and
+	 * cannot be converted to) the expected result type then an exception will be returned.
 	 * 
-	 * @param expectedResultType the class the caller would like the result to be
-	 * @return the value of the expression
-	 * @throws EvaluationException if there is a problem with evaluation of the expression.
+	 * @param desiredResultType the class the caller would like the result to be
+	 * @return the evaluation result
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	public Object getValue(Class<?> expectedResultType) throws EvaluationException;
+	public Object getValue(Class<?> desiredResultType) throws EvaluationException;
 
 	/**
 	 * Evaluate this expression in the provided context and return the result of evaluation.
-	 * @param context the context to evaluate this expression in
+	 * 
+	 * @param context the context in which to evaluate the expression
 	 * @return the evaluation result
-	 * @throws EvaluationException an exception occurred during expression evaluation
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	public Object getValue(EvaluationContext context) throws EvaluationException;
 
@@ -60,34 +58,53 @@ public interface Expression {
 	 * is not and cannot be converted to that type.
 	 * 
 	 * @param context the context in which to evaluate the expression
-	 * @param expectedResultType the class the caller would like the result to be
-	 * @return the value of the expression
-	 * @throws SpelException if there is a problem with evaluation of the expression.
+	 * @param desiredResultType the class the caller would like the result to be
+	 * @return the evaluation result
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	public Object getValue(EvaluationContext context, Class<?> expectedResultType) throws EvaluationException;
+	public Object getValue(EvaluationContext context, Class<?> desiredResultType) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.
-	 * @param context the context on which the new value should be set
-	 * @param value the new value to set
-	 * @throws EvaluationException an exception occurred during expression evaluation
+	 * 
+	 * @param context the context in which to set the value of the expression
+	 * @param value the new value
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for the given
-	 * context.
-	 * @param context the context to evaluate
+	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
+	 * the given context.
+	 * 
+	 * @param context the context in which to evaluate the expression
 	 * @return the most general type of value that can be set on this context
-	 * @throws EvaluationException an exception occurred during expression evaluation
+	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	public Class getValueType(EvaluationContext context) throws EvaluationException;
 
 	/**
+	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method using
+	 * the default context.
+	 * 
+	 * @return the most general type of value that can be set on this context
+	 * @throws EvaluationException if there is a problem determining the type
+	 */
+	public Class getValueType() throws EvaluationException;
+
+	/**
 	 * Returns the original string used to create this expression, unmodified.
+	 * 
 	 * @return the original expression string
 	 */
 	public String getExpressionString();
 
-
+	/**
+	 * Determine if an expression can be written to, i.e. setValue() can be called.
+	 * 
+	 * @param context the context in which the expression should be checked
+	 * @return true if the expression is writable
+	 * @throws EvaluationException if there is a problem determining if it is writable
+	 */
+	public boolean isWritable(EvaluationContext context) throws EvaluationException;
 }
