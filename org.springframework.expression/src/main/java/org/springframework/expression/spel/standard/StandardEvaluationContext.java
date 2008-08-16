@@ -61,9 +61,22 @@ public class StandardEvaluationContext implements EvaluationContext {
 		addPropertyAccessor(new ReflectionPropertyResolver());
 	}
 
+	public void reset() {
+		typeUtils = new StandardTypeUtilities();
+		methodResolvers.clear();
+		addMethodResolver(new ReflectionMethodResolver());
+		constructorResolvers.clear();
+		addConstructorResolver(new ReflectionConstructorResolver());
+		propertyResolvers.clear();
+		addPropertyAccessor(new ReflectionPropertyResolver());
+		simpleReferencesMap.clear();
+		variables.clear();
+		rootObject = null;
+	}
+
 	public StandardEvaluationContext(Object rootContextObject) {
 		this();
-		this.rootObject = rootContextObject;
+		rootObject = rootContextObject;
 	}
 
 	public void setClassLoader(ClassLoader loader) {
@@ -124,19 +137,18 @@ public class StandardEvaluationContext implements EvaluationContext {
 	public List<PropertyAccessor> getPropertyAccessors() {
 		return propertyResolvers;
 	}
-	
+
 	public void addPropertyAccessor(PropertyAccessor accessor) {
 		propertyResolvers.add(accessor);
 	}
-	
+
 	public void removePropertyAccessor(PropertyAccessor accessor) {
 		propertyResolvers.remove(accessor);
 	}
-	
-	public void insertPropertyAccessor(int position,PropertyAccessor accessor) {
-		propertyResolvers.add(position,accessor);
-	}
 
+	public void insertPropertyAccessor(int position, PropertyAccessor accessor) {
+		propertyResolvers.add(position, accessor);
+	}
 
 	public List<MethodResolver> getMethodResolvers() {
 		return methodResolvers;
@@ -155,14 +167,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public void setRootObject(Object o) {
-		this.rootObject = o;
+		rootObject = o;
 	}
 
 	// TODO 3 have a variant that adds at position (same for ctor/propOrField)
 	public void addMethodResolver(MethodResolver resolver) {
 		methodResolvers.add(resolver);
 	}
-	
+
 	public void removeMethodResolver(MethodResolver resolver) {
 		methodResolvers.remove(resolver);
 	}
@@ -171,11 +183,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 		methodResolvers.add(pos, resolver);
 	}
 
-
 	public void addConstructorResolver(ConstructorResolver resolver) {
 		constructorResolvers.add(resolver);
 	}
-
 
 	public void addReference(String contextName, String objectName, Object value) {
 		Map<String, Object> contextMap = simpleReferencesMap.get(contextName);
@@ -187,7 +197,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public void addTypeConverter(StandardIndividualTypeConverter newConverter) {
-		((StandardTypeConverter)typeUtils.getTypeConverter()).registerConverter(newConverter);
+		((StandardTypeConverter) typeUtils.getTypeConverter()).registerConverter(newConverter);
 	}
 
 }
