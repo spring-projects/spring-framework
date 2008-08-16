@@ -56,11 +56,11 @@ public class BooleanExpressionTests extends ExpressionTestCase {
 	}
 
 	public void testBooleanErrors01() {
-		evaluateAndCheckError("1 or false", SpelMessages.TYPE_CONVERSION_ERROR, 0);
-		evaluateAndCheckError("false or 39", SpelMessages.TYPE_CONVERSION_ERROR, 9);
+		evaluateAndCheckError("1.0 or false", SpelMessages.TYPE_CONVERSION_ERROR, 0);
+		evaluateAndCheckError("false or 39.4", SpelMessages.TYPE_CONVERSION_ERROR, 9);
 		evaluateAndCheckError("true and 'hello'", SpelMessages.TYPE_CONVERSION_ERROR, 9);
 		evaluateAndCheckError(" 'hello' and 'goodbye'", SpelMessages.TYPE_CONVERSION_ERROR, 1);
-		evaluateAndCheckError("!35", SpelMessages.TYPE_CONVERSION_ERROR, 1);
+		evaluateAndCheckError("!35.2", SpelMessages.TYPE_CONVERSION_ERROR, 1);
 		evaluateAndCheckError("! 'foob'", SpelMessages.TYPE_CONVERSION_ERROR, 2);
 	}
 }
