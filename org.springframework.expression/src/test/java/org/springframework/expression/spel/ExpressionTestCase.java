@@ -312,22 +312,45 @@ public abstract class ExpressionTestCase extends TestCase {
 		}
 	}
 
+	/**
+	 * Produce a nice string representation of the input object.
+	 * 
+	 * @param value object to be formatted
+	 * @return a nice string
+	 */
 	public static String stringValueOf(Object value) {
 		// do something nice for arrays
-		if (value == null)
+		if (value == null) {
 			return "null";
+		}
 		if (value.getClass().isArray()) {
 			StringBuilder sb = new StringBuilder();
 			if (value.getClass().getComponentType().isPrimitive()) {
-				// TODO 4 ought to support other primitives!
-				int[] l = (int[]) value;
-				sb.append("int[").append(l.length).append("]{");
-				for (int j = 0; j < l.length; j++) {
-					if (j > 0)
-						sb.append(",");
-					sb.append(stringValueOf(l[j]));
+				Class<?> primitiveType = value.getClass().getComponentType();
+				if (primitiveType == Integer.TYPE) {
+					int[] l = (int[]) value;
+					sb.append("int[").append(l.length).append("]{");
+					for (int j = 0; j < l.length; j++) {
+						if (j > 0) {
+							sb.append(",");
+						}
+						sb.append(stringValueOf(l[j]));
+					}
+					sb.append("}");
+				} else if (primitiveType == Long.TYPE) {
+					long[] l = (long[]) value;
+					sb.append("long[").append(l.length).append("]{");
+					for (int j = 0; j < l.length; j++) {
+						if (j > 0) {
+							sb.append(",");
+						}
+						sb.append(stringValueOf(l[j]));
+					}
+					sb.append("}");
+				} else {
+					throw new RuntimeException("Please implement support for type " + primitiveType.getName()
+							+ " in ExpressionTestCase.stringValueOf()");
 				}
-				sb.append("}");
 			} else {
 				List<Object> l = Arrays.asList((Object[]) value);
 				sb.append(value.getClass().getComponentType().getName()).append("[").append(l.size()).append("]{");
@@ -346,30 +369,5 @@ public abstract class ExpressionTestCase extends TestCase {
 			return value.toString();
 		}
 	}
-
-	// protected void evaluateAndCheckError(String string, ELMessages expectedMessage, Object... otherProperties) {
-	// try {
-	// SpelExpression expr = (SpelExpression) parser.parseExpression(string);
-	// if (expr == null)
-	// fail("Parser returned null for expression");
-	// // expr.printAST(System.out);
-	// @SuppressWarnings("unused")
-	// Object value = expr.getValue(eContext);
-	// fail("Should have failed with message " + expectedMessage);
-	// } catch (ExpressionException ee) {
-	// ELException ex = (ELException) ee;
-	// if (expectedMessage != ex.getMessageUnformatted()) {
-	// System.out.println(ex.getMessage());
-	// ex.printStackTrace();
-	// assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
-	// }
-	// if (otherProperties != null && otherProperties.length != 0) {
-	// // first one is expected position of the error within the string
-	// int pos = ((Integer) otherProperties[0]).intValue();
-	// assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
-	// }
-	// }
-	//
-	// }
 
 }
