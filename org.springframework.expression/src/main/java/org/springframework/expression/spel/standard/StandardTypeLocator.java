@@ -33,7 +33,6 @@ public class StandardTypeLocator implements TypeLocator {
 		loader = Thread.currentThread().getContextClassLoader();
 		registerImport("java.lang");
 		registerImport("java.util");
-		registerImport("java.awt");
 	}
 
 	// OPTIMIZE I'm sure this *could* be more inefficient if I tried really hard...
