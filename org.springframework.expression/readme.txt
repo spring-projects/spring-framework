@@ -11,6 +11,8 @@ Low Importance
 
 - For the ternary operator, should isWritable() return true/false depending on evaluating the condition and check isWritable() of whichever branch it
 would have taken?  At the moment ternary expressions are just considered NOT writable.
+- Enhance type locator interface with direct support for register/unregister imports and ability to set class loader?
+- Should some of the common errors (like SpelMessages.TYPE_NOT_FOUND) be promoted to top level exceptions?
 
 Syntax
 
