@@ -18,11 +18,9 @@ package org.springframework.expression.spel;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.common.ExpressionUtils;
 import org.springframework.expression.spel.ast.SpelNode;
 import org.springframework.expression.spel.standard.StandardEvaluationContext;
-
-// TODO 3 Do we need more getValue() options - for example with just a root object or with a set of variables?
-// (these things are currently captured in the Context)
 
 /**
  * A SpelExpressions represents a parsed (valid) expression that is ready to be evaluated in a specified context. An
@@ -55,44 +53,22 @@ public class SpelExpression implements Expression {
 	}
 
 	/**
-	 * Evaluate the expression in a default context that knows nothing (and therefore cannot resolve references to
-	 * properties/etc). Only useful for trivial expressions like '3+4'.
-	 * 
-	 * @return the value of the expression
-	 * @throws SpelException if there is a problem with evaluation of the expression
+	 * {@inheritDoc}
 	 */
 	public Object getValue() throws EvaluationException {
 		EvaluationContext eContext = new StandardEvaluationContext();
 		return ast.getValue(new ExpressionState(eContext));
 	}
 
-	// public Class<?> getValueType() throws ELException {
-	// return ast.getValueType(new ExpressionState());
-	// }
-
 	/**
-	 * Evaluate the expression in a specified context which can resolve references to properties, methods, types, etc.
-	 * The {@link StandardEvaluationContext} can be sub classed and overridden where necessary, rather than implementing
-	 * the entire EvaluationContext interface.
-	 * 
-	 * @param context the context in which to evaluate the expression
-	 * @return the value of the expression
-	 * @throws SpelException if there is a problem with evaluation of the expression.
+	 * {@inheritDoc}
 	 */
 	public Object getValue(EvaluationContext context) throws EvaluationException {
 		return ast.getValue(new ExpressionState(context));
 	}
 
 	/**
-	 * Evaluate the expression in a specified context which can resolve references to properties, methods, types, etc -
-	 * the type of the evaluation result is expected to be of a particular class and an exception will be thrown if it
-	 * is not and cannot be converted to that type. The {@link StandardEvaluationContext} can be sub classed and
-	 * overridden where necessary, rather than implementing the entire EvaluationContext interface.
-	 * 
-	 * @param context the context in which to evaluate the expression
-	 * @param expectedResultType the class the caller would like the result to be
-	 * @return the value of the expression
-	 * @throws SpelException if there is a problem with evaluation of the expression.
+	 * {@inheritDoc}
 	 */
 	public Object getValue(EvaluationContext context, Class<?> expectedResultType) throws EvaluationException {
 		Object result = ast.getValue(new ExpressionState(context));
@@ -109,23 +85,14 @@ public class SpelExpression implements Expression {
 	}
 
 	/**
-	 * Evaluate an expression and set the result to the specified value. This only makes sense when working with the
-	 * expression against a context.
-	 * 
-	 * @param context the context in which to evaluate the expression
-	 * @param value the new value
-	 * @throws SpelException if there is a problem with evaluation of the expression.
+	 * {@inheritDoc}
 	 */
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
 		ast.setValue(new ExpressionState(context), value);
 	}
 
 	/**
-	 * Determine if an expression evaluates to an value that can be set with a value (for example, a property).
-	 * 
-	 * @param context the context in which to evaluate the expression
-	 * @return true if the expression supports setValue()
-	 * @throws SpelException if there is a problem with evaluation of the expression.
+	 * {@inheritDoc}
 	 */
 	public boolean isWritable(EvaluationContext context) throws EvaluationException {
 		return ast.isWritable(new ExpressionState(context));
@@ -148,15 +115,39 @@ public class SpelExpression implements Expression {
 	public String toStringAST() {
 		return ast.toStringAST();
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Class getValueType(EvaluationContext context) throws EvaluationException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		// TODO is this a legal implementation? The null return value could be very unhelpful. See other getValueType()
+		// also.
+		Object value = getValue(context);
+		if (value == null) {
+			return null;
+		} else {
+			return value.getClass();
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public Class getValueType() throws EvaluationException {
+		Object value = getValue();
+		if (value == null) {
+			return null;
+		} else {
+			return value.getClass();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Object getValue(Class<?> expectedResultType) throws EvaluationException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		Object result = getValue();
+		return ExpressionUtils.convert(null, result, expectedResultType);
 	}
 
 }
