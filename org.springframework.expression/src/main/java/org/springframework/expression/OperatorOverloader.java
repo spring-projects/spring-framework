@@ -1,6 +1,5 @@
 package org.springframework.expression;
 
-
 /**
  * By default the mathematical operators {@link Operation} support simple types like numbers. By providing an
  * implementation of OperatorOverloader, a user of the expression language can support these operations on other types.
@@ -9,9 +8,9 @@ package org.springframework.expression;
  */
 public interface OperatorOverloader {
 
-	// TODO (asc) does this need a better type name?
-	// TODO (asc) needs some testing!
-	
+	// TODO does type OperatorOverloader need a better name?
+	// TODO Operator overloading needs some testing!
+
 	/**
 	 * Return true if the operator overloader supports the specified operation between the two operands and so should be
 	 * invoked to handle it.
