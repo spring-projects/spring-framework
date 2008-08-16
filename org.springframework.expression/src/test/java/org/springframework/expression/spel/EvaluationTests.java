@@ -416,9 +416,8 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("@(a/b/c:orange).name", "Orange", String.class, true);
 	}
 
-	// TODO 4 automatic/default imports for next line?
 	public void testReferences06() {
-		evaluate("@(apple).color.getRGB() == 	T(Color).green.getRGB()", "true", Boolean.class);
+		evaluate("@(apple).color.getRGB() == 	T(java.awt.Color).green.getRGB()", "true", Boolean.class);
 	}
 
 	public void testReferences06b() {
@@ -435,7 +434,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	// }
 
 	public void testStaticRef02() {
-		evaluate("T(Color).green.getRGB()!=0", "true", Boolean.class);
+		evaluate("T(java.awt.Color).green.getRGB()!=0", "true", Boolean.class);
 	}
 
 	// variables and functions
