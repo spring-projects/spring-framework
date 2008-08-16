@@ -376,6 +376,16 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("{2}.#isEven(#this[0]) == 'y'?'it is even':'it is odd'", "it is even", String.class);
 	}
 
+	public void testTernaryOperator03() {
+		evaluateAndCheckError("'hello'?1:2", SpelMessages.TYPE_CONVERSION_ERROR); // cannot convert String to boolean
+	}
+
+	public void testTernaryOperator04() {
+		// an int becomes TRUE if not 0, otherwise FALSE
+		evaluate("12?1:2", 1, Integer.class); // int to boolean
+		evaluate("1L?1:2", 1, Integer.class); // long to boolean
+	}
+
 	// Indexer
 	public void testCutProcessor01() {
 		evaluate("{1,2,3,4,5}.cut(1,3)", "[2, 3, 4]", ArrayList.class);
