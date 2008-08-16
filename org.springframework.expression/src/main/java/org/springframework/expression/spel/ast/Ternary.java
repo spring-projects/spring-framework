@@ -17,8 +17,8 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
@@ -31,18 +31,25 @@ public class Ternary extends SpelNode {
 		super(payload);
 	}
 
+	/**
+	 * Evaluate the condition and if true evaluate the first alternative, otherwise evaluate the second alternative.
+	 * 
+	 * @param state the expression state
+	 * @throws EvaluationException if the condition does not evaluate correctly to a boolean or there is a problem
+	 * executing the chosen alternative
+	 */
 	@Override
 	public Object getValue(ExpressionState state) throws EvaluationException {
-		Object condition = getChild(0).getValue(state);
+		Boolean b = (Boolean) getChild(0).getValue(state, Boolean.class);
 		try {
-			boolean b = state.toBoolean(condition);
-			if (b)
+			if (b) {
 				return getChild(1).getValue(state);
-			else
+			} else {
 				return getChild(2).getValue(state);
-		} catch (SpelException see) {
-			see.setPosition(getChild(0).getCharPositionInLine());
-			throw see;
+			}
+		} catch (SpelException ex) {
+			ex.setPosition(getChild(0).getCharPositionInLine());
+			throw ex;
 		}
 	}
 
@@ -52,7 +59,6 @@ public class Ternary extends SpelNode {
 				.append(" : ").append(getChild(2).toStringAST()).toString();
 	}
 
-	// TODO 3 should this say TRUE if the left or the right are writable???
 	@Override
 	public boolean isWritable(ExpressionState expressionState) throws SpelException {
 		return false;
