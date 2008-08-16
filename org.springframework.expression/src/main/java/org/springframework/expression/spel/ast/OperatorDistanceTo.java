@@ -17,15 +17,14 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
-// TODO is the operator 'distanceto' any use...?
 /**
  * The distanceto operator uses an implementation of the levenshtein distance measurement for determining the 'edit
  * distance' between two strings (the two operands to distanceto). http://en.wikipedia.org/wiki/Levenshtein_distance
- * @author Andy Clement
  * 
+ * @author Andy Clement
  */
 public class OperatorDistanceTo extends Operator {
 
