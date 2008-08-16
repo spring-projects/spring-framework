@@ -20,9 +20,10 @@ import java.io.Serializable;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.common.ExpressionUtils;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.generated.SpringExpressionsParser;
 
 /**
@@ -70,7 +71,8 @@ public abstract class SpelNode extends CommonTree implements Serializable {
 	 * @throws EvaluationException if any problem occurs evaluating the expression or setting the new value
 	 */
 	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelException(getCharPositionInLine(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass(), getTokenName());
+		throw new SpelException(getCharPositionInLine(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass(),
+				getTokenName());
 	}
 
 	/**
@@ -104,7 +106,21 @@ public abstract class SpelNode extends CommonTree implements Serializable {
 	 * @return the class of the object if it is not already a class object, or null if the object is null
 	 */
 	public Class<?> getObjectClass(Object o) {
-	  if (o==null) return null;
-	  return (o instanceof Class) ? ((Class<?>) o) : o.getClass();
+		if (o == null)
+			return null;
+		return (o instanceof Class) ? ((Class<?>) o) : o.getClass();
+	}
+
+	protected final Object getValue(ExpressionState state, Class<?> desiredReturnType) throws EvaluationException {
+		Object result = getValue(state);
+		if (result != null && desiredReturnType != null) {
+			Class<?> resultType = result.getClass();
+			if (desiredReturnType.isAssignableFrom(resultType)) {
+				return result;
+			}
+			// Attempt conversion to the requested type, may throw an exception
+			return ExpressionUtils.convert(state.getEvaluationContext(), result, desiredReturnType);
+		}
+		return result;
 	}
 }
