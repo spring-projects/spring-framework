@@ -42,22 +42,47 @@ public class StandardTypeConverter implements TypeConverter {
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		Map<Class<?>, StandardIndividualTypeConverter> possibleConvertersToTheTargetType = converters.get(targetType);
 		if (possibleConvertersToTheTargetType == null && targetType.isPrimitive()) {
-			if (targetType == Integer.TYPE)
+			if (targetType == Integer.TYPE) {
+				if (sourceType == Integer.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Integer.class);
-			else if (targetType == Boolean.TYPE)
+			} else if (targetType == Boolean.TYPE) {
+				if (sourceType == Boolean.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Boolean.class);
-			else if (targetType == Short.TYPE)
+			} else if (targetType == Short.TYPE) {
+				if (sourceType == Short.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Short.class);
-			else if (targetType == Long.TYPE)
+			} else if (targetType == Long.TYPE) {
+				if (sourceType == Long.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Long.class);
-			else if (targetType == Character.TYPE)
+			} else if (targetType == Character.TYPE) {
+				if (sourceType == Character.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Character.class);
-			else if (targetType == Double.TYPE)
+			} else if (targetType == Double.TYPE) {
+				if (sourceType == Double.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Double.class);
-			else if (targetType == Float.TYPE)
+			} else if (targetType == Float.TYPE) {
+				if (sourceType == Float.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Float.class);
-			else if (targetType == Byte.TYPE)
+			} else if (targetType == Byte.TYPE) {
+				if (sourceType == Byte.class) {
+					return true;
+				}
 				possibleConvertersToTheTargetType = converters.get(Byte.class);
+			}
 		}
 		if (possibleConvertersToTheTargetType != null) {
 			StandardIndividualTypeConverter aConverter = possibleConvertersToTheTargetType.get(sourceType);
@@ -72,24 +97,50 @@ public class StandardTypeConverter implements TypeConverter {
 	public Object convertValue(Object value, Class<?> targetType) throws SpelException {
 		if (value == null || value.getClass() == targetType)
 			return value;
+		Class sourceType = value.getClass();
 		Map<Class<?>, StandardIndividualTypeConverter> possibleConvertersToTheTargetType = converters.get(targetType);
 		if (possibleConvertersToTheTargetType == null && targetType.isPrimitive()) {
-			if (targetType == Integer.TYPE)
+			if (targetType == Integer.TYPE) {
+				if (sourceType == Integer.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Integer.class);
-			else if (targetType == Boolean.TYPE)
+			} else if (targetType == Boolean.TYPE) {
+				if (sourceType == Boolean.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Boolean.class);
-			else if (targetType == Short.TYPE)
+			} else if (targetType == Short.TYPE) {
+				if (sourceType == Short.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Short.class);
-			else if (targetType == Long.TYPE)
+			} else if (targetType == Long.TYPE) {
+				if (sourceType == Long.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Long.class);
-			else if (targetType == Character.TYPE)
+			} else if (targetType == Character.TYPE) {
+				if (sourceType == Character.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Character.class);
-			else if (targetType == Double.TYPE)
+			} else if (targetType == Double.TYPE) {
+				if (sourceType == Double.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Double.class);
-			else if (targetType == Float.TYPE)
+			} else if (targetType == Float.TYPE) {
+				if (sourceType == Float.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Float.class);
-			else if (targetType == Byte.TYPE)
+			} else if (targetType == Byte.TYPE) {
+				if (sourceType == Byte.class) {
+					return value;
+				}
 				possibleConvertersToTheTargetType = converters.get(Byte.class);
+			}
 		}
 		Object result = null;
 		if (possibleConvertersToTheTargetType != null) {
@@ -126,15 +177,19 @@ public class StandardTypeConverter implements TypeConverter {
 
 	private static class ToBooleanConverter implements StandardIndividualTypeConverter {
 		public Object convert(Object value) throws SpelException {
-			return ((Boolean) value).booleanValue();
+			if (value instanceof Integer) {
+				return ((Integer) value).intValue() != 0;
+			} else {
+				return ((Long) value).longValue() != 0;
+			}
 		}
 
 		public Class<?>[] getFrom() {
-			return new Class<?>[] { Boolean.class };
+			return new Class<?>[] { Integer.class, Long.class };
 		}
 
 		public Class<?> getTo() {
-			return Boolean.TYPE;
+			return Boolean.class;
 		}
 	}
 
@@ -264,21 +319,16 @@ public class StandardTypeConverter implements TypeConverter {
 
 	private static class ToIntegerConverter implements StandardIndividualTypeConverter {
 		public Object convert(Object value) throws SpelException {
-			if (value instanceof Integer)
-				return ((Integer) value).intValue();
-			else if (value instanceof Long) {
-				try {
-					return Integer.parseInt(((Long) value).toString());
-				} catch (NumberFormatException nfe) {
-					throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "long value '" + value
-							+ "' cannot be represented as an int");
-				}
-			} else
-				return null;
+			try {
+				return Integer.parseInt(((Long) value).toString());
+			} catch (NumberFormatException nfe) {
+				throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "long value '" + value
+						+ "' cannot be represented as an int");
+			}
 		}
 
 		public Class<?>[] getFrom() {
-			return new Class<?>[] { Integer.class, Long.class };
+			return new Class<?>[] { Long.class };
 		}
 
 		public Class<?> getTo() {
