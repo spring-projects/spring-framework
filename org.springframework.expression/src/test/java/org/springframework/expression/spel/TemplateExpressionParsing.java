@@ -27,35 +27,38 @@ public class TemplateExpressionParsing extends ExpressionTestCase {
 
 	public void testParsingSimpleTemplateExpression01() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression expr = parser.parseExpression("hello ${'world'}",DefaultTemplateParserContext.INSTANCE);
+		Expression expr = parser.parseExpression("hello ${'world'}", DefaultTemplateParserContext.INSTANCE);
 		Object o = expr.getValue();
 		System.out.println(o);
-		assertEquals("hello world",o.toString());
+		assertEquals("hello world", o.toString());
 	}
 
 	public void testParsingSimpleTemplateExpression02() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression expr = parser.parseExpression("hello ${'to'} you",DefaultTemplateParserContext.INSTANCE);
+		Expression expr = parser.parseExpression("hello ${'to'} you", DefaultTemplateParserContext.INSTANCE);
 		Object o = expr.getValue();
 		System.out.println(o);
-		assertEquals("hello to you",o.toString());
+		assertEquals("hello to you", o.toString());
 	}
 
 	public void testParsingSimpleTemplateExpression03() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression expr = parser.parseExpression("The quick ${'brown'} fox jumped over the ${'lazy'} dog",DefaultTemplateParserContext.INSTANCE);
+		Expression expr = parser.parseExpression("The quick ${'brown'} fox jumped over the ${'lazy'} dog",
+				DefaultTemplateParserContext.INSTANCE);
 		Object o = expr.getValue();
 		System.out.println(o);
-		assertEquals("The quick brown fox jumped over the lazy dog",o.toString());
+		assertEquals("The quick brown fox jumped over the lazy dog", o.toString());
 	}
 
-	// TODO need to support this case but what is the neatest way?  Escapet the clasing delimiters in the expression string?
-//	public void testParsingTemplateExpressionThatEmbedsTheDelimiters() throws Exception {
-//		SpelExpressionParser parser = new SpelExpressionParser();
-//		Expression expr = parser.parseExpression("The quick ${{'green','brown'}.${true}} fox jumped over the ${'lazy'} dog",DefaultTemplateParserContext.INSTANCE);
-//		Object o = expr.getValue();
-//		System.out.println(o);
-//		assertEquals("The quick brown fox jumped over the lazy dog",o.toString());
-//	}
+	// TODO need to support this case but what is the neatest way? Escape the clashing delimiters in the expression
+	// string?
+	// public void testParsingTemplateExpressionThatEmbedsTheDelimiters() throws Exception {
+	// SpelExpressionParser parser = new SpelExpressionParser();
+	// Expression expr = parser.parseExpression("The quick ${{'green','brown'}.${true}} fox jumped over the ${'lazy'}
+	// dog",DefaultTemplateParserContext.INSTANCE);
+	// Object o = expr.getValue();
+	// System.out.println(o);
+	// assertEquals("The quick brown fox jumped over the lazy dog",o.toString());
+	// }
 
 }
