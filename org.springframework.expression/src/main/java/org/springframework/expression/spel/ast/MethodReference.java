@@ -29,9 +29,9 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.internal.Utils;
 import org.springframework.expression.spel.processors.AverageProcessor;
 import org.springframework.expression.spel.processors.CountProcessor;
@@ -48,7 +48,7 @@ public class MethodReference extends SpelNode {
 	private static Map<String, DataProcessor> registeredProcessers = new HashMap<String, DataProcessor>();
 
 	private final String name;
-	private MethodExecutor fastInvocationAccessor; // TODO should this be nulled if executing in a different context or is it OK to keep?
+	private MethodExecutor fastInvocationAccessor;
 
 	static {
 		registeredProcessers.put("count", new CountProcessor());
@@ -309,7 +309,8 @@ public class MethodReference extends SpelNode {
 					if (cause instanceof SpelException) {
 						throw (SpelException) cause;
 					} else {
-						throw new SpelException(cause, SpelMessages.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
+						throw new SpelException(cause, SpelMessages.PROBLEM_LOCATING_METHOD, name, contextObject
+								.getClass());
 					}
 				}
 			}
