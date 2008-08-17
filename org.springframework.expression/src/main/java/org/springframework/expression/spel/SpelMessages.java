@@ -68,7 +68,7 @@ public enum SpelMessages {
 			Kind.ERROR, 1027, "Unable to access property ''{0}'' through getter on type ''{1}''"), UNABLE_TO_ACCESS_PROPERTY_THROUGH_SETTER(
 			Kind.ERROR, 1028, "Unable to access property ''{0}'' through setter on type ''{1}''"), INVALID_PATTERN(
 			Kind.ERROR, 1029, "Pattern is not valid ''{0}''"), RECOGNITION_ERROR(Kind.ERROR, 1030,
-			"Recognition error: {0}"), // TODO 2 poor message
+			"Recognition error: {0}"), // TODO poor message when a recognition exception occurs
 	PROJECTION_NOT_SUPPORTED_ON_TYPE(Kind.ERROR, 1031, "Projection is not supported on the type ''{0}''"), ARGLIST_SHOULD_NOT_BE_EVALUATED(
 			Kind.ERROR, 1032, "The argument list of a lambda expression should never have getValue() called upon it"), MAPENTRY_SHOULD_NOT_BE_EVALUATED(
 			Kind.ERROR, 1033, "A map entry should never have getValue() called upon it"), EXCEPTION_DURING_PROPERTY_READ(
@@ -97,7 +97,7 @@ public enum SpelMessages {
 			Kind.ERROR, 1055, "Problem locating method {0} cannot on type {1}"), PROBLEM_LOCATING_CONSTRUCTOR(
 			Kind.ERROR, 1056,
 			"A problem occurred whilst attempting to construct an object of type ''{0}'' using arguments ''{1}''"), INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR(
-			Kind.ERROR, 1057, "First operand to like operator must be a string. ''{0}'' is not"), INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR(
+			Kind.ERROR, 1057, "First operand to like operator must be a string.  ''{0}'' is not"), INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR(
 			Kind.ERROR, 1058, "Second operand to like operator must be a string (regex). ''{0}'' is not"), SETVALUE_NOT_SUPPORTED(
 			Kind.ERROR, 1059, "setValue(ExpressionState, Object) not implemented for ''{0}''  (''{1}''"), TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION(
 			Kind.ERROR, 1060, "Expected the type of the new array to be specified as a String but found ''{0}''"), PROBLEM_DURING_TYPE_CONVERSION(
