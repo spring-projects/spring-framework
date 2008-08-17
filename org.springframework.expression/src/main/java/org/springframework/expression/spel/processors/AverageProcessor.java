@@ -17,11 +17,11 @@ package org.springframework.expression.spel.processors;
 
 import java.util.Collection;
 
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
-// TODO 3 does it return an element consistent with input? (an int if input is ints, even though the average may be
+// TODO does it return an element consistent with input? (an int if input is ints, even though the average may be
 // X.Y?) yes, for now
 /**
  * The AverageProcessor operates upon an input collection and computes the average value of the elements within it. It
