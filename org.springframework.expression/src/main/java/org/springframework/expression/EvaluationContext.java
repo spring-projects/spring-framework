@@ -58,7 +58,7 @@ public interface EvaluationContext {
 	 */
 	void setVariable(String name, Object value);
 
-	// TODO (asc) lookupReference() - is it too expensive to return all objects within a context?
+	// TODO lookupReference() - is it too expensive to return all objects within a context?
 	/**
 	 * Look up an object reference in a particular context. If no contextName is specified (null), assume the default
 	 * context. If no objectName is specified (null), return all objects in the specified context (List<Object>).
