@@ -17,9 +17,9 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 public class OperatorSoundsLike extends Operator {
 
@@ -32,19 +32,19 @@ public class OperatorSoundsLike extends Operator {
 		Object left = getLeftOperand().getValue(state);
 		Object right = getRightOperand().getValue(state);
 		if (!(left instanceof String)) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.SOUNDSLIKE_NEEDS_STRING_OPERAND, left.getClass()
-					.getName());
+			throw new SpelException(getCharPositionInLine(), SpelMessages.SOUNDSLIKE_NEEDS_STRING_OPERAND, left
+					.getClass().getName());
 		}
 		if (!(right instanceof String)) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.SOUNDSLIKE_NEEDS_STRING_OPERAND, right.getClass()
-					.getName());
+			throw new SpelException(getCharPositionInLine(), SpelMessages.SOUNDSLIKE_NEEDS_STRING_OPERAND, right
+					.getClass().getName());
 		}
 		String leftSoundex = computeSoundex((String) left);
 		String rightSoundex = computeSoundex((String) right);
 		return state.getTypeComparator().compare(leftSoundex, rightSoundex) == 0;
 	}
 
-	// TODO OPTIMIZE better algorithm implementation is possible for soundex
+	// TODO if we keep soundslike, improve upon this basic implementation
 	private String computeSoundex(String input) {
 		if (input == null || input.length() == 0)
 			return "0000";
