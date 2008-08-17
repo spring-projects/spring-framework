@@ -17,19 +17,17 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * The operator 'is' checks if an object is of the class specified in the right hand operand, in the same way that
  * instanceof does in Java.
  * 
  * @author Andy Clement
- * 
  */
 public class OperatorIs extends Operator {
-	// TODO should 'is' change to 'instanceof' ?
 
 	public OperatorIs(Token payload) {
 		super(payload);
@@ -40,16 +38,27 @@ public class OperatorIs extends Operator {
 		return "is";
 	}
 
+	/**
+	 * Compare the left operand to see it is an instance of the type specified as the right operand. The right operand
+	 * must be a class.
+	 * 
+	 * @param state the expression state
+	 * @return true if the left operand is an instanceof of the right operand, otherwise false
+	 * @throws EvaluationException if there is a problem evaluating the expression
+	 */
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Boolean getValue(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValue(state);
 		Object right = getRightOperand().getValue(state);
-		if (!(right instanceof Class<?>)) {
-			throw new SpelException(getRightOperand().getCharPositionInLine(),
-					SpelMessages.IS_OPERATOR_NEEDS_CLASS_OPERAND, right.getClass().getName());
+		if (left == null) {
+			return false; // null is not an instanceof anything
 		}
-		// TODO Could this defer to type utilities? What would be the benefit?
-		return (((Class<?>) right).isAssignableFrom(left.getClass()));
+		if (right == null || !(right instanceof Class<?>)) {
+			throw new SpelException(getRightOperand().getCharPositionInLine(),
+					SpelMessages.IS_OPERATOR_NEEDS_CLASS_OPERAND, (right == null ? "null" : right.getClass().getName()));
+		}
+		Class<?> rightClass = (Class<?>) right;
+		return rightClass.isAssignableFrom(left.getClass());
 	}
 
 }

@@ -56,4 +56,11 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		parseAndCheckError("1;2;3", SpelMessages.PARSE_PROBLEM, 1, "mismatched input ';' expecting EOF"); // POOR
 		evaluate("(1;2;3)", 3, Integer.class);
 	}
+
+	public void testBrokenExpression07() {
+		// T() can only take an identifier (possibly qualified), not a literal
+		// message ought to say identifier rather than ID
+		parseAndCheckError("null is T('a')", SpelMessages.PARSE_PROBLEM, 10, "mismatched input ''a'' expecting ID"); // POOR
+	}
+
 }
