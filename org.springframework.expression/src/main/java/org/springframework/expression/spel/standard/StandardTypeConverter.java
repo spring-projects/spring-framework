@@ -93,7 +93,7 @@ public class StandardTypeConverter implements TypeConverter {
 		return false;
 	}
 
-	// TODO 3 Q In case of a loss in information with coercion to a narrower type, should we throw an exception?
+	// TODO In case of a loss in information with coercion to a narrower type, should we throw an exception?
 	public Object convertValue(Object value, Class<?> targetType) throws SpelException {
 		if (value == null || value.getClass() == targetType)
 			return value;
@@ -201,7 +201,7 @@ public class StandardTypeConverter implements TypeConverter {
 				try {
 					Double.parseDouble((String) value);
 				} catch (NumberFormatException nfe) {
-					// TODO 3 Q throw something or leave the caller to throw a conversion exception?
+					// returning null will mean the caller throws a type conversion related exception
 				}
 			} else if (value instanceof Integer) {
 				return new Double(((Integer) value).intValue());
