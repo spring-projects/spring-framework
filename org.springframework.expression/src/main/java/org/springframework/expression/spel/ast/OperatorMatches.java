@@ -21,13 +21,13 @@ import java.util.regex.PatternSyntaxException;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
-// TODO what should be the difference between like and matches?
 /**
- * Implements the matches operator.
+ * Implements the matches operator. Matches takes two operands. The first is a string and the second is a java regex. It
+ * will return true when getValue() is called if the first operand matches the regex.
  * 
  * @author Andy Clement
  */
@@ -38,21 +38,38 @@ public class OperatorMatches extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValue(state);
+	public String getOperatorName() {
+		return "matches";
+	}
+
+	/**
+	 * Check the first operand matches the regex specified as the second operand.
+	 * 
+	 * @param state the expression state
+	 * @return true if the first operand matches the regex specified as the second operand, otherwise false
+	 * @throws EvaluationException if there is a problem evaluating the expression (e.g. the regex is invalid)
+	 */
+	@Override
+	public Boolean getValue(ExpressionState state) throws EvaluationException {
+		SpelNode leftOp = getLeftOperand();
+		SpelNode rightOp = getRightOperand();
+		Object left = leftOp.getValue(state, String.class);
 		Object right = getRightOperand().getValue(state);
 		try {
+			if (!(left instanceof String)) {
+				throw new SpelException(leftOp.getCharPositionInLine(),
+						SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR, left);
+			}
+			if (!(right instanceof String)) {
+				throw new SpelException(rightOp.getCharPositionInLine(),
+						SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR, right);
+			}
 			Pattern pattern = Pattern.compile((String) right);
 			Matcher matcher = pattern.matcher((String) left);
 			return matcher.matches();
 		} catch (PatternSyntaxException pse) {
-			throw new SpelException(pse, SpelMessages.INVALID_PATTERN, right);
+			throw new SpelException(rightOp.getCharPositionInLine(), pse, SpelMessages.INVALID_PATTERN, right);
 		}
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "matches";
 	}
 
 }

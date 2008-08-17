@@ -101,12 +101,36 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("{1, 2, 3, 4, 5} is T(List)", "true", Boolean.class);
 	}
 
+	public void testRelOperatorsIs04() {
+		evaluate("null is T(String)", "false", Boolean.class);
+	}
+
+	public void testRelOperatorsIs05() {
+		evaluate("null is T(Integer)", "false", Boolean.class);
+	}
+
+	public void testRelOperatorsIs06() {
+		evaluateAndCheckError("'A' is null", SpelMessages.IS_OPERATOR_NEEDS_CLASS_OPERAND, 7, "null");
+	}
+
 	public void testRelOperatorsMatches01() {
 		evaluate("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "false", Boolean.class);
 	}
 
 	public void testRelOperatorsMatches02() {
 		evaluate("'5.00' matches '^-?\\d+(\\.\\d{2})?$'", "true", Boolean.class);
+	}
+
+	public void testRelOperatorsMatches03() {
+		evaluateAndCheckError("null matches '^.*$'", SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR, 0, null);
+	}
+
+	public void testRelOperatorsMatches04() {
+		evaluateAndCheckError("'abc' matches null", SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR, 14, null);
+	}
+
+	public void testRelOperatorsMatches05() {
+		evaluate("27 matches '^.*2.*$'", true, Boolean.class); // conversion int>string
 	}
 
 	// mathematical operators
@@ -336,7 +360,7 @@ public class EvaluationTests extends ExpressionTestCase {
 				SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	}
 
-	// TODO 3 Q Is $index within projection/selection useful or just cute?
+	// TODO Is $index within projection/selection useful or just cute?
 	public void testSelectionUsingIndex() {
 		evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
 	}

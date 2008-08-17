@@ -164,7 +164,7 @@ public abstract class ExpressionTestCase extends TestCase {
 			assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult
 					+ "' but result was of type '" + resultType + "'", expectedClassOfResult
 					.equals/* isAssignableFrom */(resultType), true);
-			// TODO 4 isAssignableFrom would allow some room for compatibility
+			// TODO isAssignableFrom would allow some room for compatibility
 			// in the above expression...
 
 			boolean isWritable = e.isWritable(eContext);
@@ -243,7 +243,19 @@ public abstract class ExpressionTestCase extends TestCase {
 								+ " properties of the exception, it only has " + inserts.length + " inserts");
 					}
 					for (int i = 1; i < otherProperties.length; i++) {
-						if (!inserts[i - 1].equals(otherProperties[i])) {
+						if (otherProperties[i] == null) {
+							if (inserts[i - 1] != null) {
+								ex.printStackTrace();
+								fail("Insert does not match, expected 'null' but insert value was '" + inserts[i - 1]
+										+ "'");
+							}
+						} else if (inserts[i - 1] == null) {
+							if (otherProperties[i] != null) {
+								ex.printStackTrace();
+								fail("Insert does not match, expected '" + otherProperties[i]
+										+ "' but insert value was 'null'");
+							}
+						} else if (!inserts[i - 1].equals(otherProperties[i])) {
 							ex.printStackTrace();
 							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
 									+ inserts[i - 1] + "'");
