@@ -19,15 +19,16 @@ import org.springframework.expression.spel.standard.StandardIndividualTypeConver
 import org.springframework.expression.spel.standard.StandardTypeConverter;
 
 /**
- * A type converter can convert values between different types.  There is a default implementation called {@link StandardTypeConverter}
- * that supports some basic conversions.  That default implementation can be extended through subclassing or
- * via registration of new {@link StandardIndividualTypeConverter} instances with the StandardTypeConverter.
- *
+ * A type converter can convert values between different types. There is a default implementation called
+ * {@link StandardTypeConverter} that supports some basic conversions. That default implementation can be extended
+ * through subclassing or via registration of new {@link StandardIndividualTypeConverter} instances with the
+ * StandardTypeConverter.
+ * 
  * @author Andy Clement
  */
 public interface TypeConverter {
-// TODO (asc) replace this stuff with Keiths spring-binding conversion code
-// TODO (asc) should ExpressionException be thrown for lost precision in the case of coercion?
+	// TODO replace this stuff with Keiths spring-binding conversion code
+	// TODO should ExpressionException be thrown for lost precision in the case of coercion?
 
 	/**
 	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
@@ -38,7 +39,6 @@ public interface TypeConverter {
 	 * @throws EvaluationException if conversion is not possible
 	 */
 	Object convertValue(Object value, Class<?> targetType) throws EvaluationException;
-
 
 	/**
 	 * Return true if the type converter can convert the specified type to the desired target type.
