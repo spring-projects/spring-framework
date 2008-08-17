@@ -58,11 +58,11 @@ public class OperatorMatches extends Operator {
 		try {
 			if (!(left instanceof String)) {
 				throw new SpelException(leftOp.getCharPositionInLine(),
-						SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR, left);
+						SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
 			}
 			if (!(right instanceof String)) {
 				throw new SpelException(rightOp.getCharPositionInLine(),
-						SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR, right);
+						SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 			}
 			Pattern pattern = Pattern.compile((String) right);
 			Matcher matcher = pattern.matcher((String) left);
