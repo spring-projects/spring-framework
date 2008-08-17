@@ -58,19 +58,23 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testRelOperatorsLike01() {
-		evaluate("'Abc' like '[A-Z]b.*'", "true", Boolean.class);
-	} // not the same as CSharp thing which matched '[A-Z]b*'
+		evaluate("'Abc' like 'A%_'", "true", Boolean.class);
+	}
 
 	public void testRelOperatorsLike02() {
 		evaluate("'Abc' like '..'", "false", Boolean.class);
-	} // was '?'
+	}
 
 	public void testRelOperatorsLike03() {
-		evaluateAndCheckError("7 like '.'", SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR);
+		evaluateAndCheckError("null like '.'", SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR);
 	}
 
 	public void testRelOperatorsLike04() {
 		evaluateAndCheckError("'abc' like 2.0", SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR);
+	}
+
+	public void testRelOperatorsLike05() {
+		evaluate("27 like '__'", "true", Boolean.class); // conversion int>string
 	}
 
 	public void testRelOperatorsBetween01() {
@@ -122,11 +126,11 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testRelOperatorsMatches03() {
-		evaluateAndCheckError("null matches '^.*$'", SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR, 0, null);
+		evaluateAndCheckError("null matches '^.*$'", SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, 0, null);
 	}
 
 	public void testRelOperatorsMatches04() {
-		evaluateAndCheckError("'abc' matches null", SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR, 14, null);
+		evaluateAndCheckError("'abc' matches null", SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, 14, null);
 	}
 
 	public void testRelOperatorsMatches05() {

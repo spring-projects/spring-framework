@@ -21,13 +21,14 @@ import java.util.regex.PatternSyntaxException;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
- * Implements the like operator. The expected operands for like are a string and a pattern (JDK regex). The operator
- * will return true if the string matches the regex.
+ * Implements the like operator. The like operator behaves the same as the SQL LIKE operator. The first operand is
+ * compared against the expression supplied as the second operand. This expression supports two wildcards: % meaning any
+ * string of any length, and _ meaning any single character.
  * 
  * @author Andy Clement
  */
@@ -43,10 +44,10 @@ public class OperatorLike extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Boolean getValue(ExpressionState state) throws EvaluationException {
 		SpelNode leftOp = getLeftOperand();
 		SpelNode rightOp = getRightOperand();
-		Object left = leftOp.getValue(state);
+		Object left = leftOp.getValue(state, String.class);
 		Object right = getRightOperand().getValue(state);
 		try {
 			if (!(left instanceof String)) {
@@ -57,12 +58,16 @@ public class OperatorLike extends Operator {
 				throw new SpelException(rightOp.getCharPositionInLine(),
 						SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR, right);
 			}
-			Pattern pattern = Pattern.compile((String) right);
+			// Translate that pattern to a java regex
+			// not really the best option, what if the right operand already had regex related chars in it?
+			String likePattern = (String) right;
+			likePattern = likePattern.replace('_', '.');
+			likePattern = likePattern.replaceAll("%", ".*");
+			Pattern pattern = Pattern.compile(likePattern);
 			Matcher matcher = pattern.matcher((String) left);
 			return matcher.matches();
 		} catch (PatternSyntaxException pse) {
 			throw new SpelException(rightOp.getCharPositionInLine(), pse, SpelMessages.INVALID_PATTERN, right);
 		}
 	}
-
 }

@@ -106,7 +106,9 @@ public enum SpelMessages {
 			Kind.ERROR, 1063, "A problem occurred whilst attempting to set the property ''{0}'': ''{1}''"), NOT_AN_INTEGER(
 			Kind.ERROR, 1064, "The value ''{0}'' cannot be parsed as an int"), NOT_A_LONG(Kind.ERROR, 1065,
 			"The value ''{0}'' cannot be parsed as a long"), PARSE_PROBLEM(Kind.ERROR, 1066,
-			"Error occurred during expression parse: {0}"), ;
+			"Error occurred during expression parse: {0}"), INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR(Kind.ERROR,
+			1067, "First operand to matches operator must be a string.  ''{0}'' is not"), INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR(
+			Kind.ERROR, 1068, "Second operand to matches operator must be a string. ''{0}'' is not");
 
 	private Kind kind;
 	private int code;
