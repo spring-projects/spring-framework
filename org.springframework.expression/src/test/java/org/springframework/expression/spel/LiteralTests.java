@@ -97,7 +97,7 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("null", null, null);
 	}
 
-	// TODO 3 'default' format for date varies too much, we need to standardize on a format for EL
+	// TODO 'default' format for date varies too much, we need to standardize on a format for EL
 	// public void testLiteralDate01() {
 	// eval("date('3-Feb-2008 4:50:20 PM').getTime()>0", "true", Boolean.class);
 	// }
