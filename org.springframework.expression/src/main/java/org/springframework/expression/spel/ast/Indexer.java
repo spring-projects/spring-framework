@@ -20,12 +20,12 @@ import java.util.Map;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
-// TODO 2 support multidimensional arrays
-// TODO 3 support correct syntax for multidimensional [][][] and not [,,,]
+// TODO support multidimensional arrays
+// TODO support correct syntax for multidimensional [][][] and not [,,,]
 /**
  * An Indexer can index into some proceeding structure to access a particular piece of it. Supported structures are:
  * strings/collections (lists/sets)/arrays
