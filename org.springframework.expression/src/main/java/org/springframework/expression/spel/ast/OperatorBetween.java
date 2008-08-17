@@ -20,14 +20,14 @@ import java.util.List;
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Represents the between operator. The left operand to between must be a single value and the right operand must be a
  * list - this operator returns true if the left operand is between (using the registered comparator) the two elements
- * in the list.
+ * in the list. The definition of between being inclusive follows the SQL BETWEEN definition.
  * 
  * @author Andy Clement
  */
@@ -42,8 +42,16 @@ public class OperatorBetween extends Operator {
 		return "between";
 	}
 
+	/**
+	 * Returns a boolean based on whether a value is in the range expressed. The first operand is any value whilst the
+	 * second is a list of two values - those two values being the bounds allowed for the first operand (inclusive).
+	 * 
+	 * @param state the expression state
+	 * @return true if the left operand is in the range specified, false otherwise
+	 * @throws EvaluationException if there is a problem evaluating the expression
+	 */
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Boolean getValue(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValue(state);
 		Object right = getRightOperand().getValue(state);
 		if (!(right instanceof List) || ((List<?>) right).size() != 2) {
@@ -55,11 +63,10 @@ public class OperatorBetween extends Operator {
 		Object high = l.get(1);
 		TypeComparator comparator = state.getTypeComparator();
 		try {
-			// TODO between is inclusive, is that OK
 			return (comparator.compare(left, low) >= 0 && comparator.compare(left, high) <= 0);
-		} catch (SpelException ee) {
-			ee.setPosition(getCharPositionInLine());
-			throw ee;
+		} catch (SpelException ex) {
+			ex.setPosition(getCharPositionInLine());
+			throw ex;
 		}
 	}
 
