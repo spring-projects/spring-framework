@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.MethodExecutor;
 
 public class ReflectionMethodExecutor implements MethodExecutor {
@@ -31,17 +32,22 @@ public class ReflectionMethodExecutor implements MethodExecutor {
 	private final Integer[] argsRequiringConversion;
 
 	public ReflectionMethodExecutor(Method theMethod, Integer[] argumentsRequiringConversion) {
-		this.m = theMethod;
-		this.argsRequiringConversion = argumentsRequiringConversion;
+		m = theMethod;
+		argsRequiringConversion = argumentsRequiringConversion;
 	}
-	
 
 	public Object execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		if (argsRequiringConversion != null && arguments != null) {
-			ReflectionUtils.convertArguments(m.getParameterTypes(),m.isVarArgs(),context.getTypeUtils().getTypeConverter(), argsRequiringConversion, arguments);
+			try {
+				ReflectionUtils.convertArguments(m.getParameterTypes(), m.isVarArgs(), context.getTypeUtils()
+						.getTypeConverter(), argsRequiringConversion, arguments);
+			} catch (EvaluationException ex) {
+				throw new AccessException("Problem invoking method '" + m.getName() + "' on '" + target.getClass()
+						+ "': " + ex.getMessage(), ex);
+			}
 		}
 		if (m.isVarArgs()) {
-			arguments = ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(),arguments);
+			arguments = ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(), arguments);
 		}
 		try {
 			if (!m.isAccessible()) {
