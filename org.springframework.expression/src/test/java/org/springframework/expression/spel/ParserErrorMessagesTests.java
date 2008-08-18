@@ -63,4 +63,9 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		parseAndCheckError("null is T('a')", SpelMessages.PARSE_PROBLEM, 10, "mismatched input ''a'' expecting ID"); // POOR
 	}
 
+	public void testExpressionLists02a() {
+		// either missing semi or rogue 5. RPAREN should at least be ')', and why doesn't it give the other possibles?
+		parseAndCheckError("( (3;4)5)", SpelMessages.PARSE_PROBLEM, 7, "mismatched input '5' expecting RPAREN"); // POOR
+	}
+
 }

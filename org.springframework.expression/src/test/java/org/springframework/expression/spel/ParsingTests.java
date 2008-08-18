@@ -391,9 +391,6 @@ public class ParsingTests extends TestCase {
 		parseCheck("( (3;4);5)", "((3;4);5)");
 	}
 
-	// TODO parser recovery for this next one: missing semi
-	// public void testExpressionLists02a() { parseCheck("( (3;4)5)","((3;4);5)");}
-	// // badly formed, missing a semi
 	public void testExpressionLists03() {
 		parseCheck("(3;(4;5))");
 	}
