@@ -33,6 +33,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 	public void testFunctionAccess01() {
 		evaluate("#reverseInt(1,2,3)", "int[3]{3,2,1}", int[].class);
 		evaluate("#reverseInt('1',2,3)", "int[3]{3,2,1}", int[].class); // requires type conversion of '1' to 1
+		evaluateAndCheckError("#reverseInt(1)", SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 1, 1, 3);
 	}
 
 	public void testFunctionAccess02() {

@@ -35,12 +35,12 @@ import org.springframework.expression.spel.reflection.ReflectionUtils;
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in the context prior to the
  * expression being evaluated or within the expression itself using a lambda function definition. For example: Lambda
  * function definition in an expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
- * "#isEven(37)"
+ * "#isEven(37)".  Functions may also be static java methods, registered in the context prior to invocation of the 
+ * expression.
  * 
  * Functions are very simplistic, the arguments are not part of the definition (right now), so the names must be unique.
  * 
  * @author Andy Clement
- * 
  */
 public class FunctionReference extends SpelNode {
 
@@ -81,11 +81,15 @@ public class FunctionReference extends SpelNode {
 	private Object executeFunctionJLRMethod(ExpressionState state, Method m) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
 		
+		if (!m.isVarArgs() && m.getParameterTypes().length != functionArgs.length) {
+			throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m.getParameterTypes().length);
+		}
 		// Only static methods can be called in this way
 		if (!Modifier.isStatic(m.getModifiers())) {
 			throw new SpelException(getCharPositionInLine(),SpelMessages.FUNCTION_MUST_BE_STATIC,m.getDeclaringClass().getName()+"."+m.getName(),name);
 		}
-		
+
+		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			EvaluationContext ctx = state.getEvaluationContext();
 			TypeConverter converter = null;
@@ -112,6 +116,7 @@ public class FunctionReference extends SpelNode {
 		}
 	}
 
+	
 	/*
 	 * Execute a function that was defined as a lambda function.
 	 */
