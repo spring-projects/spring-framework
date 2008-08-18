@@ -36,13 +36,12 @@ public enum SpelMessages {
 	// TODO put keys and messages into bundles for easy NLS
 	// TODO damn code formatter keeps messing up the layout
 
-	INITIALIZER_LENGTH_INCORRECT(Kind.ERROR, 1001,
-			"Array constructor call: initializer size of {0} does not match declared length of {1}"), TYPE_CONVERSION_ERROR(
-			Kind.ERROR, 1002, "Type conversion problem, cannot convert from {0} to {1}"), CONSTRUCTOR_NOT_FOUND(
-			Kind.ERROR, 1003, "Constructor call: No suitable constructor on type {0} for arguments {1}"), TYPE_NOT_FOUND(
-			Kind.ERROR, 1004, "Type cannot be found ''{0}''"), ADDITION_NOT_DEFINED(Kind.ERROR, 1005,
-			"Addition not defined between operands of type {0} and {1}"), METHOD_NOT_FOUND(Kind.ERROR, 1006,
-			"Method call: Method {0} cannot be found on {1} type"), ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT(
+	INITIALIZER_LENGTH_INCORRECT(Kind.ERROR, 1001, "Array constructor call: initializer size of {0} does not match declared length of {1}"), 
+	TYPE_CONVERSION_ERROR(Kind.ERROR, 1002, "Type conversion problem, cannot convert from {0} to {1}"), 
+	CONSTRUCTOR_NOT_FOUND(Kind.ERROR, 1003, "Constructor call: No suitable constructor on type {0} for arguments {1}"), 
+	TYPE_NOT_FOUND(Kind.ERROR, 1004, "Type cannot be found ''{0}''"), 
+	ADDITION_NOT_DEFINED(Kind.ERROR, 1005, "Addition not defined between operands of type {0} and {1}"), 
+	METHOD_NOT_FOUND(Kind.ERROR, 1006, "Method call: Method {0} cannot be found on {1} type"), ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT(
 			Kind.ERROR, 1007, "Method call: Attempted to call method {0} on null context object"), ATTEMPTED_PROPERTY_FIELD_REF_ON_NULL_CONTEXT_OBJECT(
 			Kind.ERROR, 1008,
 			"Field or property reference: Attempted to refer to field or property ''{0}'' on null context object"), PROPERTY_OR_FIELD_NOT_FOUND(
