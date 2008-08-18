@@ -97,13 +97,31 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("null", null, null);
 	}
 
-	// TODO 'default' format for date varies too much, we need to standardize on a format for EL
-	// public void testLiteralDate01() {
-	// eval("date('3-Feb-2008 4:50:20 PM').getTime()>0", "true", Boolean.class);
-	// }
+	public void testLiteralDate01() {
+		evaluate("date('Wed, 4 Jul 2001 12:08:56 GMT').getTime()>0", "true", Boolean.class);
+	}
 
 	public void testLiteralDate02() {
 		evaluate("date('19740824131030','yyyyMMddHHmmss').getHours()", "13", Integer.class);
 	}
 
+	public void testLiteralDate03() {
+		// Jal is not a valid month
+		evaluateAndCheckError("date('Wed, 4 Jal 2001 12:08:56 GMT').getTime()>0", SpelMessages.DATE_CANNOT_BE_PARSED);
+	}
+
+	public void testLiteralDate04() {
+		// null format
+		parseAndCheckError("date('Wed, 4 Jul 2001 12:08:56 GMT',null).getTime()>0", SpelMessages.PARSE_PROBLEM);
+	}
+
+	public void testLiteralDate05() {
+		// null date
+		parseAndCheckError("date(null).getTime()>0", SpelMessages.PARSE_PROBLEM);
+	}
+
+	public void testLiteralDate06() {
+		// int year convertable from number to string
+		parseAndCheckError("date(2008,'yyyy').getTime()>0", SpelMessages.PARSE_PROBLEM);
+	}
 }
