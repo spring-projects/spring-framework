@@ -137,42 +137,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("27 matches '^.*2.*$'", true, Boolean.class); // conversion int>string
 	}
 
-	// mathematical operators
-	public void testMathOperatorAdd01() {
-		evaluate("2 + 4", "6", Integer.class);
-	}
-
-	public void testMathOperatorAdd02() {
-		evaluate("'hello' + ' ' + 'world'", "hello world", String.class);
-	}
-
-	public void testMathOperatorSubtract01() {
-		evaluate("5 - 4", "1", Integer.class);
-	}
-
-	public void testMathOperatorMultiply01() {
-		evaluate("7 * 4", "28", Integer.class);
-	}
-
-	public void testMathOperatorDivide01() {
-		evaluate("8 / 4", "2", Integer.class);
-	}
-
-	public void testMathOperatorDivide02() {
-		evaluate("8.4 / 4", "2.1", Double.class);
-	}
-
-	public void testMathOperatorDivide03() {
-		evaluateAndAskForReturnType("8/4", new Double(2.0), Double.class);
-	}
-
-	// public void testMathOperatorDivide04() {
-	// evaluateAndAskForReturnType("8.4 / 4", "2", Integer.class);
-	// }
-
-	public void testMathOperatorModulus01() {
-		evaluate("7 % 4", "3", Integer.class);
-	}
 
 	// mixing operators
 	public void testMixingOperators01() {

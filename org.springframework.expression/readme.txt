@@ -33,6 +33,6 @@ Syntax
 - See LiteralTests for Date (4,5,6) - should date take an expression rather than be hardcoded in the grammar
   to take 2 strings only?
 - when doing arithmetic, eg. 8.4 / 4  and the user asks for an Integer return type - do we silently coerce or
-  say we cannot as it won't fit into an int? (see EvaluationTests.testMathOperatorDivide04)
+  say we cannot as it won't fit into an int? (see OperatorTests.testMathOperatorDivide04)
 - Is $index within projection/selection useful or just cute?
-  
+- All reals are represented as Doubles (so 1.25f is held internally as a double, can be converted to float when required though) - is that ok?
