@@ -166,7 +166,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndAskForReturnType("8/4", new Double(2.0), Double.class);
 	}
 
-	// TODO decide about a conversion like this, should we support it and coerce silently?
 	// public void testMathOperatorDivide04() {
 	// evaluateAndAskForReturnType("8.4 / 4", "2", Integer.class);
 	// }
@@ -364,7 +363,6 @@ public class EvaluationTests extends ExpressionTestCase {
 				SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	}
 
-	// TODO Is $index within projection/selection useful or just cute?
 	public void testSelectionUsingIndex() {
 		evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
 	}
