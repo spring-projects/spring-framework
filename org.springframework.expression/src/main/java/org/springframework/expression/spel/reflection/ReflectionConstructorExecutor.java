@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 
 /**
  * A simple CommandExecutor implementation that runs a constructor using reflective invocation.
@@ -36,19 +37,24 @@ public class ReflectionConstructorExecutor implements ConstructorExecutor {
 	private final Integer[] argsRequiringConversion;
 
 	public ReflectionConstructorExecutor(Constructor<?> constructor, Integer[] argsRequiringConversion) {
-		this.c = constructor;
+		c = constructor;
 		this.argsRequiringConversion = argsRequiringConversion;
 	}
 
 	/**
-	 * Invoke a constructor via reflection.  
+	 * Invoke a constructor via reflection.
 	 */
 	public Object execute(EvaluationContext context, Object... arguments) throws AccessException {
 		if (argsRequiringConversion != null && arguments != null) {
-			ReflectionUtils.convertArguments(c.getParameterTypes(), c.isVarArgs(), context.getTypeUtils().getTypeConverter(), argsRequiringConversion, arguments);
+			try {
+				ReflectionUtils.convertArguments(c.getParameterTypes(), c.isVarArgs(), context.getTypeUtils()
+						.getTypeConverter(), argsRequiringConversion, arguments);
+			} catch (EvaluationException ex) {
+				throw new AccessException("Problem invoking constructor on '" + c + "': " + ex.getMessage(), ex);
+			}
 		}
 		if (c.isVarArgs()) {
-			arguments = ReflectionUtils.setupArgumentsForVarargsInvocation(c.getParameterTypes(),arguments);
+			arguments = ReflectionUtils.setupArgumentsForVarargsInvocation(c.getParameterTypes(), arguments);
 		}
 		try {
 			if (!c.isAccessible()) {
