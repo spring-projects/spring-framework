@@ -61,6 +61,10 @@ public class TestScenarioCreator {
 					new Class[] { Integer.TYPE, Integer.TYPE, Integer.TYPE }));
 			testContext.registerFunction("reverseString", TestScenarioCreator.class.getDeclaredMethod("reverseString",
 					new Class[] { String.class }));
+			testContext.registerFunction("varargsFunctionReverseStringsAndMerge", TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge",
+					new Class[] { String[].class }));
+			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2", TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2",
+					new Class[] { Integer.TYPE,String[].class }));
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
@@ -199,5 +203,26 @@ public class TestScenarioCreator {
 			backwards.append(input.charAt(input.length() - 1 - i));
 		}
 		return backwards.toString();
+	}
+
+	public static String varargsFunctionReverseStringsAndMerge(String...strings) {
+		StringBuilder sb = new StringBuilder();
+		if (strings!=null) {
+			for (int i=strings.length-1;i>=0;i--) {
+				sb.append(strings[i]);
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static String varargsFunctionReverseStringsAndMerge2(int j, String...strings) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(j);
+		if (strings!=null) {
+			for (int i=strings.length-1;i>=0;i--) {
+				sb.append(strings[i]);
+			}
+		}
+		return sb.toString();
 	}
 }
