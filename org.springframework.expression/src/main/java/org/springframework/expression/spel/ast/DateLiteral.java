@@ -19,12 +19,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Represents a date literal value in an expression (a java.util.Date object).
@@ -47,7 +48,9 @@ public class DateLiteral extends SpelNode {
 			if (getChildCount() > 1) {
 				formatter = new SimpleDateFormat((String) getChild(1).getValue(state));
 			} else {
-				formatter = DateFormat.getDateTimeInstance();
+				// http://java.sun.com/j2se/1.4.2/docs/api/java/text/SimpleDateFormat.html
+				// this is something of this format: "Wed, 4 Jul 2001 12:08:56 GMT"
+				formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.UK);
 			}
 		}
 		String valueToParse = (String) getChild(0).getValue(state);
