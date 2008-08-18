@@ -34,6 +34,9 @@ public abstract class ExpressionTestCase extends TestCase {
 
 	private final static boolean DEBUG = false;
 
+	protected final static boolean SHOULD_BE_WRITABLE = true;
+	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
+	
 	protected static SpelExpressionParser parser = new SpelExpressionParser();
 	protected static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
@@ -159,8 +162,14 @@ public abstract class ExpressionTestCase extends TestCase {
 						null);
 			}
 			Class<? extends Object> resultType = value.getClass();
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-					ExpressionTestCase.stringValueOf(value));
+			if (expectedValue instanceof String) {
+				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+						ExpressionTestCase.stringValueOf(value));
+			} else {
+				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+			}
+//			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+//					ExpressionTestCase.stringValueOf(value));
 			assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult
 					+ "' but result was of type '" + resultType + "'", expectedClassOfResult
 					.equals/* isAssignableFrom */(resultType), true);
