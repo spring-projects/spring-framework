@@ -24,9 +24,9 @@ import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.internal.TypeCode;
 import org.springframework.expression.spel.internal.Utils;
 
@@ -118,7 +118,8 @@ public class ConstructorReference extends SpelNode {
 	}
 
 	/**
-	 * Create an array and return it.  The children of this node indicate the type of array, the array ranks and any optional initializer that might have been supplied.
+	 * Create an array and return it. The children of this node indicate the type of array, the array ranks and any
+	 * optional initializer that might have been supplied.
 	 * 
 	 * @param state the expression state within which this expression is being evaluated
 	 * @return the new array
@@ -127,7 +128,9 @@ public class ConstructorReference extends SpelNode {
 	private Object createArray(ExpressionState state) throws EvaluationException {
 		Object intendedArrayType = getChild(0).getValue(state);
 		if (!(intendedArrayType instanceof String)) {
-			throw new SpelException(getChild(0).getCharPositionInLine(),SpelMessages.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,Utils.formatClassnameForMessage(intendedArrayType.getClass()));
+			throw new SpelException(getChild(0).getCharPositionInLine(),
+					SpelMessages.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION, Utils
+							.formatClassnameForMessage(intendedArrayType.getClass()));
 		}
 		String type = (String) intendedArrayType;
 		Class<?> componentType = null;
@@ -142,7 +145,8 @@ public class ConstructorReference extends SpelNode {
 
 		if (getChild(1).getChildCount() == 0) { // are the array ranks defined?
 			if (getChildCount() < 3) {
-				throw new SpelException(getCharPositionInLine(), SpelMessages.NO_SIZE_OR_INITIALIZER_FOR_ARRAY_CONSTRUCTION);
+				throw new SpelException(getCharPositionInLine(),
+						SpelMessages.NO_SIZE_OR_INITIALIZER_FOR_ARRAY_CONSTRUCTION);
 			}
 			// no array ranks so use the size of the initializer to determine array size
 			int arraySize = getChild(2).getChildCount();
@@ -150,29 +154,28 @@ public class ConstructorReference extends SpelNode {
 		} else {
 			// Array ranks are specified but is it a single or multiple dimension array?
 			int dimensions = getChild(1).getChildCount();
-			if (dimensions == 1) {				
+			if (dimensions == 1) {
 				Object o = getChild(1).getValue(state);
 				int arraySize = state.toInteger(o);
 				if (getChildCount() == 3) {
 					// Check initializer length matches array size length
 					int initializerLength = getChild(2).getChildCount();
 					if (initializerLength != arraySize) {
-						throw new SpelException(getChild(2).getCharPositionInLine(), SpelMessages.INITIALIZER_LENGTH_INCORRECT,
-								initializerLength, arraySize);
+						throw new SpelException(getChild(2).getCharPositionInLine(),
+								SpelMessages.INITIALIZER_LENGTH_INCORRECT, initializerLength, arraySize);
 					}
 				}
 				newArray = Array.newInstance(componentType, arraySize);
 			} else {
 				// Multi-dimensional - hold onto your hat !
 				int[] dims = new int[dimensions];
-				for (int d=0; d<dimensions;d++) {
+				for (int d = 0; d < dimensions; d++) {
 					dims[d] = state.toInteger(getChild(1).getChild(d).getValue(state));
 				}
-				newArray = Array.newInstance(componentType,dims);
-				// TODO check any specified initializer matches
+				newArray = Array.newInstance(componentType, dims);
+				// TODO check any specified initializer for the multidim array matches
 			}
 		}
-		
 
 		// Populate the array using the initializer if one is specified
 		if (getChildCount() == 3) {
@@ -275,7 +278,8 @@ public class ConstructorReference extends SpelNode {
 	}
 
 	/**
-	 * Go through the list of registered constructor resolvers and see if any can find a constructor that takes the specified set of arguments.
+	 * Go through the list of registered constructor resolvers and see if any can find a constructor that takes the
+	 * specified set of arguments.
 	 * 
 	 * @param typename the type trying to be constructed
 	 * @param argumentTypes the types of the arguments supplied that the constructor must take
@@ -283,7 +287,8 @@ public class ConstructorReference extends SpelNode {
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelException if there is a problem locating the constructor
 	 */
-	public ConstructorExecutor findExecutorForConstructor(String typename, Class<?>[] argumentTypes, ExpressionState state) throws SpelException {
+	public ConstructorExecutor findExecutorForConstructor(String typename, Class<?>[] argumentTypes,
+			ExpressionState state) throws SpelException {
 		EvaluationContext eContext = state.getEvaluationContext();
 		List<ConstructorResolver> cResolvers = eContext.getConstructorResolvers();
 		if (cResolvers != null) {
