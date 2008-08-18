@@ -471,7 +471,7 @@ public class ReflectionUtils {
 		}
 	}
 
-	static void convertArguments(Class[] parameterTypes, boolean isVarargs, TypeConverter converter,
+	public static void convertArguments(Class[] parameterTypes, boolean isVarargs, TypeConverter converter,
 			Object... arguments) throws EvaluationException {
 		Class varargsType = null;
 		if (isVarargs) {
@@ -484,13 +484,21 @@ public class ReflectionUtils {
 			} else {
 				targetType = parameterTypes[i];
 			}
+			if (converter==null) {
+				throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "No converter available to convert '"
+						+ arguments[i] + " to type '" + targetType + "'");					
+			}
 			try {
 				if (arguments[i] != null && arguments[i].getClass() != targetType) {
 					arguments[i] = converter.convertValue(arguments[i], targetType);
 				}
 			} catch (EvaluationException e) {
-				throw new SpelException(e, SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "Converter failed to convert '"
-						+ arguments[i] + " to type '" + targetType + "'");
+				// allows for another type converter throwing a different kind of EvaluationException
+				if (!(e instanceof SpelException)) {
+					throw new SpelException(e, SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "Converter failed to convert '"
+							+ arguments[i].getClass().getName() + "' to type '" + targetType + "'");
+				}
+				throw e;
 			}
 		}
 	}
@@ -505,7 +513,7 @@ public class ReflectionUtils {
 	 * @param arguments the arguments to be setup ready for the invocation
 	 * @return a repackaged array of arguments where any varargs setup has been done
 	 */
-	static Object[] setupArgumentsForVarargsInvocation(Class[] parameterTypes, Object... arguments) {
+	public static Object[] setupArgumentsForVarargsInvocation(Class[] parameterTypes, Object... arguments) {
 		// Check if array already built for final argument
 		int nParams = parameterTypes.length;
 		int nArgs = arguments.length;
