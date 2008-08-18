@@ -17,8 +17,8 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.internal.TypeCode;
 
 /**
@@ -35,7 +35,7 @@ public class TypeReference extends SpelNode {
 
 	@Override
 	public Object getValue(ExpressionState state) throws EvaluationException {
-		// TODO OPTIMIZE cache the type reference once found?
+		// TODO possible optimization here if we cache the discovered type reference, but can we do that?
 		String typename = (String) getChild(0).getValue(state);
 		if (typename.indexOf(".") == -1 && Character.isLowerCase(typename.charAt(0))) {
 			TypeCode tc = TypeCode.forName(typename);
