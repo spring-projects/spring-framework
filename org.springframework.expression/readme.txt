@@ -26,3 +26,13 @@ Syntax
 - MATCHES is now the thing that takes a java regex.  What does 'like' do? right now it is the SQL LIKE that supports
   wildcards % and _.  It has a poor implementation but I need to know whether to keep it in the language before
   fixing that.
+- Need to agree on a standard date format for 'default' processing of dates.  Currently it is:
+  formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.UK);
+  // this is something of this format: "Wed, 4 Jul 2001 12:08:56 GMT"
+  // http://java.sun.com/j2se/1.4.2/docs/api/java/text/SimpleDateFormat.html
+- See LiteralTests for Date (4,5,6) - should date take an expression rather than be hardcoded in the grammar
+  to take 2 strings only?
+- when doing arithmetic, eg. 8.4 / 4  and the user asks for an Integer return type - do we silently coerce or
+  say we cannot as it won't fit into an int? (see EvaluationTests.testMathOperatorDivide04)
+- Is $index within projection/selection useful or just cute?
+  
