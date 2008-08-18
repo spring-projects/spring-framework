@@ -323,16 +323,25 @@ public class StandardTypeConverter implements TypeConverter {
 
 	private static class ToIntegerConverter implements StandardIndividualTypeConverter {
 		public Object convert(Object value) throws SpelException {
-			try {
-				return Integer.parseInt(((Long) value).toString());
-			} catch (NumberFormatException nfe) {
-				throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "long value '" + value
-						+ "' cannot be represented as an int");
+			if (value instanceof String) {
+				try {
+					return Integer.parseInt((String)value);
+				} catch (NumberFormatException nfe) {
+					throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "cannot parse string '" + value
+							+ "' as an integer");
+				}
+			} else { // Long
+				try {
+					return Integer.parseInt(((Long) value).toString());
+				} catch (NumberFormatException nfe) {
+					throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "long value '" + value
+							+ "' cannot be represented as an int");
+				}
 			}
 		}
 
 		public Class<?>[] getFrom() {
-			return new Class<?>[] { Long.class };
+			return new Class<?>[] { Long.class, String.class };
 		}
 
 		public Class<?> getTo() {

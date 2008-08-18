@@ -17,16 +17,19 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.reflection.ReflectionUtils;
 
 /**
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in the context prior to the
@@ -54,11 +57,12 @@ public class FunctionReference extends SpelNode {
 		if (o == null) {
 			throw new SpelException(SpelMessages.FUNCTION_NOT_DEFINED, name);
 		}
+		
+		// Two possibilities: a lambda function or a Java static method registered as a function
 		if (!(o instanceof Lambda || o instanceof Method)) {
 			throw new SpelException(SpelMessages.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, name, o.getClass());
 		}
 		
-		// FUNCTION REF NEEDS TO DO ARG CONVERSION??
 		if (o instanceof Lambda) {
 			return executeLambdaFunction(state, (Lambda) o);
 		} else { // o instanceof Method
@@ -66,28 +70,36 @@ public class FunctionReference extends SpelNode {
 		}
 	}
 
-	/* Execute a function represented as a java.lang.reflect.Method */
+	/**
+	 * Execute a function represented as a java.lang.reflect.Method.
+	 * 
+	 * @param state the expression evaluation state
+	 * @param the java method to invoke
+	 * @return the return value of the invoked Java method
+	 * @throws EvaluationException if there is any problem invoking the method
+	 */
 	private Object executeFunctionJLRMethod(ExpressionState state, Method m) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
-		if (m.getParameterTypes().length != functionArgs.length) {
-			throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m
-					.getParameterTypes().length);
+		
+		// Only static methods can be called in this way
+		if (!Modifier.isStatic(m.getModifiers())) {
+			throw new SpelException(getCharPositionInLine(),SpelMessages.FUNCTION_MUST_BE_STATIC,m.getDeclaringClass().getName()+"."+m.getName(),name);
 		}
 		
-		// Check if arguments need converting
-		Class<?>[] expectedParams = m.getParameterTypes();
-		Object[] argsToPass = new Object[functionArgs.length];
-		TypeConverter converter = state.getEvaluationContext().getTypeUtils().getTypeConverter();
-		for (int arg=0; arg<argsToPass.length; arg++) {
-			if (functionArgs[arg]==null || functionArgs[arg].getClass()==expectedParams[arg]) {
-				argsToPass[arg]=functionArgs[arg];
-			} else {
-				argsToPass[arg]=converter.convertValue(functionArgs[arg], expectedParams[arg]);
+		if (functionArgs != null) {
+			EvaluationContext ctx = state.getEvaluationContext();
+			TypeConverter converter = null;
+			if (ctx.getTypeUtils()!=null) {
+				converter = ctx.getTypeUtils().getTypeConverter();
 			}
+			ReflectionUtils.convertArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
+		}
+		if (m.isVarArgs()) {
+			functionArgs = ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(), functionArgs);
 		}
 		
 		try {
-			return m.invoke(m.getClass(), argsToPass);
+			return m.invoke(m.getClass(), functionArgs);
 		} catch (IllegalArgumentException e) {
 			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());
