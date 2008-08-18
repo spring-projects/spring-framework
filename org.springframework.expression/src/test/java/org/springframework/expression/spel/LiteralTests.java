@@ -156,4 +156,10 @@ public class LiteralTests extends ExpressionTestCase {
 		// int year convertable from number to string
 		parseAndCheckError("date(2008,'yyyy').getTime()>0", SpelMessages.PARSE_PROBLEM);
 	}
+	
+	public void testConversions() {
+		// getting the expression type to be what we want - either:
+		evaluate("(#foo=37;#foo.byteValue())",(byte)37,Byte.class); // calling byteValue() on Integer.class
+		evaluateAndAskForReturnType("(#foo=37;#foo)",(byte)37,Byte.class); // relying on registered type converters
+	}
 }

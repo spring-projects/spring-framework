@@ -26,7 +26,6 @@ public class OperatorPlus extends Operator {
 		super(payload);
 	}
 
-	// TODO OperatorPlus is lacking a bit on implementation...
 	@Override
 	public Object getValue(ExpressionState state) throws EvaluationException {
 		SpelNode leftOp = getLeftOperand();

@@ -220,11 +220,15 @@ public class StandardTypeConverter implements TypeConverter {
 
 	private static class ToFloatConverter implements StandardIndividualTypeConverter {
 		public Object convert(Object value) throws SpelException {
-			return ((Double) value).floatValue();
+			if (value instanceof Integer) {
+				return ((Integer)value).floatValue();
+			} else {
+				return ((Double) value).floatValue();
+			}
 		}
 
 		public Class<?>[] getFrom() {
-			return new Class<?>[] { Double.class };
+			return new Class<?>[] { Double.class, Integer.class };
 		}
 
 		public Class<?> getTo() {
