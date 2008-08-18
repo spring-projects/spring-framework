@@ -89,10 +89,42 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("-0x20l", -32L, Long.class);
 	}
 
-	public void testLiteralReal01() {
-		evaluate("6.0221415E+23", "6.0221415E23", Double.class);
+	public void testLiteralReal01_CreatingDoubles() {
+		evaluate("1.25",1.25d,Double.class);
+		evaluate("2.99",2.99d,Double.class);
+		evaluate("-3.141",-3.141d,Double.class);
+		evaluate("1.25d",1.25d,Double.class);
+		evaluate("2.99d",2.99d,Double.class);
+		evaluate("-3.141d",-3.141d,Double.class);
+		evaluate("1.25D",1.25d,Double.class);
+		evaluate("2.99D",2.99d,Double.class);
+		evaluate("-3.141D",-3.141d,Double.class);
 	}
 
+	public void testLiteralReal02_CreatingFloats() {
+		// For now, everything becomes a double...
+		evaluate("1.25f",1.25d,Double.class);
+		evaluate("2.99f",2.99d,Double.class);
+		evaluate("-3.141f",-3.141d,Double.class);
+		evaluate("1.25F",1.25d,Double.class);
+		evaluate("2.99F",2.99d,Double.class);
+		evaluate("-3.141F",-3.141d,Double.class);
+	}
+	
+	public void testLiteralReal03_UsingExponents() {
+		evaluate("6.0221415E+23", "6.0221415E23", Double.class);
+		evaluate("6.0221415e+23", "6.0221415E23", Double.class);
+		evaluate("6.0221415E+23d", "6.0221415E23", Double.class);
+		evaluate("6.0221415e+23D", "6.0221415E23", Double.class);
+		evaluate("6.0221415E+23f", "6.0221415E23", Double.class);
+		evaluate("6.0221415e+23F", "6.0221415E23", Double.class);
+	}
+
+	public void testLiteralReal04_BadExpressions() {
+		parseAndCheckError("6.1e23e22",SpelMessages.PARSE_PROBLEM,6,"mismatched input 'e22' expecting EOF");
+		parseAndCheckError("6.1f23e22",SpelMessages.PARSE_PROBLEM,4,"mismatched input '23e22' expecting EOF");
+	}
+	
 	public void testLiteralNull01() {
 		evaluate("null", null, null);
 	}
