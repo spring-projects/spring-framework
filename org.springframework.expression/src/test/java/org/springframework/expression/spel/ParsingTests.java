@@ -22,7 +22,7 @@ import org.springframework.expression.ParseException;
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
  * write itself to a string form and check that is as expected.
- *
+ * 
  * @author Andy Clement
  */
 public class ParsingTests extends TestCase {
@@ -360,14 +360,15 @@ public class ParsingTests extends TestCase {
 		parseCheck("{|x,y| $x > $y ? $x : $y }", "{|x,y| ($x > $y) ? $x : $y }");
 	}
 
-	public void testLambdaMax() {
-		parseCheck("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))", "(#max={|x,y| ($x > $y) ? $x : $y };#max(5,25))");
-	}
-
-	public void testLambdaFactorial() {
-		parseCheck("(#fact = {|n| $n <= 1 ? 1 : $n * #fact($n-1) }; #fact(5))",
-				"(#fact={|n| ($n <= 1) ? 1 : ($n * #fact(($n - 1))) };#fact(5))");
-	} // 120
+	//
+	// public void testLambdaMax() {
+	// parseCheck("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))", "(#max={|x,y| ($x > $y) ? $x : $y };#max(5,25))");
+	// }
+	//
+	// public void testLambdaFactorial() {
+	// parseCheck("(#fact = {|n| $n <= 1 ? 1 : $n * #fact($n-1) }; #fact(5))",
+	// "(#fact={|n| ($n <= 1) ? 1 : ($n * #fact(($n - 1))) };#fact(5))");
+	// } // 120
 
 	// Type references
 	public void testTypeReferences01() {
@@ -378,39 +379,10 @@ public class ParsingTests extends TestCase {
 		parseCheck("T(String)");
 	}
 
-	// Nesting expressions and expression lists
-	public void testExpressionLists01() {
-		parseCheck("(3;4;5)");
-	}
-
-	public void testExpressionLists02() {
-		parseCheck("( (3;4);5)", "((3;4);5)");
-	}
-
-	public void testExpressionLists03() {
-		parseCheck("(3;(4;5))");
-	}
-
-	public void testExpressionLists04() {
-		parseCheck("((3;4;5))", "(3;4;5)");
-	}
-
-	public void testExpressionLists05() {
-		parseCheck("((3;4)+(5;6))", "((3;4) + (5;6))");
-	}
-
-	public void testExpressionLists06() {
-		parseCheck("((3;4;)+(5;6))", "((3;4) + (5;6))");
-	}
-
-	public void testExpressionLists07() {
-		parseCheck("((3;4;)+(5;6;))", "((3;4) + (5;6))");
-	}
-
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the same
 	 * as the original expression.
-	 *
+	 * 
 	 * @param expression the expression to parse *and* the expected value of the string form of the resultant AST
 	 */
 	public void parseCheck(String expression) {
@@ -420,7 +392,7 @@ public class ParsingTests extends TestCase {
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the
 	 * expected value.
-	 *
+	 * 
 	 * @param expression the expression to parse
 	 * @param expectedStringFormOfAST the expected string form of the AST
 	 */

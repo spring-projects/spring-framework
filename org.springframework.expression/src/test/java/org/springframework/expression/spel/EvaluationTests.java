@@ -180,17 +180,9 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("#{1:'January', 2:'February', 3:'March'}.get(2)", "February", String.class);
 	}
 
-	public void testInlineMapCreation06() {
-		evaluate("(#pos=3;#{1:'January', 2:'February', 3:'March'}[#pos])", "March", String.class);
-	}
-
 	// set construction
 	public void testSetConstruction01() {
 		evaluate("new HashSet().addAll({'a','b','c'})", "true", Boolean.class);
-	}
-
-	public void testSets01() {
-		evaluate("(#var=new HashSet();#var.addAll({'a','b','c'});#var[1])", "c", String.class);
 	}
 
 	// constructors
@@ -323,19 +315,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("#var1='value1'", "value1", String.class);
 	}
 
-	public void testAssignmentToVariables02() {
-		evaluate("(#var1='value1';#var1)", "value1", String.class, true);
-	}
-
-	// Property setting
-	public void testAssignmentToProperty01() {
-		evaluate("placeOfBirth.city='SmilJan'", "SmilJan", String.class);
-		evaluate(
-				"(#oldPOB = placeOfBirth.city;placeOfBirth.city='FairOak';'From ' + #oldPOB + ' to ' + placeOfBirth.city)",
-				"From SmilJan to FairOak", String.class);
-		evaluate("placeOfBirth.city='SmilJan'", "SmilJan", String.class);
-	}
-
 	// Ternary operator
 	public void testTernaryOperator01() {
 		evaluate("{1}.#isEven(#this[0]) == 'y'?'it is even':'it is odd'", "it is odd", String.class);
@@ -389,10 +368,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("@(apple).color.getRGB() == 	T(java.awt.Color).green.getRGB()", "true", Boolean.class);
 	}
 
-	public void testReferences06b() {
-		evaluate("(#t='Color';@(apple).color.getRGB() == 	T(java.awt.Color).green.getRGB())", "true", Boolean.class);
-	}
-
 	public void testReferences07() {
 		evaluate("@(apple).color.getRGB().equals(T(java.awt.Color).green.getRGB())", "true", Boolean.class);
 	}
@@ -424,49 +399,46 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("{|| true }", "{|| true }", Lambda.class);
 	}
 
-	public void testLambdaNoArgsReferenced() {
-		evaluate("(#fn={|| false };#fn)", "{|| false }", Lambda.class, true);
-	}
-
 	public void testLambda01() {
 		evaluate("{|x,y| $x > $y ? $x : $y }", "{|x,y| ($x > $y) ? $x : $y }",
 				org.springframework.expression.spel.ast.Lambda.class);
 	}
 
-	public void testLambda02() {
-		evaluate("(#max={|x,y| $x > $y ? $x : $y };true)", "true", Boolean.class);
-	}
-
-	public void testLambdaMax() {
-		evaluate("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))", "25", Integer.class);
-	}
-
-	public void testLambdaFactorial01() {
-		evaluate("(#fact = {|n| $n <= 1 ? 1 : $n * #fact($n-1) }; #fact(5))", "120", Integer.class);
-	}
-
-	public void testLambdaFactorial02() {
-		evaluate("(#fact = {|n| $n <= 1 ? 1 : #fact($n-1) * $n }; #fact(5))", "120", Integer.class);
-	}
-
-	public void testLambdaAlphabet01() {
-		evaluate("(#alpha = {|l,s| $l>'z'?$s:#alpha($l+1,$s+$l)};#alphabet={||#alpha('a','')}; #alphabet())",
-				"abcdefghijklmnopqrstuvwxyz", String.class);
-	}
-
-	public void testLambdaAlphabet02() {
-		evaluate("(#alphabet = {|l,s| $l>'z'?$s:#alphabet($l+1,$s+$l)};#alphabet('a',''))",
-				"abcdefghijklmnopqrstuvwxyz", String.class);
-	}
-
-	public void testLambdaDelegation01() {
-		evaluate("(#sqrt={|n| T(Math).sqrt($n)};#delegate={|f,n| $f($n)};#delegate(#sqrt,4))", "2.0", Double.class);
-	}
-
-	public void testVariableReferences() {
-		evaluate("(#answer=42;#answer)", "42", Integer.class, true);
-		evaluate("($answer=42;$answer)", "42", Integer.class, true);
-	}
+	//
+	// public void testLambda02() {
+	// evaluate("(#max={|x,y| $x > $y ? $x : $y };true)", "true", Boolean.class);
+	// }
+	//
+	// public void testLambdaMax() {
+	// evaluate("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))", "25", Integer.class);
+	// }
+	//
+	// public void testLambdaFactorial01() {
+	// evaluate("(#fact = {|n| $n <= 1 ? 1 : $n * #fact($n-1) }; #fact(5))", "120", Integer.class);
+	// }
+	//
+	// public void testLambdaFactorial02() {
+	// evaluate("(#fact = {|n| $n <= 1 ? 1 : #fact($n-1) * $n }; #fact(5))", "120", Integer.class);
+	// }
+	//
+	// public void testLambdaAlphabet01() {
+	// evaluate("(#alpha = {|l,s| $l>'z'?$s:#alpha($l+1,$s+$l)};#alphabet={||#alpha('a','')}; #alphabet())",
+	// "abcdefghijklmnopqrstuvwxyz", String.class);
+	// }
+	//
+	// public void testLambdaAlphabet02() {
+	// evaluate("(#alphabet = {|l,s| $l>'z'?$s:#alphabet($l+1,$s+$l)};#alphabet('a',''))",
+	// "abcdefghijklmnopqrstuvwxyz", String.class);
+	// }
+	//
+	// public void testLambdaDelegation01() {
+	// evaluate("(#sqrt={|n| T(Math).sqrt($n)};#delegate={|f,n| $f($n)};#delegate(#sqrt,4))", "2.0", Double.class);
+	// }
+	//
+	// public void testVariableReferences() {
+	// evaluate("(#answer=42;#answer)", "42", Integer.class, true);
+	// evaluate("($answer=42;$answer)", "42", Integer.class, true);
+	// }
 
 	// type references
 	public void testTypeReferences01() {

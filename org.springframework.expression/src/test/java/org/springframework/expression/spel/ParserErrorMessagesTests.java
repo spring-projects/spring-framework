@@ -35,12 +35,6 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		parseAndCheckError("0xB0BG", SpelMessages.PARSE_PROBLEM, 5, "mismatched input 'G' expecting EOF");
 	}
 
-	public void testBrokenExpression03() {
-		// too many closing brackets
-		parseAndCheckError("((3;4;)+(5;6;)))", SpelMessages.PARSE_PROBLEM, 15, "mismatched input ')' expecting EOF");
-		evaluate("((3;4;)+(5;6;))", 10 /* 4+6 */, Integer.class);
-	}
-
 	public void testBrokenExpression04() {
 		// missing right operand
 		parseAndCheckError("true or ", SpelMessages.PARSE_PROBLEM, -1, "no viable alternative at input '<EOF>'"); // POOR
@@ -51,21 +45,10 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		parseAndCheckError("1 + ", SpelMessages.PARSE_PROBLEM, -1, "no viable alternative at input '<EOF>'"); // POOR
 	}
 
-	public void testBrokenExpression06() {
-		// expression list missing surrounding parentheses
-		parseAndCheckError("1;2;3", SpelMessages.PARSE_PROBLEM, 1, "mismatched input ';' expecting EOF"); // POOR
-		evaluate("(1;2;3)", 3, Integer.class);
-	}
-
 	public void testBrokenExpression07() {
 		// T() can only take an identifier (possibly qualified), not a literal
 		// message ought to say identifier rather than ID
 		parseAndCheckError("null is T('a')", SpelMessages.PARSE_PROBLEM, 10, "mismatched input ''a'' expecting ID"); // POOR
-	}
-
-	public void testExpressionLists02a() {
-		// either missing semi or rogue 5. RPAREN should at least be ')', and why doesn't it give the other possibles?
-		parseAndCheckError("( (3;4)5)", SpelMessages.PARSE_PROBLEM, 7, "mismatched input '5' expecting RPAREN"); // POOR
 	}
 
 }
