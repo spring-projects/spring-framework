@@ -57,26 +57,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("name in {null, \"Anonymous\"}", "false", Boolean.class);
 	}
 
-	public void testRelOperatorsLike01() {
-		evaluate("'Abc' like 'A%_'", "true", Boolean.class);
-	}
-
-	public void testRelOperatorsLike02() {
-		evaluate("'Abc' like '..'", "false", Boolean.class);
-	}
-
-	public void testRelOperatorsLike03() {
-		evaluateAndCheckError("null like '.'", SpelMessages.INVALID_FIRST_OPERAND_FOR_LIKE_OPERATOR);
-	}
-
-	public void testRelOperatorsLike04() {
-		evaluateAndCheckError("'abc' like 2.0", SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR);
-	}
-
-	public void testRelOperatorsLike05() {
-		evaluate("27 like '__'", "true", Boolean.class); // conversion int>string
-	}
-
 	public void testRelOperatorsBetween01() {
 		evaluate("1 between {1, 5}", "true", Boolean.class);
 	}
@@ -136,7 +116,6 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testRelOperatorsMatches05() {
 		evaluate("27 matches '^.*2.*$'", true, Boolean.class); // conversion int>string
 	}
-
 
 	// mixing operators
 	public void testMixingOperators01() {
@@ -482,43 +461,6 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	public void testLambdaDelegation01() {
 		evaluate("(#sqrt={|n| T(Math).sqrt($n)};#delegate={|f,n| $f($n)};#delegate(#sqrt,4))", "2.0", Double.class);
-	}
-
-	// Soundex
-	public void testSoundex01() {
-		evaluate("'Rob' soundslike 'Rod'", "false", Boolean.class);
-	}
-
-	public void testSoundex02() {
-		evaluate("'Robert' soundslike 'Rupert'", "true", Boolean.class);
-	}
-
-	public void testSoundex03() {
-		evaluate("'Andy' soundslike 'Christian'", "false", Boolean.class);
-	}
-
-	public void testSoundex04() {
-		evaluate("@(fruits:).values().?{#this.colorName soundslike 'gren'}!=null", "true", Boolean.class);
-	}
-
-	public void testSoundex05() {
-		evaluate("@(fruits:).values().?{colorName soundslike 'gren'}!=null", "true", Boolean.class);
-	}
-
-	public void testSoundex06() {
-		evaluate("'Adrian' soundslike 'Adrain'", "true", Boolean.class);
-	}
-
-	// Word distance
-	public void testDistanceTo01() {
-		evaluate("'Saturday' distanceto 'Sunday'", "3", Integer.class);
-		evaluate("'Saturday' distanceto 'Monday'", "5", Integer.class);
-		evaluate("'Saturday' distanceto 'Saturdaz'", "1", Integer.class);
-		evaluate("'Saturday' distanceto 'Saturdab'", "1", Integer.class);
-	}
-
-	public void testDistanceTo02() {
-		evaluate("'Kitten' distanceto 'Sitting'", "3", Integer.class);
 	}
 
 	public void testVariableReferences() {
