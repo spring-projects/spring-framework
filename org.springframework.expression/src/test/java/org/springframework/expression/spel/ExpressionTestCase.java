@@ -27,7 +27,7 @@ import org.springframework.expression.spel.standard.StandardEvaluationContext;
 
 /**
  * Common superclass for expression tests.
- * 
+ *
  * @author Andy Clement
  */
 public abstract class ExpressionTestCase extends TestCase {
@@ -36,9 +36,9 @@ public abstract class ExpressionTestCase extends TestCase {
 
 	protected final static boolean SHOULD_BE_WRITABLE = true;
 	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
-	
-	protected static SpelExpressionParser parser = new SpelExpressionParser();
-	protected static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+
+	protected final static SpelExpressionParser parser = new SpelExpressionParser();
+	protected final static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	/**
 	 * Evaluate an expression and check that the actual result matches the expectedValue and the class of the result
@@ -137,7 +137,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	 * Evaluate an expression and check that the actual result matches the expectedValue and the class of the result
 	 * matches the expectedClassOfResult. This method can also check if the expression is writable (for example, it is a
 	 * variable or property reference).
-	 * 
+	 *
 	 * @param expression The expression to evaluate
 	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedClassOfResult the expected class of the evaluation result
@@ -335,7 +335,7 @@ public abstract class ExpressionTestCase extends TestCase {
 
 	/**
 	 * Produce a nice string representation of the input object.
-	 * 
+	 *
 	 * @param value object to be formatted
 	 * @return a nice string
 	 */

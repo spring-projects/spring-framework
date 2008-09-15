@@ -39,7 +39,6 @@ import org.springframework.expression.spel.ast.MethodReference;
 import org.springframework.expression.spel.ast.NullLiteral;
 import org.springframework.expression.spel.ast.OperatorAnd;
 import org.springframework.expression.spel.ast.OperatorBetween;
-import org.springframework.expression.spel.ast.OperatorDistanceTo;
 import org.springframework.expression.spel.ast.OperatorDivide;
 import org.springframework.expression.spel.ast.OperatorEquality;
 import org.springframework.expression.spel.ast.OperatorGreaterThan;
@@ -49,7 +48,6 @@ import org.springframework.expression.spel.ast.OperatorInequality;
 import org.springframework.expression.spel.ast.OperatorIs;
 import org.springframework.expression.spel.ast.OperatorLessThan;
 import org.springframework.expression.spel.ast.OperatorLessThanOrEqual;
-import org.springframework.expression.spel.ast.OperatorLike;
 import org.springframework.expression.spel.ast.OperatorMatches;
 import org.springframework.expression.spel.ast.OperatorMinus;
 import org.springframework.expression.spel.ast.OperatorModulus;
@@ -57,7 +55,6 @@ import org.springframework.expression.spel.ast.OperatorMultiply;
 import org.springframework.expression.spel.ast.OperatorNot;
 import org.springframework.expression.spel.ast.OperatorOr;
 import org.springframework.expression.spel.ast.OperatorPlus;
-import org.springframework.expression.spel.ast.OperatorSoundsLike;
 import org.springframework.expression.spel.ast.Placeholder;
 import org.springframework.expression.spel.ast.Projection;
 import org.springframework.expression.spel.ast.PropertyOrFieldReference;
@@ -110,10 +107,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new OperatorLessThanOrEqual(payload);
 			case SpringExpressionsLexer.GREATER_THAN_OR_EQUAL:
 				return new OperatorGreaterThanOrEqual(payload);
-			case SpringExpressionsLexer.SOUNDSLIKE:
-				return new OperatorSoundsLike(payload);
-			case SpringExpressionsLexer.DISTANCETO:
-				return new OperatorDistanceTo(payload);
 			case SpringExpressionsLexer.PLUS:
 				return new OperatorPlus(payload);
 			case SpringExpressionsLexer.MINUS:
@@ -187,8 +180,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 
 			case SpringExpressionsLexer.IN:
 				return new OperatorIn(payload);
-			case SpringExpressionsLexer.LIKE:
-				return new OperatorLike(payload);
 			case SpringExpressionsLexer.BETWEEN:
 				return new OperatorBetween(payload);
 			case SpringExpressionsLexer.MATCHES:

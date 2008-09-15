@@ -22,7 +22,7 @@ import org.springframework.expression.ParseException;
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
  * write itself to a string form and check that is as expected.
- * 
+ *
  * @author Andy Clement
  */
 public class ParsingTests extends TestCase {
@@ -135,14 +135,6 @@ public class ParsingTests extends TestCase {
 
 	public void testRelOperatorsIn01() {
 		parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
-	}
-
-	public void testRelOperatorsLike01() {
-		parseCheck("'Abc' like '[A-Z]b*'", "('Abc' like '[A-Z]b*')");
-	}
-
-	public void testRelOperatorsLike02() {
-		parseCheck("'Abc' like '?'", "('Abc' like '?')");
 	}
 
 	public void testRelOperatorsBetween01() {
@@ -418,7 +410,7 @@ public class ParsingTests extends TestCase {
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the same
 	 * as the original expression.
-	 * 
+	 *
 	 * @param expression the expression to parse *and* the expected value of the string form of the resultant AST
 	 */
 	public void parseCheck(String expression) {
@@ -428,7 +420,7 @@ public class ParsingTests extends TestCase {
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the
 	 * expected value.
-	 * 
+	 *
 	 * @param expression the expression to parse
 	 * @param expectedStringFormOfAST the expected string form of the AST
 	 */

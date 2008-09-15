@@ -86,17 +86,10 @@ relationalExpression : sumExpression (relationalOperator^ sumExpression)?;
 
 sumExpression
 	: productExpression ( (PLUS^ | MINUS^) productExpression)*;
-//	: left=productExpression (PLUS right+=productExpression)+ -> ^(ADD $left $right)
-//	| left=productExpression (MINUS right+=productExpression)+ -> ^(SUBTRACT $left $right)
-//	| productExpression;
 
 // TODO could really do with changing ast node types here
 productExpression
 	: powerExpr ((STAR^ | DIV^| MOD^) powerExpr)* ;
-//	: left=powerExpr (STAR right+=powerExpr) -> ^(MULTIPLY $left $right)
-//	| left=powerExpr (DIV right+=powerExpr) -> ^(DIVIDE $left $right)
-//	| left=powerExpr (MOD right+=powerExpr) -> ^(MODULUS $left $right)
-//	| powerExpr;
 
 powerExpr  : unaryExpression (POWER^ unaryExpression)? ;
 
@@ -126,7 +119,6 @@ startNode
     | listInitializer
     | mapInitializer
     | lambda
-//  | attribute
     ;
     
 node
@@ -288,10 +280,7 @@ relationalOperator
     |   IN   
     |   IS   
     |   BETWEEN   
-    |   LIKE   
     |   MATCHES
-    |   SOUNDSLIKE
-    |   DISTANCETO   
     ; 
           
 ASSIGN: '=';
@@ -301,14 +290,9 @@ LESS_THAN: '<';
 LESS_THAN_OR_EQUAL: '<=';
 GREATER_THAN: '>';
 GREATER_THAN_OR_EQUAL: '>=';
-SOUNDSLIKE
-	:	'soundslike';
-DISTANCETO
-	:	'distanceto';
 IN:     'in';	
 IS:     'is';
 BETWEEN:'between';
-LIKE:   'like';
 MATCHES:'matches';
 NULL_LITERAL: 'null';
 

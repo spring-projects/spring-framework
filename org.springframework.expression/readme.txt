@@ -19,7 +19,6 @@ would have taken?  At the moment ternary expressions are just considered NOT wri
 
 Syntax
 
-- are distanceto or soundslike any use?
 - should the 'is' operator change to 'instanceof' ?
 - in this expression we hit the problem of not being able to write chars, since '' always means string:
   evaluate("new java.lang.String('hello').charAt(2).equals('l'.charAt(0))", true, Boolean.class);
