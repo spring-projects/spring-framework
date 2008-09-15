@@ -27,11 +27,13 @@ import org.springframework.expression.spel.SpelMessages;
  * The AverageProcessor operates upon an input collection and computes the average value of the elements within it. It
  * will currently only operate upon Numbers and its return value type is an Integer if the input values were integers,
  * otherwise it is a double.
+ * 
+ * @author Andy Clement
  */
 public class AverageProcessor implements DataProcessor {
 
 	public Object process(Collection<?> input, Object[] arguments, ExpressionState state) throws SpelException {
-		// TypeUtilities typeUtilities = state.getTypeUtilities();
+		// TODO could support average of other types if delegated to OperatorOverloader for addition and division
 		boolean allIntegerObjects = true;
 		int total = 0;
 		int numberOfElements = 0;

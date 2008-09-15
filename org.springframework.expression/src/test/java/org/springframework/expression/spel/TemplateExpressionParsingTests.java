@@ -23,7 +23,7 @@ import org.springframework.expression.common.DefaultTemplateParserContext;
  * 
  * @author Andy Clement
  */
-public class TemplateExpressionParsing extends ExpressionTestCase {
+public class TemplateExpressionParsingTests extends ExpressionTestCase {
 
 	public void testParsingSimpleTemplateExpression01() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();

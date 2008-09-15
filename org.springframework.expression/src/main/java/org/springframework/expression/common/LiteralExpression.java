@@ -24,14 +24,15 @@ public class LiteralExpression implements Expression {
 	}
 
 	public String getExpressionString() {
-		return new StringBuilder().append("'").append(literalValue).append("'").toString();
+		return literalValue;
+		// return new StringBuilder().append("'").append(literalValue).append("'").toString();
 	}
 
-	public Object getValue() throws EvaluationException {
+	public String getValue() throws EvaluationException {
 		return literalValue;
 	}
 
-	public Object getValue(EvaluationContext context) throws EvaluationException {
+	public String getValue(EvaluationContext context) throws EvaluationException {
 		return literalValue;
 	}
 

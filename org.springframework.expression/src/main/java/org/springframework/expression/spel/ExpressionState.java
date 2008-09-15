@@ -25,6 +25,7 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
+import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeUtils;
 import org.springframework.expression.spel.internal.VariableScope;
 
@@ -42,21 +43,21 @@ public class ExpressionState {
 
 	private EvaluationContext relatedContext;
 
-	private final Stack<VariableScope> environment = new Stack<VariableScope>();
+	private final Stack<VariableScope> variableScopes = new Stack<VariableScope>();
 
 	private final Stack<Object> contextObjects = new Stack<Object>();
 
 	public ExpressionState(EvaluationContext context) {
-		this.relatedContext = context;
-		createEnvironment();
+		relatedContext = context;
+		createVariableScope();
 	}
 
 	public ExpressionState() {
-		createEnvironment();
+		createVariableScope();
 	}
 
-	private void createEnvironment() {
-		environment.add(new VariableScope()); // create an empty top level VariableScope
+	private void createVariableScope() {
+		variableScopes.add(new VariableScope()); // create an empty top level VariableScope
 	}
 
 	/**
@@ -97,37 +98,42 @@ public class ExpressionState {
 		return getTypeUtilities().getTypeLocator().findType(type);
 	}
 
+	// TODO all these methods that grab the type converter will fail badly if there isn't one...
 	public boolean toBoolean(Object value) throws EvaluationException {
-		// TODO cache TypeConverter when it is set/changed?
-		return ((Boolean) getTypeUtilities().getTypeConverter().convertValue(value, Boolean.TYPE)).booleanValue();
+		return ((Boolean) getTypeConverter().convertValue(value, Boolean.TYPE)).booleanValue();
 	}
 
 	public char toCharacter(Object value) throws EvaluationException {
-		return ((Character) getTypeUtilities().getTypeConverter().convertValue(value, Character.TYPE)).charValue();
+		return ((Character) getTypeConverter().convertValue(value, Character.TYPE)).charValue();
 	}
 
 	public short toShort(Object value) throws EvaluationException {
-		return ((Short) getTypeUtilities().getTypeConverter().convertValue(value, Short.TYPE)).shortValue();
+		return ((Short) getTypeConverter().convertValue(value, Short.TYPE)).shortValue();
 	}
 
 	public int toInteger(Object value) throws EvaluationException {
-		return ((Integer) getTypeUtilities().getTypeConverter().convertValue(value, Integer.TYPE)).intValue();
+		return ((Integer) getTypeConverter().convertValue(value, Integer.TYPE)).intValue();
 	}
 
 	public double toDouble(Object value) throws EvaluationException {
-		return ((Double) getTypeUtilities().getTypeConverter().convertValue(value, Double.TYPE)).doubleValue();
+		return ((Double) getTypeConverter().convertValue(value, Double.TYPE)).doubleValue();
 	}
 
 	public float toFloat(Object value) throws EvaluationException {
-		return ((Float) getTypeUtilities().getTypeConverter().convertValue(value, Float.TYPE)).floatValue();
+		return ((Float) getTypeConverter().convertValue(value, Float.TYPE)).floatValue();
 	}
 
 	public long toLong(Object value) throws EvaluationException {
-		return ((Long) getTypeUtilities().getTypeConverter().convertValue(value, Long.TYPE)).longValue();
+		return ((Long) getTypeConverter().convertValue(value, Long.TYPE)).longValue();
 	}
 
 	public byte toByte(Object value) throws EvaluationException {
-		return ((Byte) getTypeUtilities().getTypeConverter().convertValue(value, Byte.TYPE)).byteValue();
+		return ((Byte) getTypeConverter().convertValue(value, Byte.TYPE)).byteValue();
+	}
+
+	public TypeConverter getTypeConverter() {
+		// TODO cache TypeConverter when it is set/changed?
+		return getTypeUtilities().getTypeConverter();
 	}
 
 	public void setVariable(String name, Object value) {
@@ -142,26 +148,26 @@ public class ExpressionState {
 	 * A new scope is entered when a function is invoked
 	 */
 	public void enterScope(Map<String, Object> argMap) {
-		environment.push(new VariableScope(argMap));
+		variableScopes.push(new VariableScope(argMap));
 	}
 
 	public void enterScope(String name, Object value) {
-		environment.push(new VariableScope(name, value));
+		variableScopes.push(new VariableScope(name, value));
 	}
 
 	public void exitScope() {
-		environment.pop();
+		variableScopes.pop();
 	}
 
 	public void setLocalVariable(String name, Object value) {
-		environment.peek().setVariable(name, value);
+		variableScopes.peek().setVariable(name, value);
 	}
 
 	public Object lookupLocalVariable(String name) {
-		int scopeNumber = environment.size() - 1;
+		int scopeNumber = variableScopes.size() - 1;
 		for (int i = scopeNumber; i >= 0; i--) {
-			if (environment.get(i).definesVariable(name)) {
-				return environment.get(i).lookupVariable(name);
+			if (variableScopes.get(i).definesVariable(name)) {
+				return variableScopes.get(i).lookupVariable(name);
 			}
 		}
 		return null;

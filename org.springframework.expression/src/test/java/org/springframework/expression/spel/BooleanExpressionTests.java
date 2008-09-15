@@ -55,6 +55,12 @@ public class BooleanExpressionTests extends ExpressionTestCase {
 		evaluate("true and false or false", Boolean.FALSE, Boolean.class);
 	}
 
+	public void testWritability() {
+		evaluate("true and true", Boolean.TRUE, Boolean.class, false);
+		evaluate("true or true", Boolean.TRUE, Boolean.class, false);
+		evaluate("!false", Boolean.TRUE, Boolean.class, false);
+	}
+
 	public void testBooleanErrors01() {
 		evaluateAndCheckError("1.0 or false", SpelMessages.TYPE_CONVERSION_ERROR, 0);
 		evaluateAndCheckError("false or 39.4", SpelMessages.TYPE_CONVERSION_ERROR, 9);

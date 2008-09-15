@@ -6,6 +6,8 @@ High Importance
 in a different context then the stored executor may be incorrect.  It may harmless 'fail' which would cause us to retrieve a new one, but 
 can it do anything malicious? In which case we either need to forget them when the context changes or store them elsewhere.  Should caching be
 something that can be switched on/off by the context? (shouldCacheExecutors() on the interface?)
+- Expression serialization needs supporting
+- expression basic interface and common package.  Should LiteralExpression be settable? should getExpressionString return quoted value?
 
 Low Importance
 
@@ -13,6 +15,7 @@ Low Importance
 would have taken?  At the moment ternary expressions are just considered NOT writable.
 - Enhance type locator interface with direct support for register/unregister imports and ability to set class loader?
 - Should some of the common errors (like SpelMessages.TYPE_NOT_FOUND) be promoted to top level exceptions?
+- Expression comparison - is it necessary?
 
 Syntax
 

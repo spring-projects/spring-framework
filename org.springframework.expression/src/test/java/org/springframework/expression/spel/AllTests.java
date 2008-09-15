@@ -18,6 +18,9 @@ package org.springframework.expression.spel;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.springframework.expression.common.CompositeStringExpressionTests;
+import org.springframework.expression.common.LiteralExpressionTests;
+
 /**
  * Pulls together all the tests for Spring EL into a single suite.
  * 
@@ -42,9 +45,12 @@ public class AllTests {
 		suite.addTestSuite(TypeReferencing.class);
 		suite.addTestSuite(PerformanceTests.class);
 		suite.addTestSuite(DefaultComparatorUnitTests.class);
-		suite.addTestSuite(TemplateExpressionParsing.class);
+		suite.addTestSuite(TemplateExpressionParsingTests.class);
 		suite.addTestSuite(ExpressionLanguageScenarioTests.class);
 		suite.addTestSuite(ScenariosForSpringSecurity.class);
+		suite.addTestSuite(SpelUtilitiesTests.class);
+		suite.addTestSuite(LiteralExpressionTests.class);
+		suite.addTestSuite(CompositeStringExpressionTests.class);
 		// $JUnit-END$
 		return suite;
 	}

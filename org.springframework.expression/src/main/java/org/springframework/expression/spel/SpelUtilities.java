@@ -45,13 +45,10 @@ public class SpelUtilities {
 	private static void printAST(PrintStream out, SpelNode t, String indent) {
 		if (t != null) {
 			StringBuffer sb = new StringBuffer();
-			String s = null;
-			if (t.getType() == -1)
-				s = "EOF";
-			else {
-				s = t.getClass().getSimpleName();
-			}
-			sb.append(indent + s + (t.getChildCount() < 2 ? "" : " #" + t.getChildCount()));
+			String s = (t.getType() == -1 ? "EOF" : t.getClass().getSimpleName());
+			sb.append(indent).append(s);
+			sb.append("  value=").append(t.getText());
+			sb.append(t.getChildCount() < 2 ? "" : "  children=#" + t.getChildCount());
 			out.println(sb.toString());
 			for (int i = 0; i < t.getChildCount(); i++) {
 				printAST(out, t.getChild(i), indent + "  ");
