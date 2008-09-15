@@ -59,10 +59,6 @@ tokens {
 }
 
 expr: expression EOF!;
-
-exprList
-    : LPAREN expression (SEMI expression)+ (SEMIRPAREN | RPAREN)
-      -> ^(EXPRESSIONLIST expression+);
       
 SEMIRPAREN : ';)'; // recoveryrelated: allows us to cope with a rogue superfluous semicolon before the rparen in an expression list
 
@@ -102,8 +98,7 @@ primaryExpression
 
 startNode 
     : 
-    (LPAREN expression SEMI) => exprList 
-    | parenExpr
+    parenExpr
     | methodOrProperty 
     | functionOrVar
     | localFunctionOrVar
@@ -135,7 +130,6 @@ dottedNode
     | selection 
     | firstSelection 
     | lastSelection 
-    | exprList
     ))
 	;
 	

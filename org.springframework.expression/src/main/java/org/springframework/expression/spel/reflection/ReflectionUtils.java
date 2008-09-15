@@ -182,7 +182,6 @@ public class ReflectionUtils {
 	 * match an expected type
 	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
 	 */
-	@SuppressWarnings("unchecked")
 	private static ArgumentsMatchInfo compareArguments(Class[] expectedArgTypes, Class[] suppliedArgTypes,
 			TypeConverter typeConverter, boolean conversionAllowed) {
 		ArgsMatchKind match = ArgsMatchKind.EXACT;
@@ -230,7 +229,6 @@ public class ReflectionUtils {
 	 * match an expected type
 	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
 	 */
-	@SuppressWarnings("unchecked")
 	private static ArgumentsMatchInfo compareArgumentsVarargs(Class[] expectedArgTypes, Class[] suppliedArgTypes,
 			TypeConverter typeConverter, boolean conversionAllowed) {
 		ArgsMatchKind match = ArgsMatchKind.EXACT;
@@ -484,9 +482,9 @@ public class ReflectionUtils {
 			} else {
 				targetType = parameterTypes[i];
 			}
-			if (converter==null) {
-				throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "No converter available to convert '"
-						+ arguments[i] + " to type '" + targetType + "'");					
+			if (converter == null) {
+				throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,
+						"No converter available to convert '" + arguments[i] + " to type '" + targetType + "'");
 			}
 			try {
 				if (arguments[i] != null && arguments[i].getClass() != targetType) {
@@ -495,8 +493,9 @@ public class ReflectionUtils {
 			} catch (EvaluationException e) {
 				// allows for another type converter throwing a different kind of EvaluationException
 				if (!(e instanceof SpelException)) {
-					throw new SpelException(e, SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, "Converter failed to convert '"
-							+ arguments[i].getClass().getName() + "' to type '" + targetType + "'");
+					throw new SpelException(e, SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,
+							"Converter failed to convert '" + arguments[i].getClass().getName() + "' to type '"
+									+ targetType + "'");
 				}
 				throw e;
 			}
