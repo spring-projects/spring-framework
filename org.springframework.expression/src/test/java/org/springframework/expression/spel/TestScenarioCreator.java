@@ -61,10 +61,11 @@ public class TestScenarioCreator {
 					new Class[] { Integer.TYPE, Integer.TYPE, Integer.TYPE }));
 			testContext.registerFunction("reverseString", TestScenarioCreator.class.getDeclaredMethod("reverseString",
 					new Class[] { String.class }));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge", TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge",
-					new Class[] { String[].class }));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2", TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2",
-					new Class[] { Integer.TYPE,String[].class }));
+			testContext.registerFunction("varargsFunctionReverseStringsAndMerge", TestScenarioCreator.class
+					.getDeclaredMethod("varargsFunctionReverseStringsAndMerge", new Class[] { String[].class }));
+			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2", TestScenarioCreator.class
+					.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2", new Class[] { Integer.TYPE,
+							String[].class }));
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
@@ -86,8 +87,8 @@ public class TestScenarioCreator {
 	 */
 	private static void createTestClassloader(StandardEvaluationContext testContext) {
 		try {
-			ClassLoader cl = new URLClassLoader(new URL[] { new File("target/test-classes/testcode.jar").toURI().toURL() },
-					Thread.currentThread().getContextClassLoader());
+			ClassLoader cl = new URLClassLoader(new URL[] { new File("target/test-classes/testcode.jar").toURI()
+					.toURL() }, Thread.currentThread().getContextClassLoader());
 			testContext.setClassLoader(cl);
 		} catch (MalformedURLException mue) {
 			mue.printStackTrace();
@@ -97,7 +98,7 @@ public class TestScenarioCreator {
 	/**
 	 * Create the root context object, an Inventor instance. Non-qualified property and method references will be
 	 * resolved against this context object.
-	 * 
+	 *
 	 * @param testContext the evaluation context in which to set the root object
 	 */
 	private static void setupRootContextObject(StandardEvaluationContext testContext) {
@@ -113,11 +114,10 @@ public class TestScenarioCreator {
 
 	/**
 	 * Create a context configuration that tests can reference into using the
-	 * @() language construct.
-	 * at(context:objectName) will index a particular object within a particular context. The 'root' context will be used
-	 * for references where no context is specified, eg.
+	 * @() language construct. at(context:objectName) will index a particular object within a particular context. The
+	 * 'root' context will be used for references where no context is specified, eg.
 	 * @(orange).
-	 * 
+	 *
 	 * @param testContext the evaluation context in which to register the new references
 	 */
 	private static void populateContextMap(StandardEvaluationContext testContext) {
@@ -205,21 +205,21 @@ public class TestScenarioCreator {
 		return backwards.toString();
 	}
 
-	public static String varargsFunctionReverseStringsAndMerge(String...strings) {
+	public static String varargsFunctionReverseStringsAndMerge(String... strings) {
 		StringBuilder sb = new StringBuilder();
-		if (strings!=null) {
-			for (int i=strings.length-1;i>=0;i--) {
+		if (strings != null) {
+			for (int i = strings.length - 1; i >= 0; i--) {
 				sb.append(strings[i]);
 			}
 		}
 		return sb.toString();
 	}
-	
-	public static String varargsFunctionReverseStringsAndMerge2(int j, String...strings) {
+
+	public static String varargsFunctionReverseStringsAndMerge2(int j, String... strings) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(j);
-		if (strings!=null) {
-			for (int i=strings.length-1;i>=0;i--) {
+		if (strings != null) {
+			for (int i = strings.length - 1; i >= 0; i--) {
 				sb.append(strings[i]);
 			}
 		}

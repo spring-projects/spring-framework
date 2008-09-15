@@ -47,6 +47,10 @@ public class ParsingTests extends TestCase {
 		parseCheck("true");
 	}
 
+	public void testLiteralBoolean03() {
+		parseCheck("!true");
+	}
+
 	public void testLiteralInteger01() {
 		parseCheck("1");
 	}
