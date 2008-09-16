@@ -17,7 +17,6 @@ package org.springframework.expression.spel.internal;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTreeAdaptor;
-import org.springframework.expression.spel.ast.ArgList;
 import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.expression.spel.ast.CompoundExpression;
@@ -27,11 +26,8 @@ import org.springframework.expression.spel.ast.ExpressionListNode;
 import org.springframework.expression.spel.ast.FunctionReference;
 import org.springframework.expression.spel.ast.Identifier;
 import org.springframework.expression.spel.ast.Indexer;
-import org.springframework.expression.spel.ast.Lambda;
 import org.springframework.expression.spel.ast.ListInitializer;
 import org.springframework.expression.spel.ast.Literal;
-import org.springframework.expression.spel.ast.LocalFunctionReference;
-import org.springframework.expression.spel.ast.LocalVariableReference;
 import org.springframework.expression.spel.ast.MapEntry;
 import org.springframework.expression.spel.ast.MapInitializer;
 import org.springframework.expression.spel.ast.MethodReference;
@@ -150,10 +146,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new ConstructorReference(payload, false);
 			case SpringExpressionsLexer.CONSTRUCTOR_ARRAY:
 				return new ConstructorReference(payload, true);
-			case SpringExpressionsLexer.LOCALFUNC:
-				return new LocalFunctionReference(payload);
-			case SpringExpressionsLexer.LOCALVAR:
-				return new LocalVariableReference(payload);
 			case SpringExpressionsLexer.VARIABLEREF:
 				return new VariableReference(payload);
 			case SpringExpressionsLexer.FUNCTIONREF:
@@ -183,11 +175,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new OperatorMatches(payload);
 			case SpringExpressionsLexer.IS:
 				return new OperatorIs(payload);
-
-			case SpringExpressionsLexer.ARGLIST:
-				return new ArgList(payload);
-			case SpringExpressionsLexer.LAMBDA:
-				return new Lambda(payload);
 
 			case SpringExpressionsLexer.RPAREN:
 				return new Placeholder(payload);

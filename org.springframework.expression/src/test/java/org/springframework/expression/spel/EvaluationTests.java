@@ -18,8 +18,6 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.springframework.expression.spel.ast.Lambda;
-
 /**
  * Tests the evaluation of real expressions in a real context.
  * 
@@ -285,9 +283,9 @@ public class EvaluationTests extends ExpressionTestCase {
 				"[false, false, false, false, false, true, true, true, true, true]", ArrayList.class);
 	}
 
-	public void testProjection04() {
-		evaluate("{1,2,3,4,5,6,7,8,9,10}.!{$index>5?'y':'n'}", "[n, n, n, n, n, n, y, y, y, y]", ArrayList.class);
-	}
+	// public void testProjection04() {
+	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{$index>5?'y':'n'}", "[n, n, n, n, n, n, y, y, y, y]", ArrayList.class);
+	// }
 
 	public void testSelection01() {
 		evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
@@ -298,9 +296,9 @@ public class EvaluationTests extends ExpressionTestCase {
 				SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	}
 
-	public void testSelectionUsingIndex() {
-		evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
-	}
+	// public void testSelectionUsingIndex() {
+	// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
+	// }
 
 	public void testSelectionFirst01() {
 		evaluate("{1,2,3,4,5,6,7,8,9,10}.^{#isEven(#this) == 'y'}", "2", Integer.class);
@@ -392,16 +390,6 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	public void testFunctionAccess02() {
 		evaluate("#reverseString('hello')", "olleh", String.class);
-	}
-
-	// lambda
-	public void testLambdaNoArgs() {
-		evaluate("{|| true }", "{|| true }", Lambda.class);
-	}
-
-	public void testLambda01() {
-		evaluate("{|x,y| $x > $y ? $x : $y }", "{|x,y| ($x > $y) ? $x : $y }",
-				org.springframework.expression.spel.ast.Lambda.class);
 	}
 
 	//

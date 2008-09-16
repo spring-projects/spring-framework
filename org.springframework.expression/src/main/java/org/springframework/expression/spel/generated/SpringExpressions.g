@@ -16,7 +16,6 @@ tokens {
 	REFERENCE;
 	PROPERTY_OR_FIELD;
 	INDEXER;
-	ARGLIST;
 	CONSTRUCTOR;
 	HOLDER;
 	CONSTRUCTOR_ARRAY;
@@ -27,8 +26,6 @@ tokens {
 	VARIABLEREF;
 	LIST_INITIALIZER;
 	MAP_INITIALIZER;
-	LOCALVAR;
-	LOCALFUNC;
 	MAP_ENTRY;
 	METHOD;
 	ADD;
@@ -100,7 +97,6 @@ startNode
     parenExpr
     | methodOrProperty 
     | functionOrVar
-    | localFunctionOrVar
     | reference
     | indexer
     | literal
@@ -112,7 +108,6 @@ startNode
     | lastSelection
     | listInitializer
     | mapInitializer
-    | lambda
     ;
     
 node
@@ -141,13 +136,6 @@ function : POUND id=ID methodArgs -> ^(FUNCTIONREF[$id] methodArgs);
     
 var : POUND id=ID -> ^(VARIABLEREF[$id]); 
 
-localFunctionOrVar
-	: (DOLLAR ID LPAREN) => localFunction
-	| localVar
-	;
-
-localFunction : DOLLAR id=ID methodArgs -> ^(LOCALFUNC[$id] methodArgs);
-localVar: DOLLAR id=ID -> ^(LOCALVAR[$id]);
 
 methodOrProperty
 	:	(ID LPAREN) => id=ID methodArgs -> ^(METHOD[$id] methodArgs)
@@ -194,15 +182,6 @@ lastSelection: SELECT_LAST^ expression RCURLY!;
 type:	TYPE qualifiedId RPAREN -> ^(TYPEREF qualifiedId);
 //type:   TYPE tn=qualifiedId (LBRACKET RBRACKET)? (COMMA qid=qualifiedId)? RPAREN
 
-//attribute
-//	:	AT! LBRACKET! tn:qualifiedId! (ctorArgs)? RBRACKET!
-//		   { #attribute = #([EXPR, tn_AST.getText(), "Spring.Expressions.AttributeNode"], #attribute); }
-//	;
-
-lambda
-   :   LAMBDA (argList)? PIPE expression RCURLY -> ^(LAMBDA (argList)? expression);
-
-argList : (id+=ID (COMMA id+=ID)*) -> ^(ARGLIST ($id)*);
 
 constructor  
 	:	('new' qualifiedId LPAREN) => 'new' qualifiedId ctorArgs -> ^(CONSTRUCTOR qualifiedId ctorArgs)
@@ -312,7 +291,6 @@ BANG: '!';
 POUND: '#';
 QMARK: '?';
 DEFAULT: '??';
-LAMBDA: '{|';
 PROJECT: '!{';
 SELECT: '?{';
 SELECT_FIRST: '^{';

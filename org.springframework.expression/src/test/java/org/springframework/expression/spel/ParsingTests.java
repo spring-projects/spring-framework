@@ -355,11 +355,6 @@ public class ParsingTests extends TestCase {
 				"({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
 	}
 
-	// lambda
-	public void testLambda01() {
-		parseCheck("{|x,y| $x > $y ? $x : $y }", "{|x,y| ($x > $y) ? $x : $y }");
-	}
-
 	//
 	// public void testLambdaMax() {
 	// parseCheck("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))", "(#max={|x,y| ($x > $y) ? $x : $y };#max(5,25))");

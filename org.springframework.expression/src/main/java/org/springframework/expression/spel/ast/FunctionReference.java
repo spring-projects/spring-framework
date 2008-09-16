@@ -18,9 +18,6 @@ package org.springframework.expression.spel.ast;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationContext;
@@ -35,7 +32,7 @@ import org.springframework.expression.spel.reflection.ReflectionUtils;
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in the context prior to the
  * expression being evaluated or within the expression itself using a lambda function definition. For example: Lambda
  * function definition in an expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
- * "#isEven(37)".  Functions may also be static java methods, registered in the context prior to invocation of the 
+ * "#isEven(37)". Functions may also be static java methods, registered in the context prior to invocation of the
  * expression.
  * 
  * Functions are very simplistic, the arguments are not part of the definition (right now), so the names must be unique.
@@ -57,17 +54,13 @@ public class FunctionReference extends SpelNode {
 		if (o == null) {
 			throw new SpelException(SpelMessages.FUNCTION_NOT_DEFINED, name);
 		}
-		
+
 		// Two possibilities: a lambda function or a Java static method registered as a function
-		if (!(o instanceof Lambda || o instanceof Method)) {
+		if (!(o instanceof Method)) {
 			throw new SpelException(SpelMessages.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, name, o.getClass());
 		}
-		
-		if (o instanceof Lambda) {
-			return executeLambdaFunction(state, (Lambda) o);
-		} else { // o instanceof Method
-			return executeFunctionJLRMethod(state, (Method) o);
-		}
+
+		return executeFunctionJLRMethod(state, (Method) o);
 	}
 
 	/**
@@ -80,20 +73,23 @@ public class FunctionReference extends SpelNode {
 	 */
 	private Object executeFunctionJLRMethod(ExpressionState state, Method m) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
-		
+
 		if (!m.isVarArgs() && m.getParameterTypes().length != functionArgs.length) {
-			throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m.getParameterTypes().length);
+			throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m
+					.getParameterTypes().length);
 		}
 		// Only static methods can be called in this way
 		if (!Modifier.isStatic(m.getModifiers())) {
-			throw new SpelException(getCharPositionInLine(),SpelMessages.FUNCTION_MUST_BE_STATIC,m.getDeclaringClass().getName()+"."+m.getName(),name);
+			throw new SpelException(getCharPositionInLine(), SpelMessages.FUNCTION_MUST_BE_STATIC, m
+					.getDeclaringClass().getName()
+					+ "." + m.getName(), name);
 		}
 
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			EvaluationContext ctx = state.getEvaluationContext();
 			TypeConverter converter = null;
-			if (ctx.getTypeUtils()!=null) {
+			if (ctx.getTypeUtils() != null) {
 				converter = ctx.getTypeUtils().getTypeConverter();
 			}
 			ReflectionUtils.convertArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
@@ -101,7 +97,7 @@ public class FunctionReference extends SpelNode {
 		if (m.isVarArgs()) {
 			functionArgs = ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(), functionArgs);
 		}
-		
+
 		try {
 			return m.invoke(m.getClass(), functionArgs);
 		} catch (IllegalArgumentException e) {
@@ -113,29 +109,6 @@ public class FunctionReference extends SpelNode {
 		} catch (InvocationTargetException e) {
 			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());
-		}
-	}
-
-	
-	/*
-	 * Execute a function that was defined as a lambda function.
-	 */
-	private Object executeLambdaFunction(ExpressionState state, Lambda lambdaExpression) throws EvaluationException {
-		Object[] functionArgs = getArguments(state);
-		List<String> args = lambdaExpression.getArguments();
-		if (args.size() != functionArgs.length) {
-			throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, args
-					.size());
-		}
-		Map<String, Object> argMap = new HashMap<String, Object>();
-		for (int i = 0; i < args.size(); i++) {
-			argMap.put(args.get(i), functionArgs[i]);
-		}
-		try {
-			state.enterScope(argMap);
-			return ((SpelNode) lambdaExpression.getExpression()).getValue(state);
-		} finally {
-			state.exitScope();
 		}
 	}
 
