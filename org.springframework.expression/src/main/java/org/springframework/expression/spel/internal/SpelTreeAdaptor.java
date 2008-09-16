@@ -22,7 +22,6 @@ import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.DateLiteral;
 import org.springframework.expression.spel.ast.Dot;
 import org.springframework.expression.spel.ast.ExpressionListNode;
 import org.springframework.expression.spel.ast.FunctionReference;
@@ -123,8 +122,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new StringLiteral(payload);
 			case SpringExpressionsLexer.NULL_LITERAL:
 				return new NullLiteral(payload);
-			case SpringExpressionsLexer.DATE_LITERAL:
-				return new DateLiteral(payload);
 
 			case SpringExpressionsLexer.ID:
 				return new Identifier(payload);
