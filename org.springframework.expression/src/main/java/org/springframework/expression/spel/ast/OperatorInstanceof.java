@@ -22,20 +22,20 @@ import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
- * The operator 'is' checks if an object is of the class specified in the right hand operand, in the same way that
- * instanceof does in Java.
+ * The operator 'instanceof' checks if an object is of the class specified in the right hand operand, in the same way
+ * that instanceof does in Java.
  * 
  * @author Andy Clement
  */
-public class OperatorIs extends Operator {
+public class OperatorInstanceof extends Operator {
 
-	public OperatorIs(Token payload) {
+	public OperatorInstanceof(Token payload) {
 		super(payload);
 	}
 
 	@Override
 	public String getOperatorName() {
-		return "is";
+		return "instanceof";
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class OperatorIs extends Operator {
 		}
 		if (right == null || !(right instanceof Class<?>)) {
 			throw new SpelException(getRightOperand().getCharPositionInLine(),
-					SpelMessages.IS_OPERATOR_NEEDS_CLASS_OPERAND, (right == null ? "null" : right.getClass().getName()));
+					SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND, (right == null ? "null" : right.getClass().getName()));
 		}
 		Class<?> rightClass = (Class<?>) right;
 		return rightClass.isAssignableFrom(left.getClass());

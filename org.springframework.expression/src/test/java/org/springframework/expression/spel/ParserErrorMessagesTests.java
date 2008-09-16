@@ -48,7 +48,8 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 	public void testBrokenExpression07() {
 		// T() can only take an identifier (possibly qualified), not a literal
 		// message ought to say identifier rather than ID
-		parseAndCheckError("null is T('a')", SpelMessages.PARSE_PROBLEM, 10, "mismatched input ''a'' expecting ID"); // POOR
+		parseAndCheckError("null instanceof T('a')", SpelMessages.PARSE_PROBLEM, 18,
+				"mismatched input ''a'' expecting ID"); // POOR
 	}
 
 }

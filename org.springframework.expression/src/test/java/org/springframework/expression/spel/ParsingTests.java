@@ -146,11 +146,11 @@ public class ParsingTests extends TestCase {
 	}// true
 
 	public void testRelOperatorsIs01() {
-		parseCheck("'xyz' is int", "('xyz' is int)");
+		parseCheck("'xyz' instanceof int", "('xyz' instanceof int)");
 	}// false
 
 	public void testRelOperatorsIs02() {
-		parseCheck("{1, 2, 3, 4, 5} is List", "({1,2,3,4,5} is List)");
+		parseCheck("{1, 2, 3, 4, 5} instanceof List", "({1,2,3,4,5} instanceof List)");
 	}// true
 
 	public void testRelOperatorsMatches01() {

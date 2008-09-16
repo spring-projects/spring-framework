@@ -40,7 +40,7 @@ import org.springframework.expression.spel.ast.OperatorGreaterThan;
 import org.springframework.expression.spel.ast.OperatorGreaterThanOrEqual;
 import org.springframework.expression.spel.ast.OperatorIn;
 import org.springframework.expression.spel.ast.OperatorInequality;
-import org.springframework.expression.spel.ast.OperatorIs;
+import org.springframework.expression.spel.ast.OperatorInstanceof;
 import org.springframework.expression.spel.ast.OperatorLessThan;
 import org.springframework.expression.spel.ast.OperatorLessThanOrEqual;
 import org.springframework.expression.spel.ast.OperatorMatches;
@@ -170,8 +170,8 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new OperatorBetween(payload);
 			case SpringExpressionsLexer.MATCHES:
 				return new OperatorMatches(payload);
-			case SpringExpressionsLexer.IS:
-				return new OperatorIs(payload);
+			case SpringExpressionsLexer.INSTANCEOF:
+				return new OperatorInstanceof(payload);
 
 			case SpringExpressionsLexer.RPAREN:
 				return new Placeholder(payload);
