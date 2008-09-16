@@ -1,4 +1,4 @@
-// $ANTLR 3.0.1 /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g 2008-09-16 09:47:51
+// $ANTLR 3.0.1 /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g 2008-09-16 09:57:24
 package org.springframework.expression.spel.generated;
 
 import org.antlr.runtime.*;
@@ -7,105 +7,101 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class SpringExpressionsLexer extends Lexer {
-    public static final int COMMA=49;
-    public static final int GREATER_THAN_OR_EQUAL=77;
-    public static final int GREATER_THAN=76;
+    public static final int GREATER_THAN_OR_EQUAL=71;
+    public static final int SELECT_FIRST=52;
+    public static final int COMMA=45;
+    public static final int HOLDER=12;
     public static final int EXPRESSIONLIST=4;
-    public static final int MINUS=39;
-    public static final int NUMBER=28;
-    public static final int LESS_THAN=74;
-    public static final int BANG=44;
-    public static final int ARGLIST=11;
-    public static final int FALSE=68;
-    public static final int METHOD=25;
+    public static final int TYPE=54;
+    public static final int GREATER_THAN=70;
+    public static final int MINUS=36;
+    public static final int MAP_ENTRY=21;
+    public static final int SELECT_LAST=53;
+    public static final int NUMBER=25;
+    public static final int BANG=41;
+    public static final int LESS_THAN=68;
+    public static final int METHOD=22;
+    public static final int FALSE=62;
     public static final int PROPERTY_OR_FIELD=9;
+    public static final int LBRACKET=47;
     public static final int INDEXER=10;
-    public static final int CONSTRUCTOR_ARRAY=14;
-    public static final int NULL_LITERAL=64;
-    public static final int NAMED_ARGUMENT=15;
-    public static final int PIPE=60;
-    public static final int DOT=45;
-    public static final int AND=37;
+    public static final int MOD=39;
+    public static final int CONSTRUCTOR_ARRAY=13;
+    public static final int FUNCTIONREF=15;
+    public static final int NULL_LITERAL=58;
+    public static final int NAMED_ARGUMENT=14;
+    public static final int OR=33;
+    public static final int PIPE=77;
+    public static final int DOT=42;
+    public static final int RCURLY=50;
     public static final int EXPRESSION=6;
-    public static final int LCURLY=61;
+    public static final int AND=34;
+    public static final int T86=86;
+    public static final int LCURLY=55;
+    public static final int REAL_TYPE_SUFFIX=84;
+    public static final int STRING_LITERAL=56;
+    public static final int SELECT=51;
     public static final int QUALIFIED_IDENTIFIER=7;
-    public static final int SELECT=55;
-    public static final int STRING_LITERAL=62;
-    public static final int REAL_TYPE_SUFFIX=88;
-    public static final int SUBTRACT=27;
-    public static final int RBRACKET=52;
-    public static final int RPAREN=35;
-    public static final int BETWEEN=80;
-    public static final int SIGN=89;
-    public static final int PLUS=38;
+    public static final int RBRACKET=48;
+    public static final int SUBTRACT=24;
+    public static final int ASSIGN=27;
+    public static final int BETWEEN=74;
+    public static final int RPAREN=32;
+    public static final int LPAREN=31;
+    public static final int SIGN=85;
+    public static final int HEX_DIGIT=65;
+    public static final int PLUS=35;
+    public static final int LIST_INITIALIZER=19;
+    public static final int APOS=78;
     public static final int INTEGER_LITERAL=5;
-    public static final int AT=50;
-    public static final int RANGE=18;
-    public static final int WS=85;
-    public static final int DOLLAR=48;
-    public static final int LESS_THAN_OR_EQUAL=75;
-    public static final int HEXADECIMAL_INTEGER_LITERAL=65;
-    public static final int LAMBDA=59;
-    public static final int SEMI=82;
-    public static final int EQUAL=72;
-    public static final int DOT_ESCAPED=84;
-    public static final int QMARK=32;
-    public static final int PROJECT=53;
-    public static final int COLON=33;
-    public static final int DIV=41;
-    public static final int REAL_LITERAL=66;
-    public static final int EXPONENT_PART=87;
-    public static final int TRUE=67;
-    public static final int ADD=26;
-    public static final int POUND=46;
-    public static final int HOLDER=13;
-    public static final int SELECT_FIRST=56;
-    public static final int TYPE=58;
-    public static final int MAP_ENTRY=24;
-    public static final int SELECT_LAST=57;
-    public static final int LBRACKET=51;
-    public static final int MOD=42;
-    public static final int FUNCTIONREF=16;
-    public static final int OR=36;
-    public static final int RCURLY=54;
-    public static final int ASSIGN=30;
-    public static final int LPAREN=34;
-    public static final int HEX_DIGIT=71;
-    public static final int LIST_INITIALIZER=20;
-    public static final int APOS=83;
-    public static final int ID=47;
-    public static final int NOT_EQUAL=73;
-    public static final int POWER=43;
-    public static final int TYPEREF=17;
-    public static final int DECIMAL_DIGIT=69;
-    public static final int IS=79;
-    public static final int SEMIRPAREN=29;
-    public static final int DQ_STRING_LITERAL=63;
-    public static final int MAP_INITIALIZER=21;
-    public static final int LOCALFUNC=23;
-    public static final int IN=78;
-    public static final int CONSTRUCTOR=12;
-    public static final int INTEGER_TYPE_SUFFIX=70;
-    public static final int MATCHES=81;
+    public static final int AT=46;
+    public static final int ID=44;
+    public static final int NOT_EQUAL=67;
+    public static final int RANGE=17;
+    public static final int POWER=40;
+    public static final int TYPEREF=16;
+    public static final int DECIMAL_DIGIT=63;
+    public static final int WS=80;
+    public static final int IS=73;
+    public static final int DOLLAR=81;
+    public static final int SEMIRPAREN=26;
+    public static final int LESS_THAN_OR_EQUAL=69;
+    public static final int DQ_STRING_LITERAL=57;
+    public static final int MAP_INITIALIZER=20;
+    public static final int HEXADECIMAL_INTEGER_LITERAL=59;
+    public static final int IN=72;
+    public static final int CONSTRUCTOR=11;
+    public static final int SEMI=76;
+    public static final int INTEGER_TYPE_SUFFIX=64;
+    public static final int EQUAL=66;
+    public static final int MATCHES=75;
+    public static final int DOT_ESCAPED=79;
+    public static final int QMARK=29;
+    public static final int UPTO=82;
     public static final int EOF=-1;
-    public static final int UPTO=86;
     public static final int REFERENCE=8;
-    public static final int Tokens=91;
-    public static final int DEFAULT=31;
-    public static final int LOCALVAR=22;
-    public static final int STAR=40;
-    public static final int VARIABLEREF=19;
-    public static final int T90=90;
+    public static final int Tokens=87;
+    public static final int COLON=30;
+    public static final int DEFAULT=28;
+    public static final int PROJECT=49;
+    public static final int DIV=38;
+    public static final int STAR=37;
+    public static final int VARIABLEREF=18;
+    public static final int REAL_LITERAL=60;
+    public static final int ADD=23;
+    public static final int TRUE=61;
+    public static final int EXPONENT_PART=83;
+    public static final int POUND=43;
     public SpringExpressionsLexer() {;} 
     public SpringExpressionsLexer(CharStream input) {
         super(input);
     }
     public String getGrammarFileName() { return "/Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g"; }
 
-    // $ANTLR start T90
-    public final void mT90() throws RecognitionException {
+    // $ANTLR start T86
+    public final void mT86() throws RecognitionException {
         try {
-            int _type = T90;
+            int _type = T86;
             // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:8:5: ( 'new' )
             // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:8:7: 'new'
             {
@@ -119,14 +115,14 @@ public class SpringExpressionsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end T90
+    // $ANTLR end T86
 
     // $ANTLR start SEMIRPAREN
     public final void mSEMIRPAREN() throws RecognitionException {
         try {
             int _type = SEMIRPAREN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:62:12: ( ';)' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:62:14: ';)'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:59:12: ( ';)' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:59:14: ';)'
             {
             match(";)"); 
 
@@ -144,10 +140,10 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mINTEGER_LITERAL() throws RecognitionException {
         try {
             int _type = INTEGER_LITERAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:2: ( ( DECIMAL_DIGIT )+ ( INTEGER_TYPE_SUFFIX )? )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:4: ( DECIMAL_DIGIT )+ ( INTEGER_TYPE_SUFFIX )?
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:238:2: ( ( DECIMAL_DIGIT )+ ( INTEGER_TYPE_SUFFIX )? )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:238:4: ( DECIMAL_DIGIT )+ ( INTEGER_TYPE_SUFFIX )?
             {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:4: ( DECIMAL_DIGIT )+
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:238:4: ( DECIMAL_DIGIT )+
             int cnt1=0;
             loop1:
             do {
@@ -161,7 +157,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                 switch (alt1) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:5: DECIMAL_DIGIT
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:238:5: DECIMAL_DIGIT
             	    {
             	    mDECIMAL_DIGIT(); 
 
@@ -177,7 +173,7 @@ public class SpringExpressionsLexer extends Lexer {
                 cnt1++;
             } while (true);
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:21: ( INTEGER_TYPE_SUFFIX )?
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:238:21: ( INTEGER_TYPE_SUFFIX )?
             int alt2=2;
             int LA2_0 = input.LA(1);
 
@@ -186,7 +182,7 @@ public class SpringExpressionsLexer extends Lexer {
             }
             switch (alt2) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:22: INTEGER_TYPE_SUFFIX
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:238:22: INTEGER_TYPE_SUFFIX
                     {
                     mINTEGER_TYPE_SUFFIX(); 
 
@@ -209,38 +205,38 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mHEXADECIMAL_INTEGER_LITERAL() throws RecognitionException {
         try {
             int _type = HEXADECIMAL_INTEGER_LITERAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:29: ( ( '0x' | '0X' ) ( HEX_DIGIT )+ ( INTEGER_TYPE_SUFFIX )? )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:31: ( '0x' | '0X' ) ( HEX_DIGIT )+ ( INTEGER_TYPE_SUFFIX )?
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:29: ( ( '0x' | '0X' ) ( HEX_DIGIT )+ ( INTEGER_TYPE_SUFFIX )? )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:31: ( '0x' | '0X' ) ( HEX_DIGIT )+ ( INTEGER_TYPE_SUFFIX )?
             {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:31: ( '0x' | '0X' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:31: ( '0x' | '0X' )
             int alt3=2;
             int LA3_0 = input.LA(1);
 
             if ( (LA3_0=='0') ) {
                 int LA3_1 = input.LA(2);
 
-                if ( (LA3_1=='x') ) {
-                    alt3=1;
-                }
-                else if ( (LA3_1=='X') ) {
+                if ( (LA3_1=='X') ) {
                     alt3=2;
+                }
+                else if ( (LA3_1=='x') ) {
+                    alt3=1;
                 }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("261:31: ( '0x' | '0X' )", 3, 1, input);
+                        new NoViableAltException("240:31: ( '0x' | '0X' )", 3, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("261:31: ( '0x' | '0X' )", 3, 0, input);
+                    new NoViableAltException("240:31: ( '0x' | '0X' )", 3, 0, input);
 
                 throw nvae;
             }
             switch (alt3) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:32: '0x'
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:32: '0x'
                     {
                     match("0x"); 
 
@@ -248,7 +244,7 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:39: '0X'
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:39: '0X'
                     {
                     match("0X"); 
 
@@ -258,7 +254,7 @@ public class SpringExpressionsLexer extends Lexer {
 
             }
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:45: ( HEX_DIGIT )+
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:45: ( HEX_DIGIT )+
             int cnt4=0;
             loop4:
             do {
@@ -272,7 +268,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                 switch (alt4) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:46: HEX_DIGIT
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:46: HEX_DIGIT
             	    {
             	    mHEX_DIGIT(); 
 
@@ -288,7 +284,7 @@ public class SpringExpressionsLexer extends Lexer {
                 cnt4++;
             } while (true);
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:58: ( INTEGER_TYPE_SUFFIX )?
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:58: ( INTEGER_TYPE_SUFFIX )?
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -297,7 +293,7 @@ public class SpringExpressionsLexer extends Lexer {
             }
             switch (alt5) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:59: INTEGER_TYPE_SUFFIX
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:240:59: INTEGER_TYPE_SUFFIX
                     {
                     mINTEGER_TYPE_SUFFIX(); 
 
@@ -320,8 +316,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mASSIGN() throws RecognitionException {
         try {
             int _type = ASSIGN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:276:7: ( '=' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:276:9: '='
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:255:7: ( '=' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:255:9: '='
             {
             match('='); 
 
@@ -338,8 +334,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mEQUAL() throws RecognitionException {
         try {
             int _type = EQUAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:277:6: ( '==' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:277:8: '=='
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:256:6: ( '==' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:256:8: '=='
             {
             match("=="); 
 
@@ -357,8 +353,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mNOT_EQUAL() throws RecognitionException {
         try {
             int _type = NOT_EQUAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:278:10: ( '!=' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:278:12: '!='
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:257:10: ( '!=' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:257:12: '!='
             {
             match("!="); 
 
@@ -376,8 +372,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mLESS_THAN() throws RecognitionException {
         try {
             int _type = LESS_THAN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:279:10: ( '<' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:279:12: '<'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:258:10: ( '<' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:258:12: '<'
             {
             match('<'); 
 
@@ -394,8 +390,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mLESS_THAN_OR_EQUAL() throws RecognitionException {
         try {
             int _type = LESS_THAN_OR_EQUAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:280:19: ( '<=' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:280:21: '<='
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:19: ( '<=' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:259:21: '<='
             {
             match("<="); 
 
@@ -413,8 +409,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mGREATER_THAN() throws RecognitionException {
         try {
             int _type = GREATER_THAN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:281:13: ( '>' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:281:15: '>'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:260:13: ( '>' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:260:15: '>'
             {
             match('>'); 
 
@@ -431,8 +427,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mGREATER_THAN_OR_EQUAL() throws RecognitionException {
         try {
             int _type = GREATER_THAN_OR_EQUAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:282:22: ( '>=' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:282:24: '>='
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:22: ( '>=' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:261:24: '>='
             {
             match(">="); 
 
@@ -450,8 +446,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mIN() throws RecognitionException {
         try {
             int _type = IN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:283:3: ( 'in' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:283:9: 'in'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:262:3: ( 'in' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:262:9: 'in'
             {
             match("in"); 
 
@@ -469,8 +465,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mIS() throws RecognitionException {
         try {
             int _type = IS;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:284:3: ( 'is' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:284:9: 'is'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:263:3: ( 'is' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:263:9: 'is'
             {
             match("is"); 
 
@@ -488,8 +484,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mBETWEEN() throws RecognitionException {
         try {
             int _type = BETWEEN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:285:8: ( 'between' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:285:9: 'between'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:264:8: ( 'between' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:264:9: 'between'
             {
             match("between"); 
 
@@ -507,8 +503,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mMATCHES() throws RecognitionException {
         try {
             int _type = MATCHES;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:286:8: ( 'matches' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:286:9: 'matches'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:265:8: ( 'matches' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:265:9: 'matches'
             {
             match("matches"); 
 
@@ -526,8 +522,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mNULL_LITERAL() throws RecognitionException {
         try {
             int _type = NULL_LITERAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:287:13: ( 'null' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:287:15: 'null'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:266:13: ( 'null' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:266:15: 'null'
             {
             match("null"); 
 
@@ -545,8 +541,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mSEMI() throws RecognitionException {
         try {
             int _type = SEMI;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:289:5: ( ';' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:289:7: ';'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:268:5: ( ';' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:268:7: ';'
             {
             match(';'); 
 
@@ -563,8 +559,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mDOT() throws RecognitionException {
         try {
             int _type = DOT;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:290:4: ( '.' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:290:9: '.'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:269:4: ( '.' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:269:9: '.'
             {
             match('.'); 
 
@@ -581,8 +577,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mCOMMA() throws RecognitionException {
         try {
             int _type = COMMA;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:291:6: ( ',' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:291:8: ','
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:270:6: ( ',' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:270:8: ','
             {
             match(','); 
 
@@ -599,8 +595,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mLPAREN() throws RecognitionException {
         try {
             int _type = LPAREN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:292:7: ( '(' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:292:9: '('
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:271:7: ( '(' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:271:9: '('
             {
             match('('); 
 
@@ -617,8 +613,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mRPAREN() throws RecognitionException {
         try {
             int _type = RPAREN;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:293:7: ( ')' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:293:9: ')'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:272:7: ( ')' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:272:9: ')'
             {
             match(')'); 
 
@@ -635,8 +631,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mLCURLY() throws RecognitionException {
         try {
             int _type = LCURLY;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:294:7: ( '{' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:294:9: '{'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:273:7: ( '{' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:273:9: '{'
             {
             match('{'); 
 
@@ -653,8 +649,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mRCURLY() throws RecognitionException {
         try {
             int _type = RCURLY;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:295:7: ( '}' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:295:9: '}'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:274:7: ( '}' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:274:9: '}'
             {
             match('}'); 
 
@@ -671,8 +667,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mLBRACKET() throws RecognitionException {
         try {
             int _type = LBRACKET;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:296:9: ( '[' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:296:11: '['
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:275:9: ( '[' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:275:11: '['
             {
             match('['); 
 
@@ -689,8 +685,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mRBRACKET() throws RecognitionException {
         try {
             int _type = RBRACKET;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:297:9: ( ']' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:297:11: ']'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:276:9: ( ']' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:276:11: ']'
             {
             match(']'); 
 
@@ -707,8 +703,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mPIPE() throws RecognitionException {
         try {
             int _type = PIPE;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:298:5: ( '|' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:298:7: '|'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:277:5: ( '|' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:277:7: '|'
             {
             match('|'); 
 
@@ -725,8 +721,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mAND() throws RecognitionException {
         try {
             int _type = AND;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:4: ( 'and' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:9: 'and'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:279:4: ( 'and' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:279:9: 'and'
             {
             match("and"); 
 
@@ -744,8 +740,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mOR() throws RecognitionException {
         try {
             int _type = OR;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:301:3: ( 'or' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:301:9: 'or'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:280:3: ( 'or' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:280:9: 'or'
             {
             match("or"); 
 
@@ -763,8 +759,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mFALSE() throws RecognitionException {
         try {
             int _type = FALSE;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:6: ( 'false' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:9: 'false'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:281:6: ( 'false' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:281:9: 'false'
             {
             match("false"); 
 
@@ -782,8 +778,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mTRUE() throws RecognitionException {
         try {
             int _type = TRUE;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:303:5: ( 'true' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:303:9: 'true'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:282:5: ( 'true' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:282:9: 'true'
             {
             match("true"); 
 
@@ -801,8 +797,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mPLUS() throws RecognitionException {
         try {
             int _type = PLUS;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:305:5: ( '+' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:305:7: '+'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:284:5: ( '+' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:284:7: '+'
             {
             match('+'); 
 
@@ -819,8 +815,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mMINUS() throws RecognitionException {
         try {
             int _type = MINUS;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:306:6: ( '-' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:306:8: '-'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:285:6: ( '-' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:285:8: '-'
             {
             match('-'); 
 
@@ -837,8 +833,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mDIV() throws RecognitionException {
         try {
             int _type = DIV;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:307:4: ( '/' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:307:6: '/'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:286:4: ( '/' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:286:6: '/'
             {
             match('/'); 
 
@@ -855,8 +851,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mSTAR() throws RecognitionException {
         try {
             int _type = STAR;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:308:5: ( '*' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:308:7: '*'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:287:5: ( '*' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:287:7: '*'
             {
             match('*'); 
 
@@ -873,8 +869,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mMOD() throws RecognitionException {
         try {
             int _type = MOD;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:309:4: ( '%' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:309:6: '%'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:288:4: ( '%' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:288:6: '%'
             {
             match('%'); 
 
@@ -891,8 +887,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mPOWER() throws RecognitionException {
         try {
             int _type = POWER;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:310:6: ( '^' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:310:8: '^'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:289:6: ( '^' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:289:8: '^'
             {
             match('^'); 
 
@@ -909,8 +905,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mBANG() throws RecognitionException {
         try {
             int _type = BANG;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:311:5: ( '!' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:311:7: '!'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:290:5: ( '!' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:290:7: '!'
             {
             match('!'); 
 
@@ -927,8 +923,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mPOUND() throws RecognitionException {
         try {
             int _type = POUND;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:6: ( '#' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:8: '#'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:291:6: ( '#' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:291:8: '#'
             {
             match('#'); 
 
@@ -945,8 +941,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mQMARK() throws RecognitionException {
         try {
             int _type = QMARK;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:6: ( '?' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:8: '?'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:292:6: ( '?' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:292:8: '?'
             {
             match('?'); 
 
@@ -963,8 +959,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mDEFAULT() throws RecognitionException {
         try {
             int _type = DEFAULT;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:8: ( '??' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:10: '??'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:293:8: ( '??' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:293:10: '??'
             {
             match("??"); 
 
@@ -978,31 +974,12 @@ public class SpringExpressionsLexer extends Lexer {
     }
     // $ANTLR end DEFAULT
 
-    // $ANTLR start LAMBDA
-    public final void mLAMBDA() throws RecognitionException {
-        try {
-            int _type = LAMBDA;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:7: ( '{|' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:9: '{|'
-            {
-            match("{|"); 
-
-
-            }
-
-            this.type = _type;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end LAMBDA
-
     // $ANTLR start PROJECT
     public final void mPROJECT() throws RecognitionException {
         try {
             int _type = PROJECT;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:316:8: ( '!{' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:316:10: '!{'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:294:8: ( '!{' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:294:10: '!{'
             {
             match("!{"); 
 
@@ -1020,8 +997,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mSELECT() throws RecognitionException {
         try {
             int _type = SELECT;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:317:7: ( '?{' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:317:9: '?{'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:295:7: ( '?{' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:295:9: '?{'
             {
             match("?{"); 
 
@@ -1039,8 +1016,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mSELECT_FIRST() throws RecognitionException {
         try {
             int _type = SELECT_FIRST;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:318:13: ( '^{' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:318:15: '^{'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:296:13: ( '^{' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:296:15: '^{'
             {
             match("^{"); 
 
@@ -1058,8 +1035,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mSELECT_LAST() throws RecognitionException {
         try {
             int _type = SELECT_LAST;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:319:12: ( '${' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:319:14: '${'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:297:12: ( '${' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:297:14: '${'
             {
             match("${"); 
 
@@ -1077,8 +1054,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mTYPE() throws RecognitionException {
         try {
             int _type = TYPE;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:320:5: ( 'T(' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:320:7: 'T('
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:298:5: ( 'T(' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:298:7: 'T('
             {
             match("T("); 
 
@@ -1096,11 +1073,11 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mSTRING_LITERAL() throws RecognitionException {
         try {
             int _type = STRING_LITERAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:15: ( '\\'' ( APOS | ~ '\\'' )* '\\'' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:17: '\\'' ( APOS | ~ '\\'' )* '\\''
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:15: ( '\\'' ( APOS | ~ '\\'' )* '\\'' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:17: '\\'' ( APOS | ~ '\\'' )* '\\''
             {
             match('\''); 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:23: ( APOS | ~ '\\'' )*
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:23: ( APOS | ~ '\\'' )*
             loop6:
             do {
                 int alt6=3;
@@ -1122,14 +1099,14 @@ public class SpringExpressionsLexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:24: APOS
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:24: APOS
             	    {
             	    mAPOS(); 
 
             	    }
             	    break;
             	case 2 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:29: ~ '\\''
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:300:29: ~ '\\''
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='&')||(input.LA(1)>='(' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
@@ -1165,11 +1142,11 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mDQ_STRING_LITERAL() throws RecognitionException {
         try {
             int _type = DQ_STRING_LITERAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:323:18: ( '\"' (~ '\"' )* '\"' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:323:20: '\"' (~ '\"' )* '\"'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:301:18: ( '\"' (~ '\"' )* '\"' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:301:20: '\"' (~ '\"' )* '\"'
             {
             match('\"'); 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:323:25: (~ '\"' )*
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:301:25: (~ '\"' )*
             loop7:
             do {
                 int alt7=2;
@@ -1182,7 +1159,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                 switch (alt7) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:323:26: ~ '\"'
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:301:26: ~ '\"'
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
@@ -1218,8 +1195,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mID() throws RecognitionException {
         try {
             int _type = ID;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:3: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | DOT_ESCAPED )* )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:5: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | DOT_ESCAPED )*
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:3: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | DOT_ESCAPED )* )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:5: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | DOT_ESCAPED )*
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -1231,7 +1208,7 @@ public class SpringExpressionsLexer extends Lexer {
                 recover(mse);    throw mse;
             }
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:29: ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | DOT_ESCAPED )*
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:29: ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | DOT_ESCAPED )*
             loop8:
             do {
                 int alt8=6;
@@ -1325,35 +1302,35 @@ public class SpringExpressionsLexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:30: 'a' .. 'z'
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:30: 'a' .. 'z'
             	    {
             	    matchRange('a','z'); 
 
             	    }
             	    break;
             	case 2 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:39: 'A' .. 'Z'
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:39: 'A' .. 'Z'
             	    {
             	    matchRange('A','Z'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:48: '_'
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:48: '_'
             	    {
             	    match('_'); 
 
             	    }
             	    break;
             	case 4 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:52: '0' .. '9'
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:52: '0' .. '9'
             	    {
             	    matchRange('0','9'); 
 
             	    }
             	    break;
             	case 5 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:61: DOT_ESCAPED
+            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:302:61: DOT_ESCAPED
             	    {
             	    mDOT_ESCAPED(); 
 
@@ -1379,8 +1356,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mDOT_ESCAPED() throws RecognitionException {
         try {
             int _type = DOT_ESCAPED;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:325:12: ( '\\\\.' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:325:14: '\\\\.'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:303:12: ( '\\\\.' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:303:14: '\\\\.'
             {
             match("\\."); 
 
@@ -1398,10 +1375,10 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mWS() throws RecognitionException {
         try {
             int _type = WS;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:326:3: ( ( ' ' | '\\t' | '\\n' | '\\r' )+ )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:326:5: ( ' ' | '\\t' | '\\n' | '\\r' )+
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:304:3: ( ( ' ' | '\\t' | '\\n' | '\\r' )+ )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:304:5: ( ' ' | '\\t' | '\\n' | '\\r' )+
             {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:326:5: ( ' ' | '\\t' | '\\n' | '\\r' )+
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:304:5: ( ' ' | '\\t' | '\\n' | '\\r' )+
             int cnt9=0;
             loop9:
             do {
@@ -1455,8 +1432,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mDOLLAR() throws RecognitionException {
         try {
             int _type = DOLLAR;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:327:7: ( '$' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:327:9: '$'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:305:7: ( '$' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:305:9: '$'
             {
             match('$'); 
 
@@ -1473,8 +1450,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mAT() throws RecognitionException {
         try {
             int _type = AT;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:328:3: ( '@' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:328:5: '@'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:306:3: ( '@' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:306:5: '@'
             {
             match('@'); 
 
@@ -1491,8 +1468,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mUPTO() throws RecognitionException {
         try {
             int _type = UPTO;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:329:5: ( '..' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:329:7: '..'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:307:5: ( '..' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:307:7: '..'
             {
             match(".."); 
 
@@ -1510,8 +1487,8 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mCOLON() throws RecognitionException {
         try {
             int _type = COLON;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:330:6: ( ':' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:330:8: ':'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:308:6: ( ':' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:308:8: ':'
             {
             match(':'); 
 
@@ -1528,18 +1505,18 @@ public class SpringExpressionsLexer extends Lexer {
     public final void mREAL_LITERAL() throws RecognitionException {
         try {
             int _type = REAL_LITERAL;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:333:14: ( ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) ) )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:311:14: ( ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) ) )
             int alt20=4;
             alt20 = dfa20.predict(input);
             switch (alt20) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:3: ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:3: ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:3: ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:4: '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:3: ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:4: '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )?
                     {
                     match('.'); 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:8: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:8: ( DECIMAL_DIGIT )+
                     int cnt10=0;
                     loop10:
                     do {
@@ -1553,7 +1530,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt10) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:9: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:9: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -1569,7 +1546,7 @@ public class SpringExpressionsLexer extends Lexer {
                         cnt10++;
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:25: ( EXPONENT_PART )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:25: ( EXPONENT_PART )?
                     int alt11=2;
                     int LA11_0 = input.LA(1);
 
@@ -1578,7 +1555,7 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     switch (alt11) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:26: EXPONENT_PART
+                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:26: EXPONENT_PART
                             {
                             mEXPONENT_PART(); 
 
@@ -1587,7 +1564,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                     }
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:42: ( REAL_TYPE_SUFFIX )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:42: ( REAL_TYPE_SUFFIX )?
                     int alt12=2;
                     int LA12_0 = input.LA(1);
 
@@ -1596,7 +1573,7 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     switch (alt12) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:334:43: REAL_TYPE_SUFFIX
+                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:312:43: REAL_TYPE_SUFFIX
                             {
                             mREAL_TYPE_SUFFIX(); 
 
@@ -1612,12 +1589,12 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:2: ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:2: ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:2: ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:3: ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:2: ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:3: ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )?
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:3: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:3: ( DECIMAL_DIGIT )+
                     int cnt13=0;
                     loop13:
                     do {
@@ -1631,7 +1608,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt13) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:4: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:4: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -1648,7 +1625,7 @@ public class SpringExpressionsLexer extends Lexer {
                     } while (true);
 
                     match('.'); 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:24: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:24: ( DECIMAL_DIGIT )+
                     int cnt14=0;
                     loop14:
                     do {
@@ -1662,7 +1639,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt14) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:25: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:25: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -1678,7 +1655,7 @@ public class SpringExpressionsLexer extends Lexer {
                         cnt14++;
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:41: ( EXPONENT_PART )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:41: ( EXPONENT_PART )?
                     int alt15=2;
                     int LA15_0 = input.LA(1);
 
@@ -1687,7 +1664,7 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     switch (alt15) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:42: EXPONENT_PART
+                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:42: EXPONENT_PART
                             {
                             mEXPONENT_PART(); 
 
@@ -1696,7 +1673,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                     }
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:58: ( REAL_TYPE_SUFFIX )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:58: ( REAL_TYPE_SUFFIX )?
                     int alt16=2;
                     int LA16_0 = input.LA(1);
 
@@ -1705,7 +1682,7 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     switch (alt16) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:335:59: REAL_TYPE_SUFFIX
+                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:313:59: REAL_TYPE_SUFFIX
                             {
                             mREAL_TYPE_SUFFIX(); 
 
@@ -1721,12 +1698,12 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:2: ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:2: ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:2: ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:3: ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:2: ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:3: ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )?
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:3: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:3: ( DECIMAL_DIGIT )+
                     int cnt17=0;
                     loop17:
                     do {
@@ -1740,7 +1717,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt17) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:4: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:4: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -1756,14 +1733,14 @@ public class SpringExpressionsLexer extends Lexer {
                         cnt17++;
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:20: ( EXPONENT_PART )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:21: EXPONENT_PART
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:20: ( EXPONENT_PART )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:21: EXPONENT_PART
                     {
                     mEXPONENT_PART(); 
 
                     }
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:36: ( REAL_TYPE_SUFFIX )?
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:36: ( REAL_TYPE_SUFFIX )?
                     int alt18=2;
                     int LA18_0 = input.LA(1);
 
@@ -1772,7 +1749,7 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     switch (alt18) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:336:37: REAL_TYPE_SUFFIX
+                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:314:37: REAL_TYPE_SUFFIX
                             {
                             mREAL_TYPE_SUFFIX(); 
 
@@ -1788,12 +1765,12 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     break;
                 case 4 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:2: ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:2: ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:2: ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:3: ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:2: ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:3: ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:3: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:3: ( DECIMAL_DIGIT )+
                     int cnt19=0;
                     loop19:
                     do {
@@ -1807,7 +1784,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt19) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:4: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:4: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -1823,8 +1800,8 @@ public class SpringExpressionsLexer extends Lexer {
                         cnt19++;
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:20: ( REAL_TYPE_SUFFIX )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:337:21: REAL_TYPE_SUFFIX
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:20: ( REAL_TYPE_SUFFIX )
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:315:21: REAL_TYPE_SUFFIX
                     {
                     mREAL_TYPE_SUFFIX(); 
 
@@ -1848,8 +1825,8 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start APOS
     public final void mAPOS() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:339:15: ( '\\'' '\\'' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:339:17: '\\'' '\\''
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:317:15: ( '\\'' '\\'' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:317:17: '\\'' '\\''
             {
             match('\''); 
             match('\''); 
@@ -1865,8 +1842,8 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start DECIMAL_DIGIT
     public final void mDECIMAL_DIGIT() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:340:24: ( '0' .. '9' )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:340:26: '0' .. '9'
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:318:24: ( '0' .. '9' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:318:26: '0' .. '9'
             {
             matchRange('0','9'); 
 
@@ -1881,8 +1858,8 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start INTEGER_TYPE_SUFFIX
     public final void mINTEGER_TYPE_SUFFIX() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:341:30: ( ( 'L' | 'l' ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:341:32: ( 'L' | 'l' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:319:30: ( ( 'L' | 'l' ) )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:319:32: ( 'L' | 'l' )
             {
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
@@ -1906,7 +1883,7 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start HEX_DIGIT
     public final void mHEX_DIGIT() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:342:20: ( '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:320:20: ( '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' )
             // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='F')||(input.LA(1)>='a' && input.LA(1)<='f') ) {
@@ -1931,7 +1908,7 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start EXPONENT_PART
     public final void mEXPONENT_PART() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:24: ( 'e' ( SIGN )* ( DECIMAL_DIGIT )+ | 'E' ( SIGN )* ( DECIMAL_DIGIT )+ )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:24: ( 'e' ( SIGN )* ( DECIMAL_DIGIT )+ | 'E' ( SIGN )* ( DECIMAL_DIGIT )+ )
             int alt25=2;
             int LA25_0 = input.LA(1);
 
@@ -1943,16 +1920,16 @@ public class SpringExpressionsLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("344:10: fragment EXPONENT_PART : ( 'e' ( SIGN )* ( DECIMAL_DIGIT )+ | 'E' ( SIGN )* ( DECIMAL_DIGIT )+ );", 25, 0, input);
+                    new NoViableAltException("322:10: fragment EXPONENT_PART : ( 'e' ( SIGN )* ( DECIMAL_DIGIT )+ | 'E' ( SIGN )* ( DECIMAL_DIGIT )+ );", 25, 0, input);
 
                 throw nvae;
             }
             switch (alt25) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:26: 'e' ( SIGN )* ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:26: 'e' ( SIGN )* ( DECIMAL_DIGIT )+
                     {
                     match('e'); 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:31: ( SIGN )*
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:31: ( SIGN )*
                     loop21:
                     do {
                         int alt21=2;
@@ -1965,7 +1942,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt21) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:32: SIGN
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:32: SIGN
                     	    {
                     	    mSIGN(); 
 
@@ -1977,7 +1954,7 @@ public class SpringExpressionsLexer extends Lexer {
                         }
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:40: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:40: ( DECIMAL_DIGIT )+
                     int cnt22=0;
                     loop22:
                     do {
@@ -1991,7 +1968,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt22) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:41: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:41: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -2011,10 +1988,10 @@ public class SpringExpressionsLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:59: 'E' ( SIGN )* ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:59: 'E' ( SIGN )* ( DECIMAL_DIGIT )+
                     {
                     match('E'); 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:64: ( SIGN )*
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:64: ( SIGN )*
                     loop23:
                     do {
                         int alt23=2;
@@ -2027,7 +2004,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt23) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:65: SIGN
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:65: SIGN
                     	    {
                     	    mSIGN(); 
 
@@ -2039,7 +2016,7 @@ public class SpringExpressionsLexer extends Lexer {
                         }
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:73: ( DECIMAL_DIGIT )+
+                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:73: ( DECIMAL_DIGIT )+
                     int cnt24=0;
                     loop24:
                     do {
@@ -2053,7 +2030,7 @@ public class SpringExpressionsLexer extends Lexer {
 
                         switch (alt24) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:344:74: DECIMAL_DIGIT
+                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:322:74: DECIMAL_DIGIT
                     	    {
                     	    mDECIMAL_DIGIT(); 
 
@@ -2083,7 +2060,7 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start SIGN
     public final void mSIGN() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:345:15: ( '+' | '-' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:323:15: ( '+' | '-' )
             // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:
             {
             if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
@@ -2108,7 +2085,7 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR start REAL_TYPE_SUFFIX
     public final void mREAL_TYPE_SUFFIX() throws RecognitionException {
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:346:27: ( 'F' | 'f' | 'D' | 'd' )
+            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:324:27: ( 'F' | 'f' | 'D' | 'd' )
             // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:
             {
             if ( input.LA(1)=='D'||input.LA(1)=='F'||input.LA(1)=='d'||input.LA(1)=='f' ) {
@@ -2131,14 +2108,14 @@ public class SpringExpressionsLexer extends Lexer {
     // $ANTLR end REAL_TYPE_SUFFIX
 
     public void mTokens() throws RecognitionException {
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:8: ( T90 | SEMIRPAREN | INTEGER_LITERAL | HEXADECIMAL_INTEGER_LITERAL | ASSIGN | EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | IN | IS | BETWEEN | MATCHES | NULL_LITERAL | SEMI | DOT | COMMA | LPAREN | RPAREN | LCURLY | RCURLY | LBRACKET | RBRACKET | PIPE | AND | OR | FALSE | TRUE | PLUS | MINUS | DIV | STAR | MOD | POWER | BANG | POUND | QMARK | DEFAULT | LAMBDA | PROJECT | SELECT | SELECT_FIRST | SELECT_LAST | TYPE | STRING_LITERAL | DQ_STRING_LITERAL | ID | DOT_ESCAPED | WS | DOLLAR | AT | UPTO | COLON | REAL_LITERAL )
-        int alt26=56;
+        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:8: ( T86 | SEMIRPAREN | INTEGER_LITERAL | HEXADECIMAL_INTEGER_LITERAL | ASSIGN | EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | IN | IS | BETWEEN | MATCHES | NULL_LITERAL | SEMI | DOT | COMMA | LPAREN | RPAREN | LCURLY | RCURLY | LBRACKET | RBRACKET | PIPE | AND | OR | FALSE | TRUE | PLUS | MINUS | DIV | STAR | MOD | POWER | BANG | POUND | QMARK | DEFAULT | PROJECT | SELECT | SELECT_FIRST | SELECT_LAST | TYPE | STRING_LITERAL | DQ_STRING_LITERAL | ID | DOT_ESCAPED | WS | DOLLAR | AT | UPTO | COLON | REAL_LITERAL )
+        int alt26=55;
         alt26 = dfa26.predict(input);
         switch (alt26) {
             case 1 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:10: T90
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:10: T86
                 {
-                mT90(); 
+                mT86(); 
 
                 }
                 break;
@@ -2416,112 +2393,105 @@ public class SpringExpressionsLexer extends Lexer {
                 }
                 break;
             case 41 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:330: LAMBDA
-                {
-                mLAMBDA(); 
-
-                }
-                break;
-            case 42 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:337: PROJECT
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:330: PROJECT
                 {
                 mPROJECT(); 
 
                 }
                 break;
-            case 43 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:345: SELECT
+            case 42 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:338: SELECT
                 {
                 mSELECT(); 
 
                 }
                 break;
-            case 44 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:352: SELECT_FIRST
+            case 43 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:345: SELECT_FIRST
                 {
                 mSELECT_FIRST(); 
 
                 }
                 break;
-            case 45 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:365: SELECT_LAST
+            case 44 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:358: SELECT_LAST
                 {
                 mSELECT_LAST(); 
 
                 }
                 break;
-            case 46 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:377: TYPE
+            case 45 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:370: TYPE
                 {
                 mTYPE(); 
 
                 }
                 break;
-            case 47 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:382: STRING_LITERAL
+            case 46 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:375: STRING_LITERAL
                 {
                 mSTRING_LITERAL(); 
 
                 }
                 break;
-            case 48 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:397: DQ_STRING_LITERAL
+            case 47 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:390: DQ_STRING_LITERAL
                 {
                 mDQ_STRING_LITERAL(); 
 
                 }
                 break;
-            case 49 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:415: ID
+            case 48 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:408: ID
                 {
                 mID(); 
 
                 }
                 break;
-            case 50 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:418: DOT_ESCAPED
+            case 49 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:411: DOT_ESCAPED
                 {
                 mDOT_ESCAPED(); 
 
                 }
                 break;
-            case 51 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:430: WS
+            case 50 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:423: WS
                 {
                 mWS(); 
 
                 }
                 break;
-            case 52 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:433: DOLLAR
+            case 51 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:426: DOLLAR
                 {
                 mDOLLAR(); 
 
                 }
                 break;
-            case 53 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:440: AT
+            case 52 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:433: AT
                 {
                 mAT(); 
 
                 }
                 break;
-            case 54 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:443: UPTO
+            case 53 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:436: UPTO
                 {
                 mUPTO(); 
 
                 }
                 break;
-            case 55 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:448: COLON
+            case 54 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:441: COLON
                 {
                 mCOLON(); 
 
                 }
                 break;
-            case 56 :
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:454: REAL_LITERAL
+            case 55 :
+                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:1:447: REAL_LITERAL
                 {
                 mREAL_LITERAL(); 
 
@@ -2586,42 +2556,41 @@ public class SpringExpressionsLexer extends Lexer {
             this.transition = DFA20_transition;
         }
         public String getDescription() {
-            return "333:1: REAL_LITERAL : ( ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) ) );";
+            return "311:1: REAL_LITERAL : ( ( '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ '.' ( DECIMAL_DIGIT )+ ( EXPONENT_PART )? ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( EXPONENT_PART ) ( REAL_TYPE_SUFFIX )? ) | ( ( DECIMAL_DIGIT )+ ( REAL_TYPE_SUFFIX ) ) );";
         }
     }
     static final String DFA26_eotS =
-        "\1\uffff\1\45\1\55\2\57\1\62\1\65\1\67\1\71\3\45\1\77\3\uffff\1"+
-        "\101\4\uffff\4\45\5\uffff\1\107\1\uffff\1\112\1\114\1\45\7\uffff"+
-        "\2\45\16\uffff\1\120\1\121\2\45\4\uffff\1\45\1\125\2\45\10\uffff"+
-        "\1\45\1\131\2\uffff\2\45\1\134\1\uffff\2\45\1\137\1\uffff\2\45\1"+
-        "\uffff\1\45\1\143\1\uffff\2\45\1\146\1\uffff\2\45\1\uffff\1\151"+
-        "\1\152\2\uffff";
+        "\1\uffff\1\45\1\55\2\57\1\62\1\65\1\67\1\71\3\45\1\77\10\uffff\4"+
+        "\45\5\uffff\1\105\1\uffff\1\110\1\112\1\45\7\uffff\2\45\16\uffff"+
+        "\1\116\1\117\2\45\2\uffff\1\45\1\123\2\45\10\uffff\1\45\1\127\2"+
+        "\uffff\2\45\1\132\1\uffff\2\45\1\135\1\uffff\2\45\1\uffff\1\45\1"+
+        "\141\1\uffff\2\45\1\144\1\uffff\2\45\1\uffff\1\147\1\150\2\uffff";
     static final String DFA26_eofS =
-        "\153\uffff";
+        "\151\uffff";
     static final String DFA26_minS =
-        "\1\11\1\145\1\51\2\56\4\75\1\156\1\145\1\141\1\56\3\uffff\1\174"+
-        "\4\uffff\1\156\1\162\1\141\1\162\5\uffff\1\173\1\uffff\1\77\1\173"+
-        "\1\50\7\uffff\1\154\1\167\16\uffff\2\60\2\164\4\uffff\1\144\1\60"+
-        "\1\154\1\165\10\uffff\1\154\1\60\2\uffff\1\167\1\143\1\60\1\uffff"+
-        "\1\163\1\145\1\60\1\uffff\1\145\1\150\1\uffff\1\145\1\60\1\uffff"+
-        "\2\145\1\60\1\uffff\1\156\1\163\1\uffff\2\60\2\uffff";
+        "\1\11\1\145\1\51\2\56\4\75\1\156\1\145\1\141\1\56\10\uffff\1\156"+
+        "\1\162\1\141\1\162\5\uffff\1\173\1\uffff\1\77\1\173\1\50\7\uffff"+
+        "\1\154\1\167\16\uffff\2\60\2\164\2\uffff\1\144\1\60\1\154\1\165"+
+        "\10\uffff\1\154\1\60\2\uffff\1\167\1\143\1\60\1\uffff\1\163\1\145"+
+        "\1\60\1\uffff\1\145\1\150\1\uffff\1\145\1\60\1\uffff\2\145\1\60"+
+        "\1\uffff\1\156\1\163\1\uffff\2\60\2\uffff";
     static final String DFA26_maxS =
         "\1\175\1\165\1\51\1\170\1\146\1\75\1\173\2\75\1\163\1\145\1\141"+
-        "\1\71\3\uffff\1\174\4\uffff\1\156\1\162\1\141\1\162\5\uffff\1\173"+
-        "\1\uffff\2\173\1\50\7\uffff\1\154\1\167\16\uffff\2\172\2\164\4\uffff"+
-        "\1\144\1\172\1\154\1\165\10\uffff\1\154\1\172\2\uffff\1\167\1\143"+
-        "\1\172\1\uffff\1\163\1\145\1\172\1\uffff\1\145\1\150\1\uffff\1\145"+
-        "\1\172\1\uffff\2\145\1\172\1\uffff\1\156\1\163\1\uffff\2\172\2\uffff";
+        "\1\71\10\uffff\1\156\1\162\1\141\1\162\5\uffff\1\173\1\uffff\2\173"+
+        "\1\50\7\uffff\1\154\1\167\16\uffff\2\172\2\164\2\uffff\1\144\1\172"+
+        "\1\154\1\165\10\uffff\1\154\1\172\2\uffff\1\167\1\143\1\172\1\uffff"+
+        "\1\163\1\145\1\172\1\uffff\1\145\1\150\1\uffff\1\145\1\172\1\uffff"+
+        "\2\145\1\172\1\uffff\1\156\1\163\1\uffff\2\172\2\uffff";
     static final String DFA26_acceptS =
-        "\15\uffff\1\23\1\24\1\25\1\uffff\1\27\1\30\1\31\1\32\4\uffff\1\37"+
-        "\1\40\1\41\1\42\1\43\1\uffff\1\46\3\uffff\1\57\1\60\1\61\1\62\1"+
-        "\63\1\65\1\67\2\uffff\1\2\1\21\1\4\1\3\1\70\1\6\1\5\1\7\1\52\1\45"+
-        "\1\11\1\10\1\13\1\12\4\uffff\1\66\1\22\1\51\1\26\4\uffff\1\54\1"+
-        "\44\1\50\1\53\1\47\1\55\1\64\1\56\2\uffff\1\14\1\15\3\uffff\1\34"+
-        "\3\uffff\1\1\2\uffff\1\33\2\uffff\1\20\3\uffff\1\36\2\uffff\1\35"+
-        "\2\uffff\1\16\1\17";
+        "\15\uffff\1\23\1\24\1\25\1\26\1\27\1\30\1\31\1\32\4\uffff\1\37\1"+
+        "\40\1\41\1\42\1\43\1\uffff\1\46\3\uffff\1\56\1\57\1\60\1\61\1\62"+
+        "\1\64\1\66\2\uffff\1\2\1\21\1\4\1\3\1\67\1\6\1\5\1\7\1\51\1\45\1"+
+        "\11\1\10\1\13\1\12\4\uffff\1\65\1\22\4\uffff\1\53\1\44\1\52\1\50"+
+        "\1\47\1\54\1\63\1\55\2\uffff\1\15\1\14\3\uffff\1\34\3\uffff\1\1"+
+        "\2\uffff\1\33\2\uffff\1\20\3\uffff\1\36\2\uffff\1\35\2\uffff\1\16"+
+        "\1\17";
     static final String DFA26_specialS =
-        "\153\uffff}>";
+        "\151\uffff}>";
     static final String[] DFA26_transitionS = {
             "\2\47\2\uffff\1\47\22\uffff\1\47\1\6\1\44\1\37\1\41\1\35\1\uffff"+
             "\1\43\1\16\1\17\1\34\1\31\1\15\1\32\1\14\1\33\1\3\11\4\1\51"+
@@ -2637,31 +2606,40 @@ public class SpringExpressionsLexer extends Lexer {
             "\1\63\75\uffff\1\64",
             "\1\66",
             "\1\70",
-            "\1\72\4\uffff\1\73",
+            "\1\73\4\uffff\1\72",
             "\1\74",
             "\1\75",
             "\1\76\1\uffff\12\60",
             "",
             "",
             "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "\1\100",
-            "",
-            "",
-            "",
-            "",
+            "\1\101",
             "\1\102",
             "\1\103",
+            "",
+            "",
+            "",
+            "",
+            "",
             "\1\104",
-            "\1\105",
             "",
-            "",
-            "",
-            "",
-            "",
-            "\1\106",
-            "",
-            "\1\110\73\uffff\1\111",
+            "\1\107\73\uffff\1\106",
+            "\1\111",
             "\1\113",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "\1\114",
             "\1\115",
             "",
             "",
@@ -2670,15 +2648,6 @@ public class SpringExpressionsLexer extends Lexer {
             "",
             "",
             "",
-            "\1\116",
-            "\1\117",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
             "",
             "",
             "",
@@ -2688,48 +2657,46 @@ public class SpringExpressionsLexer extends Lexer {
             "",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
+            "\1\120",
+            "\1\121",
+            "",
+            "",
             "\1\122",
-            "\1\123",
-            "",
-            "",
-            "",
-            "",
-            "\1\124",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
+            "\1\124",
+            "\1\125",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "\1\126",
-            "\1\127",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
+            "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "",
             "",
             "\1\130",
+            "\1\131",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "",
-            "",
-            "\1\132",
             "\1\133",
+            "\1\134",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "",
-            "\1\135",
             "\1\136",
-            "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
+            "\1\137",
             "",
             "\1\140",
-            "\1\141",
+            "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "",
             "\1\142",
+            "\1\143",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "",
-            "\1\144",
             "\1\145",
-            "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
-            "",
-            "\1\147",
-            "\1\150",
+            "\1\146",
             "",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
             "\12\45\7\uffff\32\45\1\uffff\1\45\2\uffff\1\45\1\uffff\32\45",
@@ -2767,7 +2734,7 @@ public class SpringExpressionsLexer extends Lexer {
             this.transition = DFA26_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( T90 | SEMIRPAREN | INTEGER_LITERAL | HEXADECIMAL_INTEGER_LITERAL | ASSIGN | EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | IN | IS | BETWEEN | MATCHES | NULL_LITERAL | SEMI | DOT | COMMA | LPAREN | RPAREN | LCURLY | RCURLY | LBRACKET | RBRACKET | PIPE | AND | OR | FALSE | TRUE | PLUS | MINUS | DIV | STAR | MOD | POWER | BANG | POUND | QMARK | DEFAULT | LAMBDA | PROJECT | SELECT | SELECT_FIRST | SELECT_LAST | TYPE | STRING_LITERAL | DQ_STRING_LITERAL | ID | DOT_ESCAPED | WS | DOLLAR | AT | UPTO | COLON | REAL_LITERAL );";
+            return "1:1: Tokens : ( T86 | SEMIRPAREN | INTEGER_LITERAL | HEXADECIMAL_INTEGER_LITERAL | ASSIGN | EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | IN | IS | BETWEEN | MATCHES | NULL_LITERAL | SEMI | DOT | COMMA | LPAREN | RPAREN | LCURLY | RCURLY | LBRACKET | RBRACKET | PIPE | AND | OR | FALSE | TRUE | PLUS | MINUS | DIV | STAR | MOD | POWER | BANG | POUND | QMARK | DEFAULT | PROJECT | SELECT | SELECT_FIRST | SELECT_LAST | TYPE | STRING_LITERAL | DQ_STRING_LITERAL | ID | DOT_ESCAPED | WS | DOLLAR | AT | UPTO | COLON | REAL_LITERAL );";
         }
     }
  
