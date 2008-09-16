@@ -63,13 +63,13 @@ public class ReflectionPropertyResolver extends CacheablePropertyAccessor {
 		if (relevantClass.isArray() && propertyName.equals("length")) {
 			return new ReflectionPropertyReaderExecutorForArrayLength();
 		}
-		Field field = ReflectionUtils.findField(propertyName, relevantClass);
-		if (field != null) {
-			return new ReflectionPropertyReaderExecutor(propertyName, field);
-		}
-		Method m = ReflectionUtils.findGetterForProperty(propertyName, relevantClass);
+		Method m = ReflectionUtils.findGetterForProperty(propertyName, relevantClass, target instanceof Class);
 		if (m != null) {
 			return new ReflectionPropertyReaderExecutor(propertyName, m);
+		}
+		Field field = ReflectionUtils.findField(propertyName, relevantClass, target instanceof Class);
+		if (field != null) {
+			return new ReflectionPropertyReaderExecutor(propertyName, field);
 		}
 		return null;
 	}
@@ -93,13 +93,13 @@ public class ReflectionPropertyResolver extends CacheablePropertyAccessor {
 			// A property not found exception will occur if the reflection finder was supposed to find it
 			return null;
 		}
-		Field field = ReflectionUtils.findField((String) name, relevantClass);
-		if (field != null) {
-			return new ReflectionPropertyWriterExecutor((String) name, field);
-		}
-		Method m = ReflectionUtils.findSetterForProperty((String) name, relevantClass);
+		Method m = ReflectionUtils.findSetterForProperty((String) name, relevantClass, target instanceof Class);
 		if (m != null) {
 			return new ReflectionPropertyWriterExecutor((String) name, m);
+		}
+		Field field = ReflectionUtils.findField((String) name, relevantClass, target instanceof Class);
+		if (field != null) {
+			return new ReflectionPropertyWriterExecutor((String) name, field);
 		}
 		return null;
 	}

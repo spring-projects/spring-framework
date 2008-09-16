@@ -12,33 +12,20 @@ public class ReflectionPropertyWriterExecutor implements PropertyWriterExecutor 
 
 	private Method methodToAccessProperty;
 	private Field fieldToAccessProperty;
-	private String propertyName;
+	private final String propertyName;
 
 	public ReflectionPropertyWriterExecutor(String propertyName, Method method) {
 		this.propertyName = propertyName;
-		this.methodToAccessProperty = method;
+		methodToAccessProperty = method;
 	}
 
 	public ReflectionPropertyWriterExecutor(String propertyName, Field field) {
 		this.propertyName = propertyName;
-		this.fieldToAccessProperty = field;
+		fieldToAccessProperty = field;
 	}
 
 	// public Object execute(EvaluationContext context, Object target) throws AccessException {
 	public void execute(EvaluationContext evaluationContext, Object target, Object newValue) throws AccessException {
-		if (fieldToAccessProperty != null) {
-			try {
-				if (!fieldToAccessProperty.isAccessible()) {
-					fieldToAccessProperty.setAccessible(true);
-				}
-				fieldToAccessProperty.set(target, newValue);
-				return;
-			} catch (IllegalArgumentException e) {
-				throw new AccessException("Unable to access field: " + propertyName, e);
-			} catch (IllegalAccessException e) {
-				throw new AccessException("Unable to access field: " + propertyName, e);
-			}
-		}
 		if (methodToAccessProperty != null) {
 			try {
 				if (!methodToAccessProperty.isAccessible())
@@ -51,6 +38,19 @@ public class ReflectionPropertyWriterExecutor implements PropertyWriterExecutor 
 				throw new AccessException("Unable to access property '" + propertyName + "' through setter", e);
 			} catch (InvocationTargetException e) {
 				throw new AccessException("Unable to access property '" + propertyName + "' through setter", e);
+			}
+		}
+		if (fieldToAccessProperty != null) {
+			try {
+				if (!fieldToAccessProperty.isAccessible()) {
+					fieldToAccessProperty.setAccessible(true);
+				}
+				fieldToAccessProperty.set(target, newValue);
+				return;
+			} catch (IllegalArgumentException e) {
+				throw new AccessException("Unable to access field: " + propertyName, e);
+			} catch (IllegalAccessException e) {
+				throw new AccessException("Unable to access field: " + propertyName, e);
 			}
 		}
 		throw new AccessException("No method or field accessor found for property '" + propertyName + "'");
