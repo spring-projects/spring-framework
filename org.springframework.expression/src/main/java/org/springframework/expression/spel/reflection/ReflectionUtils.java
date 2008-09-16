@@ -19,6 +19,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -347,11 +348,11 @@ public class ReflectionUtils {
 	/**
 	 * Find a field of a certain name on a specified class
 	 */
-	public final static Field findField(String name, Class<?> clazz) {
-		Field[] fields = clazz.getFields(); // TODO what about inherited fields? try getFields() too?
+	public final static Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
+		Field[] fields = clazz.getFields(); // TODO use getDeclaredFields() and search up hierarchy?
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
-			if (field.getName().equals(name)) {
+			if (field.getName().equals(name) && (mustBeStatic ? Modifier.isStatic(field.getModifiers()) : true)) {
 				return field;
 			}
 		}
@@ -362,14 +363,16 @@ public class ReflectionUtils {
 	 * Find a getter method for the specified property. A getter is defined as a method whose name start with the prefix
 	 * 'get' and the rest of the name is the same as the property name (with the first character uppercased).
 	 */
-	public static Method findGetterForProperty(String propertyName, Class<?> clazz) {
-		Method[] ms = clazz.getMethods();
+	public static Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
+		Method[] ms = clazz.getMethods();// TODO use getDeclaredMethods() and search up hierarchy?
 		StringBuilder sb = new StringBuilder();
 		sb.append("get").append(propertyName.substring(0, 1).toUpperCase()).append(propertyName.substring(1));
 		String expectedGetterName = sb.toString();
 		for (int i = 0; i < ms.length; i++) {
 			Method method = ms[i];
-			if (method.getParameterTypes().length == 0 && method.getName().equals(expectedGetterName)) {
+			if (method.getParameterTypes().length == 0
+					&& (mustBeStatic ? Modifier.isStatic(method.getModifiers()) : true)
+					&& method.getName().equals(expectedGetterName)) {
 				return method;
 			}
 		}
@@ -379,14 +382,16 @@ public class ReflectionUtils {
 	/**
 	 * Find a setter method for the specified property
 	 */
-	public static Method findSetterForProperty(String propertyName, Class<?> clazz) {
-		Method[] ms = clazz.getMethods();
+	public static Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
+		Method[] ms = clazz.getMethods(); // TODO use getDeclaredMethods() and search up hierarchy?
 		StringBuilder sb = new StringBuilder();
 		sb.append("set").append(propertyName.substring(0, 1).toUpperCase()).append(propertyName.substring(1));
 		String setterName = sb.toString();
 		for (int i = 0; i < ms.length; i++) {
 			Method method = ms[i];
-			if (method.getParameterTypes().length == 1 && method.getName().equals(setterName)) {
+			if (method.getParameterTypes().length == 1
+					&& (mustBeStatic ? Modifier.isStatic(method.getModifiers()) : true)
+					&& method.getName().equals(setterName)) {
 				return method;
 			}
 		}
