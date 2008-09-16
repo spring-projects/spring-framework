@@ -346,29 +346,29 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	// Bean references
-	public void testReferences01() {
-		evaluate("@(apple).name", "Apple", String.class, true);
-	}
-
-	public void testReferences02() {
-		evaluate("@(fruits:banana).name", "Banana", String.class, true);
-	}
-
-	public void testReferences03() {
-		evaluate("@(a.b.c)", null, null);
-	} // null - no context, a.b.c treated as name
-
-	public void testReferences05() {
-		evaluate("@(a/b/c:orange).name", "Orange", String.class, true);
-	}
-
-	public void testReferences06() {
-		evaluate("@(apple).color.getRGB() == 	T(java.awt.Color).green.getRGB()", "true", Boolean.class);
-	}
-
-	public void testReferences07() {
-		evaluate("@(apple).color.getRGB().equals(T(java.awt.Color).green.getRGB())", "true", Boolean.class);
-	}
+	// public void testReferences01() {
+	// evaluate("@(apple).name", "Apple", String.class, true);
+	// }
+	//
+	// public void testReferences02() {
+	// evaluate("@(fruits:banana).name", "Banana", String.class, true);
+	// }
+	//
+	// public void testReferences03() {
+	// evaluate("@(a.b.c)", null, null);
+	// } // null - no context, a.b.c treated as name
+	//
+	// public void testReferences05() {
+	// evaluate("@(a/b/c:orange).name", "Orange", String.class, true);
+	// }
+	//
+	// public void testReferences06() {
+	// evaluate("@(apple).color.getRGB() == 	T(java.awt.Color).green.getRGB()", "true", Boolean.class);
+	// }
+	//
+	// public void testReferences07() {
+	// evaluate("@(apple).color.getRGB().equals(T(java.awt.Color).green.getRGB())", "true", Boolean.class);
+	// }
 
 	// value is not public, it is accessed through getRGB()
 	// public void testStaticRef01() {
