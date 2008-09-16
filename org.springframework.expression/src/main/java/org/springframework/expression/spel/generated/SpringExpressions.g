@@ -13,7 +13,6 @@ tokens {
 	INTEGER_LITERAL;
 	EXPRESSION;
 	QUALIFIED_IDENTIFIER;
-	REFERENCE;
 	PROPERTY_OR_FIELD;
 	INDEXER;
 	CONSTRUCTOR;
@@ -97,7 +96,6 @@ startNode
     parenExpr
     | methodOrProperty 
     | functionOrVar
-    | reference
     | indexer
     | literal
     | type
@@ -152,17 +150,6 @@ methodArgs :  LPAREN! (argument (COMMA! argument)* (COMMA!)?)? RPAREN!;
 // access id as a child of the new node.
 property: id=ID -> ^(PROPERTY_OR_FIELD[$id]);
 
-// start - in this block there are changes to help parser recovery and code completion
-
-// fiddled with to support better code completion
-// we preserve the colon and rparen to give positional info and the qualifiedId is optional to cope with
-// code completing in @() (which is really an invalid expression)
-reference
-	:  AT pos=LPAREN (cn=contextName COLON)? (q=qualifiedId)? RPAREN
-  	-> ^(REFERENCE[$pos] ($cn COLON)? $q? RPAREN);
-// what I really want here is: was there a colon? position of the right paren
-
-// end - in this block there are changes to help parser recovery and code completion
 
 //indexer: LBRACKET r1=range (COMMA r2=range)* RBRACKET -> ^(INDEXER $r1 ($r2)*);
 indexer: LBRACKET r1=argument (COMMA r2=argument)* RBRACKET -> ^(INDEXER $r1 ($r2)*);

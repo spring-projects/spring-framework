@@ -228,18 +228,18 @@ public class ParsingTests extends TestCase {
 		parseCheck("{'a','b','a','d','e'}.distinct()");
 	}
 
-	// references
-	public void testReferences01() {
-		parseCheck("@(foo)");
-	}
-
-	public void testReferences02() {
-		parseCheck("@(p:foo)");
-	}
-
-	public void testReferences04() {
-		parseCheck("@(a/b/c:foo)", "@(a.b.c:foo)");
-	}// normalized to '.' for separator in QualifiedIdentifier
+	// // references
+	// public void testReferences01() {
+	// parseCheck("@(foo)");
+	// }
+	//
+	// public void testReferences02() {
+	// parseCheck("@(p:foo)");
+	// }
+	//
+	// public void testReferences04() {
+	// parseCheck("@(a/b/c:foo)", "@(a.b.c:foo)");
+	// }// normalized to '.' for separator in QualifiedIdentifier
 
 	// properties
 	public void testProperties01() {

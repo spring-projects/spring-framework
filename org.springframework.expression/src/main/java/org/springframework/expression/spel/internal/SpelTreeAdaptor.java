@@ -55,7 +55,6 @@ import org.springframework.expression.spel.ast.Projection;
 import org.springframework.expression.spel.ast.PropertyOrFieldReference;
 import org.springframework.expression.spel.ast.QualifiedIdentifier;
 import org.springframework.expression.spel.ast.RealLiteral;
-import org.springframework.expression.spel.ast.Reference;
 import org.springframework.expression.spel.ast.Selection;
 import org.springframework.expression.spel.ast.StringLiteral;
 import org.springframework.expression.spel.ast.Ternary;
@@ -127,8 +126,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new MethodReference(payload);
 			case SpringExpressionsLexer.QUALIFIED_IDENTIFIER:
 				return new QualifiedIdentifier(payload);
-			case SpringExpressionsLexer.REFERENCE:
-				return new Reference(payload);
 			case SpringExpressionsLexer.TYPEREF:
 				return new TypeReference(payload);
 
