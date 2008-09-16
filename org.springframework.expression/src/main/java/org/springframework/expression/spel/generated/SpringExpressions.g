@@ -18,7 +18,6 @@ tokens {
 	INDEXER;
 	ARGLIST;
 	CONSTRUCTOR;
-	DATE_LITERAL;
 	HOLDER;
 	CONSTRUCTOR_ARRAY;
 	NAMED_ARGUMENT;
@@ -252,12 +251,9 @@ literal
 	| NULL_LITERAL
 	| HEXADECIMAL_INTEGER_LITERAL 
 	| REAL_LITERAL
-	| dateLiteral
 	;
 	
 boolLiteral: TRUE | FALSE;
-
-dateLiteral: 'date' LPAREN d=STRING_LITERAL (COMMA f=STRING_LITERAL)? RPAREN -> ^(DATE_LITERAL $d ($f)?);
 
 INTEGER_LITERAL
 	: (DECIMAL_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;
@@ -327,27 +323,12 @@ STRING_LITERAL:	'\''! (APOS|~'\'')* '\''!;
 DQ_STRING_LITERAL:	'"'! (~'"')* '"'!;
 ID:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|DOT_ESCAPED)*;
 DOT_ESCAPED: '\\.';
-//DOUBLE_DOT: ':';
 WS: ( ' ' | '\t' | '\n' |'\r')+ { $channel=HIDDEN; } ;
 DOLLAR:	'$';
 AT: '@';
 UPTO: '..';
 COLON: ':';
 
-	/*
-	// real - use syntactic predicates (guess mode)
-	:	('.' DECIMAL_DIGIT) =>
-		in= '.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?
-			
-	|	((DECIMAL_DIGIT)+ '.' DECIMAL_DIGIT) =>
-		 in=(DECIMAL_DIGIT)+ '.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?
-		
-	|	((DECIMAL_DIGIT)+ (EXPONENT_PART)) =>
-		in= (DECIMAL_DIGIT)+ (EXPONENT_PART) (REAL_TYPE_SUFFIX)?
-		
-	|	((DECIMAL_DIGIT)+ (REAL_TYPE_SUFFIX)) =>
-		in= (DECIMAL_DIGIT)+ (REAL_TYPE_SUFFIX)		
-*/		 
 
 REAL_LITERAL :	
   ('.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?) |
@@ -362,5 +343,4 @@ fragment HEX_DIGIT : '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'A'|'B'|'C'|'D'|'E'
 	
 fragment EXPONENT_PART : 'e'  (SIGN)*  (DECIMAL_DIGIT)+ | 'E'  (SIGN)*  (DECIMAL_DIGIT)+ ;	
 fragment SIGN :	'+' | '-' ;
-// TODO what is M or m?
-fragment REAL_TYPE_SUFFIX : 'F' | 'f' | 'D' | 'd' | 'M' | 'm' ;
+fragment REAL_TYPE_SUFFIX : 'F' | 'f' | 'D' | 'd';

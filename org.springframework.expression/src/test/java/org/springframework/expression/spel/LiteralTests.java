@@ -129,34 +129,6 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("null", null, null);
 	}
 
-	public void testLiteralDate01() {
-		evaluate("date('Wed, 4 Jul 2001 12:08:56 GMT').getTime()>0", "true", Boolean.class);
-	}
-
-	public void testLiteralDate02() {
-		evaluate("date('19740824131030','yyyyMMddHHmmss').getHours()", "13", Integer.class);
-	}
-
-	public void testLiteralDate03() {
-		// Jal is not a valid month
-		evaluateAndCheckError("date('Wed, 4 Jal 2001 12:08:56 GMT').getTime()>0", SpelMessages.DATE_CANNOT_BE_PARSED);
-	}
-
-	public void testLiteralDate04() {
-		// null format
-		parseAndCheckError("date('Wed, 4 Jul 2001 12:08:56 GMT',null).getTime()>0", SpelMessages.PARSE_PROBLEM);
-	}
-
-	public void testLiteralDate05() {
-		// null date
-		parseAndCheckError("date(null).getTime()>0", SpelMessages.PARSE_PROBLEM);
-	}
-
-	public void testLiteralDate06() {
-		// int year convertable from number to string
-		parseAndCheckError("date(2008,'yyyy').getTime()>0", SpelMessages.PARSE_PROBLEM);
-	}
-
 	public void testConversions() {
 		// getting the expression type to be what we want - either:
 		evaluate("new Integer(37).byteValue()", (byte) 37, Byte.class); // calling byteValue() on Integer.class
