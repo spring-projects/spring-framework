@@ -4,8 +4,6 @@ options {
 	language = Java;
 	output=AST;
 	k=2;
-	//caseSensitive = false;
-	//backtrack=true;
 }
 
 tokens {
@@ -29,9 +27,6 @@ tokens {
 	METHOD;
 	ADD;
 	SUBTRACT;
-//	MULTIPLY;
-//	DIVIDE;
-//	MODULUS;
 	NUMBER;
 }
 
@@ -55,19 +50,15 @@ tokens {
 
 expr: expression EOF!;
       
-SEMIRPAREN : ';)'; // recoveryrelated: allows us to cope with a rogue superfluous semicolon before the rparen in an expression list
-
 expression : 
     logicalOrExpression
     ( (ASSIGN^ logicalOrExpression) 
 	  | (DEFAULT^ logicalOrExpression) 
 	  | (QMARK^ expression COLON! expression))?;
 
-parenExpr : LPAREN! expression RPAREN!;// (ROGUE! | RPAREN!);
-
+parenExpr : LPAREN! expression RPAREN!;
 	
 logicalOrExpression 
-// possible extra info we could use for better error messages
 : logicalAndExpression (OR^ logicalAndExpression)*;
                         
 logicalAndExpression 
@@ -78,7 +69,6 @@ relationalExpression : sumExpression (relationalOperator^ sumExpression)?;
 sumExpression
 	: productExpression ( (PLUS^ | MINUS^) productExpression)*;
 
-// TODO could really do with changing ast node types here
 productExpression
 	: powerExpr ((STAR^ | DIV^| MOD^) powerExpr)* ;
 
@@ -234,7 +224,7 @@ relationalOperator
     |   GREATER_THAN            
     |   GREATER_THAN_OR_EQUAL 
     |   IN   
-    |   IS   
+    |   INSTANCEOF   
     |   BETWEEN   
     |   MATCHES
     ; 
@@ -247,7 +237,7 @@ LESS_THAN_OR_EQUAL: '<=';
 GREATER_THAN: '>';
 GREATER_THAN_OR_EQUAL: '>=';
 IN:     'in';	
-IS:     'is';
+INSTANCEOF:     'instanceof';
 BETWEEN:'between';
 MATCHES:'matches';
 NULL_LITERAL: 'null';

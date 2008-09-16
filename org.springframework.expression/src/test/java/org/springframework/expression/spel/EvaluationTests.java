@@ -72,27 +72,27 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	public void testRelOperatorsIs01() {
-		evaluate("'xyz' is T(int)", "false", Boolean.class);
+		evaluate("'xyz' instanceof T(int)", "false", Boolean.class);
 	}
 
 	public void testRelOperatorsIs02() {
-		evaluate("{1, 2, 3, 4, 5} is T(List)", "true", Boolean.class);
+		evaluate("{1, 2, 3, 4, 5} instanceof T(List)", "true", Boolean.class);
 	}
 
 	public void testRelOperatorsIs03() {
-		evaluate("{1, 2, 3, 4, 5} is T(List)", "true", Boolean.class);
+		evaluate("{1, 2, 3, 4, 5} instanceof T(List)", "true", Boolean.class);
 	}
 
 	public void testRelOperatorsIs04() {
-		evaluate("null is T(String)", "false", Boolean.class);
+		evaluate("null instanceof T(String)", "false", Boolean.class);
 	}
 
 	public void testRelOperatorsIs05() {
-		evaluate("null is T(Integer)", "false", Boolean.class);
+		evaluate("null instanceof T(Integer)", "false", Boolean.class);
 	}
 
 	public void testRelOperatorsIs06() {
-		evaluateAndCheckError("'A' is null", SpelMessages.IS_OPERATOR_NEEDS_CLASS_OPERAND, 7, "null");
+		evaluateAndCheckError("'A' instanceof null", SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND, 15, "null");
 	}
 
 	public void testRelOperatorsMatches01() {
