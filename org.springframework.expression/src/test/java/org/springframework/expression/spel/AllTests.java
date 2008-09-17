@@ -48,6 +48,7 @@ public class AllTests {
 		suite.addTestSuite(TemplateExpressionParsingTests.class);
 		suite.addTestSuite(ExpressionLanguageScenarioTests.class);
 		suite.addTestSuite(ScenariosForSpringSecurity.class);
+		suite.addTestSuite(MapAccessTests.class);
 		suite.addTestSuite(SpelUtilitiesTests.class);
 		suite.addTestSuite(LiteralExpressionTests.class);
 		suite.addTestSuite(CompositeStringExpressionTests.class);
