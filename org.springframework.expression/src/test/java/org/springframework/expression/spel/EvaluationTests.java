@@ -15,7 +15,6 @@
  */
 package org.springframework.expression.spel;
 
-
 /**
  * Tests the evaluation of real expressions in a real context.
  * 
@@ -457,4 +456,5 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndAskForReturnType("3*4+5", (short) 17, Short.class);
 		evaluateAndAskForReturnType("3*4+5", "17", String.class);
 	}
+
 }

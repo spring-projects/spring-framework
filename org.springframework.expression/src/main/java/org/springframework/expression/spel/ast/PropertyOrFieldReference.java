@@ -25,9 +25,9 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.PropertyReaderExecutor;
 import org.springframework.expression.PropertyWriterExecutor;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.internal.Utils;
 
 /**
@@ -68,9 +68,9 @@ public class PropertyOrFieldReference extends SpelNode {
 		return name.toString();
 	}
 
-	/** 
+	/**
 	 * Attempt to read the named property from the current context object.
-     *
+	 * 
 	 * @param state the evaluation state
 	 * @param name the name of the property
 	 * @return the value of the property
@@ -88,19 +88,20 @@ public class PropertyOrFieldReference extends SpelNode {
 				// let's try to get a new one and call it before giving up
 			}
 		}
-		
+
 		Class<?> contextObjectClass = getObjectClass(contextObject);
 
 		List<PropertyAccessor> accessorsToTry = getPropertyAccessorsToTry(contextObjectClass, state);
-		
-		// Go through the accessors that may be able to resolve it.  If they are a cacheable accessor then
-		// get the accessor and use it.  If they are not cacheable but report they can read the property
+
+		// Go through the accessors that may be able to resolve it. If they are a cacheable accessor then
+		// get the accessor and use it. If they are not cacheable but report they can read the property
 		// then ask them to read it
 		if (accessorsToTry != null) {
 			try {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor instanceof CacheablePropertyAccessor) {
-						cachedReaderExecutor = ((CacheablePropertyAccessor)accessor).getReaderAccessor(eContext, contextObject, name);
+						cachedReaderExecutor = ((CacheablePropertyAccessor) accessor).getReaderAccessor(eContext,
+								contextObject, name);
 						if (cachedReaderExecutor != null) {
 							try {
 								return cachedReaderExecutor.execute(state.getEvaluationContext(), contextObject);
@@ -124,14 +125,14 @@ public class PropertyOrFieldReference extends SpelNode {
 				throw new SpelException(ae, SpelMessages.EXCEPTION_DURING_PROPERTY_READ, name, ae.getMessage());
 			}
 		}
-		throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, name, Utils.formatClassnameForMessage(contextObjectClass));
+		throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, name, Utils
+				.formatClassnameForMessage(contextObjectClass));
 	}
 
-	
 	private void writeProperty(ExpressionState state, Object name, Object newValue) throws SpelException {
 		Object contextObject = state.getActiveContextObject();
 		EvaluationContext eContext = state.getEvaluationContext();
-		
+
 		if (cachedWriterExecutor != null) {
 			try {
 				cachedWriterExecutor.execute(state.getEvaluationContext(), contextObject, newValue);
@@ -149,7 +150,8 @@ public class PropertyOrFieldReference extends SpelNode {
 			try {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor instanceof CacheablePropertyAccessor) {
-						cachedWriterExecutor = ((CacheablePropertyAccessor)accessor).getWriterAccessor(eContext, contextObject, name);
+						cachedWriterExecutor = ((CacheablePropertyAccessor) accessor).getWriterAccessor(eContext,
+								contextObject, name);
 						if (cachedWriterExecutor != null) {
 							try {
 								cachedWriterExecutor.execute(state.getEvaluationContext(), contextObject, newValue);
@@ -171,7 +173,8 @@ public class PropertyOrFieldReference extends SpelNode {
 					}
 				}
 			} catch (AccessException ae) {
-				throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE, name, ae.getMessage());
+				throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,
+						name, ae.getMessage());
 			}
 		}
 		throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND, name, Utils
@@ -204,8 +207,8 @@ public class PropertyOrFieldReference extends SpelNode {
 	 * Determines the set of property resolvers that should be used to try and access a property on the specified target
 	 * type. The resolvers are considered to be in an ordered list, however in the returned list any that are exact
 	 * matches for the input target type (as opposed to 'general' resolvers that could work for any type) are placed at
-	 * the start of the list.  In addition, there are specific resolvers that exactly name the class in question and
-	 * resolvers that name a specific class but it is a supertype of the class we have.  These are put at the end of the
+	 * the start of the list. In addition, there are specific resolvers that exactly name the class in question and
+	 * resolvers that name a specific class but it is a supertype of the class we have. These are put at the end of the
 	 * specific resolvers set and will be tried after exactly matching accessors but before generic accessors.
 	 * 
 	 * @param targetType the type upon which property access is being attempted
@@ -219,13 +222,16 @@ public class PropertyOrFieldReference extends SpelNode {
 			if (targets == null) { // generic resolver that says it can be used for any type
 				generalAccessors.add(resolver);
 			} else {
-				int pos = 0;
-				for (int i = 0; i < targets.length; i++) {
-					Class<?> clazz = targets[i];
-					if (clazz == targetType) { // put exact matches on the front to be tried first?
-						specificAccessors.add(pos++, resolver);
-					} else if (clazz.isAssignableFrom(targetType)) { // put supertype matches at the end of the specificAccessor list
-						generalAccessors.add(resolver);
+				if (targetType != null) {
+					int pos = 0;
+					for (int i = 0; i < targets.length; i++) {
+						Class<?> clazz = targets[i];
+						if (clazz == targetType) { // put exact matches on the front to be tried first?
+							specificAccessors.add(pos++, resolver);
+						} else if (clazz.isAssignableFrom(targetType)) { // put supertype matches at the end of the
+																			// specificAccessor list
+							generalAccessors.add(resolver);
+						}
 					}
 				}
 			}
