@@ -7,7 +7,6 @@ options {
 }
 
 tokens {
-	EXPRESSIONLIST;
 	INTEGER_LITERAL;
 	EXPRESSION;
 	QUALIFIED_IDENTIFIER;
@@ -15,15 +14,10 @@ tokens {
 	INDEXER;
 	CONSTRUCTOR;
 	HOLDER;
-	CONSTRUCTOR_ARRAY;
 	NAMED_ARGUMENT;
 	FUNCTIONREF;
 	TYPEREF;
-	RANGE;
 	VARIABLEREF;
-	LIST_INITIALIZER;
-	MAP_INITIALIZER;
-	MAP_ENTRY;
 	METHOD;
 	ADD;
 	SUBTRACT;
@@ -94,8 +88,6 @@ startNode
     | selection 
     | firstSelection
     | lastSelection
-    | listInitializer
-    | mapInitializer
     ;
     
 node
@@ -141,10 +133,8 @@ methodArgs :  LPAREN! (argument (COMMA! argument)* (COMMA!)?)? RPAREN!;
 property: id=ID -> ^(PROPERTY_OR_FIELD[$id]);
 
 
-//indexer: LBRACKET r1=range (COMMA r2=range)* RBRACKET -> ^(INDEXER $r1 ($r2)*);
 indexer: LBRACKET r1=argument (COMMA r2=argument)* RBRACKET -> ^(INDEXER $r1 ($r2)*);
 	
-//range: INTEGER_LITERAL UPTO^ INTEGER_LITERAL |
 // argument;
 	// TODO make expression conditional with ? if want completion for when the RCURLY is missing
 projection: PROJECT^ expression RCURLY!;
@@ -162,29 +152,8 @@ type:	TYPE qualifiedId RPAREN -> ^(TYPEREF qualifiedId);
 
 constructor  
 	:	('new' qualifiedId LPAREN) => 'new' qualifiedId ctorArgs -> ^(CONSTRUCTOR qualifiedId ctorArgs)
-	|   arrayConstructor
-	;
-
-arrayConstructor
-	: 'new' qualifiedId arrayRank (listInitializer)?
-	  -> ^(CONSTRUCTOR_ARRAY qualifiedId arrayRank (listInitializer)?)
 	;
 	
-arrayRank
-    : LBRACKET (expression (COMMA expression)*)? RBRACKET -> ^(EXPRESSIONLIST expression*);
-    
-listInitializer
-    : LCURLY expression (COMMA expression)* RCURLY -> ^(LIST_INITIALIZER expression*);
-
-//arrayInitializer
-//    : LCURLY expression (COMMA expression)* RCURLY -> ^(ARRAY_INITIALIZER expression*);
-    
-mapInitializer
-    : POUND LCURLY mapEntry (COMMA mapEntry)* RCURLY -> ^(MAP_INITIALIZER mapEntry*);
-
-mapEntry
-    : expression COLON expression -> ^(MAP_ENTRY expression*);
-
 ctorArgs
 	: LPAREN! (namedArgument (COMMA! namedArgument)*)? RPAREN!;
 
@@ -223,7 +192,6 @@ relationalOperator
     |   LESS_THAN_OR_EQUAL      
     |   GREATER_THAN            
     |   GREATER_THAN_OR_EQUAL 
-    |   IN   
     |   INSTANCEOF   
     |   BETWEEN   
     |   MATCHES
@@ -236,7 +204,6 @@ LESS_THAN: '<';
 LESS_THAN_OR_EQUAL: '<=';
 GREATER_THAN: '>';
 GREATER_THAN_OR_EQUAL: '>=';
-IN:     'in';	
 INSTANCEOF:     'instanceof';
 BETWEEN:'between';
 MATCHES:'matches';

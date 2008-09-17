@@ -133,25 +133,25 @@ public class ParsingTests extends TestCase {
 		parseCheck("3>=3", "(3 >= 3)");
 	}
 
-	public void testRelOperatorsIn01() {
-		parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
-	}
+	// public void testRelOperatorsIn01() {
+	// parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
+	// }
+	//
+	// public void testRelOperatorsBetween01() {
+	// parseCheck("1 between {1, 5}", "(1 between {1,5})");
+	// }
 
-	public void testRelOperatorsBetween01() {
-		parseCheck("1 between {1, 5}", "(1 between {1,5})");
-	}
-
-	public void testRelOperatorsBetween02() {
-		parseCheck("'efg' between {'abc', 'xyz'}", "('efg' between {'abc','xyz'})");
-	}// true
+	// public void testRelOperatorsBetween02() {
+	// parseCheck("'efg' between {'abc', 'xyz'}", "('efg' between {'abc','xyz'})");
+	// }// true
 
 	public void testRelOperatorsIs01() {
 		parseCheck("'xyz' instanceof int", "('xyz' instanceof int)");
 	}// false
 
-	public void testRelOperatorsIs02() {
-		parseCheck("{1, 2, 3, 4, 5} instanceof List", "({1,2,3,4,5} instanceof List)");
-	}// true
+	// public void testRelOperatorsIs02() {
+	// parseCheck("{1, 2, 3, 4, 5} instanceof List", "({1,2,3,4,5} instanceof List)");
+	// }// true
 
 	public void testRelOperatorsMatches01() {
 		parseCheck("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "('5.0067' matches '^-?\\d+(\\.\\d{2})?$')");
@@ -196,37 +196,37 @@ public class ParsingTests extends TestCase {
 	}
 
 	// collection processors
-	public void testCollectionProcessorsCount01() {
-		parseCheck("new String[] {'abc','def','xyz'}.count()");
-	}
+	// public void testCollectionProcessorsCount01() {
+	// parseCheck("new String[] {'abc','def','xyz'}.count()");
+	// }
 
-	public void testCollectionProcessorsCount02() {
-		parseCheck("new int[] {1,2,3}.count()");
-	}
-
-	public void testCollectionProcessorsMax01() {
-		parseCheck("new int[] {1,2,3}.max()");
-	}
-
-	public void testCollectionProcessorsMin01() {
-		parseCheck("new int[] {1,2,3}.min()");
-	}
-
-	public void testCollectionProcessorsAverage01() {
-		parseCheck("new int[] {1,2,3}.average()");
-	}
-
-	public void testCollectionProcessorsSort01() {
-		parseCheck("new int[] {3,2,1}.sort()");
-	}
-
-	public void testCollectionProcessorsNonNull01() {
-		parseCheck("{'a','b',null,'d',null}.nonNull()");
-	}
-
-	public void testCollectionProcessorsDistinct01() {
-		parseCheck("{'a','b','a','d','e'}.distinct()");
-	}
+	// public void testCollectionProcessorsCount02() {
+	// parseCheck("new int[] {1,2,3}.count()");
+	// }
+	//
+	// public void testCollectionProcessorsMax01() {
+	// parseCheck("new int[] {1,2,3}.max()");
+	// }
+	//
+	// public void testCollectionProcessorsMin01() {
+	// parseCheck("new int[] {1,2,3}.min()");
+	// }
+	//
+	// public void testCollectionProcessorsAverage01() {
+	// parseCheck("new int[] {1,2,3}.average()");
+	// }
+	//
+	// public void testCollectionProcessorsSort01() {
+	// parseCheck("new int[] {3,2,1}.sort()");
+	// }
+	//
+	// public void testCollectionProcessorsNonNull01() {
+	// parseCheck("{'a','b',null,'d',null}.nonNull()");
+	// }
+	//
+	// public void testCollectionProcessorsDistinct01() {
+	// parseCheck("{'a','b','a','d','e'}.distinct()");
+	// }
 
 	// // references
 	// public void testReferences01() {
@@ -255,30 +255,30 @@ public class ParsingTests extends TestCase {
 	}
 
 	// inline list creation
-	public void testInlineListCreation01() {
-		parseCheck("{1, 2, 3, 4, 5}", "{1,2,3,4,5}");
-	}
+	// public void testInlineListCreation01() {
+	// parseCheck("{1, 2, 3, 4, 5}", "{1,2,3,4,5}");
+	// }
+	//
+	// public void testInlineListCreation02() {
+	// parseCheck("{'abc','xyz'}", "{'abc','xyz'}");
+	// }
 
-	public void testInlineListCreation02() {
-		parseCheck("{'abc','xyz'}", "{'abc','xyz'}");
-	}
-
-	// inline map creation
-	public void testInlineMapCreation01() {
-		parseCheck("#{'key1':'Value 1', 'today':DateTime.Today}");
-	}
-
-	public void testInlineMapCreation02() {
-		parseCheck("#{1:'January', 2:'February', 3:'March'}");
-	}
-
-	public void testInlineMapCreation03() {
-		parseCheck("#{'key1':'Value 1', 'today':'Monday'}['key1']");
-	}
-
-	public void testInlineMapCreation04() {
-		parseCheck("#{1:'January', 2:'February', 3:'March'}[3]");
-	}
+	// // inline map creation
+	// public void testInlineMapCreation01() {
+	// parseCheck("#{'key1':'Value 1', 'today':DateTime.Today}");
+	// }
+	//
+	// public void testInlineMapCreation02() {
+	// parseCheck("#{1:'January', 2:'February', 3:'March'}");
+	// }
+	//
+	// public void testInlineMapCreation03() {
+	// parseCheck("#{'key1':'Value 1', 'today':'Monday'}['key1']");
+	// }
+	//
+	// public void testInlineMapCreation04() {
+	// parseCheck("#{1:'January', 2:'February', 3:'March'}[3]");
+	// }
 
 	// methods
 	public void testMethods01() {
@@ -298,18 +298,18 @@ public class ParsingTests extends TestCase {
 		parseCheck("new String('hello')");
 	}
 
-	public void testConstructors02() {
-		parseCheck("new String[3]");
-	}
+	// public void testConstructors02() {
+	// parseCheck("new String[3]");
+	// }
 
 	// array construction
-	public void testArrayConstruction01() {
-		parseCheck("new int[] {1, 2, 3, 4, 5}", "new int[] {1,2,3,4,5}");
-	}
-
-	public void testArrayConstruction02() {
-		parseCheck("new String[] {'abc','xyz'}", "new String[] {'abc','xyz'}");
-	}
+	// public void testArrayConstruction01() {
+	// parseCheck("new int[] {1, 2, 3, 4, 5}", "new int[] {1,2,3,4,5}");
+	// }
+	//
+	// public void testArrayConstruction02() {
+	// parseCheck("new String[] {'abc','xyz'}", "new String[] {'abc','xyz'}");
+	// }
 
 	// variables and functions
 	public void testVariables01() {
@@ -325,24 +325,24 @@ public class ParsingTests extends TestCase {
 	}
 
 	// projections and selections
-	public void testProjections01() {
-		parseCheck("{1,2,3,4,5,6,7,8,9,10}.!{#isEven()}");
-	}
+	// public void testProjections01() {
+	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.!{#isEven()}");
+	// }
 
-	public void testSelections01() {
-		parseCheck("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}",
-				"{1,2,3,4,5,6,7,8,9,10}.?{(#isEven(#this) == 'y')}");
-	}
+	// public void testSelections01() {
+	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}",
+	// "{1,2,3,4,5,6,7,8,9,10}.?{(#isEven(#this) == 'y')}");
+	// }
 
-	public void testSelectionsFirst01() {
-		parseCheck("{1,2,3,4,5,6,7,8,9,10}.^{#isEven(#this) == 'y'}",
-				"{1,2,3,4,5,6,7,8,9,10}.^{(#isEven(#this) == 'y')}");
-	}
+	// public void testSelectionsFirst01() {
+	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.^{#isEven(#this) == 'y'}",
+	// "{1,2,3,4,5,6,7,8,9,10}.^{(#isEven(#this) == 'y')}");
+	// }
 
-	public void testSelectionsLast01() {
-		parseCheck("{1,2,3,4,5,6,7,8,9,10}.${#isEven(#this) == 'y'}",
-				"{1,2,3,4,5,6,7,8,9,10}.${(#isEven(#this) == 'y')}");
-	}
+	// public void testSelectionsLast01() {
+	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.${#isEven(#this) == 'y'}",
+	// "{1,2,3,4,5,6,7,8,9,10}.${(#isEven(#this) == 'y')}");
+	// }
 
 	// assignment
 	public void testAssignmentToVariables01() {
@@ -350,10 +350,10 @@ public class ParsingTests extends TestCase {
 	}
 
 	// ternary operator
-	public void testTernaryOperator01() {
-		parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
-				"({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
-	}
+	// public void testTernaryOperator01() {
+	// parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
+	// "({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
+	// }
 
 	//
 	// public void testLambdaMax() {

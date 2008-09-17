@@ -15,13 +15,7 @@
  */
 package org.springframework.expression.spel.ast;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.AccessException;
@@ -33,171 +27,15 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.internal.Utils;
-import org.springframework.expression.spel.processors.AverageProcessor;
-import org.springframework.expression.spel.processors.CountProcessor;
-import org.springframework.expression.spel.processors.CutProcessor;
-import org.springframework.expression.spel.processors.DataProcessor;
-import org.springframework.expression.spel.processors.DistinctProcessor;
-import org.springframework.expression.spel.processors.MaxProcessor;
-import org.springframework.expression.spel.processors.MinProcessor;
-import org.springframework.expression.spel.processors.NonNullProcessor;
-import org.springframework.expression.spel.processors.SortProcessor;
 
 public class MethodReference extends SpelNode {
-
-	private static Map<String, DataProcessor> registeredProcessers = new HashMap<String, DataProcessor>();
 
 	private final String name;
 	private MethodExecutor fastInvocationAccessor;
 
-	static {
-		registeredProcessers.put("count", new CountProcessor());
-		registeredProcessers.put("max", new MaxProcessor());
-		registeredProcessers.put("min", new MinProcessor());
-		registeredProcessers.put("average", new AverageProcessor());
-		registeredProcessers.put("sort", new SortProcessor());
-		registeredProcessers.put("nonnull", new NonNullProcessor());
-		registeredProcessers.put("distinct", new DistinctProcessor());
-		registeredProcessers.put("cut", new CutProcessor());
-	}
-
 	public MethodReference(Token payload) {
 		super(payload);
 		name = payload.getText();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object invokeDataProcessor(Object[] arguments, ExpressionState state) throws EvaluationException {
-		DataProcessor processor = registeredProcessers.get(name);
-
-		Object target = state.getActiveContextObject();
-
-		// Prepare the input, translating arrays to lists
-		boolean wasArray = false;
-		Class<?> arrayElementType = null;
-		Collection<Object> dataToProcess = null;
-		if (target instanceof Collection) {
-			dataToProcess = (Collection<Object>) target;
-		} else {
-			wasArray = true;
-			arrayElementType = target.getClass().getComponentType();
-			if (arrayElementType.equals(Integer.TYPE)) {
-				int[] data = (int[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Byte.TYPE)) {
-				byte[] data = (byte[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Character.TYPE)) {
-				char[] data = (char[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Double.TYPE)) {
-				double[] data = (double[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Long.TYPE)) {
-				long[] data = (long[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Float.TYPE)) {
-				float[] data = (float[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Short.TYPE)) {
-				short[] data = (short[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else if (arrayElementType.equals(Boolean.TYPE)) {
-				boolean[] data = (boolean[]) target;
-				dataToProcess = new ArrayList<Object>();
-				for (int i = 0; i < data.length; i++) {
-					dataToProcess.add(data[i]);
-				}
-			} else {
-				dataToProcess = Arrays.asList((Object[]) target);
-			}
-		}
-
-		Object result = processor.process(dataToProcess, arguments, state);
-
-		// Convert the result back if necessary
-		if (wasArray && (result instanceof Collection)) {
-			Collection c = (Collection) result;
-
-			if (arrayElementType.equals(Integer.TYPE)) {
-				int[] newArray = (int[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Integer) i).intValue();
-				return newArray;
-			} else if (arrayElementType.equals(Byte.TYPE)) {
-				byte[] newArray = (byte[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Byte) i).byteValue();
-				return newArray;
-			} else if (arrayElementType.equals(Character.TYPE)) {
-				char[] newArray = (char[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Character) i).charValue();
-				return newArray;
-			} else if (arrayElementType.equals(Double.TYPE)) {
-				double[] newArray = (double[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Double) i).doubleValue();
-				return newArray;
-			} else if (arrayElementType.equals(Long.TYPE)) {
-				long[] newArray = (long[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Long) i).longValue();
-				return newArray;
-			} else if (arrayElementType.equals(Float.TYPE)) {
-				float[] newArray = (float[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Float) i).floatValue();
-				return newArray;
-			} else if (arrayElementType.equals(Short.TYPE)) {
-				short[] newArray = (short[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Short) i).shortValue();
-				return newArray;
-			} else if (arrayElementType.equals(Boolean.TYPE)) {
-				boolean[] newArray = (boolean[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c)
-					newArray[idx++] = ((Boolean) i).booleanValue();
-				return newArray;
-			} else {
-				Object[] newArray = (Object[]) Array.newInstance(arrayElementType, c.size());
-				int idx = 0;
-				for (Object i : c) {
-					newArray[idx++] = i;
-				}
-				return newArray;
-			}
-		}
-		return result;
 	}
 
 	@Override
@@ -210,12 +48,6 @@ public class MethodReference extends SpelNode {
 		if (currentContext == null) {
 			throw new SpelException(getCharPositionInLine(), SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,
 					formatMethodForMessage(name, getTypes(arguments)));
-		}
-
-		boolean usingProcessor = registeredProcessers.containsKey(name);
-		if ((currentContext.getClass().isArray() && usingProcessor)
-				|| (currentContext instanceof Collection && registeredProcessers.containsKey(name))) {
-			return invokeDataProcessor(arguments, state);
 		}
 
 		if (fastInvocationAccessor != null) {
