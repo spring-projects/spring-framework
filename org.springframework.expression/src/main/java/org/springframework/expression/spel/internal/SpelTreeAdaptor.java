@@ -22,14 +22,10 @@ import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.ConstructorReference;
 import org.springframework.expression.spel.ast.Dot;
-import org.springframework.expression.spel.ast.ExpressionListNode;
 import org.springframework.expression.spel.ast.FunctionReference;
 import org.springframework.expression.spel.ast.Identifier;
 import org.springframework.expression.spel.ast.Indexer;
-import org.springframework.expression.spel.ast.ListInitializer;
 import org.springframework.expression.spel.ast.Literal;
-import org.springframework.expression.spel.ast.MapEntry;
-import org.springframework.expression.spel.ast.MapInitializer;
 import org.springframework.expression.spel.ast.MethodReference;
 import org.springframework.expression.spel.ast.NullLiteral;
 import org.springframework.expression.spel.ast.OperatorAnd;
@@ -38,7 +34,6 @@ import org.springframework.expression.spel.ast.OperatorDivide;
 import org.springframework.expression.spel.ast.OperatorEquality;
 import org.springframework.expression.spel.ast.OperatorGreaterThan;
 import org.springframework.expression.spel.ast.OperatorGreaterThanOrEqual;
-import org.springframework.expression.spel.ast.OperatorIn;
 import org.springframework.expression.spel.ast.OperatorInequality;
 import org.springframework.expression.spel.ast.OperatorInstanceof;
 import org.springframework.expression.spel.ast.OperatorLessThan;
@@ -67,8 +62,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 	public Object create(Token payload) {
 		if (payload != null) {
 			switch (payload.getType()) {
-			case SpringExpressionsLexer.EXPRESSIONLIST:
-				return new ExpressionListNode(payload);
 
 			case SpringExpressionsLexer.TRUE:
 				return new BooleanLiteral(payload, true);
@@ -132,17 +125,8 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 			case SpringExpressionsLexer.EXPRESSION:
 				return new CompoundExpression(payload);
 
-			case SpringExpressionsLexer.LIST_INITIALIZER:
-				return new ListInitializer(payload);
-			case SpringExpressionsLexer.MAP_ENTRY:
-				return new MapEntry(payload);
-			case SpringExpressionsLexer.MAP_INITIALIZER:
-				return new MapInitializer(payload);
-
 			case SpringExpressionsLexer.CONSTRUCTOR:
 				return new ConstructorReference(payload, false);
-			case SpringExpressionsLexer.CONSTRUCTOR_ARRAY:
-				return new ConstructorReference(payload, true);
 			case SpringExpressionsLexer.VARIABLEREF:
 				return new VariableReference(payload);
 			case SpringExpressionsLexer.FUNCTIONREF:
@@ -162,10 +146,7 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new Ternary(payload);
 			case SpringExpressionsLexer.INDEXER:
 				return new Indexer(payload);
-				// case SpringExpressionsLexer.UPTO: return new Range(payload);
 
-			case SpringExpressionsLexer.IN:
-				return new OperatorIn(payload);
 			case SpringExpressionsLexer.BETWEEN:
 				return new OperatorBetween(payload);
 			case SpringExpressionsLexer.MATCHES:
@@ -178,7 +159,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 			case SpringExpressionsLexer.COLON:
 				return new Placeholder(payload);
 
-				// case SpringExpressionsLexer.EOF: return new ErrorNode(payload);
 			case SpringExpressionsLexer.DOT:
 				return new Dot(payload);
 

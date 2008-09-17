@@ -30,16 +30,16 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluate("getPlaceOfBirth().getCity()", "SmilJan", String.class);
 	}
 
-	public void testBuiltInProcessors() {
-		evaluate("new int[]{1,2,3,4}.count()", 4, Integer.class);
-		evaluate("new int[]{4,3,2,1}.sort()[3]", 4, Integer.class);
-		evaluate("new int[]{4,3,2,1}.average()", 2, Integer.class);
-		evaluate("new int[]{4,3,2,1}.max()", 4, Integer.class);
-		evaluate("new int[]{4,3,2,1}.min()", 1, Integer.class);
-		evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
-		evaluate("{1,2,3,null}.nonnull().count()", 3, Integer.class);
-		evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
-	}
+	// public void testBuiltInProcessors() {
+	// evaluate("new int[]{1,2,3,4}.count()", 4, Integer.class);
+	// evaluate("new int[]{4,3,2,1}.sort()[3]", 4, Integer.class);
+	// evaluate("new int[]{4,3,2,1}.average()", 2, Integer.class);
+	// evaluate("new int[]{4,3,2,1}.max()", 4, Integer.class);
+	// evaluate("new int[]{4,3,2,1}.min()", 1, Integer.class);
+	// evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
+	// evaluate("{1,2,3,null}.nonnull().count()", 3, Integer.class);
+	// evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
+	// }
 
 	public void testStringClass() {
 		evaluate("new java.lang.String('hello').charAt(2)", 'l', Character.class);
@@ -74,7 +74,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluate("aVarargsMethod(1,2,3)", 3, Integer.class); // all need converting to strings
 		evaluate("aVarargsMethod(1)", 1, Integer.class); // needs string conversion
 		evaluate("aVarargsMethod(1,'a',3.0d)", 3, Integer.class); // first and last need conversion
-		evaluate("aVarargsMethod(new String[]{'a','b','c'})", 3, Integer.class);
+		// evaluate("aVarargsMethod(new String[]{'a','b','c'})", 3, Integer.class);
 	}
 
 	public void testVarargsInvocation02() {
@@ -85,7 +85,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluate("aVarargsMethod2(8,2,3)", 10, Integer.class);
 		evaluate("aVarargsMethod2(9)", 9, Integer.class);
 		evaluate("aVarargsMethod2(2,'a',3.0d)", 4, Integer.class);
-		evaluate("aVarargsMethod2(8,new String[]{'a','b','c'})", 11, Integer.class);
+		// evaluate("aVarargsMethod2(8,new String[]{'a','b','c'})", 11, Integer.class);
 	}
 
 	// Due to conversion there are two possible methods to call ...
