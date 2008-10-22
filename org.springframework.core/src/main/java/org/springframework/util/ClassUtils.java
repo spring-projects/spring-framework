@@ -271,6 +271,7 @@ public abstract class ClassUtils {
 	 * @return whether the specified class is present
 	 * @deprecated as of Spring 2.5, in favor of {@link #isPresent(String, ClassLoader)}
 	 */
+	@Deprecated
 	public static boolean isPresent(String className) {
 		return isPresent(className, getDefaultClassLoader());
 	}

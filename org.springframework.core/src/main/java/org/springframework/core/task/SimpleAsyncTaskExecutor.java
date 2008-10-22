@@ -49,6 +49,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * @deprecated as of Spring 2.0.3, since the default thread name prefix
 	 * is now taken from the concrete class (could be a subclass)
 	 */
+	@Deprecated
 	public static final String DEFAULT_THREAD_NAME_PREFIX =
 			ClassUtils.getShortName(SimpleAsyncTaskExecutor.class) + "-";
 
