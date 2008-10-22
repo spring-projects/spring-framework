@@ -3,4 +3,13 @@ Bundle-Name: Spring Core
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template: 
- org.apache.commons.logging;version="[1.1.1, 2.0.0)",
+ edu.emory.mathcs.backport.*;version="[3.0.0, 4.0.0)";resolution:=optional,
+ org.apache.commons.attributes.*;version="[2.2.0, 3.0.0)";resolution:=optional,
+ org.apache.commons.collections.*;version="[3.2.0, 4.0.0)";resolution:=optional,
+ org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
+ org.objectweb.asm.*;version="[2.2.3, 3.0.0)";resolution:=optional,
+ org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
+Unversioned-Imports: 
+ javax.xml.transform.*,
+ org.w3c.dom.*,
+ org.xml.sax.*
