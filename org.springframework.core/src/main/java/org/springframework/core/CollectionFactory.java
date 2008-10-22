@@ -57,6 +57,7 @@ import org.springframework.util.ClassUtils;
  * Spring-based applications/frameworks which were built to support JDK 1.3.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 1.1.1
  */
 public abstract class CollectionFactory {
@@ -68,15 +69,9 @@ public abstract class CollectionFactory {
 			ClassUtils.isPresent("org.apache.commons.collections.map.CaseInsensitiveMap",
 					CollectionFactory.class.getClassLoader());
 
-	/** Whether the backport-concurrent library is present on the classpath */
-	private static final boolean backportConcurrentAvailable =
-			ClassUtils.isPresent("edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap",
-					CollectionFactory.class.getClassLoader());
+	private static final Set<Class> approximableCollectionTypes = new HashSet<Class>(10);
 
-
-	private static final Set approximableCollectionTypes = new HashSet(10);
-
-	private static final Set approximableMapTypes = new HashSet(6);
+	private static final Set<Class> approximableMapTypes = new HashSet<Class>(6);
 
 	static {
 		approximableCollectionTypes.add(Collection.class);
@@ -107,33 +102,21 @@ public abstract class CollectionFactory {
 	 * @return the new Set instance
 	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
+	@Deprecated
 	public static Set createLinkedSetIfPossible(int initialCapacity) {
 		return new LinkedHashSet(initialCapacity);
 	}
 
 	/**
-	 * Create a copy-on-write Set (allowing for synchronization-less iteration),
-	 * requiring JDK >= 1.5 or the backport-concurrent library on the classpath.
-	 * Prefers a JDK 1.5+ CopyOnWriteArraySet to its backport-concurrent equivalent.
-	 * Throws an IllegalStateException if no copy-on-write Set is available.
+	 * Create a copy-on-write Set (allowing for synchronization-less iteration) if possible:
+	 * This implementation always creates a {@link java.util.concurrent.CopyOnWriteArraySet},
+	 * since Spring 3 requires JDK 1.5 anyway.
 	 * @return the new Set instance
-	 * @throws IllegalStateException if no copy-on-write Set is available
-	 * @see java.util.concurrent.ConcurrentHashMap
-	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
+	@Deprecated
 	public static Set createCopyOnWriteSet() {
-		if (JdkVersion.isAtLeastJava15()) {
-			logger.trace("Creating [java.util.concurrent.CopyOnWriteArraySet]");
-			return JdkConcurrentCollectionFactory.createCopyOnWriteArraySet();
-		}
-		else if (backportConcurrentAvailable) {
-			logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet]");
-			return BackportConcurrentCollectionFactory.createCopyOnWriteArraySet();
-		}
-		else {
-			throw new IllegalStateException("Cannot create CopyOnWriteArraySet - " +
-					"neither JDK 1.5 nor backport-concurrent available on the classpath");
-		}
+		return new CopyOnWriteArraySet();
 	}
 
 	/**
@@ -144,6 +127,7 @@ public abstract class CollectionFactory {
 	 * @return the new Map instance
 	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
+	@Deprecated
 	public static Map createLinkedMapIfPossible(int initialCapacity) {
 		return new LinkedHashMap(initialCapacity);
 	}
@@ -176,61 +160,36 @@ public abstract class CollectionFactory {
 	 * @return the new Map instance
 	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
+	@Deprecated
 	public static Map createIdentityMapIfPossible(int initialCapacity) {
 		return new IdentityHashMap(initialCapacity);
 	}
 
 	/**
-	 * Create a concurrent Map if possible: that is, if running on JDK >= 1.5
-	 * or if the backport-concurrent library is available. Prefers a JDK 1.5+
-	 * ConcurrentHashMap to its backport-concurrent equivalent. Falls back
-	 * to a plain synchronized HashMap if no concurrent Map is available.
+	 * Create a concurrent Map if possible: This implementation always
+	 * creates a {@link java.util.concurrent.ConcurrentHashMap}, since Spring 3.0
+	 * required JDK 1.5 anyway.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new Map instance
-	 * @see java.util.concurrent.ConcurrentHashMap
-	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
+	@Deprecated
 	public static Map createConcurrentMapIfPossible(int initialCapacity) {
-		if (JdkVersion.isAtLeastJava15()) {
-			logger.trace("Creating [java.util.concurrent.ConcurrentHashMap]");
-			return JdkConcurrentCollectionFactory.createConcurrentHashMap(initialCapacity);
-		}
-		else if (backportConcurrentAvailable) {
-			logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap]");
-			return BackportConcurrentCollectionFactory.createConcurrentHashMap(initialCapacity);
-		}
-		else {
-			logger.debug("Falling back to plain synchronized [java.util.HashMap] for concurrent map");
-			return Collections.synchronizedMap(new HashMap(initialCapacity));
-		}
+		return new ConcurrentHashMap(initialCapacity);
 	}
 
 	/**
-	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface,
-	 * requiring JDK >= 1.5 or the backport-concurrent library on the classpath.
-	 * Prefers a JDK 1.5+ ConcurrentHashMap to its backport-concurrent equivalent.
-	 * Throws an IllegalStateException if no concurrent Map is available.
+	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface:
+	 * This implementation always creates a {@link java.util.concurrent.ConcurrentHashMap},
+	 * since Spring 3.0 required JDK 1.5 anyway.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new ConcurrentMap instance
-	 * @throws IllegalStateException if no concurrent Map is available
-	 * @see java.util.concurrent.ConcurrentHashMap
-	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
+	@Deprecated
 	public static ConcurrentMap createConcurrentMap(int initialCapacity) {
-		if (JdkVersion.isAtLeastJava15()) {
-			logger.trace("Creating [java.util.concurrent.ConcurrentHashMap]");
-			return new JdkConcurrentHashMap(initialCapacity);
-		}
-		else if (backportConcurrentAvailable) {
-			logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap]");
-			return new BackportConcurrentHashMap(initialCapacity);
-		}
-		else {
-			throw new IllegalStateException("Cannot create ConcurrentHashMap - " +
-					"neither JDK 1.5 nor backport-concurrent available on the classpath");
-		}
+		return new JdkConcurrentHashMap(initialCapacity);
 	}
-
 
 	/**
 	 * Determine whether the given collection type is an approximable type,
@@ -313,56 +272,11 @@ public abstract class CollectionFactory {
 
 
 	/**
-	 * Actual creation of JDK 1.5+ concurrent Collections.
-	 * In separate inner class to avoid runtime dependency on JDK 1.5.
-	 */
-	private static abstract class JdkConcurrentCollectionFactory {
-
-		private static Set createCopyOnWriteArraySet() {
-			return new CopyOnWriteArraySet();
-		}
-
-		private static Map createConcurrentHashMap(int initialCapacity) {
-			return new ConcurrentHashMap(initialCapacity);
-		}
-	}
-
-
-	/**
-	 * Actual creation of backport-concurrent Collections.
-	 * In separate inner class to avoid runtime dependency on the backport-concurrent library.
-	 */
-	private static abstract class BackportConcurrentCollectionFactory {
-
-		private static Set createCopyOnWriteArraySet() {
-			return new edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet();
-		}
-
-		private static Map createConcurrentHashMap(int initialCapacity) {
-			return new edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap(initialCapacity);
-		}
-	}
-
-
-	/**
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
 	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
 
 		public JdkConcurrentHashMap(int initialCapacity) {
-			super(initialCapacity);
-		}
-	}
-
-
-	/**
-	 * ConcurrentMap adapter for the backport-concurrent ConcurrentHashMap class.
-	 */
-	private static class BackportConcurrentHashMap
-			extends edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
-			implements ConcurrentMap {
-
-		public BackportConcurrentHashMap(int initialCapacity) {
 			super(initialCapacity);
 		}
 	}

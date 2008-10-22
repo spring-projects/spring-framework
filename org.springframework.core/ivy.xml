@@ -22,11 +22,10 @@
 		<!-- compile dependencies -->
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->runtime" />
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="optional->runtime" />
+		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.collections" rev="3.2.0" conf="optional->compile" />
+		<!-- These should be replaced with the internal repackaging of ASM -->
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="optional->compile" />
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="optional->compile" />
-		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="optional->compile" />
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.collections" rev="3.2.0" conf="optional->compile" />
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.attributes" rev="2.2.0" conf="optional->compile" />
 		<!-- test dependencies -->
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
 				
