@@ -58,6 +58,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * @deprecated as of Spring 2.5,
 	 * in favor of recreating a BeanWrapper per target instance
 	 */
+	@Deprecated
 	void setWrappedInstance(Object obj);
 
 	/**

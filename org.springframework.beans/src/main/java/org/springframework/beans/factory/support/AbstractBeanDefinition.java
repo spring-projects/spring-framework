@@ -187,6 +187,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @param original the original bean definition to copy from
 	 * @deprecated since Spring 2.5, in favor of {@link #AbstractBeanDefinition(BeanDefinition)}
 	 */
+	@Deprecated
 	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
 		this((BeanDefinition) original);
 	}
@@ -241,6 +242,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * definition (assumably the child).
 	 * @deprecated since Spring 2.5, in favor of {@link #overrideFrom(BeanDefinition)}
 	 */
+	@Deprecated
 	public void overrideFrom(AbstractBeanDefinition other) {
 		overrideFrom((BeanDefinition) other);
 	}
@@ -422,6 +424,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
+	@Deprecated
 	public void setSingleton(boolean singleton) {
 		this.scope = (singleton ? SCOPE_SINGLETON : SCOPE_PROTOTYPE);
 		this.singleton = singleton;

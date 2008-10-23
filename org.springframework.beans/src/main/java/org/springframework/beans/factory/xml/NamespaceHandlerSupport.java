@@ -87,6 +87,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * the local name of the supplied {@link Element}.
 	 * @deprecated as of Spring 2.0.2; there should be no need to call this directly.
 	 */
+	@Deprecated
 	protected final BeanDefinitionParser findParserForElement(Element element) {
 		BeanDefinitionParser parser = (BeanDefinitionParser) this.parsers.get(element.getLocalName());
 		if (parser == null) {
@@ -136,6 +137,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * and {@link Attr Attrs}.
 	 * @deprecated as of Spring 2.0.2; there should be no need to call this directly.
 	 */
+	@Deprecated
 	protected final BeanDefinitionDecorator findDecoratorForNode(Node node) {
 		BeanDefinitionDecorator decorator = null;
 		if (node instanceof Element) {

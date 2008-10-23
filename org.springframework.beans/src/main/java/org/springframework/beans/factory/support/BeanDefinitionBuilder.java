@@ -172,6 +172,7 @@ public class BeanDefinitionBuilder  {
 	 * @deprecated since Spring 2.5, in favor of preparing this on the
 	 * {@link #getRawBeanDefinition() raw BeanDefinition object}
 	 */
+	@Deprecated
 	public BeanDefinitionBuilder setFactoryBean(String factoryBean, String factoryMethod) {
 		this.beanDefinition.setFactoryBeanName(factoryBean);
 		this.beanDefinition.setFactoryMethodName(factoryMethod);
@@ -183,6 +184,7 @@ public class BeanDefinitionBuilder  {
 	 * and all additions are at the present point.
 	 * @deprecated since Spring 2.5, in favor of {@link #addConstructorArgValue}
 	 */
+	@Deprecated
 	public BeanDefinitionBuilder addConstructorArg(Object value) {
 		return addConstructorArgValue(value);
 	}
@@ -253,6 +255,7 @@ public class BeanDefinitionBuilder  {
 	 * as alternative to {@link #setScope}.
 	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
+	@Deprecated
 	public BeanDefinitionBuilder setSingleton(boolean singleton) {
 		this.beanDefinition.setSingleton(singleton);
 		return this;
@@ -318,6 +321,7 @@ public class BeanDefinitionBuilder  {
 	 * @deprecated since Spring 2.5, in favor of preparing this on the
 	 * {@link #getRawBeanDefinition() raw BeanDefinition object}
 	 */
+	@Deprecated
 	public BeanDefinitionBuilder setSource(Object source) {
 		this.beanDefinition.setSource(source);
 		return this;
@@ -328,6 +332,7 @@ public class BeanDefinitionBuilder  {
 	 * @deprecated since Spring 2.5, in favor of preparing this on the
 	 * {@link #getRawBeanDefinition() raw BeanDefinition object}
 	 */
+	@Deprecated
 	public BeanDefinitionBuilder setResourceDescription(String resourceDescription) {
 		this.beanDefinition.setResourceDescription(resourceDescription);
 		return this;

@@ -158,6 +158,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @deprecated as of Spring 2.0: superseded by "validationMode"
 	 * @see #setValidationMode
 	 */
+	@Deprecated
 	public void setValidating(boolean validating) {
 		this.validationMode = (validating ? VALIDATION_AUTO : VALIDATION_NONE);
 	}
@@ -276,6 +277,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #setDocumentReaderClass
 	 * @see XmlBeanDefinitionParser
 	 */
+	@Deprecated
 	public void setParserClass(Class parserClass) {
 		if (this.parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
 			throw new IllegalArgumentException("'parserClass' must be an XmlBeanDefinitionParser");

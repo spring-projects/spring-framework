@@ -44,6 +44,7 @@ public interface BeanDefinitionReader {
 	 * encapsulating the methods that are relevant for bean definition handling.
 	 * @deprecated in favor of the uniformly named {@link #getRegistry()}
 	 */
+	@Deprecated
 	BeanDefinitionRegistry getBeanFactory();
 
 	/**

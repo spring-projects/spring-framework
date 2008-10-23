@@ -59,6 +59,7 @@ public class BeanDefinitionReaderUtils {
 	 * @deprecated in favor of <code>createBeanDefinition(String, String, ClassLoader)</code>
 	 * @see #createBeanDefinition(String, String, ClassLoader)
 	 */
+	@Deprecated
 	public static AbstractBeanDefinition createBeanDefinition(
 			String className, String parentName, ConstructorArgumentValues cargs,
 			MutablePropertyValues pvs, ClassLoader classLoader) throws ClassNotFoundException {

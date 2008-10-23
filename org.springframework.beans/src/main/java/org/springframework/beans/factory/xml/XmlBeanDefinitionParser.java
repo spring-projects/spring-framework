@@ -37,6 +37,7 @@ import org.springframework.core.io.Resource;
  * @see BeanDefinitionDocumentReader
  * @see XmlBeanDefinitionReader#setParserClass
  */
+@Deprecated
 public interface XmlBeanDefinitionParser {
 
 	/**
