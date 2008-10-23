@@ -155,6 +155,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @deprecated as of Spring 2.0.7, in favor of {@link #addPropertyEditorRegistrar}
 	 * and {@link #registerCustomEditor(Class, Class)}
 	 */
+	@Deprecated
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
 	/**

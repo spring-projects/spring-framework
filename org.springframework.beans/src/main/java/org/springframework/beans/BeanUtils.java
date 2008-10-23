@@ -465,6 +465,7 @@ public abstract class BeanUtils {
 	 * @deprecated as of Spring 2.0, in favor of <code>ClassUtils.isAssignable</code>
 	 * @see org.springframework.util.ClassUtils#isAssignable(Class, Class)
 	 */
+	@Deprecated
 	public static boolean isAssignable(Class targetType, Class valueType) {
 		return ClassUtils.isAssignable(targetType, valueType);
 	}
@@ -479,6 +480,7 @@ public abstract class BeanUtils {
 	 * @deprecated as of Spring 2.0, in favor of <code>ClassUtils.isAssignableValue</code>
 	 * @see org.springframework.util.ClassUtils#isAssignableValue(Class, Object)
 	 */
+	@Deprecated
 	public static boolean isAssignable(Class type, Object value) {
 		return ClassUtils.isAssignableValue(type, value);
 	}

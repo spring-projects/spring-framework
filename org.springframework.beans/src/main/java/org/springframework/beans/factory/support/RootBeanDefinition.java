@@ -102,6 +102,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param singleton the singleton status of the bean
 	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
+	@Deprecated
 	public RootBeanDefinition(Class beanClass, boolean singleton) {
 		super();
 		setBeanClass(beanClass);
@@ -156,6 +157,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param singleton the singleton status of the bean
 	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
+	@Deprecated
 	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs, boolean singleton) {
 		super(null, pvs);
 		setBeanClass(beanClass);

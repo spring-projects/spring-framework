@@ -352,6 +352,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @deprecated in favor of <code>convertIfNecessary</code>
 	 * @see #convertIfNecessary(Object, Class)
 	 */
+	@Deprecated
 	public Object doTypeConversionIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
 		return convertIfNecessary(value, requiredType, null);
 	}
