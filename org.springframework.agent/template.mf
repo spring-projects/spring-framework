@@ -1,0 +1,5 @@
+Bundle-SymbolicName: org.springframework.agent
+Bundle-Name: Spring Core
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
+Premain-Class: org.springframework.instrument.InstrumentationSavingAgent
