@@ -1,0 +1,59 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.aop.support.annotation;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+
+import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.StaticMethodMatcher;
+import org.springframework.util.Assert;
+
+/**
+ * Simple MethodMatcher that looks for a specific Java 5 annotation
+ * being present on a method (checking both the method on the invoked
+ * interface, if any, and the corresponding method on the target class).
+ *
+ * @author Juergen Hoeller
+ * @since 2.0
+ * @see AnnotationMatchingPointcut
+ */
+public class AnnotationMethodMatcher extends StaticMethodMatcher {
+
+	private final Class<? extends Annotation> annotationType;
+
+
+	/**
+	 * Create a new AnnotationClassFilter for the given annotation type.
+	 * @param annotationType the annotation type to look for
+	 */
+	public AnnotationMethodMatcher(Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "Annotation type must not be null");
+		this.annotationType = annotationType;
+	}
+
+
+	public boolean matches(Method method, Class targetClass) {
+		if (method.isAnnotationPresent(this.annotationType)) {
+			return true;
+		}
+		// The method may be on an interface, so let's check on the target class as well.
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		return (specificMethod != method && specificMethod.isAnnotationPresent(this.annotationType));
+	}
+
+}

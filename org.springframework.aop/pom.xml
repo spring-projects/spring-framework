@@ -6,11 +6,41 @@
 	<packaging>jar</packaging>
 	<name>Spring Core Abstractions and Utilities</name>
 	<version>3.0.0.M1</version>
+	<repositories>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>		
+	</repositories>
+	<build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.aopalliance</groupId>
+		    <artifactId>com.springsource.org.aopalliance</artifactId>
+		    <version>1.0.0</version>
+		</dependency>		
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>com.springsource.org.apache.commons.pool</artifactId>
+		    <version>1.4.0</version>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 </project>

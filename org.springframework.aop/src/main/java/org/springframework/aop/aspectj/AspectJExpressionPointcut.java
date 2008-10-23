@@ -1,0 +1,530 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.aop.aspectj;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.aspectj.weaver.BCException;
+import org.aspectj.weaver.patterns.NamePattern;
+import org.aspectj.weaver.reflect.ReflectionWorld;
+import org.aspectj.weaver.tools.ContextBasedMatcher;
+import org.aspectj.weaver.tools.FuzzyBoolean;
+import org.aspectj.weaver.tools.JoinPointMatch;
+import org.aspectj.weaver.tools.MatchingContext;
+import org.aspectj.weaver.tools.PointcutDesignatorHandler;
+import org.aspectj.weaver.tools.PointcutExpression;
+import org.aspectj.weaver.tools.PointcutParameter;
+import org.aspectj.weaver.tools.PointcutParser;
+import org.aspectj.weaver.tools.PointcutPrimitive;
+import org.aspectj.weaver.tools.ShadowMatch;
+
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.IntroductionAwareMethodMatcher;
+import org.springframework.aop.MethodMatcher;
+import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
+import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.aop.support.AbstractExpressionPointcut;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
+/**
+ * Spring {@link org.springframework.aop.Pointcut} implementation
+ * that uses the AspectJ weaver to evaluate a pointcut expression.
+ *
+ * <p>The pointcut expression value is an AspectJ expression. This can
+ * reference other pointcuts and use composition and other operations.
+ *
+ * <p>Naturally, as this is to be processed by Spring AOP's proxy-based model,
+ * only method execution pointcuts are supported.
+ *
+ * @author Rob Harrop
+ * @author Adrian Colyer
+ * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @author Ramnivas Laddad
+ * @since 2.0
+ */
+public class AspectJExpressionPointcut extends AbstractExpressionPointcut
+		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
+
+	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
+
+	static {
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.ARGS);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.WITHIN);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ANNOTATION);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
+	}
+
+
+	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
+
+	private final Map shadowMapCache = new HashMap();
+
+	private PointcutParser pointcutParser;
+
+	private Class pointcutDeclarationScope;
+
+	private String[] pointcutParameterNames = new String[0];
+
+	private Class[] pointcutParameterTypes = new Class[0];
+
+	private BeanFactory beanFactory;
+
+	private PointcutExpression pointcutExpression;
+
+
+	/**
+	 * Create a new default AspectJExpressionPointcut.
+	 */
+	public AspectJExpressionPointcut() {
+		this(DEFAULT_SUPPORTED_PRIMITIVES);
+	}
+
+	/**
+	 * Create a new AspectJExpressionPointcut with the given supported primitives.
+	 * @param supportedPrimitives Set of {@link org.aspectj.weaver.tools.PointcutPrimitive}
+	 * instances
+	 */
+	public AspectJExpressionPointcut(Set supportedPrimitives) {
+		this.pointcutParser =
+				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
+						supportedPrimitives);
+		this.pointcutParser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
+	}
+
+	/**
+	 * Create a new AspectJExpressionPointcut with the given settings.
+	 * @param declarationScope the declaration scope for the pointcut
+	 * @param paramNames the parameter names for the pointcut
+	 * @param paramTypes the parameter types for the pointcut
+	 */
+	public AspectJExpressionPointcut(Class declarationScope, String[] paramNames, Class[] paramTypes) {
+		this(DEFAULT_SUPPORTED_PRIMITIVES);
+		this.pointcutDeclarationScope = declarationScope;
+		if (paramNames.length != paramTypes.length) {
+			throw new IllegalStateException(
+					"Number of pointcut parameter names must match number of pointcut parameter types");
+		}
+		this.pointcutParameterNames = paramNames;
+		this.pointcutParameterTypes = paramTypes;
+	}
+
+
+	/**
+	 * Set the declaration scope for the pointcut.
+	 */
+	public void setPointcutDeclarationScope(Class pointcutDeclarationScope) {
+		this.pointcutDeclarationScope = pointcutDeclarationScope;
+	}
+
+	/**
+	 * Set the parameter names for the pointcut.
+	 */
+	public void setParameterNames(String[] names) {
+		this.pointcutParameterNames = names;
+	}
+
+	/**
+	 * Set the parameter types for the pointcut.
+	 */
+	public void setParameterTypes(Class[] types) {
+		this.pointcutParameterTypes = types;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+
+	public ClassFilter getClassFilter() {
+		checkReadyToMatch();
+		return this;
+	}
+
+	public MethodMatcher getMethodMatcher() {
+		checkReadyToMatch();
+		return this;
+	}
+
+
+	/**
+	 * Check whether this pointcut is ready to match,
+	 * lazily building the underlying AspectJ pointcut expression.
+	 */
+	private void checkReadyToMatch() {
+		if (getExpression() == null) {
+			throw new IllegalStateException("Must set property 'expression' before attempting to match");
+		}
+		if (this.pointcutExpression == null) {
+			this.pointcutExpression = buildPointcutExpression();
+		}
+	}
+
+	/**
+	 * Build the underlying AspectJ pointcut expression.
+	 */
+	private PointcutExpression buildPointcutExpression() {
+		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
+		for (int i = 0; i < pointcutParameters.length; i++) {
+			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
+					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
+		}
+		return this.pointcutParser.parsePointcutExpression(
+				replaceBooleanOperators(getExpression()), this.pointcutDeclarationScope, pointcutParameters);
+	}
+
+	/**
+	 * If a pointcut expression has been specified in XML, the user cannot
+	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
+	 * We also allow <code>and</code> between two pointcut sub-expressions.
+	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 */
+	private String replaceBooleanOperators(String pcExpr) {
+		pcExpr = StringUtils.replace(pcExpr," and "," && ");
+		pcExpr = StringUtils.replace(pcExpr, " or ", " || ");
+		pcExpr = StringUtils.replace(pcExpr, " not ", " ! ");
+		return pcExpr;
+	}
+
+	/**
+	 * Return the underlying AspectJ pointcut expression.
+	 */
+	public PointcutExpression getPointcutExpression() {
+		checkReadyToMatch();
+		return this.pointcutExpression;
+	}
+
+
+	public boolean matches(Class targetClass) {
+		checkReadyToMatch();
+		try {
+			return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
+		}
+		catch (BCException ex) {
+			logger.debug("PointcutExpression matching rejected target class", ex);
+			return false;
+		}
+	}
+
+	public boolean matches(Method method, Class targetClass, boolean beanHasIntroductions) {
+		checkReadyToMatch();
+		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		ShadowMatch shadowMatch = null;
+		try {
+			shadowMatch = getShadowMatch(targetMethod, method);
+		}
+		catch (ReflectionWorld.ReflectionWorldException ex) {
+			// Could neither introspect the target class nor the proxy class ->
+			// let's simply consider this method as non-matching.
+			return false;
+		}
+
+		// Special handling for this, target, @this, @target, @annotation
+		// in Spring - we can optimize since we know we have exactly this class,
+		// and there will never be matching subclass at runtime.
+		if (shadowMatch.alwaysMatches()) {
+			return true;
+		}
+		else if (shadowMatch.neverMatches()) {
+			return false;
+		}
+		else {
+		  // the maybe case
+		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
+		}
+	}
+
+	public boolean matches(Method method, Class targetClass) {
+		return matches(method, targetClass, false);
+	}
+
+	public boolean isRuntime() {
+		checkReadyToMatch();
+		return this.pointcutExpression.mayNeedDynamicTest();
+	}
+
+	public boolean matches(Method method, Class targetClass, Object[] args) {
+		checkReadyToMatch();
+		ShadowMatch shadowMatch = null;
+		ShadowMatch originalShadowMatch = null;
+		try {
+			shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
+			originalShadowMatch = getShadowMatch(method, method);
+		}
+		catch (ReflectionWorld.ReflectionWorldException ex) {
+			// Could neither introspect the target class nor the proxy class ->
+			// let's simply consider this method as non-matching.
+			return false;
+		}
+
+		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
+		// consistent with return of MethodInvocationProceedingJoinPoint
+		ProxyMethodInvocation pmi = null;
+		Object targetObject = null;
+		Object thisObject = null;
+		try {
+			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+			targetObject = mi.getThis();
+			if (!(mi instanceof ProxyMethodInvocation)) {
+				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+			}
+			pmi = (ProxyMethodInvocation) mi;
+			thisObject = pmi.getProxy();
+		}
+		catch (IllegalStateException ex) {
+			// No current invocation...
+			// TODO: Should we really proceed here?
+			logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
+		}
+
+		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
+
+		/*
+		 * Do a final check to see if any this(TYPE) kind of residue match. For
+		 * this purpose, we use the original method's (proxy method's) shadow to
+		 * ensure that 'this' is correctly checked against. Without this check,
+		 * we get incorrect match on this(TYPE) where TYPE matches the target
+		 * type but not 'this' (as would be the case of JDK dynamic proxies).
+		 * <p>See SPR-2979 for the original bug.
+		 */
+		if (pmi != null) {  // there is a current invocation
+			RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
+			if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+				return false;
+			}
+		}
+		if (joinPointMatch.matches() && pmi != null) {
+			bindParameters(pmi, joinPointMatch);
+		}
+		return joinPointMatch.matches();
+	}
+
+
+	protected String getCurrentProxiedBeanName() {
+		return ProxyCreationContext.getCurrentProxiedBeanName();
+	}
+
+
+	/**
+	 * A match test returned maybe - if there are any subtype sensitive variables
+	 * involved in the test (this, target, at_this, at_target, at_annotation) then
+	 * we say this is not a match as in Spring there will never be a different
+	 * runtime subtype.
+	 */
+	private boolean matchesIgnoringSubtypes(ShadowMatch shadowMatch) {
+		return !(new RuntimeTestWalker(shadowMatch).testsSubtypeSensitiveVars());
+	}
+
+	private boolean matchesTarget(ShadowMatch shadowMatch, Class targetClass) {
+		return new RuntimeTestWalker(shadowMatch).testTargetInstanceOfResidue(targetClass);
+	}
+
+	private void bindParameters(ProxyMethodInvocation invocation, JoinPointMatch jpm) {
+		// Note: Can't use JoinPointMatch.getClass().getName() as the key, since
+		// Spring AOP does all the matching at a join point, and then all the invocations
+		// under this scenario, if we just use JoinPointMatch as the key, then
+		// 'last man wins' which is not what we want at all.
+		// Using the expression is guaranteed to be safe, since 2 identical expressions
+		// are guaranteed to bind in exactly the same way.
+		invocation.setUserAttribute(getExpression(), jpm);
+	}
+
+	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
+		synchronized (this.shadowMapCache) {
+			ShadowMatch shadowMatch = (ShadowMatch) this.shadowMapCache.get(targetMethod);
+			if (shadowMatch == null) {
+				try {
+					shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
+				}
+				catch (ReflectionWorld.ReflectionWorldException ex) {
+					// Failed to introspect target method, probably because it has been loaded
+					// in a special ClassLoader. Let's try the original method instead...
+					if (targetMethod == originalMethod) {
+						throw ex;
+					}
+					shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
+				}
+				this.shadowMapCache.put(targetMethod, shadowMatch);
+			}
+			return shadowMatch;
+		}
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AspectJExpressionPointcut)) {
+			return false;
+		}
+		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
+		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
+				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, otherPc.pointcutParameterTypes);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(this.getExpression());
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);
+		return hashCode;
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AspectJExpressionPointcut: ");
+		if (this.pointcutParameterNames != null && this.pointcutParameterTypes != null) {
+			sb.append("(");
+			for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
+				sb.append(this.pointcutParameterTypes[i].getName());
+				sb.append(" ");
+				sb.append(this.pointcutParameterNames[i]);
+				if ((i+1) < this.pointcutParameterTypes.length) {
+					sb.append(", ");
+				}
+			}
+			sb.append(")");
+		}
+		sb.append(" ");
+		if (getExpression() != null) {
+			sb.append(getExpression());
+		}
+		else {
+			sb.append("<pointcut expression not set>");
+		}
+		return sb.toString();
+	}
+
+
+	/**
+	 * Handler for the Spring-specific <code>bean()</code> pointcut designator
+	 * extension to AspectJ.
+	 * <p>This handler must be added to each pointcut object that needs to
+	 * handle the <code>bean()</code> PCD. Matching context is obtained
+	 * automatically by examining a thread local variable and therefore a matching
+	 * context need not be set on the pointcut.
+	 */
+	private class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHandler {
+
+		private static final String BEAN_DESIGNATOR_NAME = "bean";
+
+		public String getDesignatorName() {
+			return BEAN_DESIGNATOR_NAME;
+		}
+
+		public ContextBasedMatcher parse(String expression) {
+			return new BeanNameContextMatcher(expression);
+		}
+	}
+
+
+	/**
+	 * Matcher class for the BeanNamePointcutDesignatorHandler.
+	 *
+	 * <p>Dynamic match tests for this matcher always return true,
+	 * since the matching decision is made at the proxy creation time.
+	 * For static match tests, this matcher abstains to allow the overall
+	 * pointcut to match even when negation is used with the bean() poitncut.
+	 */
+	private class BeanNameContextMatcher implements ContextBasedMatcher {
+
+		private final NamePattern expressionPattern;
+
+		public BeanNameContextMatcher(String expression) {
+			this.expressionPattern = new NamePattern(expression);
+		}
+
+		public boolean couldMatchJoinPointsInType(Class someClass) {
+			return (contextMatch(someClass) == FuzzyBoolean.YES);
+		}
+
+		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
+			return (contextMatch(someClass) == FuzzyBoolean.YES);
+		}
+
+		public boolean matchesDynamically(MatchingContext context) {
+			return true;
+		}
+
+		public FuzzyBoolean matchesStatically(MatchingContext context) {
+			return contextMatch(null);
+		}
+
+		public boolean mayNeedDynamicTest() {
+			return false;
+		}
+
+		private FuzzyBoolean contextMatch(Class targetType) {
+			String advisedBeanName = getCurrentProxiedBeanName();
+			if (advisedBeanName == null) {  // no proxy creation in progress
+				// abstain; can't return YES, since that will make pointcut with negation fail
+				return FuzzyBoolean.MAYBE; 
+			}
+			if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
+				return FuzzyBoolean.NO;
+			}
+			if (targetType != null) {
+				boolean isFactory = FactoryBean.class.isAssignableFrom(targetType);
+				return FuzzyBoolean.fromBoolean(
+						matchesBeanName(isFactory ? BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName : advisedBeanName));
+			}
+			else {
+				return FuzzyBoolean.fromBoolean(matchesBeanName(advisedBeanName) ||
+						matchesBeanName(BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName));
+			}
+		}
+
+		private boolean matchesBeanName(String advisedBeanName) {
+			if (this.expressionPattern.matches(advisedBeanName)) {
+				return true;
+			}
+			if (beanFactory != null) {
+				String[] aliases = beanFactory.getAliases(advisedBeanName);
+				for (int i = 0; i < aliases.length; i++) {
+					if (this.expressionPattern.matches(aliases[i])) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+}
