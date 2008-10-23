@@ -1,0 +1,97 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.jdbc.support.lob;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.Blob;
+import java.sql.SQLException;
+
+/**
+ * Simple JDBC {@link Blob} adapter that exposes a given byte array or binary stream.
+ * Optionally used by {@link DefaultLobHandler}.
+ *
+ * @author Juergen Hoeller
+ * @since 2.5.3
+ */
+class PassThroughBlob implements Blob {
+
+	private byte[] content;
+
+	private InputStream binaryStream;
+
+	private long contentLength;
+
+
+	public PassThroughBlob(byte[] content) {
+		this.content = content;
+		this.contentLength = content.length;
+	}
+
+	public PassThroughBlob(InputStream binaryStream, long contentLength) {
+		this.binaryStream = binaryStream;
+		this.contentLength = contentLength;
+	}
+
+
+	public long length() throws SQLException {
+		return this.contentLength;
+	}
+
+	public InputStream getBinaryStream() throws SQLException {
+		return (this.content != null ? new ByteArrayInputStream(this.content) : this.binaryStream);
+	}
+
+
+	public InputStream getBinaryStream(long pos, long length) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public OutputStream setBinaryStream(long pos) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public byte[] getBytes(long pos, int length) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public int setBytes(long pos, byte[] bytes) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public long position(byte pattern[], long start) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public long position(Blob pattern, long start) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public void truncate(long len) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	public void free() throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+}
