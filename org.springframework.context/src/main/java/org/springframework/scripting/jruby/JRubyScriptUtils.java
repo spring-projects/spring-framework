@@ -85,14 +85,23 @@ public abstract class JRubyScriptUtils {
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
 		Ruby ruby = initializeRuntime();
 
+		Node scriptRootNode = null;
+		/* TODO: make this JRuby 1.1 compliant
+		
 		Node scriptRootNode = (oldParseMethod != null ?
 				(Node) ReflectionUtils.invokeMethod(oldParseMethod, ruby, new Object[] {scriptSource, "", null}) :
 				ruby.parse(scriptSource, "", null, 0));
+		*/
+		IRubyObject rubyObject = null;
+		/** TODO: make this JRuby 1.1 compliant 
 		IRubyObject rubyObject = ruby.eval(scriptRootNode);
+		*/
 
 		if (rubyObject instanceof RubyNil) {
 			String className = findClassName(scriptRootNode);
+			/** TODO: make this JRuby 1.1 compliant 
 			rubyObject = ruby.evalScript("\n" + className + ".new");
+			*/
 		}
 		// still null?
 		if (rubyObject instanceof RubyNil) {
