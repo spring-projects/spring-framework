@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE rmi PUBLIC "-//BEA Systems, Inc.//RMI Runtime DTD 1.0//EN" "rmi.dtd">
+
+<!--
+  - Special WebLogic deployment descriptor for Spring's RMI invoker.
+  - Only applied by WebLogic Server, ignored on other platforms.
+  -->
+<rmi name="org.springframework.remoting.rmi.RmiInvocationWrapper">
+	<cluster clusterable="true"/>
+	<method name="*" idempotent="true"/>
+</rmi>
