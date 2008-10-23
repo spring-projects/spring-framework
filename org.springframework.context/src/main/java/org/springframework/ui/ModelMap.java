@@ -100,7 +100,7 @@ public class ModelMap extends LinkedHashMap {
 	 * <code>Map</code>, using attribute name generation for each element.
 	 * @see #addAttribute(Object)
 	 */
-	public ModelMap addAllAttributes(Collection attributeValues) {
+	public ModelMap addAllAttributes(Collection<?> attributeValues) {
 		if (attributeValues != null) {
 			for (Iterator it = attributeValues.iterator(); it.hasNext();) {
 				addAttribute(it.next());
@@ -113,7 +113,7 @@ public class ModelMap extends LinkedHashMap {
 	 * Copy all attributes in the supplied <code>Map</code> into this <code>Map</code>.
 	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap addAllAttributes(Map attributes) {
+	public ModelMap addAllAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
 			putAll(attributes);
 		}
@@ -125,7 +125,7 @@ public class ModelMap extends LinkedHashMap {
 	 * with existing objects of the same name taking precedence (i.e. not getting
 	 * replaced).
 	 */
-	public ModelMap mergeAttributes(Map attributes) {
+	public ModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (Iterator it = attributes.keySet().iterator(); it.hasNext();) {
 				Object key = it.next();
