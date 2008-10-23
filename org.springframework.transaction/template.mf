@@ -1,0 +1,26 @@
+Bundle-SymbolicName: org.springframework.transaction
+Bundle-Name: Spring Transaction
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
+Import-Package: 
+ org.springframework.stereotype;version="[2.5.5.A, 2.5.5.A]"
+Import-Template: 
+ com.ibm.wsspi.uow.*;version="[6.0.2.17, 6.1.0)";resolution:=optional,
+ javax.ejb.*;version="[3.0.0, 4.0.0)";resolution:=optional, 
+ javax.resource.*;version="[1.5.0, 2.0.0)";resolution:=optional,
+ javax.transaction.*;version="[1.0.1, 2.0.0)";resolution:=optional,
+ org.aopalliance.*;version="[1.0.0, 2.0.0)",
+ org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
+ org.objectweb.jotm.*;version="[2.0.10, 3.0.0)";resolution:=optional,
+ org.springframework.aop.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.context.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.jndi.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.metadata.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.scheduling.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.util.*;version="[2.5.5.A, 2.5.5.A]"
+Unversioned-Imports: 
+ javax.management.*,
+ javax.naming.*,
+ org.w3c.dom.*
