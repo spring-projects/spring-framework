@@ -44,6 +44,7 @@ public abstract class AopProxyUtils {
 	 * @deprecated as of Spring 2.0.3, in favor of <code>AopUtils.getTargetClass</code>
 	 * @see org.springframework.aop.support.AopUtils#getTargetClass(Object)
 	 */
+	@Deprecated
 	public static Class getTargetClass(Object candidate) {
 		Assert.notNull(candidate, "Candidate object must not be null");
 		if (AopUtils.isCglibProxy(candidate)) {

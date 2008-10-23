@@ -79,6 +79,7 @@ public abstract class AopNamespaceUtils {
 	 * {@link #registerAutoProxyCreatorIfNecessary(ParserContext, Element)} and
 	 * {@link AopConfigUtils#registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry, Object)}
 	 */
+	@Deprecated
 	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext, Object source) {
 		BeanDefinition beanDefinition = AopConfigUtils.registerAutoProxyCreatorIfNecessary(
 				parserContext.getRegistry(), source);
@@ -89,6 +90,7 @@ public abstract class AopNamespaceUtils {
 	 * @deprecated since Spring 2.5, in favor of
 	 * {@link AopConfigUtils#forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry)}
 	 */
+	@Deprecated
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
 		AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 	}

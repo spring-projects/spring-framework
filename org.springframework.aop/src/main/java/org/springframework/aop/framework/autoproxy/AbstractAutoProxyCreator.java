@@ -377,6 +377,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @deprecated in favor of <code>isInfrastructureClass(beanClass)</code>
 	 * @see #isInfrastructureClass(Class)
 	 */
+	@Deprecated
 	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
 		return isInfrastructureClass(beanClass);
 	}
