@@ -57,7 +57,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	public String[] getParameterValues(String paramName) {
-		return (String[]) getExternalContext().getRequestParameterMap().get(paramName);
+		return (String[]) getExternalContext().getRequestParameterValuesMap().get(paramName);
 	}
 
 	public Map getParameterMap() {
