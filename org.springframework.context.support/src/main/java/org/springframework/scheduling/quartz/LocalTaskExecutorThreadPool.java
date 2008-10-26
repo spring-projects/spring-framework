@@ -1,0 +1,84 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.scheduling.quartz;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.SchedulerConfigException;
+import org.quartz.spi.ThreadPool;
+
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.TaskRejectedException;
+
+/**
+ * Quartz ThreadPool adapter that delegates to a Spring-managed
+ * TaskExecutor instance, specified on SchedulerFactoryBean.
+ *
+ * @author Juergen Hoeller
+ * @since 2.0
+ * @see SchedulerFactoryBean#setTaskExecutor
+ */
+public class LocalTaskExecutorThreadPool implements ThreadPool {
+
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private TaskExecutor taskExecutor;
+
+
+	public void initialize() throws SchedulerConfigException {
+		// Absolutely needs thread-bound TaskExecutor to initialize.
+		this.taskExecutor = SchedulerFactoryBean.getConfigTimeTaskExecutor();
+		if (this.taskExecutor == null) {
+			throw new SchedulerConfigException(
+			    "No local TaskExecutor found for configuration - " +
+			    "'taskExecutor' property must be set on SchedulerFactoryBean");
+		}
+	}
+
+	public void shutdown(boolean waitForJobsToComplete) {
+	}
+
+	public int getPoolSize() {
+		return -1;
+	}
+
+
+	public boolean runInThread(Runnable runnable) {
+		if (runnable == null) {
+			return false;
+		}
+		try {
+			this.taskExecutor.execute(runnable);
+			return true;
+		}
+		catch (TaskRejectedException ex) {
+			logger.error("Task has been rejected by TaskExecutor", ex);
+			return false;
+		}
+	}
+
+	public int blockForAvailableThreads() {
+		// The present implementation always returns 1, making Quartz (1.6)
+		// always schedule any tasks that it feels like scheduling.
+		// This could be made smarter for specific TaskExecutors,
+		// for example calling <code>getMaximumPoolSize() - getActiveCount()</code>
+		// on a <code>java.util.concurrent.ThreadPoolExecutor</code>.
+		return 1;
+	}
+
+}
