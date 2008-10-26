@@ -1,0 +1,31 @@
+Bundle-SymbolicName: org.springframework.context.support
+Bundle-Name: Spring Context Support
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
+Import-Template: 
+ commonj.*;version="[1.1.0, 2.0.0)";resolution:=optional,
+ freemarker.*;version="[2.3.12, 3.0.0)";resolution:=optional,
+ javax.activation.*;version="[1.1.0, 2.0.0)";resolution:=optional,
+ javax.mail.*;version="[1.4.0, 2.0.0)";resolution:=optional,
+ net.sf.ehcache.*;version="[1.3.0, 2.0.0)";resolution:=optional,
+ net.sf.jasperreports.*;version="[2.0.5, 3.0.0)";resolution:=optional,
+ org.apache.commons.collections.*;version="[3.2.0, 4.0.0)";resolution:=optional,
+ org.apache.commons.logging.*;version="[1.1.1, 2.0.0)";resolution:=optional,
+ org.apache.velocity.*;version="[1.5.0, 2.0.0)";resolution:=optional,
+ org.quartz.*;version="[1.6.0, 2.0.0)";resolution:=optional,
+ org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.context.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.jdbc.datasource.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.jndi.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.scheduling.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.transaction.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.util.*;version="[2.5.5.A, 2.5.5.A]"
+Unversioned-Imports: 
+ javax.naming.*,
+ javax.sql.*
+Ignored-Existing-Headers: 
+ Bnd-LastModified,
+ Import-Package,
+ Export-Package,
+ Tool
