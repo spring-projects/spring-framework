@@ -153,6 +153,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation returns the description of this resource.
 	 * @see #getDescription()
 	 */
+	@Override
 	public String toString() {
 		return getDescription();
 	}
@@ -161,6 +162,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation compares description strings.
 	 * @see #getDescription()
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
@@ -170,6 +172,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation returns the description's hash code.
 	 * @see #getDescription()
 	 */
+	@Override
 	public int hashCode() {
 		return getDescription().hashCode();
 	}

@@ -166,10 +166,12 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 */
 	private static class ConcurrencyThrottleAdapter extends ConcurrencyThrottleSupport {
 
+		@Override
 		protected void beforeAccess() {
 			super.beforeAccess();
 		}
 
+		@Override
 		protected void afterAccess() {
 			super.afterAccess();
 		}

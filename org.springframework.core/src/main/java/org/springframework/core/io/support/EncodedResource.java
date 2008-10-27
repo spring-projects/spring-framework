@@ -94,6 +94,7 @@ public class EncodedResource {
 	}
 
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -106,10 +107,12 @@ public class EncodedResource {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return this.resource.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return this.resource.toString();
 	}

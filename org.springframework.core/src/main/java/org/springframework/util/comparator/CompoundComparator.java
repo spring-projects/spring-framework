@@ -184,6 +184,7 @@ public class CompoundComparator implements Comparator, Serializable {
 		return 0;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -195,10 +196,12 @@ public class CompoundComparator implements Comparator, Serializable {
 		return this.comparators.equals(other.comparators);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.comparators.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "CompoundComparator: " + this.comparators;
 	}

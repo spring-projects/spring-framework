@@ -86,6 +86,7 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns whether the underlying file exists.
 	 * @see java.io.File#exists()
 	 */
+	@Override
 	public boolean exists() {
 		return this.file.exists();
 	}
@@ -96,6 +97,7 @@ public class FileSystemResource extends AbstractResource {
 	 * @see java.io.File#canRead()
 	 * @see java.io.File#isDirectory()
 	 */
+	@Override
 	public boolean isReadable() {
 		return (this.file.canRead() && !this.file.isDirectory());
 	}
@@ -112,6 +114,7 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns a URL for the underlying file.
 	 * @see java.io.File#toURI()
 	 */
+	@Override
 	public URL getURL() throws IOException {
 		return this.file.toURI().toURL();
 	}
@@ -120,6 +123,7 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns a URI for the underlying file.
 	 * @see java.io.File#toURI()
 	 */
+	@Override
 	public URI getURI() throws IOException {
 		return this.file.toURI();
 	}
@@ -127,6 +131,7 @@ public class FileSystemResource extends AbstractResource {
 	/**
 	 * This implementation returns the underlying File reference.
 	 */
+	@Override
 	public File getFile() {
 		return this.file;
 	}
@@ -136,6 +141,7 @@ public class FileSystemResource extends AbstractResource {
 	 * relative to the path of the underlying file of this resource descriptor.
 	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
 	 */
+	@Override
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new FileSystemResource(pathToUse);
@@ -145,6 +151,7 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns the name of the file.
 	 * @see java.io.File#getName()
 	 */
+	@Override
 	public String getFilename() {
 		return this.file.getName();
 	}
@@ -162,6 +169,7 @@ public class FileSystemResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying File references.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
@@ -170,6 +178,7 @@ public class FileSystemResource extends AbstractResource {
 	/**
 	 * This implementation returns the hash code of the underlying File reference.
 	 */
+	@Override
 	public int hashCode() {
 		return this.path.hashCode();
 	}

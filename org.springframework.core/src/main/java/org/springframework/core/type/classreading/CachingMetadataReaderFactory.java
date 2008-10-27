@@ -61,6 +61,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	}
 
 
+	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
 			MetadataReader metadataReader = this.classReaderCache.get(resource);

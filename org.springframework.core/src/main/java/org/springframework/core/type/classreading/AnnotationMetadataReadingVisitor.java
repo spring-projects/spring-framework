@@ -54,14 +54,17 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	}
 
 
+	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 		return new EmptyVisitor() {
+			@Override
 			public void visit(String name, Object value) {
 				// Explicitly defined annotation attribute value.
 				attributes.put(name, value);
 			}
+			@Override
 			public void visitEnd() {
 				try {
 					Class annotationClass = classLoader.loadClass(className);

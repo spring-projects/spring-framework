@@ -49,6 +49,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	}
 
 
+	@Override
 	protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
 		try {
 			if (this.classLoader != null) {
@@ -65,6 +66,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 		}
 	}
 
+	@Override
 	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
 		if (this.classLoader != null) {
 			// Use the specified ClassLoader to resolve local proxy classes.
