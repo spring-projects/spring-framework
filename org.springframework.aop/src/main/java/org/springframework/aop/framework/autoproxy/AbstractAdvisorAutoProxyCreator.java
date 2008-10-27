@@ -49,6 +49,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
@@ -62,6 +63,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 
+	@Override
 	protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource targetSource) {
 		List advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
@@ -155,6 +157,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	/**
 	 * This auto-proxy creator always returns pre-filtered Advisors.
 	 */
+	@Override
 	protected boolean advisorsPreFiltered() {
 		return true;
 	}
@@ -170,6 +173,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 			super(beanFactory);
 		}
 
+		@Override
 		protected boolean isEligibleBean(String beanName) {
 			return AbstractAdvisorAutoProxyCreator.this.isEligibleAdvisorBean(beanName);
 		}

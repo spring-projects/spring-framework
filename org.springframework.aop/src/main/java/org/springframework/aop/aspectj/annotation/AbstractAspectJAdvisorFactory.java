@@ -300,6 +300,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			return this.argNames;
 		}
 
+		@Override
 		public String toString() {
 			return this.annotation.toString();
 		}

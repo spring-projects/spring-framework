@@ -57,6 +57,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	 * is meant to be per thread per instance of the ThreadLocalTargetSource class.
 	 */
 	private final ThreadLocal targetInThread = new ThreadLocal() {
+		@Override
 		public String toString() {
 			return "Thread-local instance of bean '" + getTargetBeanName() + "'";
 		}

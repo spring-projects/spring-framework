@@ -547,6 +547,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * For debugging/diagnostic use.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName() + ": ");
 		sb.append(this.interfaces.size()).append(" interfaces ");
@@ -574,6 +575,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			this.hashCode = method.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (other == this) {
 				return true;
@@ -582,6 +584,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			return (this.method == otherKey.method);
 		}
 
+		@Override
 		public int hashCode() {
 			return this.hashCode;
 		}

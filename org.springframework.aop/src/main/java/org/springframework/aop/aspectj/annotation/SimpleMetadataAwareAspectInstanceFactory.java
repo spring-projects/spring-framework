@@ -56,6 +56,7 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 	 * <p>The default implementation simply returns <code>Ordered.LOWEST_PRECEDENCE</code>.
 	 * @param aspectClass the aspect class
 	 */
+	@Override
 	protected int getOrderForAspectClass(Class aspectClass) {
 		Order order = (Order) aspectClass.getAnnotation(Order.class);
 		if (order != null) {

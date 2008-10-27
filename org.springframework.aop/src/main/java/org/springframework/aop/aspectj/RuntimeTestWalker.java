@@ -173,6 +173,7 @@ class RuntimeTestWalker {
 			return matches;
 		}
 
+		@Override
 		public void visit(Instanceof i) {
 			ResolvedType type = (ResolvedType) i.getType();
 			int varType = getVarType((ReflectionVar) i.getVar());
@@ -234,6 +235,7 @@ class RuntimeTestWalker {
 			return this.testsSubtypeSensitiveVars;
 		}
 		
+		@Override
 		public void visit(Instanceof i) {
 			ReflectionVar v = (ReflectionVar) i.getVar();
 			Object varUnderTest = v.getBindingAtJoinPoint(thisObj,targetObj,argsObjs);
@@ -242,6 +244,7 @@ class RuntimeTestWalker {
 			}
 		}
 
+		@Override
 		public void visit(HasAnnotation hasAnn) {
 			// If you thought things were bad before, now we sink to new levels of horror...
 			ReflectionVar v = (ReflectionVar) hasAnn.getVar();

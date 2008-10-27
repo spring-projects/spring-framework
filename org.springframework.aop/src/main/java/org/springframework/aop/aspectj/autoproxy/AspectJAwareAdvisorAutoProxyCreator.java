@@ -64,6 +64,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	 * advisor should run first. "On the way out" of a join point, the highest precedence
 	 * advisor should run last.
 	 */
+	@Override
 	protected List sortAdvisors(List advisors) {
 		// build list for sorting
 		List partiallyComparableAdvisors = new LinkedList();
@@ -96,10 +97,12 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	 * These additional advices are needed when using AspectJ expression pointcuts
 	 * and when using AspectJ-style advice.
 	 */
+	@Override
 	protected void extendAdvisors(List candidateAdvisors) {
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
 
+	@Override
 	protected boolean shouldSkip(Class beanClass, String beanName) {
 		// TODO: Consider optimization by caching the list of the aspect names
 		List candidtate = findCandidateAdvisors();
@@ -141,6 +144,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			return this.advisor;
 		}
 
+		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			Advice advice = this.advisor.getAdvice();

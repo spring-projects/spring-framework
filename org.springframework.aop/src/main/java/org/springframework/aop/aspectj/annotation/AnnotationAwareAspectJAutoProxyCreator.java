@@ -86,6 +86,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 		return advisors;
 	}
 
+	@Override
 	protected boolean isInfrastructureClass(Class beanClass) {
 		// Previously we setProxyTargetClass(true) in the constructor, but that has too
 		// broad an impact. Instead we now override isInfrastructureClass to avoid proxying
@@ -130,6 +131,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 			super(beanFactory, advisorFactory);
 		}
 
+		@Override
 		protected boolean isEligibleBean(String beanName) {
 			return AnnotationAwareAspectJAutoProxyCreator.this.isEligibleAspectBean(beanName);
 		}

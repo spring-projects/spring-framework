@@ -108,6 +108,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		return this;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -119,6 +120,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(that.methodName, this.methodName);
 	}
 
+	@Override
 	public int hashCode() {
 		int code = 17;
 		code = 37 * code + this.clazz.hashCode();

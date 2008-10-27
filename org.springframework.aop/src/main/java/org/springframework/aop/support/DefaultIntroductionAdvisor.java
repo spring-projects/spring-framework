@@ -144,6 +144,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -155,10 +156,12 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		return (this.advice.equals(otherAdvisor.advice) && this.interfaces.equals(otherAdvisor.interfaces));
 	}
 
+	@Override
 	public int hashCode() {
 		return this.advice.hashCode() * 13 + this.interfaces.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return ClassUtils.getShortName(getClass()) + ": advice [" + this.advice + "]; interfaces " +
 				ClassUtils.classNamesToString(this.interfaces);

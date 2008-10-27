@@ -137,6 +137,7 @@ public abstract class MethodMatchers {
 			return this.mm1.matches(method, targetClass, args) || this.mm2.matches(method, targetClass, args);
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj) {
 				return true;
@@ -148,6 +149,7 @@ public abstract class MethodMatchers {
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 
+		@Override
 		public int hashCode() {
 			int hashCode = 17;
 			hashCode = 37 * hashCode + this.mm1.hashCode();
@@ -172,14 +174,17 @@ public abstract class MethodMatchers {
 			this.cf2 = cf2;
 		}
 
+		@Override
 		protected boolean matchesClass1(Class targetClass) {
 			return this.cf1.matches(targetClass);
 		}
 
+		@Override
 		protected boolean matchesClass2(Class targetClass) {
 			return this.cf2.matches(targetClass);
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -232,6 +237,7 @@ public abstract class MethodMatchers {
 			return aMatches && bMatches;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -243,6 +249,7 @@ public abstract class MethodMatchers {
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 
+		@Override
 		public int hashCode() {
 			int hashCode = 17;
 			hashCode = 37 * hashCode + this.mm1.hashCode();

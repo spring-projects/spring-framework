@@ -45,6 +45,7 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 		return true;
 	}
 
+	@Override
 	public void setThrowingName(String name) {
 		setThrowingNameNoCheck(name);
 	}

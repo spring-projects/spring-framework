@@ -203,6 +203,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		this.advisorAdapterRegistry = advisorAdapterRegistry;
 	}
 
+	@Override
 	public void setFrozen(boolean frozen) {
 		this.freezeProxy = frozen;
 	}
@@ -599,6 +600,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	/**
 	 * Blow away and recache singleton on an advice change.
 	 */
+	@Override
 	protected void adviceChanged() {
 		super.adviceChanged();
 		if (this.singleton) {
@@ -650,6 +652,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
 		
+		@Override
 		public String toString() {
 			return this.message;
 		}

@@ -181,6 +181,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -193,6 +194,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 				ObjectUtils.nullSafeEquals(this.targetBeanName, otherTargetSource.targetBeanName));
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = getClass().hashCode();
 		hashCode = 13 * hashCode + ObjectUtils.nullSafeHashCode(this.beanFactory);
@@ -200,6 +202,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		return hashCode;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(ClassUtils.getShortName(getClass()));

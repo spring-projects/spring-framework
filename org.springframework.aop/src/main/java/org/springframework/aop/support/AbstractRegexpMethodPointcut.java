@@ -181,6 +181,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	protected abstract boolean matchesExclusion(String pattern, int patternIndex);
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -193,6 +194,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 				Arrays.equals(this.excludedPatterns, otherPointcut.excludedPatterns));
 	}
 
+	@Override
 	public int hashCode() {
 		int result = 27;
 		for (int i = 0; i < this.patterns.length; i++) {
@@ -206,6 +208,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		return result;
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": patterns " + ObjectUtils.nullSafeToString(this.patterns) +
 				", excluded patterns " + ObjectUtils.nullSafeToString(this.excludedPatterns);

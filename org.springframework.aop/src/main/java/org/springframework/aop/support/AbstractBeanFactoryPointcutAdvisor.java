@@ -80,6 +80,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		}
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": advice bean '" + getAdviceBeanName() + "'";
 	}

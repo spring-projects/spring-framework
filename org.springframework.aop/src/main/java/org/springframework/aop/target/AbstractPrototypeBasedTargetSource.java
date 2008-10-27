@@ -39,6 +39,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  */
 public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);
 

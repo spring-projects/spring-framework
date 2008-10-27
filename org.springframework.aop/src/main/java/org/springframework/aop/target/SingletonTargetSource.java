@@ -76,6 +76,7 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 	 * Two invoker interceptors are equal if they have the same target or if the
 	 * targets or the targets are equal.
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -90,10 +91,12 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 	/**
 	 * SingletonTargetSource uses the hash code of the target object.
 	 */
+	@Override
 	public int hashCode() {
 		return this.target.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "SingletonTargetSource for target object [" + ObjectUtils.identityToString(this.target) + "]";
 	}

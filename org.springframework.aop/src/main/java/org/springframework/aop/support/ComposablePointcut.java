@@ -179,6 +179,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -192,6 +193,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 				ObjectUtils.nullSafeEquals(that.methodMatcher, this.methodMatcher);
 	}
 
+	@Override
 	public int hashCode() {
 		int code = 17;
 		if (this.classFilter != null) {
@@ -203,6 +205,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		return code;
 	}
 
+	@Override
 	public String toString() {
 		return "ComposablePointcut: ClassFilter [" + this.classFilter +
 				"], MethodMatcher [" + this.methodMatcher + "]";

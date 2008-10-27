@@ -78,6 +78,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -89,6 +90,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		return (ObjectUtils.nullSafeEquals(this.advice, otherAdvisor.advice));
 	}
 
+	@Override
 	public int hashCode() {
 		return AspectJPointcutAdvisor.class.hashCode();
 	}

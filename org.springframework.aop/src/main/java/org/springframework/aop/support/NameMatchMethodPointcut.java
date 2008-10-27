@@ -103,6 +103,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -111,6 +112,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 				ObjectUtils.nullSafeEquals(this.mappedNames, ((NameMatchMethodPointcut) other).mappedNames));
 	}
 
+	@Override
 	public int hashCode() {
 		return (this.mappedNames != null ? this.mappedNames.hashCode() : 0);
 	}

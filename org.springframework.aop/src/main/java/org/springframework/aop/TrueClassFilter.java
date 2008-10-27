@@ -46,6 +46,7 @@ class TrueClassFilter implements ClassFilter, Serializable {
 		return INSTANCE;
 	}
 
+	@Override
 	public String toString() {
 		return "ClassFilter.TRUE";
 	}

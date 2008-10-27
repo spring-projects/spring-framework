@@ -88,6 +88,7 @@ public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterc
 	 * @see #setTrackAllInvocations
 	 * @see #isLogEnabled
 	 */
+	@Override
 	protected boolean isInterceptorEnabled(MethodInvocation invocation, Log logger) {
 		return (this.trackAllInvocations || isLogEnabled(logger));
 	}
@@ -98,6 +99,7 @@ public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterc
 	 * @see com.jamonapi.MonitorFactory#start
 	 * @see com.jamonapi.Monitor#stop
 	 */
+	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);
 		Monitor monitor = MonitorFactory.start(name);

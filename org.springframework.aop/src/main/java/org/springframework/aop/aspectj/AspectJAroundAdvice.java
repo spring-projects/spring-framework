@@ -49,6 +49,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 		return false;
 	}
 
+	@Override
 	protected boolean supportsProceedingJoinPoint() {
 		return true;
 	}

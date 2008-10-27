@@ -43,6 +43,7 @@ public abstract class AbstractGenericPointcutAdvisor extends AbstractPointcutAdv
 	}
 
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": advice [" + getAdvice() + "]";
 	}

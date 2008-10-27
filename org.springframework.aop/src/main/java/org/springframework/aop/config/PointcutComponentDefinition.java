@@ -50,10 +50,12 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 		return this.pointcutBeanName;
 	}
 
+	@Override
 	public String getDescription() {
 		return this.description;
 	}
 
+	@Override
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[] {this.pointcutDefinition};
 	}

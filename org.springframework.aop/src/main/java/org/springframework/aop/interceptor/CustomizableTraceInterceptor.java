@@ -243,6 +243,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @see #setExitMessage
 	 * @see #setExceptionMessage
 	 */
+	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
 		StopWatch stopWatch = new StopWatch(name);

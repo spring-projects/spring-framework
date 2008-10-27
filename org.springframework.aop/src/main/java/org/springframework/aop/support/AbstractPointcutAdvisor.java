@@ -50,6 +50,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -62,6 +63,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 				ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut()));
 	}
 
+	@Override
 	public int hashCode() {
 		return PointcutAdvisor.class.hashCode();
 	}

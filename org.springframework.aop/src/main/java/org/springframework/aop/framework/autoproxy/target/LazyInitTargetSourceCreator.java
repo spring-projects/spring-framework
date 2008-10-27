@@ -53,10 +53,12 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  */
 public class LazyInitTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
+	@Override
 	protected boolean isPrototypeBased() {
 		return false;
 	}
 
+	@Override
 	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class beanClass, String beanName) {
 
