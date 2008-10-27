@@ -250,6 +250,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		// If no name specified, apply method identification as transaction name.
 		if (txAttr != null && txAttr.getName() == null) {
 			txAttr = new DelegatingTransactionAttribute(txAttr) {
+				@Override
 				public String getName() {
 					return joinpointIdentification;
 				}
@@ -447,6 +448,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			transactionInfoHolder.set(this.oldTransactionInfo);
 		}
 
+		@Override
 		public String toString() {
 			return this.transactionAttribute.toString();
 		}

@@ -150,6 +150,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * by the transaction coordinator, for example in case of a timeout.
 	 * @see SmartTransactionObject#isRollbackOnly
 	 */
+	@Override
 	public boolean isGlobalRollbackOnly() {
 		return ((this.transaction instanceof SmartTransactionObject) &&
 				((SmartTransactionObject) this.transaction).isRollbackOnly());
@@ -159,6 +160,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * This implementation exposes the SavepointManager interface
 	 * of the underlying transaction object, if any.
 	 */
+	@Override
 	protected SavepointManager getSavepointManager() {
 		if (!isTransactionSavepointManager()) {
 			throw new NestedTransactionNotSupportedException(

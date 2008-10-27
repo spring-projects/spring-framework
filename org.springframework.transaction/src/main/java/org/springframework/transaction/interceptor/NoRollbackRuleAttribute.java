@@ -45,6 +45,7 @@ public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 		super(exceptionName);
 	}
 
+	@Override
 	public String toString() {
 		return "No" + super.toString();
 	}

@@ -89,11 +89,13 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 	private Method setTransactionIsolationMethod;
 
 
+	@Override
 	public void afterPropertiesSet() throws TransactionSystemException {
 		super.afterPropertiesSet();
 		loadOC4JTransactionClasses();
 	}
 
+	@Override
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		try {
 			Class transactionUtilityClass = getClass().getClassLoader().loadClass(TRANSACTION_UTILITY_CLASS_NAME);
@@ -153,6 +155,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 	}
 
 
+	@Override
 	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
 			throws NotSupportedException, SystemException {
 
@@ -211,6 +214,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 	}
 
 
+	@Override
 	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
 		if (this.beginWithNameMethod != null && name != null) {
 			UserTransaction ut = getUserTransaction();

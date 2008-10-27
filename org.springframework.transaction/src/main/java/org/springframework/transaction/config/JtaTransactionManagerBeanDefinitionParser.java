@@ -59,6 +59,7 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 			"oracle.j2ee.transaction.OC4JTransactionManager", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
 
 
+	@Override
 	protected String getBeanClassName(Element element) {
 		if (weblogicPresent) {
 			return WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME;
@@ -74,6 +75,7 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 		}
 	}
 
+	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 		return DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
 	}

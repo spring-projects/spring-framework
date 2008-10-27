@@ -54,6 +54,7 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -65,10 +66,12 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 		return ObjectUtils.nullSafeEquals(this.transactionAttribute, otherTas.transactionAttribute);
 	}
 
+	@Override
 	public int hashCode() {
 		return MatchAlwaysTransactionAttributeSource.class.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + this.transactionAttribute;
 	}

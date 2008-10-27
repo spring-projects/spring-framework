@@ -105,6 +105,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	 * "connectionSpec" property else.
 	 * @see #doGetConnection
 	 */
+	@Override
 	public final Connection getConnection() throws ResourceException {
 		ConnectionSpec threadSpec = (ConnectionSpec) this.threadBoundSpec.get();
 		if (threadSpec != null) {

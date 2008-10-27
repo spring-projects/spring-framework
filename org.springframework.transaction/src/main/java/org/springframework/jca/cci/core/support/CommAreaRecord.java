@@ -89,6 +89,7 @@ public class CommAreaRecord implements Record, Streamable {
 	}
 
 
+	@Override
 	public Object clone() {
 		return new CommAreaRecord(this.bytes);
 	}

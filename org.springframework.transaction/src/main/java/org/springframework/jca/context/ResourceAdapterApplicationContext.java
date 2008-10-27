@@ -52,6 +52,7 @@ public class ResourceAdapterApplicationContext extends GenericApplicationContext
 	}
 
 
+	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		beanFactory.addBeanPostProcessor(new BootstrapContextAwareProcessor(this.bootstrapContext));
 		beanFactory.ignoreDependencyInterface(BootstrapContextAware.class);

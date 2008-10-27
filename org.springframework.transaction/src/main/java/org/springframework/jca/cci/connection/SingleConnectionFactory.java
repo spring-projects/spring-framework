@@ -98,6 +98,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	/**
 	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("Connection or 'targetConnectionFactory' is required");
@@ -105,6 +106,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	}
 
 
+	@Override
 	public Connection getConnection() throws ResourceException {
 		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
@@ -114,6 +116,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 		}
 	}
 
+	@Override
 	public Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException {
 		throw new NotSupportedException(
 				"SingleConnectionFactory does not support custom ConnectionSpec");

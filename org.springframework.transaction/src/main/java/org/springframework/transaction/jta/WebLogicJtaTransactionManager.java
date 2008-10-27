@@ -105,11 +105,13 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	private Object transactionHelper;
 
 
+	@Override
 	public void afterPropertiesSet() throws TransactionSystemException {
 		super.afterPropertiesSet();
 		loadWebLogicTransactionClasses();
 	}
 
+	@Override
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		loadWebLogicTransactionHelperClass();
 		try {
@@ -128,6 +130,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+	@Override
 	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
 		loadWebLogicTransactionHelperClass();
 		try {
@@ -229,6 +232,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 
+	@Override
 	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
 			throws NotSupportedException, SystemException {
 
@@ -297,6 +301,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+	@Override
 	protected void doJtaResume(JtaTransactionObject txObject, Object suspendedTransaction)
 			throws InvalidTransactionException, SystemException {
 
@@ -332,6 +337,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 
+	@Override
 	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
 		if (this.weblogicUserTransactionAvailable && name != null) {
 			try {

@@ -122,6 +122,7 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -133,10 +134,12 @@ public class RollbackRuleAttribute implements Serializable{
 		return this.exceptionName.equals(rhs.exceptionName);
 	}
 	
+	@Override
 	public int hashCode() {
 		return this.exceptionName.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "RollbackRuleAttribute with pattern [" + this.exceptionName + "]";
 	}

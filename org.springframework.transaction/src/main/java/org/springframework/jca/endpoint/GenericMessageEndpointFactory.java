@@ -69,6 +69,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	 * exposing the message listener's interfaces as well as the
 	 * endpoint SPI through an AOP introduction.
 	 */
+	@Override
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
 		GenericMessageEndpoint endpoint = (GenericMessageEndpoint) super.createEndpoint(xaResource);
 		ProxyFactory proxyFactory = new ProxyFactory(this.messageListener);
@@ -81,6 +82,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	/**
 	 * Creates a concrete generic message endpoint, internal to this factory.
 	 */
+	@Override
 	protected AbstractMessageEndpoint createEndpointInternal() throws UnavailableException {
 		return new GenericMessageEndpoint();
 	}
@@ -131,6 +133,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 			}
 		}
 
+		@Override
 		protected ClassLoader getEndpointClassLoader() {
 			return messageListener.getClass().getClassLoader();
 		}

@@ -40,6 +40,7 @@ public class JBossWorkManagerTaskExecutor extends WorkManagerTaskExecutor {
 	 * for the JBossWorkManagerMBean.
 	 * @see JBossWorkManagerUtils#getWorkManager()
 	 */
+	@Override
 	protected WorkManager getDefaultWorkManager() {
 		return JBossWorkManagerUtils.getWorkManager();
 	}

@@ -63,10 +63,12 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	private static final String NO_ROLLBACK_FOR = "no-rollback-for";
 
 
+	@Override
 	protected Class getBeanClass(Element element) {
 		return TransactionInterceptor.class;
 	}
 
+	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		// Set the transaction manager property.
 		String transactionManagerName = (element.hasAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) ?

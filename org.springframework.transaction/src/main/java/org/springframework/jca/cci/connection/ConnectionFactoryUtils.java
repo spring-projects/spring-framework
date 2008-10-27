@@ -205,6 +205,7 @@ public abstract class ConnectionFactoryUtils {
 			super(connectionHolder, connectionFactory);
 		}
 
+		@Override
 		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
 			releaseConnection(((ConnectionHolder) resourceHolder).getConnection(), (ConnectionFactory) resourceKey);
 		}

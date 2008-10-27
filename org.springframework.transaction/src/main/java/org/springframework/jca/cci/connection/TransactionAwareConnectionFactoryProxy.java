@@ -89,6 +89,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	 * @return a transactional Connection if any, a new one else
 	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doGetConnection
 	 */
+	@Override
 	public Connection getConnection() throws ResourceException {
 		Connection con = ConnectionFactoryUtils.doGetConnection(getTargetConnectionFactory());
 		return getTransactionAwareConnectionProxy(con, getTargetConnectionFactory());

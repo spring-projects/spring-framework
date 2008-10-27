@@ -69,14 +69,17 @@ public abstract class DelegatingTransactionAttribute implements TransactionAttri
 	}
 
 
+	@Override
 	public boolean equals(Object obj) {
 		return this.targetAttribute.equals(obj);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.targetAttribute.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return this.targetAttribute.toString();
 	}

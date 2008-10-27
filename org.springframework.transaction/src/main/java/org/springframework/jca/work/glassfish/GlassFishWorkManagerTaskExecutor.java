@@ -73,6 +73,7 @@ public class GlassFishWorkManagerTaskExecutor extends WorkManagerTaskExecutor {
 	/**
 	 * Obtains GlassFish's default thread pool.
 	 */
+	@Override
 	protected WorkManager getDefaultWorkManager() {
 		return (WorkManager) ReflectionUtils.invokeMethod(this.getWorkManagerMethod, null, new Object[] {null});
 	}

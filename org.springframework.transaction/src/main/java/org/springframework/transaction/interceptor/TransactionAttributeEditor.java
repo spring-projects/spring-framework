@@ -47,6 +47,7 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 	 * Null or the empty string means that the method is non transactional.
 	 * @see java.beans.PropertyEditor#setAsText(java.lang.String)
 	 */
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasLength(text)) {
 			// tokenize it with ","
