@@ -1,0 +1,24 @@
+Bundle-SymbolicName: org.springframework.web.portlet
+Bundle-Name: Spring Web Portlet
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
+Import-Template: 
+ javax.portlet.*;version="[1.0.0, 2.0.0)",
+ javax.servlet.*;version="[2.4.0, 3.0.0)",
+ org.apache.commons.fileupload.*;version="[1.2.0, 2.0.0)";resolution:=optional,
+ org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
+ org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.context.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.stereotype;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.ui.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.util.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.validation.*;version="[2.5.5.A, 2.5.5.A]",
+ org.springframework.web.*;version="[2.5.5.A, 2.5.5.A]"
+Unversioned-Imports: 
+ org.xml.sax.*
+Ignored-Existing-Headers: 
+ Bnd-LastModified,
+ Import-Package,
+ Export-Package,
+ Tool
