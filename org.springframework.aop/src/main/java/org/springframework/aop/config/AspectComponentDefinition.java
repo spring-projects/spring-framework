@@ -46,10 +46,12 @@ public class AspectComponentDefinition extends CompositeComponentDefinition {
 	}
 
 
+	@Override
 	public BeanDefinition[] getBeanDefinitions() {
 		return this.beanDefinitions;
 	}
 
+	@Override
 	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}

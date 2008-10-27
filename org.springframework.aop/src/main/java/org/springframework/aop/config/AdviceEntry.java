@@ -37,6 +37,7 @@ public class AdviceEntry implements ParseState.Entry {
 		this.kind = kind;
 	}
 
+	@Override
 	public String toString() {
 		return "Advice (" + this.kind + ")";
 	}

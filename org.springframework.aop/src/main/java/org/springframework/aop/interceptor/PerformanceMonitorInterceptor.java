@@ -52,6 +52,7 @@ public class PerformanceMonitorInterceptor extends AbstractMonitoringInterceptor
 	}
 
 
+	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);
 		StopWatch stopWatch = new StopWatch(name);

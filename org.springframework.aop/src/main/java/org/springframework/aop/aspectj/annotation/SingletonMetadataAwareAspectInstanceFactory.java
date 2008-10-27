@@ -57,6 +57,7 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	 * falling back to <code>Ordered.LOWEST_PRECEDENCE</code>.
 	 * @see org.springframework.core.annotation.Order
 	 */
+	@Override
 	protected int getOrderForAspectClass(Class aspectClass) {
 		Order order = (Order) aspectClass.getAnnotation(Order.class);
 		if (order != null) {

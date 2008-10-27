@@ -158,6 +158,7 @@ public class ProxyConfig implements Serializable {
 		this.opaque = other.opaque;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("proxyTargetClass=").append(this.proxyTargetClass).append("; ");

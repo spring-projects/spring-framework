@@ -121,6 +121,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 * Propagate advice change event to all AdvisedSupportListeners.
 	 * @see AdvisedSupportListener#adviceChanged
 	 */
+	@Override
 	protected void adviceChanged() {
 		super.adviceChanged();
 		synchronized (this) {

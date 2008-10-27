@@ -39,6 +39,7 @@ public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSour
 	public static final String PREFIX_THREAD_LOCAL = "%";
 	public static final String PREFIX_PROTOTYPE = "!";
 
+	@Override
 	protected final AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class beanClass, String beanName) {
 

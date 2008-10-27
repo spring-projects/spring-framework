@@ -53,6 +53,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	/**
 	 * Initialize {@link Pattern Patterns} from the supplied <code>String[]</code>.
 	 */
+	@Override
 	protected void initPatternRepresentation(String[] patterns) throws PatternSyntaxException {
 		this.compiledPatterns = compilePatterns(patterns);
 	}
@@ -61,6 +62,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	 * Returns <code>true</code> if the {@link Pattern} at index <code>patternIndex</code>
 	 * matches the supplied candidate <code>String</code>.
 	 */
+	@Override
 	protected boolean matches(String pattern, int patternIndex) {
 		Matcher matcher = this.compiledPatterns[patternIndex].matcher(pattern);
 		return matcher.matches();
@@ -69,6 +71,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	/**
 	 * Initialize exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
 	 */
+	@Override
 	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException {
 		this.compiledExclusionPatterns = compilePatterns(excludedPatterns);
 	}
@@ -77,6 +80,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	 * Returns <code>true</code> if the exclusion {@link Pattern} at index <code>patternIndex</code>
 	 * matches the supplied candidate <code>String</code>.
 	 */
+	@Override
 	protected boolean matchesExclusion(String candidate, int patternIndex) {
 		Matcher matcher = this.compiledExclusionPatterns[patternIndex].matcher(candidate);
 		return matcher.matches();

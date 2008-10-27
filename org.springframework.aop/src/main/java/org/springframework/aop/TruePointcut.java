@@ -50,6 +50,7 @@ class TruePointcut implements Pointcut, Serializable {
 		return INSTANCE;
 	}
 
+	@Override
 	public String toString() {
 		return "Pointcut.TRUE";
 	}

@@ -134,6 +134,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 		return new JdkRegexpMethodPointcut();
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": advice [" + getAdvice() +
 				"], pointcut patterns " + ObjectUtils.nullSafeToString(this.patterns);

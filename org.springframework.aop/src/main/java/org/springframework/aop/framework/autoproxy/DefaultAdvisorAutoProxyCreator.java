@@ -91,6 +91,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	 * @see #setUsePrefix
 	 * @see #setAdvisorBeanNamePrefix
 	 */
+	@Override
 	protected boolean isEligibleAdvisorBean(String beanName) {
 		return (!isUsePrefix() || beanName.startsWith(getAdvisorBeanNamePrefix()));
 	}              

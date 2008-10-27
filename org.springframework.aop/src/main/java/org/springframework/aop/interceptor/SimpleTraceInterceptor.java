@@ -51,6 +51,7 @@ public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 
+	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String invocationDescription = getInvocationDescription(invocation);
 		logger.trace("Entering " + invocationDescription);

@@ -37,6 +37,7 @@ public class AdvisorEntry implements ParseState.Entry {
 		this.name = name;
 	}
 
+	@Override
 	public String toString() {
 		return "Advisor '" + this.name + "'";
 	}

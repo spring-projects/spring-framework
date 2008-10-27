@@ -43,10 +43,12 @@ public class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
 	 * Destroy the given independent instance.
 	 * @see #destroyPrototypeInstance
 	 */
+	@Override
 	public void releaseTarget(Object target) {
 		destroyPrototypeInstance(target);
 	}
 
+	@Override
 	public String toString() {
 		return "PrototypeTargetSource for target bean with name '" + getTargetBeanName() + "'";
 	}

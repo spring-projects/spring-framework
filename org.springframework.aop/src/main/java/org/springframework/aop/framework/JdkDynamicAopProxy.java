@@ -232,6 +232,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * <p>The compared object may be a JdkDynamicAopProxy instance itself
 	 * or a dynamic proxy wrapping a JdkDynamicAopProxy instance.
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (other == this) {
 			return true;
@@ -263,6 +264,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	/**
 	 * Proxy uses the hash code of the TargetSource.
 	 */
+	@Override
 	public int hashCode() {
 		return JdkDynamicAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
 	}

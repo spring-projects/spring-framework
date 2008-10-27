@@ -49,9 +49,11 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
 	 */
 	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
+		@Override
 		public int getOrder() {
 			return Integer.MIN_VALUE;
 		}
+		@Override
 		public String toString() {
 			return ExposeInvocationInterceptor.class.getName() +".ADVISOR";
 		}

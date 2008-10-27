@@ -61,6 +61,7 @@ public class BeanFactoryRefreshableTargetSource extends AbstractRefreshableTarge
 	/**
 	 * Retrieve a fresh target object.
 	 */
+	@Override
 	protected final Object freshTarget() {
 		return this.obtainFreshBean(this.beanFactory, this.beanName);
 	}

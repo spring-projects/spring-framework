@@ -43,6 +43,7 @@ public class AspectEntry implements ParseState.Entry {
 		this.ref = ref;
 	}
 
+	@Override
 	public String toString() {
 		return "Aspect: " + (StringUtils.hasLength(this.id) ? "id='" + this.id + "'" : "ref='" + this.ref + "'");
 	}

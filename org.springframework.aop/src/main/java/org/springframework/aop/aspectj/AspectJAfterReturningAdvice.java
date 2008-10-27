@@ -48,6 +48,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		return true;
 	}
 
+	@Override
 	public void setReturningName(String name) {
 		setReturningNameNoCheck(name);
 	}

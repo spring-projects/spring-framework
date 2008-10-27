@@ -36,6 +36,7 @@ public class PointcutEntry implements ParseState.Entry {
 		this.name = name;
 	}
 
+	@Override
 	public String toString() {
 		return "Pointcut '" + this.name + "'";
 	}

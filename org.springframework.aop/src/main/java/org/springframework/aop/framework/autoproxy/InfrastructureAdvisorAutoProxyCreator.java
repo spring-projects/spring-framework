@@ -31,11 +31,13 @@ public class InfrastructureAdvisorAutoProxyCreator extends AbstractAdvisorAutoPr
 	private ConfigurableListableBeanFactory beanFactory;
 
 
+	@Override
 	protected void initBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		super.initBeanFactory(beanFactory);
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	protected boolean isEligibleAdvisorBean(String beanName) {
 		return (this.beanFactory.containsBeanDefinition(beanName) &&
 				this.beanFactory.getBeanDefinition(beanName).getRole() == BeanDefinition.ROLE_INFRASTRUCTURE);

@@ -73,6 +73,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	}
 
 
+	@Override
 	public final void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);
 		try {
@@ -105,6 +106,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * @throws Exception to allow pooling APIs to throw exception
 	 * @see #getTarget
 	 */
+	@Override
 	public abstract void releaseTarget(Object target) throws Exception;
 
 

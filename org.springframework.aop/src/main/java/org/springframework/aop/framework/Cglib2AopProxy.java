@@ -352,11 +352,13 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof Cglib2AopProxy &&
 				AopProxyUtils.equalsInProxy(this.advised, ((Cglib2AopProxy) other).advised)));
 	}
 
+	@Override
 	public int hashCode() {
 		return Cglib2AopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
 	}
@@ -649,6 +651,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			}
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other ||
 					(other instanceof DynamicAdvisedInterceptor &&
@@ -658,6 +661,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		/**
 		 * CGLIB uses this to drive proxy creation.
 		 */
+		@Override
 		public int hashCode() {
 			return this.advised.hashCode();
 		}
@@ -692,6 +696,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		 * Gives a marginal performance improvement versus using reflection to
 		 * invoke the target when invoking public methods.
 		 */
+		@Override
 		protected Object invokeJoinpoint() throws Throwable {
 			if (this.protectedMethod) {
 				return super.invokeJoinpoint();
@@ -848,6 +853,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			}
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (other == this) {
 				return true;
@@ -915,6 +921,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			return true;
 		}
 
+		@Override
 		public int hashCode() {
 			int hashCode = 0;
 			Advisor[] advisors = this.advised.getAdvisors();

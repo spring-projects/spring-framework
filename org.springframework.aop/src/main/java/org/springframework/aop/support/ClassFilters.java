@@ -104,11 +104,13 @@ public abstract class ClassFilters {
 			return false;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other || (other instanceof UnionClassFilter &&
 					ObjectUtils.nullSafeEquals(this.filters, ((UnionClassFilter) other).filters)));
 		}
 
+		@Override
 		public int hashCode() {
 			return ObjectUtils.nullSafeHashCode(this.filters);
 		}
@@ -135,11 +137,13 @@ public abstract class ClassFilters {
 			return true;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other || (other instanceof IntersectionClassFilter &&
 					ObjectUtils.nullSafeEquals(this.filters, ((IntersectionClassFilter) other).filters)));
 		}
 
+		@Override
 		public int hashCode() {
 			return ObjectUtils.nullSafeHashCode(this.filters);
 		}

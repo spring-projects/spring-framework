@@ -94,15 +94,18 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	 * Two HotSwappableTargetSources are equal if the current target
 	 * objects are equal.
 	 */
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof HotSwappableTargetSource &&
 				this.target.equals(((HotSwappableTargetSource) other).target)));
 	}
 
+	@Override
 	public int hashCode() {
 		return HotSwappableTargetSource.class.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "HotSwappableTargetSource for target: " + this.target;
 	}

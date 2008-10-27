@@ -142,6 +142,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return getClass().getName() + ": execution: [" + this.methodInvocation + "]";
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + toShortString();
 	}

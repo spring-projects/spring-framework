@@ -207,6 +207,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Creates and holds an ObjectPool instance.
 	 * @see #createObjectPool()
 	 */
+	@Override
 	protected final void createPool() {
 		logger.debug("Creating Commons object pool");
 		this.pool = createObjectPool();
@@ -236,6 +237,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	/**
 	 * Borrow an object from the <code>ObjectPool</code>.
 	 */
+	@Override
 	public Object getTarget() throws Exception {
 		return this.pool.borrowObject();
 	}
@@ -243,6 +245,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	/**
 	 * Returns the specified object to the underlying <code>ObjectPool</code>.
 	 */
+	@Override
 	public void releaseTarget(Object target) throws Exception {
 		this.pool.returnObject(target);
 	}

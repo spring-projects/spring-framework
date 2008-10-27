@@ -385,6 +385,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -399,6 +400,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, otherPc.pointcutParameterTypes);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.getExpression());
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
@@ -407,6 +409,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return hashCode;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("AspectJExpressionPointcut: ");

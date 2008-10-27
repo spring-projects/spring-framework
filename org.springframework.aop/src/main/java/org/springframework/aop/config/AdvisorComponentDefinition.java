@@ -95,14 +95,17 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 		return this.advisorBeanName;
 	}
 
+	@Override
 	public String getDescription() {
 		return this.description;
 	}
 
+	@Override
 	public BeanDefinition[] getBeanDefinitions() {
 		return this.beanDefinitions;
 	}
 
+	@Override
 	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}

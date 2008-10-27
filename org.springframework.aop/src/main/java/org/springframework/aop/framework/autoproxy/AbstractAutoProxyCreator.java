@@ -172,10 +172,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * <p>Overridden from the super class to prevent the proxy configuration
 	 * from being frozen before the proxy is created.
 	 */
+	@Override
 	public void setFrozen(boolean frozen) {
 		this.freezeProxy = frozen;
 	}
 
+	@Override
 	public boolean isFrozen() {
 		return this.freezeProxy;
 	}
