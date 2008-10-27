@@ -5,7 +5,6 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.agent"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
@@ -24,5 +23,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.4.0/com.springsource.org.junit-4.4.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.4.0/com.springsource.org.junit-sources-4.4.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-1.0.0.jar" sourcepath="/IVY_CACHE/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-sources-1.0.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.instrument"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
