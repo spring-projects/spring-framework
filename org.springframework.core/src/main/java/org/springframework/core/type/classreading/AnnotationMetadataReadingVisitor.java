@@ -16,19 +16,14 @@
 
 package org.springframework.core.type.classreading;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
-
 import org.springframework.core.type.AnnotationMetadata;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * ASM class visitor which looks for the class name and implemented types as
@@ -54,15 +49,18 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	}
 
 
-	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
+	@Override
+    public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 		return new EmptyVisitor() {
-			public void visit(String name, Object value) {
+			@Override
+            public void visit(String name, Object value) {
 				// Explicitly defined annotation attribute value.
 				attributes.put(name, value);
 			}
-			public void visitEnd() {
+			@Override
+            public void visitEnd() {
 				try {
 					Class annotationClass = classLoader.loadClass(className);
 					// Check declared default values of attributes in the annotation type.

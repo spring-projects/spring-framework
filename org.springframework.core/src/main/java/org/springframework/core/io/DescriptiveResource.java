@@ -44,11 +44,13 @@ public class DescriptiveResource extends AbstractResource {
 	}
 
 
-	public boolean exists() {
+	@Override
+    public boolean exists() {
 		return false;
 	}
 
-	public boolean isReadable() {
+	@Override
+    public boolean isReadable() {
 		return false;
 	}
 
@@ -65,7 +67,8 @@ public class DescriptiveResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying description String.
 	 */
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
 	}
@@ -73,7 +76,8 @@ public class DescriptiveResource extends AbstractResource {
 	/**
 	 * This implementation returns the hash code of the underlying description String.
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.description.hashCode();
 	}
 

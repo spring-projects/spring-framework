@@ -40,7 +40,8 @@ public class NamedInheritableThreadLocal extends InheritableThreadLocal {
 		this.name = name;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return this.name;
 	}
 

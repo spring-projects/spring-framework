@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
+import org.springframework.util.Assert;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
-import org.springframework.util.Assert;
 
 /**
  * Static factory to conceal the automatic choice of the ControlFlow
@@ -103,7 +103,8 @@ public abstract class ControlFlowFactory {
 			return stackTrace.indexOf(token) != -1;
 		}
 
-		public String toString() {
+		@Override
+        public String toString() {
 			StringBuffer sb = new StringBuffer("Jdk14ControlFlow: ");
 			for (int i = 0; i < this.stack.length; i++) {
 				if (i > 0) {

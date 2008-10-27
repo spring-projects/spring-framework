@@ -16,15 +16,15 @@
 
 package org.springframework.core.io;
 
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for <code>java.io.File</code> handles.
@@ -86,7 +86,8 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns whether the underlying file exists.
 	 * @see java.io.File#exists()
 	 */
-	public boolean exists() {
+	@Override
+    public boolean exists() {
 		return this.file.exists();
 	}
 
@@ -96,7 +97,8 @@ public class FileSystemResource extends AbstractResource {
 	 * @see java.io.File#canRead()
 	 * @see java.io.File#isDirectory()
 	 */
-	public boolean isReadable() {
+	@Override
+    public boolean isReadable() {
 		return (this.file.canRead() && !this.file.isDirectory());
 	}
 
@@ -112,7 +114,8 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns a URL for the underlying file.
 	 * @see java.io.File#toURI()
 	 */
-	public URL getURL() throws IOException {
+	@Override
+    public URL getURL() throws IOException {
 		return this.file.toURI().toURL();
 	}
 
@@ -120,14 +123,16 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns a URI for the underlying file.
 	 * @see java.io.File#toURI()
 	 */
-	public URI getURI() throws IOException {
+	@Override
+    public URI getURI() throws IOException {
 		return this.file.toURI();
 	}
 
 	/**
 	 * This implementation returns the underlying File reference.
 	 */
-	public File getFile() {
+	@Override
+    public File getFile() {
 		return this.file;
 	}
 
@@ -136,7 +141,8 @@ public class FileSystemResource extends AbstractResource {
 	 * relative to the path of the underlying file of this resource descriptor.
 	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
 	 */
-	public Resource createRelative(String relativePath) {
+	@Override
+    public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new FileSystemResource(pathToUse);
 	}
@@ -145,7 +151,8 @@ public class FileSystemResource extends AbstractResource {
 	 * This implementation returns the name of the file.
 	 * @see java.io.File#getName()
 	 */
-	public String getFilename() {
+	@Override
+    public String getFilename() {
 		return this.file.getName();
 	}
 
@@ -162,7 +169,8 @@ public class FileSystemResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying File references.
 	 */
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
 	}
@@ -170,7 +178,8 @@ public class FileSystemResource extends AbstractResource {
 	/**
 	 * This implementation returns the hash code of the underlying File reference.
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.path.hashCode();
 	}
 

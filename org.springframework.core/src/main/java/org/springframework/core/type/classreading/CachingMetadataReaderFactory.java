@@ -16,12 +16,12 @@
 
 package org.springframework.core.type.classreading;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
@@ -61,7 +61,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	}
 
 
-	public MetadataReader getMetadataReader(Resource resource) throws IOException {
+	@Override
+    public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
 			MetadataReader metadataReader = this.classReaderCache.get(resource);
 			if (metadataReader == null) {

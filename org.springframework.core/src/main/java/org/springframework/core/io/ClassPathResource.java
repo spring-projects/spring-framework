@@ -16,17 +16,13 @@
 
 package org.springframework.core.io;
 
+import org.springframework.util.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for class path resources.
@@ -151,7 +147,8 @@ public class ClassPathResource extends AbstractResource {
 	 * @see java.lang.ClassLoader#getResource(String)
 	 * @see java.lang.Class#getResource(String)
 	 */
-	public URL getURL() throws IOException {
+	@Override
+    public URL getURL() throws IOException {
 		URL url = null;
 		if (this.clazz != null) {
 			url = this.clazz.getResource(this.path);
@@ -171,7 +168,8 @@ public class ClassPathResource extends AbstractResource {
 	 * resource, provided that it refers to a file in the file system.
 	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
 	 */
-	public File getFile() throws IOException {
+	@Override
+    public File getFile() throws IOException {
 		return ResourceUtils.getFile(getURL(), getDescription());
 	}
 
@@ -179,7 +177,8 @@ public class ClassPathResource extends AbstractResource {
 	 * This implementation determines the underlying File
 	 * (or jar file, in case of a resource in a jar/zip).
 	 */
-	protected File getFileForLastModifiedCheck() throws IOException {
+	@Override
+    protected File getFileForLastModifiedCheck() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isJarURL(url)) {
 			URL actualUrl = ResourceUtils.extractJarFileURL(url);
@@ -195,7 +194,8 @@ public class ClassPathResource extends AbstractResource {
 	 * relative to the path of the underlying resource of this descriptor.
 	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
 	 */
-	public Resource createRelative(String relativePath) {
+	@Override
+    public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new ClassPathResource(pathToUse, this.classLoader, this.clazz);
 	}
@@ -205,7 +205,8 @@ public class ClassPathResource extends AbstractResource {
 	 * resource refers to.
 	 * @see org.springframework.util.StringUtils#getFilename(String)
 	 */
-	public String getFilename() {
+	@Override
+    public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}
 
@@ -220,7 +221,8 @@ public class ClassPathResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying class path locations.
 	 */
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
 		}
@@ -237,7 +239,8 @@ public class ClassPathResource extends AbstractResource {
 	 * This implementation returns the hash code of the underlying
 	 * class path location.
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.path.hashCode();
 	}
 

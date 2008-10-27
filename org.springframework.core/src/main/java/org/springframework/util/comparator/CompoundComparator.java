@@ -16,13 +16,13 @@
 
 package org.springframework.util.comparator;
 
+import org.springframework.util.Assert;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-
-import org.springframework.util.Assert;
 
 /**
  * A comparator that chains a sequence of one or more more Comparators.
@@ -184,7 +184,8 @@ public class CompoundComparator implements Comparator, Serializable {
 		return 0;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -195,11 +196,13 @@ public class CompoundComparator implements Comparator, Serializable {
 		return this.comparators.equals(other.comparators);
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.comparators.hashCode();
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "CompoundComparator: " + this.comparators;
 	}
 

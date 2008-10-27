@@ -64,7 +64,8 @@ public final class BooleanComparator implements Comparator, Serializable {
 		return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -74,11 +75,13 @@ public final class BooleanComparator implements Comparator, Serializable {
 		return (this.trueLow == ((BooleanComparator) obj).trueLow);
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return (this.trueLow ? -1 : 1) * getClass().hashCode();
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BooleanComparator: " + (this.trueLow ? "true low" : "true high");
 	}
 

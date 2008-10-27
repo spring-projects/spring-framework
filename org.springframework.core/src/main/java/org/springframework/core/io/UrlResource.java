@@ -16,6 +16,10 @@
 
 package org.springframework.core.io;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,10 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for <code>java.net.URL</code> locators.
@@ -126,7 +126,8 @@ public class UrlResource extends AbstractResource {
 	/**
 	 * This implementation returns the underlying URL reference.
 	 */
-	public URL getURL() throws IOException {
+	@Override
+    public URL getURL() throws IOException {
 		return this.url;
 	}
 
@@ -134,7 +135,8 @@ public class UrlResource extends AbstractResource {
 	 * This implementation returns the underlying URI directly,
 	 * if possible.
 	 */
-	public URI getURI() throws IOException {
+	@Override
+    public URI getURI() throws IOException {
 		if (this.uri != null) {
 			return this.uri;
 		}
@@ -148,7 +150,8 @@ public class UrlResource extends AbstractResource {
 	 * provided that it refers to a file in the file system.
 	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
 	 */
-	public File getFile() throws IOException {
+	@Override
+    public File getFile() throws IOException {
 		if (this.uri != null) {
 			return ResourceUtils.getFile(this.uri, getDescription());
 		}
@@ -161,7 +164,8 @@ public class UrlResource extends AbstractResource {
 	 * This implementation determines the underlying File
 	 * (or jar file, in case of a resource in a jar/zip).
 	 */
-	protected File getFileForLastModifiedCheck() throws IOException {
+	@Override
+    protected File getFileForLastModifiedCheck() throws IOException {
 		if (ResourceUtils.isJarURL(this.url)) {
 			URL actualUrl = ResourceUtils.extractJarFileURL(this.url);
 			return ResourceUtils.getFile(actualUrl);
@@ -176,7 +180,8 @@ public class UrlResource extends AbstractResource {
 	 * relative to the path of the underlying URL of this resource descriptor.
 	 * @see java.net.URL#URL(java.net.URL, String)
 	 */
-	public Resource createRelative(String relativePath) throws MalformedURLException {
+	@Override
+    public Resource createRelative(String relativePath) throws MalformedURLException {
 		if (relativePath.startsWith("/")) {
 			relativePath = relativePath.substring(1);
 		}
@@ -188,7 +193,8 @@ public class UrlResource extends AbstractResource {
 	 * @see java.net.URL#getFile()
 	 * @see java.io.File#getName()
 	 */
-	public String getFilename() {
+	@Override
+    public String getFilename() {
 		return new File(this.url.getFile()).getName();
 	}
 
@@ -203,7 +209,8 @@ public class UrlResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying URL references.
 	 */
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof UrlResource && this.cleanedUrl.equals(((UrlResource) obj).cleanedUrl)));
 	}
@@ -211,7 +218,8 @@ public class UrlResource extends AbstractResource {
 	/**
 	 * This implementation returns the hash code of the underlying URL reference.
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.cleanedUrl.hashCode();
 	}
 

@@ -16,9 +16,9 @@
 
 package org.springframework.util.comparator;
 
-import java.util.Comparator;
-
 import org.springframework.util.Assert;
+
+import java.util.Comparator;
 
 /**
  * A Comparator that will safely compare nulls to be lower or higher than
@@ -96,7 +96,8 @@ public class NullSafeComparator implements Comparator {
 		return this.nonNullComparator.compare(o1, o2);
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -107,11 +108,13 @@ public class NullSafeComparator implements Comparator {
 		return (this.nonNullComparator.equals(other.nonNullComparator) && this.nullsLow == other.nullsLow);
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return (this.nullsLow ? -1 : 1) * this.nonNullComparator.hashCode();
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "NullSafeComparator: non-null comparator [" + this.nonNullComparator + "]; " +
 				(this.nullsLow ? "nulls low" : "nulls high");
 	}

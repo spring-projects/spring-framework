@@ -16,13 +16,13 @@
 
 package org.springframework.core.io.support;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 /**
  * Holder that combines a {@link org.springframework.core.io.Resource}
@@ -94,7 +94,8 @@ public class EncodedResource {
 	}
 
 
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
 		}
@@ -106,11 +107,13 @@ public class EncodedResource {
 		return false;
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.resource.hashCode();
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return this.resource.toString();
 	}
 

@@ -18,7 +18,6 @@ package org.springframework.core.type.classreading;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.EmptyVisitor;
-
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.util.ClassUtils;
 
@@ -50,7 +49,8 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 	private String[] interfaces;
 
 
-	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
+	@Override
+    public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
 		this.isAbstract = ((access & Opcodes.ACC_ABSTRACT) != 0);
@@ -63,11 +63,13 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 		}
 	}
 
-	public void visitOuterClass(String owner, String name, String desc) {
+	@Override
+    public void visitOuterClass(String owner, String name, String desc) {
 		this.enclosingClassName = ClassUtils.convertResourcePathToClassName(owner);
 	}
 
-	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+	@Override
+    public void visitInnerClass(String name, String outerName, String innerName, int access) {
 		if (outerName != null && this.className.equals(ClassUtils.convertResourcePathToClassName(name))) {
 			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerName);
 			this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);

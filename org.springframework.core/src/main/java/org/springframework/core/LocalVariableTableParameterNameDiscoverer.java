@@ -16,6 +16,12 @@
 
 package org.springframework.core;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.objectweb.asm.*;
+import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.util.ClassUtils;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,17 +30,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
-
-import org.springframework.util.ClassUtils;
 
 /**
  * Implementation of {@link ParameterNameDiscoverer} that uses the LocalVariableTable
@@ -177,7 +172,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			this.descriptorToMatch = descriptor;			
 		}
 
-		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+		@Override
+        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			if (name.equals(this.methodNameToMatch) && desc.equals(this.descriptorToMatch)) {
 				return new LocalVariableTableVisitor(this, isStatic(access));
 			} 
@@ -253,7 +249,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			this.parameterNames = new String[memberVisitor.numParamsExpected];
 		}
 
-		public void visitLocalVariable(
+		@Override
+        public void visitLocalVariable(
 				String name, String description, String signature, Label start, Label end, int index) {
 			this.hasLvtInfo = true;
 			int[] lvtSlotIndices = this.memberVisitor.lvtSlotIndex;
@@ -264,7 +261,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			}
 		}
 
-		public void visitEnd() {
+		@Override
+        public void visitEnd() {
 			if (this.hasLvtInfo || (this.isStatic && this.parameterNames.length == 0)) {
 				 // visitLocalVariable will never be called for static no args methods
 				 // which doesn't use any local variables.

@@ -96,7 +96,8 @@ public class InvertibleComparator implements Comparator, Serializable {
 		return 0;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -107,11 +108,13 @@ public class InvertibleComparator implements Comparator, Serializable {
 		return (this.comparator.equals(other.comparator) && this.ascending == other.ascending);
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return this.comparator.hashCode();
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "InvertibleComparator: [" + this.comparator + "]; ascending=" + this.ascending;
 	}
 

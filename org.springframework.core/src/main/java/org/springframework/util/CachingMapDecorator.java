@@ -19,15 +19,7 @@ package org.springframework.util;
 import java.io.Serializable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  * A simple decorator for a Map, encapsulating the workflow for caching
@@ -269,7 +261,8 @@ public class CachingMapDecorator implements Map, Serializable {
 	}
 
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "CachingMapDecorator [" + getClass().getName() + "]:" + this.targetMap;
 	}
 
