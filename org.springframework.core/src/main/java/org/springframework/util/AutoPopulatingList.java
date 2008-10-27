@@ -18,7 +18,11 @@ package org.springframework.util;
 
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Simple {@link List} wrapper class that allows for elements to be
@@ -115,8 +119,7 @@ public class AutoPopulatingList implements List, Serializable {
 		return this.backingList.containsAll(c);
 	}
 
-	@Override
-    public boolean equals(Object o) {
+	public boolean equals(Object o) {
 		return this.backingList.equals(o);
 	}
 
@@ -145,8 +148,7 @@ public class AutoPopulatingList implements List, Serializable {
 		return element;
 	}
 
-	@Override
-    public int hashCode() {
+	public int hashCode() {
 		return this.backingList.hashCode();
 	}
 

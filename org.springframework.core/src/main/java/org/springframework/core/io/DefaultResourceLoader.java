@@ -16,12 +16,12 @@
 
 package org.springframework.core.io;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Default implementation of the {@link ResourceLoader} interface.
@@ -134,8 +134,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 			return getPath();
 		}
 
-		@Override
-        public Resource createRelative(String relativePath) {
+		public Resource createRelative(String relativePath) {
 			String pathToUse = StringUtils.applyRelativePath(getPath(), relativePath);
 			return new ClassPathContextResource(pathToUse, getClassLoader());
 		}

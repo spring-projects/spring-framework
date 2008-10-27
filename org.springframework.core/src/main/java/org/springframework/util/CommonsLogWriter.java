@@ -16,9 +16,9 @@
 
 package org.springframework.util;
 
-import org.apache.commons.logging.Log;
-
 import java.io.Writer;
+
+import org.apache.commons.logging.Log;
 
 /**
  * <code>java.io.Writer</code> adapter for a Commons Logging <code>Log</code>.
@@ -53,8 +53,7 @@ public class CommonsLogWriter extends Writer {
 		}
 	}
 
-	@Override
-    public void write(char[] buffer, int offset, int length) {
+	public void write(char[] buffer, int offset, int length) {
 		for (int i = 0; i < length; i++) {
 			char ch = buffer[offset + i];
 			if (ch == '\n' && this.buffer.length() > 0) {
@@ -67,12 +66,10 @@ public class CommonsLogWriter extends Writer {
 		}
 	}
 
-	@Override
-    public void flush() {
+	public void flush() {
 	}
 
-	@Override
-    public void close() {
+	public void close() {
 	}
 
 }

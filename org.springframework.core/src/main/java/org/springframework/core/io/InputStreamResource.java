@@ -71,16 +71,14 @@ public class InputStreamResource extends AbstractResource {
 	/**
 	 * This implementation always returns <code>true</code>.
 	 */
-	@Override
-    public boolean exists() {
+	public boolean exists() {
 		return true;
 	}
 
 	/**
 	 * This implementation always returns <code>true</code>.
 	 */
-	@Override
-    public boolean isOpen() {
+	public boolean isOpen() {
 		return true;
 	}
 
@@ -108,8 +106,7 @@ public class InputStreamResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying InputStream.
 	 */
-	@Override
-    public boolean equals(Object obj) {
+	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
 	}
@@ -117,8 +114,7 @@ public class InputStreamResource extends AbstractResource {
 	/**
 	 * This implementation returns the hash code of the underlying InputStream.
 	 */
-	@Override
-    public int hashCode() {
+	public int hashCode() {
 		return this.inputStream.hashCode();
 	}
 

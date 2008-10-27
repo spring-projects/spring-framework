@@ -40,8 +40,7 @@ public class NamedThreadLocal extends ThreadLocal {
 		this.name = name;
 	}
 
-	@Override
-    public String toString() {
+	public String toString() {
 		return this.name;
 	}
 

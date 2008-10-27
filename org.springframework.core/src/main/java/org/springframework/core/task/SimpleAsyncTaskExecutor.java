@@ -16,12 +16,12 @@
 
 package org.springframework.core.task;
 
+import java.io.Serializable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
-
-import java.io.Serializable;
 
 /**
  * TaskExecutor implementation that fires up a new Thread for each task,
@@ -166,13 +166,11 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 */
 	private static class ConcurrencyThrottleAdapter extends ConcurrencyThrottleSupport {
 
-		@Override
-        protected void beforeAccess() {
+		protected void beforeAccess() {
 			super.beforeAccess();
 		}
 
-		@Override
-        protected void afterAccess() {
+		protected void afterAccess() {
 			super.afterAccess();
 		}
 	}

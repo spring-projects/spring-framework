@@ -16,13 +16,13 @@
 
 package org.springframework.core;
 
-import org.springframework.util.ClassUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.lang.reflect.Proxy;
+
+import org.springframework.util.ClassUtils;
 
 /**
  * Special ObjectInputStream subclass that resolves class names
@@ -49,8 +49,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	}
 
 
-	@Override
-    protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
+	protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
 		try {
 			if (this.classLoader != null) {
 				// Use the specified ClassLoader to resolve local classes.
@@ -66,8 +65,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 		}
 	}
 
-	@Override
-    protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
+	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
 		if (this.classLoader != null) {
 			// Use the specified ClassLoader to resolve local proxy classes.
 			Class[] resolvedInterfaces = new Class[interfaces.length];

@@ -16,12 +16,12 @@
 
 package org.springframework.core;
 
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.util.Assert;
 
 /**
  * Support class for {@link AttributeAccessor AttributeAccessors}, providing
@@ -84,8 +84,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 
-	@Override
-    public boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -96,8 +95,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		return this.attributes.equals(that.attributes);
 	}
 
-	@Override
-    public int hashCode() {
+	public int hashCode() {
 		return this.attributes.hashCode();
 	}
 
