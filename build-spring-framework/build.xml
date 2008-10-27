@@ -2,7 +2,7 @@
 <project name="build-spring-webflow" default="precommit">
 
 	<path id="bundles">
-		<pathelement location="../org.springframework.agent"/>
+		<pathelement location="../org.springframework.instrument"/>
 		<pathelement location="../org.springframework.core"/>
 		<pathelement location="../org.springframework.expression"/>
 		<pathelement location="../org.springframework.beans"/>
@@ -10,8 +10,11 @@
 		<pathelement location="../org.springframework.context"/>
 		<pathelement location="../org.springframework.transaction"/>
 		<pathelement location="../org.springframework.jdbc"/>
-		<pathelement location="../org.springframework.web"/>
 		<pathelement location="../org.springframework.orm"/>
+		<pathelement location="../org.springframework.context.support"/>
+		<pathelement location="../org.springframework.web"/>
+		<pathelement location="../org.springframework.web.servlet"/>
+		<pathelement location="../org.springframework.web.portlet"/>
 	</path>
 
 	<property file="${basedir}/../build.properties"/>
