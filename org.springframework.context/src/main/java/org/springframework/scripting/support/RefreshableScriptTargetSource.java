@@ -66,6 +66,7 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 	 * ScriptFactory's <code>requiresScriptedObjectRefresh</code> method.
 	 * @see ScriptFactory#requiresScriptedObjectRefresh(ScriptSource)
 	 */
+	@Override
 	protected boolean requiresRefresh() {
 		return this.scriptFactory.requiresScriptedObjectRefresh(this.scriptSource);
 	}
@@ -73,6 +74,7 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 	/**
 	 * Obtain a fresh target object, retrieving a FactoryBean if necessary.
 	 */
+	@Override
 	protected Object obtainFreshBean(BeanFactory beanFactory, String beanName) {
 		return super.obtainFreshBean(beanFactory,
 				(this.isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName));

@@ -249,6 +249,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @throws JMException in case of errors
 	 * @see #populateAttributeDescriptor
 	 */
+	@Override
 	protected ModelMBeanAttributeInfo[] getAttributeInfo(Object managedBean, String beanKey) throws JMException {
 		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(getClassToExpose(managedBean));
 		List infos = new ArrayList();
@@ -302,6 +303,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @return the operation metadata
 	 * @see #populateOperationDescriptor
 	 */
+	@Override
 	protected ModelMBeanOperationInfo[] getOperationInfo(Object managedBean, String beanKey) {
 		Method[] methods = getClassToExpose(managedBean).getMethods();
 		List infos = new ArrayList();
@@ -478,6 +480,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @see #setDefaultCurrencyTimeLimit(Integer)
 	 * @see #applyDefaultCurrencyTimeLimit(javax.management.Descriptor)
 	 */
+	@Override
 	protected void populateMBeanDescriptor(Descriptor descriptor, Object managedBean, String beanKey) {
 		applyDefaultCurrencyTimeLimit(descriptor);
 	}

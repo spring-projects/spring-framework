@@ -55,11 +55,13 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			"com.ibm.websphere.management.AdminServiceFactory", MBeanServerBeanDefinitionParser.class.getClassLoader());
 
 
+	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		return (StringUtils.hasText(id) ? id : MBEAN_SERVER_BEAN_NAME);
 	}
 
+	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		String agentId = element.getAttribute(AGENT_ID_ATTRIBUTE);
 		if (StringUtils.hasText(agentId)) {

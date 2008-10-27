@@ -135,14 +135,17 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 
+	@Override
 	public boolean hasErrors() {
 		return !this.errors.isEmpty();
 	}
 
+	@Override
 	public int getErrorCount() {
 		return this.errors.size();
 	}
 
+	@Override
 	public List getAllErrors() {
 		return Collections.unmodifiableList(this.errors);
 	}
@@ -158,6 +161,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return Collections.unmodifiableList(result);
 	}
 
+	@Override
 	public ObjectError getGlobalError() {
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			ObjectError objectError = (ObjectError) it.next();
@@ -179,6 +183,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return Collections.unmodifiableList(result);
 	}
 
+	@Override
 	public FieldError getFieldError() {
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			Object error = it.next();
@@ -189,6 +194,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return null;
 	}
 
+	@Override
 	public List getFieldErrors(String field) {
 		List result = new LinkedList();
 		String fixedField = fixedField(field);
@@ -201,6 +207,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return Collections.unmodifiableList(result);
 	}
 
+	@Override
 	public FieldError getFieldError(String field) {
 		String fixedField = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
@@ -238,6 +245,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * the type from a descriptor, even for <code>null</code> values.
 	 * @see #getActualFieldValue
 	 */
+	@Override
 	public Class getFieldType(String field) {
 		Object value = getActualFieldValue(fixedField(field));
 		if (value != null) {
@@ -329,6 +337,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -342,6 +351,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 				getAllErrors().equals(otherResult.getAllErrors()));
 	}
 
+	@Override
 	public int hashCode() {
 		return getObjectName().hashCode() * 29 + getTarget().hashCode();
 	}

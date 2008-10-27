@@ -760,6 +760,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (this.shutdownHook == null) {
 			// No shutdown hook registered yet.
 			this.shutdownHook = new Thread() {
+				@Override
 				public void run() {
 					doClose();
 				}
@@ -1153,6 +1154,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Return information about this context.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getId());
 		sb.append(": display name [").append(getDisplayName());

@@ -124,6 +124,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	}
 
 
+	@Override
 	public void setId(String id) {
 		super.setId(id);
 		this.setIdCalled = true;

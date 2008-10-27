@@ -102,6 +102,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * Throws an IllegalArgumentException if it encounters a JDK dynamic proxy.
 	 * Metadata can only be read from target classes and CGLIB proxies!
 	 */
+	@Override
 	protected void checkManagedBean(Object managedBean) throws IllegalArgumentException {
 		if (AopUtils.isJdkDynamicProxy(managedBean)) {
 			throw new IllegalArgumentException(
@@ -126,6 +127,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * @return whether the method has the appropriate metadata
 	 */
+	@Override
 	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return hasManagedAttribute(method);
 	}
@@ -136,6 +138,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * @return whether the method has the appropriate metadata
 	 */
+	@Override
 	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return hasManagedAttribute(method);
 	}
@@ -146,6 +149,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * @return whether the method has the appropriate metadata
 	 */
+	@Override
 	protected boolean includeOperation(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
@@ -176,6 +180,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * Reads managed resource description from the source level metadata.
 	 * Returns an empty <code>String</code> if no description can be found.
 	 */
+	@Override
 	protected String getDescription(Object managedBean, String beanKey) {
 		ManagedResource mr = this.attributeSource.getManagedResource(getClassToExpose(managedBean));
 		return (mr != null ? mr.getDescription() : "");
@@ -186,6 +191,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * descriptor. Attempts to create the description using metadata from either
 	 * the getter or setter attributes, otherwise uses the property name.
 	 */
+	@Override
 	protected String getAttributeDescription(PropertyDescriptor propertyDescriptor, String beanKey) {
 		Method readMethod = propertyDescriptor.getReadMethod();
 		Method writeMethod = propertyDescriptor.getWriteMethod();
@@ -208,6 +214,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * Retrieves the description for the supplied <code>Method</code> from the
 	 * metadata. Uses the method name is no description is present in the metadata.
 	 */
+	@Override
 	protected String getOperationDescription(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
@@ -231,6 +238,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * attributes attached to a method. Returns an empty array of <code>MBeanParameterInfo</code>
 	 * if no attributes are found.
 	 */
+	@Override
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
 		ManagedOperationParameter[] params = this.attributeSource.getManagedOperationParameters(method);
 		if (params == null || params.length == 0) {
@@ -253,6 +261,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * Reads the {@link ManagedNotification} metadata from the <code>Class</code> of the managed resource
 	 * and generates and returns the corresponding {@link ModelMBeanNotificationInfo} metadata.
 	 */
+	@Override
 	protected ModelMBeanNotificationInfo[] getNotificationInfo(Object managedBean, String beanKey) {
 		ManagedNotification[] notificationAttributes =
 				this.attributeSource.getManagedNotifications(getClassToExpose(managedBean));
@@ -273,6 +282,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * <code>persistPolicy</code>, <code>persistPeriod</code>, <code>persistLocation</code>
 	 * and <code>persistName</code> descriptor fields if they are present in the metadata.
 	 */
+	@Override
 	protected void populateMBeanDescriptor(Descriptor desc, Object managedBean, String beanKey) {
 		ManagedResource mr = this.attributeSource.getManagedResource(getClassToExpose(managedBean));
 		if (mr == null) {
@@ -309,6 +319,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * <code>default</code>, <code>persistPolicy</code> and <code>persistPeriod</code>
 	 * descriptor fields if they are present in the metadata.
 	 */
+	@Override
 	protected void populateAttributeDescriptor(Descriptor desc, Method getter, Method setter, String beanKey) {
 		ManagedAttribute gma =
 				(getter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(getter);
@@ -335,6 +346,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * to the attribute descriptor. Specifically, adds the <code>currencyTimeLimit</code>
 	 * descriptor field if it is present in the metadata.
 	 */
+	@Override
 	protected void populateOperationDescriptor(Descriptor desc, Method method, String beanKey) {
 		ManagedOperation mo = this.attributeSource.getManagedOperation(method);
 		if (mo != null) {

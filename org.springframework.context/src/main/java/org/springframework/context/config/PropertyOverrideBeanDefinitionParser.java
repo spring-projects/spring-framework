@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
  */
 class PropertyOverrideBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
 
+	@Override
 	protected Class getBeanClass(Element element) {
 		return PropertyOverrideConfigurer.class;
 	}

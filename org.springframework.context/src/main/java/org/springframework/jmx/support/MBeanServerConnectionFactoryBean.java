@@ -174,10 +174,12 @@ public class MBeanServerConnectionFactoryBean
 	 */
 	private class JMXConnectorLazyInitTargetSource extends AbstractLazyCreationTargetSource {
 
+		@Override
 		protected Object createObject() throws Exception {
 			return JMXConnectorFactory.connect(serviceUrl, environment);
 		}
 
+		@Override
 		public Class getTargetClass() {
 			return JMXConnector.class;
 		}
@@ -189,10 +191,12 @@ public class MBeanServerConnectionFactoryBean
 	 */
 	private class MBeanServerConnectionLazyInitTargetSource extends AbstractLazyCreationTargetSource {
 
+		@Override
 		protected Object createObject() throws Exception {
 			return connector.getMBeanServerConnection();
 		}
 
+		@Override
 		public Class getTargetClass() {
 			return MBeanServerConnection.class;
 		}

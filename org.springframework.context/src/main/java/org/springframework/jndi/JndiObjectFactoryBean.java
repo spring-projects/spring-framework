@@ -163,6 +163,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	/**
 	 * Look up the JNDI object and store it.
 	 */
+	@Override
 	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		super.afterPropertiesSet();
 

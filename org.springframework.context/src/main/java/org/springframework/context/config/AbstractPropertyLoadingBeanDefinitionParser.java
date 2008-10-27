@@ -32,10 +32,12 @@ import org.springframework.util.StringUtils;
  */
 abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+	@Override
 	protected boolean shouldGenerateId() {
 		return true;
 	}
 
+	@Override
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
 		String location = element.getAttribute("location");
 		if (StringUtils.hasLength(location)) {

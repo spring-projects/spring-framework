@@ -167,6 +167,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		prepare();

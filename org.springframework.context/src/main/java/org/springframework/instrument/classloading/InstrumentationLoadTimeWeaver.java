@@ -182,6 +182,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 					loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 		}
 
+		@Override
 		public String toString() {
 			return "FilteringClassFileTransformer for: " + this.targetTransformer.toString();
 		}

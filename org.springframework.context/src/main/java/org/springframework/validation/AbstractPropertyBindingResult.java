@@ -51,6 +51,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * Returns the underlying PropertyAccessor.
 	 * @see #getPropertyAccessor()
 	 */
+	@Override
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return getPropertyAccessor();
 	}
@@ -59,6 +60,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * Returns the canonical property name.
 	 * @see org.springframework.beans.PropertyAccessorUtils#canonicalPropertyName
 	 */
+	@Override
 	protected String canonicalFieldName(String field) {
 		return PropertyAccessorUtils.canonicalPropertyName(field);
 	}
@@ -67,6 +69,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * Determines the field type from the property type.
 	 * @see #getPropertyAccessor()
 	 */
+	@Override
 	public Class getFieldType(String field) {
 		return getPropertyAccessor().getPropertyType(fixedField(field));
 	}
@@ -75,6 +78,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * Fetches the field value from the PropertyAccessor.
 	 * @see #getPropertyAccessor()
 	 */
+	@Override
 	protected Object getActualFieldValue(String field) {
 		return getPropertyAccessor().getPropertyValue(field);
 	}
@@ -83,6 +87,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * Formats the field value based on registered PropertyEditors.
 	 * @see #getCustomEditor
 	 */
+	@Override
 	protected Object formatFieldValue(String field, Object value) {
 		PropertyEditor customEditor = getCustomEditor(field);
 		if (customEditor != null) {

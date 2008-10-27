@@ -58,6 +58,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	}
 
 
+	@Override
 	public final Object getTarget() {
 		return this.target;
 	}
@@ -67,6 +68,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * Creates a new one if none existed before.
 	 * @see #createBeanWrapper()
 	 */
+	@Override
 	public final ConfigurablePropertyAccessor getPropertyAccessor() {
 		if (this.beanWrapper == null) {
 			this.beanWrapper = createBeanWrapper();

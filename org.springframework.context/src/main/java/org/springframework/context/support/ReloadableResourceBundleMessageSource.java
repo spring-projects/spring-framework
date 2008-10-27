@@ -261,6 +261,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Resolves the given message code as key in the retrieved bundle files,
 	 * returning the value found in the bundle as-is (without MessageFormat parsing).
 	 */
+	@Override
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		if (this.cacheMillis < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
@@ -289,6 +290,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Resolves the given message code as key in the retrieved bundle files,
 	 * using a cached MessageFormat instance per message code.
 	 */
+	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		if (this.cacheMillis < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
@@ -580,6 +582,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	}
 
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": basenames=[" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
 	}

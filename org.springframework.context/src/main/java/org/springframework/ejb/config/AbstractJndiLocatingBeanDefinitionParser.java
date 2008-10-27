@@ -42,10 +42,12 @@ abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBe
 	public static final String JNDI_ENVIRONMENT = "jndiEnvironment";
 
 
+	@Override
 	protected boolean isEligibleAttribute(String attributeName) {
 		return (super.isEligibleAttribute(attributeName) && !ENVIRONMENT_REF.equals(attributeName));
 	}
 
+	@Override
 	protected void postProcess(BeanDefinitionBuilder definitionBuilder, Element element) {
 		Object envValue = DomUtils.getChildElementValueByTagName(element, ENVIRONMENT);
 		if (envValue != null) {

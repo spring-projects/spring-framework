@@ -153,6 +153,7 @@ public class NotificationListenerHolder {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -167,6 +168,7 @@ public class NotificationListenerHolder {
 				ObjectUtils.nullSafeEquals(this.mappedObjectNames, otherNlh.mappedObjectNames));
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.notificationListener);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.notificationFilter);

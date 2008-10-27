@@ -96,11 +96,13 @@ public class FieldError extends ObjectError {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
 				"': rejected value [" + this.rejectedValue + "]; " + resolvableToString();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -114,6 +116,7 @@ public class FieldError extends ObjectError {
 				isBindingFailure() == otherError.isBindingFailure();
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = super.hashCode();
 		hashCode = 29 * hashCode + getField().hashCode();

@@ -91,6 +91,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * {@link #releaseSessionBeanInstance} to change EJB instance creation,
 	 * for example to hold a single shared EJB component instance.
 	 */
+	@Override
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {
@@ -157,6 +158,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	/**
 	 * Reset the cached session bean instance, if necessary.
 	 */
+	@Override
 	protected void refreshHome() throws NamingException {
 		super.refreshHome();
 		if (this.cacheSessionBean) {

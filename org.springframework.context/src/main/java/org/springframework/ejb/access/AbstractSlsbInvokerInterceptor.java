@@ -101,6 +101,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @see #setLookupHomeOnStartup
 	 * @see #refreshHome
 	 */
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (this.lookupHomeOnStartup) {

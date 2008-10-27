@@ -149,6 +149,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 			if (this.threaded) {
 				// Start the connector server asynchronously (in a separate thread).
 				Thread connectorThread = new Thread() {
+					@Override
 					public void run() {
 						try {
 							connectorServer.start();

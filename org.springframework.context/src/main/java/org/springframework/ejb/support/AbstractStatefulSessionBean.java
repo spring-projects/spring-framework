@@ -54,6 +54,7 @@ public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 	 * removed via a call to <code>unloadBeanFactory()</code> from
 	 * the <code>ejbPassivate()</code> implementation.
 	 */
+	@Override
 	protected void loadBeanFactory() throws BeansException {
 		super.loadBeanFactory();
 	}
@@ -66,6 +67,7 @@ public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 	 * must also be called from <code>ejbPassivate()</code>, with a corresponding
 	 * call to <code>loadBeanFactory()</code> from <code>ejbActivate()</code>.
 	 */
+	@Override
 	protected void unloadBeanFactory() throws FatalBeanException {
 		super.unloadBeanFactory();
 	}

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
  */
 class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
 
+	@Override
 	protected Class getBeanClass(Element element) {
 		return PropertyPlaceholderConfigurer.class;
 	}

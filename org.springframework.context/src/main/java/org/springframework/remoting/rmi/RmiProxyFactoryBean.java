@@ -63,6 +63,7 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 	private Object serviceProxy;
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {

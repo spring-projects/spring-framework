@@ -62,6 +62,7 @@ public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	protected Class resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}

@@ -66,6 +66,7 @@ public class ResourceMapFactoryBean extends PropertiesFactoryBean implements Res
 	}
 
 
+	@Override
 	public Class getObjectType() {
 		return Map.class;
 	}
@@ -73,6 +74,7 @@ public class ResourceMapFactoryBean extends PropertiesFactoryBean implements Res
 	/**
 	 * Create the Map instance, populated with keys and Resource values.
 	 */
+	@Override
 	protected Object createInstance() throws IOException {
 		Map resourceMap = new HashMap();
 		Properties props = mergeProperties();

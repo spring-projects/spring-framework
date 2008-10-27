@@ -40,6 +40,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 	private final Map messages = new HashMap();
 
 
+	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		return (MessageFormat) this.messages.get(code + "_" + locale.toString());
 	}
@@ -75,6 +76,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 	}
 
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + this.messages;
 	}

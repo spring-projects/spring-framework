@@ -54,10 +54,12 @@ class MBeanExportBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String REGISTRATION_REPLACE_EXISTING = "replaceExisting";
 
 
+	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 		return MBEAN_EXPORTER_BEAN_NAME;
 	}
 
+	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		String beanClassName = (JdkVersion.isAtLeastJava15() ?
 				"org.springframework.jmx.export.annotation.AnnotationMBeanExporter" :

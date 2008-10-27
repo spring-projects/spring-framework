@@ -67,10 +67,12 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Error in object '" + this.objectName + "': " + resolvableToString();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -82,6 +84,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 		return getObjectName().equals(otherError.getObjectName());
 	}
 
+	@Override
 	public int hashCode() {
 		return super.hashCode() * 29 + getObjectName().hashCode();
 	}

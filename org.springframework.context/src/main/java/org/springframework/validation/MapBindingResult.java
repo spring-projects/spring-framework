@@ -54,10 +54,12 @@ public class MapBindingResult extends AbstractBindingResult implements Serializa
 		return this.target;
 	}
 
+	@Override
 	public final Object getTarget() {
 		return this.target;
 	}
 
+	@Override
 	protected Object getActualFieldValue(String field) {
 		return this.target.get(field);
 	}

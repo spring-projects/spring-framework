@@ -60,6 +60,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * {@link #releaseSessionBeanInstance} to change EJB instance creation,
 	 * for example to hold a single shared EJB instance.
 	 */
+	@Override
 	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {
@@ -104,6 +105,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	/**
 	 * Check for EJB3-style home object that serves as EJB component directly.
 	 */
+	@Override
 	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		if (this.homeAsComponent) {
 			return null;

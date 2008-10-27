@@ -139,6 +139,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * the parent of the internal BeanFactory accordingly.
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
 	 */
+	@Override
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
@@ -172,6 +173,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * falling back to the default superclass behavior else.
 	 * @see #setResourceLoader
 	 */
+	@Override
 	public Resource getResource(String location) {
 		if (this.resourceLoader != null) {
 			return this.resourceLoader.getResource(location);
@@ -185,6 +187,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * default superclass behavior else.
 	 * @see #setResourceLoader
 	 */
+	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
 			return ((ResourcePatternResolver) this.resourceLoader).getResources(locationPattern);
@@ -202,6 +205,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * to register beans through our public methods (or the BeanFactory's).
 	 * @see #registerBeanDefinition
 	 */
+	@Override
 	protected final void refreshBeanFactory() throws IllegalStateException {
 		if (this.refreshed) {
 			throw new IllegalStateException(
@@ -214,6 +218,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Do nothing: We hold a single internal BeanFactory that will never
 	 * get released.
 	 */
+	@Override
 	protected final void closeBeanFactory() {
 	}
 
@@ -221,6 +226,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Return the single internal BeanFactory held by this context
 	 * (as ConfigurableListableBeanFactory).
 	 */
+	@Override
 	public final ConfigurableListableBeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}

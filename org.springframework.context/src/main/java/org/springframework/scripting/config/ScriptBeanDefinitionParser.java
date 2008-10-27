@@ -96,6 +96,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * Parses the dynamic object element and returns the resulting bean definition.
 	 * Registers a {@link ScriptFactoryPostProcessor} if needed.
 	 */
+	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());
@@ -209,6 +210,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	/**
 	 * Scripted beans may be anonymous as well.
 	 */
+	@Override
 	protected boolean shouldGenerateIdAsFallback() {
 		return true;
 	}

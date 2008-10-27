@@ -206,6 +206,7 @@ public class RemoteInvocation implements Serializable {
 	}
 
 
+	@Override
 	public String toString() {
 		return "RemoteInvocation: method name '" + this.methodName + "'; parameter types " +
 				ClassUtils.classNamesToString(this.parameterTypes);

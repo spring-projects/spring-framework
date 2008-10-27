@@ -36,11 +36,13 @@ import org.springframework.validation.BindingResult;
  */
 public class BindingAwareModelMap extends ExtendedModelMap {
 
+	@Override
 	public Object put(Object key, Object value) {
 		removeBindingResultIfNecessary(key, value);
 		return super.put(key, value);
 	}
 
+	@Override
 	public void putAll(Map map) {
 		for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
 			removeBindingResultIfNecessary(entry.getKey(), entry.getValue());

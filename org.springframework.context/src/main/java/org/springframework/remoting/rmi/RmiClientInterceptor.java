@@ -129,6 +129,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		prepare();
@@ -405,6 +406,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 */
 	private static class DummyURLStreamHandler extends URLStreamHandler {
 
+		@Override
 		protected URLConnection openConnection(URL url) throws IOException {
 			throw new UnsupportedOperationException();
 		}

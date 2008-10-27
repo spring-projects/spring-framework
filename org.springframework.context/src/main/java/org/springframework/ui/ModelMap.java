@@ -150,6 +150,7 @@ public class ModelMap extends LinkedHashMap {
 	/**
 	 * @deprecated as of Spring 2.5, in favor of {@link #addAttribute(String, Object)}
 	 */
+	@Deprecated
 	public ModelMap addObject(String modelName, Object modelObject) {
 		return addAttribute(modelName, modelObject);
 	}
@@ -157,6 +158,7 @@ public class ModelMap extends LinkedHashMap {
 	/**
 	 * @deprecated as of Spring 2.5, in favor of {@link #addAttribute(Object)}
 	 */
+	@Deprecated
 	public ModelMap addObject(Object modelObject) {
 		return addAttribute(modelObject);
 	}
@@ -164,6 +166,7 @@ public class ModelMap extends LinkedHashMap {
 	/**
 	 * @deprecated as of Spring 2.5, in favor of {@link #addAllAttributes(Collection)}
 	 */
+	@Deprecated
 	public ModelMap addAllObjects(Collection objects) {
 		return addAllAttributes(objects);
 	}
@@ -171,6 +174,7 @@ public class ModelMap extends LinkedHashMap {
 	/**
 	 * @deprecated as of Spring 2.5, in favor of {@link #addAllAttributes(Map)}
 	 */
+	@Deprecated
 	public ModelMap addAllObjects(Map objects) {
 		return addAllAttributes(objects);
 	}

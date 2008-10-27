@@ -83,6 +83,7 @@ public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStrea
 	}
 
 
+	@Override
 	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException {
 
@@ -94,6 +95,7 @@ public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStrea
 		return RMIClassLoader.loadClass(this.codebaseUrl, className);
 	}
 
+	@Override
 	protected ClassLoader getFallbackClassLoader() throws IOException {
 		return RMIClassLoader.getClassLoader(this.codebaseUrl);
 	}

@@ -210,6 +210,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName());
 		sb.append(": ").append(getErrorCount()).append(" errors");

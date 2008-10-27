@@ -1001,6 +1001,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * callback.
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 */
+	@Override
 	protected void onRegister(ObjectName objectName) {
 		notifyListenersOfRegistration(objectName);
 	}
@@ -1015,6 +1016,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * callback.
 	 * @param objectName the <code>ObjectName</code> of the unregistered MBean
 	 */
+	@Override
 	protected void onUnregister(ObjectName objectName) {
 		notifyListenersOfUnregistration(objectName);
 	}
@@ -1083,6 +1085,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			this.objectName = objectName;
 		}
 
+		@Override
 		protected void postProcessTargetObject(Object targetObject) {
 			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean, this.objectName);
 		}

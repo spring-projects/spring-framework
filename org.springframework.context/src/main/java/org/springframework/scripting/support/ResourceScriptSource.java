@@ -124,6 +124,7 @@ public class ResourceScriptSource implements ScriptSource {
 	}
 
 
+	@Override
 	public String toString() {
 		return this.resource.toString();
 	}

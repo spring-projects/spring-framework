@@ -66,6 +66,7 @@ public abstract class RmiBasedExporter extends RemoteInvocationBasedExporter {
 	 * Redefined here to be visible to RmiInvocationWrapper.
 	 * Simply delegates to the corresponding superclass method.
 	 */
+	@Override
 	protected Object invoke(RemoteInvocation invocation, Object targetObject)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
