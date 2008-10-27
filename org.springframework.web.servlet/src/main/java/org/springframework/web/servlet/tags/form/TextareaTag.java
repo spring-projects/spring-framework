@@ -1,0 +1,103 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.web.servlet.tags.form;
+
+import javax.servlet.jsp.JspException;
+
+/**
+ * Databinding-aware JSP tag for rendering an HTML '<code>textarea</code>'.
+ *
+ * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @since 2.0
+ */
+public class TextareaTag extends AbstractHtmlInputElementTag {
+
+	public static final String ROWS_ATTRIBUTE = "rows";
+
+	public static final String COLS_ATTRIBUTE = "cols";
+
+	public static final String ONSELECT_ATTRIBUTE = "onselect";
+
+	public static final String READONLY_ATTRIBUTE = "readonly";
+
+
+	private String rows;
+
+	private String cols;
+
+	private String onselect;
+
+
+	/**
+	 * Set the value of the '<code>rows</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setRows(String rows) {
+		this.rows = rows;
+	}
+
+	/**
+	 * Get the value of the '<code>rows</code>' attribute.
+	 */
+	protected String getRows() {
+		return this.rows;
+	}
+
+	/**
+	 * Set the value of the '<code>cols</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setCols(String cols) {
+		this.cols = cols;
+	}
+
+	/**
+	 * Get the value of the '<code>cols</code>' attribute.
+	 */
+	protected String getCols() {
+		return this.cols;
+	}
+
+	/**
+	 * Set the value of the '<code>onselect</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setOnselect(String onselect) {
+		this.onselect = onselect;
+	}
+
+	/**
+	 * Get the value of the '<code>onselect</code>' attribute.
+	 */
+	protected String getOnselect() {
+		return this.onselect;
+	}
+
+
+	protected int writeTagContent(TagWriter tagWriter) throws JspException {
+		tagWriter.startTag("textarea");
+		writeDefaultAttributes(tagWriter);
+		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, getRows());
+		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, getCols());
+		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
+		tagWriter.appendValue(getDisplayString(getBoundValue(), getPropertyEditor()));
+		tagWriter.endTag();
+		return SKIP_BODY;
+	}
+
+}

@@ -1,0 +1,203 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.web.servlet.tags.form;
+
+import javax.servlet.jsp.JspException;
+
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.util.TagUtils;
+
+/**
+ * Convenient tag that allows one to supply a collection of objects
+ * that are to be rendered as '<code>option</code>' tags within a
+ * '<code>select</code>' tag.
+ * 
+ * <p><i>Must</i> be used within a {@link SelectTag 'select' tag}.
+ * 
+ * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @since 2.0
+ */
+public class OptionsTag extends AbstractHtmlElementTag {
+	
+	/**
+	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
+	 * objects used to generate the inner '<code>option</code>' tags.
+	 */
+	private Object items;
+
+	/**
+	 * The name of the property mapped to the '<code>value</code>' attribute
+	 * of the '<code>option</code>' tag.
+	 */
+	private String itemValue;
+
+	/**
+	 * The name of the property mapped to the inner text of the
+	 * '<code>option</code>' tag.
+	 */
+	private String itemLabel;
+
+	private String disabled;
+
+
+	/**
+	 * Set the {@link java.util.Collection}, {@link java.util.Map} or array
+	 * of objects used to generate the inner '<code>option</code>' tags.
+	 * <p>Required when wishing to render '<code>option</code>' tags from an
+	 * array, {@link java.util.Collection} or {@link java.util.Map}.
+	 * <p>Typically a runtime expression.
+	 */
+	public void setItems(Object items) {
+		this.items = items;
+	}
+
+	/**
+	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array
+	 * of objects used to generate the inner '<code>option</code>' tags.
+	 * <p>Typically a runtime expression.
+	 */
+	protected Object getItems() {
+		return this.items;
+	}
+
+	/**
+	 * Set the name of the property mapped to the '<code>value</code>'
+	 * attribute of the '<code>option</code>' tag.
+	 * <p>Required when wishing to render '<code>option</code>' tags from
+	 * an array or {@link java.util.Collection}.
+	 * <p>May be a runtime expression.
+	 */
+	public void setItemValue(String itemValue) {
+		Assert.hasText(itemValue, "'itemValue' must not be empty");
+		this.itemValue = itemValue;
+	}
+
+	/**
+	 * Return the name of the property mapped to the '<code>value</code>'
+	 * attribute of the '<code>option</code>' tag.
+	 */
+	protected String getItemValue() {
+		return this.itemValue;
+	}
+
+	/**
+	 * Set the name of the property mapped to the label (inner text) of the
+	 * '<code>option</code>' tag.
+	 * <p>May be a runtime expression.
+	 */
+	public void setItemLabel(String itemLabel) {
+		Assert.hasText(itemLabel, "'itemLabel' must not be empty");
+		this.itemLabel = itemLabel;
+	}
+
+	/**
+	 * Get the name of the property mapped to the label (inner text) of the
+	 * '<code>option</code>' tag.
+	 * <p>May be a runtime expression.
+	 */
+	protected String getItemLabel() {
+		return this.itemLabel;
+	}
+
+	/**
+	 * Set the value of the '<code>disabled</code>' attribute.
+	 * <p>May be a runtime expression.
+	 * @param disabled the value of the '<code>disabled</code>' attribute
+	 */
+	public void setDisabled(String disabled) {
+		this.disabled = disabled;
+	}
+
+	/**
+	 * Get the value of the '<code>disabled</code>' attribute.
+	 */
+	protected String getDisabled() {
+		return this.disabled;
+	}
+
+	/**
+	 * Is the current HTML tag disabled?
+	 * @return <code>true</code> if this tag is disabled
+	 */
+	protected boolean isDisabled() {
+		return "true".equals(getDisabled());
+	}
+
+
+	protected int writeTagContent(TagWriter tagWriter) throws JspException {
+		assertUnderSelectTag();
+		Object items = getItems();
+		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+		if (itemsObject != null) {
+			String itemValue = getItemValue();
+			String itemLabel = getItemLabel();
+			String valueProperty =
+					(itemValue != null ? ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)) : null);
+			String labelProperty =
+					(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
+			OptionsWriter optionWriter = new OptionsWriter(itemsObject, valueProperty, labelProperty);
+			optionWriter.writeOptions(tagWriter);
+		}
+		return SKIP_BODY;
+	}
+
+	/**
+	 * Appends a counter to a specified id,
+	 * since we're dealing with multiple HTML elements.
+	 */
+	protected String resolveId() throws JspException {
+		Object id = evaluate("id", getId());
+		if (id != null) {
+			String idString = id.toString();
+			return (StringUtils.hasText(idString) ? TagIdGenerator.nextId(idString, this.pageContext) : null);
+		}
+		return null;
+	}
+
+	private void assertUnderSelectTag() {
+		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "options", "select");
+	}
+
+	protected BindStatus getBindStatus() {
+		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+	}
+
+
+	/**
+	 * Inner class that adapts OptionWriter for multiple options to be rendered.
+	 */
+	private class OptionsWriter extends OptionWriter {
+
+		public OptionsWriter(Object optionSource, String valueProperty, String labelProperty) {
+			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+		}
+
+		protected boolean isOptionDisabled() {
+			return isDisabled();
+		}
+
+		protected void writeCommonAttributes(TagWriter tagWriter) throws JspException {
+			writeOptionalAttribute(tagWriter, "id", resolveId());
+			writeOptionalAttributes(tagWriter);
+		}
+	}
+
+}
