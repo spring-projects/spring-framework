@@ -114,6 +114,7 @@ public class Problem {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Configuration problem: ");

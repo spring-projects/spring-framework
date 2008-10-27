@@ -502,6 +502,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public String[] getAliases(String name) {
 		String beanName = transformedBeanName(name);
 		List aliases = new ArrayList();

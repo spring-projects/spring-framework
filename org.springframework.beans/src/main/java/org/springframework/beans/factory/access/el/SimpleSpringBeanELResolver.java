@@ -42,6 +42,7 @@ public class SimpleSpringBeanELResolver extends SpringBeanELResolver {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	protected BeanFactory getBeanFactory(ELContext elContext) {
 		return this.beanFactory;
 	}

@@ -918,6 +918,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Delegates to {@link #cloneBeanDefinition()}.
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Object clone() {
 		return cloneBeanDefinition();
 	}
@@ -930,6 +931,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public abstract AbstractBeanDefinition cloneBeanDefinition();
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -969,6 +971,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(getBeanClassName());
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.scope);
@@ -980,6 +983,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return hashCode;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer("class [");
 		sb.append(getBeanClassName()).append("]");

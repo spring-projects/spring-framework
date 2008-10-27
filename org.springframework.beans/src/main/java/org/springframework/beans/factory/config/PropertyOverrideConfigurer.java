@@ -93,6 +93,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	}
 
 
+	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException {
 

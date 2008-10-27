@@ -70,18 +70,22 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 
+	@Override
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
 
+	@Override
 	public Method getWriteMethod() {
 		return this.writeMethod;
 	}
 
+	@Override
 	public Class getPropertyEditorClass() {
 		return this.propertyEditorClass;
 	}
 
+	@Override
 	public synchronized Class getPropertyType() {
 		if (this.propertyType == null) {
 			if (this.readMethod != null) {

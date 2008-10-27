@@ -50,6 +50,7 @@ public abstract class BeansException extends NestedRuntimeException {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -62,6 +63,7 @@ public abstract class BeansException extends NestedRuntimeException {
 				ObjectUtils.nullSafeEquals(getCause(), otherBe.getCause()));
 	}
 
+	@Override
 	public int hashCode() {
 		return getMessage().hashCode();
 	}

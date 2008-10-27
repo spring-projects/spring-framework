@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
  */
 public class ServiceListFactoryBean extends AbstractServiceLoaderBasedFactoryBean implements BeanClassLoaderAware {
 
+	@Override
 	protected Object getObjectToExpose(ServiceLoader serviceLoader) {
 		List result = new LinkedList();
 		Iterator it = serviceLoader.iterator();
@@ -43,6 +44,7 @@ public class ServiceListFactoryBean extends AbstractServiceLoaderBasedFactoryBea
 		return result;
 	}
 
+	@Override
 	public Class getObjectType() {
 		return List.class;
 	}

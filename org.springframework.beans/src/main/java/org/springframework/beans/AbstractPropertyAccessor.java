@@ -111,6 +111,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 
 
 	// Redefined with public visibility.
+	@Override
 	public Class getPropertyType(String propertyPath) {
 		return null;
 	}

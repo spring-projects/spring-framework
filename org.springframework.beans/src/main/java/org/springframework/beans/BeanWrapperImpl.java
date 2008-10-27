@@ -282,6 +282,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return nestedBw.getCachedIntrospectionResults().getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
 
+	@Override
 	public Class getPropertyType(String propertyName) throws BeansException {
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
@@ -527,6 +528,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	// Implementation of PropertyAccessor interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public Object getPropertyValue(String propertyName) throws BeansException {
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
@@ -620,6 +622,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
+	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw = null;
 		try {
@@ -633,6 +636,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		nestedBw.setPropertyValue(tokens, new PropertyValue(propertyName, value));
 	}
 
+	@Override
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
@@ -864,6 +868,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName());
 		if (this.object != null) {

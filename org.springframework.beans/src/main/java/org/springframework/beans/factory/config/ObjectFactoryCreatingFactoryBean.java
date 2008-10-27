@@ -110,16 +110,19 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean {
 		this.targetBeanName = targetBeanName;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.hasText(this.targetBeanName, "Property 'targetBeanName' is required");
 		super.afterPropertiesSet();
 	}
 
 
+	@Override
 	public Class getObjectType() {
 		return ObjectFactory.class;
 	}
 
+	@Override
 	protected Object createInstance() {
 		return new ObjectFactory() {
 			public Object getObject() throws BeansException {

@@ -72,6 +72,7 @@ public class ReplaceOverride extends MethodOverride {
 	}
 
 
+	@Override
 	public boolean matches(Method method) {
 		// TODO could cache result for efficiency
 		if (!method.getName().equals(getMethodName())) {
@@ -99,11 +100,13 @@ public class ReplaceOverride extends MethodOverride {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Replace override for method '" + getMethodName() + "; will call bean '" +
 				this.methodReplacerBeanName + "'";
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof ReplaceOverride) || !super.equals(other)) {
 			return false;
@@ -113,6 +116,7 @@ public class ReplaceOverride extends MethodOverride {
 				ObjectUtils.nullSafeEquals(this.typeIdentifiers, that.typeIdentifiers));
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = super.hashCode();
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.methodReplacerBeanName);

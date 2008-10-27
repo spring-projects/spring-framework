@@ -139,6 +139,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		return this.parentName;
 	}
 
+	@Override
 	public void validate() throws BeanDefinitionValidationException {
 		super.validate();
 		if (this.parentName == null) {
@@ -147,10 +148,12 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	@Override
 	public AbstractBeanDefinition cloneBeanDefinition() {
 		return new ChildBeanDefinition(this);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -162,10 +165,12 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		return (ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other));
 	}
 
+	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(this.parentName) * 29 + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer("Child bean with parent '");
 		sb.append(this.parentName).append("': ").append(super.toString());

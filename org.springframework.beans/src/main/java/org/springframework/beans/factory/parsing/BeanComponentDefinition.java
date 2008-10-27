@@ -119,6 +119,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * This implementation returns this ComponentDefinition's description.
 	 * @see #getDescription()
 	 */
+	@Override
 	public String toString() {
 		return getDescription();
 	}
@@ -127,6 +128,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * This implementations expects the other object to be of type BeanComponentDefinition
 	 * as well, in addition to the superclass's equality requirements.
 	 */
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof BeanComponentDefinition && super.equals(other)));
 	}

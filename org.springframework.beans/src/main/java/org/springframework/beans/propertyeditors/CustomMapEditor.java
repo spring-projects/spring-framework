@@ -86,6 +86,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	/**
 	 * Convert the given text value to a Map with a single element.
 	 */
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		setValue(text);
 	}
@@ -93,6 +94,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	/**
 	 * Convert the given value to a Map of the target type.
 	 */
+	@Override
 	public void setValue(Object value) {
 		if (value == null && this.nullAsEmptyMap) {
 			super.setValue(createMap(this.mapType, 0));
@@ -192,6 +194,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * This implementation returns <code>null</code> to indicate that
 	 * there is no appropriate text representation.
 	 */
+	@Override
 	public String getAsText() {
 		return null;
 	}

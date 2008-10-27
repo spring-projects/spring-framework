@@ -149,6 +149,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -161,6 +162,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		    isAscending() == otherSd.isAscending() && isIgnoreCase() == otherSd.isIgnoreCase());
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = getProperty().hashCode();
 		hashCode = 29 * hashCode + (isIgnoreCase() ? 1 : 0);

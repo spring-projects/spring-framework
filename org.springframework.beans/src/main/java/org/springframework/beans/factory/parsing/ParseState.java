@@ -93,6 +93,7 @@ public final class ParseState {
 	/**
 	 * Returns a tree-style representation of the current <code>ParseState</code>.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		for (int x = 0; x < this.state.size(); x++) {

@@ -59,20 +59,24 @@ public class LookupOverride extends MethodOverride {
 	/**
 	 * Match method of the given name, with no parameters.
 	 */
+	@Override
 	public boolean matches(Method method) {
 		return (method.getName().equals(getMethodName()) && method.getParameterTypes().length == 0);
 	}
 
 
+	@Override
 	public String toString() {
 		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + this.beanName + "'";
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		return (other instanceof LookupOverride && super.equals(other) &&
 				ObjectUtils.nullSafeEquals(this.beanName, ((LookupOverride) other).beanName));
 	}
 
+	@Override
 	public int hashCode() {
 		return (29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.beanName));
 	}

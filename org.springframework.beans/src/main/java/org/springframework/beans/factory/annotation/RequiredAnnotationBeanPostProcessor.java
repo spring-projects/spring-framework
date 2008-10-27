@@ -106,6 +106,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	}
 
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
 			throws BeansException {

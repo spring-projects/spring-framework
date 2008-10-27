@@ -231,6 +231,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 
+	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
 		if (otherFactory instanceof AbstractAutowireCapableBeanFactory) {
@@ -373,6 +374,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * populates the bean instance, applies post-processors, etc.
 	 * @see #doCreateBean
 	 */
+	@Override
 	protected Object createBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)
 			throws BeanCreationException {
 
@@ -515,6 +517,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return exposedObject;
 	}
 
+	@Override
 	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
 		Class beanClass = null;
 		if (mbd.getFactoryMethodName() != null) {
@@ -610,6 +613,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * FactoryBean. If the FactoryBean instance itself is not kept as singleton,
 	 * it will be fully created to check the type of its exposed object.
 	 */
+	@Override
 	protected Class getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
 		FactoryBean fb = (mbd.isSingleton() ?
 				getSingletonFactoryBeanForTypeCheck(beanName, mbd) :
@@ -1425,6 +1429,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * object obtained from FactoryBeans (for example, to auto-proxy them).
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
+	@Override
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {
 		return applyBeanPostProcessorsAfterInitialization(object, beanName);
 	}
@@ -1432,6 +1437,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Overridden to clear FactoryBean instance cache as well.
 	 */
+	@Override
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
 		this.factoryBeanInstanceCache.remove(beanName);

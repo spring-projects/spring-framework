@@ -66,6 +66,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
@@ -82,6 +83,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 	 * This implementation returns <code>null</code> to indicate that
 	 * there is no appropriate text representation.
 	 */
+	@Override
 	public String getAsText() {
 		return null;
 	}

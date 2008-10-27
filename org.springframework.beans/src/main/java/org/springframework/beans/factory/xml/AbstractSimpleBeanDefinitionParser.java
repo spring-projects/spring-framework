@@ -123,6 +123,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * @param builder used to define the <code>BeanDefinition</code>
 	 * @see #extractPropertyName(String) 
 	 */
+	@Override
 	protected final void doParse(Element element, BeanDefinitionBuilder builder) {
 		NamedNodeMap attributes = element.getAttributes();
 		for (int x = 0; x < attributes.getLength(); x++) {

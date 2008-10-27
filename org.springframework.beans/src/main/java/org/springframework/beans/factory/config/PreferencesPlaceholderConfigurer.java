@@ -86,6 +86,7 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 * in the user preferences, then in the system preferences, then in
 	 * the passed-in properties.
 	 */
+	@Override
 	protected String resolvePlaceholder(String placeholder, Properties props) {
 		String path = null;
 		String key = placeholder;

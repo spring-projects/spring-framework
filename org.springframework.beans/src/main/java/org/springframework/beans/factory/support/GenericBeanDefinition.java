@@ -74,14 +74,17 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	@Override
 	public AbstractBeanDefinition cloneBeanDefinition() {
 		return new GenericBeanDefinition(this);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof GenericBeanDefinition && super.equals(other)));
 	}
 
+	@Override
 	public String toString() {
 		return "Generic bean: " + super.toString();
 	}

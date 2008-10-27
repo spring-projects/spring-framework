@@ -67,6 +67,7 @@ public class URIEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
 			String uri = text.trim();
@@ -111,6 +112,7 @@ public class URIEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public String getAsText() {
 		URI value = (URI) getValue();
 		return (value != null ? value.toString() : "");

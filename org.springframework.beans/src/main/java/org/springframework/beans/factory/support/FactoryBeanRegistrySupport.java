@@ -180,6 +180,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	/**
 	 * Overridden to clear the FactoryBean object cache as well.
 	 */
+	@Override
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
 		this.factoryBeanObjectCache.remove(beanName);

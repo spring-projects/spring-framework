@@ -55,10 +55,12 @@ public class PatternEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) {
 		setValue(text != null ? Pattern.compile(text, this.flags) : null);
 	}
 
+	@Override
 	public String getAsText() {
 		Pattern value = (Pattern) getValue();
 		return (value != null ? value.pattern() : "");

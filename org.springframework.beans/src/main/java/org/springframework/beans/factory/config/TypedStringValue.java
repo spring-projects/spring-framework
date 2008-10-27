@@ -170,6 +170,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -182,10 +183,12 @@ public class TypedStringValue implements BeanMetadataElement {
 				ObjectUtils.nullSafeEquals(this.targetType, otherValue.targetType));
 	}
 
+	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.targetType);
 	}
 
+	@Override
 	public String toString() {
 		return "TypedStringValue: value [" + this.value + "], target type [" + this.targetType + "]";
 	}

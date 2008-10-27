@@ -54,10 +54,12 @@ class BeanDefinitionResource extends AbstractResource {
 	}
 
 
+	@Override
 	public boolean exists() {
 		return false;
 	}
 
+	@Override
 	public boolean isReadable() {
 		return false;
 	}
@@ -75,6 +77,7 @@ class BeanDefinitionResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying BeanDefinition.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof BeanDefinitionResource &&
@@ -84,6 +87,7 @@ class BeanDefinitionResource extends AbstractResource {
 	/**
 	 * This implementation returns the hash code of the underlying BeanDefinition.
 	 */
+	@Override
 	public int hashCode() {
 		return this.beanDefinition.hashCode();
 	}

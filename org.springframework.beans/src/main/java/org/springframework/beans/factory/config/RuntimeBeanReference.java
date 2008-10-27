@@ -86,6 +86,7 @@ public class RuntimeBeanReference implements BeanReference {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -97,12 +98,14 @@ public class RuntimeBeanReference implements BeanReference {
 		return (this.beanName.equals(that.beanName) && this.toParent == that.toParent);
 	}
 
+	@Override
 	public int hashCode() {
 		int result = this.beanName.hashCode();
 		result = 29 * result + (this.toParent ? 1 : 0);
 		return result;
 	}
 
+	@Override
 	public String toString() {
 	   return '<' + getBeanName() + '>';
 	}

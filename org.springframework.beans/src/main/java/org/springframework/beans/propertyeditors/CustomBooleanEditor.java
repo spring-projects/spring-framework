@@ -97,6 +97,7 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		this.allowEmpty = allowEmpty;
 	}
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		String input = (text != null ? text.trim() : null);
 		if (this.allowEmpty && !StringUtils.hasLength(input)) {
@@ -124,6 +125,7 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		if (Boolean.TRUE.equals(getValue())) {
 			return (this.trueString != null ? this.trueString : VALUE_TRUE);

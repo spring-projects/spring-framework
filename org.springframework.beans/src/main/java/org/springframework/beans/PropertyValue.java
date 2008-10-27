@@ -160,6 +160,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -173,10 +174,12 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 				ObjectUtils.nullSafeEquals(this.source, otherPv.source));
 	}
 
+	@Override
 	public int hashCode() {
 		return this.name.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.value);
 	}
 
+	@Override
 	public String toString() {
 		return "bean property '" + this.name + "'";
 	}
