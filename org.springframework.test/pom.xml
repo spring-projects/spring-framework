@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>org.springframework.parent</artifactId>
+	    <version>3.0-M1-SNAPSHOT</version>
+    </parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.springframework.core</artifactId>
+	<packaging>jar</packaging>
+    <name>Spring Framework: Core</name>
+	<dependencies>
+		<dependency>
+		    <groupId>org.apache.log4j</groupId>
+		    <artifactId>com.springsource.org.apache.log4j</artifactId>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.collections</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>com.springsource.org.aspectj.weaver</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.objectweb.asm</groupId>
+			<artifactId>com.springsource.org.objectweb.asm</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.objectweb.asm</groupId>
+			<artifactId>com.springsource.org.objectweb.asm.commons</artifactId>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+</project>
