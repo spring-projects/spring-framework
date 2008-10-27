@@ -1,0 +1,37 @@
+<html>
+<body>
+
+This package enables automatic web controller targeting.
+
+The only implementation at present is CommonsPathMapHandlerMapping, based on Commons
+Attributes source-level attributes, but metadata implementation is pluggable.
+<br>
+In this model, you don't need to map URLs onto controllers in your Spring
+XML web application context bean definition files. You merely need to
+set one or more PathMap attributes on each of your Controller classes, and 
+new objects of these types will automatically be added to the relevant
+web application context.
+<br>
+Dependencies--whether expressed by via constructor arguments or JavaBean
+properties, will be resolved if possible using the middle tier definitions in
+the WebApplicationContext.
+
+<p>
+To use this feature, using the Commons Attributes implementation, perform the following steps:
+<ol>
+	<li>Invoke the Commons Attributes compiler on your application classes. The
+	classes must be compiled into a Jar rather than the WEB-INF/classes directory.
+	<li>Run the Commons Attributes attribute indexer tool on the Jar containing
+	your controllers.
+	<li>Use Commons Attributes syntax to define a PathMap attribute for each
+	Controller you want mapped.
+	<li>Define a bean of type UrlHandlerMapping in your <code>servletName-servlet.xml</code>
+	bean definition file in your web application. No parameters are required.	
+</ol>
+
+<p>
+You can also use other HandlerMappings, such as BeanNameHandlerMapping, in the
+same servlet XML file.
+
+</body>
+</html>
