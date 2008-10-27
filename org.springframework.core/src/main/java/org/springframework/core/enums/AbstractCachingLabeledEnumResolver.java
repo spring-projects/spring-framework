@@ -48,6 +48,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 
 
 	private final CachingMapDecorator labeledEnumCache = new CachingMapDecorator(true) {
+		@Override
 		protected Object create(Object key) {
 			Class enumType = (Class) key;
 			Set typeEnums = findLabeledEnums(enumType);
@@ -64,6 +65,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 			}
 			return Collections.unmodifiableMap(typeEnumMap);
 		}
+		@Override
 		protected boolean useWeakValue(Object key, Object value) {
 			Class enumType = (Class) key;
 			if (!ClassUtils.isCacheSafe(enumType, AbstractCachingLabeledEnumResolver.this.getClass().getClassLoader())) {

@@ -54,6 +54,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	}
 
 
+	@Override
 	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		Class result = null;
 		if (isEligibleForOverriding(name)) {

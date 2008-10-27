@@ -96,6 +96,7 @@ public class NullSafeComparator implements Comparator {
 		return this.nonNullComparator.compare(o1, o2);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -107,10 +108,12 @@ public class NullSafeComparator implements Comparator {
 		return (this.nonNullComparator.equals(other.nonNullComparator) && this.nullsLow == other.nullsLow);
 	}
 
+	@Override
 	public int hashCode() {
 		return (this.nullsLow ? -1 : 1) * this.nonNullComparator.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "NullSafeComparator: non-null comparator [" + this.nonNullComparator + "]; " +
 				(this.nullsLow ? "nulls low" : "nulls high");

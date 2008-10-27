@@ -53,6 +53,7 @@ public class CommonsLogWriter extends Writer {
 		}
 	}
 
+	@Override
 	public void write(char[] buffer, int offset, int length) {
 		for (int i = 0; i < length; i++) {
 			char ch = buffer[offset + i];
@@ -66,9 +67,11 @@ public class CommonsLogWriter extends Writer {
 		}
 	}
 
+	@Override
 	public void flush() {
 	}
 
+	@Override
 	public void close() {
 	}
 

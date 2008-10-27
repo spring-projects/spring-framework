@@ -84,6 +84,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -95,6 +96,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		return this.attributes.equals(that.attributes);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.attributes.hashCode();
 	}

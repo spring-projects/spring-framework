@@ -74,6 +74,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	/**
 	 * Treat the given text as location pattern and convert it to a Resource array.
 	 */
+	@Override
 	public void setAsText(String text) {
 		String pattern = resolvePath(text).trim();
 		try {
@@ -89,6 +90,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * Treat the given value as collection or array and convert it to a Resource array.
 	 * Considers String elements as location patterns, and takes Resource elements as-is.
 	 */
+	@Override
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection input = (value instanceof Collection ? (Collection) value : Arrays.asList((Object[]) value));

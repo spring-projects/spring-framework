@@ -232,6 +232,7 @@ public class StopWatch {
 	 * Return an informative string describing all tasks performed
 	 * For custom reporting, call <code>getTaskInfo()</code> and use the task info directly.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(shortSummary());
 		if (this.keepTaskList) {

@@ -119,6 +119,7 @@ public class AutoPopulatingList implements List, Serializable {
 		return this.backingList.containsAll(c);
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		return this.backingList.equals(o);
 	}
@@ -148,6 +149,7 @@ public class AutoPopulatingList implements List, Serializable {
 		return element;
 	}
 
+	@Override
 	public int hashCode() {
 		return this.backingList.hashCode();
 	}

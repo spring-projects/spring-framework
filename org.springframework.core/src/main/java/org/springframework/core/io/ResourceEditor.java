@@ -68,6 +68,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) {
 		if (StringUtils.hasText(text)) {
 			String locationToUse = resolvePath(text).trim();
@@ -90,6 +91,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public String getAsText() {
 		Resource value = (Resource) getValue();
 		try {

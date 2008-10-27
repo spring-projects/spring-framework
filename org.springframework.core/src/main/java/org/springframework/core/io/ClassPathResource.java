@@ -151,6 +151,7 @@ public class ClassPathResource extends AbstractResource {
 	 * @see java.lang.ClassLoader#getResource(String)
 	 * @see java.lang.Class#getResource(String)
 	 */
+	@Override
 	public URL getURL() throws IOException {
 		URL url = null;
 		if (this.clazz != null) {
@@ -171,6 +172,7 @@ public class ClassPathResource extends AbstractResource {
 	 * resource, provided that it refers to a file in the file system.
 	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
 	 */
+	@Override
 	public File getFile() throws IOException {
 		return ResourceUtils.getFile(getURL(), getDescription());
 	}
@@ -179,6 +181,7 @@ public class ClassPathResource extends AbstractResource {
 	 * This implementation determines the underlying File
 	 * (or jar file, in case of a resource in a jar/zip).
 	 */
+	@Override
 	protected File getFileForLastModifiedCheck() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isJarURL(url)) {
@@ -195,6 +198,7 @@ public class ClassPathResource extends AbstractResource {
 	 * relative to the path of the underlying resource of this descriptor.
 	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
 	 */
+	@Override
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new ClassPathResource(pathToUse, this.classLoader, this.clazz);
@@ -205,6 +209,7 @@ public class ClassPathResource extends AbstractResource {
 	 * resource refers to.
 	 * @see org.springframework.util.StringUtils#getFilename(String)
 	 */
+	@Override
 	public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}
@@ -220,6 +225,7 @@ public class ClassPathResource extends AbstractResource {
 	/**
 	 * This implementation compares the underlying class path locations.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -237,6 +243,7 @@ public class ClassPathResource extends AbstractResource {
 	 * This implementation returns the hash code of the underlying
 	 * class path location.
 	 */
+	@Override
 	public int hashCode() {
 		return this.path.hashCode();
 	}

@@ -50,6 +50,7 @@ public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolve
 	}
 
 
+	@Override
 	protected Set findLabeledEnums(Class type) {
 		Set typeEnums = new TreeSet();
 		Field[] fields = type.getFields();

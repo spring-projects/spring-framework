@@ -50,6 +50,7 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 	private String[] interfaces;
 
 
+	@Override
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
@@ -63,10 +64,12 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 		}
 	}
 
+	@Override
 	public void visitOuterClass(String owner, String name, String desc) {
 		this.enclosingClassName = ClassUtils.convertResourcePathToClassName(owner);
 	}
 
+	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
 		if (outerName != null && this.className.equals(ClassUtils.convertResourcePathToClassName(name))) {
 			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerName);

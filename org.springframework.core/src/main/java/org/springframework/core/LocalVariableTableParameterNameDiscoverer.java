@@ -177,6 +177,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			this.descriptorToMatch = descriptor;			
 		}
 
+		@Override
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			if (name.equals(this.methodNameToMatch) && desc.equals(this.descriptorToMatch)) {
 				return new LocalVariableTableVisitor(this, isStatic(access));
@@ -253,6 +254,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			this.parameterNames = new String[memberVisitor.numParamsExpected];
 		}
 
+		@Override
 		public void visitLocalVariable(
 				String name, String description, String signature, Label start, Label end, int index) {
 			this.hasLvtInfo = true;
@@ -264,6 +266,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			}
 		}
 
+		@Override
 		public void visitEnd() {
 			if (this.hasLvtInfo || (this.isStatic && this.parameterNames.length == 0)) {
 				 // visitLocalVariable will never be called for static no args methods
