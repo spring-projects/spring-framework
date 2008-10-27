@@ -247,6 +247,7 @@ public class MethodMapTransactionAttributeSource
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -258,10 +259,12 @@ public class MethodMapTransactionAttributeSource
 		return ObjectUtils.nullSafeEquals(this.methodMap, otherTas.methodMap);
 	}
 
+	@Override
 	public int hashCode() {
 		return MethodMapTransactionAttributeSource.class.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + this.methodMap;
 	}

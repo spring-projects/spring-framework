@@ -125,6 +125,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 * return false.
 	 * @see TransactionAttribute#rollbackOn(java.lang.Throwable)
 	 */
+	@Override
 	public boolean rollbackOn(Throwable ex) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Applying rules to determine whether transaction should rollback on " + ex);
@@ -158,6 +159,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer result = getDefinitionDescription();
 		if (this.rollbackRules != null) {

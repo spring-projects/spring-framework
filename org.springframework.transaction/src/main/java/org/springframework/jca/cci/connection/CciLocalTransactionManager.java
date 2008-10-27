@@ -119,6 +119,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		return getConnectionFactory();
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
 		ConnectionHolder conHolder =
@@ -127,12 +128,14 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		return txObject;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 		// Consider a pre-bound connection as transaction.
 		return (txObject.getConnectionHolder() != null);
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 
@@ -169,12 +172,14 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		}
 	}
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 		txObject.setConnectionHolder(null);
 		return TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
@@ -185,6 +190,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		return txObject.getConnectionHolder().isRollbackOnly();
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();
@@ -202,6 +208,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();
@@ -219,6 +226,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		}
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -228,6 +236,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
 
+	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 

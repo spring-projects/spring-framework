@@ -54,6 +54,7 @@ public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 	}
 
 
+	@Override
 	protected final Record createInputRecord(RecordFactory recordFactory, Object inObject) {
 		try {
 			return new CommAreaRecord(objectToBytes(inObject));
@@ -63,6 +64,7 @@ public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 		}
 	}
 
+	@Override
 	protected final Object extractOutputData(Record record) throws DataAccessException {
 		CommAreaRecord commAreaRecord = (CommAreaRecord) record;
 		try {

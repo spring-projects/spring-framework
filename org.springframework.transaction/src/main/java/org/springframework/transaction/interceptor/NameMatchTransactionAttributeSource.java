@@ -146,6 +146,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -157,10 +158,12 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		return ObjectUtils.nullSafeEquals(this.nameMap, otherTas.nameMap);
 	}
 
+	@Override
 	public int hashCode() {
 		return NameMatchTransactionAttributeSource.class.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + this.nameMap;
 	}

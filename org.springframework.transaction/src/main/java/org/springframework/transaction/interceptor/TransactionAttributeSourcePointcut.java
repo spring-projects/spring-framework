@@ -36,6 +36,7 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 		return (tas == null || tas.getTransactionAttribute(method, targetClass) != null);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -47,10 +48,12 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 		return ObjectUtils.nullSafeEquals(getTransactionAttributeSource(), otherPc.getTransactionAttributeSource());
 	}
 
+	@Override
 	public int hashCode() {
 		return TransactionAttributeSourcePointcut.class.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + getTransactionAttributeSource();
 	}

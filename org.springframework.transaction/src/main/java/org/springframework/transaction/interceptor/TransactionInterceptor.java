@@ -216,6 +216,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 			super(throwable);
 		}
 
+		@Override
 		public String toString() {
 			return getCause().toString();
 		}

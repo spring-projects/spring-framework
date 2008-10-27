@@ -136,6 +136,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws TransactionSystemException {
 		initUserTransactionAndTransactionManager();
 
@@ -176,6 +177,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	/**
 	 * Registers the synchronizations as interposed JTA Synchronization on the UOWManager.
 	 */
+	@Override
 	protected void doRegisterAfterCompletionWithJtaTransaction(JtaTransactionObject txObject, List synchronizations) {
 		this.uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
 	}

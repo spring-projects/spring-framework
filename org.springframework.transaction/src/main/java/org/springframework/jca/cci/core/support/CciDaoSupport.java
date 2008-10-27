@@ -93,6 +93,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	  return this.cciTemplate;
 	}
 
+	@Override
 	protected final void checkDaoConfig() {
 		if (this.cciTemplate == null) {
 			throw new IllegalArgumentException("'connectionFactory' or 'cciTemplate' is required");

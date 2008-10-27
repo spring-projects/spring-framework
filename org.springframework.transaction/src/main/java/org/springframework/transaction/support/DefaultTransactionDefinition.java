@@ -217,6 +217,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * This implementation compares the <code>toString()</code> results.
 	 * @see #toString()
 	 */
+	@Override
 	public boolean equals(Object other) {
 		return (other instanceof TransactionDefinition && toString().equals(other.toString()));
 	}
@@ -225,6 +226,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * This implementation returns <code>toString()</code>'s hash code.
 	 * @see #toString()
 	 */
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
@@ -241,6 +243,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #getDefinitionDescription()
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
 	 */
+	@Override
 	public String toString() {
 		return getDefinitionDescription().toString();
 	}

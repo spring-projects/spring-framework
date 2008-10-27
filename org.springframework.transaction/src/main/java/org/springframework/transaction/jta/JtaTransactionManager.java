@@ -790,6 +790,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * flag to enforce a fresh lookup for every transaction.
 	 * @see #setCacheUserTransaction
 	 */
+	@Override
 	protected Object doGetTransaction() {
 		UserTransaction ut = getUserTransaction();
 		if (ut == null) {
@@ -814,6 +815,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		return new JtaTransactionObject(ut);
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		try {
@@ -832,11 +834,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #doBegin
 	 * @see javax.transaction.UserTransaction#begin()
 	 */
+	@Override
 	protected boolean useSavepointForNestedTransaction() {
 		return false;
 	}
 
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		try {
@@ -927,6 +931,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		try {
@@ -955,6 +960,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		return getTransactionManager().suspend();
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		try {
@@ -997,10 +1003,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * This implementation returns "true": a JTA commit will properly handle
 	 * transactions that have been marked rollback-only at a global level.
 	 */
+	@Override
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
 		return true;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		JtaTransactionObject txObject = (JtaTransactionObject) status.getTransaction();
 		try {
@@ -1045,6 +1053,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		JtaTransactionObject txObject = (JtaTransactionObject) status.getTransaction();
 		try {
@@ -1071,6 +1080,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		JtaTransactionObject txObject = (JtaTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -1091,6 +1101,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	protected void registerAfterCompletionWithExistingTransaction(Object transaction, List synchronizations) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		logger.debug("Registering after-completion synchronization with existing JTA transaction");

@@ -210,6 +210,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			this.targetClass = targetClass;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -222,6 +223,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 					ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
 		}
 
+		@Override
 		public int hashCode() {
 			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
 		}

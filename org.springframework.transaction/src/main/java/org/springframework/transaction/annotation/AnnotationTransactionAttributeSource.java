@@ -112,10 +112,12 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	}
 
 
+	@Override
 	protected TransactionAttribute findTransactionAttribute(Method method) {
 		return determineTransactionAttribute(method);
 	}
 
+	@Override
 	protected TransactionAttribute findTransactionAttribute(Class clazz) {
 		return determineTransactionAttribute(clazz);
 	}
@@ -144,15 +146,18 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	/**
 	 * By default, only public methods can be made transactional.
 	 */
+	@Override
 	protected boolean allowPublicMethodsOnly() {
 		return this.publicMethodsOnly;
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || other instanceof AnnotationTransactionAttributeSource);
 	}
 
+	@Override
 	public int hashCode() {
 		return AnnotationTransactionAttributeSource.class.hashCode();
 	}
