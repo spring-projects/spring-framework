@@ -10,9 +10,9 @@
 		<pathelement location="../org.springframework.context"/>
 		<pathelement location="../org.springframework.transaction"/>
 		<pathelement location="../org.springframework.jdbc"/>
+		<pathelement location="../org.springframework.web"/>
 		<pathelement location="../org.springframework.orm"/>
 		<pathelement location="../org.springframework.context.support"/>
-		<pathelement location="../org.springframework.web"/>
 		<pathelement location="../org.springframework.web.servlet"/>
 		<pathelement location="../org.springframework.web.portlet"/>
 	</path>
