@@ -65,10 +65,12 @@ public class ListFactoryBean extends AbstractFactoryBean {
 	}
 
 
+	@Override
 	public Class getObjectType() {
 		return List.class;
 	}
 
+	@Override
 	protected Object createInstance() {
 		if (this.sourceList == null) {
 			throw new IllegalArgumentException("'sourceList' is required");

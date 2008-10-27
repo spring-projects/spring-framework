@@ -100,6 +100,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	/**
 	 * Parse the Number from the given text, using the specified NumberFormat.
 	 */
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			// Treat empty String as null value.
@@ -118,6 +119,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	/**
 	 * Coerce a Number value into the required target class, if necessary.
 	 */
+	@Override
 	public void setValue(Object value) {
 		if (value instanceof Number) {
 			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
@@ -130,6 +132,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	/**
 	 * Format the Number as String, using the specified NumberFormat.
 	 */
+	@Override
 	public String getAsText() {
 		Object value = getValue();
 		if (value == null) {

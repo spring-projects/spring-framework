@@ -63,6 +63,7 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Delegates to {@link #getDescription}.
 	 */
+	@Override
 	public String toString() {
 		return getDescription();
 	}

@@ -50,6 +50,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 * properties content.
 	 * @param text the text to be so converted
 	 */
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		Properties props = new Properties();
 		if (text != null) {
@@ -69,6 +70,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	/**
 	 * Take {@link Properties} as-is; convert {@link Map} into <code>Properties</code>.
 	 */
+	@Override
 	public void setValue(Object value) {
 		if (!(value instanceof Properties) && value instanceof Map) {
 			Properties props = new Properties();

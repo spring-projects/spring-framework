@@ -98,6 +98,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	public abstract boolean matches(Method method);
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -111,6 +112,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 				ObjectUtils.nullSafeEquals(this.source, that.source));
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.methodName);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.source);

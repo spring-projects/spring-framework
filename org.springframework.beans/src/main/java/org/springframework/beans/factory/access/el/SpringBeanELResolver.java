@@ -43,6 +43,7 @@ public abstract class SpringBeanELResolver extends ELResolver {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
+	@Override
 	public Object getValue(ELContext elContext, Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
@@ -58,6 +59,7 @@ public abstract class SpringBeanELResolver extends ELResolver {
 		return null;
 	}
 
+	@Override
 	public Class<?> getType(ELContext elContext, Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
@@ -70,6 +72,7 @@ public abstract class SpringBeanELResolver extends ELResolver {
 		return null;
 	}
 
+	@Override
 	public void setValue(ELContext elContext, Object base, Object property, Object value) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
@@ -81,6 +84,7 @@ public abstract class SpringBeanELResolver extends ELResolver {
 		}
 	}
 
+	@Override
 	public boolean isReadOnly(ELContext elContext, Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
@@ -92,10 +96,12 @@ public abstract class SpringBeanELResolver extends ELResolver {
 		return false;
 	}
 
+	@Override
 	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, Object base) {
 		return null;
 	}
 
+	@Override
 	public Class<?> getCommonPropertyType(ELContext elContext, Object base) {
 		return Object.class;
 	}

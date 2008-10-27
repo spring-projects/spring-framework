@@ -57,6 +57,7 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(text);
@@ -72,6 +73,7 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		Class[] classes = (Class[]) getValue();
 		if (classes == null || classes.length == 0) {

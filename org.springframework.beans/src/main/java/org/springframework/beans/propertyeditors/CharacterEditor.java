@@ -69,6 +69,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasLength(text)) {
 			// Treat empty String as null value.
@@ -89,6 +90,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		Object value = getValue();
 		return (value != null ? value.toString() : "");

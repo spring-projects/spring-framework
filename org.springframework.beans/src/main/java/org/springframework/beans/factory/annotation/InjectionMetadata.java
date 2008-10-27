@@ -222,6 +222,7 @@ public class InjectionMetadata {
 			return null;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -241,10 +242,12 @@ public class InjectionMetadata {
 			}
 		}
 
+		@Override
 		public int hashCode() {
 			return this.member.getClass().hashCode() * 29 + this.member.getName().hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return getClass().getSimpleName() + " for " + this.member;
 		}

@@ -63,6 +63,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	private static final int METHOD_REPLACER = 2;
 
 
+	@Override
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 
@@ -70,6 +71,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(null, null);
 	}
 
+	@Override
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Constructor ctor, Object[] args) {
@@ -133,11 +135,13 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 				return beanDefinition;
 			}
 
+			@Override
 			public boolean equals(Object other) {
 				return (other.getClass().equals(getClass()) &&
 						((CglibIdentitySupport) other).getBeanDefinition().equals(beanDefinition));
 			}
 
+			@Override
 			public int hashCode() {
 				return beanDefinition.hashCode();
 			}

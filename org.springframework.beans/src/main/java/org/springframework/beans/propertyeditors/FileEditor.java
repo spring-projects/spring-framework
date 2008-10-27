@@ -77,6 +77,7 @@ public class FileEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		// Check whether we got an absolute file path without "file:" prefix.
 		// For backwards compatibility, we'll consider those as straight file path.
@@ -108,6 +109,7 @@ public class FileEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		File value = (File) getValue();
 		return (value != null ? value.getPath() : "");

@@ -69,6 +69,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	}
 
 
+	@Override
 	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 		InputSource source = super.resolveEntity(publicId, systemId);
 		if (source == null && systemId != null) {

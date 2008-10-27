@@ -80,6 +80,7 @@ public class PropertyBatchUpdateException extends BeansException {
 	}
 
 
+	@Override
 	public String getMessage() {
 		StringBuffer sb = new StringBuffer("Failed properties: ");
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
@@ -91,6 +92,7 @@ public class PropertyBatchUpdateException extends BeansException {
 		return sb.toString();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getName()).append("; nested PropertyAccessExceptions (");
@@ -102,6 +104,7 @@ public class PropertyBatchUpdateException extends BeansException {
 		return sb.toString();
 	}
 
+	@Override
 	public void printStackTrace(PrintStream ps) {
 		synchronized (ps) {
 			ps.println(getClass().getName() + "; nested PropertyAccessException details (" +
@@ -113,6 +116,7 @@ public class PropertyBatchUpdateException extends BeansException {
 		}
 	}
 
+	@Override
 	public void printStackTrace(PrintWriter pw) {
 		synchronized (pw) {
 			pw.println(getClass().getName() + "; nested PropertyAccessException details (" +
@@ -124,6 +128,7 @@ public class PropertyBatchUpdateException extends BeansException {
 		}
 	}
 
+	@Override
 	public boolean contains(Class exType) {
 		if (exType == null) {
 			return false;

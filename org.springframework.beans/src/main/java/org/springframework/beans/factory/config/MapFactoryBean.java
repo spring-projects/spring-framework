@@ -65,10 +65,12 @@ public class MapFactoryBean extends AbstractFactoryBean {
 	}
 
 
+	@Override
 	public Class getObjectType() {
 		return Map.class;
 	}
 
+	@Override
 	protected Object createInstance() {
 		if (this.sourceMap == null) {
 			throw new IllegalArgumentException("'sourceMap' is required");

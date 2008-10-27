@@ -181,6 +181,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		}
 	}
 
+	@Override
 	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
 		// Quick check on the concurrent map first, with minimal locking.
 		Constructor[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
@@ -234,6 +235,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return (candidateConstructors.length > 0 ? candidateConstructors : null);
 	}
 
+	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
 		try {
@@ -245,6 +247,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return true;
 	}
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 

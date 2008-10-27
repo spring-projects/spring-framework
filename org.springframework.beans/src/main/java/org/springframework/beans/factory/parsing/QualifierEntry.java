@@ -36,6 +36,7 @@ public class QualifierEntry implements ParseState.Entry {
 		this.typeName = typeName;
 	}
 
+	@Override
 	public String toString() {
 		return "Qualifier '" + this.typeName + "'";
 	}

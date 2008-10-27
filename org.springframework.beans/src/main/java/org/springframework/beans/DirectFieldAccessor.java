@@ -77,6 +77,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		return this.fieldMap.containsKey(propertyName);
 	}
 
+	@Override
 	public Class getPropertyType(String propertyName) throws BeansException {
 		Field field = (Field) this.fieldMap.get(propertyName);
 		if (field != null) {
@@ -85,6 +86,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		return null;
 	}
 
+	@Override
 	public Object getPropertyValue(String propertyName) throws BeansException {
 		Field field = (Field) this.fieldMap.get(propertyName);
 		if (field == null) {
@@ -100,6 +102,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		}
 	}
 
+	@Override
 	public void setPropertyValue(String propertyName, Object newValue) throws BeansException {
 		Field field = (Field) this.fieldMap.get(propertyName);
 		if (field == null) {

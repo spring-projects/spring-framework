@@ -165,6 +165,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 
+	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
 		if (otherFactory instanceof DefaultListableBeanFactory) {
@@ -179,6 +180,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public boolean containsBeanDefinition(String beanName) {
 		return this.beanDefinitionMap.containsKey(beanName);
 	}
@@ -378,6 +380,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
 	}
 
+	@Override
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
@@ -405,6 +408,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * if the factory's configuration has been marked as frozen.
 	 * @see #freezeConfiguration()
 	 */
+	@Override
 	protected boolean isBeanEligibleForMetadataCaching(String beanName) {
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
@@ -529,6 +533,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Only allows alias overriding if bean definition overriding is allowed.
 	 */
+	@Override
 	protected boolean allowAliasOverriding() {
 		return this.allowBeanDefinitionOverriding;
 	}
@@ -729,6 +734,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(ObjectUtils.identityToString(this));
 		sb.append(": defining beans [");

@@ -244,14 +244,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	@Override
 	public AbstractBeanDefinition cloneBeanDefinition() {
 		return new RootBeanDefinition(this);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof RootBeanDefinition && super.equals(other)));
 	}
 
+	@Override
 	public String toString() {
 		return "Root bean: " + super.toString();
 	}

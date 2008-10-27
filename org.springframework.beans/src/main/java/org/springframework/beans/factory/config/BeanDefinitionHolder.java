@@ -145,11 +145,13 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see #getLongDescription()
 	 * @see #getShortDescription()
 	 */
+	@Override
 	public String toString() {
 		return getLongDescription();
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -163,6 +165,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 				ObjectUtils.nullSafeEquals(this.aliases, otherHolder.aliases);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = this.beanDefinition.hashCode();
 		hashCode = 29 * hashCode + this.beanName.hashCode();

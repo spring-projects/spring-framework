@@ -249,6 +249,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 
+	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
 			throws BeansException {
 

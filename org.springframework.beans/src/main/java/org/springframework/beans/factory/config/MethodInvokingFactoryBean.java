@@ -118,6 +118,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	protected Class resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
@@ -133,6 +134,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * if possible.
 	 * @see ConfigurableBeanFactory#getTypeConverter()
 	 */
+	@Override
 	protected TypeConverter getDefaultTypeConverter() {
 		if (this.beanFactory != null) {
 			return this.beanFactory.getTypeConverter();

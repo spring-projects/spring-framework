@@ -106,6 +106,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * This implementation looks for a method with matching parameter types.
 	 * @see #doFindMatchingMethod
 	 */
+	@Override
 	protected Method findMatchingMethod() {
 		Method matchingMethod = super.findMatchingMethod();
 		// Second pass: look for method where arguments can be converted to parameter types.

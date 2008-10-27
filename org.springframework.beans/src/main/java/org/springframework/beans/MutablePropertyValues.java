@@ -325,6 +325,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -336,10 +337,12 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return this.propertyValueList.equals(that.propertyValueList);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.propertyValueList.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();
 		StringBuffer sb = new StringBuffer("PropertyValues: length=" + pvs.length + "; ");

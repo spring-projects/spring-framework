@@ -61,6 +61,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) {
 		if (text == null) {
 			setValue(null);
@@ -79,6 +80,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		Object value = getValue();
 		return (value != null ? value.toString() : "");

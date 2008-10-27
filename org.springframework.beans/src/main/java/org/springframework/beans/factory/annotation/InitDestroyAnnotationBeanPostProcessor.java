@@ -297,11 +297,13 @@ public class InitDestroyAnnotationBeanPostProcessor
 			this.method.invoke(target, (Object[]) null);
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other || (other instanceof LifecycleElement &&
 					this.method.getName().equals(((LifecycleElement) other).method.getName())));
 		}
 
+		@Override
 		public int hashCode() {
 			return this.method.getName().hashCode();
 		}

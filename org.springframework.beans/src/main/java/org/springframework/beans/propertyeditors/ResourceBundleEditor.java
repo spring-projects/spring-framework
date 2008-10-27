@@ -79,6 +79,7 @@ public class ResourceBundleEditor extends PropertyEditorSupport {
 	public static final String BASE_NAME_SEPARATOR = "_";
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		Assert.hasText(text, "'text' must not be empty");
 		ResourceBundle bundle;

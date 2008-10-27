@@ -146,6 +146,7 @@ public class BeanCreationException extends FatalBeanException {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(super.toString());
 		if (this.relatedCauses != null) {
@@ -158,6 +159,7 @@ public class BeanCreationException extends FatalBeanException {
 		return sb.toString();
 	}
 
+	@Override
 	public void printStackTrace(PrintStream ps) {
 		synchronized (ps) {
 			super.printStackTrace(ps);
@@ -171,6 +173,7 @@ public class BeanCreationException extends FatalBeanException {
 		}
 	}
 
+	@Override
 	public void printStackTrace(PrintWriter pw) {
 		synchronized (pw) {
 			super.printStackTrace(pw);
@@ -184,6 +187,7 @@ public class BeanCreationException extends FatalBeanException {
 		}
 	}
 
+	@Override
 	public boolean contains(Class exClass) {
 		if (super.contains(exClass)) {
 			return true;

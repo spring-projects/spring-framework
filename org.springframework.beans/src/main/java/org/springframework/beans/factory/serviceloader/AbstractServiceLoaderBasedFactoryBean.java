@@ -53,6 +53,7 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 		return this.serviceType;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -62,6 +63,7 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	 * Delegates to {@link #getObjectToExpose(java.util.ServiceLoader)}.
 	 * @return the object to expose
 	 */
+	@Override
 	protected Object createInstance() {
 		Assert.notNull(getServiceType(), "Property 'serviceType' is required");
 		return getObjectToExpose(ServiceLoader.load(getServiceType(), this.beanClassLoader));

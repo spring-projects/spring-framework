@@ -43,6 +43,7 @@ public class PropertyEntry implements ParseState.Entry {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Property '" + this.name + "'";
 	}

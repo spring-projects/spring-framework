@@ -65,10 +65,12 @@ public class SetFactoryBean extends AbstractFactoryBean {
 	}
 
 
+	@Override
 	public Class getObjectType() {
 		return Set.class;
 	}
 
+	@Override
 	protected Object createInstance() {
 		if (this.sourceSet == null) {
 			throw new IllegalArgumentException("'sourceSet' is required");

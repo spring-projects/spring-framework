@@ -66,6 +66,7 @@ public class URLEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
@@ -77,6 +78,7 @@ public class URLEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		URL value = (URL) getValue();
 		return (value != null ? value.toExternalForm() : "");

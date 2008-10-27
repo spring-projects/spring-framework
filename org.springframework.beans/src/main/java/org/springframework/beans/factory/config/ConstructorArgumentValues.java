@@ -312,6 +312,7 @@ public class ConstructorArgumentValues {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -344,6 +345,7 @@ public class ConstructorArgumentValues {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = 7;
 		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
