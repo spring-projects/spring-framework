@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.springframework.agent</name>
+	<name>org.springframework.instrument</name>
 	<comment></comment>
 	<projects>
 	</projects>
