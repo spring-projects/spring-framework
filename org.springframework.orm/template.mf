@@ -45,6 +45,7 @@ Import-Template:
  org.hibernate.persister.entity;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
  org.hibernate.tool.hbm2ddl;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
  org.hibernate.transaction;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
+ org.hibernate.transform;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
  org.hibernate.type;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
  org.hibernate.usertype;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
  org.hibernate.util;version="[3.2.6.ga, 3.3.0)";resolution:=optional,
