@@ -11,6 +11,18 @@
 
 	<configurations>
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
+		<conf name="aop" extends="runtime" description="JARs needed to use AOP"/>
+		<conf name="eclipselink" extends="jpa" description="JARs needed to use EclipseLink JPA"/>
+		<conf name="hibernate" extends="runtime" description="JARs needed to use Hibernate"/>
+		<conf name="hibernate-jpa" extends="hibernate, jpa" description="JARs needed to use Hibernate JPA"/>
+		<conf name="ibatis" extends="runtime" description="JARs needed to use Ibatis"/>
+		<conf name="jdo" extends="runtime" description="JARs needed to use JDO"/>
+		<conf name="jndi" extends="runtime" description="JARs needed to use JNDI"/>
+		<conf name="jpa" extends="runtime" description="JARs needed to develop JPA beans"/>
+		<conf name="openjpa" extends="jpa" description="JARs needed to use OpenJPA JPA"/>
+		<conf name="toplink-essentials" extends="jpa" description="JARs needed to use TopLink Essentials JPA"/>
+		<conf name="toplink" extends="runtime" description="JARs needed to use TopLink"/>
+		<conf name="web" extends="runtime" description="JARs needed to develop for the web"/>
 	</configurations>
 
 	<publications>
@@ -19,31 +31,30 @@
 	</publications>
 
 	<dependencies>
-		<!-- compile dependencies -->
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->runtime" />
-		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="compile->compile" />
-		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="compile->compile" />
-		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="compile->compile" />
-		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="compile->compile" />
-		<dependency org="org.springframework" name="org.springframework.jdbc" rev="latest.integration" conf="compile->compile" />
-		<!-- optional dependencies -->
-		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="optional->compile" />
-		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional->compile" />
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.2.6.ga" conf="optional->compile" />
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations.common" rev="3.3.0.ga" conf="optional->compile" />
-		<dependency org="com.oracle.toplink" name="com.springsource.oracle.toplink" rev="10.1.3" conf="optional->compile" />
-		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="optional->compile" />
-		<dependency org="com.oracle.toplink.essentials" name="com.springsource.oracle.toplink.essentials" rev="2.0.0.b41-beta2" conf="optional->compile" />
-		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence" rev="1.0.2" conf="optional->compile" />
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.2.GA" conf="optional->compile" />
-		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="optional->compile" />
-		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.1.0" conf="optional->compile" />
-		<dependency org="org.apache.ibatis" name="com.springsource.com.ibatis" rev="2.3.0.677" conf="optional->compile" />
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="optional->compile" />
-		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="optional->compile" />
+		<dependency org="com.oracle.toplink.essentials" name="com.springsource.oracle.toplink.essentials" rev="2.0.0.b41-beta2" conf="optional, toplink-essentials->compile"/>
+		<dependency org="com.oracle.toplink" name="com.springsource.oracle.toplink" rev="10.1.3" conf="optional, toplink->compile"/>
+		<dependency org="org.aopalliance" name="com.springsource.org.aopalliance" rev="1.0.0" conf="optional, aop->compile"/>
+		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->compile"/>
+		<dependency org="org.apache.ibatis" name="com.springsource.com.ibatis" rev="2.3.4.726" conf="optional, ibatis->compile"/>
+		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence" rev="1.0.2" conf="optional, openjpa->compile"/>
+		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="optional, eclipselink-> compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.2.6.ga" conf="optional, hibernate->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.3.0.ga" conf="optional, hibernate-jpa->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.1.ga" conf="optional, hibernate-jpa->compile"/>
+		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.0.0" conf="provided, jdo->compile"/>
+		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided, jpa->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.4.0" conf="provided, web->compile"/>
+		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
+		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="optional, aop->compile"/>
+		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="compile->compile"/>
+		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="optional, jndi->compile"/>
+		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="compile->compile"/>
+		<dependency org="org.springframework" name="org.springframework.instrument.classloading" rev="latest.integration" conf="optional, jpa->compile"/>
+		<dependency org="org.springframework" name="org.springframework.jdbc" rev="latest.integration" conf="compile->compile"/>
+		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="compile->compile"/>
+		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional, web->compile"/>
 		<!-- test dependencies -->
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
-				
 	</dependencies>
 
 </ivy-module>
