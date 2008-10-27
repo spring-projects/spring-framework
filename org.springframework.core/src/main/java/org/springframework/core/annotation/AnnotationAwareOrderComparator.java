@@ -33,7 +33,8 @@ import org.springframework.core.Ordered;
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
-	protected int getOrder(Object obj) {
+	@Override
+    protected int getOrder(Object obj) {
 		if (obj instanceof Ordered) {
 			return ((Ordered) obj).getOrder();
 		}

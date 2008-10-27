@@ -180,7 +180,8 @@ public class ToStringCreator {
 	/**
 	 * Return the String representation that this ToStringCreator built.
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		this.styler.styleEnd(this.buffer, this.object);
 		return this.buffer.toString();
 	}

@@ -49,7 +49,8 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 		return this.getCode().compareTo(that.getCode());
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -60,11 +61,13 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 		return (this.getType().equals(other.getType()) && this.getCode().equals(other.getCode()));
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return (getType().hashCode() * 29 + getCode().hashCode());
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return getLabel();
 	}
 

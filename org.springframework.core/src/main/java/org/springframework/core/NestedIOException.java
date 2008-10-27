@@ -59,7 +59,8 @@ public class NestedIOException extends IOException {
 	 * Return the detail message, including the message from the nested exception
 	 * if there is one.
 	 */
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}
 

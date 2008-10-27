@@ -75,7 +75,8 @@ public class ByteArrayResource extends AbstractResource {
 	/**
 	 * This implementation always returns <code>true</code>.
 	 */
-	public boolean exists() {
+	@Override
+    public boolean exists() {
 		return true;
 	}
 
@@ -100,7 +101,8 @@ public class ByteArrayResource extends AbstractResource {
 	 * This implementation compares the underlying byte array.
 	 * @see java.util.Arrays#equals(byte[], byte[])
 	 */
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof ByteArrayResource && Arrays.equals(((ByteArrayResource) obj).byteArray, this.byteArray)));
 	}
@@ -109,7 +111,8 @@ public class ByteArrayResource extends AbstractResource {
 	 * This implementation returns the hash code based on the
 	 * underlying byte array.
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return (byte[].class.hashCode() * 29 * this.byteArray.length);
 	}
 
