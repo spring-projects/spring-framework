@@ -48,6 +48,7 @@ class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 			"org.springframework.context.weaving.AspectJWeavingEnabler";
 
 
+	@Override
 	protected String getBeanClassName(Element element) {
 		if (element.hasAttribute(WEAVER_CLASS_ATTRIBUTE)) {
 			return element.getAttribute(WEAVER_CLASS_ATTRIBUTE);
@@ -55,10 +56,12 @@ class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 		return DEFAULT_LOAD_TIME_WEAVER_CLASS_NAME;
 	}
 
+	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 		return ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME;
 	}
 
+	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 

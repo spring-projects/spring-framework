@@ -83,6 +83,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		this.refreshHomeOnConnectFailure = refreshHomeOnConnectFailure;
 	}
 
+	@Override
 	protected boolean isHomeRefreshable() {
 		return this.refreshHomeOnConnectFailure;
 	}
@@ -94,6 +95,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #setHomeInterface
 	 * @see javax.rmi.PortableRemoteObject#narrow
 	 */
+	@Override
 	protected Object lookup() throws NamingException {
 		Object homeObject = super.lookup();
 		if (this.homeInterface != null) {
@@ -111,6 +113,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	/**
 	 * Check for EJB3-style home object that serves as EJB component directly.
 	 */
+	@Override
 	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		if (this.homeAsComponent) {
 			return null;
@@ -132,6 +135,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #doInvoke
 	 * @see #refreshAndRetry
 	 */
+	@Override
 	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation);

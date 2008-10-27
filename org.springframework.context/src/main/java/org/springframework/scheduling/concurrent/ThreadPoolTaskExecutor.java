@@ -223,6 +223,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
+	@Override
 	public void setThreadNamePrefix(String threadNamePrefix) {
 		super.setThreadNamePrefix(threadNamePrefix);
 		this.threadNamePrefixSet = true;

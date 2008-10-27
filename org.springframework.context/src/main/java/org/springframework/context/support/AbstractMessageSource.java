@@ -272,6 +272,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @return the rendered default message (with resolved arguments)
 	 * @see #formatMessage(String, Object[], java.util.Locale)
 	 */
+	@Override
 	protected String renderDefaultMessage(String defaultMessage, Object[] args, Locale locale) {
 		return formatMessage(defaultMessage, args, locale);
 	}
@@ -285,6 +286,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @param locale the locale to resolve through
 	 * @return an array of arguments with any MessageSourceResolvables resolved
 	 */
+	@Override
 	protected Object[] resolveArguments(Object[] args, Locale locale) {
 		if (args == null) {
 			return new Object[0];

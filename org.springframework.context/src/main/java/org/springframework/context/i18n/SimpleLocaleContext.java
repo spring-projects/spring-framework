@@ -46,6 +46,7 @@ public class SimpleLocaleContext implements LocaleContext {
 		return this.locale;
 	}
 
+	@Override
 	public String toString() {
 		return this.locale.toString();
 	}

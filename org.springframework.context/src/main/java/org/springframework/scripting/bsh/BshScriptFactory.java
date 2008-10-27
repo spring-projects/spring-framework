@@ -184,6 +184,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 
+	@Override
 	public String toString() {
 		return "BshScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
 	}

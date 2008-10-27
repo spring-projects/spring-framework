@@ -134,11 +134,13 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * resolvable content through <code>resolvableToString()</code>.
 	 * @see #resolvableToString()
 	 */
+	@Override
 	public String toString() {
 		return getClass().getName() + ": " + resolvableToString();
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -152,6 +154,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 				ObjectUtils.nullSafeEquals(getDefaultMessage(), otherResolvable.getDefaultMessage());
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(getCodes());
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getArguments());

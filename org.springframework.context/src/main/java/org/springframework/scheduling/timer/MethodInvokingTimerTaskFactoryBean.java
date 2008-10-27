@@ -48,6 +48,7 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvokingRunnable i
 	private TimerTask timerTask;
 
 
+	@Override
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		super.afterPropertiesSet();
 		this.timerTask = new DelegatingTimerTask(this);

@@ -161,6 +161,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Resolves the given message code as key in the registered resource bundles,
 	 * returning the value found in the bundle as-is (without MessageFormat parsing).
 	 */
+	@Override
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		String result = null;
 		for (int i = 0; result == null && i < this.basenames.length; i++) {
@@ -176,6 +177,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Resolves the given message code as key in the registered resource bundles,
 	 * using a cached MessageFormat instance per message code.
 	 */
+	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		MessageFormat messageFormat = null;
 		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
@@ -298,6 +300,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	/**
 	 * Show the configuration of this MessageSource.
 	 */
+	@Override
 	public String toString() {
 		return getClass().getName() + ": basenames=[" +
 				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";

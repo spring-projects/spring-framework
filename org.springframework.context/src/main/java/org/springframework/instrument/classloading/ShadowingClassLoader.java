@@ -93,6 +93,7 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	}
 
 
+	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (shouldShadow(name)) {
 			Class cls = this.classCache.get(name);
@@ -134,6 +135,7 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	 * @return whether the specified class is excluded
 	 * @deprecated in favor of {@link #isEligibleForShadowing}
 	 */
+	@Deprecated
 	protected boolean isClassNameExcludedFromShadowing(String className) {
 		return false;
 	}
@@ -180,14 +182,17 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	}
 
 
+	@Override
 	public URL getResource(String name) {
 		return this.enclosingClassLoader.getResource(name);
 	}
 
+	@Override
 	public InputStream getResourceAsStream(String name) {
 		return this.enclosingClassLoader.getResourceAsStream(name);
 	}
 
+	@Override
 	public Enumeration<URL> getResources(String name) throws IOException {
 		return this.enclosingClassLoader.getResources(name);
 	}

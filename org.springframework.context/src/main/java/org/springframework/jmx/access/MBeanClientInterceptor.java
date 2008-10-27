@@ -584,6 +584,7 @@ public class MBeanClientInterceptor
 			this.parameterTypes = (parameterTypes != null ? parameterTypes : new Class[0]);
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (other == this) {
 				return true;
@@ -592,6 +593,7 @@ public class MBeanClientInterceptor
 			return (this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes));
 		}
 
+		@Override
 		public int hashCode() {
 			return this.name.hashCode();
 		}

@@ -82,6 +82,7 @@ public class StaticScriptSource implements ScriptSource {
 	}
 
 
+	@Override
 	public String toString() {
 		return "static script" + (this.className != null ? " [" + this.className + "]" : "");
 	}

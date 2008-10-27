@@ -42,15 +42,18 @@ class JndiLookupBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionP
 	public static final String DEFAULT_OBJECT = "defaultObject";
 
 
+	@Override
 	protected Class getBeanClass(Element element) {
 		return JndiObjectFactoryBean.class;
 	}
 
+	@Override
 	protected boolean isEligibleAttribute(String attributeName) {
 		return (super.isEligibleAttribute(attributeName) &&
 				!DEFAULT_VALUE.equals(attributeName) && !DEFAULT_REF.equals(attributeName));
 	}
 
+	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		super.doParse(element, parserContext, builder);
 

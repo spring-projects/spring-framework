@@ -66,6 +66,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	/**
 	 * Sets managed resource to expose and stores its {@link ClassLoader}.
 	 */
+	@Override
 	public void setManagedResource(Object managedResource, String managedResourceType)
 			throws MBeanException, InstanceNotFoundException, InvalidTargetObjectTypeException {
 
@@ -79,6 +80,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#invoke
 	 */
+	@Override
 	public Object invoke(String opName, Object[] opArgs, String[] sig)
 			throws MBeanException, ReflectionException {
 
@@ -97,6 +99,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#getAttribute
 	 */
+	@Override
 	public Object getAttribute(String attrName)
 			throws AttributeNotFoundException, MBeanException, ReflectionException {
 
@@ -115,6 +118,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#getAttributes
 	 */
+	@Override
 	public AttributeList getAttributes(String[] attrNames) {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
@@ -131,6 +135,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#setAttribute
 	 */
+	@Override
 	public void setAttribute(Attribute attribute)
 			throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
 
@@ -149,6 +154,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#setAttributes
 	 */
+	@Override
 	public AttributeList setAttributes(AttributeList attributes) {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {

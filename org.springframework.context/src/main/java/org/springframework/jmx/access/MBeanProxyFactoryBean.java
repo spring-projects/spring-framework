@@ -69,6 +69,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 		this.proxyInterface = proxyInterface;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -77,6 +78,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	 * Checks that the <code>proxyInterface</code> has been specified and then
 	 * generates the proxy for the target MBean.
 	 */
+	@Override
 	public void afterPropertiesSet() throws MBeanServerNotFoundException, MBeanInfoRetrievalException {
 		super.afterPropertiesSet();
 

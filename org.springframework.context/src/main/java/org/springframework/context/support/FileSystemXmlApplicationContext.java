@@ -151,6 +151,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @return Resource handle
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		if (path != null && path.startsWith("/")) {
 			path = path.substring(1);

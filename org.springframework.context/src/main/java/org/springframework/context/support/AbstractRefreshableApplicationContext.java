@@ -112,6 +112,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * bean factory, shutting down the previous bean factory (if any) and
 	 * initializing a fresh bean factory for the next phase of the context's lifecycle.
 	 */
+	@Override
 	protected final void refreshBeanFactory() throws BeansException {
 		if (hasBeanFactory()) {
 			destroyBeans();
@@ -131,6 +132,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 	}
 
+	@Override
 	protected final void closeBeanFactory() {
 		synchronized (this.beanFactoryMonitor) {
 			this.beanFactory = null;
@@ -147,6 +149,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 	}
 
+	@Override
 	public final ConfigurableListableBeanFactory getBeanFactory() {
 		synchronized (this.beanFactoryMonitor) {
 			if (this.beanFactory == null) {

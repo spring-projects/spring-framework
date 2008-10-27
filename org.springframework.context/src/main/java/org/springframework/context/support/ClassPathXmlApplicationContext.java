@@ -198,6 +198,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	}
 
 
+	@Override
 	protected Resource[] getConfigResources() {
 		return this.configResources;
 	}

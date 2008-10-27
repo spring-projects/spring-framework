@@ -271,6 +271,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
+	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
 		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
 		if (beanType != null) {
@@ -508,6 +509,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			super(member, pd);
 		}
 
+		@Override
 		protected void initAnnotation(AnnotatedElement ae) {
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
@@ -553,6 +555,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			super(member, pd);
 		}
 
+		@Override
 		protected void initAnnotation(AnnotatedElement ae) {
 			WebServiceRef resource = ae.getAnnotation(WebServiceRef.class);
 			String resourceName = resource.name();
@@ -639,6 +642,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			super(member, pd);
 		}
 
+		@Override
 		protected void initAnnotation(AnnotatedElement ae) {
 			EJB resource = ae.getAnnotation(EJB.class);
 			String resourceBeanName = resource.beanName();
@@ -704,6 +708,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.lookupType = lookupType;
 		}
 
+		@Override
 		public Class getDependencyType() {
 			return this.lookupType;
 		}

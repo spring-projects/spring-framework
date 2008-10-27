@@ -264,6 +264,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * to create a BindException instance if still needed.
 	 * @see #getBindingResult()
 	 */
+	@Deprecated
 	public BindException getErrors() {
 		if (this.bindException == null) {
 			this.bindException = new BindException(getBindingResult());

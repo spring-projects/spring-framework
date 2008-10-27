@@ -90,6 +90,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 		this.cache = cache;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (this.lookupOnStartup) {

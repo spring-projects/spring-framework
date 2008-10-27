@@ -31,6 +31,7 @@ import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
  */
 class LocalStatelessSessionBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionParser {
 
+	@Override
 	protected String getBeanClassName(Element element) {
 		return "org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean";
 	}

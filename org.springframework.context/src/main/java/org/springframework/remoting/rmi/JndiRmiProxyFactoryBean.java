@@ -72,6 +72,7 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {

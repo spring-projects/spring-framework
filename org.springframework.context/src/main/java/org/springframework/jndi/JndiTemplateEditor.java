@@ -32,6 +32,7 @@ public class JndiTemplateEditor extends PropertyEditorSupport {
 
 	private final PropertiesEditor propertiesEditor = new PropertiesEditor();
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (text == null) {
 			throw new IllegalArgumentException("JndiTemplate cannot be created from null string");

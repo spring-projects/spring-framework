@@ -61,6 +61,7 @@ public class DelegatingTimerTask extends TimerTask {
 	 * Delegates execution to the underlying Runnable, catching any exception
 	 * or error thrown in order to continue scheduled execution.
 	 */
+	@Override
 	public void run() {
 		try {
 			this.delegate.run();

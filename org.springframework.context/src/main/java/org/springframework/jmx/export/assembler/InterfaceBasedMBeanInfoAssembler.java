@@ -165,6 +165,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @return <code>true</code> if the <code>Method</code> is declared in one of the
 	 * configured interfaces, otherwise <code>false</code>.
 	 */
+	@Override
 	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return isPublicInInterface(method, beanKey);
 	}
@@ -178,6 +179,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @return <code>true</code> if the <code>Method</code> is declared in one of the
 	 * configured interfaces, otherwise <code>false</code>.
 	 */
+	@Override
 	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return isPublicInInterface(method, beanKey);
 	}
@@ -191,6 +193,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @return <code>true</code> if the <code>Method</code> is declared in one of the
 	 * configured interfaces, otherwise <code>false</code>.
 	 */
+	@Override
 	protected boolean includeOperation(Method method, String beanKey) {
 		return isPublicInInterface(method, beanKey);
 	}

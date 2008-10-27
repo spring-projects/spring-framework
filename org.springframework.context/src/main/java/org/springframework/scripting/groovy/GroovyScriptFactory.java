@@ -262,6 +262,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	}
 
 
+	@Override
 	public String toString() {
 		return "GroovyScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
 	}

@@ -58,6 +58,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 		super(parent);
 	}
 
+	@Override
 	public Class loadClass(String name) throws ClassNotFoundException {
 		return new ContextOverridingClassLoader(getParent()).loadClass(name);
 	}
@@ -77,6 +78,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 			super(parent);
 		}
 
+		@Override
 		protected boolean isEligibleForOverriding(String className) {
 			if (isExcluded(className) || ContextTypeMatchClassLoader.this.isExcluded(className)) {
 				return false;
@@ -92,6 +94,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 			return true;
 		}
 
+		@Override
 		protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
 			byte[] bytes = (byte[]) bytesCache.get(name);
 			if (bytes == null) {

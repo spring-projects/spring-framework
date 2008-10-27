@@ -81,6 +81,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (this.businessInterface == null) {

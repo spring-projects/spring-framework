@@ -128,6 +128,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * <p>The default implementation simply builds a
 	 * {@link org.springframework.context.support.ClassPathXmlApplicationContext}.
 	 */
+	@Override
 	protected BeanFactory createDefinition(String resourceLocation, String factoryKey) {
 		return new ClassPathXmlApplicationContext(new String[] {resourceLocation}, false);
 	}
@@ -136,6 +137,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * Overrides the default method to refresh the ApplicationContext, invoking
 	 * {@link ConfigurableApplicationContext#refresh ConfigurableApplicationContext.refresh()}.
 	 */
+	@Override
 	protected void initializeDefinition(BeanFactory groupDef) {
 		if (groupDef instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) groupDef).refresh();
@@ -146,6 +148,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * Overrides the default method to operate on an ApplicationContext, invoking
 	 * {@link ConfigurableApplicationContext#refresh ConfigurableApplicationContext.close()}.
 	 */
+	@Override
 	protected void destroyDefinition(BeanFactory groupDef, String selector) {
 		if (groupDef instanceof ConfigurableApplicationContext) {
 			if (logger.isTraceEnabled()) {

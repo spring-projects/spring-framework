@@ -48,6 +48,7 @@ public class BindException extends Exception implements BindingResult {
 	 * @deprecated in favor of <code>BindingResult.MODEL_KEY_PREFIX</code>
 	 * @see BindingResult#MODEL_KEY_PREFIX
 	 */
+	@Deprecated
 	public static final String ERROR_KEY_PREFIX = BindException.class.getName() + ".";
 
 
@@ -243,14 +244,17 @@ public class BindException extends Exception implements BindingResult {
 	/**
 	 * Returns diagnostic information about the errors held in this object.
 	 */
+	@Override
 	public String getMessage() {
 		return this.bindingResult.toString();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		return (this == other || this.bindingResult.equals(other));
 	}
 
+	@Override
 	public int hashCode() {
 		return this.bindingResult.hashCode();
 	}

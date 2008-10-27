@@ -93,14 +93,17 @@ public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBean
 	}
 
 
+	@Override
 	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return isMatch(method, beanKey);
 	}
 
+	@Override
 	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return isMatch(method, beanKey);
 	}
 
+	@Override
 	protected boolean includeOperation(Method method, String beanKey) {
 		return isMatch(method, beanKey);
 	}

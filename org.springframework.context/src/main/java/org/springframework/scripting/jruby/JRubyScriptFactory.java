@@ -119,6 +119,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 
+	@Override
 	public String toString() {
 		return "JRubyScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
 	}

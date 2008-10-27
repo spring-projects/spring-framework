@@ -65,6 +65,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * will be automatically converted to Spring's RemoteAccessException.
 	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
 	 */
+	@Deprecated
 	public static Object invoke(MethodInvocation invocation, Remote stub, String serviceName) throws Throwable {
 		try {
 			return invokeRemoteMethod(invocation, stub);
@@ -86,6 +87,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * letting reflection exceptions through as-is.
 	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
 	 */
+	@Deprecated
 	public static Object doInvoke(MethodInvocation invocation, Remote stub) throws InvocationTargetException {
 		return invokeRemoteMethod(invocation, stub);
 	}

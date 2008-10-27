@@ -131,6 +131,7 @@ public class TimerFactoryBean implements FactoryBean, BeanNameAware, Initializin
 	 * Can be overridden in subclasses to provide custom Timer subclasses.
 	 * @deprecated as of Spring 2.0.1, in favor of {@link #createTimer(String, boolean)}
 	 */
+	@Deprecated
 	protected Timer createTimer(boolean daemon) {
 		return null;
 	}

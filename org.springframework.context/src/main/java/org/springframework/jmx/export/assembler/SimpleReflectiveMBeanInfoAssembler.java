@@ -32,6 +32,7 @@ public class SimpleReflectiveMBeanInfoAssembler extends AbstractConfigurableMBea
 	/**
 	 * Always returns <code>true</code>.
 	 */
+	@Override
 	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return true;
 	}
@@ -39,6 +40,7 @@ public class SimpleReflectiveMBeanInfoAssembler extends AbstractConfigurableMBea
 	/**
 	 * Always returns <code>true</code>.
 	 */
+	@Override
 	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return true;
 	}
@@ -46,6 +48,7 @@ public class SimpleReflectiveMBeanInfoAssembler extends AbstractConfigurableMBea
   /**
 	 * Always returns <code>true</code>.
 	 */
+	@Override
 	protected boolean includeOperation(Method method, String beanKey) {
 		return true;
 	}
