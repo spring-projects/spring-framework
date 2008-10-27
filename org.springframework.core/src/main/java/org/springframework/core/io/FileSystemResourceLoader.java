@@ -46,8 +46,7 @@ public class FileSystemResourceLoader extends DefaultResourceLoader {
 	 * @see FileSystemResource
 	 * @see org.springframework.web.context.support.ServletContextResourceLoader#getResourceByPath
 	 */
-	@Override
-    protected Resource getResourceByPath(String path) {
+	protected Resource getResourceByPath(String path) {
 		if (path != null && path.startsWith("/")) {
 			path = path.substring(1);
 		}

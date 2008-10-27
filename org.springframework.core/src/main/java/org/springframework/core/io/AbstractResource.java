@@ -16,9 +16,6 @@
 
 package org.springframework.core.io;
 
-import org.springframework.core.NestedIOException;
-import org.springframework.util.ResourceUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +23,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import org.springframework.core.NestedIOException;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Convenience base class for {@link Resource} implementations,
@@ -153,8 +153,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation returns the description of this resource.
 	 * @see #getDescription()
 	 */
-	@Override
-    public String toString() {
+	public String toString() {
 		return getDescription();
 	}
 
@@ -162,8 +161,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation compares description strings.
 	 * @see #getDescription()
 	 */
-	@Override
-    public boolean equals(Object obj) {
+	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
 	}
@@ -172,8 +170,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation returns the description's hash code.
 	 * @see #getDescription()
 	 */
-	@Override
-    public int hashCode() {
+	public int hashCode() {
 		return getDescription().hashCode();
 	}
 

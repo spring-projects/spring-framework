@@ -16,12 +16,12 @@
 
 package org.springframework.core.io;
 
+import java.beans.PropertyEditorSupport;
+import java.io.IOException;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
-
-import java.beans.PropertyEditorSupport;
-import java.io.IOException;
 
 /**
  * {@link java.beans.PropertyEditor Editor} for {@link Resource}
@@ -68,8 +68,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 
-	@Override
-    public void setAsText(String text) {
+	public void setAsText(String text) {
 		if (StringUtils.hasText(text)) {
 			String locationToUse = resolvePath(text).trim();
 			setValue(this.resourceLoader.getResource(locationToUse));
@@ -91,8 +90,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 
-	@Override
-    public String getAsText() {
+	public String getAsText() {
 		Resource value = (Resource) getValue();
 		try {
 			// Try to determine URL for resource.

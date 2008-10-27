@@ -16,13 +16,19 @@
 
 package org.springframework.core.enums;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CachingMapDecorator;
 import org.springframework.util.ClassUtils;
-
-import java.util.*;
 
 /**
  * Abstract base class for {@link LabeledEnumResolver} implementations,
@@ -42,8 +48,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 
 
 	private final CachingMapDecorator labeledEnumCache = new CachingMapDecorator(true) {
-		@Override
-        protected Object create(Object key) {
+		protected Object create(Object key) {
 			Class enumType = (Class) key;
 			Set typeEnums = findLabeledEnums(enumType);
 			if (typeEnums == null || typeEnums.isEmpty()) {
@@ -59,8 +64,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 			}
 			return Collections.unmodifiableMap(typeEnumMap);
 		}
-		@Override
-        protected boolean useWeakValue(Object key, Object value) {
+		protected boolean useWeakValue(Object key, Object value) {
 			Class enumType = (Class) key;
 			if (!ClassUtils.isCacheSafe(enumType, AbstractCachingLabeledEnumResolver.this.getClass().getClassLoader())) {
 				if (logger.isDebugEnabled()) {

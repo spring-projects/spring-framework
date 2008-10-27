@@ -16,12 +16,16 @@
 
 package org.springframework.core.io.support;
 
-import org.springframework.core.io.Resource;
-import org.springframework.util.SystemPropertyUtils;
-
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import org.springframework.core.io.Resource;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Editor for {@link org.springframework.core.io.Resource} arrays, to
@@ -70,8 +74,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	/**
 	 * Treat the given text as location pattern and convert it to a Resource array.
 	 */
-	@Override
-    public void setAsText(String text) {
+	public void setAsText(String text) {
 		String pattern = resolvePath(text).trim();
 		try {
 			setValue(this.resourcePatternResolver.getResources(pattern));
@@ -86,8 +89,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * Treat the given value as collection or array and convert it to a Resource array.
 	 * Considers String elements as location patterns, and takes Resource elements as-is.
 	 */
-	@Override
-    public void setValue(Object value) throws IllegalArgumentException {
+	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection input = (value instanceof Collection ? (Collection) value : Arrays.asList((Object[]) value));
 			List merged = new ArrayList();

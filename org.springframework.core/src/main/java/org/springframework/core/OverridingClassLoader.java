@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
-import org.springframework.util.FileCopyUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.springframework.util.FileCopyUtils;
 
 /**
  * <code>ClassLoader</code> that does <i>not</i> always delegate to the
@@ -54,8 +54,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	}
 
 
-	@Override
-    protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		Class result = null;
 		if (isEligibleForOverriding(name)) {
 			result = loadClassForOverriding(name);

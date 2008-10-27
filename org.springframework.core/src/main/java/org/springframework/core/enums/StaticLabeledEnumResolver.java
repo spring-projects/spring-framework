@@ -16,12 +16,12 @@
 
 package org.springframework.core.enums;
 
-import org.springframework.util.Assert;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.springframework.util.Assert;
 
 /**
  * {@link LabeledEnumResolver} that resolves statically defined enumerations.
@@ -50,8 +50,7 @@ public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolve
 	}
 
 
-	@Override
-    protected Set findLabeledEnums(Class type) {
+	protected Set findLabeledEnums(Class type) {
 		Set typeEnums = new TreeSet();
 		Field[] fields = type.getFields();
 		for (int i = 0; i < fields.length; i++) {
