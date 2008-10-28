@@ -84,6 +84,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 * to the superclass's initialization.
 	 * @see #detectHandlers
 	 */
+	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 		detectHandlers();
@@ -165,6 +166,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	/**
 	 * Uses the current PortletMode as lookup key.
 	 */
+	@Override
 	protected Object getLookupKey(PortletRequest request) throws Exception {
 		return request.getPortletMode();
 	}
@@ -194,6 +196,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 			}
 		}
 
+		@Override
 		public String toString() {
 			return StringUtils.arrayToCommaDelimitedString(this.params);
 		}

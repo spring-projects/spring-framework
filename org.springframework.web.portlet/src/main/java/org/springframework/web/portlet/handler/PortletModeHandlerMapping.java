@@ -76,6 +76,7 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * to the superclass's initialization.
 	 * @see #registerHandlers
 	 */
+	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 		registerHandlers(this.portletModeMap);
@@ -86,6 +87,7 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * @param portletModeMap Map with mode names as keys and handler beans or bean names as values
 	 * @throws BeansException if the handler couldn't be registered
 	 */
+	@Override
 	protected void registerHandlers(Map portletModeMap) throws BeansException {
 		if (CollectionUtils.isEmpty(portletModeMap)) {
 			logger.warn("Neither 'portletModeMap' nor 'mappings' set on PortletModeHandlerMapping");
@@ -105,6 +107,7 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	/**
 	 * Uses the current PortletMode as lookup key.
 	 */
+	@Override
 	protected Object getLookupKey(PortletRequest request) throws Exception {
 		return request.getPortletMode();
 	}

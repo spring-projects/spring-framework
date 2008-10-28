@@ -98,6 +98,7 @@ public class PortletWrappingController extends AbstractController
 		this.useSharedPortletConfig = useSharedPortletConfig;
 	}
 
+	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}
@@ -156,12 +157,14 @@ public class PortletWrappingController extends AbstractController
 	}
 
 
+	@Override
 	protected void handleActionRequestInternal(
 			ActionRequest request, ActionResponse response) throws Exception {
 
 		this.portletInstance.processAction(request, response);
 	}
 
+	@Override
 	protected ModelAndView handleRenderRequestInternal(
 			RenderRequest request, RenderResponse response) throws Exception {
 

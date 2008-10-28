@@ -371,6 +371,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #processFormSubmission
 	 * @see #handleRenderRequestInternal
 	 */
+	@Override
 	protected void handleActionRequestInternal(ActionRequest request, ActionResponse response)
 			throws Exception {
 
@@ -420,6 +421,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #processFormSubmission
 	 * @see #handleActionRequestInternal
 	 */
+	@Override
 	protected ModelAndView handleRenderRequestInternal(RenderRequest request, RenderResponse response)
 			throws Exception {
 
@@ -680,6 +682,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return object form to bind onto
 	 * @see #formBackingObject
 	 */
+	@Override
 	protected final Object getCommand(PortletRequest request) throws Exception {
 		// If not in session-form mode, create a new form-backing object.
 		if (!isSessionForm()) {

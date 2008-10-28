@@ -96,6 +96,7 @@ public class PortletContextResource extends AbstractResource implements ContextR
 	 * This implementation checks <code>PortletContext.getResource</code>.
 	 * @see javax.portlet.PortletContext#getResource(String)
 	 */
+	@Override
 	public boolean exists() {
 		try {
 			URL url = this.portletContext.getResource(this.path);
@@ -124,6 +125,7 @@ public class PortletContextResource extends AbstractResource implements ContextR
 	 * but throws a FileNotFoundException if no resource found.
 	 * @see javax.portlet.PortletContext#getResource(String)
 	 */
+	@Override
 	public URL getURL() throws IOException {
 		URL url = this.portletContext.getResource(this.path);
 		if (url == null) {
@@ -138,16 +140,19 @@ public class PortletContextResource extends AbstractResource implements ContextR
 	 * but throws a FileNotFoundException if not found or not resolvable.
 	 * @see javax.portlet.PortletContext#getRealPath(String)
 	 */
+	@Override
 	public File getFile() throws IOException {
 		String realPath = PortletUtils.getRealPath(this.portletContext, this.path);
 		return new File(realPath);
 	}
 
+	@Override
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new PortletContextResource(this.portletContext, pathToUse);
 	}
 
+	@Override
 	public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}
@@ -161,6 +166,7 @@ public class PortletContextResource extends AbstractResource implements ContextR
 	}
 
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -172,6 +178,7 @@ public class PortletContextResource extends AbstractResource implements ContextR
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return this.path.hashCode();
 	}

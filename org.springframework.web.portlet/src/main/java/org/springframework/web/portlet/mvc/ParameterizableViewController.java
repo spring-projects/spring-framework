@@ -81,6 +81,7 @@ public class ParameterizableViewController extends AbstractController {
 		return this.viewName;
 	}
 
+	@Override
 	protected void initApplicationContext() {
 		if (this.viewName == null) {
 			throw new IllegalArgumentException("Property 'viewName' is required");
@@ -91,6 +92,7 @@ public class ParameterizableViewController extends AbstractController {
 	/**
 	 * Return a ModelAndView object with the specified view name.
 	 */
+	@Override
 	protected ModelAndView handleRenderRequestInternal(RenderRequest request, RenderResponse response)
 			throws Exception {
 

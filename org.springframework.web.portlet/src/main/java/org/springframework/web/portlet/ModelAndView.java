@@ -288,6 +288,7 @@ public class ModelAndView {
 	/**
 	 * Return diagnostic information about this model and view.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer("ModelAndView: ");
 		if (isReference()) {

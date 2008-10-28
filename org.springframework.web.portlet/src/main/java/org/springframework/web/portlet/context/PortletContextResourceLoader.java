@@ -53,6 +53,7 @@ public class PortletContextResourceLoader extends DefaultResourceLoader {
 	 * This implementation supports file paths beneath the root of the web application.
 	 * @see PortletContextResource
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		return new PortletContextResource(this.portletContext, path);
 	}

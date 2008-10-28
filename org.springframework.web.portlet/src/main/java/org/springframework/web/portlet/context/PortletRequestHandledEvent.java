@@ -106,6 +106,7 @@ public class PortletRequestHandledEvent extends RequestHandledEvent {
 	}
 
 
+	@Override
 	public String getShortDescription() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("portlet=[").append(this.portletName).append("]; ");
@@ -113,6 +114,7 @@ public class PortletRequestHandledEvent extends RequestHandledEvent {
 		return sb.toString();
 	}
 
+	@Override
 	public String getDescription() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("portlet=[").append(this.portletName).append("]; ");
@@ -122,6 +124,7 @@ public class PortletRequestHandledEvent extends RequestHandledEvent {
 		return sb.toString();
 	}
 
+	@Override
 	public String toString() {
 		return "PortletRequestHandledEvent: " + getDescription();
 	}

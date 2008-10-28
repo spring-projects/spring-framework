@@ -346,6 +346,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/**
 	 * This implementation calls {@link #initStrategies}.
 	 */
+	@Override
 	public void onRefresh(ApplicationContext context) {
 		initStrategies(context);
 	}
@@ -644,6 +645,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param response current portlet Action response
 	 * @throws Exception in case of any kind of processing failure
 	 */
+	@Override
 	protected void doActionService(ActionRequest request, ActionResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received action request");
@@ -746,6 +748,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param response current portlet render response
 	 * @throws Exception in case of any kind of processing failure
 	 */
+	@Override
 	protected void doRenderService(RenderRequest request, RenderResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received render request");

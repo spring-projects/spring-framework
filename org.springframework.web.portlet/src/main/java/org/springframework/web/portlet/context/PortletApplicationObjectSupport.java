@@ -49,6 +49,7 @@ public abstract class PortletApplicationObjectSupport extends ApplicationObjectS
 	 * @see #getPortletContext()
 	 * @see #getTempDir()
 	 */
+	@Override
 	protected boolean isContextRequired() {
 		return true;
 	}

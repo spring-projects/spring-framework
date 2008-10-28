@@ -86,6 +86,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	}
 
 
+	@Override
 	protected final void handleActionRequestInternal(ActionRequest request, ActionResponse response)
 			throws Exception {
 
@@ -104,6 +105,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 		setCommandInSession(response);
 	}
 
+	@Override
 	protected final ModelAndView handleRenderRequestInternal(
 			RenderRequest request, RenderResponse response) throws Exception {
 

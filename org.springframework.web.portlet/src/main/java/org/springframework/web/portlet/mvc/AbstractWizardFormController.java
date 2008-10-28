@@ -230,6 +230,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Calls page-specific onBindAndValidate method.
 	 */
+	@Override
 	protected final void onBindAndValidate(PortletRequest request, Object command, BindException errors)
 			throws Exception {
 
@@ -261,6 +262,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #isFinishRequest(PortletRequest)
 	 * @see #isCancelRequest(PortletRequest)
 	 */
+	@Override
 	protected boolean isFormSubmission(PortletRequest request) {
 		return super.isFormSubmission(request) || isFinishRequest(request) || isCancelRequest(request);
 	}
@@ -268,6 +270,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Calls page-specific referenceData method.
 	 */
+	@Override
 	protected final Map referenceData(PortletRequest request, Object command, Errors errors)
 			throws Exception {
 
@@ -315,6 +318,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>This can be overridden in subclasses, e.g. to prepare wizard-specific
 	 * error views in case of an Exception.
 	 */
+	@Override
 	protected ModelAndView showForm(
 			RenderRequest request, RenderResponse response, BindException errors) throws Exception {
 
@@ -557,6 +561,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #setBindOnNewForm
 	 * @see #handleInvalidSubmit
 	 */
+	@Override
 	protected ModelAndView renderInvalidSubmit(RenderRequest request, RenderResponse response)
 			throws Exception {
 
@@ -574,6 +579,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @throws Exception in case of errors
 	 * @see #renderInvalidSubmit
 	 */
+	@Override
 	protected void handleInvalidSubmit(ActionRequest request, ActionResponse response) throws Exception {
 	}
 
@@ -581,6 +587,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Apply wizard workflow: finish, cancel, page change.
 	 * @see #processFormSubmission
 	 */
+	@Override
 	protected final ModelAndView renderFormSubmission(RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception {
 
@@ -626,6 +633,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Apply wizard workflow: finish, cancel, page change.
 	 * @see #renderFormSubmission
 	 */
+	@Override
 	protected final void processFormSubmission(
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
 			throws Exception {

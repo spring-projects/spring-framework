@@ -235,6 +235,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 * Update all accessed session attributes through <code>session.setAttribute</code>
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
+	@Override
 	protected void updateAccessedSessionAttributes() {
 		this.session = this.request.getPortletSession(false);
 		synchronized (this.sessionAttributesToUpdate) {
@@ -280,6 +281,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
+	@Override
 	public String toString() {
 		return this.request.toString();
 	}

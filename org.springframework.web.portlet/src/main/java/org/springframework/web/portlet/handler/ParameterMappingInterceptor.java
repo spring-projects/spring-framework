@@ -65,6 +65,7 @@ public class ParameterMappingInterceptor extends HandlerInterceptorAdapter {
 	 * If request is an {@link javax.portlet.ActionRequest ActionRequest},
 	 * get handler mapping parameter and add it to the ActionResponse.
 	 */
+	@Override
 	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
 		String mappingParameter = request.getParameter(this.parameterName);
 		if (mappingParameter != null) {

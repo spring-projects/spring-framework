@@ -136,6 +136,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return buffer.toString();
 	}
 
+	@Override
 	public String toString() {
 		return "PortletWebRequest: " + getDescription(true);
 	}

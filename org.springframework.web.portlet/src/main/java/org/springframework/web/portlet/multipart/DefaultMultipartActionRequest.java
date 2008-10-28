@@ -79,6 +79,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 
+	@Override
 	public Enumeration getParameterNames() {
 		Set paramNames = new HashSet();
 		Enumeration paramEnum = super.getParameterNames();
@@ -89,6 +90,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 		return Collections.enumeration(paramNames);
 	}
 
+	@Override
 	public String getParameter(String name) {
 		String[] values = (String[]) getMultipartParameters().get(name);
 		if (values != null) {
@@ -97,6 +99,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 		return super.getParameter(name);
 	}
 
+	@Override
 	public String[] getParameterValues(String name) {
 		String[] values = (String[]) getMultipartParameters().get(name);
 		if (values != null) {
@@ -105,6 +108,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 		return super.getParameterValues(name);
 	}
 
+	@Override
 	public Map getParameterMap() {
 		Map paramMap = new HashMap();
 		paramMap.putAll(super.getParameterMap());

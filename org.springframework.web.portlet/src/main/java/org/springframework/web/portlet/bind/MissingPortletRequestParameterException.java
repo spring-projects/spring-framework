@@ -41,6 +41,7 @@ public class MissingPortletRequestParameterException extends PortletRequestBindi
 	}
 
 
+	@Override
 	public String getMessage() {
 		return "Required " + this.parameterType + " parameter '" + parameterName + "' is not present";
 	}

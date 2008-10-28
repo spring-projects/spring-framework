@@ -592,12 +592,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		private boolean render = false;
 
+		@Override
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
 			return (this.action == other.action && this.render == other.render &&
 					Arrays.equals(this.modes, other.modes) && Arrays.equals(this.params, other.params));
 		}
 
+		@Override
 		public int hashCode() {
 			return (Arrays.hashCode(this.modes) * 29 + Arrays.hashCode(this.params));
 		}

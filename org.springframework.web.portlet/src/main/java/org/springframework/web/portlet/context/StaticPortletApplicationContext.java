@@ -63,6 +63,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	}
 
 
+	@Override
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
 		if (parent instanceof WebApplicationContext) {
@@ -132,6 +133,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	/**
 	 * Register request/session scopes, a {@link PortletContextAwareProcessor}, etc.
 	 */
+	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext, this.portletConfig));
@@ -148,6 +150,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	 * This implementation supports file paths beneath the root of the PortletContext.
 	 * @see PortletContextResource
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		return new PortletContextResource(this.portletContext, path);
 	}
@@ -156,6 +159,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	 * This implementation supports pattern matching in unexpanded WARs too.
 	 * @see PortletContextResourcePatternResolver
 	 */
+	@Override
 	protected ResourcePatternResolver getResourcePatternResolver() {
 		return new PortletContextResourcePatternResolver(this);
 	}
