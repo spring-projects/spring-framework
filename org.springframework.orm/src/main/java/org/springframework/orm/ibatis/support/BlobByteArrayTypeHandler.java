@@ -54,12 +54,14 @@ public class BlobByteArrayTypeHandler extends AbstractLobTypeHandler {
 		super(lobHandler);
 	}
 
+	@Override
 	protected void setParameterInternal(
 			PreparedStatement ps, int index, Object value, String jdbcType, LobCreator lobCreator)
 			throws SQLException {
 		lobCreator.setBlobAsBytes(ps, index, (byte[]) value);
 	}
 
+	@Override
 	protected Object getResultInternal(ResultSet rs, int index, LobHandler lobHandler)
 			throws SQLException {
 		return lobHandler.getBlobAsBytes(rs, index);

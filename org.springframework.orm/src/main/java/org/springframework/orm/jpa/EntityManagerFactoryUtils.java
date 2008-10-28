@@ -346,14 +346,17 @@ public abstract class EntityManagerFactoryUtils {
 			return ENTITY_MANAGER_SYNCHRONIZATION_ORDER;
 		}
 
+		@Override
 		protected boolean shouldUnbindAtCompletion() {
 			return this.newEntityManager;
 		}
 
+		@Override
 		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
 			closeEntityManager(((EntityManagerHolder) resourceHolder).getEntityManager());
 		}
 
+		@Override
 		protected void cleanupResource(ResourceHolder resourceHolder, Object resourceKey, boolean committed) {
 			if (!committed) {
 				// Clear all pending inserts/updates/deletes in the EntityManager.

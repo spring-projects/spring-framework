@@ -30,6 +30,7 @@ public class LocalJtaDataSourceConnectionProvider extends LocalDataSourceConnect
 	 * This implementation returns <code>true</code>,
 	 * since we're assuming a JTA DataSource.
 	 */
+	@Override
 	public boolean supportsAggressiveRelease() {
 		return true;
 	}

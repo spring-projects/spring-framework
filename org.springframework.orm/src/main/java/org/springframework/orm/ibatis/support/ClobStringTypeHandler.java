@@ -57,12 +57,14 @@ public class ClobStringTypeHandler extends AbstractLobTypeHandler {
 		super(lobHandler);
 	}
 
+	@Override
 	protected void setParameterInternal(
 			PreparedStatement ps, int index, Object value, String jdbcType, LobCreator lobCreator)
 			throws SQLException {
 		lobCreator.setClobAsString(ps, index, (String) value);
 	}
 
+	@Override
 	protected Object getResultInternal(ResultSet rs, int index, LobHandler lobHandler)
 			throws SQLException {
 		return lobHandler.getClobAsString(rs, index);

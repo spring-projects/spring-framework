@@ -68,15 +68,18 @@ public class BlobByteArrayType extends AbstractLobType  {
 		return byte[].class;
 	}
 
+	@Override
 	public boolean isMutable() {
 		return true;
 	}
 
+	@Override
 	public boolean equals(Object x, Object y) {
 		return (x == y) ||
 				(x instanceof byte[] && y instanceof byte[] && Arrays.equals((byte[]) x, (byte[]) y));
 	}
 
+	@Override
 	public Object deepCopy(Object value) {
 		if (value == null) {
 			return null;
@@ -87,6 +90,7 @@ public class BlobByteArrayType extends AbstractLobType  {
 		return copy;
 	}
 
+	@Override
 	protected Object nullSafeGetInternal(
 			ResultSet rs, String[] names, Object owner, LobHandler lobHandler)
 			throws SQLException {
@@ -94,6 +98,7 @@ public class BlobByteArrayType extends AbstractLobType  {
 		return lobHandler.getBlobAsBytes(rs, names[0]);
 	}
 
+	@Override
 	protected void nullSafeSetInternal(
 			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException {

@@ -46,6 +46,7 @@ import org.springframework.transaction.TransactionException;
  */
 public class HibernateJpaDialect extends DefaultJpaDialect {
 
+	@Override
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
@@ -53,6 +54,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return prepareTransaction(entityManager, definition.isReadOnly(), definition.getName());
 	}
 
+	@Override
 	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
 			throws PersistenceException {
 
@@ -74,6 +76,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return new SessionTransactionData(session, previousFlushMode);
 	}
 
+	@Override
 	public void cleanupTransaction(Object transactionData) {
 		((SessionTransactionData) transactionData).resetFlushMode();
 	}
@@ -87,6 +90,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return (con != null ? new SimpleConnectionHandle(con) : null);
 	}
 
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return SessionFactoryUtils.convertHibernateAccessException((HibernateException) ex);

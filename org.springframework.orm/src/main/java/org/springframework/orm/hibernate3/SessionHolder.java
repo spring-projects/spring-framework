@@ -144,6 +144,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 
+	@Override
 	public void clear() {
 		super.clear();
 		this.transaction = null;

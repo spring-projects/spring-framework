@@ -58,6 +58,7 @@ public class PersistenceManagerHolder extends ResourceHolderSupport {
 		return this.transactionActive;
 	}
 
+	@Override
 	public void clear() {
 		super.clear();
 		this.transactionActive = false;

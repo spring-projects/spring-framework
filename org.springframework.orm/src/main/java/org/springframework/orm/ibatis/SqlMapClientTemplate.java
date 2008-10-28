@@ -137,11 +137,13 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 * If no DataSource specified, use SqlMapClient's DataSource.
 	 * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource()
 	 */
+	@Override
 	public DataSource getDataSource() {
 		DataSource ds = super.getDataSource();
 		return (ds != null ? ds : this.sqlMapClient.getDataSource());
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.sqlMapClient == null) {
 			throw new IllegalArgumentException("Property 'sqlMapClient' is required");
@@ -338,6 +340,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	/**
 	 * @deprecated as of iBATIS 2.3.0
 	 */
+	@Deprecated
 	public PaginatedList queryForPaginatedList(String statementName, int pageSize)
 			throws DataAccessException {
 
@@ -347,6 +350,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	/**
 	 * @deprecated as of iBATIS 2.3.0
 	 */
+	@Deprecated
 	public PaginatedList queryForPaginatedList(
 			final String statementName, final Object parameterObject, final int pageSize)
 			throws DataAccessException {

@@ -75,6 +75,7 @@ public class CommonsLoggingSessionLog904 extends DefaultSessionLog {
 	}
 
 
+	@Override
 	public void log(SessionLogEntry entry) {
 		if (entry.hasException()) {
 			if (shouldLogExceptions() && logger.isWarnEnabled()) {

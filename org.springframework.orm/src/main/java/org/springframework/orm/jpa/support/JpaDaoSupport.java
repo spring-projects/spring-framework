@@ -114,6 +114,7 @@ public abstract class JpaDaoSupport extends DaoSupport {
 	  return jpaTemplate;
 	}
 
+	@Override
 	protected final void checkDaoConfig() {
 		if (this.jpaTemplate == null) {
 			throw new IllegalArgumentException("entityManagerFactory or jpaTemplate is required");

@@ -181,10 +181,12 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 			this.lobCreator = lobCreator;
 		}
 
+		@Override
 		public int getOrder() {
 			return LOB_CREATOR_SYNCHRONIZATION_ORDER;
 		}
 
+		@Override
 		public void beforeCompletion() {
 			this.lobCreator.close();
 		}

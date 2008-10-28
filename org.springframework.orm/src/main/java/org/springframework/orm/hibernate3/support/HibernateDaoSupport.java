@@ -112,6 +112,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	  return this.hibernateTemplate;
 	}
 
+	@Override
 	protected final void checkDaoConfig() {
 		if (this.hibernateTemplate == null) {
 			throw new IllegalArgumentException("'sessionFactory' or 'hibernateTemplate' is required");

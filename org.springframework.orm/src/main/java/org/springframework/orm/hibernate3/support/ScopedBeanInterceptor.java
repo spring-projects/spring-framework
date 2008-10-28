@@ -44,6 +44,7 @@ import org.springframework.aop.support.AopUtils;
  */
 public class ScopedBeanInterceptor extends EmptyInterceptor {
 
+	@Override
 	public String getEntityName(Object entity) {
 		if (entity instanceof ScopedObject) {
 			// Determine underlying object's type.

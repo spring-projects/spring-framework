@@ -251,6 +251,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		return getSessionFactory();
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		TopLinkTransactionObject txObject = new TopLinkTransactionObject();
 		SessionHolder sessionHolder = (SessionHolder)
@@ -259,11 +260,13 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		return txObject;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) transaction;
 		return (txObject.getSessionHolder() != null);
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		Session session = null;
 
@@ -358,12 +361,14 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		return ((DatabaseAccessor) accessor).getConnection();
 	}
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) transaction;
 		txObject.setSessionHolder(null);
 		return TransactionSynchronizationManager.unbindResource(getSessionFactory());
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SessionHolder sessionHolder = (SessionHolder) suspendedResources;
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
@@ -374,6 +379,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -391,6 +397,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -400,6 +407,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		txObject.getSessionHolder().clear();
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -409,6 +417,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		txObject.getSessionHolder().setRollbackOnly();
 	}
 
+	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) transaction;
 

@@ -56,10 +56,12 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return this.persistenceProvider;
 	}
 
+	@Override
 	public String getPersistenceProviderRootPackage() {
 		return "org.eclipse.persistence";
 	}
 
+	@Override
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
@@ -106,10 +108,12 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return JpaEntityManager.class;
 	}

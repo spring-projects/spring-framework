@@ -447,10 +447,12 @@ public abstract class ExtendedEntityManagerCreator {
 			return EntityManagerFactoryUtils.ENTITY_MANAGER_SYNCHRONIZATION_ORDER + 1;
 		}
 
+		@Override
 		protected boolean shouldReleaseBeforeCompletion() {
 			return false;
 		}
 
+		@Override
 		public void afterCommit() {
 			super.afterCommit();
 			// Trigger commit here to let exceptions propagate to the caller.
@@ -462,6 +464,7 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 		}
 
+		@Override
 		public void afterCompletion(int status) {
 			super.afterCompletion(status);
 			if (status != STATUS_COMMITTED) {

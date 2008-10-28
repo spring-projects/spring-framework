@@ -187,6 +187,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 			throws DataAccessException {
 
 		return execute(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				if (args != null) {
 					return session.executeQuery(queryName, entityClass, new Vector(Arrays.asList(args)));
@@ -214,6 +215,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 			throws DataAccessException {
 
 		return execute(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				if (args != null) {
 					return session.executeQuery(query, new Vector(Arrays.asList(args)));
@@ -236,6 +238,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public List readAll(final Class entityClass, final boolean enforceReadOnly) throws DataAccessException {
 		return executeFind(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				return session.readAllObjects(entityClass);
 			}
@@ -250,6 +253,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 			throws DataAccessException {
 
 		return executeFind(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				return session.readAllObjects(entityClass, expression);
 			}
@@ -264,6 +268,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 			throws DataAccessException {
 
 		return executeFind(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				return session.readAllObjects(entityClass, call);
 			}
@@ -278,6 +283,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 			throws DataAccessException {
 
 		return execute(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				return session.readObject(entityClass, expression);
 			}
@@ -292,6 +298,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 			throws DataAccessException {
 
 		return execute(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				return session.readObject(entityClass, call);
 			}
@@ -403,6 +410,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object refresh(final Object entity, final boolean enforceReadOnly) throws DataAccessException {
 		return execute(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				return session.refreshObject(entity);
 			}
@@ -415,6 +423,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public List refreshAll(final Collection entities, final boolean enforceReadOnly) throws DataAccessException {
 		return (List) execute(new SessionReadCallback(enforceReadOnly) {
+			@Override
 			protected Object readFromSession(Session session) throws TopLinkException {
 				List result = new ArrayList(entities.size());
 				for (Iterator it = entities.iterator(); it.hasNext();) {
@@ -433,6 +442,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object register(final Object entity) {
 		return execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.registerObject(entity);
 			}
@@ -441,6 +451,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public List registerAll(final Collection entities) {
 		return (List) execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.registerAllObjects(entities);
 			}
@@ -449,6 +460,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public void registerNew(final Object entity) {
 		execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.registerNewObject(entity);
 			}
@@ -457,6 +469,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object registerExisting(final Object entity) {
 		return execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.registerExistingObject(entity);
 			}
@@ -465,6 +478,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object merge(final Object entity) throws DataAccessException {
 		return execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.mergeClone(entity);
 			}
@@ -473,6 +487,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object deepMerge(final Object entity) throws DataAccessException {
 		return execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.deepMergeClone(entity);
 			}
@@ -481,6 +496,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object shallowMerge(final Object entity) throws DataAccessException {
 		return execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.shallowMergeClone(entity);
 			}
@@ -489,6 +505,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public Object mergeWithReferences(final Object entity) throws DataAccessException {
 		return execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.mergeCloneWithReferences(entity);
 			}
@@ -497,6 +514,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public void delete(final Object entity) throws DataAccessException {
 		execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				return unitOfWork.deleteObject(entity);
 			}
@@ -505,6 +523,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 	public void deleteAll(final Collection entities) throws DataAccessException {
 		execute(new UnitOfWorkCallback() {
+			@Override
 			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
 				unitOfWork.deleteAllObjects(entities);
 				return null;

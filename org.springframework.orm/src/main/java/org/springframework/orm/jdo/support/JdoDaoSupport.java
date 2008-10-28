@@ -108,6 +108,7 @@ public abstract class JdoDaoSupport extends DaoSupport {
 	  return jdoTemplate;
 	}
 
+	@Override
 	protected final void checkDaoConfig() {
 		if (this.jdoTemplate == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory or jdoTemplate is required");

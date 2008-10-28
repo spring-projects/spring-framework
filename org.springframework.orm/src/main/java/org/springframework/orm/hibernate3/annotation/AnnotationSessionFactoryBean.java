@@ -100,6 +100,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	}
 
 
+	@Override
 	public void setConfigurationClass(Class configurationClass) {
 		if (configurationClass == null || !AnnotationConfiguration.class.isAssignableFrom(configurationClass)) {
 			throw new IllegalArgumentException(
@@ -159,6 +160,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * Reads metadata from annotated classes and packages into the
 	 * AnnotationConfiguration instance.
 	 */
+	@Override
 	protected void postProcessMappings(Configuration config) throws HibernateException {
 		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
 		if (this.annotatedClasses != null) {
@@ -225,6 +227,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	/**
 	 * Delegates to {@link #postProcessAnnotationConfiguration}.
 	 */
+	@Override
 	protected final void postProcessConfiguration(Configuration config) throws HibernateException {
 		postProcessAnnotationConfiguration((AnnotationConfiguration) config);
 	}

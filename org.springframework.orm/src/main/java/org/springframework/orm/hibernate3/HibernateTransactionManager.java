@@ -431,6 +431,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		return getSessionFactory();
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		HibernateTransactionObject txObject = new HibernateTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
@@ -468,12 +469,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		return txObject;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 		return (txObject.hasSpringManagedTransaction() ||
 				(this.hibernateManagedSession && txObject.hasHibernateManagedTransaction()));
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -600,6 +603,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 		txObject.setSessionHolder(null);
@@ -613,6 +617,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		return new SuspendedResourcesHolder(sessionHolder, connectionHolder);
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
@@ -626,6 +631,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+	@Override
 	protected void prepareForCommit(DefaultTransactionStatus status) {
 		if (this.earlyFlushBeforeCommit) {
 			HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
@@ -645,6 +651,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -664,6 +671,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -689,6 +697,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -698,6 +707,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.setRollbackOnly();
 	}
 
+	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
