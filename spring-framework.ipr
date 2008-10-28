@@ -479,6 +479,7 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.core/core.iml" filepath="$PROJECT_DIR$/org.springframework.core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.instrument/instrument.iml" filepath="$PROJECT_DIR$/org.springframework.instrument/instrument.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" filepath="$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.orm/orm.iml" filepath="$PROJECT_DIR$/org.springframework.orm/orm.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.transaction/transaction.iml" filepath="$PROJECT_DIR$/org.springframework.transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web/web.iml" filepath="$PROJECT_DIR$/org.springframework.web/web.iml" />
@@ -541,18 +542,6 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.aop" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.beans" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.context" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.context.support" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.core" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.instrument" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.jdbc" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.orm" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.transaction" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.web" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.web.portlet" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/org.springframework.web.servlet" vcs="svn" />
   </component>
   <component name="atlassian-ide-plugin-workspace">
     <option name="bambooConfiguration">
