@@ -9,6 +9,7 @@
 		<pathelement location="../org.springframework.aop"/>
 		<pathelement location="../org.springframework.context"/>
 		<pathelement location="../org.springframework.transaction"/>
+		<pathelement location="../org.springframework.jms"/>
 		<pathelement location="../org.springframework.aspects"/>
 		<pathelement location="../org.springframework.jdbc"/>
 		<pathelement location="../org.springframework.web"/>

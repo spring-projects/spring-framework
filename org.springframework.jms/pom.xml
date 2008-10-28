@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>org.springframework.parent</artifactId>
+	    <version>3.0-M1-SNAPSHOT</version>
+    </parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.springframework.jdbc</artifactId>
+	<packaging>jar</packaging>
+    <name>Spring Framework: JDBC</name>
+	<dependencies>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.core</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.beans</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.context</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.transaction</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>com.springsource.javax.transaction</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+		    <groupId>com.mchange.c3p0</groupId>
+		    <artifactId>com.springsource.com.mchange.v2.c3p0</artifactId>
+			<optional>true</optional>
+		</dependency>		
+		<dependency>
+		    <groupId>com.experlog.xapool</groupId>
+		    <artifactId>com.springsource.org.enhydra.jdbc</artifactId>
+			<optional>true</optional>
+		</dependency>		
+	</dependencies>
+</project>
