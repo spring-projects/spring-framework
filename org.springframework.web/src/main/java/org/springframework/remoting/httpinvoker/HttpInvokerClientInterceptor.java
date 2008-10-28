@@ -122,6 +122,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		return this.httpInvokerRequestExecutor;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 

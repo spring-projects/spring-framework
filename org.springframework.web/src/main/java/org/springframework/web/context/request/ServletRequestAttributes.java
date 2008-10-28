@@ -208,6 +208,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * Update all accessed session attributes through <code>session.setAttribute</code>
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
+	@Override
 	protected void updateAccessedSessionAttributes() {
 		// Store session reference for access after request completion.
 		this.session = this.request.getSession(false);
@@ -245,6 +246,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
+	@Override
 	public String toString() {
 		return this.request.toString();
 	}

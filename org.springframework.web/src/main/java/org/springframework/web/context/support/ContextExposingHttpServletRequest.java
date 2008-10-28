@@ -77,6 +77,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 	}
 
 
+	@Override
 	public Object getAttribute(String name) {
 		if ((this.explicitAttributes == null || !this.explicitAttributes.contains(name)) &&
 				(this.exposedContextBeanNames == null || this.exposedContextBeanNames.contains(name)) &&
@@ -88,6 +89,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		super.setAttribute(name, value);
 		if (this.explicitAttributes == null) {

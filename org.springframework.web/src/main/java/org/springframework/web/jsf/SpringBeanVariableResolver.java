@@ -38,6 +38,7 @@ public class SpringBeanVariableResolver extends DelegatingVariableResolver {
 		super(originalVariableResolver);
 	}
 
+	@Override
 	public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
 		Object bean = resolveSpringBean(facesContext, name);
 		if (bean != null) {

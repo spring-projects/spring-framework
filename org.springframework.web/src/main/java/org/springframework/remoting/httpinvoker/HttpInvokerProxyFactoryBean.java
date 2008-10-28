@@ -53,6 +53,7 @@ public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
 	private Object serviceProxy;
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {

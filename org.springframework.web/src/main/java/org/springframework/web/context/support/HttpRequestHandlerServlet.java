@@ -51,12 +51,14 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 	private HttpRequestHandler target;
 
 
+	@Override
 	public void init() throws ServletException {
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		this.target = (HttpRequestHandler) wac.getBean(getServletName(), HttpRequestHandler.class);
 	}
 
 
+	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

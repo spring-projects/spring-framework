@@ -53,10 +53,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class Log4jConfigServlet extends HttpServlet {
 
+	@Override
 	public void init() {
 		Log4jWebConfigurer.initLogging(getServletContext());
 	}
 
+	@Override
 	public void destroy() {
 		Log4jWebConfigurer.shutdownLogging(getServletContext());
 	}
@@ -67,6 +69,7 @@ public class Log4jConfigServlet extends HttpServlet {
 	 * ever be created in web.xml. That's why a correctly invoked Servlet 2.3
 	 * listener is much more appropriate for initialization work ;-)
 	 */
+	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		getServletContext().log(
 				"Attempt to call service method on Log4jConfigServlet as [" +
@@ -74,6 +77,7 @@ public class Log4jConfigServlet extends HttpServlet {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
+	@Override
 	public String getServletInfo() {
 		return "Log4jConfigServlet for Servlet API 2.3 " +
 				"(deprecated in favor of Log4jConfigListener for Servlet API 2.4)";

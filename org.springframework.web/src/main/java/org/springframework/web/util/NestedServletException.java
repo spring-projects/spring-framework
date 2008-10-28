@@ -71,6 +71,7 @@ public class NestedServletException extends ServletException {
 	 * Return the detail message, including the message from the nested exception
 	 * if there is one.
 	 */
+	@Override
 	public String getMessage() {
 		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}

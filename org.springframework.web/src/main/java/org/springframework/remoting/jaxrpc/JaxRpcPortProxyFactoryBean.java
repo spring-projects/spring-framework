@@ -56,6 +56,7 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getServiceInterface() == null) {
 			// Use JAX-RPC port interface (a traditional RMI interface)

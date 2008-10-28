@@ -147,6 +147,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @see #beforeRequest
 	 * @see #afterRequest
 	 */
+	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {

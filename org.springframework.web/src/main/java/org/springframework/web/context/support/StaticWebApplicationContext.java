@@ -132,6 +132,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	/**
 	 * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.
 	 */
+	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(SCOPE_SESSION, new SessionScope(false));
@@ -146,6 +147,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * This implementation supports file paths beneath the root of the ServletContext.
 	 * @see ServletContextResource
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
 	}
@@ -154,6 +156,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * This implementation supports pattern matching in unexpanded WARs too.
 	 * @see ServletContextResourcePatternResolver
 	 */
+	@Override
 	protected ResourcePatternResolver getResourcePatternResolver() {
 		return new ServletContextResourcePatternResolver(this);
 	}
@@ -161,6 +164,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	/**
 	 * Initialize the theme capability.
 	 */
+	@Override
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
 	}

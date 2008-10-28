@@ -76,6 +76,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 	}
 
 
+	@Override
 	protected int getScope() {
 		return this.scope;
 	}
@@ -84,6 +85,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 		return RequestContextHolder.currentRequestAttributes().getSessionId();
 	}
 
+	@Override
 	public Object get(String name, ObjectFactory objectFactory) {
 		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
 		synchronized (mutex) {
@@ -91,6 +93,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 		}
 	}
 
+	@Override
 	public Object remove(String name) {
 		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
 		synchronized (mutex) {

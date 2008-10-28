@@ -130,6 +130,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	}
 
 
+	@Override
 	protected void initFilterBean() throws ServletException {
 		// If no target bean name specified, use filter name.
 		if (this.targetBeanName == null) {
@@ -167,6 +168,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 		invokeDelegate(delegateToUse, request, response, filterChain);
 	}
 
+	@Override
 	public void destroy() {
 		Filter delegateToUse = null;
 		synchronized (this.delegateMonitor) {

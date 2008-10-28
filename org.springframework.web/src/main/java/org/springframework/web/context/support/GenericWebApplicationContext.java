@@ -99,6 +99,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * Register ServletContextAwareProcessor.
 	 * @see ServletContextAwareProcessor
 	 */
+	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
@@ -111,6 +112,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * This implementation supports file paths beneath the root of the ServletContext.
 	 * @see ServletContextResource
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
 	}
@@ -119,6 +121,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * This implementation supports pattern matching in unexpanded WARs too.
 	 * @see ServletContextResourcePatternResolver
 	 */
+	@Override
 	protected ResourcePatternResolver getResourcePatternResolver() {
 		return new ServletContextResourcePatternResolver(this);
 	}
@@ -126,6 +129,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	/**
 	 * Initialize the theme capability.
 	 */
+	@Override
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
 	}

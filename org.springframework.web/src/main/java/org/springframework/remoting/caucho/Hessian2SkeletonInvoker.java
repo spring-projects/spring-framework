@@ -55,6 +55,7 @@ class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 		this.debugLogger = debugLog;
 	}
 
+	@Override
 	public void invoke(final InputStream inputStream, final OutputStream outputStream) throws Throwable {
 		InputStream isToUse = inputStream;
 		OutputStream osToUse = outputStream;

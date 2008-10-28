@@ -440,6 +440,7 @@ public abstract class ExpressionEvaluationUtils {
 			this.hashCode = this.value.hashCode() * 29 + this.resultClass.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (!(obj instanceof ExpressionCacheKey)) {
 				return false;
@@ -448,6 +449,7 @@ public abstract class ExpressionEvaluationUtils {
 			return (this.value.equals(other.value) && this.resultClass.equals(other.resultClass));
 		}
 
+		@Override
 		public int hashCode() {
 			return this.hashCode;
 		}

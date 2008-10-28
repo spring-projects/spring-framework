@@ -45,6 +45,7 @@ public class JaxWsPortProxyFactoryBean extends JaxWsPortClientInterceptor
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 

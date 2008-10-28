@@ -150,6 +150,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 		return sb.toString();
 	}
 
+	@Override
 	public String toString() {
 		return ("RequestHandledEvent: " + getDescription());
 	}
