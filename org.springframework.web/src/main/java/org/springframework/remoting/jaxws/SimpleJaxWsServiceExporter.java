@@ -62,6 +62,7 @@ public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 	}
 
 
+	@Override
 	protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
 		String fullAddress = this.baseAddress + annotation.serviceName();
 		endpoint.publish(fullAddress);

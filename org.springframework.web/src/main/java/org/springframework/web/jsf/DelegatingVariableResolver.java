@@ -103,6 +103,7 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * Delegate to the original VariableResolver first, then try to
 	 * resolve the variable as Spring bean in the root WebApplicationContext.
 	 */
+	@Override
 	public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
 		Object value = resolveOriginal(facesContext, name);
 		if (value != null) {

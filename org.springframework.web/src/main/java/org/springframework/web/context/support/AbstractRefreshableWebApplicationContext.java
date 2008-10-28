@@ -125,6 +125,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		return this.namespace;
 	}
 
+	@Override
 	public String[] getConfigLocations() {
 		return super.getConfigLocations();
 	}
@@ -133,6 +134,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/**
 	 * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.
 	 */
+	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
@@ -147,6 +149,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 * This implementation supports file paths beneath the root of the ServletContext.
 	 * @see ServletContextResource
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
 	}
@@ -155,6 +158,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 * This implementation supports pattern matching in unexpanded WARs too.
 	 * @see ServletContextResourcePatternResolver
 	 */
+	@Override
 	protected ResourcePatternResolver getResourcePatternResolver() {
 		return new ServletContextResourcePatternResolver(this);
 	}
@@ -162,6 +166,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/**
 	 * Initialize the theme capability.
 	 */
+	@Override
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
 	}

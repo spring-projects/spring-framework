@@ -87,6 +87,7 @@ public class WebApplicationContextVariableResolver extends VariableResolver {
 	 * <p>If no WebApplicationContext is available, all requests
 	 * will be delegated to the original VariableResolver.
 	 */
+	@Override
 	public Object resolveVariable(FacesContext context, String name) throws EvaluationException {
 		Object value = null;
 		if (WEB_APPLICATION_CONTEXT_VARIABLE_NAME.equals(name)) {

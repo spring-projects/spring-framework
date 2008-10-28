@@ -110,6 +110,7 @@ public class ServletContextPropertyPlaceholderConfigurer extends PropertyPlaceho
 	}
 
 
+	@Override
 	protected String resolvePlaceholder(String placeholder, Properties props) {
 		String value = null;
 		if (this.contextOverride && this.servletContext != null) {

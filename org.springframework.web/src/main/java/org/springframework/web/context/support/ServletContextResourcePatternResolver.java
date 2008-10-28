@@ -67,6 +67,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see ServletContextResource
 	 * @see javax.servlet.ServletContext#getResourcePaths
 	 */
+	@Override
 	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
 		if (rootDirResource instanceof ServletContextResource) {
 			ServletContextResource scResource = (ServletContextResource) rootDirResource;

@@ -47,18 +47,22 @@ public class JaxWsSoapFaultException extends SoapFaultException {
 	}
 
 
+	@Override
 	public String getFaultCode() {
 		return getFault().getFaultCode();
 	}
 
+	@Override
 	public QName getFaultCodeAsQName() {
 		return getFault().getFaultCodeAsQName();
 	}
 
+	@Override
 	public String getFaultString() {
 		return getFault().getFaultString();
 	}
 
+	@Override
 	public String getFaultActor() {
 		return getFault().getFaultActor();
 	}

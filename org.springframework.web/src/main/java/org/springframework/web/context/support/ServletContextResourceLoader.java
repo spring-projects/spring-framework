@@ -54,6 +54,7 @@ public class ServletContextResourceLoader extends DefaultResourceLoader {
 	 * This implementation supports file paths beneath the root of the web application.
 	 * @see ServletContextResource
 	 */
+	@Override
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
 	}

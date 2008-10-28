@@ -105,6 +105,7 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	 * as argument will be used. Else, the standard <code>handleNavigation</code>
 	 * method will be called.
 	 */
+	@Override
 	public void handleNavigation(FacesContext facesContext, String fromAction, String outcome) {
 		NavigationHandler handler = getDelegate(facesContext);
 		if (handler instanceof DecoratingNavigationHandler) {

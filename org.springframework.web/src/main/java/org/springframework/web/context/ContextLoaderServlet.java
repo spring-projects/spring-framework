@@ -76,6 +76,7 @@ public class ContextLoaderServlet extends HttpServlet {
 	/**
 	 * Initialize the root web application context.
 	 */
+	@Override
 	public void init() throws ServletException {
 		this.contextLoader = createContextLoader();
 		this.contextLoader.initWebApplicationContext(getServletContext());
@@ -101,6 +102,7 @@ public class ContextLoaderServlet extends HttpServlet {
 	/**
 	 * Close the root web application context.
 	 */
+	@Override
 	public void destroy() {
 		if (this.contextLoader != null) {
 			this.contextLoader.closeWebApplicationContext(getServletContext());
@@ -113,6 +115,7 @@ public class ContextLoaderServlet extends HttpServlet {
 	 * ever be created in web.xml. That's why a correctly invoked Servlet 2.3
 	 * listener is much more appropriate for initialization work ;-)
 	 */
+	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		getServletContext().log(
 				"Attempt to call service method on ContextLoaderServlet as [" +
@@ -121,6 +124,7 @@ public class ContextLoaderServlet extends HttpServlet {
 	}
 
 
+	@Override
 	public String getServletInfo() {
 		return "ContextLoaderServlet for Servlet API 2.3 " +
 		    "(deprecated in favor of ContextLoaderListener for Servlet API 2.4)";

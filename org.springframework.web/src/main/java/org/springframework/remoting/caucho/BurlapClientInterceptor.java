@@ -105,6 +105,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		prepare();

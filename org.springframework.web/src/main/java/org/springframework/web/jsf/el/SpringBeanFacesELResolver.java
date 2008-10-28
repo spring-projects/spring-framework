@@ -74,6 +74,7 @@ public class SpringBeanFacesELResolver extends SpringBeanELResolver {
 	 * @param elContext the current JSF ELContext
 	 * @return the Spring BeanFactory (never <code>null</code>)
 	 */
+	@Override
 	protected BeanFactory getBeanFactory(ELContext elContext) {
 		return getWebApplicationContext(elContext);
 	}

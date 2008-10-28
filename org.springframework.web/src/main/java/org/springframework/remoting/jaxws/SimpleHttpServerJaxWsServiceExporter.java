@@ -149,6 +149,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.server == null) {
 			InetSocketAddress address = (this.hostname != null ?
@@ -163,6 +164,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 		super.afterPropertiesSet();
 	}
 
+	@Override
 	protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
 		String fullPath = this.basePath + annotation.serviceName();
 		HttpContext httpContext = this.server.createContext(fullPath);
@@ -175,6 +177,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 		endpoint.publish(httpContext);
 	}
 
+	@Override
 	public void destroy() {
 		super.destroy();
 		if (this.localServer) {

@@ -77,6 +77,7 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	 * @see #initBeanDefinitionReader
 	 * @see #loadBeanDefinitions
 	 */
+	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws IOException {
 		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
@@ -131,6 +132,7 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	 * and "/WEB-INF/test-servlet.xml" for a context with the namespace "test-servlet"
 	 * (like for a DispatcherServlet instance with the servlet-name "test").
 	 */
+	@Override
 	protected String[] getDefaultConfigLocations() {
 		if (getNamespace() != null) {
 			return new String[] {DEFAULT_CONFIG_LOCATION_PREFIX + getNamespace() + DEFAULT_CONFIG_LOCATION_SUFFIX};

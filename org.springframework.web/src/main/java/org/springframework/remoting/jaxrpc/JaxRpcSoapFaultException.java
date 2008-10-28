@@ -46,18 +46,22 @@ public class JaxRpcSoapFaultException extends SoapFaultException {
 	}
 
 
+	@Override
 	public String getFaultCode() {
 		return getOriginalException().getFaultCode().toString();
 	}
 
+	@Override
 	public QName getFaultCodeAsQName() {
 		return getOriginalException().getFaultCode();
 	}
 
+	@Override
 	public String getFaultString() {
 		return getOriginalException().getFaultString();
 	}
 
+	@Override
 	public String getFaultActor() {
 		return getOriginalException().getFaultActor();
 	}

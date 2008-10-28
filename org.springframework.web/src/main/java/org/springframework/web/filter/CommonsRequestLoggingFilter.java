@@ -36,6 +36,7 @@ public class CommonsRequestLoggingFilter extends AbstractRequestLoggingFilter {
 	/**
 	 * Writes a log message before the request is processed.
 	 */
+	@Override
 	protected void beforeRequest(HttpServletRequest request, String message) {
 		if (logger.isDebugEnabled()) {
 			logger.debug(message);
@@ -45,6 +46,7 @@ public class CommonsRequestLoggingFilter extends AbstractRequestLoggingFilter {
 	/**
 	 * Writes a log message after the request is processed.
 	 */
+	@Override
 	protected void afterRequest(HttpServletRequest request, String message) {
 		if (logger.isDebugEnabled()) {
 			logger.debug(message);

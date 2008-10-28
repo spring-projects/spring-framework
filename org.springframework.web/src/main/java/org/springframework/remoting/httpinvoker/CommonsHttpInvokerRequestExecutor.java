@@ -119,6 +119,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * @see #validateResponse
 	 * @see #getResponseBody
 	 */
+	@Override
 	protected RemoteInvocationResult doExecuteRequest(
 			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 			throws IOException, ClassNotFoundException {

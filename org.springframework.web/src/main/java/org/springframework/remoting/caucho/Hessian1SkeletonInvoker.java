@@ -56,6 +56,7 @@ class Hessian1SkeletonInvoker extends HessianSkeletonInvoker {
 		}
 	}
 
+	@Override
 	public void invoke(InputStream inputStream, OutputStream outputStream) throws Throwable {
 		HessianInput in = new HessianInput(inputStream);
 		HessianOutput out = new HessianOutput(outputStream);

@@ -47,6 +47,7 @@ public class Log4jNestedDiagnosticContextFilter extends AbstractRequestLoggingFi
 	 * Logs the before-request message through Log4J and
 	 * adds a message the Log4J NDC before the request is processed.
 	 */
+	@Override
 	protected void beforeRequest(HttpServletRequest request, String message) {
 		if (log4jLogger.isDebugEnabled()) {
 			log4jLogger.debug(message);
@@ -69,6 +70,7 @@ public class Log4jNestedDiagnosticContextFilter extends AbstractRequestLoggingFi
 	 * Removes the log message from the Log4J NDC after the request is processed
 	 * and logs the after-request message through Log4J.
 	 */
+	@Override
 	protected void afterRequest(HttpServletRequest request, String message) {
 		NDC.pop();
 		if (NDC.getDepth() == 0) {

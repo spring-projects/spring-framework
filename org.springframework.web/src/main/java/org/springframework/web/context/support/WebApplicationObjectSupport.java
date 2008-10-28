@@ -57,6 +57,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @see #getServletContext()
 	 * @see #getTempDir()
 	 */
+	@Override
 	protected boolean isContextRequired() {
 		return true;
 	}
@@ -65,6 +66,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * Calls {@link #initServletContext(javax.servlet.ServletContext)} if the
 	 * given ApplicationContext is a {@link WebApplicationContext}.
 	 */
+	@Override
 	protected void initApplicationContext(ApplicationContext context) {
 		super.initApplicationContext(context);
 		if (context instanceof WebApplicationContext) {

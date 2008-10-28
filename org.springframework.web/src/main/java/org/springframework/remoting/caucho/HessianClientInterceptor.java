@@ -177,6 +177,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		prepare();

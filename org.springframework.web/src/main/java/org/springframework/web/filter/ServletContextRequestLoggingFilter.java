@@ -36,6 +36,7 @@ public class ServletContextRequestLoggingFilter extends AbstractRequestLoggingFi
 	/**
 	 * Writes a log message before the request is processed.
 	 */
+	@Override
 	protected void beforeRequest(HttpServletRequest request, String message) {
 		getServletContext().log(message);
 	}
@@ -43,6 +44,7 @@ public class ServletContextRequestLoggingFilter extends AbstractRequestLoggingFi
 	/**
 	 * Writes a log message after the request is processed.
 	 */
+	@Override
 	protected void afterRequest(HttpServletRequest request, String message) {
 		getServletContext().log(message);
 	}

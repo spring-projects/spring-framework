@@ -68,6 +68,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * NavigationHandler as argument.
 	 * @see #handleNavigation(javax.faces.context.FacesContext, String, String, javax.faces.application.NavigationHandler)
 	 */
+	@Override
 	public final void handleNavigation(FacesContext facesContext, String fromAction, String outcome) {
 		handleNavigation(facesContext, fromAction, outcome, this.decoratedNavigationHandler);
 	}

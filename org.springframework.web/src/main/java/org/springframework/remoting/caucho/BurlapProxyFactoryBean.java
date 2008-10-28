@@ -45,6 +45,7 @@ public class BurlapProxyFactoryBean extends BurlapClientInterceptor implements F
 	private Object serviceProxy;
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
