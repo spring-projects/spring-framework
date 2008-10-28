@@ -66,6 +66,7 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 	/**
 	 * Return the Quartz Scheduler instance that this accessor operates on.
 	 */
+	@Override
 	public Scheduler getScheduler() {
 		return this.scheduler;
 	}

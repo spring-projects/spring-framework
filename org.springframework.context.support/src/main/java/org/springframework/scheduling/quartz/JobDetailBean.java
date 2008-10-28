@@ -59,6 +59,7 @@ public class JobDetailBean extends JobDetail
 	 * to adapt the given job class to the Quartz Job interface.
 	 * @see SchedulerFactoryBean#setJobFactory
 	 */
+	@Override
 	public void setJobClass(Class jobClass) {
 		if (jobClass != null && !Job.class.isAssignableFrom(jobClass)) {
 			super.setJobClass(DelegatingJob.class);
@@ -73,6 +74,7 @@ public class JobDetailBean extends JobDetail
 	 * Overridden to support any job class, to allow a custom JobFactory
 	 * to adapt the given job class to the Quartz Job interface.
 	 */
+	@Override
 	public Class getJobClass() {
 		return (this.actualJobClass != null ? this.actualJobClass : super.getJobClass());
 	}

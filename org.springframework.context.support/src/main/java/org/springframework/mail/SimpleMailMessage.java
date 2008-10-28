@@ -199,6 +199,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer("SimpleMailMessage: ");
 		sb.append("from=").append(this.from).append("; ");
@@ -212,6 +213,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return sb.toString();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -230,6 +232,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 				ObjectUtils.nullSafeEquals(this.text, otherMessage.text));
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = (this.from == null ? 0 : this.from.hashCode());
 		hashCode = 29 * hashCode + (this.replyTo == null ? 0 : this.replyTo.hashCode());

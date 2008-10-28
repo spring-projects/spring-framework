@@ -146,6 +146,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setPreTemplateLoaders
 	 * @see #setPostTemplateLoaders
 	 */
+	@Deprecated
 	public void setTemplateLoaders(TemplateLoader[] templateLoaders) {
 		if (templateLoaders != null) {
 			this.templateLoaders.addAll(Arrays.asList(templateLoaders));

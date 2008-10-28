@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
  */
 public class InternetAddressEditor extends PropertyEditorSupport {
 
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
 			try {
@@ -50,6 +51,7 @@ public class InternetAddressEditor extends PropertyEditorSupport {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		InternetAddress value = (InternetAddress) getValue();
 		return (value != null ? value.toUnicodeString() : "");

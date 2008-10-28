@@ -628,6 +628,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 						"] in " + startupDelay + " seconds");
 			}
 			Thread schedulerThread = new Thread() {
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(startupDelay * 1000);
@@ -656,6 +657,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	// Implementation of FactoryBean interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public Scheduler getScheduler() {
 		return this.scheduler;
 	}
