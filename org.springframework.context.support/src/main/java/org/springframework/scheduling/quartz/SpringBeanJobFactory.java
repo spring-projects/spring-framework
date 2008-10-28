@@ -67,6 +67,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 * Create the job instance, populating it with property values taken
 	 * from the scheduler context, job data map and trigger data map.
 	 */
+	@Override
 	protected Object createJobInstance(TriggerFiredBundle bundle) {
 		Object job = BeanUtils.instantiateClass(bundle.getJobDetail().getJobClass());
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(job);

@@ -158,6 +158,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	protected Class resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
@@ -200,6 +201,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	/**
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
+	@Override
 	public Class getTargetClass() {
 		Class targetClass = super.getTargetClass();
 		if (targetClass == null && this.targetBeanName != null) {
@@ -212,6 +214,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	/**
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
+	@Override
 	public Object getTargetObject() {
 		Object targetObject = super.getTargetObject();
 		if (targetObject == null && this.targetBeanName != null) {
@@ -255,6 +258,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		/**
 		 * Invoke the method via the MethodInvoker.
 		 */
+		@Override
 		protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 			try {
 				this.methodInvoker.invoke();

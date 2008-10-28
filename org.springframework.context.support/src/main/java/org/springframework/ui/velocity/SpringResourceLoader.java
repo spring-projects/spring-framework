@@ -68,6 +68,7 @@ public class SpringResourceLoader extends ResourceLoader {
 	private String[] resourceLoaderPaths;
 
 
+	@Override
 	public void init(ExtendedProperties configuration) {
 		this.resourceLoader = (org.springframework.core.io.ResourceLoader)
 				this.rsvc.getApplicationAttribute(SPRING_RESOURCE_LOADER);
@@ -93,6 +94,7 @@ public class SpringResourceLoader extends ResourceLoader {
 		}
 	}
 
+	@Override
 	public InputStream getResourceStream(String source) throws ResourceNotFoundException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for Velocity resource with name [" + source + "]");
@@ -113,10 +115,12 @@ public class SpringResourceLoader extends ResourceLoader {
 				"Could not find resource [" + source + "] in Spring resource loader path");
 	}
 
+	@Override
 	public boolean isSourceModified(Resource resource) {
 		return false;
 	}
 
+	@Override
 	public long getLastModified(Resource resource) {
 		return 0;
 	}

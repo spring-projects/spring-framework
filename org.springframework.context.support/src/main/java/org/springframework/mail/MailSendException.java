@@ -106,6 +106,7 @@ public class MailSendException extends MailException {
 	}
 
 
+	@Override
 	public String getMessage() {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			return super.getMessage();
@@ -123,6 +124,7 @@ public class MailSendException extends MailException {
 		}
 	}
 
+	@Override
 	public String toString() {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			return super.toString();
@@ -139,6 +141,7 @@ public class MailSendException extends MailException {
 		}
 	}
 
+	@Override
 	public void printStackTrace(PrintStream ps) {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			super.printStackTrace(ps);
@@ -154,6 +157,7 @@ public class MailSendException extends MailException {
 		}
 	}
 
+	@Override
 	public void printStackTrace(PrintWriter pw) {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			super.printStackTrace(pw);

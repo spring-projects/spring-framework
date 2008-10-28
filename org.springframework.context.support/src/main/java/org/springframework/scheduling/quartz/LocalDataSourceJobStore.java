@@ -78,6 +78,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	private DataSource dataSource;
 
 
+	@Override
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
 	    throws SchedulerConfigException {
 
@@ -133,6 +134,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		super.initialize(loadHelper, signaler);
 	}
 
+	@Override
 	protected void closeConnection(Connection con) {
 		// Will work for transactional and non-transactional connections.
 		DataSourceUtils.releaseConnection(con, this.dataSource);

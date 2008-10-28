@@ -168,6 +168,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	 * Delegates to the underlying FileTypeMap.
 	 * @see #getFileTypeMap()
 	 */
+	@Override
 	public String getContentType(File file) {
 		return getFileTypeMap().getContentType(file);
 	}
@@ -176,6 +177,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	 * Delegates to the underlying FileTypeMap.
 	 * @see #getFileTypeMap()
 	 */
+	@Override
 	public String getContentType(String fileName) {
 		return getFileTypeMap().getContentType(fileName);
 	}
