@@ -46,6 +46,7 @@ public class DB2MainframeSequenceMaxValueIncrementer extends AbstractSequenceMax
 	}
 
 
+	@Override
 	protected String getSequenceQuery() {
 		return "select next value for " + getIncrementerName() + " from sysibm.sysdummy1";
 	}

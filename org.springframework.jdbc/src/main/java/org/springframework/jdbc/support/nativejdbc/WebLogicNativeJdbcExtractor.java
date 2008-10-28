@@ -70,6 +70,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Return <code>true</code>, as WebLogic returns wrapped Statements.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
 	}
@@ -77,6 +78,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Return <code>true</code>, as WebLogic returns wrapped PreparedStatements.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return true;
 	}
@@ -84,6 +86,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Return <code>true</code>, as WebLogic returns wrapped CallableStatements.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return true;
 	}
@@ -91,6 +94,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via WebLogic's <code>getVendorConnection</code> method.
 	 */
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.jdbcExtensionClass.isAssignableFrom(con.getClass())) {
 			return (Connection) ReflectionUtils.invokeJdbcMethod(this.getVendorConnectionMethod, con);

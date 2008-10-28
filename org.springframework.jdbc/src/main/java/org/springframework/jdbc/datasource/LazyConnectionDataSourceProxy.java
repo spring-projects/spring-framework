@@ -153,6 +153,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
@@ -216,6 +217,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @return a lazy Connection handle
 	 * @see ConnectionProxy#getTargetConnection()
 	 */
+	@Override
 	public Connection getConnection() throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
@@ -233,6 +235,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @return a lazy Connection handle
 	 * @see ConnectionProxy#getTargetConnection()
 	 */
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),

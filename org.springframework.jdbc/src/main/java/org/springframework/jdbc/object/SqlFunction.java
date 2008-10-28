@@ -128,6 +128,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * single row returned by the function. If there are a different number
 	 * of rows returned, this is treated as an error.
 	 */
+	@Override
 	protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 		return this.rowMapper.mapRow(rs, rowNum);
 	}

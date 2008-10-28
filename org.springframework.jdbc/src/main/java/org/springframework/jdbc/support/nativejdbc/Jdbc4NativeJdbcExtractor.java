@@ -40,22 +40,27 @@ import java.sql.Statement;
  */
 public class Jdbc4NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		return (Connection) con.unwrap(Connection.class);
 	}
 
+	@Override
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		return (Statement) stmt.unwrap(Statement.class);
 	}
 
+	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		return (PreparedStatement) ps.unwrap(PreparedStatement.class);
 	}
 
+	@Override
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		return (CallableStatement) cs.unwrap(CallableStatement.class);
 	}
 
+	@Override
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		return (ResultSet) rs.unwrap(ResultSet.class);
 	}

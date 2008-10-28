@@ -186,6 +186,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * JDO 2.0 DataStoreConnections, for example.
 	 * @see org.springframework.orm.jdo.DefaultJdoDialect#getJdbcConnection
 	 */
+	@Override
 	public void released() {
 		super.released();
 		if (this.currentConnection != null) {
@@ -195,6 +196,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 
+	@Override
 	public void clear() {
 		super.clear();
 		this.transactionActive = false;

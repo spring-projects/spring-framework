@@ -123,6 +123,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see #getCurrentIsolationLevel()
 	 * @see #getCurrentReadOnlyFlag()
 	 */
+	@Override
 	protected Connection doGetConnection(String username, String password) throws SQLException {
 		Connection con = super.doGetConnection(username, password);
 		Boolean readOnlyToUse = getCurrentReadOnlyFlag();

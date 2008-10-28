@@ -62,6 +62,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
 	 * <p>This implementation always returns <code>true</code>.
 	 */
+	@Override
 	public boolean isResultsParameter() {
 		return true;
 	}

@@ -129,6 +129,7 @@ public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 	}
 
 
+	@Override
 	protected Connection getConnectionFromDriver(Properties props) throws SQLException {
 		Driver driver = getDriver();
 		String url = getUrl();

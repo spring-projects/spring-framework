@@ -45,6 +45,7 @@ public class OracleSequenceMaxValueIncrementer extends AbstractSequenceMaxValueI
 	}
 
 
+	@Override
 	protected String getSequenceQuery() {
 		return "select " + getIncrementerName() + ".nextval from dual";
 	}

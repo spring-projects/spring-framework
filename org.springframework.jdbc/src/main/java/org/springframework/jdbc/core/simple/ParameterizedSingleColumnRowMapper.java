@@ -48,6 +48,7 @@ public class ParameterizedSingleColumnRowMapper<T> extends SingleColumnRowMapper
 	public ParameterizedSingleColumnRowMapper() {
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		return (T) super.mapRow(rs, rowNumber);

@@ -129,6 +129,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * <p>This implementation always returns <code>false</code>.
 	 */
+	@Override
 	public boolean isInputValueProvided() {
 		return false;
 	}

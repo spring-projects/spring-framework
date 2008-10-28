@@ -105,6 +105,7 @@ public class SqlInOutParameter extends SqlOutParameter {
 	/**
 	 * This implementation always returns <code>true</code>.
 	 */
+	@Override
 	public boolean isInputValueProvided() {
 		return true;
 	}

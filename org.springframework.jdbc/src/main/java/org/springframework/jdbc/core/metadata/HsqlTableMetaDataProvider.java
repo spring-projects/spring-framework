@@ -33,11 +33,13 @@ public class HsqlTableMetaDataProvider extends GenericTableMetaDataProvider {
 	}
 
 
+	@Override
 	public boolean isGetGeneratedKeysSimulated() {
 		return true;
 	}
 
 
+	@Override
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return "select max(identity()) from " + tableName;
 	}

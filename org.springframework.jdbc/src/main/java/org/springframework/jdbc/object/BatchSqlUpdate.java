@@ -138,6 +138,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	/**
 	 * BatchSqlUpdate does not support BLOB or CLOB parameters.
 	 */
+	@Override
 	protected boolean supportsLobParameters() {
 		return false;
 	}
@@ -157,6 +158,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * executed by this method)
 	 * @see #flush
 	 */
+	@Override
 	public int update(Object[] params) throws DataAccessException {
 		validateParameters(params);
 		this.parameterQueue.add(params.clone());

@@ -44,6 +44,7 @@ public class H2SequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncre
 	}
 
 
+	@Override
 	protected String getSequenceQuery() {
 		return "select " + getIncrementerName() + ".nextval from dual";
 	}

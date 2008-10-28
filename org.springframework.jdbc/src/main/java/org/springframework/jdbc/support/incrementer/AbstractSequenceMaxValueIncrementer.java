@@ -59,6 +59,7 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 	/**
 	 * Executes the SQL as specified by {@link #getSequenceQuery()}.
 	 */
+	@Override
 	protected long getNextKey() throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;

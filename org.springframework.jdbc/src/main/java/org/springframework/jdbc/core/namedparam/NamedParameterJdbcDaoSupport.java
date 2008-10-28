@@ -34,6 +34,7 @@ public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 	/**
 	 * Create a NamedParameterJdbcTemplate based on the configured JdbcTemplate.
 	 */
+	@Override
 	protected void initTemplateConfig() {
 		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 	}

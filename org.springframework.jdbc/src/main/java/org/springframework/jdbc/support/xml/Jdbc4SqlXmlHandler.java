@@ -90,6 +90,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	public SqlXmlValue newSqlXmlValue(final String value) {
 		return new AbstractJdbc4SqlXmlValue() {
+			@Override
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
 				xmlObject.setString(value);
 			}
@@ -98,6 +99,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	public SqlXmlValue newSqlXmlValue(final XmlBinaryStreamProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
+			@Override
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
 				provider.provideXml(xmlObject.setBinaryStream());
 			}
@@ -106,6 +108,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	public SqlXmlValue newSqlXmlValue(final XmlCharacterStreamProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
+			@Override
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
 				provider.provideXml(xmlObject.setCharacterStream());
 			}
@@ -114,6 +117,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	public SqlXmlValue newSqlXmlValue(final Class resultClass, final XmlResultProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
+			@Override
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
 				provider.provideXml(xmlObject.setResult(resultClass));
 			}
@@ -122,6 +126,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	public SqlXmlValue newSqlXmlValue(final Document document) {
 		return new AbstractJdbc4SqlXmlValue() {
+			@Override
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
 				((DOMResult) xmlObject.setResult(DOMResult.class)).setNode(document);
 			}

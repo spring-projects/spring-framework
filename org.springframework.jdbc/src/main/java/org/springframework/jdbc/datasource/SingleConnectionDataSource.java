@@ -94,6 +94,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * directly, set up the Driver class manually before invoking this DataSource.
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
+	@Deprecated
 	public SingleConnectionDataSource(
 			String driverClassName, String url, String username, String password, boolean suppressClose) {
 
@@ -177,6 +178,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	}
 
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
@@ -197,6 +199,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * with a single Connection. Returns the single Connection if given
 	 * the same username and password; throws a SQLException else.
 	 */
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		if (ObjectUtils.nullSafeEquals(username, getUsername()) &&
 				ObjectUtils.nullSafeEquals(password, getPassword())) {

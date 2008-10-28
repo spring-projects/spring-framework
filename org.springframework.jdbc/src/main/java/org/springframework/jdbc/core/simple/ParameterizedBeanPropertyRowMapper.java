@@ -61,6 +61,7 @@ public class ParameterizedBeanPropertyRowMapper<T> extends BeanPropertyRowMapper
 	public ParameterizedBeanPropertyRowMapper() {
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		return (T) super.mapRow(rs, rowNumber);

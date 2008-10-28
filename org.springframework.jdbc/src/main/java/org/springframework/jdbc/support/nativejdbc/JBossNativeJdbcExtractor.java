@@ -93,6 +93,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingConnection</code> method.
 	 */
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.wrappedConnectionClass.isAssignableFrom(con.getClass())) {
 			return (Connection) ReflectionUtils.invokeJdbcMethod(this.getUnderlyingConnectionMethod, con);
@@ -103,6 +104,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingStatement</code> method.
 	 */
+	@Override
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		if (this.wrappedStatementClass.isAssignableFrom(stmt.getClass())) {
 			return (Statement) ReflectionUtils.invokeJdbcMethod(this.getUnderlyingStatementMethod, stmt);
@@ -113,6 +115,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingStatement</code> method.
 	 */
+	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		return (PreparedStatement) getNativeStatement(ps);
 	}
@@ -120,6 +123,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingStatement</code> method.
 	 */
+	@Override
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		return (CallableStatement) getNativeStatement(cs);
 	}
@@ -127,6 +131,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingResultSet</code> method.
 	 */
+	@Override
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		if (this.wrappedResultSetClass.isAssignableFrom(rs.getClass())) {
 			return (ResultSet) ReflectionUtils.invokeJdbcMethod(this.getUnderlyingResultSetMethod, rs);

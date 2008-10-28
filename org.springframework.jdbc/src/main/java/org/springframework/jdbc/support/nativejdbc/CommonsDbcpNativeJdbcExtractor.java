@@ -84,22 +84,27 @@ public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		return (Connection) getInnermostDelegate(con);
 	}
 
+	@Override
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		return (Statement) getInnermostDelegate(stmt);
 	}
 
+	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		return (PreparedStatement) getNativeStatement(ps);
 	}
 
+	@Override
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		return (CallableStatement) getNativeStatement(cs);
 	}
 
+	@Override
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		return (ResultSet) getInnermostDelegate(rs);
 	}

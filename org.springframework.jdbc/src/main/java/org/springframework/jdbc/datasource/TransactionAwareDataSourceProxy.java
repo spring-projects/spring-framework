@@ -121,6 +121,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @see DataSourceUtils#doGetConnection
 	 * @see ConnectionProxy#getTargetConnection
 	 */
+	@Override
 	public Connection getConnection() throws SQLException {
 		DataSource ds = getTargetDataSource();
 		Assert.state(ds != null, "'targetDataSource' is required");

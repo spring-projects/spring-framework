@@ -70,6 +70,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * Implementation of protected abstract method. This invokes the subclass's
 	 * implementation of the mapRow() method.
 	 */
+	@Override
 	protected RowMapper newRowMapper(Object[] parameters, Map context) {
 		return new RowMapperImpl(parameters, context);
 	}

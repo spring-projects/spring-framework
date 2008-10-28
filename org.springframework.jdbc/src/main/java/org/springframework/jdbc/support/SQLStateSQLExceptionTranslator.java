@@ -86,6 +86,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 	}
 
 
+	@Override
 	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
 		String sqlState = getSqlState(ex);
 		if (sqlState != null && sqlState.length() >= 2) {

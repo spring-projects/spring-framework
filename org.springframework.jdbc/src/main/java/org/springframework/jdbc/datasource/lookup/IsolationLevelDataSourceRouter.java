@@ -100,6 +100,7 @@ public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 	 * as well as isolation level names as defined on the
 	 * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition interface}.
 	 */
+	@Override
 	protected Object resolveSpecifiedLookupKey(Object lookupKey) {
 		if (lookupKey instanceof Integer) {
 			return (Integer) lookupKey;
@@ -117,6 +118,7 @@ public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 		}
 	}
 
+	@Override
 	protected Object determineCurrentLookupKey() {
 		return TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
 	}
