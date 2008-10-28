@@ -46,6 +46,7 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 	}
 
 
+	@Override
 	public final boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
 			throws PortletException, IOException {
 

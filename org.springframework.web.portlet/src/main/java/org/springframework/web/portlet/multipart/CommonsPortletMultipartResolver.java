@@ -106,6 +106,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @return the new PortletFileUpload instance
 	 */
+	@Override
 	protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
 		return new PortletFileUpload(fileItemFactory);
 	}
@@ -133,6 +134,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
 			return new DefaultMultipartActionRequest(request) {
+				@Override
 				protected void initializeMultipart() {
 					MultipartParsingResult parsingResult = parseRequest(request);
 					setMultipartFiles(parsingResult.getMultipartFiles());

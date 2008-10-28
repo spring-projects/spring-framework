@@ -88,6 +88,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * to the superclass's initialization.
 	 * @see #registerHandlers
 	 */
+	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 		registerHandlers(this.parameterMap);
@@ -98,6 +99,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * @param parameterMap Map with parameter names as keys and handler beans or bean names as values
 	 * @throws BeansException if the handler couldn't be registered
 	 */
+	@Override
 	protected void registerHandlers(Map parameterMap) throws BeansException {
 		if (CollectionUtils.isEmpty(parameterMap)) {
 			logger.warn("'parameterMap' is empty on ParameterHandlerMapping");
@@ -112,6 +114,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * Uses the value of the specified parameter as lookup key.
 	 * @see #setParameterName
 	 */
+	@Override
 	protected Object getLookupKey(PortletRequest request) throws Exception {
 		return request.getParameter(this.parameterName);
 	}

@@ -66,6 +66,7 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * Determines a handler for the computed lookup key for the given request.
 	 * @see #getLookupKey
 	 */
+	@Override
 	protected Object getHandlerInternal(PortletRequest request) throws Exception {
 		Object lookupKey = getLookupKey(request);
 		Object handler = this.handlerMap.get(lookupKey);

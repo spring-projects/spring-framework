@@ -72,6 +72,7 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see org.springframework.web.portlet.context.PortletContextResource
 	 * @see javax.portlet.PortletContext#getResourcePaths
 	 */
+	@Override
 	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
 		if (rootDirResource instanceof PortletContextResource) {
 			PortletContextResource pcResource = (PortletContextResource) rootDirResource;

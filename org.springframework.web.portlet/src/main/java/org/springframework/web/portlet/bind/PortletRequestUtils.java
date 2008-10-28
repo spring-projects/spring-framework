@@ -548,10 +548,12 @@ public abstract class PortletRequestUtils {
 
 	private static class IntParser extends ParameterParser {
 
+		@Override
 		protected String getType() {
 			return "int";
 		}
 
+		@Override
 		protected Object doParse(String s) throws NumberFormatException {
 			return Integer.valueOf(s);
 		}
@@ -573,10 +575,12 @@ public abstract class PortletRequestUtils {
 
 	private static class LongParser extends ParameterParser {
 
+		@Override
 		protected String getType() {
 			return "long";
 		}
 
+		@Override
 		protected Object doParse(String parameter) throws NumberFormatException {
 			return Long.valueOf(parameter);
 		}
@@ -598,10 +602,12 @@ public abstract class PortletRequestUtils {
 
 	private static class FloatParser extends ParameterParser {
 
+		@Override
 		protected String getType() {
 			return "float";
 		}
 
+		@Override
 		protected Object doParse(String parameter) throws NumberFormatException {
 			return Float.valueOf(parameter);
 		}
@@ -623,10 +629,12 @@ public abstract class PortletRequestUtils {
 
 	private static class DoubleParser extends ParameterParser {
 
+		@Override
 		protected String getType() {
 			return "double";
 		}
 
+		@Override
 		protected Object doParse(String parameter) throws NumberFormatException {
 			return Double.valueOf(parameter);
 		}
@@ -648,10 +656,12 @@ public abstract class PortletRequestUtils {
 
 	private static class BooleanParser extends ParameterParser {
 
+		@Override
 		protected String getType() {
 			return "boolean";
 		}
 
+		@Override
 		protected Object doParse(String parameter) throws NumberFormatException {
 			return (parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("on") ||
 					parameter.equalsIgnoreCase("yes") || parameter.equals("1") ? Boolean.TRUE : Boolean.FALSE);
@@ -674,10 +684,12 @@ public abstract class PortletRequestUtils {
 
 	private static class StringParser extends ParameterParser {
 
+		@Override
 		protected String getType() {
 			return "string";
 		}
 
+		@Override
 		protected Object doParse(String parameter) throws NumberFormatException {
 			return parameter;
 		}

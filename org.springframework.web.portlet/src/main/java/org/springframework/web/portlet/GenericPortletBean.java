@@ -92,6 +92,7 @@ public abstract class GenericPortletBean extends GenericPortlet {
 	 * @throws PortletException if bean properties are invalid (or required
 	 * properties are missing), or if subclass initialization fails.
 	 */
+	@Override
 	public final void init() throws PortletException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Initializing portlet '" + getPortletName() + "'");
@@ -135,6 +136,7 @@ public abstract class GenericPortletBean extends GenericPortlet {
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
+	@Override
 	public final String getPortletName() {
 		return (getPortletConfig() != null ? getPortletConfig().getPortletName() : null);
 	}
@@ -144,6 +146,7 @@ public abstract class GenericPortletBean extends GenericPortlet {
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
+	@Override
 	public final PortletContext getPortletContext() {
 		return (getPortletConfig() != null ? getPortletConfig().getPortletContext() : null);
 	}

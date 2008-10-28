@@ -253,6 +253,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	 * Overridden method of GenericPortletBean, invoked after any bean properties
 	 * have been set. Creates this portlet's ApplicationContext.
 	 */
+	@Override
 	protected final void initPortletBean() throws PortletException, BeansException {
 		getPortletContext().log("Initializing Spring FrameworkPortlet '" + getPortletName() + "'");
 		if (logger.isInfoEnabled()) {
@@ -435,6 +436,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	/**
 	 * Overridden for friendlier behavior in unit tests.
 	 */
+	@Override
 	protected String getTitle(RenderRequest renderRequest) {
 		try {
 			return super.getTitle(renderRequest);
@@ -447,6 +449,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	/**
 	 * Delegate render requests to processRequest/doRenderService.
 	 */
+	@Override
 	protected final void doDispatch(RenderRequest request, RenderResponse response)
 			throws PortletException, IOException {
 
@@ -456,6 +459,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	/**
 	 * Delegate action requests to processRequest/doActionService.
 	 */
+	@Override
 	public final void processAction(ActionRequest request, ActionResponse response)
 			throws PortletException, IOException {
 
@@ -589,6 +593,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	 * Close the ApplicationContext of this portlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
+	@Override
 	public void destroy() {
 		getPortletContext().log("Destroying Spring FrameworkPortlet '" + getPortletName() + "'");
 		if (this.portletApplicationContext instanceof ConfigurableApplicationContext) {

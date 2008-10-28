@@ -76,6 +76,7 @@ public class XmlPortletApplicationContext extends AbstractRefreshablePortletAppl
 	 * @see #initBeanDefinitionReader
 	 * @see #loadBeanDefinitions
 	 */
+	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws IOException {
 		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
@@ -130,6 +131,7 @@ public class XmlPortletApplicationContext extends AbstractRefreshablePortletAppl
 	 * and "/WEB-INF/test-portlet.xml" for a context with the namespace "test-portlet"
 	 * (like for a DispatcherPortlet instance with the portlet-name "test").
 	 */
+	@Override
 	protected String[] getDefaultConfigLocations() {
 		if (getNamespace() != null) {
 			return new String[] {DEFAULT_CONFIG_LOCATION_PREFIX + getNamespace() + DEFAULT_CONFIG_LOCATION_SUFFIX};

@@ -200,6 +200,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #setFormView
 	 * @see #showForm(RenderRequest, RenderResponse, BindException, Map)
 	 */
+	@Override
 	protected ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors)
 			throws Exception {
 
@@ -238,6 +239,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
+	@Override
 	protected Map referenceData(PortletRequest request, Object command, Errors errors) throws Exception {
 		return referenceData(request);
 	}
@@ -271,6 +273,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #onSubmitRender(Object)
 	 * @see #processFormSubmission(ActionRequest, ActionResponse, Object, BindException)
 	 */
+	@Override
 	protected ModelAndView renderFormSubmission(RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception {
 
@@ -296,6 +299,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #doSubmitAction(Object)
 	 * @see #renderFormSubmission(RenderRequest, RenderResponse, Object, BindException)
 	 */
+	@Override
 	protected void processFormSubmission(
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
 			throws Exception {
@@ -329,6 +333,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * and should not get validated but just show the new form.
 	 * @see #isFormChangeRequest
 	 */
+	@Override
 	protected boolean suppressValidation(PortletRequest request) {
 		return isFormChangeRequest(request);
 	}

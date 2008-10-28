@@ -349,6 +349,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 
+	@Override
 	protected void initApplicationContext() {
 		if (this.validators != null) {
 			for (int i = 0; i < this.validators.length; i++) {

@@ -137,6 +137,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	 * to the superclass's initialization.
 	 * @see #registerHandlers
 	 */
+	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 		registerHandlers(this.portletModeParameterMap);
@@ -147,6 +148,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	 * @param portletModeParameterMap Map with mode names as keys and parameter Maps as values
 	 * @throws BeansException if the handler couldn't be registered
 	 */
+	@Override
 	protected void registerHandlers(Map portletModeParameterMap) throws BeansException {
 		if (CollectionUtils.isEmpty(portletModeParameterMap)) {
 			logger.warn("'portletModeParameterMap' not set on PortletModeParameterHandlerMapping");
@@ -210,6 +212,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	 * @see javax.portlet.PortletRequest#getPortletMode()
 	 * @see #setParameterName
 	 */
+	@Override
 	protected Object getLookupKey(PortletRequest request) throws Exception {
 		PortletMode mode = request.getPortletMode();
 		String parameter = request.getParameter(this.parameterName);
@@ -231,6 +234,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 			this.parameter = parameter;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -243,10 +247,12 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 					ObjectUtils.nullSafeEquals(this.parameter, otherKey.parameter));
 		}
 
+		@Override
 		public int hashCode() {
 			return (this.mode.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.parameter));
 		}
 
+		@Override
 		public String toString() {
 			return "Portlet mode '" + this.mode + "', parameter '" + this.parameter + "'";
 		}
