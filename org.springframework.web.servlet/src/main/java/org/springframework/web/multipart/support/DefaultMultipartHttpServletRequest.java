@@ -64,6 +64,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 
+	@Override
 	public Enumeration getParameterNames() {
 		Set paramNames = new HashSet();
 		Enumeration paramEnum = super.getParameterNames();
@@ -74,6 +75,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		return Collections.enumeration(paramNames);
 	}
 
+	@Override
 	public String getParameter(String name) {
 		String[] values = (String[]) getMultipartParameters().get(name);
 		if (values != null) {
@@ -82,6 +84,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		return super.getParameter(name);
 	}
 
+	@Override
 	public String[] getParameterValues(String name) {
 		String[] values = (String[]) getMultipartParameters().get(name);
 		if (values != null) {
@@ -90,6 +93,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		return super.getParameterValues(name);
 	}
 
+	@Override
 	public Map getParameterMap() {
 		Map paramMap = new HashMap();
 		paramMap.putAll(super.getParameterMap());

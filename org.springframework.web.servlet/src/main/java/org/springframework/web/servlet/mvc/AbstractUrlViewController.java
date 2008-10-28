@@ -88,6 +88,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	 * Retrieves the URL path to use for lookup and delegates to
 	 * {@link #getViewNameForRequest}.
 	 */
+	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		String viewName = getViewNameForRequest(request);

@@ -59,12 +59,14 @@ public class ViewRendererServlet extends HttpServlet {
 	public static final String MODEL_ATTRIBUTE = ViewRendererServlet.class.getName() + ".MODEL";
 
 
+	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		processRequest(request, response);
 	}
 
+	@Override
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

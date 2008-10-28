@@ -193,6 +193,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * {@link #setItems items} property is set, otherwise exposes the
 	 * bound value for the nested {@link OptionTag OptionTags}.
 	 */
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("select");
 		writeDefaultAttributes(tagWriter);
@@ -287,6 +288,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Closes any block tag that might have been opened when using
 	 * nested {@link OptionTag options}.
 	 */
+	@Override
 	public int doEndTag() throws JspException {
 		if (this.tagWriter != null) {
 			this.tagWriter.endTag();
@@ -299,6 +301,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Clears the {@link TagWriter} that might have been left over when using
 	 * nested {@link OptionTag options}.
 	 */
+	@Override
 	public void doFinally() {
 		super.doFinally();
 		this.tagWriter = null;

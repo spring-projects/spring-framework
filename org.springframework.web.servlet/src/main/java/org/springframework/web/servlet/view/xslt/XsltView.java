@@ -173,6 +173,7 @@ public class XsltView extends AbstractUrlBasedView {
 	/**
 	 * Initialize this XsltView's TransformerFactory.
 	 */
+	@Override
 	protected void initApplicationContext() throws BeansException {
 		this.transformerFactory = newTransformerFactory(this.transformerFactoryClass);
 		this.transformerFactory.setErrorListener(this.errorListener);
@@ -220,6 +221,7 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 
+	@Override
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

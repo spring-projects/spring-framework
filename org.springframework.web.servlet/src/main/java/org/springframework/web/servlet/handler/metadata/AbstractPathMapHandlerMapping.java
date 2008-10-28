@@ -48,6 +48,7 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * @deprecated as of Spring 2.5, in favor of annotation-based request mapping.
  * To be removed in Spring 3.0.
  */
+@Deprecated
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 
 	/** Constants instance for AutowireCapableBeanFactory */
@@ -104,6 +105,7 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 	 * to the superclass's initialization.
 	 * @see #detectAndCreateHandlers
 	 */
+	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 

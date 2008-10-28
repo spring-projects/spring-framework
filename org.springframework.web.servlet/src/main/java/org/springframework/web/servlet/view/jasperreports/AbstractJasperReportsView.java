@@ -313,6 +313,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * JasperReports views do not strictly required a 'url' value.
 	 * Alternatively, the {@link #getReport()} template method may be overridden.
 	 */
+	@Override
 	protected boolean isUrlRequired() {
 		return false;
 	}
@@ -323,6 +324,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * <p>Subclasses can add custom initialization logic by overriding
 	 * the {@link #onInit} method.
 	 */
+	@Override
 	protected final void initApplicationContext() throws ApplicationContextException {
 		this.report = loadReport();
 
@@ -547,6 +549,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * acccording to the <code>getReportData</code> method.
 	 * @see #getReportData
 	 */
+	@Override
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

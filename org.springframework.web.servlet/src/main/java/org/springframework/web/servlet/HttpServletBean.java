@@ -103,6 +103,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * @throws ServletException if bean properties are invalid (or required
 	 * properties are missing), or if subclass initialization fails.
 	 */
+	@Override
 	public final void init() throws ServletException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Initializing servlet '" + getServletName() + "'");
@@ -147,6 +148,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * ServletConfig set yet.
 	 * @see #getServletConfig()
 	 */
+	@Override
 	public final String getServletName() {
 		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
 	}
@@ -156,6 +158,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * ServletConfig set yet.
 	 * @see #getServletConfig()
 	 */
+	@Override
 	public final ServletContext getServletContext() {
 		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
 	}

@@ -377,6 +377,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName());
 		if (getBeanName() != null) {

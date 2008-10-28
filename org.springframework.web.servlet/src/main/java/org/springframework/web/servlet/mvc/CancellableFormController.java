@@ -108,6 +108,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * Consider an explicit cancel request as a form submission too.
 	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
 	 */
+	@Override
 	protected boolean isFormSubmission(HttpServletRequest request) {
 		return super.isFormSubmission(request) || isCancelRequest(request);
 	}
@@ -116,6 +117,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * Suppress validation for an explicit cancel request too.
 	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
 	 */
+	@Override
 	protected boolean suppressValidation(HttpServletRequest request, Object command) {
 		return super.suppressValidation(request, command) || isCancelRequest(request);
 	}
@@ -129,6 +131,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
 	 * @see SimpleFormController#processFormSubmission
 	 */
+	@Override
 	protected ModelAndView processFormSubmission(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {

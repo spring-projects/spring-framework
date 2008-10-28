@@ -125,6 +125,7 @@ public class VelocityConfigurer extends VelocityEngineFactory
 	 * loader in order to load the spring Velocity macros from the class path.
 	 * @see org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
 	 */
+	@Override
 	protected void postProcessVelocityEngine(VelocityEngine velocityEngine) {
 		velocityEngine.setApplicationAttribute(ServletContext.class.getName(), this.servletContext);
 		velocityEngine.setProperty(

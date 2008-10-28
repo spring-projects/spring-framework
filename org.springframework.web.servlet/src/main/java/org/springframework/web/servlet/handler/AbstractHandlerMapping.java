@@ -105,6 +105,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #extendInterceptors(java.util.List)
 	 * @see #initInterceptors()
 	 */
+	@Override
 	protected void initApplicationContext() throws BeansException {
 		extendInterceptors(this.interceptors);
 		initInterceptors();

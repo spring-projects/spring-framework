@@ -43,6 +43,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 	private boolean exposeSpringMacroHelpers = true;
 
 
+	@Override
 	protected Class requiredViewClass() {
 		return AbstractTemplateView.class;
 	}
@@ -97,6 +98,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 	}
 
 
+	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractTemplateView view = (AbstractTemplateView) super.buildView(viewName);
 		view.setExposeRequestAttributes(this.exposeRequestAttributes);

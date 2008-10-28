@@ -89,6 +89,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("textarea");
 		writeDefaultAttributes(tagWriter);

@@ -168,6 +168,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #setFormView
 	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException, Map)
 	 */
+	@Override
 	protected ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors)
 			throws Exception {
@@ -210,6 +211,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
+	@Override
 	protected Map referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
 		return referenceData(request);
 	}
@@ -247,6 +249,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #onSubmit(Object)
 	 * @see #doSubmitAction(Object)
 	 */
+	@Override
 	protected ModelAndView processFormSubmission(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
@@ -274,6 +277,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * validated but just show the new form.
 	 * @see #isFormChangeRequest
 	 */
+	@Override
 	protected boolean suppressValidation(HttpServletRequest request, Object command) {
 		return isFormChangeRequest(request, command);
 	}

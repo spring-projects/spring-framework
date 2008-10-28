@@ -147,12 +147,14 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 
+	@Override
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
 		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
 		String label = getLabelValue(value);
 		renderOption(value,  label, tagWriter);
 	}
 
+	@Override
 	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
 		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
 		String label = bodyContent.getString();
@@ -162,10 +164,12 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Make sure we are under a '<code>select</code>' tag before proceeding.
 	 */
+	@Override
 	protected void onWriteTagContent() {
 		assertUnderSelectTag();
 	}
 
+	@Override
 	protected void exposeAttributes() throws JspException {
 		Object value = resolveValue();
 		this.oldValue = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
@@ -174,10 +178,12 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, getDisplayString(value, getBindStatus().getEditor()));
 	}
 
+	@Override
 	protected BindStatus getBindStatus() {
 		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
 
+	@Override
 	protected void removeAttributes() {
 		if (this.oldValue != null) {
 			this.pageContext.setAttribute(VALUE_ATTRIBUTE, this.oldValue);
@@ -212,6 +218,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		tagWriter.endTag();
 	}
 
+	@Override
 	protected String autogenerateId() throws JspException {
 		return null;
 	}

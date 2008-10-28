@@ -375,6 +375,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
 	 * Subclasses should call this when they want the base attribute set to be written to the output.
 	 */
+	@Override
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		super.writeDefaultAttributes(tagWriter);
 		writeOptionalAttributes(tagWriter);

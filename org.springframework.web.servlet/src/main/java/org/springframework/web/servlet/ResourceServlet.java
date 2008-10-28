@@ -168,6 +168,7 @@ public class ResourceServlet extends HttpServletBean {
 	/**
 	 * Remember the startup time, using no last-modified time before it.
 	 */
+	@Override
 	protected void initServletBean() {
 		this.pathMatcher = getPathMatcher();
 		this.startupTime = System.currentTimeMillis();
@@ -188,6 +189,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * Determine the URL of the target resource and include it.
 	 * @see #determineResourceUrl
 	 */
+	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
@@ -297,6 +299,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * @see #determineResourceUrl
 	 * @see #getFileTimestamp
 	 */
+	@Override
 	protected final long getLastModified(HttpServletRequest request) {
 		if (this.applyLastModified) {
 			String resourceUrl = determineResourceUrl(request);

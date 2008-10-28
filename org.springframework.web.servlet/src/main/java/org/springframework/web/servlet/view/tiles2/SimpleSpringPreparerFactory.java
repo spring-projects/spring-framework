@@ -42,6 +42,7 @@ public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 	private final Map sharedPreparers = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
+	@Override
 	protected ViewPreparer getPreparer(String name, WebApplicationContext context) throws TilesException {
 		// Quick check on the concurrent map first, with minimal locking.
 		ViewPreparer preparer = (ViewPreparer) this.sharedPreparers.get(name);

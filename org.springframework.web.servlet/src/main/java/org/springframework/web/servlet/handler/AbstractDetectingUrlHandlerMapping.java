@@ -52,6 +52,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	 * Calls the {@link #detectHandlers()} method in addition to the
 	 * superclass's initialization.
 	 */
+	@Override
 	public void initApplicationContext() throws ApplicationContextException {
 		super.initApplicationContext();
 		detectHandlers();

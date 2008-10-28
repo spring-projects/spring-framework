@@ -30,6 +30,7 @@ package org.springframework.web.servlet.handler.metadata;
  * To be removed in Spring 3.0.
  * @@org.apache.commons.attributes.Indexed()
  */
+@Deprecated
 public class PathMap {
 	
 	/*

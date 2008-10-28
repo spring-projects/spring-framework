@@ -90,6 +90,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * in page, request, session or application scope; if not found,
 	 * returns the <code>HttpServletRequest.getLocale()</code>.
 	 */
+	@Override
 	protected Locale getFallbackLocale() {
 		if (jstlPresent) {
 			Locale locale = JstlPageLocaleResolver.getJstlLocale(getPageContext());

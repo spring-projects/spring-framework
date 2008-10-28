@@ -172,6 +172,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Adds input-specific optional attributes as defined by this base class.
 	 */
+	@Override
 	protected void writeOptionalAttributes(TagWriter tagWriter) throws JspException {
 		super.writeOptionalAttributes(tagWriter);
 

@@ -33,10 +33,12 @@ public class JasperReportsPdfView extends AbstractJasperReportsSingleFormatView 
 		setContentType("application/pdf");
 	}
 
+	@Override
 	protected JRExporter createExporter() {
 		return new JRPdfExporter();
 	}
 
+	@Override
 	protected boolean useWriter() {
 		return false;
 	}

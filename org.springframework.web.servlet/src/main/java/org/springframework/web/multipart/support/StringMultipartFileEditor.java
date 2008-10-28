@@ -52,10 +52,12 @@ public class StringMultipartFileEditor extends PropertyEditorSupport {
 	}
 
 
+	@Override
 	public void setAsText(String text) {
 		setValue(text);
 	}
 
+	@Override
 	public void setValue(Object value) {
 		if (value instanceof MultipartFile) {
 			MultipartFile multipartFile = (MultipartFile) value;

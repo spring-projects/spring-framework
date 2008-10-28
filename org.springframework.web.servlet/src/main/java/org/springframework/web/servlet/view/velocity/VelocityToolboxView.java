@@ -100,6 +100,7 @@ public class VelocityToolboxView extends VelocityView {
 	 * initialization of ViewTool instances.
 	 * @see #initTool
 	 */
+	@Override
 	protected Context createVelocityContext(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -125,6 +126,7 @@ public class VelocityToolboxView extends VelocityView {
 	 * @see org.apache.velocity.tools.view.tools.ViewTool#init(Object)
 	 * @see org.apache.velocity.tools.view.tools.LinkTool#init(Object)
 	 */
+	@Override
 	protected void initTool(Object tool, Context velocityContext) throws Exception {
 		// Initialize ViewTool instances with the Velocity context.
 		// Despite having an "init(Object)" method, all known ViewTool

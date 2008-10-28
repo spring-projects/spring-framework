@@ -152,6 +152,7 @@ public class ServletWrappingController extends AbstractController
 	 * Invoke the the wrapped Servlet instance.
 	 * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
 	 */
+	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
 

@@ -164,6 +164,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * Appends a counter to a specified id as well,
 	 * since we're dealing with multiple HTML elements.
 	 */
+	@Override
 	protected String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
 		if (id != null) {
@@ -178,6 +179,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * {@link #setItems(Object)} values. Marks the element as checked if the
 	 * value matches the bound value.
 	 */
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		Object items = getItems();
 		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);

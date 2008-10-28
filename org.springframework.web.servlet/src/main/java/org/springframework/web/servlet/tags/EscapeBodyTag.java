@@ -60,6 +60,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 	}
 
 
+	@Override
 	protected int doStartTagInternal() {
 		// do nothing
 		return EVAL_BODY_BUFFERED;
@@ -73,6 +74,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 		this.bodyContent = bodyContent;
 	}
 
+	@Override
 	public int doAfterBody() throws JspException {
 		try {
 			String content = readBodyContent();

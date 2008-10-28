@@ -29,6 +29,7 @@ package org.springframework.web.servlet.tags.form;
  */
 public class RadioButtonsTag extends AbstractMultiCheckedElementTag {
 
+	@Override
 	protected String getInputType() {
 		return "radio";
 	}

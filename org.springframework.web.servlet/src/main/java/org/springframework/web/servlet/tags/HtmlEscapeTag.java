@@ -45,6 +45,7 @@ public class HtmlEscapeTag extends RequestContextAwareTag {
 	}
 
 
+	@Override
 	protected int doStartTagInternal() throws JspException {
 		boolean resolvedDefaultHtmlEscape =
 				ExpressionEvaluationUtils.evaluateBoolean("defaultHtmlEscape", this.defaultHtmlEscape, pageContext);

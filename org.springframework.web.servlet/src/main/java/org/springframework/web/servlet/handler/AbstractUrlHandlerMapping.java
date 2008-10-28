@@ -154,6 +154,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param request current HTTP request
 	 * @return the handler instance, or <code>null</code> if none found
 	 */
+	@Override
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		Object handler = lookupHandler(lookupPath, request);
@@ -353,6 +354,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			this.pathWithinMapping = pathWithinMapping;
 		}
 
+		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 			exposePathWithinMapping(this.pathWithinMapping, request);
 			return true;

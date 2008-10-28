@@ -56,10 +56,12 @@ public abstract class AbstractPdfView extends AbstractView {
 	}
 
 
+	@Override
 	protected boolean generatesDownloadContent() {
 		return true;
 	}
 
+	@Override
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 

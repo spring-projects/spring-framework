@@ -75,6 +75,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	}
 
 
+	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

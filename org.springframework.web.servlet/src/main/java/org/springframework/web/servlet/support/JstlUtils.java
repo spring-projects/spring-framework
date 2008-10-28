@@ -117,6 +117,7 @@ public abstract class JstlUtils {
 			this.request = request;
 		}
 
+		@Override
 		public ResourceBundle getResourceBundle() {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {
@@ -129,6 +130,7 @@ public abstract class JstlUtils {
 			return new MessageSourceResourceBundle(this.messageSource, getLocale());
 		}
 
+		@Override
 		public Locale getLocale() {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {

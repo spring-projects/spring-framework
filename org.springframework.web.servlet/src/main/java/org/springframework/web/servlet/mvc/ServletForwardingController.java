@@ -109,6 +109,7 @@ public class ServletForwardingController extends AbstractController implements B
 	}
 
 
+	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

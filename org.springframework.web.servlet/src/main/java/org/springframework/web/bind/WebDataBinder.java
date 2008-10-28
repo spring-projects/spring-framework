@@ -144,6 +144,7 @@ public class WebDataBinder extends DataBinder {
 	 * before delegating to the superclass binding process.
 	 * @see #checkFieldMarkers
 	 */
+	@Override
 	protected void doBind(MutablePropertyValues mpvs) {
 		checkFieldMarkers(mpvs);
 		super.doBind(mpvs);

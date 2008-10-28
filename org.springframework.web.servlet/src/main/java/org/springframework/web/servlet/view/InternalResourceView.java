@@ -175,6 +175,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * An ApplicationContext is not strictly required for InternalResourceView.
 	 */
+	@Override
 	protected boolean isContextRequired() {
 		return false;
 	}
@@ -185,6 +186,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see #setExposeForwardAttributes
 	 * @see #exposeForwardRequestAttributes(javax.servlet.http.HttpServletRequest)
 	 */
+	@Override
 	protected void initServletContext(ServletContext sc) {
 		if (this.exposeForwardAttributes == null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
 			this.exposeForwardAttributes = Boolean.TRUE;
@@ -196,6 +198,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * Render the internal resource given the specified model.
 	 * This includes setting the model as request attributes.
 	 */
+	@Override
 	protected void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 

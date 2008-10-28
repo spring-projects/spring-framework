@@ -33,10 +33,12 @@ public class JasperReportsXlsView extends AbstractJasperReportsSingleFormatView 
 		setContentType("application/vnd.ms-excel");
 	}
 
+	@Override
 	protected JRExporter createExporter() {
 		return new JRXlsExporter();
 	}
 
+	@Override
 	protected boolean useWriter() {
 		return false;
 	}

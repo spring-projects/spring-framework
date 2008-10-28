@@ -394,6 +394,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * This implementation calls {@link #initStrategies}.
 	 */
+	@Override
 	protected void onRefresh(ApplicationContext context) throws BeansException {
 		initStrategies(context);
 	}
@@ -775,6 +776,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Exposes the DispatcherServlet-specific request attributes and
 	 * delegates to {@link #doDispatch} for the actual dispatching.
 	 */
+	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
 			String requestUri = new UrlPathHelper().getRequestUri(request);
@@ -949,6 +951,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Override HttpServlet's <code>getLastModified</code> method to evaluate
 	 * the Last-Modified value of the mapped handler.
 	 */
+	@Override
 	protected long getLastModified(HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			String requestUri = new UrlPathHelper().getRequestUri(request);
@@ -992,6 +995,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
 			}
+			@Override
 			public String toString() {
 				return getLocale().toString();
 			}

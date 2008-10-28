@@ -123,6 +123,7 @@ public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHand
 	}
 
 
+	@Override
 	protected String[] buildUrlsForHandler(String beanName, Class beanClass) {
 		return generatePathMappings(beanClass);
 	}

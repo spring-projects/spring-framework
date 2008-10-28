@@ -252,6 +252,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #showNewForm
 	 * @see #processFormSubmission
 	 */
+	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
@@ -425,6 +426,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #formBackingObject
 	 */
+	@Override
 	protected final Object getCommand(HttpServletRequest request) throws Exception {
 		// If not in session-form mode, create a new form-backing object.
 		if (!isSessionForm()) {

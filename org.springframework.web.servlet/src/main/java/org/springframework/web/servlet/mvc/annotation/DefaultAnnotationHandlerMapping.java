@@ -105,6 +105,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 * Checks for presence of the {@link org.springframework.web.bind.annotation.RequestMapping}
 	 * annotation on the handler class and on any of its methods.
 	 */
+	@Override
 	protected String[] determineUrlsForHandler(String beanName) {
 		ApplicationContext context = getApplicationContext();
 		Class<?> handlerType = context.getType(beanName);
@@ -177,6 +178,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 * Validate the given annotated handler against the current request.
 	 * @see #validateMapping
 	 */
+	@Override
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
 		RequestMapping mapping = this.cachedMappings.get(handler.getClass());
 		if (mapping == null) {

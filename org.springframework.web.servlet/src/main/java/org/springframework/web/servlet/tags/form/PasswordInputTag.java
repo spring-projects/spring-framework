@@ -51,6 +51,7 @@ public class PasswordInputTag extends InputTag {
 	 * Return '<code>password</code>' causing the rendered HTML '<code>input</code>'
 	 * element to have a '<code>type</code>' of '<code>password</code>'.
 	 */
+	@Override
 	protected String getType() {
 		return "password";
 	}
@@ -60,6 +61,7 @@ public class PasswordInputTag extends InputTag {
 	 * {@link #setShowPassword(boolean) 'showPassword'} property value is
 	 * {@link Boolean#TRUE true}.
 	 */
+	@Override
 	protected void writeValue(TagWriter tagWriter) throws JspException {
 		if (this.showPassword) {
 			super.writeValue(tagWriter);

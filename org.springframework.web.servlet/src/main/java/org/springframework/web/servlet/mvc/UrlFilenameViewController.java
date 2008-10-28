@@ -96,6 +96,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #setPrefix
 	 * @see #setSuffix
 	 */
+	@Override
 	protected String getViewNameForRequest(HttpServletRequest request) {
 		String uri = extractOperableUrl(request);
 		return getViewNameForUrlPath(uri);

@@ -28,11 +28,13 @@ import org.springframework.stereotype.Controller;
  */
 class AnnotationControllerTypePredicate extends ControllerTypePredicate {
 
+	@Override
 	public boolean isControllerType(Class beanClass) {
 		return (super.isControllerType(beanClass) ||
 				AnnotationUtils.findAnnotation(beanClass, Controller.class) != null);
 	}
 
+	@Override
 	public boolean isMultiActionControllerType(Class beanClass) {
 		return (super.isMultiActionControllerType(beanClass) ||
 				AnnotationUtils.findAnnotation(beanClass, Controller.class) != null);

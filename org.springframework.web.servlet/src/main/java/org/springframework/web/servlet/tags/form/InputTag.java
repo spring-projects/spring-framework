@@ -133,6 +133,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * Uses the value returned by {@link #getType()} to determine which
 	 * type of '<code>input</code>' element to render.
 	 */
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 

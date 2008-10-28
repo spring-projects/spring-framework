@@ -76,6 +76,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	 * {@link #setValue(Object) value}. Marks the element as checked if the
 	 * value matches the {@link #getValue bound value}.
 	 */
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		String id = resolveId();
