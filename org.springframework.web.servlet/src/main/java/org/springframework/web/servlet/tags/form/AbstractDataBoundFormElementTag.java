@@ -53,6 +53,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * command object name is exposed.
 	 * @deprecated as of Spring 2.5, in favor of {@link FormTag#MODEL_ATTRIBUTE_VARIABLE_NAME}
 	 */
+	@Deprecated
 	public static final String COMMAND_NAME_VARIABLE_NAME =
 			Conventions.getQualifiedAttributeName(AbstractFormTag.class, "commandName");
 
@@ -95,6 +96,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * <p>May be a runtime expression; defaults to the value of {@link #getName()}.
 	 * Note that the default value may not be valid for certain tags.
 	 */
+	@Override
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -102,6 +104,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	/**
 	 * Get the value of the '<code>id</code>' attribute.
 	 */
+	@Override
 	public String getId() {
 		return this.id;
 	}
@@ -219,6 +222,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	/**
 	 * Disposes of the {@link BindStatus} instance.
 	 */
+	@Override
 	public void doFinally() {
 		super.doFinally();
 		this.bindStatus = null;

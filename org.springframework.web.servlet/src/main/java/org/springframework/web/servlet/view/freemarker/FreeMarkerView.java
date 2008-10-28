@@ -137,6 +137,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * locale-specific one is not found.
 	 * @see freemarker.cache.TemplateCache#getTemplate
 	 */
+	@Override
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
@@ -218,6 +219,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Output is directed to the servlet response.
 	 * <p>This method can be overridden if custom behavior is needed.
 	 */
+	@Override
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -351,6 +353,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	private static class GenericServletAdapter extends GenericServlet {
 
+		@Override
 		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
 			// no-op
 		}

@@ -142,6 +142,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	}
 
 
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		assertUnderSelectTag();
 		Object items = getItems();
@@ -163,6 +164,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Appends a counter to a specified id,
 	 * since we're dealing with multiple HTML elements.
 	 */
+	@Override
 	protected String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
 		if (id != null) {
@@ -176,6 +178,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "options", "select");
 	}
 
+	@Override
 	protected BindStatus getBindStatus() {
 		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
@@ -190,10 +193,12 @@ public class OptionsTag extends AbstractHtmlElementTag {
 			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
 		}
 
+		@Override
 		protected boolean isOptionDisabled() {
 			return isDisabled();
 		}
 
+		@Override
 		protected void writeCommonAttributes(TagWriter tagWriter) throws JspException {
 			writeOptionalAttribute(tagWriter, "id", resolveId());
 			writeOptionalAttributes(tagWriter);

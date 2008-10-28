@@ -66,6 +66,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	 * Requires VelocityView.
 	 * @see VelocityView
 	 */
+	@Override
 	protected Class requiredViewClass() {
 		return VelocityView.class;
 	}
@@ -119,6 +120,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	}
 
 
+	@Override
 	protected void initApplicationContext() {
 		super.initApplicationContext();
 
@@ -138,6 +140,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	}
 
 
+	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		VelocityView view = (VelocityView) super.buildView(viewName);
 		view.setVelocityFormatterAttribute(this.velocityFormatterAttribute);

@@ -45,6 +45,7 @@ public class VelocityLayoutViewResolver extends VelocityViewResolver {
 	 * Requires VelocityLayoutView.
 	 * @see VelocityLayoutView
 	 */
+	@Override
 	protected Class requiredViewClass() {
 		return VelocityLayoutView.class;
 	}
@@ -88,6 +89,7 @@ public class VelocityLayoutViewResolver extends VelocityViewResolver {
 	}
 
 
+	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		VelocityLayoutView view = (VelocityLayoutView) super.buildView(viewName);
 		// Use not-null checks to preserve VelocityLayoutView's defaults.

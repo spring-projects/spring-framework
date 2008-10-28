@@ -55,6 +55,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	/**
 	 * Requires the view class to be a subclass of {@link AbstractJasperReportsView}.
 	 */
+	@Override
 	protected Class requiredViewClass() {
 		return AbstractJasperReportsView.class;
 	}
@@ -116,6 +117,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 
+	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractJasperReportsView view = (AbstractJasperReportsView) super.buildView(viewName);
 

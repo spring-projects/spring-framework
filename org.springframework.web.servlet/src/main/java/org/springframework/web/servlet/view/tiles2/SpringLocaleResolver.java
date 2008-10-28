@@ -40,6 +40,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class SpringLocaleResolver extends DefaultLocaleResolver {
 
+	@Override
 	public Locale resolveLocale(TilesRequestContext context) {
 		if (context.getRequest() instanceof HttpServletRequest) {
 			return RequestContextUtils.getLocale((HttpServletRequest) context.getRequest());

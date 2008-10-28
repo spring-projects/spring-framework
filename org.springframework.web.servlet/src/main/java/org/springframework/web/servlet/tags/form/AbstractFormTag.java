@@ -86,6 +86,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * the created {@link TagWriter} to the {@link #writeTagContent(TagWriter)} method.
 	 * @return the value returned by {@link #writeTagContent(TagWriter)}
 	 */
+	@Override
 	protected final int doStartTagInternal() throws Exception {
 		return writeTagContent(createTagWriter());
 	}
@@ -111,6 +112,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	/**
 	 * Overridden to default to <code>true</code> in case of no explicit default given.
 	 */
+	@Override
 	protected boolean isDefaultHtmlEscape() {
 		Boolean defaultHtmlEscape = getRequestContext().getDefaultHtmlEscape();
 		return (defaultHtmlEscape == null || defaultHtmlEscape.booleanValue());

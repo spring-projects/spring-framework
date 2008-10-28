@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 
+	@Override
 	public void setValue(Object value) {
 		if (value instanceof MultipartFile) {
 			MultipartFile multipartFile = (MultipartFile) value;
@@ -50,6 +51,7 @@ public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 		}
 	}
 
+	@Override
 	public String getAsText() {
 		byte[] value = (byte[]) getValue();
 		return (value != null ? new String(value) : "");

@@ -44,6 +44,7 @@ public class DispatcherServletWebRequest extends ServletWebRequest {
 		super(request);
 	}
 
+	@Override
 	public Locale getLocale() {
 		return RequestContextUtils.getLocale(getRequest());
 	}

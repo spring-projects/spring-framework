@@ -67,6 +67,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * @see #REQUEST_CONTEXT_PAGE_ATTRIBUTE
 	 * @see org.springframework.web.servlet.support.JspAwareRequestContext
 	 */
+	@Override
 	public final int doStartTag() throws JspException {
 		this.requestContext = (RequestContext) this.pageContext.getAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 		try {

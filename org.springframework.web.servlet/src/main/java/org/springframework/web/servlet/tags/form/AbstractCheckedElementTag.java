@@ -76,6 +76,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	/**
 	 * Return a unique ID for the bound name within the current PageContext.
 	 */
+	@Override
 	protected String autogenerateId() throws JspException {
 		return TagIdGenerator.nextId(getName(), this.pageContext);
 	}
@@ -86,6 +87,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * {@link org.springframework.web.servlet.tags.form.TagWriter},
 	 * marking it as 'checked' if appropriate.
 	 */
+	@Override
 	protected abstract int writeTagContent(TagWriter tagWriter) throws JspException;
 
 }

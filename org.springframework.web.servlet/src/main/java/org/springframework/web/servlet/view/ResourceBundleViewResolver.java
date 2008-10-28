@@ -174,6 +174,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 
+	@Override
 	protected void initApplicationContext() throws BeansException {
 		if (this.localesToInitialize != null) {
 			for (int i = 0; i < this.localesToInitialize.length; i++) {
@@ -182,6 +183,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		}
 	}
 
+	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		BeanFactory factory = initFactory(locale);
 		try {

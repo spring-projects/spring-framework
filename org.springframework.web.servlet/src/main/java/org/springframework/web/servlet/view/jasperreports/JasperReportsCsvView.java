@@ -33,10 +33,12 @@ public class JasperReportsCsvView extends AbstractJasperReportsSingleFormatView 
 		setContentType("text/csv");
 	}
 
+	@Override
 	protected JRExporter createExporter() {
 		return new JRCsvExporter();
 	}
 
+	@Override
 	protected boolean useWriter() {
 		return true;
 	}

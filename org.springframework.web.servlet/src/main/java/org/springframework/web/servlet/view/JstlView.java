@@ -114,6 +114,7 @@ public class JstlView extends InternalResourceView {
 	 * context-param.
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */
+	@Override
 	protected void initServletContext(ServletContext servletContext) {
 		if (this.messageSource != null) {
 			this.messageSource = JstlUtils.getJstlAwareMessageSource(servletContext, this.messageSource);
@@ -125,6 +126,7 @@ public class JstlView extends InternalResourceView {
 	 * Exposes a JSTL LocalizationContext for Spring's locale and MessageSource.
 	 * @see JstlUtils#exposeLocalizationContext
 	 */
+	@Override
 	protected void exposeHelpers(HttpServletRequest request) throws Exception {
 		if (this.messageSource != null) {
 			JstlUtils.exposeLocalizationContext(request, this.messageSource);

@@ -83,6 +83,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * that body content is written correctly.
 	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag(LABEL_TAG);
 		tagWriter.writeAttribute(FOR_ATTRIBUTE, resolveFor());
@@ -98,6 +99,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * '<code>label</code>' tag.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
+	@Override
 	protected String getName() throws JspException {
 		// This also suppresses the 'id' attribute (which is okay for a <label/>)
 		return null;
@@ -130,6 +132,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	/**
 	 * Close the '<code>label</code>' tag.
 	 */
+	@Override
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
 		return EVAL_PAGE;
@@ -138,6 +141,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	/**
 	 * Disposes of the {@link TagWriter} instance.
 	 */
+	@Override
 	public void doFinally() {
 		super.doFinally();
 		this.tagWriter = null;

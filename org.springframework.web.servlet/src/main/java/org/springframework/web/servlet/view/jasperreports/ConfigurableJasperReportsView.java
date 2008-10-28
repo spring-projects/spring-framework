@@ -63,6 +63,7 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	/**
 	 * Checks that the {@link #setExporterClass(Class) exporterClass} property is specified.
 	 */
+	@Override
 	protected void onInit() {
 		if (this.exporterClass == null) {
 			throw new IllegalArgumentException("exporterClass is required");
@@ -75,6 +76,7 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	 * @see #setExporterClass(Class)
 	 * @see BeanUtils#instantiateClass(Class)
 	 */
+	@Override
 	protected JRExporter createExporter() {
 		return (JRExporter) BeanUtils.instantiateClass(this.exporterClass);
 	}
@@ -83,6 +85,7 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	 * Indicates how the {@link JRExporter} should render its data.
 	 * @see #setUseWriter(boolean)
 	 */
+	@Override
 	protected boolean useWriter() {
 		return this.useWriter;
 	}

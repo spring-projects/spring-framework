@@ -47,6 +47,7 @@ import org.springframework.web.bind.WebDataBinder;
  */
 public class CheckboxTag extends AbstractSingleCheckedElementTag {
 
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		super.writeTagContent(tagWriter);
 
@@ -62,6 +63,7 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 		return SKIP_BODY;
 	}
 
+	@Override
 	protected void writeTagDetails(TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("type", "checkbox");
 

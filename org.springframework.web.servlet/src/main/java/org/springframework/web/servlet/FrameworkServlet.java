@@ -271,6 +271,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Overridden method of {@link HttpServletBean}, invoked after any bean properties
 	 * have been set. Creates this servlet's WebApplicationContext.
 	 */
+	@Override
 	protected final void initServletBean() throws ServletException, BeansException {
 		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.logger.isInfoEnabled()) {
@@ -495,6 +496,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #doService
 	 * @see #doHead
 	 */
+	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
@@ -505,6 +507,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Delegate POST requests to {@link #processRequest}.
 	 * @see #doService
 	 */
+	@Override
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
@@ -515,6 +518,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Delegate PUT requests to {@link #processRequest}.
 	 * @see #doService
 	 */
+	@Override
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
@@ -525,6 +529,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Delegate DELETE requests to {@link #processRequest}.
 	 * @see #doService
 	 */
+	@Override
 	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
@@ -536,6 +541,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>Applies HttpServlet's standard OPTIONS processing first.
 	 * @see #doService
 	 */
+	@Override
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		super.doOptions(request, response);
 		if (this.dispatchOptionsRequest) {
@@ -548,6 +554,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>Applies HttpServlet's standard TRACE processing first.
 	 * @see #doService
 	 */
+	@Override
 	protected void doTrace(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		super.doTrace(request, response);
 		if (this.dispatchTraceRequest) {
@@ -637,6 +644,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Close the WebApplicationContext of this servlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
+	@Override
 	public void destroy() {
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {

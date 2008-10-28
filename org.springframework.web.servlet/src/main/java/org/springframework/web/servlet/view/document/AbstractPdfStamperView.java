@@ -46,10 +46,12 @@ public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
   }
 
 
+	@Override
 	protected boolean generatesDownloadContent() {
 		return true;
 	}
 
+   @Override
    protected final void renderMergedOutputModel(
 			 Map model, HttpServletRequest request, HttpServletResponse response) throws Exception{
 

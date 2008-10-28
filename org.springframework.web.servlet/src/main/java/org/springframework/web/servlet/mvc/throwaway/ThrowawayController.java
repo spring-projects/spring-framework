@@ -54,6 +54,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @deprecated as of Spring 2.5, in favor of annotation-based controllers.
  * To be removed in Spring 3.0.
  */
+@Deprecated
 public interface ThrowawayController {
 
 	/**

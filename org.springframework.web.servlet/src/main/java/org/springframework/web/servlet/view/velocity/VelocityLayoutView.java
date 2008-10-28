@@ -118,6 +118,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * Note that during rendering of the screen content, the layout template
 	 * can be changed which may invalidate any early checking done here.
 	 */
+	@Override
 	protected void checkTemplate() throws ApplicationContextException {
 		super.checkTemplate();
 
@@ -141,6 +142,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * value of screenContentKey). The layout template is then merged with the
 	 * modified Context in the super class.
 	 */
+	@Override
 	protected void doRender(Context context, HttpServletResponse response) throws Exception {
 		renderScreenContent(context);
 

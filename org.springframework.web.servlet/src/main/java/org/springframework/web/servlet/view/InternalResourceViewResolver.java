@@ -75,6 +75,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	/**
 	 * This resolver requires {@link InternalResourceView}.
 	 */
+	@Override
 	protected Class requiredViewClass() {
 		return InternalResourceView.class;
 	}
@@ -114,6 +115,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	}
 
 
+	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		InternalResourceView view = (InternalResourceView) super.buildView(viewName);
 		if (this.alwaysInclude != null) {

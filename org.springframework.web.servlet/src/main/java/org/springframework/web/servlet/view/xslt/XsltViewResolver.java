@@ -117,10 +117,12 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 	}
 
 
+	@Override
 	protected Class requiredViewClass() {
 		return XsltView.class;
 	}
 
+	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		XsltView view = (XsltView) super.buildView(viewName);
 		view.setSourceKey(this.sourceKey);

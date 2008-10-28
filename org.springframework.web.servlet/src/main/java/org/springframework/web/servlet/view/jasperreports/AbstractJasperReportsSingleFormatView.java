@@ -47,6 +47,7 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasperReportsView {
 
+	@Override
 	protected boolean generatesDownloadContent() {
 		return !useWriter();
 	}
@@ -55,6 +56,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * Perform rendering for a single Jasper Reports exporter, that is,
 	 * for a pre-defined output format.
 	 */
+	@Override
 	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
 

@@ -333,6 +333,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		return this.order;
 	}
 
+	@Override
 	protected void initApplicationContext() {
 		super.initApplicationContext();
 		if (getViewClass() == null) {
@@ -345,6 +346,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * This implementation returns just the view name,
 	 * as this ViewResolver doesn't support localized resolution.
 	 */
+	@Override
 	protected Object getCacheKey(String viewName, Locale locale) {
 		return viewName;
 	}
@@ -357,6 +359,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #loadView
 	 * @see #requiredViewClass
 	 */
+	@Override
 	protected View createView(String viewName, Locale locale) throws Exception {
 		// If this resolver is not supposed to handle the given view,
 		// return null to pass on to the next resolver in the chain.
@@ -408,6 +411,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
+	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		AbstractUrlBasedView view = buildView(viewName);
 		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);

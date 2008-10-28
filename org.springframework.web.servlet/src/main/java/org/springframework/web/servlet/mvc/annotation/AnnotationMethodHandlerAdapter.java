@@ -666,12 +666,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		public String[] params = new String[0];
 
+		@Override
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
 			return (Arrays.equals(this.paths, other.paths) && Arrays.equals(this.methods, other.methods) &&
 					Arrays.equals(this.params, other.params));
 		}
 
+		@Override
 		public int hashCode() {
 			return (Arrays.hashCode(this.paths) * 29 + Arrays.hashCode(this.methods) * 31 +
 					Arrays.hashCode(this.params));

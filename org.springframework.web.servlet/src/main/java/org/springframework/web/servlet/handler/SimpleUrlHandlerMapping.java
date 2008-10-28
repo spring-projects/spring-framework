@@ -98,6 +98,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * Calls the {@link #registerHandlers} method in addition to the
 	 * superclass's initialization.
 	 */
+	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 		registerHandlers(this.urlMap);

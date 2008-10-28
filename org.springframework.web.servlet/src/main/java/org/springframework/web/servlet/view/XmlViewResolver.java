@@ -84,6 +84,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	 * Pre-initialize the factory from the XML file.
 	 * Only effective if caching is enabled.
 	 */
+	@Override
 	protected void initApplicationContext() throws BeansException {
 		if (isCache()) {
 			initFactory();
@@ -95,10 +96,12 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	 * This implementation returns just the view name,
 	 * as XmlViewResolver doesn't support localized resolution.
 	 */
+	@Override
 	protected Object getCacheKey(String viewName, Locale locale) {
 		return viewName;
 	}
 
+	@Override
 	protected View loadView(String viewName, Locale locale) throws BeansException {
 		BeanFactory factory = initFactory();
 		try {

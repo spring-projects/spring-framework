@@ -84,6 +84,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	 * @see #extractHandlerMethodNameFromUrlPath
 	 * @see #postProcessHandlerMethodName
 	 */
+	@Override
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
 		String methodName = (String) this.methodNameCache.get(urlPath);
 		if (methodName == null) {

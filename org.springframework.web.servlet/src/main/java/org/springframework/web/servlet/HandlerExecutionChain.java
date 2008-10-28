@@ -116,6 +116,7 @@ public class HandlerExecutionChain {
 	/**
 	 * Delegates to the handler's <code>toString()</code>.
 	 */
+	@Override
 	public String toString() {
 		return String.valueOf(handler);
 	}

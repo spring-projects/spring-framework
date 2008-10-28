@@ -111,6 +111,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	 * @param fileItemFactory the Commons FileItemFactory to use
 	 * @return the new ServletFileUpload instance
 	 */
+	@Override
 	protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
 		return new ServletFileUpload(fileItemFactory);
 	}
@@ -138,6 +139,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
 			return new DefaultMultipartHttpServletRequest(request) {
+				@Override
 				protected void initializeMultipart() {
 					MultipartParsingResult parsingResult = parseRequest(request);
 					setMultipartFiles(parsingResult.getMultipartFiles());

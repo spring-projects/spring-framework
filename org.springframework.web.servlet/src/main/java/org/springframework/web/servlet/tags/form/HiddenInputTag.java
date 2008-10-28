@@ -39,6 +39,7 @@ public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 	 * @see #writeDefaultAttributes(TagWriter)
 	 * @see #getBoundValue()
 	 */
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);

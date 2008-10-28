@@ -106,6 +106,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * This implementation delegates to {@link #buildUrlsForHandler},
 	 * provided that {@link #isEligibleForMapping} returns <code>true</code>.
 	 */
+	@Override
 	protected String[] determineUrlsForHandler(String beanName) {
 		Class beanClass = getApplicationContext().getType(beanName);
 		if (isEligibleForMapping(beanName, beanClass)) {

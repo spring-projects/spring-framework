@@ -76,6 +76,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(super.toString());
 		sb.append("; URL [").append(getUrl()).append("]");

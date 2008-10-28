@@ -121,6 +121,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	}
 
 
+	@Override
 	protected boolean generatesDownloadContent() {
 		return true;
 	}
@@ -128,6 +129,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	/**
 	 * Renders the Excel view, given the specified model.
 	 */
+	@Override
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 

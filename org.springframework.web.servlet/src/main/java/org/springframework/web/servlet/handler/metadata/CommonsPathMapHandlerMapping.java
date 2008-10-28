@@ -55,6 +55,7 @@ import org.apache.commons.attributes.Attributes;
  * @deprecated as of Spring 2.5, in favor of annotation-based request mapping.
  * To be removed in Spring 3.0.
  */
+@Deprecated
 public class CommonsPathMapHandlerMapping extends AbstractPathMapHandlerMapping {
 	
 	/**
@@ -62,6 +63,7 @@ public class CommonsPathMapHandlerMapping extends AbstractPathMapHandlerMapping 
 	 * objects with the required PathMap attribute. Protected so that it can
 	 * be overridden during testing.
 	 */
+	@Override
 	protected Class[] getClassesWithPathMapAttributes() throws Exception {
 		AttributeIndex ai = new AttributeIndex(getClass().getClassLoader());
 		Collection classes = ai.getClasses(PathMap.class);
@@ -73,6 +75,7 @@ public class CommonsPathMapHandlerMapping extends AbstractPathMapHandlerMapping 
 	 * We know there's at least one, as the getClassNamesWithPathMapAttributes
 	 * method return this class name.
 	 */
+	@Override
 	protected PathMap[] getPathMapAttributes(Class handlerClass) {
 		Collection atts = Attributes.getAttributes(handlerClass, PathMap.class);
 		return (PathMap[]) atts.toArray(new PathMap[atts.size()]);

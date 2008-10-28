@@ -158,6 +158,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	 * @see org.springframework.web.util.JavaScriptUtils#javaScriptEscape(String)
 	 * @see #writeMessage(String)
 	 */
+	@Override
 	protected final int doStartTagInternal() throws JspException, IOException {
 		try {
 			// Resolve the unescaped message.

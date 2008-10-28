@@ -53,6 +53,7 @@ public class FreeMarkerViewResolver extends AbstractTemplateViewResolver {
 	 * Requires FreeMarkerView.
 	 * @see FreeMarkerView
 	 */
+	@Override
 	protected Class requiredViewClass() {
 		return FreeMarkerView.class;
 	}

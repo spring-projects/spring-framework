@@ -33,6 +33,7 @@ import org.springframework.web.bind.WebDataBinder;
  */
 public class CheckboxesTag extends AbstractMultiCheckedElementTag {
 
+	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		super.writeTagContent(tagWriter);
 
@@ -48,6 +49,7 @@ public class CheckboxesTag extends AbstractMultiCheckedElementTag {
 		return SKIP_BODY;
 	}
 
+	@Override
 	protected String getInputType() {
 		return "checkbox";
 	}

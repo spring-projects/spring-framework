@@ -79,6 +79,7 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 	}
 
 
+	@Override
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
 		String methodName = this.mappings.getProperty(urlPath);
 		if (methodName != null) {

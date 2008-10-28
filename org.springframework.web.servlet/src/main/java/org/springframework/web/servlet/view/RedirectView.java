@@ -189,6 +189,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @see #appendQueryProperties
 	 * @see #sendRedirect
 	 */
+	@Override
 	protected void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws IOException {
 

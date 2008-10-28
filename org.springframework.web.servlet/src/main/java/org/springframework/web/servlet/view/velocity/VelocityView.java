@@ -247,6 +247,7 @@ public class VelocityView extends AbstractTemplateView {
  	 * Invoked on startup. Looks for a single VelocityConfig bean to
  	 * find the relevant VelocityEngine for this factory.
  	 */
+	@Override
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
@@ -308,6 +309,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * Output is directed to the servlet response.
 	 * <p>This method can be overridden if custom behavior is needed.
 	 */
+	@Override
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -575,6 +577,7 @@ public class VelocityView extends AbstractTemplateView {
 			this.locale = locale;
 		}
 
+		@Override
 		public Locale getLocale() {
 			return this.locale;
 		}
@@ -594,6 +597,7 @@ public class VelocityView extends AbstractTemplateView {
 			this.locale = locale;
 		}
 
+		@Override
 		public Locale getLocale() {
 			return this.locale;
 		}

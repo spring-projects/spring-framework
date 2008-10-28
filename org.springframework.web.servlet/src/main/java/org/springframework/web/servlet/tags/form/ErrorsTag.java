@@ -106,6 +106,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * <p>Simply returns <code>null</code> because the '<code>name</code>' attribute
 	 * is not a validate attribute for the '<code>span</code>' element.
 	 */
+	@Override
 	protected String getName() throws JspException {
 		return null;
 	}
@@ -118,6 +119,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * @return the value for the HTML '<code>id</code>' attribute
 	 * @see #getPropertyPath()
 	 */
+	@Override
 	protected String autogenerateId() throws JspException {
 		String path = getPropertyPath();
 		if ("".equals(path)) {
@@ -132,6 +134,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * <p>Only renders output when there are errors for the configured {@link #setPath path}.
 	 * @return <code>true</code> only when there are errors for the configured {@link #setPath path}
 	 */
+	@Override
 	protected boolean shouldRender() throws JspException {
 		try {
 			return getBindStatus().isError();
@@ -142,6 +145,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		}
 	}
 
+	@Override
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag(getElement());
 		writeDefaultAttributes(tagWriter);
@@ -163,6 +167,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * <p>Only called if {@link #shouldRender()} returns <code>true</code>.
 	 * @see #removeAttributes()
 	 */
+	@Override
 	protected void exposeAttributes() throws JspException {
 		List errorMessages = new ArrayList();
 		errorMessages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
@@ -176,6 +181,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * {@link #MESSAGES_ATTRIBUTE this key} in the {@link PageContext#PAGE_SCOPE}.
 	 * @see #exposeAttributes()
 	 */
+	@Override
 	protected void removeAttributes() {
 		if (this.errorMessagesWereExposed) {
 			if (this.oldMessages != null) {

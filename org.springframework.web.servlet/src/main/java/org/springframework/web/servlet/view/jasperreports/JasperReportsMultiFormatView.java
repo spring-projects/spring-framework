@@ -168,6 +168,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 
+	@Override
 	protected boolean generatesDownloadContent() {
 		return true;
 	}
@@ -177,6 +178,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * key to lookup the appropriate view class from the mappings. The rendering of the
 	 * report is then delegated to an instance of that view class.
 	 */
+	@Override
 	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
 

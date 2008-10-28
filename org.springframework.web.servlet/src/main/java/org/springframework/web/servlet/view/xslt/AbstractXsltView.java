@@ -83,6 +83,7 @@ import org.springframework.web.util.NestedServletException;
  * @deprecated since Spring 2.5; superseded by {@link XsltView} and its
  * more flexible {@link XsltView#locateSource} mechanism
  */
+@Deprecated
 public abstract class AbstractXsltView extends AbstractView {
 
 	/** The default content type if no stylesheet specified */
@@ -129,6 +130,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 
+	@Override
 	public void setContentType(String contentType) {
 		super.setContentType(contentType);
 		this.customContentTypeSet = true;
@@ -259,6 +261,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Here we load our template, as we need the
 	 * {@link org.springframework.context.ApplicationContext} to do it.
 	 */
+	@Override
 	protected final void initApplicationContext() throws ApplicationContextException {
 		this.transformerFactory = newTransformerFactory(this.transformerFactoryClass);
 		this.transformerFactory.setErrorListener(this.errorListener);
@@ -315,6 +318,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 
+	@Override
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -437,6 +441,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @deprecated as of Spring 2.0.4, in favor of the
 	 * {@link #getParameters(HttpServletRequest)} variant
 	 */
+	@Deprecated
 	protected Map getParameters() {
 		return null;
 	}

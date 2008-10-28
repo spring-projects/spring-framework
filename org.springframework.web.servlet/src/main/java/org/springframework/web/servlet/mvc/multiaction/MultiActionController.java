@@ -403,6 +403,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see #invokeNamedMethod
 	 * @see #handleNoSuchRequestHandlingMethod
 	 */
+	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		try {
@@ -601,6 +602,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @deprecated as of Spring 2.0:
 	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder)</code> instead
 	 */
+	@Deprecated
 	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder) throws Exception {
 	}
 

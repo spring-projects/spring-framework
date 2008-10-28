@@ -49,6 +49,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class TilesView extends AbstractUrlBasedView {
 
+	@Override
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

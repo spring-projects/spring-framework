@@ -90,6 +90,7 @@ public class TransformTag extends HtmlEscapingAwareTag {
 	}
 
 
+	@Override
 	protected final int doStartTagInternal() throws JspException {
 		Object resolvedValue = this.value;
 		if (this.value instanceof String) {

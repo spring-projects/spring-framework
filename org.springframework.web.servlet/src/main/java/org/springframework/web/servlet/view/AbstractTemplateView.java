@@ -120,6 +120,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	}
 
 
+	@Override
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 

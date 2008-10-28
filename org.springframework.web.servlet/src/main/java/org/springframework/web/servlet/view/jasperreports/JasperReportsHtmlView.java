@@ -33,10 +33,12 @@ public class JasperReportsHtmlView extends AbstractJasperReportsSingleFormatView
 		setContentType("text/html");
 	}
 
+	@Override
 	protected JRExporter createExporter() {
 		return new JRHtmlExporter();
 	}
 
+	@Override
 	protected boolean useWriter() {
 		return true;
 	}

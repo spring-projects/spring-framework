@@ -44,6 +44,7 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 	}
 
 
+	@Override
 	public final boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException, IOException {
 

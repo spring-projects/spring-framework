@@ -319,6 +319,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 
+	@Override
 	protected void initApplicationContext() {
 		if (this.validators != null) {
 			for (int i = 0; i < this.validators.length; i++) {
@@ -567,6 +568,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @deprecated as of Spring 2.0.4, in favor of the
 	 * {@link #suppressValidation(HttpServletRequest, Object)} variant
 	 */
+	@Deprecated
 	protected boolean suppressValidation(HttpServletRequest request) {
 		return false;
 	}

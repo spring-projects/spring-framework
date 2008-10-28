@@ -222,6 +222,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Calls page-specific onBindAndValidate method.
 	 */
+	@Override
 	protected final void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 	    throws Exception {
 
@@ -253,6 +254,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #isFinishRequest(javax.servlet.http.HttpServletRequest)
 	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
 	 */
+	@Override
 	protected boolean isFormSubmission(HttpServletRequest request) {
 		return super.isFormSubmission(request) || isFinishRequest(request) || isCancelRequest(request);
 	}
@@ -260,6 +262,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Calls page-specific referenceData method.
 	 */
+	@Override
 	protected final Map referenceData(HttpServletRequest request, Object command, Errors errors)
 	    throws Exception {
 
@@ -307,6 +310,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>This can be overridden in subclasses, e.g. to prepare wizard-specific
 	 * error views in case of an Exception.
 	 */
+	@Override
 	protected ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors)
 	    throws Exception {
@@ -451,6 +455,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #showNewForm
 	 * @see #setBindOnNewForm
 	 */
+	@Override
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
@@ -461,6 +466,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Apply wizard workflow: finish, cancel, page change.
 	 */
+	@Override
 	protected final ModelAndView processFormSubmission(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {

@@ -45,6 +45,7 @@ public class ThemeTag extends MessageTag {
 	/**
 	 * Use the theme MessageSource for theme message resolution.
 	 */
+	@Override
 	protected MessageSource getMessageSource() {
 		return getRequestContext().getTheme().getMessageSource();
 	}
@@ -52,6 +53,7 @@ public class ThemeTag extends MessageTag {
 	/**
 	 * Return exception message that indicates the current theme.
 	 */
+	@Override
 	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
 		return "Theme '" + getRequestContext().getTheme().getName() + "': " + ex.getMessage();
 	}
