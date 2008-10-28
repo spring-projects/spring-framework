@@ -13,14 +13,14 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)";resolution:=optional,
  org.apache.velocity.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  org.quartz.*;version="[1.6.0, 2.0.0)";resolution:=optional,
- org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.context.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.jdbc.datasource.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.jndi.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.scheduling.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.transaction.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.util.*;version="[2.5.5.A, 2.5.5.A]"
+ org.springframework.beans.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.context.*;version="[3.0.0, 3.0.1)",
+ org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.jdbc.datasource.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.jndi.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.scheduling.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.transaction.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.util.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
  javax.naming.*,
  javax.sql.*

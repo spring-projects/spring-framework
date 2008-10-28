@@ -20,13 +20,13 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
  org.apache.taglibs.*;version="[1.1.2, 2.0.0)";resolution:=optional,
- org.springframework.aop.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.context.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.remoting.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.ui.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.util.*;version="[2.5.5.A, 2.5.5.A]"
+ org.springframework.aop.*;version="[3.0.0, 3.0.1)",
+ org.springframework.beans.*;version="[3.0.0, 3.0.1)",
+ org.springframework.context.*;version="[3.0.0, 3.0.1)",
+ org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.remoting.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.ui.*;version="[3.0.0, 3.0.1)",
+ org.springframework.util.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
  com.sun.net.*,
  javax.jws.*,

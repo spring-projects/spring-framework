@@ -7,14 +7,14 @@ Import-Template:
  javax.servlet.*;version="[2.4.0, 3.0.0)",
  org.apache.commons.fileupload.*;version="[1.2.0, 2.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
- org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.context.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.stereotype;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.ui.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.util.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.validation.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.web.*;version="[2.5.5.A, 2.5.5.A]"
+ org.springframework.beans.*;version="[3.0.0, 3.0.1)",
+ org.springframework.context.*;version="[3.0.0, 3.0.1)",
+ org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.stereotype;version="[3.0.0, 3.0.1)",
+ org.springframework.ui.*;version="[3.0.0, 3.0.1)",
+ org.springframework.util.*;version="[3.0.0, 3.0.1)",
+ org.springframework.validation.*;version="[3.0.0, 3.0.1)",
+ org.springframework.web.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
  org.xml.sax.*
 Ignored-Existing-Headers: 
