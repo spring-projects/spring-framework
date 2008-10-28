@@ -87,6 +87,7 @@ public abstract class AbstractColumnMaxValueIncrementer extends AbstractDataFiel
 		return this.cacheSize;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.columnName == null) {

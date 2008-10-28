@@ -391,10 +391,12 @@ public abstract class DataSourceUtils {
 			this.order = getConnectionSynchronizationOrder(dataSource);
 		}
 
+		@Override
 		public int getOrder() {
 			return this.order;
 		}
 
+		@Override
 		public void suspend() {
 			if (this.holderActive) {
 				TransactionSynchronizationManager.unbindResource(this.dataSource);
@@ -409,12 +411,14 @@ public abstract class DataSourceUtils {
 			}
 		}
 
+		@Override
 		public void resume() {
 			if (this.holderActive) {
 				TransactionSynchronizationManager.bindResource(this.dataSource, this.connectionHolder);
 			}
 		}
 
+		@Override
 		public void beforeCompletion() {
 			// Release Connection early if the holder is not open anymore
 			// (that is, not used by another resource like a Hibernate Session
@@ -430,6 +434,7 @@ public abstract class DataSourceUtils {
 			}
 		}
 
+		@Override
 		public void afterCompletion(int status) {
 			// If we haven't closed the Connection in beforeCompletion,
 			// close it now. The holder might have been used for other

@@ -43,6 +43,7 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	 * @deprecated since Spring 2.5, in favor of throwing an
 	 * IllegalStateException in case of the driver not being found
 	 */
+	@Deprecated
 	public CannotGetJdbcConnectionException(String msg, ClassNotFoundException ex) {
 		super(msg, ex);
 	}

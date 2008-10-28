@@ -55,11 +55,13 @@ public class SpringLobCreatorSynchronization extends TransactionSynchronizationA
 		this.lobCreator = lobCreator;
 	}
 
+	@Override
 	public int getOrder() {
 		return LOB_CREATOR_SYNCHRONIZATION_ORDER;
 	}
 
 
+	@Override
 	public void beforeCompletion() {
 		// Close the LobCreator early if possible, to avoid issues with strict JTA
 		// implementations that issue warnings when doing JDBC operations after
@@ -68,6 +70,7 @@ public class SpringLobCreatorSynchronization extends TransactionSynchronizationA
 		this.lobCreator.close();
 	}
 
+	@Override
 	public void afterCompletion(int status) {
 		if (!this.beforeCompletionCalled) {
 			// beforeCompletion not called before (probably because of flushing on commit

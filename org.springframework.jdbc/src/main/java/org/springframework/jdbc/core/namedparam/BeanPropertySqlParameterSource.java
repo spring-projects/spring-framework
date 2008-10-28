@@ -91,6 +91,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	 * Derives a default SQL type from the corresponding property type.
 	 * @see org.springframework.jdbc.core.StatementCreatorUtils#javaTypeToSqlParameterType
 	 */
+	@Override
 	public int getSqlType(String paramName) {
 		int sqlType = super.getSqlType(paramName);
 		if (sqlType != TYPE_UNKNOWN) {

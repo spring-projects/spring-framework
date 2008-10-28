@@ -49,6 +49,7 @@ public class HsqlSequenceMaxValueIncrementer extends AbstractSequenceMaxValueInc
 	}
 
 
+	@Override
 	protected String getSequenceQuery() {
 		return "call next value for " + getIncrementerName();
 	}

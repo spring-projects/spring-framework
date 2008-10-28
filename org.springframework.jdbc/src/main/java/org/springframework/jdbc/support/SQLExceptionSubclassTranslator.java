@@ -61,6 +61,7 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 		setFallbackTranslator(new SQLStateSQLExceptionTranslator());
 	}
 
+	@Override
 	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
 		if (ex instanceof SQLTransientException) {
 			if (ex instanceof SQLTransactionRollbackException) {

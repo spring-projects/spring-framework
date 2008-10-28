@@ -73,6 +73,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Return <code>true</code>, as WebSphere returns wrapped Statements.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
 	}
@@ -80,6 +81,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Return <code>true</code>, as WebSphere returns wrapped PreparedStatements.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return true;
 	}
@@ -87,6 +89,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Return <code>true</code>, as WebSphere returns wrapped CallableStatements.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return true;
 	}
@@ -94,6 +97,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via WebSphere's <code>getNativeConnection</code> method.
 	 */
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.webSphere5ConnectionClass.isAssignableFrom(con.getClass())) {
 			return (Connection) ReflectionUtils.invokeJdbcMethod(

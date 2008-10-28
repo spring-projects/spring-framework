@@ -85,6 +85,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 	}
 
 
+	@Override
 	protected synchronized long getNextKey() throws DataAccessException {
 		if (this.maxId == this.nextId) {
 			/*

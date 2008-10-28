@@ -46,6 +46,7 @@ public class XAPoolNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * Return <code>true</code>, as CoreStatement does not allow access to the
 	 * underlying Connection.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
 	}
@@ -54,10 +55,12 @@ public class XAPoolNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * Return <code>true</code>, as CoreCallableStatement does not allow access to the
 	 * underlying Connection.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return true;
 	}
 
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (con instanceof CoreConnection) {
 			return ((CoreConnection) con).con;
@@ -65,6 +68,7 @@ public class XAPoolNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		return con;
 	}
 
+	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		if (ps instanceof CorePreparedStatement) {
 			return ((CorePreparedStatement) ps).ps;

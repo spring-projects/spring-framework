@@ -56,6 +56,7 @@ public class SimpleConnectionHandle implements ConnectionHandle {
 	}
 
 
+	@Override
 	public String toString() {
 		return "SimpleConnectionHandle: " + this.connection;
 	}

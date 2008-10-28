@@ -46,6 +46,7 @@ public class DB2SequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncr
 	}
 
 
+	@Override
 	protected String getSequenceQuery() {
 		return "values nextval for " + getIncrementerName();
 	}

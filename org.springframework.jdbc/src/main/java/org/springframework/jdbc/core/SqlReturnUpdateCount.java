@@ -26,6 +26,7 @@ public class SqlReturnUpdateCount extends SqlParameter {
 	 * before execution even if they are <code>null</code>.
 	 * <p>This implementation always returns <code>false</code>.
 	 */
+	@Override
 	public boolean isInputValueProvided() {
 		return false;
 	}
@@ -35,6 +36,7 @@ public class SqlReturnUpdateCount extends SqlParameter {
 	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
 	 * <p>This implementation always returns <code>true</code>.
 	 */
+	@Override
 	public boolean isResultsParameter() {
 		return true;
 	}

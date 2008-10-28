@@ -124,6 +124,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * <p>Delegates to {@link #doGetConnection(String, String)} with the
 	 * determined credentials as parameters.
 	 */
+	@Override
 	public Connection getConnection() throws SQLException {
 		JdbcUserCredentials threadCredentials = (JdbcUserCredentials) this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -138,6 +139,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * Simply delegates to {@link #doGetConnection(String, String)},
 	 * keeping the given user credentials as-is.
 	 */
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return doGetConnection(username, password);
 	}
@@ -178,6 +180,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 			this.password = password;
 		}
 
+		@Override
 		public String toString() {
 			return "JdbcUserCredentials[username='" + this.username + "',password='" + this.password + "']";
 		}

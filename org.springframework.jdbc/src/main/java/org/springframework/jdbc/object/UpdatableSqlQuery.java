@@ -58,6 +58,7 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 	 * Implementation of the superclass template method. This invokes the subclass's
 	 * implementation of the <code>updateRow()</code> method.
 	 */
+	@Override
 	protected RowMapper newRowMapper(Object[] parameters, Map context) {
 		return new RowMapperImpl(context);
 	}

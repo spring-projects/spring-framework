@@ -124,6 +124,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * based on our declared parameters.
 	 * @see RdbmsOperation#compileInternal()
 	 */
+	@Override
 	protected final void compileInternal() {
 		if (isSqlReadyForUse()) {
 			this.callString = getSql();

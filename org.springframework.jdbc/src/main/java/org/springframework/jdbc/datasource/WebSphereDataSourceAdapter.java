@@ -113,6 +113,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * Checks that the specified 'targetDataSource' actually is
 	 * a WebSphere WSDataSource.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
@@ -129,6 +130,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @see #createConnectionSpec
 	 * @see com.ibm.websphere.rsadapter.WSDataSource#getConnection(com.ibm.websphere.rsadapter.JDBCConnectionSpec)
 	 */
+	@Override
 	protected Connection doGetConnection(String username, String password) throws SQLException {
 		// Create JDBCConnectionSpec using current isolation level value and read-only flag.
 		Object connSpec = createConnectionSpec(

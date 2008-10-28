@@ -75,6 +75,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * StoredProcedure parameter Maps are by default allowed to contain
 	 * additional entries that are not actually used as parameters.
 	 */
+	@Override
 	protected boolean allowsUnusedParameters() {
 		return true;
 	}
@@ -90,6 +91,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Names are purely used to help mapping.
 	 * @param param parameter object
 	 */
+	@Override
 	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {
 		if (param.getName() == null) {
 			throw new InvalidDataAccessApiUsageException("Parameters to stored procedures must have names as well as types");

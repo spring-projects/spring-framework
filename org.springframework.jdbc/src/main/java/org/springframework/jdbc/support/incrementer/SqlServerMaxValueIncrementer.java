@@ -73,6 +73,7 @@ public class SqlServerMaxValueIncrementer extends AbstractColumnMaxValueIncremen
 	}
 
 
+	@Override
 	protected synchronized long getNextKey() throws DataAccessException {
 		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
 			/*

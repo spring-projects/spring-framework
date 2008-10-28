@@ -17,6 +17,7 @@ public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider 
 	}
 
 
+	@Override
 	public boolean isGetGeneratedKeysSimulated() {
 		if (getDatabaseVersion().compareTo("8.2.0") >= 0) {
 			return true;
@@ -28,6 +29,7 @@ public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider 
 	}
 
 
+	@Override
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return "RETURNING " + keyColumnName;
 	}

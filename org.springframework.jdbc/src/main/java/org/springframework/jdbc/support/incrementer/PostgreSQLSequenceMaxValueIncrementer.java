@@ -44,6 +44,7 @@ public class PostgreSQLSequenceMaxValueIncrementer extends AbstractSequenceMaxVa
 	}
 
 
+	@Override
 	protected String getSequenceQuery() {
 		return "select nextval('" + getIncrementerName() + "')";
 	}

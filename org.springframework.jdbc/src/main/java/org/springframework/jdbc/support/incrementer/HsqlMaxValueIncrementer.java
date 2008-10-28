@@ -84,6 +84,7 @@ public class HsqlMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 	}
 
 
+	@Override
 	protected synchronized long getNextKey() throws DataAccessException {
 		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
 			/*

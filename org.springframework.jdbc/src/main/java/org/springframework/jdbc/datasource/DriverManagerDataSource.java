@@ -119,6 +119,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	 * If you need to register a new driver, consider using
 	 * {@link SimpleDriverDataSource} instead.
 	 */
+	@Deprecated
 	public DriverManagerDataSource(String driverClassName, String url, String username, String password) {
 		setDriverClassName(driverClassName);
 		setUrl(url);
@@ -157,6 +158,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	}
 
 
+	@Override
 	protected Connection getConnectionFromDriver(Properties props) throws SQLException {
 		String url = getUrl();
 		if (logger.isDebugEnabled()) {

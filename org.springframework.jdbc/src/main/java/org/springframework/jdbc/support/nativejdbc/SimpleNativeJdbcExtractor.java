@@ -94,6 +94,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		this.nativeConnectionNecessaryForNativeStatements = nativeConnectionNecessaryForNativeStatements;
 	}
 
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return this.nativeConnectionNecessaryForNativeStatements;
 	}
@@ -114,6 +115,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		this.nativeConnectionNecessaryForNativePreparedStatements = nativeConnectionNecessary;
 	}
 
+	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return this.nativeConnectionNecessaryForNativePreparedStatements;
 	}
@@ -134,6 +136,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		this.nativeConnectionNecessaryForNativeCallableStatements = nativeConnectionNecessary;
 	}
 
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return this.nativeConnectionNecessaryForNativeCallableStatements;
 	}

@@ -36,6 +36,7 @@ public class SimpleJdbcDaoSupport extends JdbcDaoSupport {
 	/**
 	 * Create a SimpleJdbcTemplate based on the configured JdbcTemplate.
 	 */
+	@Override
 	protected void initTemplateConfig() {
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(getJdbcTemplate());
 	}

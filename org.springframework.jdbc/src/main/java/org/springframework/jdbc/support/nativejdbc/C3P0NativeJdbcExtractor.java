@@ -71,14 +71,17 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
 	}
 
+	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return true;
 	}
 
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return true;
 	}
@@ -89,6 +92,7 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * raw Connection (which is otherwise not directly supported by C3P0).
 	 * @see #getRawConnection
 	 */
+	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (con instanceof C3P0ProxyConnection) {
 			C3P0ProxyConnection cpCon = (C3P0ProxyConnection) con;

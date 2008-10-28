@@ -137,6 +137,7 @@ public class ParsedSql {
 	/**
 	 * Exposes the original SQL String.
 	 */
+	@Override
 	public String toString() {
 		return this.originalSql;
 	}

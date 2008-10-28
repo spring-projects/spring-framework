@@ -73,6 +73,7 @@ public class SybaseMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 	}
 
 
+	@Override
 	protected synchronized long getNextKey() throws DataAccessException {
 		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
 			/*

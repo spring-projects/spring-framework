@@ -51,6 +51,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * Overridden method to configure the PreparedStatementCreatorFactory
 	 * based on our declared parameters.
 	 */
+	@Override
 	protected final void compileInternal() {
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
