@@ -59,6 +59,7 @@ public class BlobSerializableTypeHandler extends AbstractLobTypeHandler {
 		super(lobHandler);
 	}
 
+	@Override
 	protected void setParameterInternal(
 			PreparedStatement ps, int index, Object value, String jdbcType, LobCreator lobCreator)
 			throws SQLException, IOException {
@@ -80,6 +81,7 @@ public class BlobSerializableTypeHandler extends AbstractLobTypeHandler {
 		}
 	}
 
+	@Override
 	protected Object getResultInternal(ResultSet rs, int index, LobHandler lobHandler)
 			throws SQLException, IOException {
 

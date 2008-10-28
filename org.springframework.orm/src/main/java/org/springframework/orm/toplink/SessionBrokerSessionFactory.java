@@ -66,6 +66,7 @@ public class SessionBrokerSessionFactory extends AbstractSessionFactory {
 	 * @see #createClientSession()
 	 * @see #getMasterSession()
 	 */
+	@Override
 	public Session createSession() throws TopLinkException {
 		try {
 			return createClientSession();
@@ -80,6 +81,7 @@ public class SessionBrokerSessionFactory extends AbstractSessionFactory {
 	/**
 	 * Return this factory's SessionBroker as-is.
 	 */
+	@Override
 	protected Session getMasterSession() {
 		return this.sessionBroker;
 	}
@@ -88,6 +90,7 @@ public class SessionBrokerSessionFactory extends AbstractSessionFactory {
 	 * Create a plain client SessionBroker for this factory's ServerSession.
 	 * @see oracle.toplink.sessionbroker.SessionBroker#acquireClientSessionBroker()
 	 */
+	@Override
 	protected Session createClientSession() throws TopLinkException {
 		return this.sessionBroker.acquireClientSessionBroker();
 	}

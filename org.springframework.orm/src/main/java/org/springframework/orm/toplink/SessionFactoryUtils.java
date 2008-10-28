@@ -223,10 +223,12 @@ public abstract class SessionFactoryUtils {
 			super(sessionHolder, sessionFactory);
 		}
 
+		@Override
 		protected boolean shouldReleaseBeforeCompletion() {
 			return false;
 		}
 
+		@Override
 		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
 			releaseSession(((SessionHolder) resourceHolder).getSession(), (SessionFactory) resourceKey);
 		}

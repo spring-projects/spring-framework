@@ -101,6 +101,7 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 	}
 
 
+	@Override
 	public void log(SessionLogEntry entry) {
 		Log logger = LogFactory.getLog(getCategory(entry));
 		switch (entry.getLevel()) {

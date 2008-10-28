@@ -381,6 +381,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @deprecated in favor of {@link #makePersistent(Object)}.
 	 * To be removed in Spring 3.0.
 	 */
+	@Deprecated
 	public Object attachCopy(Object detachedEntity) {
 		return makePersistent(detachedEntity);
 	}
@@ -389,6 +390,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @deprecated in favor of {@link #makePersistentAll(java.util.Collection)}.
 	 * To be removed in Spring 3.0.
 	 */
+	@Deprecated
 	public Collection attachCopyAll(Collection detachedEntities) {
 		return makePersistentAll(detachedEntities);
 	}

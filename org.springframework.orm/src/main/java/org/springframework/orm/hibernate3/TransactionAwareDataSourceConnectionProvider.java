@@ -35,6 +35,7 @@ public class TransactionAwareDataSourceConnectionProvider extends LocalDataSourc
 	 * Return a TransactionAwareDataSourceProxy for the given DataSource,
 	 * provided that it isn't a TransactionAwareDataSourceProxy already.
 	 */
+	@Override
 	protected DataSource getDataSourceToUse(DataSource originalDataSource) {
 		if (originalDataSource instanceof TransactionAwareDataSourceProxy) {
 			return originalDataSource;
@@ -47,6 +48,7 @@ public class TransactionAwareDataSourceConnectionProvider extends LocalDataSourc
 	 * to receive the same Connection within a transaction, as we are
 	 * exposing a TransactionAwareDataSourceProxy.
 	 */
+	@Override
 	public boolean supportsAggressiveRelease() {
 		return true;
 	}

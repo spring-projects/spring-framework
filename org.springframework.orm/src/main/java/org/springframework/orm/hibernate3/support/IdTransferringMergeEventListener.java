@@ -54,6 +54,7 @@ public class IdTransferringMergeEventListener extends DefaultMergeEventListener 
 	/**
 	 * Hibernate 3.1 implementation of ID transferral.
 	 */
+	@Override
 	protected void entityIsTransient(MergeEvent event, Map copyCache) {
 		super.entityIsTransient(event, copyCache);
 		SessionImplementor session = event.getSession();

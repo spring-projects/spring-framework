@@ -512,6 +512,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 
+	@Override
 	protected SessionFactory buildSessionFactory() throws Exception {
 		// Create Configuration instance.
 		Configuration config = newConfiguration();
@@ -831,6 +832,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see #setSchemaUpdate
 	 * @see #updateDatabaseSchema()
 	 */
+	@Override
 	protected void afterSessionFactoryCreation() throws Exception {
 		if (this.schemaUpdate) {
 			DataSource dataSource = getDataSource();
@@ -854,6 +856,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	/**
 	 * Allows for schema export on shutdown.
 	 */
+	@Override
 	public void destroy() throws HibernateException {
 		DataSource dataSource = getDataSource();
 		if (dataSource != null) {

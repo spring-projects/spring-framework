@@ -103,6 +103,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 	  return this.sqlMapClientTemplate;
 	}
 
+	@Override
 	protected final void checkDaoConfig() {
 		if (!this.externalTemplate) {
 			this.sqlMapClientTemplate.afterPropertiesSet();

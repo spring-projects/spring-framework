@@ -103,6 +103,7 @@ public abstract class TopLinkDaoSupport extends DaoSupport {
 		return topLinkTemplate;
 	}
 
+	@Override
 	protected final void checkDaoConfig() {
 		if (this.topLinkTemplate == null) {
 			throw new IllegalArgumentException("sessionFactory or topLinkTemplate is required");

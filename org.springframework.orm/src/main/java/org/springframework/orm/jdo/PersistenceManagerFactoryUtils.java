@@ -308,10 +308,12 @@ public abstract class PersistenceManagerFactoryUtils {
 			return PERSISTENCE_MANAGER_SYNCHRONIZATION_ORDER;
 		}
 
+		@Override
 		protected boolean shouldUnbindAtCompletion() {
 			return this.newPersistenceManager;
 		}
 
+		@Override
 		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
 			releasePersistenceManager(((PersistenceManagerHolder) resourceHolder).getPersistenceManager(),
 					(PersistenceManagerFactory) resourceKey);

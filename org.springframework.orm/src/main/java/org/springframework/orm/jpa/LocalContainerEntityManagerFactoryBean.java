@@ -260,10 +260,12 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 
+	@Override
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return this.persistenceUnitInfo;
 	}
 
+	@Override
 	public String getPersistenceUnitName() {
 		if (this.persistenceUnitInfo != null) {
 			return this.persistenceUnitInfo.getPersistenceUnitName();
@@ -271,6 +273,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		return super.getPersistenceUnitName();
 	}
 
+	@Override
 	public DataSource getDataSource() {
 		if (this.persistenceUnitInfo != null) {
 			return this.persistenceUnitInfo.getNonJtaDataSource();

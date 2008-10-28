@@ -54,6 +54,7 @@ public class ServerSessionFactory extends AbstractSessionFactory {
 	/**
 	 * Return this factory's ServerSession as-is.
 	 */
+	@Override
 	protected Session getMasterSession() {
 		return this.serverSession;
 	}
@@ -62,6 +63,7 @@ public class ServerSessionFactory extends AbstractSessionFactory {
 	 * Create a plain ClientSession for this factory's ServerSession.
 	 * @see oracle.toplink.threetier.ServerSession#acquireClientSession()
 	 */
+	@Override
 	protected Session createClientSession() throws TopLinkException {
 		return this.serverSession.acquireClientSession();
 	}

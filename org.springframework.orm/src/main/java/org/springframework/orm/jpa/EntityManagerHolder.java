@@ -69,6 +69,7 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		return this.savepointManager;
 	}
 
+	@Override
 	public void clear() {
 		super.clear();
 		this.transactionActive = false;

@@ -201,6 +201,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("PersistenceUnitInfo: name '");

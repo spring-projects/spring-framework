@@ -53,10 +53,12 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return this.persistenceProvider;
 	}
 
+	@Override
 	public String getPersistenceProviderRootPackage() {
 		return "oracle.toplink.essentials";
 	}
 
+	@Override
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
@@ -103,10 +105,12 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return oracle.toplink.essentials.ejb.cmp3.EntityManager.class;
 	}

@@ -383,6 +383,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @deprecated as of Spring 2.5, in favor of {@link #executeWithNativeSession}
 	 */
+	@Deprecated
 	public Object execute(HibernateCallback action, boolean enforceNativeSession) throws DataAccessException {
 		return doExecute(action, false, enforceNativeSession);
 	}

@@ -274,6 +274,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		return getEntityManagerFactory();
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		JpaTransactionObject txObject = new JpaTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
@@ -297,10 +298,12 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		return txObject;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		return ((JpaTransactionObject) transaction).hasTransaction();
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
@@ -415,6 +418,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 		txObject.setEntityManagerHolder(null, false);
@@ -428,6 +432,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		return new SuspendedResourcesHolder(entityManagerHolder, connectionHolder);
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(
@@ -441,10 +446,12 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * This implementation returns "true": a JPA commit will properly handle
 	 * transactions that have been marked rollback-only at a global level.
 	 */
+	@Override
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
 		return true;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -470,6 +477,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -494,6 +502,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -503,6 +512,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		txObject.setRollbackOnly();
 	}
 
+	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
@@ -598,14 +608,17 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			return tx.getRollbackOnly();
 		}
 
+		@Override
 		public Object createSavepoint() throws TransactionException {
 			return getSavepointManager().createSavepoint();
 		}
 
+		@Override
 		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 			getSavepointManager().rollbackToSavepoint(savepoint);
 		}
 
+		@Override
 		public void releaseSavepoint(Object savepoint) throws TransactionException {
 			getSavepointManager().releaseSavepoint(savepoint);
 		}

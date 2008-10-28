@@ -445,6 +445,7 @@ public interface HibernateOperations {
 	 * @deprecated as of Spring 2.5, in favor of individual
 	 * <code>saveOrUpdate</code> or <code>merge</code> usage
 	 */
+	@Deprecated
 	void saveOrUpdateAll(Collection entities) throws DataAccessException;
 
 	/**

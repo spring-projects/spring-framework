@@ -70,6 +70,7 @@ public class ClobStringType extends AbstractLobType {
 		return String.class;
 	}
 
+	@Override
 	protected Object nullSafeGetInternal(
 			ResultSet rs, String[] names, Object owner, LobHandler lobHandler)
 			throws SQLException {
@@ -77,6 +78,7 @@ public class ClobStringType extends AbstractLobType {
 		return lobHandler.getClobAsString(rs, names[0]);
 	}
 
+	@Override
 	protected void nullSafeSetInternal(
 			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException {

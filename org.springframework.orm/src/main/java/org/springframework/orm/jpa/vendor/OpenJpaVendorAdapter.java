@@ -53,10 +53,12 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return this.persistenceProvider;
 	}
 
+	@Override
 	public String getPersistenceProviderRootPackage() {
 		return "org.apache.openjpa";
 	}
 
+	@Override
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
@@ -102,14 +104,17 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 
+	@Override
 	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
 		return OpenJPAEntityManagerFactorySPI.class;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return OpenJPAEntityManagerSPI.class;
 	}

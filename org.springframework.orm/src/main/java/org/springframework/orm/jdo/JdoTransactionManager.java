@@ -258,6 +258,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		return getPersistenceManagerFactory();
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		JdoTransactionObject txObject = new JdoTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
@@ -281,10 +282,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		return txObject;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		return ((JdoTransactionObject) transaction).hasTransaction();
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 
@@ -382,6 +385,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 		txObject.setPersistenceManagerHolder(null, false);
@@ -395,6 +399,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		return new SuspendedResourcesHolder(persistenceManagerHolder, connectionHolder);
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(
@@ -408,10 +413,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	 * This implementation returns "true": a JDO2 commit will properly handle
 	 * transactions that have been marked rollback-only at a global level.
 	 */
+	@Override
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
 		return true;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -428,6 +435,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -445,6 +453,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -454,6 +463,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		txObject.setRollbackOnly();
 	}
 
+	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 

@@ -84,10 +84,12 @@ public class BlobSerializableType extends AbstractLobType {
 		return Serializable.class;
 	}
 
+	@Override
 	public boolean isMutable() {
 		return true;
 	}
 
+	@Override
 	public Object deepCopy(Object value) throws HibernateException {
 		try {
 			// Write to new byte array to clone.
@@ -118,6 +120,7 @@ public class BlobSerializableType extends AbstractLobType {
 		}
 	}
 
+	@Override
 	protected Object nullSafeGetInternal(
 			ResultSet rs, String[] names, Object owner, LobHandler lobHandler)
 			throws SQLException, IOException, HibernateException {
@@ -140,6 +143,7 @@ public class BlobSerializableType extends AbstractLobType {
 		}
 	}
 
+	@Override
 	protected void nullSafeSetInternal(
 			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException, IOException {

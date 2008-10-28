@@ -229,6 +229,7 @@ public interface JdoOperations {
 	 * @deprecated in favor of {@link #makePersistent(Object)}.
 	 * To be removed in Spring 3.0.
 	 */
+	@Deprecated
 	Object attachCopy(Object detachedEntity);
 
 	/**
@@ -243,6 +244,7 @@ public interface JdoOperations {
 	 * @deprecated in favor of {@link #makePersistentAll(java.util.Collection)}.
 	 * To be removed in Spring 3.0.
 	 */
+	@Deprecated
 	Collection attachCopyAll(Collection detachedEntities);
 
 	/**

@@ -64,10 +64,12 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return this.persistenceProvider;
 	}
 
+	@Override
 	public String getPersistenceProviderRootPackage() {
 		return "org.hibernate";
 	}
 
+	@Override
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
@@ -112,14 +114,17 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 
+	@Override
 	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
 		return HibernateEntityManagerFactory.class;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return HibernateEntityManager.class;
 	}
