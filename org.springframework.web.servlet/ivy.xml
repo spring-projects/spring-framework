@@ -31,7 +31,7 @@
 		<dependency org="com.lowagie.text" name="com.springsource.com.lowagie.text" rev="2.0.8" conf="optional, itext->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12" conf="optional, freemarker->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.4.0" conf="provided->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.1.0" conf="provided->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.0.0" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2" conf="provided->compile"/>
 		<dependency org="net.sourceforge.jexcelapi" name="com.springsource.jxl" rev="2.6.6" conf="optional, jexcelapi->compile"/>
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5" conf="optional, jasper-reports->compile"/>
