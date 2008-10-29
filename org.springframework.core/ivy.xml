@@ -30,6 +30,7 @@
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="optional->compile" />
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="optional->compile" />
 		<!-- test dependencies -->
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.4.0" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
 
 	</dependencies>
