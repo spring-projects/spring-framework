@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="useCodeAsDefaultMessage">
+			<value>${useCodeAsDefaultMessage}</value>
+		</property>
+		<property name="basenames">
+			<list>
+				<value>org/springframework/web/context/WEB-INF/${message-file}</value>
+				<value>org/springframework/web/context/WEB-INF/more-context-messages</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="messageSourceString" factory-bean="messageSource" factory-method="toString"/>
+
+	<bean id="currentTimeMillis" class="javax.management.ObjectName" factory-method="getInstance">
+		<constructor-arg value="${objectName}"/>
+	</bean>
+
+</beans>

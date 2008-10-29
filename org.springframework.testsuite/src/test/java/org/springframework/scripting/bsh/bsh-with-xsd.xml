@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
+
+	<lang:bsh id="messenger" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
+			script-interfaces="org.springframework.scripting.Messenger"
+			init-method="init" destroy-method="destroy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:bsh>
+
+	<lang:bsh id="messengerPrototype" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
+			script-interfaces="org.springframework.scripting.ConfigurableMessenger"
+			scope="prototype" init-method="init" destroy-method="destroy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:bsh>
+
+	<lang:bsh id="messengerImpl" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
+			init-method="init" destroy-method="destroy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:bsh>
+
+	<lang:bsh id="messengerInstance" script-source="classpath:org/springframework/scripting/bsh/MessengerInstance.bsh"
+			init-method="init" destroy-method="destroy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:bsh>
+
+	<lang:bsh id="messengerByType" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
+			autowire="byType" dependency-check="objects" init-method="init" destroy-method="destroy">
+	</lang:bsh>
+
+	<lang:bsh id="messengerByName" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
+			autowire="byName" init-method="init" destroy-method="destroy">
+	</lang:bsh>
+
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+
+	<lang:bsh id="calculator" script-interfaces="org.springframework.scripting.Calculator">
+		<lang:inline-script>
+			int add(int x, int y) {
+				return x + y;
+			}
+		</lang:inline-script>
+	</lang:bsh>
+
+	<lang:bsh id="refreshableMessenger" script-interfaces="org.springframework.scripting.Messenger"
+			script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh" refresh-check-delay="5000"
+			init-method="init" destroy-method="destroy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:bsh>
+
+</beans>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="aapc" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+		<property name="customTargetSourceCreators">
+			<list>
+				<ref local="aapc.quickTargetSourceCreator"/>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="aapc.quickTargetSourceCreator"
+		class="org.springframework.aop.framework.autoproxy.target.QuickTargetSourceCreator"/>
+
+	<bean id="test" scope="prototype" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<bean id="wife" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Kerry</value></property>
+	</bean>
+	
+	<!-- Prefix means it will be pooled -->
+	<bean id=":test" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<!-- Prefix means it will be thread local -->
+	<bean name="%test" scope="prototype" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<!-- Prefix means it will be a prototype target source -->
+	<bean name="!test" scope="prototype" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+
+</beans>		

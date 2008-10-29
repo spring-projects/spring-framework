@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBeanTests$TypeTestLocalSessionFactoryBean">
+		<property name="typeDefinitions">
+			<list>
+				<bean class="org.springframework.orm.hibernate3.TypeDefinitionBean">
+					<property name="typeName" value="type1"/>
+					<property name="typeClass" value="mypackage.MyTypeClass"/>
+					<property name="parameters">
+						<props>
+							<prop key="param1">value1</prop>
+							<prop key="otherParam">othervalue</prop>
+						</props>
+					</property>
+				</bean>
+				<bean id="type2" class="org.springframework.orm.hibernate3.TypeDefinitionBean">
+					<property name="typeName" value="type2"/>
+					<property name="typeClass" value="mypackage.MyOtherTypeClass"/>
+					<property name="parameters">
+						<props>
+							<prop key="myParam">myvalue</prop>
+						</props>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+</beans>

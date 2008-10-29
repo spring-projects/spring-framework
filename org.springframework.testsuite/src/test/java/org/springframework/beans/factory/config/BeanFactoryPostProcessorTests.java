@@ -1,0 +1,96 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.beans.factory.config;
+
+import junit.framework.TestCase;
+
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.support.StaticApplicationContext;
+
+/**
+ * @author Colin Sampaleanu
+ * @author Juergen Hoeller
+ * @since 02.10.2003
+ */
+public class BeanFactoryPostProcessorTests extends TestCase {
+
+	public void testRegisteredBeanFactoryPostProcessor() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		TestBeanFactoryPostProcessor bfpp = new TestBeanFactoryPostProcessor();
+		ac.addBeanFactoryPostProcessor(bfpp);
+		assertFalse(bfpp.wasCalled);
+		ac.refresh();
+		assertTrue(bfpp.wasCalled);
+	}
+	
+	public void testDefinedBeanFactoryPostProcessor() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		ac.registerSingleton("bfpp", TestBeanFactoryPostProcessor.class);
+		ac.refresh();
+		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) ac.getBean("bfpp");
+		assertTrue(bfpp.wasCalled);
+	}
+
+	public void testMultipleDefinedBeanFactoryPostProcessors() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		MutablePropertyValues pvs1 = new MutablePropertyValues();
+		pvs1.addPropertyValue("initValue", "${key}");
+		ac.registerSingleton("bfpp1", TestBeanFactoryPostProcessor.class, pvs1);
+		MutablePropertyValues pvs2 = new MutablePropertyValues();
+		pvs2.addPropertyValue("properties", "key=value");
+		ac.registerSingleton("bfpp2", PropertyPlaceholderConfigurer.class, pvs2);
+		ac.refresh();
+		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) ac.getBean("bfpp1");
+		assertEquals("value", bfpp.initValue);
+		assertTrue(bfpp.wasCalled);
+	}
+
+	public void testBeanFactoryPostProcessorNotExecutedByBeanFactory() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class));
+		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class));
+		bf.registerBeanDefinition("bfpp", new RootBeanDefinition(TestBeanFactoryPostProcessor.class));
+		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) bf.getBean("bfpp");
+		assertFalse(bfpp.wasCalled);
+	}
+
+	
+	public static class TestBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+
+		public String initValue;
+
+		public void setInitValue(String initValue) {
+			this.initValue = initValue;
+		}
+
+		public boolean wasCalled = false;
+		
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+			wasCalled = true;
+		}
+	}
+	
+}

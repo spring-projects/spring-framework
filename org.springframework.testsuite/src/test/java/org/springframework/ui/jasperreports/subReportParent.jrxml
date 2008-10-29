@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created using JasperAssistant (http://www.jasperassistant.com) -->
+<!DOCTYPE jasperReport PUBLIC "-//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+
+<jasperReport name="MasterReport" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="50" bottomMargin="50">
+	<reportFont name="Arial_Normal" isDefault="true" fontName="Arial" size="12" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+	<reportFont name="Arial_Bold" isDefault="false" fontName="Arial" size="12" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica-Bold" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+	<reportFont name="Arial_Italic" isDefault="false" fontName="Arial" size="12" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica-Oblique" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+	<parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/>
+	<parameter name="SubReportData" class="net.sf.jasperreports.engine.JRDataSource"/>
+	<field name="city" class="java.lang.String">
+	</field>
+	<title>
+		<band height="50">
+			<line>
+				<reportElement x="0" y="0" width="515" height="1"/>
+				<graphicElement/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="10" width="515" height="30"/>
+				<textElement textAlignment="Center">
+					<font reportFont="Arial_Normal" size="22"/>
+				</textElement>
+				<text><![CDATA[Master Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="21">
+			<rectangle>
+				<reportElement x="0" y="5" width="515" height="15" backcolor="#333333"/>
+				<graphicElement pen="None"/>
+			</rectangle>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="5" width="515" height="15" forecolor="#ffffff" backcolor="#333333"/>
+				<textElement>
+					<font reportFont="Arial_Bold"/>
+				</textElement>
+				<text><![CDATA[City List]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="20" width="515" height="1"/>
+				<graphicElement/>
+			</line>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="50">
+			<textField>
+				<reportElement x="5" y="5" width="100" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font reportFont="Arial_Bold"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{city}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement isPrintRepeatedValues="false" x="110" y="5" width="100" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font reportFont="Arial_Bold"/>
+				</textElement>
+				<text><![CDATA[(continued)]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="20" width="515" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement/>
+			</line>
+			<subreport>
+				<reportElement isPrintRepeatedValues="false" x="5" y="25" width="325" height="20" isRemoveLineWhenBlank="true" backcolor="#ffcc99"/>
+				<subreportParameter name="City">
+					<subreportParameterExpression><![CDATA[$F{city}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{SubReportData}]]></dataSourceExpression>
+				<subreportExpression class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{ProductsSubReport}]]></subreportExpression>
+			</subreport>
+			<!--<subreport>
+				<reportElement positionType="Float" x="335" y="25" width="175" height="20" isRemoveLineWhenBlank="true" backcolor="#99ccff"/>
+				<subreportParameter name="City">
+					<subreportParameterExpression><![CDATA[$F{City}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["AddressReport.jasper"]]></subreportExpression>
+			</subreport> -->
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="40">
+			<line>
+				<reportElement x="0" y="10" width="515" height="1"/>
+				<graphicElement/>
+			</line>
+			<textField>
+				<reportElement x="200" y="20" width="80" height="15"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page " + String.valueOf($V{PAGE_NUMBER}) + " of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="280" y="20" width="75" height="15"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + String.valueOf($V{PAGE_NUMBER})]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBeanTests$FilterTestLocalSessionFactoryBean">
+		<property name="filterDefinitions">
+			<list>
+				<bean class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean">
+					<property name="filterName" value="filter1"/>
+					<property name="parameterTypes">
+						<props>
+							<prop key="param1">string</prop>
+							<prop key="otherParam">long</prop>
+						</props>
+					</property>
+					<property name="defaultFilterCondition" value="someCondition"/>
+				</bean>
+				<bean id="filter2" class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean">
+					<property name="parameterTypes">
+						<props>
+							<prop key="myParam">integer</prop>
+						</props>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+</beans>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="rod" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="age"><value>31</value></property>
+	</bean>
+
+	<bean id="kerryX" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Kerry</value></property>
+		<property name="age"><value>34</value></property>
+		<property name="spouse"><ref local="rod"/></property>
+	</bean>
+
+</beans>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="a" class="org.springframework.beans.factory.xml.DependenciesBean"
+		dependency-check="objects">
+		<!-- <property name="name"><value>Rod</value></property> -->
+	</bean>
+
+</beans>

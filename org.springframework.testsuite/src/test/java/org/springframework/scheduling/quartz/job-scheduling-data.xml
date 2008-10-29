@@ -1,0 +1,29 @@
+<quartz xmlns="http://www.opensymphony.com/quartz/JobSchedulingData"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.opensymphony.com/quartz/JobSchedulingData
+				http://www.opensymphony.com/quartz/xml/job_scheduling_data_1_5.xsd"
+		version="1.5">
+
+	<job>
+		<job-detail>
+			<name>myJob</name>
+			<group>myGroup</group>
+			<job-class>org.springframework.scheduling.quartz.QuartzSupportTests$DummyJob</job-class>
+			<job-data-map>
+				<entry>
+					<key>param</key>
+					<value>10</value>
+				</entry>
+			</job-data-map>
+		</job-detail>
+		<trigger>
+			<simple>
+				<name>myTrigger</name>
+				<group>myGroup</group>
+				<repeat-count>1</repeat-count>
+				<repeat-interval>500</repeat-interval>
+			</simple>
+		</trigger>
+	</job>
+
+</quartz>

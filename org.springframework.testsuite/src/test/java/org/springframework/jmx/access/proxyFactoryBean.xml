@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="bean:name=proxyTestBean1">
+					<ref local="testBean"/>
+				</entry>
+			</map>
+		</property>
+		<property name="assembler">
+			<bean class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+				<property name="attributeSource">
+					<bean class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource">
+						<property name="attributes">
+							<bean class="org.springframework.metadata.commons.CommonsAttributes"/>
+						</property>
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="proxyBean" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+		<property name="proxyInterface">
+			<value>org.springframework.jmx.IJmxTestBean</value>
+		</property>
+		<property name="objectName">
+			<value>bean:name=proxyTestBean1</value>
+		</property>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+		<property name="name">
+			<value>TEST</value>
+		</property>
+		<property name="age">
+			<value>100</value>
+		</property>
+	</bean>
+
+</beans>
