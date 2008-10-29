@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 
@@ -369,10 +370,10 @@ public class BeanWrapperTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(et);
 
 		bw.setPropertyValue("flushMode", "NEVER");
-		assertEquals(FlushMode.NEVER, et.getFlushMode());
+		Assert.assertEquals(FlushMode.NEVER, et.getFlushMode());
 
 		bw.setPropertyValue("flushMode", "  AUTO ");
-		assertEquals(FlushMode.AUTO, et.getFlushMode());
+		Assert.assertEquals(FlushMode.AUTO, et.getFlushMode());
 
 		try {
 			bw.setPropertyValue("flushMode", "EVER");
@@ -1159,7 +1160,7 @@ public class BeanWrapperTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("someProperty", "someValue");
 		assertEquals("someValue", bw.getPropertyValue("someProperty"));
-		assertEquals("someValue", bean.getSomeProperty());
+		Assert.assertEquals("someValue", bean.getSomeProperty());
 	}
 
 	public void testErrorMessageOfNestedProperty() {
