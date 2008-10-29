@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<aop:config>
+		<aop:aspect id="afterAdviceBindingTests" ref="testAspect">
+			<aop:after method="oneIntArg" pointcut="execution(* setAge(int)) and args(age)"/>
+			<aop:after method="oneObjectArg" pointcut="execution(* getAge()) and this(bean)"/>
+			<aop:after method="oneObjectArg" pointcut="execution(* getDoctor()) and target(bean)"/>
+			<aop:after method="oneIntAndOneObject"
+					pointcut="execution(* setAge(..)) and args(age) and this(bean)" arg-names="age,bean"/>
+			<aop:after method="needsJoinPoint" pointcut="execution(* getAge())"/>
+			<aop:after method="needsJoinPointStaticPart" pointcut="execution(* getAge())"/>
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="testAspect" class="org.springframework.aop.aspectj.AdviceBindingTestAspect"/>
+
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+
+</beans>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="schedulerName" value="myScheduler"/>
+		<property name="exposeSchedulerInRepository" value="true"/>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerAccessorBean">
+		<property name="schedulerName" value="myScheduler"/>
+		<property name="triggers">
+			<list>
+				<ref local="exportTrigger"/>
+				<ref local="importTrigger"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="exportTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="exportService"/>
+				<property name="targetMethod" value="doExport"/>
+			</bean>
+		</property>
+		<property name="repeatInterval" value="1000"/>
+		<property name="repeatCount" value="1"/>
+	</bean>
+
+	<bean id="importTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="importService"/>
+				<property name="targetMethod" value="doImport"/>
+			</bean>
+		</property>
+		<property name="repeatInterval" value="1000"/>
+		<property name="repeatCount" value="1"/>
+	</bean>
+
+	<bean id="exportService" class="org.springframework.scheduling.quartz.QuartzTestBean"/>
+
+	<bean id="importService" class="org.springframework.scheduling.quartz.QuartzTestBean"/>
+
+</beans>

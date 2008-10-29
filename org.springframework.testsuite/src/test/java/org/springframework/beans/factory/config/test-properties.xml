@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties version="1.0">
+
+	<entry key="tb.array[0].age">99</entry>
+	<entry key="tb.list[1].name">test</entry>
+
+</properties>

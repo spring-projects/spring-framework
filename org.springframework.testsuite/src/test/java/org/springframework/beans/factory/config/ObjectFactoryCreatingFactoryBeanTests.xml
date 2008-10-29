@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+  Test data for ObjectFactoryCreatingFactoryBeanTests
+-->
+<beans>
+	
+	<bean id="prototypeTarget" class="java.util.Date" scope="prototype"/>
+
+	<bean id="prototype" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+		<property name="targetBeanName"><idref local="prototypeTarget"/></property>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBeanTests$TestBean">
+		<property name="objectFactory"><ref local="prototype"/></property>
+	</bean>
+  
+</beans>

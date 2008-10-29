@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<toolbox>
+  <xhtml>true</xhtml>
+  <data type="string">
+    <key>foo</key>
+    <value>this is foo.</value>
+  </data>
+  <tool>
+    <key>map</key>
+    <class>java.util.HashMap</class>
+  </tool>
+  <tool>
+    <key>date</key>
+    <scope>application</scope>
+    <class>org.apache.velocity.tools.generic.DateTool</class>
+  </tool>
+	<tool>
+		<key>link</key>
+		<scope>request</scope>
+		<class>org.apache.velocity.tools.view.tools.LinkTool</class>
+	</tool>
+</toolbox>

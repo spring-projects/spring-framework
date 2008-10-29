@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+				"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+	<bean id="testBean" class="org.springframework.beans.TestBean">
+		<property name="someList">
+			<list value-type="java.lang.Integer">
+				<value>1</value>
+				<value>2</value>
+				<value>3</value>
+			</list>
+		</property>
+		<property name="someSet">
+			<set value-type="java.lang.Integer">
+				<value>1</value>
+				<value>2</value>
+				<value>3</value>
+			</set>
+		</property>
+		<property name="someMap">
+			<map key-type="java.lang.Integer" value-type="java.lang.Boolean">
+				<entry key="1" value="true"/>
+				<entry key="2" value="false"/>
+				<entry key="3" value="false"/>
+				<entry key="4" value="true"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="testBean2" class="org.springframework.beans.TestBean">
+		<property name="someMap">
+			<map key-type="java.lang.Integer" value-type="java.lang.Boolean">
+				<entry>
+					<key>
+						<value>1</value>
+					</key>
+					<value>true</value>
+				</entry>
+				<entry>
+					<key>
+						<value>2</value>
+					</key>
+					<value>false</value>
+				</entry>
+				<entry>
+					<key>
+						<value>3</value>
+					</key>
+					<value>false</value>
+				</entry>
+				<entry>
+					<key>
+						<value>4</value>
+					</key>
+					<value>true</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+</beans>

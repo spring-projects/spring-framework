@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="testBeanTarget" class="org.springframework.aop.framework.PrototypeTargetTests$TestBeanImpl"
+		  scope="prototype"/>
+
+	<bean id="testInterceptor" class="org.springframework.aop.framework.PrototypeTargetTests$TestInterceptor"
+			scope="singleton"/>
+
+	<bean id="testBeanPrototype" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>org.springframework.aop.framework.PrototypeTargetTests$TestBean</value>
+		</property>
+		<property name="singleton">
+			<value>false</value>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>testInterceptor</value>
+				<value>testBeanTarget</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="testBeanSingleton" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>org.springframework.aop.framework.PrototypeTargetTests$TestBean</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>testInterceptor</value>
+				<value>testBeanTarget</value>
+			</list>
+		</property>
+	</bean>
+
+</beans>

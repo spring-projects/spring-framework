@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-lazy-init="true">
+
+	<bean id="abstractBeta" class="org.springframework.aop.framework.ProxyFactoryBean"
+			abstract="true"/>
+
+	<bean name="beta" parent="abstractBeta">
+		<property name="target">
+			<bean class="org.springframework.beans.factory.FactoryBeanTests$Beta" autowire="byType">
+        <property name="name" value="${myName}"/>
+      </bean>
+		</property>
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<bean id="alpha" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<bean class="org.springframework.beans.factory.FactoryBeanTests$Alpha" autowire="byType"/>
+		</property>
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<bean id="gamma" class="org.springframework.beans.factory.FactoryBeanTests$Gamma"/>
+
+  <bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean">
+    <property name="beta" ref="beta"/>
+  </bean>
+
+  <bean id="gammaFactory" factory-bean="betaFactory" factory-method="getGamma"/>
+
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="properties">
+      <props>
+        <prop key="myName">yourName</prop>
+      </props>
+    </property>
+  </bean>
+
+</beans>

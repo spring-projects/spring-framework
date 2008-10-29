@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jms="http://www.springframework.org/schema/jms"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.5.xsd">
+
+	<jms:listener-container connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
+			destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
+			transaction-manager="testTransactionManager">
+		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
+		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
+	</jms:listener-container>
+
+	<jms:listener-container>
+		<jms:listener destination="testDestination" ref="testBean3"/>
+	</jms:listener-container>
+
+	<jms:jca-listener-container resource-adapter="testResourceAdapter" activation-spec-factory="testActivationSpecFactory"
+			message-converter="testMessageConverter">
+		<jms:listener id="listener3" destination="testDestination" ref="testBean1" method="setName"/>
+		<jms:listener id="listener4" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
+	</jms:jca-listener-container>
+
+	<jms:jca-listener-container activation-spec-factory="testActivationSpecFactory">
+		<jms:listener destination="testDestination" ref="testBean3"/>
+	</jms:jca-listener-container>
+
+	<!-- the default ConnectionFactory -->
+	<bean id="connectionFactory" class="org.springframework.jms.StubConnectionFactory"/>
+
+	<bean id="testConnectionFactory" class="org.springframework.jms.StubConnectionFactory"/>
+
+	<!-- the default ResourceAdapter -->
+	<bean id="resourceAdapter" class="org.springframework.jca.StubResourceAdapter"/>
+
+	<bean id="testResourceAdapter" class="org.springframework.jca.StubResourceAdapter"/>
+
+	<bean id="testTaskExecutor" class="org.springframework.core.task.StubTaskExecutor"/>
+
+	<bean id="testActivationSpecFactory" class="org.springframework.jms.listener.endpoint.StubJmsActivationSpecFactory"/>
+
+	<bean id="testDestinationResolver" class="org.springframework.jms.support.destination.DynamicDestinationResolver"/>
+
+	<bean id="testMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter102"/>
+
+	<bean id="testTransactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
+
+	<bean id="testBean1" class="org.springframework.beans.TestBean"/>
+
+	<bean id="testBean2" class="org.springframework.beans.TestBean"/>
+
+	<bean id="testBean3" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestMessageListener"/>
+
+</beans>

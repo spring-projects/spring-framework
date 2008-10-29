@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="a" class="org.springframework.beans.factory.xml.DependenciesBean"
+		dependency-check="objects">
+		<property name="spouse"><ref local="kerry"/></property>
+		<property name="age"><value>33</value></property>
+		<property name="name"><value>Rod</value></property>
+	</bean>
+	
+	<bean id="kerry" class="org.springframework.beans.TestBean"
+		dependency-check="none">
+	</bean>
+
+</beans>

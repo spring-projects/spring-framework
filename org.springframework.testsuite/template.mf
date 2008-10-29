@@ -1,0 +1,4 @@
+Bundle-SymbolicName: org.springframework.core
+Bundle-Name: Spring Core
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2

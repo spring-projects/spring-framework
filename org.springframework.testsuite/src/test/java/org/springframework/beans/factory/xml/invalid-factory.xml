@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="invalidFactory"	class="org.springframework.beans.factory.DummyFactory" scope="prototype">
+		<property name="singleton"><value>false</value></property>
+	</bean>
+	
+</beans>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	     xmlns:util="http://www.springframework.org/schema/util"
+	     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<!-- just ensures that one can use <ref local=""/> to refer to the various <util:collections/> types -->
+	
+	<util:map id="map"/>
+	<util:list id="list"/>
+	<util:set id="set"/>
+	<util:properties id="properties" location="org/springframework/beans/factory/xml/test.properties"/>
+
+	<bean id="bean" class="org.springframework.beans.TestBean">
+		<property name="someMap">
+			<map>
+				<entry key="map">
+					<ref local="map"/>
+				</entry>
+			</map>
+		</property>
+		<property name="someList">
+			<list>
+				<ref local="list"/>
+			</list>
+		</property>
+		<property name="someProperties">
+			<ref local="properties"/>
+		</property>
+		<property name="someSet">
+			<ref local="set"/>
+		</property>
+	</bean>
+
+</beans>
