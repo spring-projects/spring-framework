@@ -1,0 +1,8 @@
+http\://www.springframework.org/schema/context/spring-context-2.5.xsd=org/springframework/context/config/spring-context-2.5.xsd
+http\://www.springframework.org/schema/context/spring-context.xsd=org/springframework/context/config/spring-context-2.5.xsd
+http\://www.springframework.org/schema/jee/spring-jee-2.0.xsd=org/springframework/ejb/config/spring-jee-2.0.xsd
+http\://www.springframework.org/schema/jee/spring-jee-2.5.xsd=org/springframework/ejb/config/spring-jee-2.5.xsd
+http\://www.springframework.org/schema/jee/spring-jee.xsd=org/springframework/ejb/config/spring-jee-2.5.xsd
+http\://www.springframework.org/schema/lang/spring-lang-2.0.xsd=org/springframework/scripting/config/spring-lang-2.0.xsd
+http\://www.springframework.org/schema/lang/spring-lang-2.5.xsd=org/springframework/scripting/config/spring-lang-2.5.xsd
+http\://www.springframework.org/schema/lang/spring-lang.xsd=org/springframework/scripting/config/spring-lang-2.5.xsd

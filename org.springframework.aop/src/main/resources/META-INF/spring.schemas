@@ -1,0 +1,3 @@
+http\://www.springframework.org/schema/aop/spring-aop-2.0.xsd=org/springframework/aop/config/spring-aop-2.0.xsd
+http\://www.springframework.org/schema/aop/spring-aop-2.5.xsd=org/springframework/aop/config/spring-aop-2.5.xsd
+http\://www.springframework.org/schema/aop/spring-aop.xsd=org/springframework/aop/config/spring-aop-2.5.xsd

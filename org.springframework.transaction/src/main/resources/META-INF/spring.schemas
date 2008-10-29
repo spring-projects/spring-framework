@@ -1,0 +1,3 @@
+http\://www.springframework.org/schema/tx/spring-tx-2.0.xsd=org/springframework/transaction/config/spring-tx-2.0.xsd
+http\://www.springframework.org/schema/tx/spring-tx-2.5.xsd=org/springframework/transaction/config/spring-tx-2.5.xsd
+http\://www.springframework.org/schema/tx/spring-tx.xsd=org/springframework/transaction/config/spring-tx-2.5.xsd
