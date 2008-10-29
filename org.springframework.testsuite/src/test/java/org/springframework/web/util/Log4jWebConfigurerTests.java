@@ -29,8 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.util.Log4jConfigurerTests;
-import org.springframework.util.MockLog4jAppender;
 
 /**
  * @author Juergen Hoeller
@@ -47,7 +45,7 @@ public class Log4jWebConfigurerTests extends TestCase {
 	}
 
 	public void testInitLoggingWithAbsoluteFilePath() throws FileNotFoundException {
-		URL url = Log4jConfigurerTests.class.getResource("testlog4j.properties");
+		URL url = Log4jWebConfigurerTests.class.getResource("testlog4j.properties");
 		doTestInitLogging(url.toString(), false);
 	}
 
@@ -67,7 +65,7 @@ public class Log4jWebConfigurerTests extends TestCase {
 	*/
 
 	public void testInitLoggingWithFileUrlAndRefreshInterval() throws FileNotFoundException {
-		URL url = Log4jConfigurerTests.class.getResource("testlog4j.properties");
+		URL url = Log4jWebConfigurerTests.class.getResource("testlog4j.properties");
 		doTestInitLogging(url.toString(), true);
 	}
 
