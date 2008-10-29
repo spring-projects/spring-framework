@@ -22,7 +22,7 @@ import org.springframework.beans.TestBean;
  * @author Juergen Hoeller
  */
 public class CountingFactory implements FactoryBean {
-	
+
 	private static int factoryBeanInstanceCount = 0;
 
 
