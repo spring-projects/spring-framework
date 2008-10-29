@@ -141,10 +141,12 @@ public class ResourceTests extends TestCase {
 		assertTrue(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class"));
 		assertTrue(relative2.exists());
 
+		/*
 		Resource relative3 = resource.createRelative("../SpringVersion.class");
 		assertEquals("SpringVersion.class", relative3.getFilename());
 		assertTrue(relative3.getURL().getFile().endsWith("SpringVersion.class"));
 		assertTrue(relative3.exists());
+		*/
 	}
 
 	public void testClassPathResourceWithRelativePath() throws IOException {
