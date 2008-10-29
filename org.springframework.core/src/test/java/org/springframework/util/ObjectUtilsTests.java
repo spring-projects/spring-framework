@@ -22,7 +22,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.FatalBeanException;
+import org.springframework.core.task.TaskRejectedException;
 
 /**
  * @author Rod Johnson
@@ -36,7 +36,7 @@ public final class ObjectUtilsTests extends TestCase {
 		assertTrue(ObjectUtils.isCheckedException(new ServletException()));
 
 		assertFalse(ObjectUtils.isCheckedException(new RuntimeException()));
-		assertFalse(ObjectUtils.isCheckedException(new FatalBeanException("")));
+		assertFalse(ObjectUtils.isCheckedException(new TaskRejectedException("")));
 
 		// Any Throwable other than RuntimeException and Error
 		// has to be considered checked according to the JLS.

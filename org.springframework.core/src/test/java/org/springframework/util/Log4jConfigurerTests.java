@@ -34,7 +34,7 @@ public class Log4jConfigurerTests extends TestCase {
 	}
 
 	public void testInitLoggingWithRelativeFilePath() throws FileNotFoundException {
-		doTestInitLogging("test/org/springframework/util/testlog4j.properties", false);
+		doTestInitLogging("src/test/resources/org/springframework/util/testlog4j.properties", false);
 	}
 
 	public void testInitLoggingWithAbsoluteFilePath() throws FileNotFoundException {
@@ -47,7 +47,7 @@ public class Log4jConfigurerTests extends TestCase {
 	}
 
 	public void testInitLoggingWithRelativeFilePathAndRefreshInterval() throws FileNotFoundException {
-		doTestInitLogging("test/org/springframework/util/testlog4j.properties", true);
+		doTestInitLogging("src/test/resources/org/springframework/util/testlog4j.properties", true);
 	}
 
 	/* only works on Windows

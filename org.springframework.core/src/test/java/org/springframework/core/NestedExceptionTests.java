@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 
 /**
  * @author Rod Johnson
@@ -51,7 +52,7 @@ public class NestedExceptionTests extends TestCase {
 		ServletException rootCause = new ServletException(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedRuntimeException nex = new NestedRuntimeException(myMessage, rootCause) {};
-		assertEquals(nex.getCause(), rootCause);
+		Assert.assertEquals(nex.getCause(), rootCause);
 		assertTrue(nex.getMessage().indexOf(myMessage) != -1);
 		assertTrue(nex.getMessage().indexOf(rootCauseMesg) != -1);
 
@@ -87,7 +88,7 @@ public class NestedExceptionTests extends TestCase {
 		ServletException rootCause = new ServletException(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nex = new NestedCheckedException(myMessage, rootCause) {};
-		assertEquals(nex.getCause(), rootCause);
+		Assert.assertEquals(nex.getCause(), rootCause);
 		assertTrue(nex.getMessage().indexOf(myMessage) != -1);
 		assertTrue(nex.getMessage().indexOf(rootCauseMesg) != -1);
 		
