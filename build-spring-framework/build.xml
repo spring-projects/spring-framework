@@ -18,6 +18,7 @@
 		<pathelement location="../org.springframework.context.support"/>
 		<pathelement location="../org.springframework.web.servlet"/>
 		<pathelement location="../org.springframework.web.portlet"/>
+		<pathelement location="../org.springframework.test"/>
 	</path>
 
 	<property file="${basedir}/../build.properties"/>
