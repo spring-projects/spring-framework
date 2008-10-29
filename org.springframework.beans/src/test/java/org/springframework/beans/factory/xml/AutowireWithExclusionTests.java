@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.CountingFactory;
@@ -40,7 +41,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		TestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals(sally, rob.getSpouse());
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithExclusion() throws Exception {
@@ -49,7 +50,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		beanFactory.preInstantiateSingletons();
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithExclusionInParentFactory() throws Exception {
@@ -62,7 +63,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		child.registerBeanDefinition("rob2", robDef);
 		TestBean rob = (TestBean) child.getBean("rob2");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithPrimaryInParentFactory() throws Exception {
@@ -79,7 +80,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		child.registerBeanDefinition("props3", propsDef);
 		TestBean rob = (TestBean) child.getBean("rob2");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithPrimaryOverridingParentFactory() throws Exception {
@@ -96,7 +97,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		child.registerBeanDefinition("props3", propsDef);
 		TestBean rob = (TestBean) child.getBean("rob2");
 		assertEquals("props3", rob.getSomeProperties().getProperty("name"));
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithInclusion() throws Exception {
@@ -105,7 +106,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		beanFactory.preInstantiateSingletons();
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithSelectiveInclusion() throws Exception {
@@ -114,7 +115,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		beanFactory.preInstantiateSingletons();
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
-		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+		Assert.assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testConstructorAutowireWithAutoSelfExclusion() throws Exception {
