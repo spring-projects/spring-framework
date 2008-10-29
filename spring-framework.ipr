@@ -122,54 +122,8 @@
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
       <entry name="?*.xsd" />
+      <entry name="?*.types" />
     </wildcardResourcePatterns>
-  </component>
-  <component name="Cvs2Configuration">
-    <option name="PRUNE_EMPTY_DIRECTORIES" value="true" />
-    <option name="MERGING_MODE" value="0" />
-    <option name="MERGE_WITH_BRANCH1_NAME" value="HEAD" />
-    <option name="MERGE_WITH_BRANCH2_NAME" value="HEAD" />
-    <option name="RESET_STICKY" value="false" />
-    <option name="CREATE_NEW_DIRECTORIES" value="true" />
-    <option name="DEFAULT_TEXT_FILE_SUBSTITUTION" value="kv" />
-    <option name="PROCESS_UNKNOWN_FILES" value="false" />
-    <option name="PROCESS_DELETED_FILES" value="false" />
-    <option name="PROCESS_IGNORED_FILES" value="false" />
-    <option name="RESERVED_EDIT" value="false" />
-    <option name="CHECKOUT_DATE_OR_REVISION_SETTINGS">
-      <value>
-        <option name="BRANCH" value="" />
-        <option name="DATE" value="" />
-        <option name="USE_BRANCH" value="false" />
-        <option name="USE_DATE" value="false" />
-      </value>
-    </option>
-    <option name="UPDATE_DATE_OR_REVISION_SETTINGS">
-      <value>
-        <option name="BRANCH" value="" />
-        <option name="DATE" value="" />
-        <option name="USE_BRANCH" value="false" />
-        <option name="USE_DATE" value="false" />
-      </value>
-    </option>
-    <option name="SHOW_CHANGES_REVISION_SETTINGS">
-      <value>
-        <option name="BRANCH" value="" />
-        <option name="DATE" value="" />
-        <option name="USE_BRANCH" value="false" />
-        <option name="USE_DATE" value="false" />
-      </value>
-    </option>
-    <option name="SHOW_OUTPUT" value="false" />
-    <option name="ADD_WATCH_INDEX" value="0" />
-    <option name="REMOVE_WATCH_INDEX" value="0" />
-    <option name="UPDATE_KEYWORD_SUBSTITUTION" />
-    <option name="MAKE_NEW_FILES_READONLY" value="false" />
-    <option name="SHOW_CORRUPTED_PROJECT_FILES" value="0" />
-    <option name="TAG_AFTER_PROJECT_COMMIT" value="false" />
-    <option name="OVERRIDE_EXISTING_TAG_FOR_PROJECT" value="true" />
-    <option name="TAG_AFTER_PROJECT_COMMIT_NAME" value="" />
-    <option name="CLEAN_COPY" value="false" />
   </component>
   <component name="DependenciesAnalyzeManager">
     <option name="myForwardDirection" value="false" />
@@ -206,6 +160,15 @@
           <module name="org.springframework.jdbc" />
           <module name="context-support" />
           <module name="jdbc" />
+          <module name="jms" />
+          <module name="org.springframework.testsuite" />
+          <module name="beans" />
+        </modules>
+      </facet-type>
+      <facet-type id="web">
+        <modules>
+          <module name="org.springframework.testsuite" />
+          <module name="testsuite" />
         </modules>
       </facet-type>
     </autodetection-disabled>
@@ -481,6 +444,8 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" filepath="$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.orm/orm.iml" filepath="$PROJECT_DIR$/org.springframework.orm/orm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.test/test.iml" filepath="$PROJECT_DIR$/org.springframework.test/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.testsuite/testsuite.iml" filepath="$PROJECT_DIR$/org.springframework.testsuite/testsuite.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.transaction/transaction.iml" filepath="$PROJECT_DIR$/org.springframework.transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web/web.iml" filepath="$PROJECT_DIR$/org.springframework.web/web.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web.portlet/web-portlet.iml" filepath="$PROJECT_DIR$/org.springframework.web.portlet/web-portlet.iml" />
@@ -542,32 +507,6 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
-  </component>
-  <component name="atlassian-ide-plugin-workspace">
-    <option name="bambooConfiguration">
-      <BambooProjectConfiguration>
-        <option name="tableConfiguration">
-          <ProjectToolWindowTableConfiguration />
-        </option>
-      </BambooProjectConfiguration>
-    </option>
-    <option name="crucibleConfiguration">
-      <CrucibleProjectConfiguration>
-        <option name="crucibleFilters">
-          <CrucibleFiltersBean />
-        </option>
-        <option name="tableConfiguration">
-          <ProjectToolWindowTableConfiguration />
-        </option>
-      </CrucibleProjectConfiguration>
-    </option>
-    <option name="jiraConfiguration">
-      <JiraProjectConfiguration>
-        <option name="tableConfiguration">
-          <ProjectToolWindowTableConfiguration />
-        </option>
-      </JiraProjectConfiguration>
-    </option>
   </component>
   <component name="com.intellij.ide.util.scopeChooser.ScopeChooserConfigurable" proportions="" version="1">
     <option name="myLastEditedConfigurable" />
