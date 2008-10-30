@@ -149,7 +149,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 	}
 
 	private void setViewProperties(AbstractJasperReportsView view) {
-		view.setUrl("org/springframework/ui/jasperreports/DataSourceReport.jasper");
+		view.setUrl("/org/springframework/ui/jasperreports/DataSourceReport.jasper");
 		StaticWebApplicationContext ac = new StaticWebApplicationContext();
 		ac.setServletContext(new MockServletContext());
 		ac.addMessage("page", Locale.GERMAN, "MeineSeite");

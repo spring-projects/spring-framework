@@ -38,14 +38,11 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
  */
 public abstract class AbstractJasperReportsTests extends TestCase {
 
-	protected static final String COMPILED_REPORT =
-			"org/springframework/ui/jasperreports/DataSourceReport.jasper";
+	protected static final String COMPILED_REPORT = "/org/springframework/ui/jasperreports/DataSourceReport.jasper";
 
-	protected static final String UNCOMPILED_REPORT =
-			"org/springframework/ui/jasperreports/DataSourceReport.jrxml";
+	protected static final String UNCOMPILED_REPORT = "/org/springframework/ui/jasperreports/DataSourceReport.jrxml";
 
-	protected static final String SUB_REPORT_PARENT =
-			"org/springframework/ui/jasperreports/subReportParent.jrxml";
+	protected static final String SUB_REPORT_PARENT = "/org/springframework/ui/jasperreports/subReportParent.jrxml";
 
 	protected static boolean canCompileReport;
 

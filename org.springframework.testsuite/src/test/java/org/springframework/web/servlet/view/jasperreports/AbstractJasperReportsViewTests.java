@@ -194,7 +194,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		model.put("SubReportData", getProductData());
 
 		Properties subReports = new Properties();
-		subReports.put("ProductsSubReport", "org/springframework/ui/jasperreports/subReportChild.jrxml");
+		subReports.put("ProductsSubReport", "/org/springframework/ui/jasperreports/subReportChild.jrxml");
 
 		AbstractJasperReportsView view = getView(SUB_REPORT_PARENT);
 		view.setReportDataKey("dataSource");
