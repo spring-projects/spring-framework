@@ -24,5 +24,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.instrument"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.aspectj/com.springsource.org.aspectj.weaver/1.5.4/com.springsource.org.aspectj.weaver-1.5.4.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/edu.emory.mathcs.backport/com.springsource.edu.emory.mathcs.backport/3.0.0/com.springsource.edu.emory.mathcs.backport-3.0.0.jar" sourcepath="/IVY_CACHE/edu.emory.mathcs.backport/com.springsource.edu.emory.mathcs.backport/3.0.0/com.springsource.edu.emory.mathcs.backport-sources-3.0.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar" sourcepath="/IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-sources-2.3.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.hamcrest/com.springsource.org.hamcrest.core/1.1.0/com.springsource.org.hamcrest.core-1.1.0.jar" sourcepath="/IVY_CACHE/org.hamcrest/com.springsource.org.hamcrest.core/1.1.0/com.springsource.org.hamcrest.core-sources-1.1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
