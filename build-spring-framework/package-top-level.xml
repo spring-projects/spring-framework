@@ -15,7 +15,7 @@
 			<property name="target.dir" value="${package.docs.dir}"/>
 		</ant>
 
-		<ant dir="../spring-framework-reference" target="doc" inheritAll="false">
+		<!--ant dir="../spring-framework-reference" target="doc" inheritAll="false">
 			<property name="package.output.dir" value="${package.output.dir}"/>
 			<propertyset>
 				<propertyref builtin="commandline"/>
@@ -29,7 +29,7 @@
 				<propertyref builtin="commandline"/>
 			</propertyset>
 			<property name="timestamp" value="${timestamp}"/>
-		</subant>
+		</subant-->
 
 		<copy todir="${package.output.dir}">
 			<fileset dir="${basedir}/resources"/>
@@ -38,8 +38,8 @@
 		<copy todir="${package.output.dir}/projects">
 			<fileset dir="${basedir}/..">
 				<exclude name="**/target/**"/>
-				<exclude name="ivy-cache/**"/>
 				<exclude name="integration-repo/**"/>
+				<exclude name="ivy-cache/repository/org.apache.velocity/org.apache.velocity.docbookframework.dist/**"/>
 				<exclude name="spring-build/lib/docbook/**" />
 				<exclude name="**/*OLD*/**"/>
 			</fileset>
@@ -52,9 +52,21 @@
 				file="${package.output.dir}/projects/build.properties"/>
 
 		<zip destfile="${package.output.file}">
-			<zipfileset dir="${package.dir}"/>
+			<zipfileset dir="${package.dir}">
+				<exclude name="${package.basename}/docs/**"/>
+				<exclude name="${package.basename}/projects/ivy-cache/**"/>
+			</zipfileset>
 		</zip>
 		
+		<zip destfile="${artifacts.dir}/${package.basename}-with-docs.zip">
+			<zipfileset dir="${package.dir}">
+				<exclude name="${package.basename}/projects/ivy-cache/**"/>
+			</zipfileset>
+		</zip>
+
+		<zip destfile="${artifacts.dir}/${package.basename}-with-dependencies.zip">
+			<zipfileset dir="${package.dir}"/>
+		</zip>
 	</target>
 
 </project>
