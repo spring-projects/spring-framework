@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+	
+<beans>
+
+	<!--
+		Whacky error codes for testing
+		-->
+  <bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="badSqlGrammarCodes"><value>1,2,942</value></property>
+    <property name="dataIntegrityViolationCodes"><value>1,1400,1722</value></property>
+  </bean>
+
+  <bean id="DB0" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductName"><value>*DB0</value></property>
+    <property name="badSqlGrammarCodes"><value>-204,1,2</value></property>
+    <property name="dataIntegrityViolationCodes"><value>3,4</value></property>
+  </bean>
+
+  <bean id="DB1" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductName"><value>DB1*</value></property>
+    <property name="badSqlGrammarCodes"><value>-204,1,2</value></property>
+    <property name="dataIntegrityViolationCodes"><value>3,4</value></property>
+  </bean>
+
+  <bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName"><value>*DB2*</value></property>
+    <property name="badSqlGrammarCodes"><value>-204,1,2</value></property>
+    <property name="dataIntegrityViolationCodes"><value>3,4</value></property>
+  </bean>
+
+  <bean id="DB3" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductName"><value>*DB3*</value></property>
+    <property name="badSqlGrammarCodes"><value>-204,1,2</value></property>
+    <property name="dataIntegrityViolationCodes"><value>3,4</value></property>
+  </bean>
+
+</beans>
