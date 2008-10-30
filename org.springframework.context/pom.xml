@@ -1,16 +1,90 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>org.springframework.parent</artifactId>
+	    <version>3.0-M1-SNAPSHOT</version>
+    </parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.springframework</groupId>
 	<artifactId>org.springframework.context</artifactId>
 	<packaging>jar</packaging>
-	<name>Spring Core Abstractions and Utilities</name>
-	<version>3.0.0.M1</version>
+    <name>Spring Framework: Context</name>
 	<dependencies>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.core</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.beans</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.aop</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.agent</artifactId>
+        </dependency>
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
+			<groupId>javax.ejb</groupId>
+			<artifactId>com.springsource.javax.ejb</artifactId>
+			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>com.springsource.javax.jms</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>com.springsource.javax.persistence</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.cglib</groupId>
+			<artifactId>com.springsource.net.sf.cglib</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>com.springsource.org.aspectj.weaver</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+		    <groupId>org.aopalliance</groupId>
+		    <artifactId>com.springsource.org.aopalliance</artifactId>
+			<optional>true</optional>
+		</dependency>		
+		<dependency>
+		    <groupId>org.jruby</groupId>
+		    <artifactId>com.springsource.org.jruby</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+		    <groupId>org.codehaus.groovy</groupId>
+		    <artifactId>com.springsource.org.codehaus.groovy</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+		    <groupId>org.beanshell</groupId>
+		    <artifactId>com.springsource.bsh</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+		    <groupId>edu.emory.mathcs.backport</groupId>
+		    <artifactId>com.springsource.edu.emory.mathcs.backport</artifactId>
+			<optional>true</optional>
+		</dependency>		
+		<dependency>
+		    <groupId>com.oracle.oc4j</groupId>
+		    <artifactId>com.springsource.oracle.classloader</artifactId>
+			<optional>true</optional>
+		</dependency>		
+		<dependency>
+		    <groupId>com.sun.enterprise</groupId>
+		    <artifactId>com.springsource.com.sun.enterprise.loader</artifactId>
+			<optional>true</optional>
+		</dependency>		
 	</dependencies>
 </project>
