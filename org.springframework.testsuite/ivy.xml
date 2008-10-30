@@ -22,7 +22,6 @@
 	</publications>
 
 	<dependencies>
-		<dependency org="com.oracle.toplink" name="com.springsource.oracle.toplink" rev="10.1.3" conf="test->compile"/>
 		<dependency org="com.ibm.websphere" name="com.springsource.com.ibm.websphere.uow" rev="6.0.2.17" conf="test->compile"/>
 		<dependency org="com.opensymphony.quartz" name="com.springsource.org.quartz" rev="1.6.2" conf="test->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="test->compile"/>
