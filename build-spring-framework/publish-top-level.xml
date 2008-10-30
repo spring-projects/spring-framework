@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="publish-top-level" xmlns:aws="antlib:org.springframework.build.aws">
 
-	<target name="publish" depends="publish-multi-bundle.publish, publish-package"
+	<target name="publish" depends="publish-package, publish-multi-bundle.publish"
 			description="Publish package, Ivy, and Maven artifacts"/>
 
 	<target name="publish-package" depends="aws.init">
