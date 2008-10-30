@@ -39,6 +39,8 @@ import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 
+import junit.framework.Assert;
+
 /**
  * @author Trevor Cook
  * @author Thomas Risberg
@@ -962,10 +964,10 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		List cust = query.findCustomers(ids);
 
 		assertEquals("We got two customers back", cust.size(), 2);
-		assertEquals("First customer id was assigned correctly", ((Customer)cust.get(0)).getId(), 1);
-		assertEquals("First customer forename was assigned correctly", ((Customer)cust.get(0)).getForename(), "rod");
-		assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
-		assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
+		Assert.assertEquals("First customer id was assigned correctly", ((Customer)cust.get(0)).getId(), 1);
+		Assert.assertEquals("First customer forename was assigned correctly", ((Customer)cust.get(0)).getForename(), "rod");
+		Assert.assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
+		Assert.assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
 	}
 	
 	public void testNamedParameterQueryReusingParameter() throws SQLException {
@@ -1032,10 +1034,10 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		List cust = query.findCustomers(new Integer(1));
 
 		assertEquals("We got two customers back", cust.size(), 2);
-		assertEquals("First customer id was assigned correctly", ((Customer)cust.get(0)).getId(), 1);
-		assertEquals("First customer forename was assigned correctly", ((Customer)cust.get(0)).getForename(), "rod");
-		assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
-		assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
+		Assert.assertEquals("First customer id was assigned correctly", ((Customer)cust.get(0)).getId(), 1);
+		Assert.assertEquals("First customer forename was assigned correctly", ((Customer)cust.get(0)).getForename(), "rod");
+		Assert.assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
+		Assert.assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
 	}
 
 	public void testNamedParameterUsingInvalidQuestionMarkPlaceHolders() throws SQLException {
