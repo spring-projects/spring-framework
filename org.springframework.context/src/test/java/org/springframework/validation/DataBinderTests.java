@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
@@ -288,7 +289,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("object", "1");
 		binder.bind(pvs);
-		assertEquals(new Integer(1), tb.getObject());
+		Assert.assertEquals(new Integer(1), tb.getObject());
 	}
 
 	public void testBindingWithAllowedFields() throws Exception {
