@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="build-spring-webflow" default="precommit">
+<project name="build-spring-framework" default="precommit">
 
 	<path id="bundles">
 		<pathelement location="../org.springframework.instrument"/>
@@ -26,6 +26,6 @@
 	<import file="${basedir}/publish-top-level.xml"/>
 	<import file="${basedir}/../spring-build/multi-bundle/default.xml"/>
 
-	<target name="precommit" depends="clean,clean-integration,jar,test"/>
+	<target name="precommit" depends="clean,clean-integration,test"/>
 
 </project>

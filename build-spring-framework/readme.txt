@@ -1,13 +1,13 @@
 This is where the master build that creates releases of Spring Framework resides.  The build system is based on spring-build, which is linked in using an SVN external to https://src.springframework.org/svn/spring-build.
 
 USERS
-- To build all Spring Web Flow projects, including samples:
+- To build all Spring Framework projects, including samples:
 
     1. From this directory, run:
        ant
         
 Build Pre-requisites:
-- javac 1.5 or > must be in your system path
+- javac 1.6 or > must be in your system path
 - ant 1.7 or > must be in your system path
 
 DEVELOPERS
