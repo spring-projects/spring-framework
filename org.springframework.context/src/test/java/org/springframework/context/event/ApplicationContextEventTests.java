@@ -24,6 +24,7 @@ import org.easymock.EasyMock;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.Assert;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -173,7 +174,7 @@ public class ApplicationContextEventTests {
 
 		BeanThatBroadcasts broadcaster = (BeanThatBroadcasts) context.getBean("broadcaster");
 		context.publishEvent(new MyEvent(context));
-		assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
+		Assert.assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
 	}
 
 	public static class MyEvent extends ApplicationEvent {
