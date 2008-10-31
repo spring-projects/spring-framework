@@ -25,26 +25,24 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.TestBean;
-import org.springframework.test.AssertThrows;
 
 /**
- * <p>
- * JUnit 3.8 based unit tests for {@link ReflectionUtils}.
- * </p>
+ * <p> JUnit 4 based unit tests for {@link ReflectionUtils}. </p>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Arjen Poutsma
  */
-public class ReflectionUtilsTests extends TestCase {
+public class ReflectionUtilsTests {
 
-	public void testFindField() {
-		Field field;
-
-		field = ReflectionUtils.findField(TestBeanSubclassWithPublicField.class, "publicField", String.class);
+	@Test
+	public void findField() {
+		Field field = ReflectionUtils.findField(TestBeanSubclassWithPublicField.class, "publicField", String.class);
 		assertNotNull(field);
 		assertEquals("publicField", field.getName());
 		assertEquals(String.class, field.getType());
@@ -63,17 +61,10 @@ public class ReflectionUtilsTests extends TestCase {
 		assertTrue("Field should be private.", Modifier.isPrivate(field.getModifiers()));
 	}
 
-	public void testSetField() {
+	@Test
+	public void setField() {
 		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
 		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
-
-		new AssertThrows(IllegalStateException.class,
-				"Calling setField() with on a private field without making it accessible should throw an IllegalStateException.") {
-
-			public void test() throws Exception {
-				ReflectionUtils.setField(field, testBean, "FooBar");
-			}
-		}.runTest();
 
 		ReflectionUtils.makeAccessible(field);
 
@@ -85,39 +76,48 @@ public class ReflectionUtilsTests extends TestCase {
 		assertNull(testBean.getName());
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void setFieldIllegal() {
+		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
+		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		ReflectionUtils.setField(field, testBean, "FooBar");
+	}
 
-	public void testInvokeMethod() throws Exception {
+	@Test
+	public void invokeMethod() throws Exception {
 		String rob = "Rob Harrop";
-		String juergen = "Juergen Hoeller";
 
 		TestBean bean = new TestBean();
 		bean.setName(rob);
 
 		Method getName = TestBean.class.getMethod("getName", (Class[]) null);
-		Method setName = TestBean.class.getMethod("setName", new Class[] { String.class });
+		Method setName = TestBean.class.getMethod("setName", new Class[]{String.class});
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
 		assertEquals("Incorrect name returned", rob, name);
 
-		ReflectionUtils.invokeMethod(setName, bean, new Object[] { juergen });
+		String juergen = "Juergen Hoeller";
+		ReflectionUtils.invokeMethod(setName, bean, new Object[]{juergen});
 		assertEquals("Incorrect name set", juergen, bean.getName());
 	}
 
-	public void testDeclaresException() throws Exception {
-		Method remoteExMethod = A.class.getDeclaredMethod("foo", new Class[] {Integer.class});
+	@Test
+	public void declaresException() throws Exception {
+		Method remoteExMethod = A.class.getDeclaredMethod("foo", new Class[]{Integer.class});
 		assertTrue(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class));
 		assertTrue(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class));
 		assertFalse(ReflectionUtils.declaresException(remoteExMethod, NoSuchMethodException.class));
 		assertFalse(ReflectionUtils.declaresException(remoteExMethod, Exception.class));
 
-		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[] {String.class});
+		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[]{String.class});
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class));
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, NumberFormatException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, Exception.class));
 	}
 
-	public void testCopySrcToDestinationOfIncorrectClass() {
+	@Test
+	public void copySrcToDestinationOfIncorrectClass() {
 		TestBean src = new TestBean();
 		String dest = new String();
 		try {
@@ -129,7 +129,8 @@ public class ReflectionUtilsTests extends TestCase {
 		}
 	}
 
-	public void testRejectsNullSrc() {
+	@Test
+	public void rejectsNullSrc() {
 		TestBean src = null;
 		String dest = new String();
 		try {
@@ -141,7 +142,8 @@ public class ReflectionUtilsTests extends TestCase {
 		}
 	}
 
-	public void testRejectsNullDest() {
+	@Test
+	public void rejectsNullDest() {
 		TestBean src = new TestBean();
 		String dest = null;
 		try {
@@ -153,13 +155,15 @@ public class ReflectionUtilsTests extends TestCase {
 		}
 	}
 
-	public void testValidCopy() {
+	@Test
+	public void validCopy() {
 		TestBean src = new TestBean();
 		TestBean dest = new TestBean();
 		testValidCopy(src, dest);
 	}
 
-	public void testValidCopyOnSubTypeWithNewField() {
+	@Test
+	public void validCopyOnSubTypeWithNewField() {
 		TestBeanSubclassWithNewField src = new TestBeanSubclassWithNewField();
 		TestBeanSubclassWithNewField dest = new TestBeanSubclassWithNewField();
 		src.magic = 11;
@@ -172,7 +176,8 @@ public class ReflectionUtilsTests extends TestCase {
 		assertEquals(src.prot, dest.prot);
 	}
 
-	public void testValidCopyToSubType() {
+	@Test
+	public void validCopyToSubType() {
 		TestBean src = new TestBean();
 		TestBeanSubclassWithNewField dest = new TestBeanSubclassWithNewField();
 		dest.magic = 11;
@@ -181,7 +186,8 @@ public class ReflectionUtilsTests extends TestCase {
 		assertEquals(11, dest.magic);
 	}
 
-	public void testValidCopyToSubTypeWithFinalField() {
+	@Test
+	public void validCopyToSubTypeWithFinalField() {
 		TestBeanSubclassWithFinalField src = new TestBeanSubclassWithFinalField();
 		TestBeanSubclassWithFinalField dest = new TestBeanSubclassWithFinalField();
 		// Check that this doesn't fail due to attempt to assign final
@@ -201,9 +207,10 @@ public class ReflectionUtilsTests extends TestCase {
 	}
 
 	static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
-		private List methodNames = new LinkedList();
 
-		private List methods = new LinkedList();
+		private List<String> methodNames = new LinkedList<String>();
+
+		private List<Method> methods = new LinkedList<Method>();
 
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
 			this.methodNames.add(m.getName());
@@ -217,7 +224,7 @@ public class ReflectionUtilsTests extends TestCase {
 		public List getMethods() {
 			return this.methods;
 		}
-	};
+	}
 
 	public void testDoWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
@@ -234,6 +241,8 @@ public class ReflectionUtilsTests extends TestCase {
 	}
 
 	public static class TestBeanSubclass extends TestBean {
+
+		@Override
 		public void absquatulate() {
 			throw new UnsupportedOperationException();
 		}
@@ -253,33 +262,37 @@ public class ReflectionUtilsTests extends TestCase {
 	}
 
 	public void testFindMethod() throws Exception {
-	  assertNotNull(ReflectionUtils.findMethod(B.class, "bar", new Class[]{String.class}));
-	  assertNotNull(ReflectionUtils.findMethod(B.class, "foo", new Class[]{Integer.class}));
+		assertNotNull(ReflectionUtils.findMethod(B.class, "bar", new Class[]{String.class}));
+		assertNotNull(ReflectionUtils.findMethod(B.class, "foo", new Class[]{Integer.class}));
 	}
 
-
 	public static class TestBeanSubclassWithPublicField extends TestBean {
+
 		public String publicField = "foo";
 	}
 
 	public static class TestBeanSubclassWithNewField extends TestBean {
+
 		private int magic;
+
 		protected String prot = "foo";
 	}
 
-
 	public static class TestBeanSubclassWithFinalField extends TestBean {
+
 		private final String foo = "will break naive copy that doesn't exclude statics";
 	}
 
-
 	private static class A {
-		private void foo(Integer i) throws RemoteException {}
+
+		private void foo(Integer i) throws RemoteException {
+		}
 	}
 
-
 	private static class B extends A {
-		void bar(String s) throws IllegalArgumentException {}
+
+		void bar(String s) throws IllegalArgumentException {
+		}
 	}
 
 }
