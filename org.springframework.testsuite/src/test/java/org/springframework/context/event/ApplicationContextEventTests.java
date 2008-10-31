@@ -19,11 +19,11 @@ package org.springframework.context.event;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.MockControl;
-import org.easymock.internal.AlwaysMatcher;
-import org.easymock.internal.EqualsMatcher;
+import org.easymock.EasyMock;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -36,7 +36,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.BeanThatBroadcasts;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.test.AssertThrows;
 
 /**
  * Unit and integration tests for the ApplicationContext event support.
@@ -44,7 +43,7 @@ import org.springframework.test.AssertThrows;
  * @author Alef Arendsen
  * @author Rick Evans
  */
-public class ApplicationContextEventTests extends TestCase {
+public class ApplicationContextEventTests {
 
 	private AbstractApplicationEventMulticaster getMulticaster() {
 		return new AbstractApplicationEventMulticaster() {
@@ -53,7 +52,8 @@ public class ApplicationContextEventTests extends TestCase {
 		};
 	}
 
-	public void testMulticasterNewCollectionClass() {
+	@Test
+	public void multicasterNewCollectionClass() {
 		AbstractApplicationEventMulticaster mc = getMulticaster();
 
 		mc.addApplicationListener(new NoOpApplicationListener());
@@ -64,34 +64,26 @@ public class ApplicationContextEventTests extends TestCase {
 		assertEquals(ArrayList.class, mc.getApplicationListeners().getClass());
 	}
 
-	public void testMulticasterInvalidCollectionClass_NotEvenACollectionType() {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				AbstractApplicationEventMulticaster mc = getMulticaster();
-				mc.setCollectionClass(ApplicationContextEventTests.class);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void multicasterInvalidCollectionClass_NotEvenACollectionType() {
+		AbstractApplicationEventMulticaster mc = getMulticaster();
+		mc.setCollectionClass(ApplicationContextEventTests.class);
 	}
 
-	public void testMulticasterInvalidCollectionClass_PassingAnInterfaceNotAConcreteClass() {
-		new AssertThrows(FatalBeanException.class) {
-			public void test() throws Exception {
-				AbstractApplicationEventMulticaster mc = getMulticaster();
-				mc.setCollectionClass(List.class);
-			}
-		}.runTest();
+	@Test(expected = FatalBeanException.class)
+	public void multicasterInvalidCollectionClass_PassingAnInterfaceNotAConcreteClass() {
+		AbstractApplicationEventMulticaster mc = getMulticaster();
+		mc.setCollectionClass(List.class);
 	}
 
-	public void testMulticasterNullCollectionClass() {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				AbstractApplicationEventMulticaster mc = getMulticaster();
-				mc.setCollectionClass(null);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void multicasterNullCollectionClass() {
+		AbstractApplicationEventMulticaster mc = getMulticaster();
+		mc.setCollectionClass(null);
 	}
 
-	public void testMulticasterRemoveAll() {
+	@Test
+	public void multicasterRemoveAll() {
 		AbstractApplicationEventMulticaster mc = getMulticaster();
 		mc.addApplicationListener(new NoOpApplicationListener());
 		mc.removeAllListeners();
@@ -99,7 +91,8 @@ public class ApplicationContextEventTests extends TestCase {
 		assertEquals(0, mc.getApplicationListeners().size());
 	}
 
-	public void testMulticasterRemoveOne() {
+	@Test
+	public void multicasterRemoveOne() {
 		AbstractApplicationEventMulticaster mc = getMulticaster();
 		ApplicationListener one = new NoOpApplicationListener();
 		ApplicationListener two = new NoOpApplicationListener();
@@ -112,55 +105,48 @@ public class ApplicationContextEventTests extends TestCase {
 		assertTrue("Remaining listener present", mc.getApplicationListeners().contains(two));
 	}
 
-	public void testSimpleApplicationEventMulticaster() {
-		MockControl ctrl = MockControl.createControl(ApplicationListener.class);
-		ApplicationListener listener = (ApplicationListener) ctrl.getMock();
+	@Test
+	public void simpleApplicationEventMulticaster() {
+		ApplicationListener listener = EasyMock.createMock(ApplicationListener.class);
 
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 		listener.onApplicationEvent(evt);
-		ctrl.setMatcher(new EqualsMatcher());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener);
 
-		ctrl.replay();
+		replay(listener);
 
 		smc.multicastEvent(evt);
 
-		ctrl.verify();
+		verify(listener);
 	}
 
+	@Test
 	public void testEvenPublicationInterceptor() throws Throwable {
-		MockControl invCtrl = MockControl.createControl(MethodInvocation.class);
-		MethodInvocation invocation = (MethodInvocation) invCtrl.getMock();
+		MethodInvocation invocation = EasyMock.createMock(MethodInvocation.class);
+		ApplicationContext ctx = EasyMock.createMock(ApplicationContext.class);
 
-		MockControl ctxCtrl = MockControl.createControl(ApplicationContext.class);
-		ApplicationContext ctx = (ApplicationContext) ctxCtrl.getMock();
-
-		EventPublicationInterceptor interceptor =
-				new EventPublicationInterceptor();
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventClass(MyEvent.class);
 		interceptor.setApplicationEventPublisher(ctx);
 		interceptor.afterPropertiesSet();
 
-		invocation.proceed();
-		invCtrl.setReturnValue(new Object());
+		expect(invocation.proceed()).andReturn(new Object());
 
-		invocation.getThis();
-		invCtrl.setReturnValue(new Object());
-		ctx.publishEvent(new MyEvent(new Object()));
-		ctxCtrl.setDefaultMatcher(new AlwaysMatcher());
+		expect(invocation.getThis()).andReturn(new Object());
 
-		ctxCtrl.replay();
-		invCtrl.replay();
+		ctx.publishEvent(isA(MyEvent.class));
+
+		replay(invocation, ctx);
 
 		interceptor.invoke(invocation);
 
-		ctxCtrl.verify();
-		invCtrl.verify();
+		verify(invocation, ctx);
 	}
 
-	public void testListenerAndBroadcasterWithUnresolvableCircularReference() {
+	@Test
+	public void listenerAndBroadcasterWithUnresolvableCircularReference() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.setDisplayName("listener context");
 		context.registerBeanDefinition("broadcaster", new RootBeanDefinition(BeanThatBroadcasts.class));
@@ -176,7 +162,8 @@ public class ApplicationContextEventTests extends TestCase {
 		}
 	}
 
-	public void testListenerAndBroadcasterWithResolvableCircularReference() {
+	@Test
+	public void listenerAndBroadcasterWithResolvableCircularReference() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("broadcaster", new RootBeanDefinition(BeanThatBroadcasts.class));
 		RootBeanDefinition listenerDef = new RootBeanDefinition(BeanThatListens.class);
@@ -189,14 +176,12 @@ public class ApplicationContextEventTests extends TestCase {
 		assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
 	}
 
-
 	public static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {
 			super(source);
 		}
 	}
-
 
 	private static final class NoOpApplicationListener implements ApplicationListener {
 
