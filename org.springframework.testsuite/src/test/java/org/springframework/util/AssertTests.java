@@ -16,10 +16,15 @@
 
 package org.springframework.util;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link Assert} class.
@@ -27,158 +32,124 @@ import java.util.*;
  * @author Keith Donald
  * @author Erwin Vervaet
  * @author Rick Evans
+ * @author Arjen Poutsma
  */
-public class AssertTests extends TestCase {
+public class AssertTests {
 
-    public void testInstanceOf() {
-        final Set set = new HashSet();
-        Assert.isInstanceOf(HashSet.class, set);
-        new AssertThrows(IllegalArgumentException.class, "a hash map is not a set") {
-            public void test() throws Exception {
-                Assert.isInstanceOf(HashMap.class, set);
-            }
-        }.runTest();
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void instanceOf() {
+		final Set set = new HashSet();
+		Assert.isInstanceOf(HashSet.class, set);
+		Assert.isInstanceOf(HashMap.class, set);
+	}
 
-    public void testIsNullDoesNotThrowExceptionIfArgumentIsNullWithMessage() {
-        Assert.isNull(null, "Bla");
-    }
+	@Test
+	public void isNullDoesNotThrowExceptionIfArgumentIsNullWithMessage() {
+		Assert.isNull(null, "Bla");
+	}
 
-    public void testIsNullDoesNotThrowExceptionIfArgumentIsNull() {
-        Assert.isNull(null);
-    }
+	@Test
+	public void isNullDoesNotThrowExceptionIfArgumentIsNull() {
+		Assert.isNull(null);
+	}
 
-    public void testIsNullThrowsExceptionIfArgumentIsNotNull() {
-        new AssertThrows(IllegalArgumentException.class, "object is not null") {
-            public void test() throws Exception {
-                Assert.isNull(new Object());
-            }
-        }.runTest();
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void isNullThrowsExceptionIfArgumentIsNotNull() {
+		Assert.isNull(new Object());
+	}
 
-    public void testIsNullThrowsExceptionIfArgumentIsNotNullWithMessage() {
-        new AssertThrows(IllegalArgumentException.class, "object is not null") {
-            public void test() throws Exception {
-                Assert.isNull(new Object(), "Bla");
-            }
+	@Test(expected = IllegalArgumentException.class)
+	public void isTrueWithFalseExpressionThrowsException() throws Exception {
+		Assert.isTrue(false);
+	}
 
-            protected void checkExceptionExpectations(Exception actualException) {
-                assertEquals("Bla", actualException.getMessage());
-                super.checkExceptionExpectations(actualException);
-            }
-        }.runTest();
-    }
+	@Test
+	public void isTrueWithTrueExpressionSunnyDay() throws Exception {
+		Assert.isTrue(true);
+	}
 
-    public void testIsTrueWithFalseExpressionThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.isTrue(false);
-            }
-        }.runTest();
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testHasLengthWithNullStringThrowsException() throws Exception {
+		Assert.hasLength(null);
+	}
 
-    public void testIsTrueWithTrueExpressionSunnyDay() throws Exception {
-        Assert.isTrue(true);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void hasLengthWithEmptyStringThrowsException() throws Exception {
+		Assert.hasLength("");
+	}
 
-    public void testHasLengthWithNullStringThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.hasLength(null);
-            }
-        }.runTest();
-    }
+	@Test
+	public void hasLengthWithWhitespaceOnlyStringDoesNotThrowException() throws Exception {
+		Assert.hasLength("\t  ");
+	}
 
-    public void testHasLengthWithEmptyStringThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.hasLength("");
-            }
-        }.runTest();
-    }
+	@Test
+	public void hasLengthSunnyDay() throws Exception {
+		Assert.hasLength("I Heart ...");
+	}
 
-    public void testHasLengthWithWhitespaceOnlyStringDoesNotThrowException() throws Exception {
-        Assert.hasLength("\t  ");
-    }
+	@Test
+	public void doesNotContainWithNullSearchStringDoesNotThrowException() throws Exception {
+		Assert.doesNotContain(null, "rod");
+	}
 
-    public void testHasLengthSunnyDay() throws Exception {
-        Assert.hasLength("I Heart ...");
-    }
+	@Test
+	public void doesNotContainWithNullSubstringDoesNotThrowException() throws Exception {
+		Assert.doesNotContain("A cool chick's name is Brod. ", null);
+	}
 
-    public void testDoesNotContainWithNullSearchStringDoesNotThrowException() throws Exception {
-        Assert.doesNotContain(null, "rod");
-    }
+	@Test
+	public void doesNotContainWithEmptySubstringDoesNotThrowException() throws Exception {
+		Assert.doesNotContain("A cool chick's name is Brod. ", "");
+	}
 
-    public void testDoesNotContainWithNullSubstringDoesNotThrowException() throws Exception {
-        Assert.doesNotContain("A cool chick's name is Brod. ", null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void assertNotEmptyWithNullCollectionThrowsException() throws Exception {
+		Assert.notEmpty((Collection) null);
+	}
 
-    public void testDoesNotContainWithEmptySubstringDoesNotThrowException() throws Exception {
-        Assert.doesNotContain("A cool chick's name is Brod. ", "");
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void assertNotEmptyWithEmptyCollectionThrowsException() throws Exception {
+		Assert.notEmpty(new ArrayList());
+	}
 
-    public void testAssertNotEmptyWithNullCollectionThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.notEmpty((Collection) null);
-            }
-        }.runTest();
-    }
+	@Test
+	public void assertNotEmptyWithCollectionSunnyDay() throws Exception {
+		List<String> collection = new ArrayList<String>();
+		collection.add("");
+		Assert.notEmpty(collection);
+	}
 
-    public void testAssertNotEmptyWithEmptyCollectionThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.notEmpty(new ArrayList());
-            }
-        }.runTest();
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void assertNotEmptyWithNullMapThrowsException() throws Exception {
+		Assert.notEmpty((Map) null);
+	}
 
-    public void testAssertNotEmptyWithCollectionSunnyDay() throws Exception {
-        List collection = new ArrayList();
-        collection.add("");
-        Assert.notEmpty(collection);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void assertNotEmptyWithEmptyMapThrowsException() throws Exception {
+		Assert.notEmpty(new HashMap());
+	}
 
-    public void testAssertNotEmptyWithNullMapThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.notEmpty((Map) null);
-            }
-        }.runTest();
-    }
+	@Test
+	public void assertNotEmptyWithMapSunnyDay() throws Exception {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("", "");
+		Assert.notEmpty(map);
+	}
 
-    public void testAssertNotEmptyWithEmptyMapThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.notEmpty(new HashMap());
-            }
-        }.runTest();
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void isInstanceofClassWithNullInstanceThrowsException() throws Exception {
+		Assert.isInstanceOf(String.class, null);
+	}
 
-    public void testAssertNotEmptyWithMapSunnyDay() throws Exception {
-        Map map = new HashMap();
-        map.put("", "");
-        Assert.notEmpty(map);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void stateWithFalseExpressionThrowsException() throws Exception {
+		Assert.state(false);
+	}
 
-    public void testIsInstanceofClassWithNullInstanceThrowsException() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                Assert.isInstanceOf(String.class, null);
-            }
-        }.runTest();
-    }
-
-    public void testStateWithFalseExpressionThrowsException() throws Exception {
-        new AssertThrows(IllegalStateException.class) {
-            public void test() throws Exception {
-                Assert.state(false);
-            }
-        }.runTest();
-    }
-
-    public void testStateWithTrueExpressionSunnyDay() throws Exception {
-        Assert.state(true);
-    }
+	@Test
+	public void stateWithTrueExpressionSunnyDay() throws Exception {
+		Assert.state(true);
+	}
 
 }
