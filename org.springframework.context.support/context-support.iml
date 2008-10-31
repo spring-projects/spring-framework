@@ -137,6 +137,28 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.apache.poi/com.springsource.org.apache.poi/3.0.2.FINAL/com.springsource.org.apache.poi-3.0.2.FINAL.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.apache.poi/com.springsource.org.apache.poi/3.0.2.FINAL/com.springsource.org.apache.poi-sources-3.0.2.FINAL.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-sources-2.3.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">

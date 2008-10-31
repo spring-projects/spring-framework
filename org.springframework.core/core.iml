@@ -99,6 +99,15 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hamcrest/com.springsource.org.hamcrest.core/1.1.0/com.springsource.org.hamcrest.core-1.1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">
