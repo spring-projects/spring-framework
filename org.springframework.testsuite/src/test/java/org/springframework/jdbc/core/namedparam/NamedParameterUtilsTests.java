@@ -20,19 +20,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class NamedParameterUtilsTests extends TestCase {
+public class NamedParameterUtilsTests {
 
-	public void testParseSql() {
+	@Test
+	public void parseSql() {
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals("xxx ? yyyy ? ? ? zzzzz", NamedParameterUtils.substituteNamedParameters(psql, null));
@@ -57,21 +58,24 @@ public class NamedParameterUtilsTests extends TestCase {
 
 	}
 
-	public void testSubstituteNamedParameters() {
+	@Test
+	public void substituteNamedParameters() {
 		MapSqlParameterSource namedParams = new MapSqlParameterSource();
 		namedParams.addValue("a", "a").addValue("b", "b").addValue("c", "c");
 		assertEquals("xxx ? ? ?", NamedParameterUtils.substituteNamedParameters("xxx :a :b :c", namedParams));
-		assertEquals("xxx ? ? ? xx ? ?", NamedParameterUtils.substituteNamedParameters("xxx :a :b :c xx :a :a", namedParams));
+		assertEquals("xxx ? ? ? xx ? ?",
+				NamedParameterUtils.substituteNamedParameters("xxx :a :b :c xx :a :a", namedParams));
 	}
 
-	public void testConvertParamMapToArray() {
-		Map paramMap = new HashMap();
+	@Test
+	public void convertParamMapToArray() {
+		Map<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("a", "a");
 		paramMap.put("b", "b");
 		paramMap.put("c", "c");
-		assertTrue(3 == NamedParameterUtils.buildValueArray("xxx :a :b :c", paramMap).length);
-		assertTrue(5 == NamedParameterUtils.buildValueArray("xxx :a :b :c xx :a :b", paramMap).length);
-		assertTrue(5 == NamedParameterUtils.buildValueArray("xxx :a :a :a xx :a :a", paramMap).length);
+		assertSame(3, NamedParameterUtils.buildValueArray("xxx :a :b :c", paramMap).length);
+		assertSame(5, NamedParameterUtils.buildValueArray("xxx :a :b :c xx :a :b", paramMap).length);
+		assertSame(5, NamedParameterUtils.buildValueArray("xxx :a :a :a xx :a :a", paramMap).length);
 		assertEquals("b", NamedParameterUtils.buildValueArray("xxx :a :b :c xx :a :b", paramMap)[4]);
 		try {
 			NamedParameterUtils.buildValueArray("xxx :a :b ?", paramMap);
@@ -81,31 +85,35 @@ public class NamedParameterUtilsTests extends TestCase {
 		}
 	}
 
-	public void testConvertTypeMapToArray() {
+	@Test
+	public void convertTypeMapToArray() {
 		MapSqlParameterSource namedParams = new MapSqlParameterSource();
 		namedParams.addValue("a", "a", 1).addValue("b", "b", 2).addValue("c", "c", 3);
-		assertTrue(3 == NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c"), namedParams).length);
-		assertTrue(5 == NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams).length);
-		assertTrue(5 == NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a"), namedParams).length);
-		assertEquals(2, NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams)[4]);
+		assertSame(3, NamedParameterUtils
+				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c"), namedParams).length);
+		assertSame(5, NamedParameterUtils
+				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams).length);
+		assertSame(5, NamedParameterUtils
+				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a"), namedParams).length);
+		assertEquals(2, NamedParameterUtils
+				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams)[4]);
 	}
 
-	public void testBuildValueArrayWithMissingParameterValue() throws Exception {
-		new AssertThrows(InvalidDataAccessApiUsageException.class) {
-			public void test() throws Exception {
-				String sql = "select count(0) from foo where id = :id";
-				NamedParameterUtils.buildValueArray(sql, new HashMap());
-			}
-		}.runTest();
+	@Test(expected = InvalidDataAccessApiUsageException.class)
+	public void buildValueArrayWithMissingParameterValue() throws Exception {
+		String sql = "select count(0) from foo where id = :id";
+		NamedParameterUtils.buildValueArray(sql, new HashMap());
 	}
 
-	public void testSubstituteNamedParametersWithStringContainingQuotes() throws Exception {
+	@Test
+	public void substituteNamedParametersWithStringContainingQuotes() throws Exception {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		String newSql = NamedParameterUtils.substituteNamedParameters(sql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
 	}
 
+	@Test
 	public void testParseSqlStatementWithStringContainingQuotes() throws Exception {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
@@ -116,7 +124,8 @@ public class NamedParameterUtilsTests extends TestCase {
 	/*
 	 * SPR-4789
 	 */
-	public void testParseSqlContainingComments() {
+	@Test
+	public void parseSqlContainingComments() {
 		String sql1 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
 		ParsedSql psql1 = NamedParameterUtils.parseSqlStatement(sql1);
 		assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz -- :xx XX\n",
@@ -152,7 +161,8 @@ public class NamedParameterUtilsTests extends TestCase {
 	/*
 	 * SPR-4612
 	 */
-	public void testParseSqlStatementWithPostgresCasting() throws Exception {
+	@Test
+	public void parseSqlStatementWithPostgresCasting() throws Exception {
 		String expectedSql = "select 'first name' from artists where id = ? and birth_date=?::timestamp";
 		String sql = "select 'first name' from artists where id = :id and birth_date=:birthDate::timestamp";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -162,7 +172,8 @@ public class NamedParameterUtilsTests extends TestCase {
 	/*
 	 * SPR-2544
 	 */
-	public void testParseSqlStatementWithLogicalAnd() {
+	@Test
+	public void parseSqlStatementWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(expectedSql);
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
@@ -171,7 +182,8 @@ public class NamedParameterUtilsTests extends TestCase {
 	/*
 	 * SPR-2544
 	 */
-	public void testSubstituteNamedParametersWithLogicalAnd() throws Exception {
+	@Test
+	public void substituteNamedParametersWithLogicalAnd() throws Exception {
 		String expectedSql = "xxx & yyyy";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
@@ -180,7 +192,8 @@ public class NamedParameterUtilsTests extends TestCase {
 	/*
 	 * SPR-3173
 	 */
-	public void testVariableAssignmentOperator() throws Exception {
+	@Test
+	public void variableAssignmentOperator() throws Exception {
 		String expectedSql = "x := 1";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
