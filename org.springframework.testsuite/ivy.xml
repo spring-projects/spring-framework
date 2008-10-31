@@ -24,6 +24,7 @@
 	<dependencies>
 		<dependency org="com.ibm.websphere" name="com.springsource.com.ibm.websphere.uow" rev="6.0.2.17" conf="test->compile"/>
 		<dependency org="com.opensymphony.quartz" name="com.springsource.org.quartz" rev="1.6.2" conf="test->compile"/>
+		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0" conf="test->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="2.1.0" conf="test->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08" conf="test->compile"/>
@@ -74,7 +75,8 @@
 		<!-- test dependencies -->
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->compile"/>
-
+		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
+		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
 	</dependencies>
 
 </ivy-module>
