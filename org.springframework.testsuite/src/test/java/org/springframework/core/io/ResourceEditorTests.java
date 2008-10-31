@@ -16,19 +16,21 @@
 
 package org.springframework.core.io;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
-
 import java.beans.PropertyEditor;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link ResourceEditor} class.
  *
  * @author Rick Evans
+ * @author Arjen Poutsma
  */
-public final class ResourceEditorTests extends TestCase {
+public final class ResourceEditorTests {
 
-	public void testSunnyDay() throws Exception {
+	@Test
+	public void sunnyDay() throws Exception {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText("classpath:org/springframework/core/io/ResourceEditorTests.class");
 		Resource resource = (Resource) editor.getValue();
@@ -36,21 +38,20 @@ public final class ResourceEditorTests extends TestCase {
 		assertTrue(resource.exists());
 	}
 
-	public void testCtorWithNullResourceLoader() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new ResourceEditor(null);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void ctorWithNullResourceLoader() throws Exception {
+		new ResourceEditor(null);
 	}
 
-	public void testSetAndGetAsTextWithNull() throws Exception {
+	@Test
+	public void setAndGetAsTextWithNull() throws Exception {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText(null);
 		assertEquals("", editor.getAsText());
 	}
 
-	public void testSetAndGetAsTextWithWhitespaceResource() throws Exception {
+	@Test
+	public void setAndGetAsTextWithWhitespaceResource() throws Exception {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText("  ");
 		assertEquals("", editor.getAsText());
