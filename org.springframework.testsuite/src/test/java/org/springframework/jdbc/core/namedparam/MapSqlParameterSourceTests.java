@@ -16,30 +16,30 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
-import org.springframework.test.AssertThrows;
 import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
  * @author Rick Evans
+ * @author Arjen Poutsma
  */
-public final class MapSqlParameterSourceTests extends TestCase {
+public final class MapSqlParameterSourceTests {
 
-	public void testNullParameterValuesPassedToCtorIsOk() throws Exception {
+	@Test
+	public void nullParameterValuesPassedToCtorIsOk() throws Exception {
 		new MapSqlParameterSource(null);
 	}
 
-	public void testGetValueChokesIfParameterIsNotPresent() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				MapSqlParameterSource source = new MapSqlParameterSource();
-				source.getValue("pechorin was right!");
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void getValueChokesIfParameterIsNotPresent() throws Exception {
+		MapSqlParameterSource source = new MapSqlParameterSource();
+		source.getValue("pechorin was right!");
 	}
 
-	public void testSqlParameterValueRegistersSqlType() throws Exception {
+	@Test
+	public void sqlParameterValueRegistersSqlType() throws Exception {
 		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(2, "Foo"));
 		assertEquals("Correct SQL Type not registered", 2, msps.getSqlType("FOO"));
 		MapSqlParameterSource msps2 = new MapSqlParameterSource();
