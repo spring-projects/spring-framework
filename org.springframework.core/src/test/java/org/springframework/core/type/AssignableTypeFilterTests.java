@@ -22,8 +22,6 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 /**
  * @author Ramnivas Laddad
@@ -92,6 +90,14 @@ public class AssignableTypeFilterTests extends TestCase {
 
 
 	private static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
+	}
+
+	private static interface JdbcDaoSupport {
+
+	}
+
+	private static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
+
 	}
 
 }

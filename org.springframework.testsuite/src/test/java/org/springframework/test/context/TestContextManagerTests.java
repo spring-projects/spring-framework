@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -35,6 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.core.style.ToStringCreator;
 
 /**
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies
@@ -170,7 +170,7 @@ public class TestContextManagerTests {
 
 		@Override
 		public String toString() {
-			return new ToStringBuilder(this).append("name", this.name).toString();
+			return new ToStringCreator(this).append("name", this.name).toString();
 		}
 	}
 

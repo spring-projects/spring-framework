@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Assert;
+
 import org.springframework.beans.GenericBean;
 import org.springframework.core.io.Resource;
 
@@ -91,11 +93,11 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 
 	public void testProgrammaticListIntrospection() throws Exception {
 		Method setter = GenericBean.class.getMethod("setResourceList", List.class);
-		assertEquals(Resource.class,
+		Assert.assertEquals(Resource.class,
 				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(setter, 0)));
 
 		Method getter = GenericBean.class.getMethod("getResourceList");
-		assertEquals(Resource.class,
+		Assert.assertEquals(Resource.class,
 				GenericCollectionTypeResolver.getCollectionReturnType(getter));
 	}
 
