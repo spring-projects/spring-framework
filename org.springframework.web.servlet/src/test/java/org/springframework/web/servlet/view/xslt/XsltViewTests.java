@@ -22,17 +22,19 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import junit.framework.TestCase;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -41,50 +43,46 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class XsltViewTests extends TestCase {
+public class XsltViewTests {
 
-	private static final String HTML_OUTPUT = "org/springframework/web/servlet/view/xslt/products.xsl";
+	private static final String HTML_OUTPUT = "/org/springframework/web/servlet/view/xslt/products.xsl";
 
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 	}
 
-	public void testWithNoSource() throws Exception {
+	@Test(expected = IllegalArgumentException.class)
+	public void withNoSource() throws Exception {
 		final XsltView view = getXsltView(HTML_OUTPUT);
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				view.render(new HashMap(), request, response);
-			}
-		}.runTest();
+		view.render(new HashMap(), request, response);
 	}
 
-	public void testWithoutUrl() throws Exception {
+	@Test(expected = IllegalArgumentException.class)
+	public void withoutUrl() throws Exception {
 		final XsltView view = new XsltView();
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				view.afterPropertiesSet();
-			}
-		}.runTest();
+		view.afterPropertiesSet();
 	}
 
-	public void testSimpleTransformWithSource() throws Exception {
+	@Test
+	public void simpleTransformWithSource() throws Exception {
 		Source source = new StreamSource(getProductDataResource().getInputStream());
 		Map model = new HashMap();
 		model.put("someKey", source);
 		doTestWithModel(model);
 	}
 
+	@Test
 	public void testSimpleTransformWithDocument() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
 		Map model = new HashMap();
@@ -92,6 +90,7 @@ public class XsltViewTests extends TestCase {
 		doTestWithModel(model);
 	}
 
+	@Test
 	public void testSimpleTransformWithNode() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
 		Map model = new HashMap();
@@ -99,24 +98,28 @@ public class XsltViewTests extends TestCase {
 		doTestWithModel(model);
 	}
 
+	@Test
 	public void testSimpleTransformWithInputStream() throws Exception {
 		Map model = new HashMap();
 		model.put("someKey", getProductDataResource().getInputStream());
 		doTestWithModel(model);
 	}
 
+	@Test
 	public void testSimpleTransformWithReader() throws Exception {
 		Map model = new HashMap();
 		model.put("someKey", new InputStreamReader(getProductDataResource().getInputStream()));
 		doTestWithModel(model);
 	}
 
+	@Test
 	public void testSimpleTransformWithResource() throws Exception {
 		Map model = new HashMap();
 		model.put("someKey", getProductDataResource());
 		doTestWithModel(model);
 	}
 
+	@Test
 	public void testWithSourceKey() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
@@ -129,6 +132,7 @@ public class XsltViewTests extends TestCase {
 		assertHtmlOutput(this.response.getContentAsString());
 	}
 
+	@Test
 	public void testContentTypeCarriedFromTemplate() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 
@@ -141,6 +145,7 @@ public class XsltViewTests extends TestCase {
 		assertEquals("UTF-8", this.response.getCharacterEncoding());
 	}
 
+	@Test
 	public void testModelParametersCarriedAcross() throws Exception {
 		Map model = new HashMap();
 		model.put("someKey", getProductDataResource());
@@ -149,6 +154,7 @@ public class XsltViewTests extends TestCase {
 		assertTrue(this.response.getContentAsString().indexOf("Product List") > -1);
 	}
 
+	@Test
 	public void testStaticAttributesCarriedAcross() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
