@@ -23,6 +23,7 @@
 		<dependency org="com.ibm.websphere" name="com.springsource.com.ibm.websphere.uow" rev="6.0.2.17" conf="test->compile"/>
 		<dependency org="com.opensymphony.quartz" name="com.springsource.org.quartz" rev="1.6.2" conf="test->compile"/>
 		<dependency org="com.oracle.toplink.essentials" name="com.springsource.oracle.toplink.essentials" rev="2.0.0.b41-beta2" conf="test->compile"/>
+		<dependency org="com.sun.enterprise" name="com.springsource.com.sun.enterprise.loader" rev="1.0.0" conf="test->compile"/>
 		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0" conf="test->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="test->compile"/>
@@ -57,10 +58,12 @@
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.5.4" conf="test->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.5.1" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.2.6.ga" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.1.ga" conf="test->compile"/>
+		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="test->runtime" />
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="test->runtime" />
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="test->compile"/>
