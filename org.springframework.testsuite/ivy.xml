@@ -11,9 +11,6 @@
 
 	<configurations>
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
-		<conf name="aspectj" extends="runtime" description="JARs needed to run with AspectJ"/>
-		<conf name="commons-collections" extends="runtime" description="JARs needed to run with Commons Collections"/>
-		<conf name="log4j" extends="runtime" description="JARs needed to use Log4J"/>
 	</configurations>
 
 	<publications>
@@ -22,10 +19,13 @@
 	</publications>
 
 	<dependencies>
+		<dependency org="com.caucho" name="com.springsource.com.caucho" rev="3.1.5" conf="test->compile"/>
 		<dependency org="com.ibm.websphere" name="com.springsource.com.ibm.websphere.uow" rev="6.0.2.17" conf="test->compile"/>
 		<dependency org="com.opensymphony.quartz" name="com.springsource.org.quartz" rev="1.6.2" conf="test->compile"/>
+		<dependency org="com.oracle.toplink.essentials" name="com.springsource.oracle.toplink.essentials" rev="2.0.0.b41-beta2" conf="test->compile"/>
 		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0" conf="test->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="test->compile"/>
+		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="2.1.0" conf="test->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08" conf="test->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.0.0" conf="test->compile"/>
@@ -46,6 +46,8 @@
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" conf="test->runtime"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.pool" rev="1.4.0" conf="test->compile"/>
+		<dependency org="org.apache.ibatis" name="com.springsource.com.ibatis" rev="2.3.4.726" conf="test->compile"/>
+		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence" rev="1.0.2" conf="test->compile"/>
 		<dependency org="org.apache.poi" name="com.springsource.org.apache.poi" rev="3.0.2.FINAL" conf="test->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles" rev="2.0.5" conf="test->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.core" rev="2.0.5.osgi" conf="test->compile"/>
@@ -55,8 +57,10 @@
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.5.4" conf="test->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.5.1" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.2.6.ga" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.1.ga" conf="test->compile"/>
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="test->runtime" />
 		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="test->runtime" />
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="test->compile"/>
@@ -77,6 +81,7 @@
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.8.0" conf="test->compile"/>
 	</dependencies>
 
 </ivy-module>
