@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/>
+
+	<bean id="testBean" class="org.springframework.beans.factory.annotation.RequiredTestBean">
+		<property name="name" value="Rob Harrop"/>
+		<property name="favouriteColour" value="Blue"/>
+		<property name="jobTitle" value="Grand Poobah"/>
+	</bean>
+
+</beans>

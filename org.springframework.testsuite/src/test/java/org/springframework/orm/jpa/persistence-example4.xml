@@ -1,0 +1,18 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+	version="1.0">
+
+	<persistence-unit name="OrderManagement4"
+		transaction-type="RESOURCE_LOCAL">
+		<non-jta-data-source>jdbc/MyDB</non-jta-data-source>
+		<mapping-file>order-mappings.xml</mapping-file>
+
+		<class>com.acme.Order</class>		
+		<class>com.acme.Customer</class>
+		<class>com.acme.Item</class>
+		<exclude-unlisted-classes />
+		
+	</persistence-unit>
+
+</persistence>
