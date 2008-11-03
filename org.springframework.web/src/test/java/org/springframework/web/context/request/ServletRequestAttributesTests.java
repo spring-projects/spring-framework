@@ -17,38 +17,33 @@
 package org.springframework.web.context.request;
 
 import java.io.Serializable;
-
 import javax.servlet.http.HttpServletRequest;
 
-import junit.framework.TestCase;
 import org.easymock.MockControl;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public class ServletRequestAttributesTests extends TestCase {
+public class ServletRequestAttributesTests {
 
 	private static final String KEY = "ThatThingThatThing";
-
 
 	private static final Serializable VALUE = new Serializable() {
 	};
 
-
-	public void testCtorRejectsNullArg() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new ServletRequestAttributes(null);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void ctorRejectsNullArg() throws Exception {
+		new ServletRequestAttributes(null);
 	}
 
-	public void testUpdateAccessedAttributes() throws Exception {
+	@Test
+	public void updateAccessedAttributes() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -59,7 +54,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		attrs.requestCompleted();
 	}
 
-	public void testSetRequestScopedAttribute() throws Exception {
+	@Test
+	public void setRequestScopedAttribute() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
@@ -67,7 +63,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
-	public void testSetRequestScopedAttributeAfterCompletion() throws Exception {
+	@Test
+	public void setRequestScopedAttributeAfterCompletion() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		request.close();
@@ -80,7 +77,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		}
 	}
 
-	public void testSetSessionScopedAttribute() throws Exception {
+	@Test
+	public void setSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -91,7 +89,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
-	public void testSetSessionScopedAttributeAfterCompletion() throws Exception {
+	@Test
+	public void setSessionScopedAttributeAfterCompletion() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -104,7 +103,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
-	public void testSetGlobalSessionScopedAttribute() throws Exception {
+	@Test
+	public void setGlobalSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -115,7 +115,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
-	public void testSetGlobalSessionScopedAttributeAfterCompletion() throws Exception {
+	@Test
+	public void setGlobalSessionScopedAttributeAfterCompletion() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -128,7 +129,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
-	public void testGetSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
+	@Test
+	public void getSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
 		request.getSession(false);
@@ -142,7 +144,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		mockRequest.verify();
 	}
 
-	public void testRemoveSessionScopedAttribute() throws Exception {
+	@Test
+	public void removeSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -153,7 +156,8 @@ public class ServletRequestAttributesTests extends TestCase {
 		assertNull(value);
 	}
 
-	public void testRemoveSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
+	@Test
+	public void removeSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
 		request.getSession(false);
