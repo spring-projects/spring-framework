@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 public class WebUtilsTests extends TestCase {
 
 	public void testFindParameterValue() {
-		Map params = new HashMap();
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("myKey1", "myValue1");
 		params.put("myKey2_myValue2", "xxx");
 		params.put("myKey3_myValue3.x", "xxx");
