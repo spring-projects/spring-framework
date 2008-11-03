@@ -20,7 +20,6 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rob Harrop
@@ -150,13 +149,14 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithNullResolvedCommand() throws Exception {
-		new AssertThrows(IllegalArgumentException.class,
-				"Must not be able to have a command name that resolves to null") {
-			public void test() throws Exception {
-				tag.setCommandName("${null}");
-				tag.doStartTag();
-			}
-		}.runTest();
+		try {
+			tag.setCommandName("${null}");
+			tag.doStartTag();
+			fail("Must not be able to have a command name that resolves to null");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	/*
