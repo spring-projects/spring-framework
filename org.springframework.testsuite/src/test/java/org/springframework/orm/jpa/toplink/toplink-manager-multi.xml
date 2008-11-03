@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+	
+	<import resource="classpath:/org/springframework/orm/jpa/multi-jpa-emf.xml"/>
+
+	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
+		<property name="database" value="HSQL"/>
+		<property name="showSql" value="true"/>
+		<property name="generateDdl" value="true"/>
+	</bean>
+
+	<bean id="jpaProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean"/>
+
+</beans>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd
+				http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd"
+		default-lazy-init="true">
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="myDs">jdbc/MyDataSource</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- JNDI Lookup Tests -->
+	<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource"/>
+
+	<jee:jndi-lookup id="complex"
+			jndi-name="${myDs}"
+			cache="true"
+			resource-ref="true"
+			lookup-on-startup="true"
+			expose-access-context="true"
+			expected-type="com.myapp.DefaultFoo"
+			proxy-interface="com.myapp.Foo"
+			default-value="myValue"/>
+
+	<jee:jndi-lookup id="withEnvironment" jndi-name="jdbc/MyDataSource" default-ref="myBean">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:jndi-lookup>
+
+	<jee:jndi-lookup id="withReferencedEnvironment" jndi-name="jdbc/MyDataSource" environment-ref="myEnvironment"/>
+
+	<util:properties id="myEnvironment">
+		<prop key="foo">bar</prop>
+	</util:properties>
+
+	<!-- Local EJB Tests -->
+	<jee:local-slsb id="simpleLocalEjb" jndi-name="ejb/MyLocalBean"
+			business-interface="org.springframework.beans.ITestBean"/>
+
+	<jee:local-slsb id="complexLocalEjb"
+			jndi-name="ejb/MyLocalBean"
+			business-interface="org.springframework.beans.ITestBean"
+			cache-home="true"
+			lookup-home-on-startup="true"
+			resource-ref="true">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:local-slsb>
+
+	<!-- Remote EJB Tests -->
+	<jee:remote-slsb id="simpleRemoteEjb" jndi-name="ejb/MyRemoteBean"
+			business-interface="org.springframework.beans.ITestBean"/>
+
+	<jee:remote-slsb id="complexRemoteEjb"
+			jndi-name="ejb/MyRemoteBean"
+			business-interface="org.springframework.beans.ITestBean"
+			cache-home="true"
+			lookup-home-on-startup="true"
+			resource-ref="true"
+			home-interface="org.springframework.beans.ITestBean"
+			refresh-home-on-connect-failure="true"
+      cache-session-bean="true">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:remote-slsb>
+
+</beans>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+				"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="otherTestBean" class="org.springframework.beans.TestBean"/>
+	<bean id="prototypeTestBean" class="org.springframework.beans.TestBean" scope="prototype"/>
+	<bean id="annotatedBean" class="org.springframework.beans.factory.generic.SomeAnnotatedBean"/>
+</beans>

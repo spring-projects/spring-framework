@@ -1,0 +1,72 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.aop.aspectj;
+
+import junit.framework.TestCase;
+
+import org.springframework.aop.framework.Advised;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+/**
+ * Check that an aspect that depends on another bean, where the referenced bean
+ * itself is advised by the same aspect, works correctly.
+ *
+ * @author Ramnivas Laddad
+ * @author Juergen Hoeller
+ */
+public class PropertyDependentAspectTests extends TestCase {
+
+	public void testPropertyDependentAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
+		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-before-aspect-test.xml");
+	}
+
+	public void testPropertyDependentAspectWithPropertyDeclaredAfterAdvice() throws Exception {
+		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-after-aspect-test.xml");
+	}
+
+	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
+		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-before-aspect-test.xml");
+	}
+
+	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredAfterAdvice() throws Exception {
+		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-after-aspect-test.xml");
+	}
+
+	private void checkXmlAspect(String appContextFile) {
+		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile);
+		ICounter counter = (ICounter) context.getBean("counter");
+		assertTrue("Proxy didn't get created", counter instanceof Advised);
+
+		counter.increment();
+		JoinPointMonitorAspect callCountingAspect = (JoinPointMonitorAspect)context.getBean("monitoringAspect");
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.beforeExecutions);
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.aroundExecutions);
+	}
+
+	private void checkAtAspectJAspect(String appContextFile) {
+		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile);
+		ICounter counter = (ICounter) context.getBean("counter");
+		assertTrue("Proxy didn't get created", counter instanceof Advised);
+
+		counter.increment();
+		JoinPointMonitorAtAspectJAspect callCountingAspect = (JoinPointMonitorAtAspectJAspect)context.getBean("monitoringAspect");
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.beforeExecutions);
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.aroundExecutions);
+	}
+
+}

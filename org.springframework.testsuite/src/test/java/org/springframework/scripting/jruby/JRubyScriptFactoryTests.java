@@ -19,6 +19,7 @@ package org.springframework.scripting.jruby;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
@@ -54,14 +55,14 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
 
-		assertEquals(calc, calc);
-		assertEquals(messenger, messenger);
+		Assert.assertEquals(calc, calc);
+		Assert.assertEquals(messenger, messenger);
 		assertTrue(!messenger.equals(calc));
-		assertTrue(messenger.hashCode() != calc.hashCode());
+		assertNotSame(messenger.hashCode(), calc.hashCode());
 		assertTrue(!messenger.toString().equals(calc.toString()));
 
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		Assert.assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
 	public void testNonStaticScript() throws Exception {
@@ -72,12 +73,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
 
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect.", desiredMessage, messenger.getMessage());
+		Assert.assertEquals("Message is incorrect.", desiredMessage, messenger.getMessage());
 
 		Refreshable refreshable = (Refreshable) messenger;
 		refreshable.refresh();
 
-		assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
+		Assert.assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
@@ -141,14 +142,14 @@ public class JRubyScriptFactoryTests extends TestCase {
 		TestBean testBean = (TestBean) ctx.getBean("testBean");
 
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		assertEquals("Hello World!", messenger.getMessage());
+		Assert.assertEquals("Hello World!", messenger.getMessage());
 		assertFalse(messenger instanceof Refreshable);
 
 		TestBeanAwareMessenger messengerByType = (TestBeanAwareMessenger) ctx.getBean("messengerByType");
-		assertEquals(testBean, messengerByType.getTestBean());
+		Assert.assertEquals(testBean, messengerByType.getTestBean());
 
 		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
-		assertEquals(testBean, messengerByName.getTestBean());
+		Assert.assertEquals(testBean, messengerByName.getTestBean());
 	}
 
 	public void testPrototypeScriptFromTag() throws Exception {
@@ -158,12 +159,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 		assertNotSame(messenger, messenger2);
 		assertSame(messenger.getClass(), messenger2.getClass());
-		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals("Hello World!", messenger2.getMessage());
+		Assert.assertEquals("Hello World!", messenger.getMessage());
+		Assert.assertEquals("Hello World!", messenger2.getMessage());
 		messenger.setMessage("Bye World!");
 		messenger2.setMessage("Byebye World!");
-		assertEquals("Bye World!", messenger.getMessage());
-		assertEquals("Byebye World!", messenger2.getMessage());
+		Assert.assertEquals("Bye World!", messenger.getMessage());
+		Assert.assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
 	public void testInlineScriptFromTag() throws Exception {
@@ -176,18 +177,18 @@ public class JRubyScriptFactoryTests extends TestCase {
 	public void testRefreshableFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
-		assertEquals("Hello World!", messenger.getMessage());
+		Assert.assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
 
 	public void testThatMultipleScriptInterfacesAreSupported() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("calculatingMessenger");
-		assertEquals("Hello World!", messenger.getMessage());
+		Assert.assertEquals("Hello World!", messenger.getMessage());
 
 		// cool, now check that the Calculator interface is also exposed
 		Calculator calc = (Calculator) messenger;
-		assertEquals(0, calc.add(2, -2));
+		Assert.assertEquals(0, calc.add(2, -2));
 	}
 
 	public void testWithComplexArg() throws Exception {
@@ -269,7 +270,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	public void testAOP() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-aop.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());
+		Assert.assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());
 	}
 
 
