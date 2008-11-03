@@ -30,7 +30,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.MockBodyContent;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.AssertThrows;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
@@ -141,12 +140,12 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setParent(null);
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
-		new AssertThrows(IllegalStateException.class,
-				"Must not be able to use <option> tag without exposed context.") {
-			public void test() throws Exception {
-				tag.doStartTag();
-			}
-		}.runTest();
+		try {
+			tag.doStartTag();
+			fail("Must not be able to use <option> tag without exposed context.");
+		}  catch (IllegalStateException ex) {
+			// expected
+		}
 	}
 
 	public void testWithEnum() throws Exception {
@@ -429,14 +428,14 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testOptionTagNotNestedWithinSelectTag() throws Exception {
-		new AssertThrows(IllegalStateException.class,
-				"Must throw an IllegalStateException when not nested within a <select/> tag.") {
-			public void test() throws Exception {
-				tag.setParent(null);
-				tag.setValue("foo");
-				tag.doStartTag();
-			}
-		}.runTest();
+		try {
+			tag.setParent(null);
+			tag.setValue("foo");
+			tag.doStartTag();
+			fail("Must throw an IllegalStateException when not nested within a <select/> tag.");
+		} catch (IllegalStateException ex) {
+			// expected
+		}
 	}
 
 
