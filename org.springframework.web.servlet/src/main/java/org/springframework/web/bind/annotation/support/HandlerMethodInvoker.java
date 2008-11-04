@@ -38,6 +38,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -56,22 +57,20 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartRequest;
 
 /**
- * Support class for invoking an annotated handler method.
- * Operates on the introspection results of a {@link HandlerMethodResolver}
- * for a specific handler type.
+ * Support class for invoking an annotated handler method. Operates on the introspection results of a {@link
+ * HandlerMethodResolver} for a specific handler type.
  *
- * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
- * and {@link org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
+ * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter} and {@link
+ * org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
  *
  * @author Juergen Hoeller
- * @since 2.5.2
+ * @author Arjen Poutsma
  * @see #invokeHandlerMethod
+ * @since 2.5.2
  */
 public class HandlerMethodInvoker {
 
-	/**
-	 * We'll create a lot of these objects, so we don't want a new logger every time.
-	 */
+	/** We'll create a lot of these objects, so we don't want a new logger every time. */
 	private static final Log logger = LogFactory.getLog(HandlerMethodInvoker.class);
 
 	private final HandlerMethodResolver methodResolver;
@@ -86,7 +85,6 @@ public class HandlerMethodInvoker {
 
 	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
-
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver) {
 		this(methodResolver, null);
 	}
@@ -95,10 +93,11 @@ public class HandlerMethodInvoker {
 		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null);
 	}
 
-	public HandlerMethodInvoker(
-			HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
-			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer,
-			WebArgumentResolver... customArgumentResolvers) {
+	public HandlerMethodInvoker(HandlerMethodResolver methodResolver,
+								WebBindingInitializer bindingInitializer,
+								SessionAttributeStore sessionAttributeStore,
+								ParameterNameDiscoverer parameterNameDiscoverer,
+								WebArgumentResolver... customArgumentResolvers) {
 
 		this.methodResolver = methodResolver;
 		this.bindingInitializer = bindingInitializer;
@@ -107,10 +106,10 @@ public class HandlerMethodInvoker {
 		this.customArgumentResolvers = customArgumentResolvers;
 	}
 
-
-	public final Object invokeHandlerMethod(
-			Method handlerMethod, Object handler, NativeWebRequest webRequest, ExtendedModelMap implicitModel)
-			throws Exception {
+	public final Object invokeHandlerMethod(Method handlerMethod,
+											Object handler,
+											NativeWebRequest webRequest,
+											ExtendedModelMap implicitModel) throws Exception {
 
 		Method handlerMethodToInvoke = BridgeMethodResolver.findBridgedMethod(handlerMethod);
 		try {
@@ -124,8 +123,10 @@ public class HandlerMethodInvoker {
 				Object attrValue = doInvokeMethod(attributeMethodToInvoke, handler, args);
 				String attrName = AnnotationUtils.findAnnotation(attributeMethodToInvoke, ModelAttribute.class).value();
 				if ("".equals(attrName)) {
-					Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
-					attrName = Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
+					Class resolvedType =
+							GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
+					attrName =
+							Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
 				}
 				implicitModel.addAttribute(attrName, attrValue);
 			}
@@ -142,9 +143,10 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object[] resolveHandlerArguments(
-			Method handlerMethod, Object handler, NativeWebRequest webRequest, ExtendedModelMap implicitModel)
-			throws Exception {
+	private Object[] resolveHandlerArguments(Method handlerMethod,
+											 Object handler,
+											 NativeWebRequest webRequest,
+											 ExtendedModelMap implicitModel) throws Exception {
 
 		Class[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
@@ -155,6 +157,7 @@ public class HandlerMethodInvoker {
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
 			boolean paramRequired = false;
+			String paramDefaultValue = null;
 			String attrName = null;
 			Object[] paramAnns = methodParam.getParameterAnnotations();
 
@@ -164,6 +167,7 @@ public class HandlerMethodInvoker {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
 					paramRequired = requestParam.required();
+					paramDefaultValue = requestParam.defaultValue();
 					break;
 				}
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
@@ -204,7 +208,8 @@ public class HandlerMethodInvoker {
 			}
 
 			if (paramName != null) {
-				args[i] = resolveRequestParam(paramName, paramRequired, methodParam, webRequest, handler);
+				args[i] = resolveRequestParam(paramName, paramRequired, paramDefaultValue, methodParam, webRequest,
+						handler);
 			}
 			else if (attrName != null) {
 				WebDataBinder binder = resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
@@ -238,7 +243,8 @@ public class HandlerMethodInvoker {
 					Method methodToInvoke = BridgeMethodResolver.findBridgedMethod(initBinderMethod);
 					String[] targetNames = AnnotationUtils.findAnnotation(methodToInvoke, InitBinder.class).value();
 					if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
-						Object[] initBinderArgs = resolveInitBinderArguments(handler, methodToInvoke, binder, webRequest);
+						Object[] initBinderArgs =
+								resolveInitBinderArguments(handler, methodToInvoke, binder, webRequest);
 						if (debug) {
 							logger.debug("Invoking init-binder method: " + methodToInvoke);
 						}
@@ -253,8 +259,10 @@ public class HandlerMethodInvoker {
 		}
 	}
 
-	private Object[] resolveInitBinderArguments(Object handler, Method initBinderMethod,
-			WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
+	private Object[] resolveInitBinderArguments(Object handler,
+												Method initBinderMethod,
+												WebDataBinder binder,
+												NativeWebRequest webRequest) throws Exception {
 
 		Class[] initBinderParams = initBinderMethod.getParameterTypes();
 		Object[] initBinderArgs = new Object[initBinderParams.length];
@@ -265,6 +273,7 @@ public class HandlerMethodInvoker {
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
 			boolean paramRequired = false;
+			String paramDefaultValue = null;
 			Object[] paramAnns = methodParam.getParameterAnnotations();
 
 			for (int j = 0; j < paramAnns.length; j++) {
@@ -273,6 +282,7 @@ public class HandlerMethodInvoker {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
 					paramRequired = requestParam.required();
+					paramDefaultValue = requestParam.defaultValue();
 					break;
 				}
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
@@ -302,16 +312,20 @@ public class HandlerMethodInvoker {
 			}
 
 			if (paramName != null) {
-				initBinderArgs[i] = resolveRequestParam(paramName, paramRequired, methodParam, webRequest, null);
+				initBinderArgs[i] =
+						resolveRequestParam(paramName, paramRequired, paramDefaultValue, methodParam, webRequest, null);
 			}
 		}
 
 		return initBinderArgs;
 	}
 
-	private Object resolveRequestParam(String paramName, boolean paramRequired,
-			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
-			throws Exception {
+	private Object resolveRequestParam(String paramName,
+									   boolean paramRequired,
+									   String paramDefaultValue,
+									   MethodParameter methodParam,
+									   NativeWebRequest webRequest,
+									   Object handlerForInitBinderCall) throws Exception {
 
 		Class paramType = methodParam.getParameterType();
 		if ("".equals(paramName)) {
@@ -332,10 +346,13 @@ public class HandlerMethodInvoker {
 			}
 		}
 		if (paramValue == null) {
-			if (paramRequired) {
+			if (StringUtils.hasText(paramDefaultValue)) {
+				paramValue = paramDefaultValue;
+			}
+			else if (paramRequired) {
 				raiseMissingParameterException(paramName, paramType);
 			}
-			if (paramType.isPrimitive()) {
+			if (paramValue == null && paramType.isPrimitive()) {
 				throw new IllegalStateException("Optional " + paramType + " parameter '" + paramName +
 						"' is not present but cannot be translated into a null value due to being declared as a " +
 						"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
@@ -346,8 +363,11 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
 	}
 
-	private WebDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
-			ExtendedModelMap implicitModel, NativeWebRequest webRequest, Object handler) throws Exception {
+	private WebDataBinder resolveModelAttribute(String attrName,
+												MethodParameter methodParam,
+												ExtendedModelMap implicitModel,
+												NativeWebRequest webRequest,
+												Object handler) throws Exception {
 
 		// Bind request parameter onto object...
 		String name = attrName;
@@ -374,9 +394,10 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final void updateModelAttributes(
-			Object handler, Map mavModel, ExtendedModelMap implicitModel, NativeWebRequest webRequest)
-			throws Exception {
+	public final void updateModelAttributes(Object handler,
+											Map mavModel,
+											ExtendedModelMap implicitModel,
+											NativeWebRequest webRequest) throws Exception {
 
 		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
 			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
@@ -407,8 +428,8 @@ public class HandlerMethodInvoker {
 	}
 
 	/**
-	 * Determine whether the given value qualifies as a "binding candidate",
-	 * i.e. might potentially be subject to bean-style data binding later on.
+	 * Determine whether the given value qualifies as a "binding candidate", i.e. might potentially be subject to
+	 * bean-style data binding later on.
 	 */
 	protected boolean isBindingCandidate(Object value) {
 		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
@@ -426,7 +447,6 @@ public class HandlerMethodInvoker {
 		throw new IllegalStateException("Should never get here");
 	}
 
-
 	protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
 		throw new IllegalStateException("Missing parameter '" + paramName + "' of type [" + paramType.getName() + "]");
 	}
@@ -441,8 +461,7 @@ public class HandlerMethodInvoker {
 		return new WebRequestDataBinder(target, objectName);
 	}
 
-	protected void doBind(NativeWebRequest webRequest, WebDataBinder binder, boolean failOnErrors)
-			throws Exception {
+	protected void doBind(NativeWebRequest webRequest, WebDataBinder binder, boolean failOnErrors) throws Exception {
 
 		WebRequestDataBinder requestBinder = (WebRequestDataBinder) binder;
 		requestBinder.bind(webRequest);
@@ -475,8 +494,7 @@ public class HandlerMethodInvoker {
 		return value;
 	}
 
-	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest)
-			throws Exception {
+	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest) throws Exception {
 
 		if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
