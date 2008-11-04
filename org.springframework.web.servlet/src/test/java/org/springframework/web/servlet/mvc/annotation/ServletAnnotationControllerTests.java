@@ -25,14 +25,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
@@ -55,6 +55,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -82,11 +83,11 @@ import org.springframework.web.util.NestedServletException;
  * @author Sam Brannen
  * @since 2.5
  */
-public class ServletAnnotationControllerTests extends TestCase {
+public class ServletAnnotationControllerTests {
 
-	public void testStandardHandleMethod() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void standardHandleMethod() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
@@ -102,7 +103,61 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("test", response.getContentAsString());
 	}
 
-	public void testProxiedStandardHandleMethod() throws Exception {
+	@Test(expected = MissingServletRequestParameterException.class)
+	public void requiredParamMissing() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequiredParamController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+	}
+
+	@Test
+	public void optionalParamMissing() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(OptionalParamController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("null", response.getContentAsString());
+	}
+
+	@Test
+	public void defaultParamMissing() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(DefaultValueParamController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("foo", response.getContentAsString());
+	}
+
+	@Test
+	public void proxiedStandardHandleMethod() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -110,7 +165,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
 				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+				wac.getBeanFactory()
+						.registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -123,12 +179,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("test", response.getContentAsString());
 	}
 
-	public void testEmptyParameterListHandleMethod() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void emptyParameterListHandleMethod() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(EmptyParameterListHandlerMethodController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(EmptyParameterListHandlerMethodController.class));
 				RootBeanDefinition vrDef = new RootBeanDefinition(InternalResourceViewResolver.class);
 				vrDef.getPropertyValues().addPropertyValue("suffix", ".jsp");
 				wac.registerBeanDefinition("viewResolver", vrDef);
@@ -147,21 +204,23 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("", response.getContentAsString());
 	}
 
-	public void testAdaptedHandleMethods() throws Exception {
+	@Test
+	public void adaptedHandleMethods() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController.class);
 	}
 
-	public void testAdaptedHandleMethods2() throws Exception {
+	@Test
+	public void adaptedHandleMethods2() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController2.class);
 	}
 
-	public void testAdaptedHandleMethods3() throws Exception {
+	@Test
+	public void adaptedHandleMethods3() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
 	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
@@ -204,9 +263,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("test-name1-typeMismatch", response.getContentAsString());
 	}
 
-	public void testFormController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void formController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
@@ -225,9 +284,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
-	public void testModelFormController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void modelFormController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyModelFormController.class));
@@ -246,7 +305,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
-	public void testProxiedFormController() throws Exception {
+	@Test
+	public void proxiedFormController() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -255,7 +315,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
 				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+				wac.getBeanFactory()
+						.registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -270,12 +331,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
-	public void testCommandProvidingFormController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void commandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyCommandProvidingFormController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MyCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
@@ -295,16 +357,18 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testTypedCommandProvidingFormController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void typedCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
-				adapterDef.getPropertyValues().addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
+				adapterDef.getPropertyValues()
+						.addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -337,12 +401,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-special-99-special-99", response.getContentAsString());
 	}
 
-	public void testBinderInitializingCommandProvidingFormController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void binderInitializingCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyBinderInitializingCommandProvidingFormController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MyBinderInitializingCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				wac.refresh();
 				return wac;
@@ -359,12 +424,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void specificBinderInitializingCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySpecificBinderInitializingCommandProvidingFormController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MySpecificBinderInitializingCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				wac.refresh();
 				return wac;
@@ -381,12 +447,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testParameterDispatchingController() throws Exception {
+	@Test
+	public void parameterDispatchingController() throws Exception {
 		final MockServletContext servletContext = new MockServletContext();
 		final MockServletConfig servletConfig = new MockServletConfig(servletContext);
 
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.setServletContext(servletContext);
@@ -441,9 +507,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testMethodNameDispatchingController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void methodNameDispatchingController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
@@ -474,9 +540,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testMethodNameDispatchingControllerWithSuffix() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void methodNameDispatchingControllerWithSuffix() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
@@ -512,9 +578,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testControllerClassNamePlusMethodNameDispatchingController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void controllerClassNamePlusMethodNameDispatchingController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
@@ -548,12 +614,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testPostMethodNameDispatchingController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void postMethodNameDispatchingController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyPostMethodNameDispatchingController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MyPostMethodNameDispatchingController.class));
 				wac.refresh();
 				return wac;
 			}
@@ -596,12 +663,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testRelativePathDispatchingController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void relativePathDispatchingController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyRelativePathDispatchingController.class));
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MyRelativePathDispatchingController.class));
 				wac.refresh();
 				return wac;
 			}
@@ -629,9 +697,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testNullCommandController() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void nullCommandController() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyNullCommandController.class));
@@ -648,9 +716,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myView", response.getContentAsString());
 	}
 
-	public void testEquivalentMappingsWithSameMethodName() throws Exception {
-		@SuppressWarnings("serial")
-		DispatcherServlet servlet = new DispatcherServlet() {
+	@Test
+	public void equivalentMappingsWithSameMethodName() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(ChildController.class));
@@ -672,127 +740,125 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@RequestMapping("/myPath.do")
 	private static class MyController extends AbstractController {
 
-		protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+				throws Exception {
 			response.getWriter().write("test");
 			return null;
 		}
 	}
 
-
 	private static class BaseController {
 
 		@RequestMapping(method = RequestMethod.GET)
-		public void myPath2(HttpServletResponse response) throws IOException  {
+		public void myPath2(HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 	}
-
 
 	@Controller
 	private static class MyAdaptedController {
 
 		@RequestMapping("/myPath1.do")
-		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")String p1,
+							 @RequestParam("param2")int p2,
+							 HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
 		@RequestMapping("/myPath3")
-		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("/myPath4.do")
-		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
-
 
 	@Controller
 	@RequestMapping("/*.do")
 	private static class MyAdaptedController2 {
 
 		@RequestMapping
-		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")String p1, int param2, HttpServletResponse response)
+				throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("/myPath3")
-		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("/myPath4.*")
-		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
-
 
 	@Controller
 	private static class MyAdaptedControllerBase<T> {
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") T p1, int param2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")T p1, int param2, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@InitBinder
-		public void initBinder(@RequestParam("param1") T p1, int param2) {
+		public void initBinder(@RequestParam("param1")T p1, int param2) {
 		}
 
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1") T p1, int param2) {
+		public void modelAttribute(@RequestParam("param1")T p1, int param2) {
 		}
 	}
-
 
 	@RequestMapping("/*.do")
 	private static class MyAdaptedController3 extends MyAdaptedControllerBase<String> {
 
 		@RequestMapping
-		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 
 		@Override
-		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")String p1, int param2, HttpServletResponse response)
+				throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("/myPath3")
-		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("/myPath4.*")
-		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 
 		@InitBinder
-		public void initBinder(@RequestParam("param1") String p1, int param2) {
+		public void initBinder(@RequestParam("param1")String p1, int param2) {
 		}
 
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1") String p1, int param2) {
+		public void modelAttribute(@RequestParam("param1")String p1, int param2) {
 		}
 	}
-
 
 	@Controller
 	@RequestMapping(method = RequestMethod.GET)
@@ -810,7 +876,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@Controller
 	public static class MyFormController {
 
@@ -823,14 +888,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
 			return "myView";
 		}
 	}
-
 
 	@Controller
 	public static class MyModelFormController {
@@ -844,7 +908,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, Model model) {
+		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, Model model) {
 			if (!model.containsAttribute("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
@@ -852,20 +916,20 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@Controller
 	private static class MyCommandProvidingFormController<T, TB, TB2> extends MyFormController {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(
-				@RequestParam T defaultName, Map<String, Object> model, @RequestParam Date date) {
+		private TestBean createTestBean(@RequestParam T defaultName,
+										Map<String, Object> model,
+										@RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
 			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
 		}
 
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, ModelMap model) {
 			return super.myHandle(tb, errors, model);
 		}
 
@@ -890,19 +954,17 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	private static class MySpecialArg {
 
 		public MySpecialArg(String value) {
 		}
 	}
 
-
 	@Controller
 	private static class MyTypedCommandProvidingFormController
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
-	}
 
+	}
 
 	@Controller
 	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
@@ -917,13 +979,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@Controller
-	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
+	private static class MySpecificBinderInitializingCommandProvidingFormController
+			extends MyCommandProvidingFormController {
 
 		@SuppressWarnings("unused")
 		@InitBinder({"myCommand", "date"})
-		private void initBinder(WebDataBinder binder, String date, @RequestParam("date") String[] date2) {
+		private void initBinder(WebDataBinder binder, String date, @RequestParam("date")String[] date2) {
 			assertEquals("2007-10-02", date);
 			assertEquals(1, date2.length);
 			assertEquals("2007-10-02", date2[0]);
@@ -932,7 +994,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 		}
 	}
-
 
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
@@ -944,7 +1005,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	private static class MySpecialArgumentResolver implements WebArgumentResolver {
 
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
@@ -954,7 +1014,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 			return UNRESOLVED;
 		}
 	}
-
 
 	@Controller
 	@RequestMapping("/myPath.do")
@@ -974,7 +1033,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 		@RequestMapping
 		public void myHandle(HttpServletResponse response, HttpServletRequest request) throws IOException {
-			if (this.servletContext == null || this.servletConfig == null || this.session == null || this.request == null) {
+			if (this.servletContext == null || this.servletConfig == null || this.session == null ||
+					this.request == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");
@@ -1000,13 +1060,11 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@Controller
 	@RequestMapping(value = "/*.do", method = RequestMethod.POST, params = "myParam=myValue")
 	private static class MyPostMethodNameDispatchingController extends MethodNameDispatchingController {
 
 	}
-
 
 	@Controller
 	@RequestMapping("/myApp/*")
@@ -1033,7 +1091,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@Controller
 	private static class MyNullCommandController {
 
@@ -1048,8 +1105,11 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("/myPath")
-		public void handle(@ModelAttribute TestBean testBean, Errors errors,
-				@ModelAttribute TestPrincipal modelPrinc, OtherPrincipal requestPrinc, Writer writer) throws IOException {
+		public void handle(@ModelAttribute TestBean testBean,
+						   Errors errors,
+						   @ModelAttribute TestPrincipal modelPrinc,
+						   OtherPrincipal requestPrinc,
+						   Writer writer) throws IOException {
 			assertNull(testBean);
 			assertNotNull(modelPrinc);
 			assertNotNull(requestPrinc);
@@ -1059,14 +1119,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	private static class TestPrincipal implements Principal {
 
 		public String getName() {
 			return "test";
 		}
 	}
-
 
 	private static class OtherPrincipal implements Principal {
 
@@ -1075,7 +1133,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	private static class TestViewResolver implements ViewResolver {
 
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
@@ -1083,8 +1140,10 @@ public class ServletAnnotationControllerTests extends TestCase {
 				public String getContentType() {
 					return null;
 				}
+
 				@SuppressWarnings({"unchecked", "deprecation"})
-				public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+				public void render(Map model, HttpServletRequest request, HttpServletResponse response)
+						throws Exception {
 					TestBean tb = (TestBean) model.get("testBean");
 					if (tb == null) {
 						tb = (TestBean) model.get("myCommand");
@@ -1104,8 +1163,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 					}
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 					if (errors.hasFieldErrors("age")) {
-						response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
-								"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+						response.getWriter().write(viewName + "-" + tb.getName() + "-" +
+								errors.getFieldError("age").getCode() + "-" + testBeans.get(0).getName() + "-" +
+								model.get("myKey"));
 					}
 					else {
 						response.getWriter().write(viewName + "-" + tb.getName() + "-" + tb.getAge() + "-" +
@@ -1116,7 +1176,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	public static class ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
@@ -1124,13 +1183,41 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 	}
 
-
 	@Controller
 	@RequestMapping("/child/test")
 	public static class ChildController extends ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
-		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId") String id) {
+		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId")String id) {
+		}
+	}
+
+	@Controller
+	public static class RequiredParamController {
+
+		@RequestMapping("/myPath.do")
+		public void myHandle(@RequestParam(value = "id", required = true)String id) {
+
+		}
+	}
+
+	@Controller
+	public static class OptionalParamController {
+
+		@RequestMapping("/myPath.do")
+		public void myHandle(@RequestParam(value = "id", required = false)String id, HttpServletResponse response)
+				throws IOException {
+			response.getWriter().write(String.valueOf(id));
+		}
+	}
+
+	@Controller
+	public static class DefaultValueParamController {
+
+		@RequestMapping("/myPath.do")
+		public void myHandle(@RequestParam(value = "id", defaultValue = "foo")String id, HttpServletResponse response)
+				throws IOException {
+			response.getWriter().write(String.valueOf(id));
 		}
 	}
 
