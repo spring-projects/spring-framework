@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * @since 2.5.2
  * @see NamedThreadLocal
  */
-public class NamedInheritableThreadLocal extends InheritableThreadLocal {
+public class NamedInheritableThreadLocal<T> extends InheritableThreadLocal<T> {
 
 	private final String name;
 
