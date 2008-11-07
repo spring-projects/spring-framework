@@ -105,7 +105,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setInvalidResultSetAccessCodes(String[] invalidResultSetAccessCodes) {
-		this.invalidResultSetAccessCodes = invalidResultSetAccessCodes;
+		this.invalidResultSetAccessCodes = StringUtils.sortStringArray(invalidResultSetAccessCodes);
 	}
 
 	public String[] getInvalidResultSetAccessCodes() {
@@ -129,7 +129,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
-		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
+		this.dataAccessResourceFailureCodes = StringUtils.sortStringArray(dataAccessResourceFailureCodes);
 	}
 
 	public String[] getDataAccessResourceFailureCodes() {
@@ -137,7 +137,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setTransientDataAccessResourceCodes(String[] transientDataAccessResourceCodes) {
-		this.transientDataAccessResourceCodes = transientDataAccessResourceCodes;
+		this.transientDataAccessResourceCodes = StringUtils.sortStringArray(transientDataAccessResourceCodes);
 	}
 
 	public String[] getTransientDataAccessResourceCodes() {
@@ -153,7 +153,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setDeadlockLoserCodes(String[] deadlockLoserCodes) {
-		this.deadlockLoserCodes = deadlockLoserCodes;
+		this.deadlockLoserCodes = StringUtils.sortStringArray(deadlockLoserCodes);
 	}
 
 	public String[] getDeadlockLoserCodes() {
@@ -161,7 +161,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setCannotSerializeTransactionCodes(String[] cannotSerializeTransactionCodes) {
-		this.cannotSerializeTransactionCodes = cannotSerializeTransactionCodes;
+		this.cannotSerializeTransactionCodes = StringUtils.sortStringArray(cannotSerializeTransactionCodes);
 	}
 	
 	public String[] getCannotSerializeTransactionCodes() {
