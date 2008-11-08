@@ -48,6 +48,7 @@ import java.util.TreeSet;
  * @author Keith Donald
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Arjen Poutsma
  * @since 16 April 2001
  * @see org.apache.commons.lang.StringUtils
  */
@@ -598,7 +599,7 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		List pathElements = new LinkedList();
+		List<String> pathElements = new LinkedList<String>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -736,7 +737,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array2)) {
 			return array1;
 		}
-		List result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		result.addAll(Arrays.asList(array1));
 		for (int i = 0; i < array2.length; i++) {
 			String str = array2[i];
@@ -767,11 +768,11 @@ public abstract class StringUtils {
 	 * @return the String array (<code>null</code> if the passed-in
 	 * Collection was <code>null</code>)
 	 */
-	public static String[] toStringArray(Collection collection) {
+	public static String[] toStringArray(Collection<String> collection) {
 		if (collection == null) {
 			return null;
 		}
-		return (String[]) collection.toArray(new String[collection.size()]);
+		return collection.toArray(new String[collection.size()]);
 	}
 
 	/**
@@ -781,12 +782,12 @@ public abstract class StringUtils {
 	 * @return the String array (<code>null</code> if the passed-in
 	 * Enumeration was <code>null</code>)
 	 */
-	public static String[] toStringArray(Enumeration enumeration) {
+	public static String[] toStringArray(Enumeration<String> enumeration) {
 		if (enumeration == null) {
 			return null;
 		}
-		List list = Collections.list(enumeration);
-		return (String[]) list.toArray(new String[list.size()]);
+		List<String> list = Collections.list(enumeration);
+		return list.toArray(new String[list.size()]);
 	}
 
 	/**
@@ -817,7 +818,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return array;
 		}
-		Set set = new TreeSet();
+		Set<String> set = new TreeSet<String>();
 		for (int i = 0; i < array.length; i++) {
 			set.add(array[i]);
 		}
@@ -941,7 +942,7 @@ public abstract class StringUtils {
 			return null;
 		}
 		StringTokenizer st = new StringTokenizer(str, delimiters);
-		List tokens = new ArrayList();
+		List<String> tokens = new ArrayList<String>();
 		while (st.hasMoreTokens()) {
 			String token = st.nextToken();
 			if (trimTokens) {
@@ -989,7 +990,7 @@ public abstract class StringUtils {
 		if (delimiter == null) {
 			return new String[] {str};
 		}
-		List result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
 				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
@@ -1025,8 +1026,8 @@ public abstract class StringUtils {
 	 * @param str the input String
 	 * @return a Set of String entries in the list
 	 */
-	public static Set commaDelimitedListToSet(String str) {
-		Set set = new TreeSet();
+	public static Set<String> commaDelimitedListToSet(String str) {
+		Set<String> set = new TreeSet<String>();
 		String[] tokens = commaDelimitedListToStringArray(str);
 		for (int i = 0; i < tokens.length; i++) {
 			set.add(tokens[i]);
@@ -1047,7 +1048,7 @@ public abstract class StringUtils {
 		if (CollectionUtils.isEmpty(coll)) {
 			return "";
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator it = coll.iterator();
 		while (it.hasNext()) {
 			sb.append(prefix).append(it.next()).append(suffix);
@@ -1090,7 +1091,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(arr)) {
 			return "";
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < arr.length; i++) {
 			if (i > 0) {
 				sb.append(delim);
