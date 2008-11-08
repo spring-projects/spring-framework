@@ -88,6 +88,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void standardHandleMethod() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
@@ -106,6 +107,7 @@ public class ServletAnnotationControllerTests {
 	@Test(expected = MissingServletRequestParameterException.class)
 	public void requiredParamMissing() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequiredParamController.class));
@@ -123,6 +125,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void optionalParamMissing() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(OptionalParamController.class));
@@ -141,6 +144,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void defaultParamMissing() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(DefaultValueParamController.class));
@@ -157,8 +161,29 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void methodNotAllowed() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNotAllowedController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
+		assertEquals("Invalid Allow Header", "PUT, DELETE, HEAD, TRACE, OPTIONS, POST", response.getHeader("Allow"));
+	}
+
+	@Test
 	public void proxiedStandardHandleMethod() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
@@ -182,6 +207,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void emptyParameterListHandleMethod() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -221,6 +247,7 @@ public class ServletAnnotationControllerTests {
 
 	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
@@ -266,6 +293,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void formController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
@@ -287,6 +315,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void modelFormController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyModelFormController.class));
@@ -308,6 +337,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void proxiedFormController() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
@@ -334,6 +364,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void commandProvidingFormController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -360,6 +391,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void typedCommandProvidingFormController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -404,6 +436,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void binderInitializingCommandProvidingFormController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -427,6 +460,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void specificBinderInitializingCommandProvidingFormController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -453,6 +487,7 @@ public class ServletAnnotationControllerTests {
 		final MockServletConfig servletConfig = new MockServletConfig(servletContext);
 
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.setServletContext(servletContext);
@@ -510,6 +545,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void methodNameDispatchingController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
@@ -543,6 +579,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void methodNameDispatchingControllerWithSuffix() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
@@ -581,6 +618,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void controllerClassNamePlusMethodNameDispatchingController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
@@ -617,6 +655,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void postMethodNameDispatchingController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -666,6 +705,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void relativePathDispatchingController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller",
@@ -700,6 +740,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void nullCommandController() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyNullCommandController.class));
@@ -719,6 +760,7 @@ public class ServletAnnotationControllerTests {
 	@Test
 	public void equivalentMappingsWithSameMethodName() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(ChildController.class));
@@ -743,6 +785,7 @@ public class ServletAnnotationControllerTests {
 	@RequestMapping("/myPath.do")
 	private static class MyController extends AbstractController {
 
+		@Override
 		protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 				throws Exception {
 			response.getWriter().write("test");
@@ -750,6 +793,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	/** @noinspection UnusedDeclaration*/
 	private static class BaseController {
 
 		@RequestMapping(method = RequestMethod.GET)
@@ -851,10 +895,12 @@ public class ServletAnnotationControllerTests {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 
+		@Override
 		@InitBinder
 		public void initBinder(@RequestParam("param1")String p1, int param2) {
 		}
 
+		@Override
 		@ModelAttribute
 		public void modelAttribute(@RequestParam("param1")String p1, int param2) {
 		}
@@ -928,6 +974,7 @@ public class ServletAnnotationControllerTests {
 			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
 		}
 
+		@Override
 		@RequestMapping("/myPath.do")
 		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, ModelMap model) {
 			return super.myHandle(tb, errors, model);
@@ -1218,6 +1265,38 @@ public class ServletAnnotationControllerTests {
 		public void myHandle(@RequestParam(value = "id", defaultValue = "foo")String id, HttpServletResponse response)
 				throws IOException {
 			response.getWriter().write(String.valueOf(id));
+		}
+	}
+
+	@Controller
+	public static class MethodNotAllowedController {
+
+
+		@RequestMapping(value="/myPath.do", method = RequestMethod.DELETE)
+		public void delete() {
+		}
+
+		@RequestMapping(value="/myPath.do", method = RequestMethod.HEAD)
+		public void head() {
+		}
+
+		@RequestMapping(value="/myPath.do", method = RequestMethod.OPTIONS)
+		public void options() {
+		}
+		@RequestMapping(value="/myPath.do", method = RequestMethod.POST)
+		public void post() {
+		}
+
+		@RequestMapping(value="/myPath.do", method = RequestMethod.PUT)
+		public void put() {
+		}
+
+		@RequestMapping(value="/myPath.do", method = RequestMethod.TRACE)
+		public void trace() {
+		}
+
+		@RequestMapping(value="/otherPath.do", method = RequestMethod.GET)
+		public void get() {
 		}
 	}
 
