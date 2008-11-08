@@ -20,11 +20,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +56,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -177,7 +181,17 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
-		assertEquals("Invalid Allow Header", "PUT, DELETE, HEAD, TRACE, OPTIONS, POST", response.getHeader("Allow"));
+		String allowHeader = (String)response.getHeader("Allow");
+		assertNotNull("No Allow header", allowHeader);
+		Set<String> allowedMethods = new HashSet<String>();
+		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
+		assertEquals("Invalid amount of supported methods", 6, allowedMethods.size());
+		assertTrue("PUT not allowed", allowedMethods.contains("PUT"));
+		assertTrue("DELETE not allowed", allowedMethods.contains("DELETE"));
+		assertTrue("HEAD not allowed", allowedMethods.contains("HEAD"));
+		assertTrue("TRACE not allowed", allowedMethods.contains("TRACE"));
+		assertTrue("OPTIONS not allowed", allowedMethods.contains("OPTIONS"));
+		assertTrue("POST not allowed", allowedMethods.contains("POST"));
 	}
 
 	@Test
