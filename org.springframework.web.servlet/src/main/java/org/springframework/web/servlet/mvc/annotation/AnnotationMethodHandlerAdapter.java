@@ -24,10 +24,11 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -51,7 +52,9 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -333,6 +336,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		catch (NoSuchRequestHandlingMethodException ex) {
 			return handleNoSuchRequestHandlingMethod(ex, request, response);
 		}
+		catch (HttpRequestMethodNotSupportedException ex) {
+			return handleHttpRequestMethodNotSupportedException(ex, request, response);
+		}
 	}
 
 	public long getLastModified(HttpServletRequest request, Object handler) {
@@ -357,6 +363,27 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		pageNotFoundLogger.warn(ex.getMessage());
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		return null;
+	}
+
+	/**
+	 * Handle the case where no request handler method was found for the particular HTTP request method.
+	 *
+	 * <p/>The default implementation logs a warning, sends an HTTP 405 error and sets the "Allow" header. Alternatively, a
+	 * fallback view could be chosen, or the HttpRequestMethodNotSupportedException could be rethrown as-is.
+	 *
+	 * @param ex	   the HttpRequestMethodNotSupportedException to be handled
+	 * @param request  current HTTP request
+	 * @param response current HTTP response
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex,
+																		HttpServletRequest request,
+																		HttpServletResponse response) throws Exception {
+		pageNotFoundLogger.warn(ex.getMessage());
+		response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		response.addHeader("Allow", StringUtils.arrayToDelimitedString(ex.getSupportedMethods(), ", "));
 		return null;
 	}
 
@@ -403,6 +430,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
 			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
 			Map<RequestMappingInfo, String> targetPathMatches = new LinkedHashMap<RequestMappingInfo, String>();
+			Set<String> allowedMethods = new LinkedHashSet<String>(7);
 			String resolvedMethodName = null;
 			for (Method handlerMethod : getHandlerMethods()) {
 				RequestMappingInfo mappingInfo = new RequestMappingInfo();
@@ -423,6 +451,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 								targetPathMatches.put(mappingInfo, mappedPath);
 							}
 							else {
+								for (RequestMethod requestMethod : mappingInfo.methods) {
+									allowedMethods.add(requestMethod.toString());
+								}
 								break;
 							}
 						}
@@ -493,7 +524,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
 			else {
-				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(), request.getParameterMap());
+				if (!allowedMethods.isEmpty()) {
+					throw new HttpRequestMethodNotSupportedException(request.getMethod(),
+							StringUtils.toStringArray(allowedMethods));
+				}
+				else {
+					throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(),
+							request.getParameterMap());
+				}
 			}
 		}
 
@@ -535,7 +573,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private boolean responseArgumentUsed = false;
 
-		public ServletHandlerMethodInvoker(HandlerMethodResolver resolver) {
+		private ServletHandlerMethodInvoker(HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore,
 					parameterNameDiscoverer, customArgumentResolvers);
 		}
