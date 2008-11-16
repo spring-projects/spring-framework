@@ -43,6 +43,7 @@ import org.springframework.web.util.HtmlUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Scott Andrews
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
@@ -64,6 +65,12 @@ public class FormTag extends AbstractHtmlElementTag {
 	public static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
 			Conventions.getQualifiedAttributeName(AbstractFormTag.class, MODEL_ATTRIBUTE);
 
+	/** Default method parameter, i.e. <code>_method</code>. */
+	private static final String DEFAULT_METHOD_PARAM = "_method";
+
+	private static final String FORM_TAG = "form";
+
+	private static final String INPUT_TAG = "input";
 
 	private static final String ACTION_ATTRIBUTE = "action";
 
@@ -80,6 +87,12 @@ public class FormTag extends AbstractHtmlElementTag {
 	private static final String ONRESET_ATTRIBUTE = "onreset";
 
 	private static final String AUTOCOMPLETE_ATTRIBUTE = "autocomplete";
+
+	private static final String NAME_ATTRIBUTE = "name";
+
+	private static final String VALUE_ATTRIBUTE = "value";
+
+	private static final String TYPE_ATTRIBUTE = "type";
 
 
 	private TagWriter tagWriter;
@@ -103,6 +116,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String onreset;
 
 	private String autocomplete;
+
+	private String methodParam = DEFAULT_METHOD_PARAM;
 
 	/** Caching a previous nested path, so that it may be reset */
 	private String previousNestedPath;
@@ -278,6 +293,27 @@ public class FormTag extends AbstractHtmlElementTag {
 		return this.autocomplete;
 	}
 
+	/**
+	 * Set the name of the request param for non-browser supported HTTP methods
+	 */
+	public void setMethodParam(String methodParam) {
+		this.methodParam = methodParam;
+	}
+
+	/**
+	 * Get the name of the request param for non-browser supported HTTP methods
+	 */
+	protected String getMethodParameter() {
+		return this.methodParam;
+	}
+
+	/**
+	 * Determine if the HTTP method is browser supported
+	 */
+	protected boolean isMethodBrowserSupported(String method) {
+		return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
+	}
+
 
 
 	/**
@@ -290,10 +326,10 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		this.tagWriter = tagWriter;
 
-		tagWriter.startTag("form");
+		tagWriter.startTag(FORM_TAG);
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, getMethod());
+		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
 		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
@@ -302,6 +338,14 @@ public class FormTag extends AbstractHtmlElementTag {
 		writeOptionalAttribute(tagWriter, AUTOCOMPLETE_ATTRIBUTE, getAutocomplete());
 
 		tagWriter.forceBlock();
+
+		if (!isMethodBrowserSupported(getMethod())) {
+			tagWriter.startTag(INPUT_TAG);
+			writeOptionalAttribute(tagWriter, TYPE_ATTRIBUTE, "hidden");
+			writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, getMethodParameter());
+			writeOptionalAttribute(tagWriter, VALUE_ATTRIBUTE, getMethod());
+			tagWriter.endTag();
+		}
 
 		// Expose the form object name for nested tags...
 		String modelAttribute = resolveModelAttribute();

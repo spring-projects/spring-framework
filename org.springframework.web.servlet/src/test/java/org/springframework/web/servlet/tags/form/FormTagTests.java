@@ -25,6 +25,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Scott Andrews
  */
 public class FormTagTests extends AbstractHtmlElementTagTests {
 	
@@ -168,6 +169,100 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		tag.doStartTag();
 		assertEquals("<form id=\"command\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\" method=\"post\">",
 				getOutput());
+	}
+	
+	public void testGet() throws Exception {
+		this.tag.setMethod("get");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+		
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+		String inputOutput = getInputTag(output);
+		
+		assertContainsAttribute(formOutput, "method", "get");
+		assertEquals("", inputOutput);
+	}
+	
+	public void testPost() throws Exception {
+		this.tag.setMethod("post");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+		String inputOutput = getInputTag(output);
+		
+		assertContainsAttribute(formOutput, "method", "post");
+		assertEquals("", inputOutput);
+	}
+	
+	public void testPut() throws Exception {
+		this.tag.setMethod("put");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+		String inputOutput = getInputTag(output);
+
+		assertContainsAttribute(formOutput, "method", "post");
+		assertContainsAttribute(inputOutput, "name", "_method");
+		assertContainsAttribute(inputOutput, "value", "put");
+		assertContainsAttribute(inputOutput, "type", "hidden");
+	}
+	
+	public void testDelete() throws Exception {
+		this.tag.setMethod("delete");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+		String inputOutput = getInputTag(output);
+
+		assertContainsAttribute(formOutput, "method", "post");
+		assertContainsAttribute(inputOutput, "name", "_method");
+		assertContainsAttribute(inputOutput, "value", "delete");
+		assertContainsAttribute(inputOutput, "type", "hidden");
+	}
+	
+	public void testCustomMethodParameter() throws Exception {
+		this.tag.setMethod("put");
+		this.tag.setMethodParam("methodParameter");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+		String inputOutput = getInputTag(output);
+
+		assertContainsAttribute(formOutput, "method", "post");
+		assertContainsAttribute(inputOutput, "name", "methodParameter");
+		assertContainsAttribute(inputOutput, "value", "put");
+		assertContainsAttribute(inputOutput, "type", "hidden");
+	}
+
+	private String getFormTag(String output) {
+		int inputStart = output.indexOf("<", 1);
+		int inputEnd = output.lastIndexOf(">", output.length() - 2);
+		return output.substring(0, inputStart) + output.substring(inputEnd + 1);
+	}
+
+	private String getInputTag(String output) {
+		int inputStart = output.indexOf("<", 1);
+		int inputEnd = output.lastIndexOf(">", output.length() - 2);
+		return output.substring(inputStart, inputEnd + 1);
 	}
 
 

@@ -186,6 +186,12 @@
 			<rtexprvalue>true</rtexprvalue>
 			<description>Common Optional Attribute</description>
 		</attribute>
+		<attribute>
+			<name>methodParam</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The parameter name used for HTTP methods other then GET and POST. Default is '_method'</description>
+		</attribute>
 	</tag>
 
 	<!-- <form:input/> tag -->
