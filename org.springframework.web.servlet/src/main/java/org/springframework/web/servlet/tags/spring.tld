@@ -342,4 +342,71 @@
 		</attribute>
 	</tag>
 
+	<tag>
+		<name>url</name>
+		<tag-class>org.springframework.web.servlet.tags.UrlTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>URL tag based on the JSTL c:url tag.  This variant is fully 
+		backwards compatible with the standard tag.  Enhancements include support 
+		for URL template parameters.</description>
+		<attribute>
+			<name>value</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The URL to build.  This value can include template place holders 
+			that are replaced with the URL encoded value of the named parameter.  Parameters 
+			must be defined using the param tag inside the body of this tag.</description>
+		</attribute>
+		<attribute>
+			<name>context</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Specifies a remote application context.  The default is the 
+			current application context.</description>
+		</attribute>
+		<attribute>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The name of the variable to export the URL value to.</description>
+		</attribute>
+		<attribute>
+			<name>scope</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The scope for the var.  'application', 'session', 'request' and 
+			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
+			effect unless the var attribute is also defined.</description>
+		</attribute>
+		<attribute>
+			<name>escapeXml</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Escape XML special characters in the resulting URL.  'true' and 
+			'false' are supported.  Defaults to 'false' to maintain compatibility with 
+			the JSTL c:url tag.  Strongly recommended to set as 'true' when rendering 
+			directly to the JspWriter in an XML or HTML based file.</description>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>param</name>
+		<tag-class>org.springframework.web.servlet.tags.ParamTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>Parameter tag based on the JSTL c:param tag.  The sole purpose is to 
+		support params inside the spring:url tag.</description>
+		<attribute>
+			<name>name</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The name of the parameter.</description>
+		</attribute>
+		<attribute>
+			<name>value</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The value of the parameter.</description>
+		</attribute>
+	</tag>
+
 </taglib>
