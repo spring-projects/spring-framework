@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -152,8 +151,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 				RequestMapping mapping = method.getAnnotation(RequestMapping.class);
 				if (mapping != null) {
 					String[] mappedPaths = mapping.value();
-					for (int i = 0; i < mappedPaths.length; i++) {
-						addUrlsForPath(urls, mappedPaths[i]);
+					for (String mappedPath : mappedPaths) {
+						addUrlsForPath(urls, mappedPath);
 					}
 				}
 			}
@@ -213,5 +212,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 					"} not met for request parameters: " + request.getParameterMap());
 		}
 	}
+
+	
 
 }

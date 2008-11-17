@@ -44,6 +44,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -158,11 +159,11 @@ public class HandlerMethodInvoker {
 			String paramName = null;
 			boolean paramRequired = false;
 			String paramDefaultValue = null;
+			String pathVarName = null;
 			String attrName = null;
 			Object[] paramAnns = methodParam.getParameterAnnotations();
 
-			for (int j = 0; j < paramAnns.length; j++) {
-				Object paramAnn = paramAnns[j];
+			for (Object paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
@@ -173,21 +174,24 @@ public class HandlerMethodInvoker {
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
 					ModelAttribute attr = (ModelAttribute) paramAnn;
 					attrName = attr.value();
+				} else if (PathVariable.class.isInstance(paramAnn)) {
+					PathVariable pathVar = (PathVariable) paramAnn;
+					pathVarName = pathVar.value();
 				}
 			}
-			if (paramName != null && attrName != null) {
-				throw new IllegalStateException("@RequestParam and @ModelAttribute are an exclusive choice -" +
-						"do not specify both on the same parameter: " + handlerMethod);
+			if ((paramName != null && attrName != null) || (paramName != null && pathVarName != null) ||
+					(pathVarName != null && attrName != null)) {
+				throw new IllegalStateException("@RequestParam, @PathVariable and @ModelAttribute are exclusive " +
+						"choices - do not specify both on the same parameter: " + handlerMethod);
 			}
 
-			Class paramType = methodParam.getParameterType();
-
-			if (paramName == null && attrName == null) {
+			if (paramName == null && attrName == null && pathVarName == null)  {
 				Object argValue = resolveCommonArgument(methodParam, webRequest);
 				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					args[i] = argValue;
 				}
 				else {
+					Class paramType = methodParam.getParameterType();
 					if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
 						args[i] = implicitModel;
 					}
@@ -223,13 +227,15 @@ public class HandlerMethodInvoker {
 					i++;
 				}
 				implicitModel.putAll(binder.getBindingResult().getModel());
+			} else if (pathVarName != null) {
+				args[i] = resolvePathVariable(pathVarName, methodParam, webRequest, handler);
 			}
 		}
 
 		return args;
 	}
 
-	private void initBinder(Object handler, String attrName, WebDataBinder binder, NativeWebRequest webRequest)
+	protected void initBinder(Object handler, String attrName, WebDataBinder binder, NativeWebRequest webRequest)
 			throws Exception {
 
 		if (this.bindingInitializer != null) {
@@ -276,8 +282,7 @@ public class HandlerMethodInvoker {
 			String paramDefaultValue = null;
 			Object[] paramAnns = methodParam.getParameterAnnotations();
 
-			for (int j = 0; j < paramAnns.length; j++) {
-				Object paramAnn = paramAnns[j];
+			for (Object paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
@@ -328,7 +333,7 @@ public class HandlerMethodInvoker {
 									   Object handlerForInitBinderCall) throws Exception {
 
 		Class paramType = methodParam.getParameterType();
-		if ("".equals(paramName)) {
+		if (paramName.length() == 0) {
 			paramName = methodParam.getParameterName();
 			if (paramName == null) {
 				throw new IllegalStateException("No parameter specified for @RequestParam argument of type [" +
@@ -391,6 +396,18 @@ public class HandlerMethodInvoker {
 		WebDataBinder binder = createBinder(webRequest, bindObject, name);
 		initBinder(handler, name, binder, webRequest);
 		return binder;
+	}
+
+	/**
+	 * Resolves the given {@link org.springframework.web.bind.annotation.PathVariable @PathVariable} variable. Overriden in
+	 * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.ServletHandlerMethodInvoker},
+	 * throws an UnsupportedOperationException by default.
+	 */
+	protected Object resolvePathVariable(String pathVarName,
+										 MethodParameter methodParam,
+										 NativeWebRequest webRequest,
+										 Object handlerForInitBinderCall) throws Exception {
+		throw new UnsupportedOperationException("@PathVariable not supported");
 	}
 
 	@SuppressWarnings("unchecked")

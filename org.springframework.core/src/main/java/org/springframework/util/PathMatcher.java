@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.util.Map;
+
 /**
  * Strategy interface for <code>String</code>-based path matching.
  * 
@@ -88,4 +90,16 @@ public interface PathMatcher {
 	 */
 	String extractPathWithinPattern(String pattern, String path);
 
+	/**
+	 * Given a pattern and a full path, extract the URI template variables. URI template
+	 * variables are expressed through curly brackets ('{' and '}').
+	 *
+	 * <p>For example: For pattern "/hotels/{hotel}" and path "/hotels/1", this method will
+	 * return a map containing "hotel"->"1".
+	 *
+	 * @param pattern the path pattern, possibly containing URI templates
+	 * @param path the full path to extract template variables from
+	 * @return a map, containing variable names as keys; variables values as values
+	 */
+	Map<String, String> extractUriTemplateVariables(String pattern, String path);
 }

@@ -16,18 +16,31 @@
 
 package org.springframework.util;
 
-import junit.framework.TestCase;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author Alef Arendsen
  * @author Seth Ladd
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  */
-public class PathMatcherTests extends TestCase {
+public class AntPathMatcherTests {
 
-	public void testAntPathMatcher() {
-		PathMatcher pathMatcher = new AntPathMatcher();
+	private AntPathMatcher pathMatcher;
 
+	@Before
+	public void createMatcher() {
+		pathMatcher = new AntPathMatcher();
+	}
+
+	@Test
+	public void standard() {
 		// test exact matching
 		assertTrue(pathMatcher.match("test", "test"));
 		assertTrue(pathMatcher.match("/test", "/test"));
@@ -109,9 +122,8 @@ public class PathMatcherTests extends TestCase {
 		assertTrue(pathMatcher.match("", ""));
 	}
 
-	public void testAntPathMatcherWithMatchStart() {
-		PathMatcher pathMatcher = new AntPathMatcher();
-
+	@Test
+	public void withMatchStart() {
 		// test exact matching
 		assertTrue(pathMatcher.matchStart("test", "test"));
 		assertTrue(pathMatcher.matchStart("/test", "/test"));
@@ -197,8 +209,8 @@ public class PathMatcherTests extends TestCase {
 		assertTrue(pathMatcher.matchStart("", ""));
 	}
 
-	public void testAntPathMatcherWithUniqueDeliminator() {
-		AntPathMatcher pathMatcher = new AntPathMatcher();
+	@Test
+	public void uniqueDeliminator() {
 		pathMatcher.setPathSeparator(".");
 
 		// test exact matching
@@ -259,9 +271,8 @@ public class PathMatcherTests extends TestCase {
 		assertFalse(pathMatcher.match(".*bla.test", "XXXbl.test"));
 	}
 
-	public void testAntPathMatcherExtractPathWithinPattern() throws Exception {
-		PathMatcher pathMatcher = new AntPathMatcher();
-
+	@Test
+	public void extractPathWithinPattern() throws Exception {
 		assertEquals("", pathMatcher.extractPathWithinPattern("/docs/commit.html", "/docs/commit.html"));
 
 		assertEquals("cvs/commit", pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit"));
@@ -281,5 +292,18 @@ public class PathMatcherTests extends TestCase {
 		assertEquals("docs/cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/**", "/docs/cvs/commit"));
 		assertEquals("docs/cvs/commit.html", pathMatcher.extractPathWithinPattern("/d?cs/**/*.html", "/docs/cvs/commit.html"));
 	}
+
+	@Test
+	public void extractUriTemplateVariables() throws Exception {
+		Map<String,String> result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}", "/hotels/1");
+		assertEquals(Collections.singletonMap("hotel", "1"), result);
+
+		result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}/bookings/{booking}", "/hotels/1/bookings/2");
+		Map<String, String> expected = new LinkedHashMap<String, String>();
+		expected.put("hotel", "1");
+		expected.put("booking", "2");
+		assertEquals(expected, result);
+	}
+
 
 }
