@@ -16,6 +16,11 @@
 
 package org.springframework.util;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * PathMatcher implementation for Ant-style path patterns.
  * Examples are provided below.
@@ -56,6 +61,10 @@ public class AntPathMatcher implements PathMatcher {
 	/** Default path separator: "/" */
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
 
+	/** Captures URI template variable names. */
+	private static final Pattern URI_TEMPLATE_NAMES_PATTERN = Pattern.compile("\\{([\\w-~_\\.]+?)\\}");
+
+
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
 
@@ -91,6 +100,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * <code>false</code> if it didn't
 	 */
 	protected boolean doMatch(String pattern, String path, boolean fullMatch) {
+		pattern = uriTemplateToAntPattern(pattern);
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
@@ -119,14 +129,13 @@ public class AntPathMatcher implements PathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(this.pathSeparator) ?
-						path.endsWith(this.pathSeparator) : !path.endsWith(this.pathSeparator));
+				return (pattern.endsWith(this.pathSeparator) ? path.endsWith(this.pathSeparator) :
+						!path.endsWith(this.pathSeparator));
 			}
 			if (!fullMatch) {
 				return true;
 			}
-			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") &&
-					path.endsWith(this.pathSeparator)) {
+			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") && path.endsWith(this.pathSeparator)) {
 				return true;
 			}
 			for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
@@ -187,17 +196,17 @@ public class AntPathMatcher implements PathMatcher {
 			int foundIdx = -1;
 
 			strLoop:
-			    for (int i = 0; i <= strLength - patLength; i++) {
-				    for (int j = 0; j < patLength; j++) {
-					    String subPat = (String) pattDirs[pattIdxStart + j + 1];
-					    String subStr = (String) pathDirs[pathIdxStart + i + j];
-					    if (!matchStrings(subPat, subStr)) {
-						    continue strLoop;
-					    }
-				    }
-				    foundIdx = pathIdxStart + i;
-				    break;
-			    }
+			for (int i = 0; i <= strLength - patLength; i++) {
+				for (int j = 0; j < patLength; j++) {
+					String subPat = (String) pattDirs[pattIdxStart + j + 1];
+					String subStr = (String) pathDirs[pathIdxStart + i + j];
+					if (!matchStrings(subPat, subStr)) {
+						continue strLoop;
+					}
+				}
+				foundIdx = pathIdxStart + i;
+				break;
+			}
 
 			if (foundIdx == -1) {
 				return false;
@@ -382,7 +391,7 @@ public class AntPathMatcher implements PathMatcher {
 		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
 		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
 
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder builder = new StringBuilder();
 
 		// Add any path parts that have a wildcarded pattern part.
 		int puts = 0;
@@ -390,9 +399,9 @@ public class AntPathMatcher implements PathMatcher {
 			String patternPart = patternParts[i];
 			if ((patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) && pathParts.length >= i + 1) {
 				if (puts > 0 || (i == 0 && !pattern.startsWith(this.pathSeparator))) {
-					buffer.append(this.pathSeparator);
+					builder.append(this.pathSeparator);
 				}
-				buffer.append(pathParts[i]);
+				builder.append(pathParts[i]);
 				puts++;
 			}
 		}
@@ -400,12 +409,51 @@ public class AntPathMatcher implements PathMatcher {
 		// Append any trailing path parts.
 		for (int i = patternParts.length; i < pathParts.length; i++) {
 			if (puts > 0 || i > 0) {
-				buffer.append(this.pathSeparator);
+				builder.append(this.pathSeparator);
 			}
-			buffer.append(pathParts[i]);
+			builder.append(pathParts[i]);
 		}
 
-		return buffer.toString();
+		return builder.toString();
+	}
+
+	/**
+	 * Replaces URI template variables with Ant-style pattern patchs. Looks for variables within curly braces, and replaces
+	 * those with <code>*</code>.
+	 *
+	 * <p/>For example: <code>/hotels/{hotel}/bookings</code> becomes
+	 * <code>/hotels/&#42;/bookings</code>
+	 *
+	 * @param pattern the pattern, possibly containing URI template variables
+	 * @return the Ant-stlye pattern path
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	private static String uriTemplateToAntPattern(String pattern) {
+		Matcher matcher = URI_TEMPLATE_NAMES_PATTERN.matcher(pattern);
+		return matcher.replaceAll("*");
+	}
+
+
+	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
+		if (pattern.contains("**") && pattern.contains("{")) {
+			throw new IllegalArgumentException("Combining '**' and URI templates is not allowed");
+		}
+		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
+		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
+
+		Map<String, String> variables = new LinkedHashMap<String, String>();
+
+		for (int i = 0; i < patternParts.length && i < pathParts.length; i++) {
+			String patternPart = patternParts[i];
+			String pathPart = pathParts[i];
+			int patternEnd = patternPart.length() -1 ;
+			if (patternEnd > 1 && patternPart.charAt(0) == '{' && patternPart.charAt(patternEnd) == '}') {
+				String varName = patternPart.substring(1, patternEnd);
+				variables.put(varName, pathPart);
+			}
+		}
+
+		return variables;
 	}
 
 }

@@ -72,6 +72,9 @@ import java.lang.annotation.Target;
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type.
+ * <li>{@link PathVariable @PathVariable} annotated parameters for acces to
+ * URI template values (i.e. /hotels/{hotel}). Variable values will be
+ * converted to the declared method argument type.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
  * {@link org.springframework.ui.ModelMap} for enriching the implicit model
  * that will be exposed to the web view.

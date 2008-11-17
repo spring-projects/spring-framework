@@ -74,6 +74,7 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerAdapter;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
@@ -420,9 +421,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 
+	/**
+	 * Servlet-specific subclass of {@link HandlerMethodResolver}.
+	 */
 	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
 
-		public ServletHandlerMethodResolver(Class<?> handlerType) {
+		private ServletHandlerMethodResolver(Class<?> handlerType) {
 			super(handlerType);
 		}
 
@@ -569,6 +573,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 
+	/**
+	 * Servlet-specific subclass of {@link HandlerMethodInvoker}.
+	 */
 	private class ServletHandlerMethodInvoker extends HandlerMethodInvoker {
 
 		private boolean responseArgumentUsed = false;
@@ -605,6 +612,33 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			if (failOnErrors) {
 				servletBinder.closeNoCatch();
 			}
+		}
+
+		@Override
+		@SuppressWarnings({"unchecked"})
+		protected Object resolvePathVariable(String pathVarName,
+										   MethodParameter methodParam,
+										   NativeWebRequest webRequest,
+										   Object handlerForInitBinderCall) throws Exception {
+			Class paramType = methodParam.getParameterType();
+			if (pathVarName.length() == 0) {
+				pathVarName = methodParam.getParameterName();
+				if (pathVarName == null) {
+					throw new IllegalStateException("No variable name specified for @PathVariable argument of type [" +
+							paramType.getName() + "], and no parameter name information found in class file either.");
+				}
+			}
+			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			Map<String, String> uriTemplateVariables =
+					(Map<String, String>) servletRequest.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+			if (uriTemplateVariables == null || !uriTemplateVariables.containsKey(pathVarName)) {
+				throw new IllegalStateException("Could not find @PathVariable [" + pathVarName + "] in @RequestMapping");
+			}
+			String pathVarValue = uriTemplateVariables.get(pathVarName);
+
+			WebDataBinder binder = createBinder(webRequest, null, pathVarName);
+			initBinder(handlerForInitBinderCall, pathVarName, binder, webRequest);
+			return binder.convertIfNecessary(pathVarValue, paramType, methodParam);
 		}
 
 		@Override
