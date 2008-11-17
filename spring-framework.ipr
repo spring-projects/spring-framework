@@ -92,7 +92,52 @@
           <option name="LABEL_INDENT_SIZE" value="0" />
           <option name="LABEL_INDENT_ABSOLUTE" value="false" />
         </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="groovy">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="gsp">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="java">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="true" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="js">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="jsp">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="xml">
           <option name="INDENT_SIZE" value="4" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
           <option name="TAB_SIZE" value="4" />
@@ -106,7 +151,7 @@
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
   <component name="CompilerConfiguration">
-    <option name="DEFAULT_COMPILER" value="Eclipse" />
+    <option name="DEFAULT_COMPILER" value="Javac" />
     <option name="DEPLOY_AFTER_MAKE" value="0" />
     <resourceExtensions>
       <entry name=".+\.(properties|xml|html|dtd|tld)" />
@@ -146,6 +191,7 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
@@ -166,6 +212,15 @@
           <module name="beans" />
           <module name="context" />
           <module name="orm" />
+          <module name="web-servlet" />
+          <module name="testsuite" />
+          <module name="web">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.web/src/test/resources/org/springframework/web/context/request/requestScopeTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web/src/test/resources/org/springframework/web/context/request/requestScopedProxyTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web/src/test/resources/org/springframework/web/context/request/sessionScopeTests.xml" />
+            </files>
+          </module>
         </modules>
       </facet-type>
       <facet-type id="web">
@@ -174,6 +229,14 @@
           <module name="testsuite" />
         </modules>
       </facet-type>
+      <facet-type id="jpa">
+        <modules>
+          <module name="testsuite" />
+        </modules>
+      </facet-type>
+      <facet-type id="Grails" />
+      <facet-type id="Groovy" />
+      <facet-type id="Gant_Grails" />
     </autodetection-disabled>
   </component>
   <component name="InspectionProjectProfileManager">
@@ -265,12 +328,20 @@
         <inspection_tool class="FallthruInSwitchStatement" level="WARNING" enabled="true" />
         <inspection_tool class="TextLabelInSwitchStatement" level="WARNING" enabled="true" />
         <inspection_tool class="MissingDeprecatedAnnotation" level="WARNING" enabled="true" />
-        <inspection_tool class="MissingOverrideAnnotation" level="WARNING" enabled="true">
-          <option name="useJdk6Rules" value="false" />
-        </inspection_tool>
+        <inspection_tool class="MissingOverrideAnnotation" level="WARNING" enabled="true" />
       </profile>
     </profiles>
     <list size="0" />
+  </component>
+  <component name="IssueNavigationConfiguration">
+    <option name="links">
+      <list>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="[A-Z]+\-\d+" />
+          <option name="linkRegexp" value="http://jira.springframework.org/browse/$0" />
+        </IssueNavigationLink>
+      </list>
+    </option>
   </component>
   <component name="JavacSettings">
     <option name="DEBUGGING_INFO" value="true" />
@@ -435,6 +506,9 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDetails">
+    <option name="projectName" value="spring-framework" />
+  </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectModuleManager">
     <modules>
@@ -443,6 +517,7 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.context/context.iml" filepath="$PROJECT_DIR$/org.springframework.context/context.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.context.support/context-support.iml" filepath="$PROJECT_DIR$/org.springframework.context.support/context-support.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.core/core.iml" filepath="$PROJECT_DIR$/org.springframework.core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.expression/expression.iml" filepath="$PROJECT_DIR$/org.springframework.expression/expression.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.instrument/instrument.iml" filepath="$PROJECT_DIR$/org.springframework.instrument/instrument.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" filepath="$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
@@ -455,7 +530,7 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web.servlet/web-servlet.iml" filepath="$PROJECT_DIR$/org.springframework.web.servlet/web-servlet.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/target" />
   </component>
   <component name="RmicSettings">
@@ -466,7 +541,24 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
   <component name="SvnBranchConfigurationManager">
-    <option name="myVersion" value="123" />
+    <option name="myConfigurationMap">
+      <map>
+        <entry key="$PROJECT_DIR$">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="branchUrls">
+                <list>
+                  <option value="https://src.springframework.org/svn/spring-framework/branches" />
+                  <option value="https://src.springframework.org/svn/spring-framework/tags" />
+                </list>
+              </option>
+              <option name="trunkUrl" value="https://src.springframework.org/svn/spring-framework/trunk" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="myVersion" value="124" />
   </component>
   <component name="SvnChangesBrowserSettings">
     <option name="USE_AUTHOR_FIELD" value="true" />
