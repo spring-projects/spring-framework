@@ -280,6 +280,7 @@ public class HandlerMethodInvoker {
 			String paramName = null;
 			boolean paramRequired = false;
 			String paramDefaultValue = null;
+			String pathVarName = null;
 			Object[] paramAnns = methodParam.getParameterAnnotations();
 
 			for (Object paramAnn : paramAnns) {
@@ -294,9 +295,13 @@ public class HandlerMethodInvoker {
 					throw new IllegalStateException(
 							"@ModelAttribute is not supported on @InitBinder methods: " + initBinderMethod);
 				}
+				else if (PathVariable.class.isInstance(paramAnn)) {
+					PathVariable pathVar = (PathVariable) paramAnn;
+					pathVarName = pathVar.value();
+				}
 			}
 
-			if (paramName == null) {
+			if (paramName == null && pathVarName == null) {
 				Object argValue = resolveCommonArgument(methodParam, webRequest);
 				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					initBinderArgs[i] = argValue;
@@ -319,6 +324,8 @@ public class HandlerMethodInvoker {
 			if (paramName != null) {
 				initBinderArgs[i] =
 						resolveRequestParam(paramName, paramRequired, paramDefaultValue, methodParam, webRequest, null);
+			} else if (pathVarName != null) {
+				initBinderArgs[i] = resolvePathVariable(pathVarName, methodParam, webRequest, null);
 			}
 		}
 
