@@ -18,8 +18,6 @@ package org.springframework.util;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * PathMatcher implementation for Ant-style path patterns.
@@ -61,10 +59,6 @@ public class AntPathMatcher implements PathMatcher {
 	/** Default path separator: "/" */
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
 
-	/** Captures URI template variable names. */
-	private static final Pattern URI_TEMPLATE_NAMES_PATTERN = Pattern.compile("\\{([\\w-~_\\.]+?)\\}");
-
-
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
 
@@ -82,11 +76,11 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	public boolean match(String pattern, String path) {
-		return doMatch(pattern, path, true);
+		return doMatch(pattern, path, true, null);
 	}
 
 	public boolean matchStart(String pattern, String path) {
-		return doMatch(pattern, path, false);
+		return doMatch(pattern, path, false, null);
 	}
 
 
@@ -99,8 +93,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the supplied <code>path</code> matched,
 	 * <code>false</code> if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch) {
-		pattern = uriTemplateToAntPattern(pattern);
+	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
@@ -119,7 +112,7 @@ public class AntPathMatcher implements PathMatcher {
 			if ("**".equals(patDir)) {
 				break;
 			}
-			if (!matchStrings(patDir, pathDirs[pathIdxStart])) {
+			if (!matchStrings(patDir, pathDirs[pathIdxStart], uriTemplateVariables)) {
 				return false;
 			}
 			pattIdxStart++;
@@ -160,7 +153,7 @@ public class AntPathMatcher implements PathMatcher {
 			if (patDir.equals("**")) {
 				break;
 			}
-			if (!matchStrings(patDir, pathDirs[pathIdxEnd])) {
+			if (!matchStrings(patDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
 				return false;
 			}
 			pattIdxEnd--;
@@ -198,9 +191,9 @@ public class AntPathMatcher implements PathMatcher {
 			strLoop:
 			for (int i = 0; i <= strLength - patLength; i++) {
 				for (int j = 0; j < patLength; j++) {
-					String subPat = (String) pattDirs[pattIdxStart + j + 1];
-					String subStr = (String) pathDirs[pathIdxStart + i + j];
-					if (!matchStrings(subPat, subStr)) {
+					String subPat = pattDirs[pattIdxStart + j + 1];
+					String subStr = pathDirs[pathIdxStart + i + j];
+					if (!matchStrings(subPat, subStr, uriTemplateVariables)) {
 						continue strLoop;
 					}
 				}
@@ -237,138 +230,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the string matches against the
 	 * pattern, or <code>false</code> otherwise.
 	 */
-	private boolean matchStrings(String pattern, String str) {
-		char[] patArr = pattern.toCharArray();
-		char[] strArr = str.toCharArray();
-		int patIdxStart = 0;
-		int patIdxEnd = patArr.length - 1;
-		int strIdxStart = 0;
-		int strIdxEnd = strArr.length - 1;
-		char ch;
-
-		boolean containsStar = false;
-		for (int i = 0; i < patArr.length; i++) {
-			if (patArr[i] == '*') {
-				containsStar = true;
-				break;
-			}
-		}
-
-		if (!containsStar) {
-			// No '*'s, so we make a shortcut
-			if (patIdxEnd != strIdxEnd) {
-				return false; // Pattern and string do not have the same size
-			}
-			for (int i = 0; i <= patIdxEnd; i++) {
-				ch = patArr[i];
-				if (ch != '?') {
-					if (ch != strArr[i]) {
-						return false;// Character mismatch
-					}
-				}
-			}
-			return true; // String matches against pattern
-		}
-
-
-		if (patIdxEnd == 0) {
-			return true; // Pattern contains only '*', which matches anything
-		}
-
-		// Process characters before first star
-		while ((ch = patArr[patIdxStart]) != '*' && strIdxStart <= strIdxEnd) {
-			if (ch != '?') {
-				if (ch != strArr[strIdxStart]) {
-					return false;// Character mismatch
-				}
-			}
-			patIdxStart++;
-			strIdxStart++;
-		}
-		if (strIdxStart > strIdxEnd) {
-			// All characters in the string are used. Check if only '*'s are
-			// left in the pattern. If so, we succeeded. Otherwise failure.
-			for (int i = patIdxStart; i <= patIdxEnd; i++) {
-				if (patArr[i] != '*') {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// Process characters after last star
-		while ((ch = patArr[patIdxEnd]) != '*' && strIdxStart <= strIdxEnd) {
-			if (ch != '?') {
-				if (ch != strArr[strIdxEnd]) {
-					return false;// Character mismatch
-				}
-			}
-			patIdxEnd--;
-			strIdxEnd--;
-		}
-		if (strIdxStart > strIdxEnd) {
-			// All characters in the string are used. Check if only '*'s are
-			// left in the pattern. If so, we succeeded. Otherwise failure.
-			for (int i = patIdxStart; i <= patIdxEnd; i++) {
-				if (patArr[i] != '*') {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// process pattern between stars. padIdxStart and patIdxEnd point
-		// always to a '*'.
-		while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
-			int patIdxTmp = -1;
-			for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
-				if (patArr[i] == '*') {
-					patIdxTmp = i;
-					break;
-				}
-			}
-			if (patIdxTmp == patIdxStart + 1) {
-				// Two stars next to each other, skip the first one.
-				patIdxStart++;
-				continue;
-			}
-			// Find the pattern between padIdxStart & padIdxTmp in str between
-			// strIdxStart & strIdxEnd
-			int patLength = (patIdxTmp - patIdxStart - 1);
-			int strLength = (strIdxEnd - strIdxStart + 1);
-			int foundIdx = -1;
-			strLoop:
-			for (int i = 0; i <= strLength - patLength; i++) {
-				for (int j = 0; j < patLength; j++) {
-					ch = patArr[patIdxStart + j + 1];
-					if (ch != '?') {
-						if (ch != strArr[strIdxStart + i + j]) {
-							continue strLoop;
-						}
-					}
-				}
-
-				foundIdx = strIdxStart + i;
-				break;
-			}
-
-			if (foundIdx == -1) {
-				return false;
-			}
-
-			patIdxStart = patIdxTmp;
-			strIdxStart = foundIdx + patLength;
-		}
-
-		// All characters in the string are used. Check if only '*'s are left
-		// in the pattern. If so, we succeeded. Otherwise failure.
-		for (int i = patIdxStart; i <= patIdxEnd; i++) {
-			if (patArr[i] != '*') {
-				return false;
-			}
-		}
-
-		return true;
+	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
+		AntPatchStringMatcher matcher = new AntPatchStringMatcher(pattern, str, uriTemplateVariables);
+		return matcher.matchStrings();
 	}
 
 	/**
@@ -417,42 +281,10 @@ public class AntPathMatcher implements PathMatcher {
 		return builder.toString();
 	}
 
-	/**
-	 * Replaces URI template variables with Ant-style pattern patchs. Looks for variables within curly braces, and replaces
-	 * those with <code>*</code>.
-	 *
-	 * <p/>For example: <code>/hotels/{hotel}/bookings</code> becomes
-	 * <code>/hotels/&#42;/bookings</code>
-	 *
-	 * @param pattern the pattern, possibly containing URI template variables
-	 * @return the Ant-stlye pattern path
-	 * @see org.springframework.util.AntPathMatcher
-	 */
-	private static String uriTemplateToAntPattern(String pattern) {
-		Matcher matcher = URI_TEMPLATE_NAMES_PATTERN.matcher(pattern);
-		return matcher.replaceAll("*");
-	}
-
-
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
-		if (pattern.contains("**") && pattern.contains("{")) {
-			throw new IllegalArgumentException("Combining '**' and URI templates is not allowed");
-		}
-		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
-
 		Map<String, String> variables = new LinkedHashMap<String, String>();
-
-		for (int i = 0; i < patternParts.length && i < pathParts.length; i++) {
-			String patternPart = patternParts[i];
-			String pathPart = pathParts[i];
-			int patternEnd = patternPart.length() -1 ;
-			if (patternEnd > 1 && patternPart.charAt(0) == '{' && patternPart.charAt(patternEnd) == '}') {
-				String varName = patternPart.substring(1, patternEnd);
-				variables.put(varName, pathPart);
-			}
-		}
-
+		boolean result = doMatch(pattern, path, true, variables);
+		Assert.state(result, "Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
 		return variables;
 	}
 

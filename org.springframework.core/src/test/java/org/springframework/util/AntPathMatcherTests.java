@@ -303,6 +303,9 @@ public class AntPathMatcherTests {
 		expected.put("hotel", "1");
 		expected.put("booking", "2");
 		assertEquals(expected, result);
+
+		result = pathMatcher.extractUriTemplateVariables("/**/hotels/**/{hotel}", "/foo/hotels/bar/1");
+		assertEquals(Collections.singletonMap("hotel", "1"), result);
 	}
 
 
