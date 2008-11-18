@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -64,7 +63,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -798,24 +796,6 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	@Test
-	public void uriTemplates() throws Exception {
-		DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) throws BeansException {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(UriTemplateController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
-		assertEquals("test-42-21", response.getContentAsString());
-	}
 
 	/*
 	 * Controllers
@@ -1338,15 +1318,5 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	@Controller
-	public static class UriTemplateController {
-
-		@RequestMapping("/hotels/{hotel}/bookings/{booking}")
-		public void handle(@PathVariable("hotel") int hotel, @PathVariable int booking, HttpServletResponse response)
-				throws IOException {
-			response.getWriter().write("test-" + hotel + "-" + booking);
-		}
-
-	}
 
 }
