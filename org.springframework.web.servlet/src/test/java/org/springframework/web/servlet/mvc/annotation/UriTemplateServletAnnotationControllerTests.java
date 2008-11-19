@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -48,6 +47,26 @@ public class UriTemplateServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("test-42", response.getContentAsString());
+	}
+
+	@Test
+	public void ambiguous() throws Exception {
+		initServlet(AmbiguousUriTemplateController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/12345");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("specific", response.getContentAsString());
+	}
+
+	@Test
+	public void relative() throws Exception {
+		initServlet(RelativePathUriTemplateController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42-21", response.getContentAsString());
 	}
 
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
@@ -101,10 +120,26 @@ public class UriTemplateServletAnnotationControllerTests {
 	@RequestMapping("/hotels/{hotel}/**")
 	public static class RelativePathUriTemplateController {
 
-		@RequestMapping("/bookings/{booking}")
-		public void handle(@PathVariable("hotel") int hotel, @PathVariable int booking, HttpServletResponse response)
+		@RequestMapping("bookings/{booking}")
+		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking, Writer writer)
 				throws IOException {
-			response.getWriter().write("test-" + hotel + "-" + booking);
+			assertEquals("Invalid path variable value", "42", hotel);
+			assertEquals("Invalid path variable value", 21, booking);
+			writer.write("test-" + hotel + "-" + booking);
+		}
+
+	}
+
+	@Controller
+	public static class AmbiguousUriTemplateController {
+		@RequestMapping("/hotels/{hotel}")
+		public void handleVars(Writer writer) throws IOException {
+			writer.write("variables");
+		}
+
+		@RequestMapping("/hotels/12345")
+		public void handleSpecific(Writer writer) throws IOException {
+			writer.write("specific");
 		}
 
 	}
