@@ -35,8 +35,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
 import junit.framework.Assert;
+import junit.framework.TestCase;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 
@@ -1092,7 +1092,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 125);
 
 		bw.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
 		sw.start("array3");
