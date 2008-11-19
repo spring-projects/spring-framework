@@ -51,6 +51,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -503,6 +504,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 			}
 			if (targetHandlerMethods.size() == 1) {
+				extractHandlerMethodUriTemplates(targetPathMatches.values().iterator().next(), lookupPath, request);
 				return targetHandlerMethods.values().iterator().next();
 			}
 			else if (!targetHandlerMethods.isEmpty()) {
@@ -525,6 +527,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						}
 					}
 				}
+				extractHandlerMethodUriTemplates(bestPathMatch, lookupPath, request);
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
 			else {
@@ -569,6 +572,37 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private boolean isBetterParamMatch(RequestMappingInfo mapping, RequestMappingInfo mappingToCompare) {
 			return (mappingToCompare.params.length < mapping.params.length);
+		}
+
+		@SuppressWarnings("unchecked")
+		private void extractHandlerMethodUriTemplates(String mappedPath, String lookupPath, HttpServletRequest request) {
+			Map<String, String> variables = null;
+			boolean hasSuffix = (mappedPath.indexOf('.') != -1);
+			if (!hasSuffix && pathMatcher.match(mappedPath + ".*", lookupPath)) {
+				String realPath = mappedPath + ".*";
+				if (pathMatcher.match(realPath, lookupPath)) {
+					variables = pathMatcher.extractUriTemplateVariables(realPath, lookupPath);
+				}
+			}
+			if (variables == null && !mappedPath.startsWith("/")) {
+				String realPath = "/**/" + mappedPath;
+				if (pathMatcher.match(realPath, lookupPath)) {
+					variables = pathMatcher.extractUriTemplateVariables(realPath, lookupPath);
+				} else {
+					realPath = realPath + ".*";
+					if (pathMatcher.match(realPath, lookupPath)) {
+						variables = pathMatcher.extractUriTemplateVariables(realPath, lookupPath);
+					}
+				}
+			}
+			if (!CollectionUtils.isEmpty(variables)) {
+				Map<String, String> typeVariables =
+						(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+				if (typeVariables != null) {
+					variables.putAll(typeVariables);
+				}
+				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, variables);
+			}
 		}
 	}
 
