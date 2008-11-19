@@ -28,24 +28,13 @@ class AntPatchStringMatcher {
 
 	private final Map<String, String> uriTemplateVariables;
 
-	/**
-	 * Constructs a new instance of the <code>AntPatchStringMatcher</code>.
-	 * @param pattern
-	 * @param str
-	 * @param uriTemplateVariables
-	 */
+	/** Constructs a new instance of the <code>AntPatchStringMatcher</code>. */
 	AntPatchStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
 		patArr = pattern.toCharArray();
 		strArr = str.toCharArray();
 		this.uriTemplateVariables = uriTemplateVariables;
 		patIdxEnd = patArr.length - 1;
 		strIdxEnd = strArr.length - 1;
-	}
-
-	private void addTemplateVariable(String varName, String varValue) {
-		if (uriTemplateVariables != null) {
-			uriTemplateVariables.put(varName, varValue);
-		}
 	}
 
 	private void addTemplateVariable(int curlyIdxStart, int curlyIdxEnd, int valIdxStart, int valIdxEnd) {
@@ -56,6 +45,11 @@ class AntPatchStringMatcher {
 		}
 	}
 
+	/**
+	 * Main entry point.
+	 *
+	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
+	 */
 	boolean matchStrings() {
 		if (shortcutPossible()) {
 			return doShortcut();
@@ -82,10 +76,16 @@ class AntPatchStringMatcher {
 		// process pattern between stars. padIdxStart and patIdxEnd point
 		// always to a '*'.
 		while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
-			int patIdxTmp = findNextStar();
-			if (patIdxTmp == patIdxStart + 1 && patArr[patIdxTmp] == '*') {
-				// Two stars next to each other, skip the first one.
-				patIdxStart++;
+			int patIdxTmp;
+			if (patArr[patIdxStart] == '{') {
+				patIdxTmp = findClosingCurly();
+				addTemplateVariable(patIdxStart, patIdxTmp, strIdxStart, strIdxEnd);
+				patIdxStart = patIdxTmp + 1;
+				strIdxStart = strIdxEnd + 1;
+				continue;
+			}
+			patIdxTmp = findNextStarOrCurly();
+			if (consecutiveStars(patIdxTmp)) {
 				continue;
 			}
 			// Find the pattern between padIdxStart & padIdxTmp in str between
@@ -119,9 +119,27 @@ class AntPatchStringMatcher {
 		return onlyStarsLeft();
 	}
 
-	private int findNextStar() {
+	private boolean consecutiveStars(int patIdxTmp) {
+		if (patIdxTmp == patIdxStart + 1 && patArr[patIdxStart] == '*' && patArr[patIdxTmp] == '*') {
+			// Two stars next to each other, skip the first one.
+			patIdxStart++;
+			return true;
+		}
+		return false;
+	}
+
+	private int findNextStarOrCurly() {
 		for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
-			if (patArr[i] == '*') {
+			if (patArr[i] == '*' || patArr[i] == '{') {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private int findClosingCurly() {
+		for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
+			if (patArr[i] == '}') {
 				return i;
 			}
 		}

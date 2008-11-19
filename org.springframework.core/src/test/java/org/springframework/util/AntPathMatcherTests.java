@@ -295,7 +295,11 @@ public class AntPathMatcherTests {
 
 	@Test
 	public void extractUriTemplateVariables() throws Exception {
-		Map<String,String> result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}", "/hotels/1");
+		Map<String,String> result;
+		result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}", "/hotels/1");
+		assertEquals(Collections.singletonMap("hotel", "1"), result);
+
+		result = pathMatcher.extractUriTemplateVariables("/h?tels/{hotel}", "/hotels/1");
 		assertEquals(Collections.singletonMap("hotel", "1"), result);
 
 		result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}/bookings/{booking}", "/hotels/1/bookings/2");
@@ -306,6 +310,12 @@ public class AntPathMatcherTests {
 
 		result = pathMatcher.extractUriTemplateVariables("/**/hotels/**/{hotel}", "/foo/hotels/bar/1");
 		assertEquals(Collections.singletonMap("hotel", "1"), result);
+
+		result = pathMatcher.extractUriTemplateVariables("/{page}.html", "/42.html");
+		assertEquals(Collections.singletonMap("page", "42"), result);
+
+		result = pathMatcher.extractUriTemplateVariables("/A-{B}-C", "/A-b-C");
+		assertEquals(Collections.singletonMap("B", "b"), result);
 	}
 
 
