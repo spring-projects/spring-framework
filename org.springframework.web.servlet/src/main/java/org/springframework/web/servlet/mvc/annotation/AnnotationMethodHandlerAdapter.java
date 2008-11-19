@@ -504,7 +504,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 			}
 			if (targetHandlerMethods.size() == 1) {
-				extractHandlerMethodUriTemplates(targetPathMatches.values().iterator().next(), lookupPath, request);
+				if (targetPathMatches.size() == 1) {
+					extractHandlerMethodUriTemplates(targetPathMatches.values().iterator().next(), lookupPath, request);
+				}
 				return targetHandlerMethods.values().iterator().next();
 			}
 			else if (!targetHandlerMethods.isEmpty()) {
@@ -527,7 +529,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						}
 					}
 				}
-				extractHandlerMethodUriTemplates(bestPathMatch, lookupPath, request);
+				if (bestPathMatch != null) {
+					extractHandlerMethodUriTemplates(bestPathMatch, lookupPath, request);
+				}
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
 			else {
