@@ -294,21 +294,21 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the name of the request param for non-browser supported HTTP methods
+	 * Set the name of the request param for non-browser supported HTTP methods.
 	 */
 	public void setMethodParam(String methodParam) {
 		this.methodParam = methodParam;
 	}
 
 	/**
-	 * Get the name of the request param for non-browser supported HTTP methods
+	 * Get the name of the request param for non-browser supported HTTP methods.
 	 */
 	protected String getMethodParameter() {
 		return this.methodParam;
 	}
 
 	/**
-	 * Determine if the HTTP method is browser supported
+	 * Determine if the HTTP method is supported by browsers (i.e. GET or POST).
 	 */
 	protected boolean isMethodBrowserSupported(String method) {
 		return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
