@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+		"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<!--
+  - Mapping file for the Hibernate implementation of the Clinic interface.
+	-->
+<hibernate-mapping auto-import="true" default-lazy="false">
+
+	<class name="org.springframework.samples.petclinic.Vet" table="vets">
+		<id name="id" column="id">
+			<generator class="identity"/>
+		</id>
+		<property name="firstName" column="first_name"/>
+		<property name="lastName" column="last_name"/>
+		<set name="specialtiesInternal" table="vet_specialties">
+			<key column="vet_id"/>
+			<many-to-many column="specialty_id" class="org.springframework.samples.petclinic.Specialty"/>
+		</set>
+	</class>
+
+	<class name="org.springframework.samples.petclinic.Specialty" table="specialties">
+		<id name="id" column="id">
+			<generator class="identity"/>
+		</id>
+		<property name="name" column="name"/>
+	</class>
+
+	<class name="org.springframework.samples.petclinic.Owner" table="owners">
+		<id name="id" column="id">
+			<generator class="identity"/>
+		</id>
+		<property name="firstName" column="first_name"/>
+		<property name="lastName" column="last_name"/>
+		<property name="address" column="address"/>
+		<property name="city" column="city"/>
+		<property name="telephone" column="telephone"/>
+		<set name="petsInternal" inverse="true" cascade="all">
+			<key column="owner_id"/>
+			<one-to-many class="org.springframework.samples.petclinic.Pet"/>
+		</set>
+	</class>
+
+	<class name="org.springframework.samples.petclinic.Pet" table="pets">
+		<id name="id" column="id">
+			<generator class="identity"/>
+		</id>
+		<property name="name" column="name"/>
+		<property name="birthDate" column="birth_date" type="date"/>
+		<many-to-one name="owner" column="owner_id" class="org.springframework.samples.petclinic.Owner"/>
+		<many-to-one name="type" column="type_id" class="org.springframework.samples.petclinic.PetType"/>
+		<set name="visitsInternal" inverse="true" cascade="all">
+			<key column="pet_id"/>
+			<one-to-many class="org.springframework.samples.petclinic.Visit"/>
+		</set>
+	</class>
+
+	<class name="org.springframework.samples.petclinic.PetType" table="types">
+		<id name="id" column="id">
+			<generator class="identity"/>
+		</id>
+		<property name="name" column="name"/>
+	</class>
+
+	<class name="org.springframework.samples.petclinic.Visit" table="visits">
+		<id name="id" column="id">
+			<generator class="identity"/>
+		</id>
+		<property name="date" column="visit_date" type="date"/>
+		<property name="description" column="description"/>
+		<many-to-one name="pet" column="pet_id" class="org.springframework.samples.petclinic.Pet"/>
+	</class>
+
+</hibernate-mapping>

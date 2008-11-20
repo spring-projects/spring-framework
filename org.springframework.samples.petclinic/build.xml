@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="org.springframework.samples.petclinic">
+	<property file="${basedir}/../build.properties"/>
+	<import file="${basedir}/../spring-build/war/default.xml"/>
+</project>

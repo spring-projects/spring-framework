@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_1_0.xsd"
+		version="1.0">
+
+	<persistence-unit-metadata>
+		<xml-mapping-metadata-complete/>
+		<persistence-unit-defaults>
+			<access>PROPERTY</access>
+		</persistence-unit-defaults>
+	</persistence-unit-metadata>
+
+	<package>org.springframework.samples.petclinic</package>
+
+	<mapped-superclass class="BaseEntity">
+		<attributes>
+			<id name="id">
+				<generated-value strategy="IDENTITY"/>
+			</id>
+			<transient name="new"/>
+		</attributes>
+	</mapped-superclass>
+
+	<mapped-superclass class="NamedEntity">
+		<attributes>
+			<basic name="name">
+				<column name="NAME"/>
+			</basic>
+		</attributes>
+	</mapped-superclass>
+
+	<mapped-superclass class="Person">
+		<attributes>
+			<basic name="firstName">
+				<column name="FIRST_NAME"/>
+			</basic>
+			<basic name="lastName">
+				<column name="LAST_NAME"/>
+			</basic>
+		</attributes>
+	</mapped-superclass>
+
+	<entity class="Vet">
+		<table name="VETS"/>
+		<attributes>
+			<many-to-many name="specialtiesInternal" target-entity="Specialty" fetch="EAGER">
+				<join-table name="VET_SPECIALTIES">
+					<join-column name="VET_ID"/>
+					<inverse-join-column name="SPECIALTY_ID"/>
+				</join-table>
+			</many-to-many>
+			<transient name="specialties"/>
+			<transient name="nrOfSpecialties"/>
+		</attributes>
+	</entity>
+
+	<entity class="Specialty">
+		<table name="SPECIALTIES"/>
+	</entity>
+
+	<entity class="Owner">
+		<table name="OWNERS"/>
+		<attributes>
+			<basic name="address"/>
+			<basic name="city"/>
+			<basic name="telephone"/>
+			<one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner" fetch="EAGER">
+				<cascade>
+					<cascade-all/>
+				</cascade>
+			</one-to-many>
+			<transient name="pets"/>
+		</attributes>
+	</entity>
+
+	<entity class="Pet">
+		<table name="PETS"/>
+		<attributes>
+			<basic name="birthDate">
+				<column name="BIRTH_DATE"/>
+				<temporal>DATE</temporal>
+			</basic>
+			<many-to-one name="owner" fetch="EAGER">
+				<cascade>
+					<cascade-all/>
+				</cascade>
+			</many-to-one>
+			<many-to-one name="type" fetch="EAGER">
+				<cascade>
+					<cascade-all/>
+				</cascade>
+			</many-to-one>
+			<one-to-many name="visitsInternal" target-entity="Visit" mapped-by="pet" fetch="EAGER">
+				<cascade>
+					<cascade-all/>
+				</cascade>
+			</one-to-many>
+			<transient name="visits"/>
+		</attributes>
+	</entity>
+
+	<entity class="PetType">
+		<table name="TYPES"/>
+	</entity>
+
+	<entity class="Visit">
+		<table name="VISITS"/>
+		<attributes>
+			<basic name="date">
+				<column name="VISIT_DATE"/>
+				<temporal>DATE</temporal>
+			</basic>
+			<many-to-one name="pet" fetch="EAGER">
+				<cascade>
+					<cascade-all/>
+				</cascade>
+			</many-to-one>
+		</attributes>
+	</entity>
+
+</entity-mappings>
