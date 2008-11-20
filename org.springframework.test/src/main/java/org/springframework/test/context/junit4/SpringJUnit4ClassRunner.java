@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.internal.runners.InitializationError;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
 import org.springframework.test.annotation.ProfileValueUtils;
@@ -148,11 +149,11 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 			testInstance = createTest();
 		}
 		catch (InvocationTargetException ex) {
-			notifier.testAborted(description, ex.getCause());
+			notifier.fireTestFailure(new Failure(description, ex.getCause()));
 			return;
 		}
 		catch (Exception ex) {
-			notifier.testAborted(description, ex);
+			notifier.fireTestFailure(new Failure(description, ex));
 			return;
 		}
 
