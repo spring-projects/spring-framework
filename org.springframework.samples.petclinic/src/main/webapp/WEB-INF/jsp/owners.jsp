@@ -16,7 +16,10 @@
   <c:forEach var="owner" items="${selections}">
     <tr>
       <td>
-          <a href="owner.do?ownerId=${owner.id}">${owner.firstName} ${owner.lastName}</a>
+          <spring:url value="owners/{ownerId}" var="ownerUrl">
+              <spring:param name="ownerId" value="${owner.id}"/>
+          </spring:url>
+          <a href="${ownerUrl}">${owner.firstName} ${owner.lastName}</a>
       </td>
       <td>${owner.address}</td>
       <td>${owner.city}</td>

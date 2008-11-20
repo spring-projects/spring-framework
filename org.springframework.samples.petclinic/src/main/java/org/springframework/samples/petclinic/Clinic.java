@@ -74,4 +74,9 @@ public interface Clinic {
 	 */
 	void storeVisit(Visit visit) throws DataAccessException;
 
+	/**
+	 * Deletes a <code>Pet</code> from the data store.
+	 */
+	void deletePet(int id) throws DataAccessException;
+
 }

@@ -110,9 +110,19 @@
 	-->
 	<servlet-mapping>
 		<servlet-name>petclinic</servlet-name>
-		<url-pattern>*.do</url-pattern>
+		<url-pattern>/clinic/*</url-pattern>
 	</servlet-mapping>
 
+    <filter>
+        <filter-name>httpMethodFilter</filter-name>
+        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>httpMethodFilter</filter-name>
+        <servlet-name>petclinic</servlet-name>
+    </filter-mapping>
+    
 	<session-config>
 		<session-timeout>10</session-timeout>
 	</session-config>

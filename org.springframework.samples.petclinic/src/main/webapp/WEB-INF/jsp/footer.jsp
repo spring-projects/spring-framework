@@ -1,8 +1,8 @@
 
   <table class="footer">
     <tr>
-      <td><a href="<c:url value="/welcome.do"/>">Home</a></td>
-      <td align="right"><img src="<c:url value="/images/springsource-logo.png"/>"/></td>
+      <td><a href="<spring:url value="/clinic/welcome"/>">Home</a></td>
+      <td align="right"><img src="<spring:url value="/images/springsource-logo.png"/>" alt="Sponsored by SpringSource"/></td>
     </tr>
   </table>
 
