@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,11 +65,10 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
 			throws BeansException {
 
-		List propertyAccessExceptions = null;
-		List propertyValues = (pvs instanceof MutablePropertyValues ?
+		List<PropertyAccessException> propertyAccessExceptions = null;
+		List<PropertyValue> propertyValues = (pvs instanceof MutablePropertyValues ?
 				((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
-		for (Iterator it = propertyValues.iterator(); it.hasNext();) {
-			PropertyValue pv = (PropertyValue) it.next();
+		for (PropertyValue pv : propertyValues) {
 			try {
 				// This method may throw any BeansException, which won't be caught
 				// here, if there is a critical failure such as no matching field.
@@ -91,7 +89,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 			}
 			catch (PropertyAccessException ex) {
 				if (propertyAccessExceptions == null) {
-					propertyAccessExceptions = new LinkedList();
+					propertyAccessExceptions = new LinkedList<PropertyAccessException>();
 				}
 				propertyAccessExceptions.add(ex);
 			}
@@ -99,7 +97,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 
 		// If we encountered individual exceptions, throw the composite exception.
 		if (propertyAccessExceptions != null) {
-			PropertyAccessException[] paeArray = (PropertyAccessException[])
+			PropertyAccessException[] paeArray =
 					propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
 			throw new PropertyBatchUpdateException(paeArray);
 		}

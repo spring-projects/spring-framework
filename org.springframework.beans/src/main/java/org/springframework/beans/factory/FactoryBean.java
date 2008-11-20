@@ -50,7 +50,7 @@ package org.springframework.beans.factory;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
-public interface FactoryBean {
+public interface FactoryBean<T> {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -69,7 +69,7 @@ public interface FactoryBean {
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException
 	 */
-	Object getObject() throws Exception;
+	T getObject() throws Exception;
 
 	/**
 	 * Return the type of object that this FactoryBean creates,
@@ -90,7 +90,7 @@ public interface FactoryBean {
 	 * or <code>null</code> if not known at the time of the call
 	 * @see ListableBeanFactory#getBeansOfType
 	 */
-	Class getObjectType();
+	Class<? extends T> getObjectType();
 
 	/**
 	 * Is the object managed by this factory a singleton? That is,

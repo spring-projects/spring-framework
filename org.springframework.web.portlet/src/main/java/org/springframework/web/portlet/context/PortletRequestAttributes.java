@@ -17,18 +17,14 @@
 package org.springframework.web.portlet.context;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.AbstractRequestAttributes;
+import org.springframework.web.context.request.DestructionCallbackBindingListener;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.portlet.util.PortletUtils;
 
@@ -52,18 +48,20 @@ import org.springframework.web.portlet.util.PortletUtils;
 public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	/**
-	 * We'll create a lot of these objects, so we don't want a new logger every time.
+	 * Constant identifying the {@link String} prefixed to the name of a
+	 * destruction callback when it is stored in a {@link PortletSession}.
 	 */
-	private static final Log logger = LogFactory.getLog(PortletRequestAttributes.class);
+	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
+			PortletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
 
 	private final PortletRequest request;
 
 	private volatile PortletSession session;
 
-	private final Map sessionAttributesToUpdate = new HashMap();
+	private final Map<String, Object> sessionAttributesToUpdate = new HashMap<String, Object>();
 
-	private final Map globalSessionAttributesToUpdate = new HashMap();
+	private final Map<String, Object> globalSessionAttributesToUpdate = new HashMap<String, Object>();
 
 
 	/**
@@ -222,6 +220,18 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	public Object resolveReference(String key) {
+		if (REFERENCE_REQUEST.equals(key)) {
+			return this.request;
+		}
+		else if (REFERENCE_SESSION.equals(key)) {
+			return getSession(true);
+		}
+		else {
+			return null;
+		}
+	}
+
 	public String getSessionId() {
 		return getSession(true).getId();
 	}
@@ -240,9 +250,8 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		this.session = this.request.getPortletSession(false);
 		synchronized (this.sessionAttributesToUpdate) {
 			if (this.session != null) {
-				for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					String name = (String) entry.getKey();
+				for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+					String name = entry.getKey();
 					Object newValue = entry.getValue();
 					Object oldValue = this.session.getAttribute(name);
 					if (oldValue == newValue) {
@@ -254,9 +263,8 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 		synchronized (this.globalSessionAttributesToUpdate) {
 			if (this.session != null) {
-				for (Iterator it = this.globalSessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					String name = (String) entry.getKey();
+				for (Map.Entry<String, Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
+					String name = entry.getKey();
 					Object newValue = entry.getValue();
 					Object oldValue = this.session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
 					if (oldValue == newValue) {
@@ -274,10 +282,9 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 * @param callback the callback to be executed for destruction
 	 */
 	private void registerSessionDestructionCallback(String name, Runnable callback) {
-		if (logger.isWarnEnabled()) {
-			logger.warn("Could not register destruction callback [" + callback + "] for attribute '" + name +
-					"' for session scope because Portlet API 1.0 does not support session attribute callbacks");
-		}
+		PortletSession session = getSession(true);
+		session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
+				new DestructionCallbackBindingListener(callback));
 	}
 
 

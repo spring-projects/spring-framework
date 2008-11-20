@@ -19,7 +19,7 @@ package org.springframework.web.context;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -32,14 +32,13 @@ import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 
 /**
  * Performs the actual initialization work for the root application context.
- * Called by {@link ContextLoaderListener} and {@link ContextLoaderServlet}.
+ * Called by {@link ContextLoaderListener}.
  *
  * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter
  * at the <code>web.xml</code> context-param level to specify the context
@@ -72,7 +71,6 @@ import org.springframework.util.ClassUtils;
  * @author Sam Brannen
  * @since 17.02.2003
  * @see ContextLoaderListener
- * @see ContextLoaderServlet
  * @see ConfigurableWebApplicationContext
  * @see org.springframework.web.context.support.XmlWebApplicationContext
  */
@@ -150,7 +148,8 @@ public class ContextLoader {
 	 * Often just holding one reference - if the ContextLoader class is
 	 * deployed in the web app ClassLoader itself!
 	 */
-	private static final Map currentContextPerThread = CollectionFactory.createConcurrentMapIfPossible(1);
+	private static final Map<ClassLoader, WebApplicationContext> currentContextPerThread =
+			new ConcurrentHashMap<ClassLoader, WebApplicationContext>(1);
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
@@ -380,7 +379,7 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */
 	public static WebApplicationContext getCurrentWebApplicationContext() {
-		return (WebApplicationContext) currentContextPerThread.get(Thread.currentThread().getContextClassLoader());
+		return currentContextPerThread.get(Thread.currentThread().getContextClassLoader());
 	}
 
 }

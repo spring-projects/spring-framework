@@ -71,13 +71,13 @@ public abstract class ClassUtils {
 	 * Map with primitive wrapper type as key and corresponding primitive
 	 * type as value, for example: Integer.class -> int.class.
 	 */
-	private static final Map primitiveWrapperTypeMap = new HashMap(8);
+	private static final Map<Class, Class> primitiveWrapperTypeMap = new HashMap<Class, Class>(8);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
 	 * type as value, for example: "int" -> "int.class".
 	 */
-	private static final Map primitiveTypeNameMap = new HashMap(16);
+	private static final Map<String, Class> primitiveTypeNameMap = new HashMap<String, Class>(16);
 
 
 	static {
@@ -90,14 +90,13 @@ public abstract class ClassUtils {
 		primitiveWrapperTypeMap.put(Long.class, long.class);
 		primitiveWrapperTypeMap.put(Short.class, short.class);
 
-		Set primitiveTypeNames = new HashSet(16);
-		primitiveTypeNames.addAll(primitiveWrapperTypeMap.values());
-		primitiveTypeNames.addAll(Arrays.asList(new Class[] {
+		Set<Class> primitiveTypes = new HashSet<Class>(16);
+		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
+		primitiveTypes.addAll(Arrays.asList(
 				boolean[].class, byte[].class, char[].class, double[].class,
-				float[].class, int[].class, long[].class, short[].class}));
-		for (Iterator it = primitiveTypeNames.iterator(); it.hasNext();) {
-			Class primitiveClass = (Class) it.next();
-			primitiveTypeNameMap.put(primitiveClass.getName(), primitiveClass);
+				float[].class, int[].class, long[].class, short[].class));
+		for (Class primitiveType : primitiveTypes) {
+			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
 		}
 	}
 
@@ -230,15 +229,11 @@ public abstract class ClassUtils {
 			return forName(className, classLoader);
 		}
 		catch (ClassNotFoundException ex) {
-			IllegalArgumentException iae = new IllegalArgumentException("Cannot find class [" + className + "]");
-			iae.initCause(ex);
-			throw iae;
+			throw new IllegalArgumentException("Cannot find class [" + className + "]", ex);
 		}
 		catch (LinkageError ex) {
-			IllegalArgumentException iae = new IllegalArgumentException(
-					"Error loading class [" + className + "]: problem with class file or dependent class.");
-			iae.initCause(ex);
-			throw iae;
+			throw new IllegalArgumentException(
+					"Error loading class [" + className + "]: problem with class file or dependent class.", ex);
 		}
 	}
 
@@ -258,7 +253,7 @@ public abstract class ClassUtils {
 		// SHOULD sit in a package, so a length check is worthwhile.
 		if (name != null && name.length() <= 8) {
 			// Could be a primitive - likely.
-			result = (Class) primitiveTypeNameMap.get(name);
+			result = primitiveTypeNameMap.get(name);
 		}
 		return result;
 	}
@@ -315,7 +310,7 @@ public abstract class ClassUtils {
 	 * @return the user-defined class
 	 */
 	public static Class getUserClass(Class clazz) {
-		return (clazz != null && clazz.getName().indexOf(CGLIB_CLASS_SEPARATOR) != -1 ?
+		return (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR) ?
 				clazz.getSuperclass() : clazz);
 	}
 
@@ -436,13 +431,13 @@ public abstract class ClassUtils {
 	 * @return a qualified name for the array class
 	 */
 	private static String getQualifiedNameForArray(Class clazz) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		while (clazz.isArray()) {
 			clazz = clazz.getComponentType();
-			buffer.append(ClassUtils.ARRAY_SUFFIX);
+			result.append(ClassUtils.ARRAY_SUFFIX);
 		}
-		buffer.insert(0, clazz.getName());
-		return buffer.toString();
+		result.insert(0, clazz.getName());
+		return result.toString();
 	}
 
 	/**
@@ -469,16 +464,16 @@ public abstract class ClassUtils {
 		}
 		Class clazz = value.getClass();
 		if (Proxy.isProxyClass(clazz)) {
-			StringBuffer buf = new StringBuffer(clazz.getName());
-			buf.append(" implementing ");
+			StringBuilder result = new StringBuilder(clazz.getName());
+			result.append(" implementing ");
 			Class[] ifcs = clazz.getInterfaces();
 			for (int i = 0; i < ifcs.length; i++) {
-				buf.append(ifcs[i].getName());
+				result.append(ifcs[i].getName());
 				if (i < ifcs.length - 1) {
-					buf.append(',');
+					result.append(',');
 				}
 			}
-			return buf.toString();
+			return result.toString();
 		}
 		else if (clazz.isArray()) {
 			return getQualifiedNameForArray(clazz);
@@ -566,15 +561,14 @@ public abstract class ClassUtils {
 		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
 		Method[] declaredMethods = clazz.getDeclaredMethods();
-		for (int i = 0; i < declaredMethods.length; i++) {
-			Method method = declaredMethods[i];
+		for (Method method : declaredMethods) {
 			if (methodName.equals(method.getName())) {
 				count++;
 			}
 		}
 		Class[] ifcs = clazz.getInterfaces();
-		for (int i = 0; i < ifcs.length; i++) {
-			count += getMethodCountForName(ifcs[i], methodName);
+		for (Class ifc : ifcs) {
+			count += getMethodCountForName(ifc, methodName);
 		}
 		if (clazz.getSuperclass() != null) {
 			count += getMethodCountForName(clazz.getSuperclass(), methodName);
@@ -593,15 +587,14 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		Method[] declaredMethods = clazz.getDeclaredMethods();
-		for (int i = 0; i < declaredMethods.length; i++) {
-			Method method = declaredMethods[i];
+		for (Method method : declaredMethods) {
 			if (method.getName().equals(methodName)) {
 				return true;
 			}
 		}
 		Class[] ifcs = clazz.getInterfaces();
-		for (int i = 0; i < ifcs.length; i++) {
-			if (hasAtLeastOneMethodWithName(ifcs[i], methodName)) {
+		for (Class ifc : ifcs) {
+			if (hasAtLeastOneMethodWithName(ifc, methodName)) {
 				return true;
 			}
 		}
@@ -657,6 +650,7 @@ public abstract class ClassUtils {
 			}
 		}
 		catch (NoSuchMethodException ex) {
+			return null;
 		}
 		return null;
 	}
@@ -832,7 +826,7 @@ public abstract class ClassUtils {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
-		StringBuffer sb = new StringBuffer("[");
+		StringBuilder sb = new StringBuilder("[");
 		for (Iterator it = classes.iterator(); it.hasNext(); ) {
 			Class clazz = (Class) it.next();
 			sb.append(clazz.getName());
@@ -881,18 +875,17 @@ public abstract class ClassUtils {
 		if (clazz.isInterface()) {
 			return new Class[] {clazz};
 		}
-		List interfaces = new ArrayList();
+		List<Class> interfaces = new ArrayList<Class>();
 		while (clazz != null) {
-			for (int i = 0; i < clazz.getInterfaces().length; i++) {
-				Class ifc = clazz.getInterfaces()[i];
-				if (!interfaces.contains(ifc) &&
-						(classLoader == null || isVisible(ifc, classLoader))) {
+			Class[] ifcs = clazz.getInterfaces();
+			for (Class ifc : ifcs) {
+				if (!interfaces.contains(ifc) && (classLoader == null || isVisible(ifc, classLoader))) {
 					interfaces.add(ifc);
 				}
 			}
 			clazz = clazz.getSuperclass();
 		}
-		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+		return interfaces.toArray(new Class[interfaces.size()]);
 	}
 
 	/**
@@ -913,7 +906,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as Set
 	 */
-	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz) {
 		return getAllInterfacesForClassAsSet(clazz, null);
 	}
 
@@ -926,12 +919,12 @@ public abstract class ClassUtils {
 	 * (may be <code>null</code> when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as Set
 	 */
-	public static Set getAllInterfacesForClassAsSet(Class clazz, ClassLoader classLoader) {
+	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
 			return Collections.singleton(clazz);
 		}
-		Set interfaces = new LinkedHashSet();
+		Set<Class> interfaces = new LinkedHashSet<Class>();
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];

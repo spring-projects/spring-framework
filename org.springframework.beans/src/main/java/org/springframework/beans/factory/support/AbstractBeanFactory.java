@@ -22,11 +22,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -51,12 +51,13 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.util.Assert;
@@ -108,17 +109,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Whether to cache bean metadata or rather reobtain it for every access */
 	private boolean cacheBeanMetadata = true;
 
-	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
-	private final Set propertyEditorRegistrars = new LinkedHashSet(4);
+	/** Resolution strategy for expressions in bean definition values */
+	private BeanExpressionResolver beanExpressionResolver;
 
-	/** Custom PropertyEditors to apply to the beans of this factory */
-	private final Map customEditors = new HashMap(4);
+	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
+	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars =
+			new LinkedHashSet<PropertyEditorRegistrar>(4);
 
 	/** A custom TypeConverter to use, overriding the default PropertyEditor mechanism */
 	private TypeConverter typeConverter;
 
+	/** Custom PropertyEditors to apply to the beans of this factory */
+	private final Map<Class, Class<PropertyEditor>> customEditors =
+			new HashMap<Class, Class<PropertyEditor>>(4);
+
 	/** BeanPostProcessors to apply in createBean */
-	private final List beanPostProcessors = new ArrayList();
+	private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
 
 	/** Indicates whether any InstantiationAwareBeanPostProcessors have been registered */
 	private boolean hasInstantiationAwareBeanPostProcessors;
@@ -127,18 +133,18 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private boolean hasDestructionAwareBeanPostProcessors;
 
 	/** Map from scope identifier String to corresponding Scope */
-	private final Map scopes = new HashMap();
+	private final Map<String, Scope> scopes = new HashMap<String, Scope>();
 
 	/** Map from bean name to merged RootBeanDefinition */
-	private final Map mergedBeanDefinitions = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, RootBeanDefinition> mergedBeanDefinitions =
+			new ConcurrentHashMap<String, RootBeanDefinition>();
 
 	/** Names of beans that have already been created at least once */
-	private final Set alreadyCreated = Collections.synchronizedSet(new HashSet());
+	private final Set<String> alreadyCreated = Collections.synchronizedSet(new HashSet<String>());
 
 	/** Names of beans that are currently in creation */
-	private final ThreadLocal prototypesCurrentlyInCreation =
-			new NamedThreadLocal("Prototype beans currently in creation");
-
+	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
+			new NamedThreadLocal<Object>("Prototype beans currently in creation");
 
 	/**
 	 * Create a new AbstractBeanFactory.
@@ -164,7 +170,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return getBean(name, null, null);
 	}
 		
-	public Object getBean(String name, Class requiredType) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return getBean(name, requiredType, null);
 	}
 
@@ -181,7 +187,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	public Object getBean(String name, Class requiredType, Object[] args) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType, Object[] args) throws BeansException {
 		return doGetBean(name, requiredType, args, false);
 	}
 
@@ -196,8 +202,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	protected Object doGetBean(
-			final String name, final Class requiredType, final Object[] args, boolean typeCheckOnly) throws BeansException {
+	protected <T> T doGetBean(
+			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
+			throws BeansException {
 
 		final String beanName = transformedBeanName(name);
 		Object bean = null;
@@ -231,7 +238,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				String nameToLookup = originalBeanName(name);
 				if (args != null) {
 					// Delegation to parent with explicit args.
-					return parentBeanFactory.getBean(nameToLookup, args);
+					return (T) parentBeanFactory.getBean(nameToLookup, args);
 				}
 				else {
 					// No args -> delegate to standard getBean method.
@@ -249,8 +256,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Guarantee initialization of beans that the current bean depends on.
 			String[] dependsOn = mbd.getDependsOn();
 			if (dependsOn != null) {
-				for (int i = 0; i < dependsOn.length; i++) {
-					String dependsOnBean = dependsOn[i];
+				for (String dependsOnBean : dependsOn) {
 					getBean(dependsOnBean);
 					registerDependentBean(dependsOnBean, beanName);
 				}
@@ -290,7 +296,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			else {
 				String scopeName = mbd.getScope();
-				final Scope scope = (Scope) this.scopes.get(scopeName);
+				final Scope scope = this.scopes.get(scopeName);
 				if (scope == null) {
 					throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
 				}
@@ -321,7 +327,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (requiredType != null && bean != null && !requiredType.isAssignableFrom(bean.getClass())) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
-		return bean;
+		return (T) bean;
 	}
 
 	public boolean containsBean(String name) {
@@ -505,7 +511,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public String[] getAliases(String name) {
 		String beanName = transformedBeanName(name);
-		List aliases = new ArrayList();
+		List<String> aliases = new ArrayList<String>();
 		boolean factoryPrefix = name.startsWith(FACTORY_BEAN_PREFIX);
 		String fullBeanName = beanName;
 		if (factoryPrefix) {
@@ -515,8 +521,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			aliases.add(fullBeanName);
 		}
 		String[] retrievedAliases = super.getAliases(beanName);
-		for (int i = 0; i < retrievedAliases.length; i++) {
-			String alias = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + retrievedAliases[i];
+		for (String retrievedAliase : retrievedAliases) {
+			String alias = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + retrievedAliase;
 			if (!alias.equals(name)) {
 				aliases.add(alias);
 			}
@@ -581,6 +587,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.cacheBeanMetadata;
 	}
 
+	public void setBeanExpressionResolver(BeanExpressionResolver resolver) {
+		this.beanExpressionResolver = resolver;
+	}
+
+	public BeanExpressionResolver getBeanExpressionResolver() {
+		return this.beanExpressionResolver;
+	}
+
 	public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
 		Assert.notNull(registrar, "PropertyEditorRegistrar must not be null");
 		this.propertyEditorRegistrars.add(registrar);
@@ -589,20 +603,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Return the set of PropertyEditorRegistrars.
 	 */
-	public Set getPropertyEditorRegistrars() {
+	public Set<PropertyEditorRegistrar> getPropertyEditorRegistrars() {
 		return this.propertyEditorRegistrars;
 	}
 
-	public void registerCustomEditor(Class requiredType, Class propertyEditorClass) {
+	public void registerCustomEditor(Class requiredType, Class<PropertyEditor> propertyEditorClass) {
 		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.isAssignable(PropertyEditor.class, propertyEditorClass);
 		this.customEditors.put(requiredType, propertyEditorClass);
-	}
-
-	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		Assert.notNull(requiredType, "Required type must not be null");
-		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
-		this.customEditors.put(requiredType, propertyEditor);
 	}
 
 	public void copyRegisteredEditorsTo(PropertyEditorRegistry registry) {
@@ -610,10 +618,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
-	 * Return the map of custom editors, with Classes as keys
-	 * and PropertyEditor instances or PropertyEditor classes as values.
+	 * Return the map of custom editors, with Classes as keys and PropertyEditor classes as values.
 	 */
-	public Map getCustomEditors() {
+	public Map<Class, Class<PropertyEditor>> getCustomEditors() {
 		return this.customEditors;
 	}
 
@@ -661,7 +668,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Return the list of BeanPostProcessors that will get applied
 	 * to beans created with this factory.
 	 */
-	public List getBeanPostProcessors() {
+	public List<BeanPostProcessor> getBeanPostProcessors() {
 		return this.beanPostProcessors;
 	}
 
@@ -700,13 +707,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	public Scope getRegisteredScope(String scopeName) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
-		return (Scope) this.scopes.get(scopeName);
+		return this.scopes.get(scopeName);
 	}
 
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		Assert.notNull(otherFactory, "BeanFactory must not be null");
 		setBeanClassLoader(otherFactory.getBeanClassLoader());
 		setCacheBeanMetadata(otherFactory.isCacheBeanMetadata());
+		setBeanExpressionResolver(otherFactory.getBeanExpressionResolver());
 		if (otherFactory instanceof AbstractBeanFactory) {
 			AbstractBeanFactory otherAbstractFactory = (AbstractBeanFactory) otherFactory;
 			this.customEditors.putAll(otherAbstractFactory.customEditors);
@@ -717,6 +725,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.hasDestructionAwareBeanPostProcessors = this.hasDestructionAwareBeanPostProcessors ||
 					otherAbstractFactory.hasDestructionAwareBeanPostProcessors;
 			this.scopes.putAll(otherAbstractFactory.scopes);
+		}
+		else {
+			setTypeConverter(otherFactory.getTypeConverter());
 		}
 	}
 
@@ -771,13 +782,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.prototypesCurrentlyInCreation.set(beanName);
 		}
 		else if (curVal instanceof String) {
-			Set beanNameSet = new HashSet(2);
-			beanNameSet.add(curVal);
+			Set<String> beanNameSet = new HashSet<String>(2);
+			beanNameSet.add((String) curVal);
 			beanNameSet.add(beanName);
 			this.prototypesCurrentlyInCreation.set(beanNameSet);
 		}
 		else {
-			Set beanNameSet = (Set) curVal;
+			Set<String> beanNameSet = (Set<String>) curVal;
 			beanNameSet.add(beanName);
 		}
 	}
@@ -794,7 +805,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.prototypesCurrentlyInCreation.set(null);
 		}
 		else if (curVal instanceof Set) {
-			Set beanNameSet = (Set) curVal;
+			Set<String> beanNameSet = (Set<String>) curVal;
 			beanNameSet.remove(beanName);
 			if (beanNameSet.isEmpty()) {
 				this.prototypesCurrentlyInCreation.set(null);
@@ -839,7 +850,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					"Bean name '" + beanName + "' does not correspond to an object in a Scope");
 		}
 		String scopeName = mbd.getScope();
-		Scope scope = (Scope) this.scopes.get(scopeName);
+		Scope scope = this.scopes.get(scopeName);
 		if (scope == null) {
 			throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
 		}
@@ -904,8 +915,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			registrySupport.useConfigValueEditors();
 		}
 		if (!this.propertyEditorRegistrars.isEmpty()) {
-			for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
-				PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
+			for (PropertyEditorRegistrar registrar : this.propertyEditorRegistrars) {
 				try {
 					registrar.registerCustomEditors(registry);
 				}
@@ -916,8 +926,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						if (isCurrentlyInCreation(bce.getBeanName())) {
 							if (logger.isDebugEnabled()) {
 								logger.debug("PropertyEditorRegistrar [" + registrar.getClass().getName() +
-										"] failed because it tried to obtain currently created bean '" + ex.getBeanName() +
-										"': " + ex.getMessage());
+										"] failed because it tried to obtain currently created bean '" +
+										ex.getBeanName() + "': " + ex.getMessage());
 							}
 							onSuppressedException(ex);
 							continue;
@@ -928,28 +938,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 		if (!this.customEditors.isEmpty()) {
-			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Class requiredType = (Class) entry.getKey();
-				Object value = entry.getValue();
-				if (value instanceof PropertyEditor) {
-					PropertyEditor editor = (PropertyEditor) value;
-					// Register the editor as shared instance, if possible,
-					// to make it clear that it might be used concurrently.
-					if (registrySupport != null) {
-						registrySupport.registerSharedEditor(requiredType, editor);
-					}
-					else {
-						registry.registerCustomEditor(requiredType, editor);
-					}
-				}
-				else if (value instanceof Class) {
-					Class editorClass = (Class) value;
-					registry.registerCustomEditor(requiredType, (PropertyEditor) BeanUtils.instantiateClass(editorClass));
-				}
-				else {
-					throw new IllegalStateException("Illegal custom editor value type: " + value.getClass().getName());
-				}
+			for (Map.Entry<Class, Class<PropertyEditor>> entry : this.customEditors.entrySet()) {
+				Class requiredType = entry.getKey();
+				Class editorClass = entry.getValue();
+				registry.registerCustomEditor(requiredType,
+						(PropertyEditor) BeanUtils.instantiateClass(editorClass));
 			}
 		}
 	}
@@ -965,7 +958,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
 		// Quick check on the concurrent map first, with minimal locking.
-		RootBeanDefinition mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
+		RootBeanDefinition mbd = this.mergedBeanDefinitions.get(beanName);
 		if (mbd != null) {
 			return mbd;
 		}
@@ -1005,7 +998,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			// Check with full lock now in order to enforce the same merged instance.
 			if (containingBd == null) {
-				mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
+				mbd = this.mergedBeanDefinitions.get(beanName);
 			}
 
 			if (mbd == null) {
@@ -1128,8 +1121,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (tempClassLoader != null) {
 					if (tempClassLoader instanceof DecoratingClassLoader) {
 						DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
-						for (int i = 0; i < typesToMatch.length; i++) {
-							dcl.excludeClass(typesToMatch[i].getName());
+						for (Class typeToMatch : typesToMatch) {
+							dcl.excludeClass(typeToMatch.getName());
 						}
 					}
 					String className = mbd.getBeanClassName();
@@ -1144,6 +1137,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		catch (LinkageError err) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
 		}
+	}
+
+	/**
+	 * Evaluate the given String as contained in a bean definition,
+	 * potentially resolving it as an expression.
+	 * @param value the value to check
+	 * @param beanDefinition the bean definition that the value comes from
+	 * @return the resolved value
+	 * @see #setBeanExpressionResolver
+	 */
+	protected Object evaluateBeanDefinitionString(String value, BeanDefinition beanDefinition) {
+		if (this.beanExpressionResolver == null) {
+			return value;
+		}
+		Scope scope = getRegisteredScope(beanDefinition.getScope());
+		return this.beanExpressionResolver.evaluate(value, new BeanExpressionContext(this, scope));
 	}
 
 
@@ -1199,8 +1208,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return null;
 		}
 		try {
-			FactoryBean factoryBean =
-					(FactoryBean) doGetBean(FACTORY_BEAN_PREFIX + beanName, FactoryBean.class, null, true);
+			FactoryBean factoryBean = doGetBean(FACTORY_BEAN_PREFIX + beanName, FactoryBean.class, null, true);
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
@@ -1339,7 +1347,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 			else {
 				// A bean with a custom scope...
-				Scope scope = (Scope) this.scopes.get(mbd.getScope());
+				Scope scope = this.scopes.get(mbd.getScope());
 				if (scope == null) {
 					throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
 				}

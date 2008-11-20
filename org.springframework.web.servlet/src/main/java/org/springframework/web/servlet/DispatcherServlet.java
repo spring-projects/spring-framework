@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -41,7 +43,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -83,11 +84,9 @@ import org.springframework.web.util.WebUtils;
  *
  * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
  * Default adapters are {@link org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter},
- * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter} and
- * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter},
- * for Spring's {@link org.springframework.web.HttpRequestHandler},
- * {@link org.springframework.web.servlet.mvc.Controller} and
- * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController} interfaces,
+ * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter},
+ * for Spring's {@link org.springframework.web.HttpRequestHandler} and
+ * {@link org.springframework.web.servlet.mvc.Controller} interfaces,
  * respectively. When running in a Java 5+ environment, a default
  * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
  * will be registered as well. HandlerAdapter objects can be added as beans in the
@@ -298,19 +297,19 @@ public class DispatcherServlet extends FrameworkServlet {
 	private ThemeResolver themeResolver;
 
 	/** List of HandlerMappings used by this servlet */
-	private List handlerMappings;
+	private List<HandlerMapping> handlerMappings;
 
 	/** List of HandlerAdapters used by this servlet */
-	private List handlerAdapters;
+	private List<HandlerAdapter> handlerAdapters;
 
 	/** List of HandlerExceptionResolvers used by this servlet */
-	private List handlerExceptionResolvers;
+	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
 	/** RequestToViewNameTranslator used by this servlet */
 	private RequestToViewNameTranslator viewNameTranslator;
 
 	/** List of ViewResolvers used by this servlet */
-	private List viewResolvers;
+	private List<ViewResolver> viewResolvers;
 
 
 	/**
@@ -422,8 +421,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initMultipartResolver(ApplicationContext context) {
 		try {
-			this.multipartResolver = (MultipartResolver)
-					context.getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
+			this.multipartResolver = context.getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
@@ -445,15 +443,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initLocaleResolver(ApplicationContext context) {
 		try {
-			this.localeResolver = (LocaleResolver)
-					context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
+			this.localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using LocaleResolver [" + this.localeResolver + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
-			this.localeResolver = (LocaleResolver) getDefaultStrategy(context, LocaleResolver.class);
+			this.localeResolver = getDefaultStrategy(context, LocaleResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
 						"': using default [" + this.localeResolver + "]");
@@ -468,15 +465,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initThemeResolver(ApplicationContext context) {
 		try {
-			this.themeResolver = (ThemeResolver)
-					context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
+			this.themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using ThemeResolver [" + this.themeResolver + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
-			this.themeResolver = (ThemeResolver) getDefaultStrategy(context, ThemeResolver.class);
+			this.themeResolver = getDefaultStrategy(context, ThemeResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
 						"': using default [" + this.themeResolver + "]");
@@ -493,19 +489,18 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.handlerMappings = null;
 
 		if (this.detectAllHandlerMappings) {
-			// Find all HandlerMappings in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerMapping> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerMappings = new ArrayList(matchingBeans.values());
+				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
 				Collections.sort(this.handlerMappings, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
+				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -532,19 +527,18 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.handlerAdapters = null;
 
 		if (this.detectAllHandlerAdapters) {
-			// Find all HandlerAdapters in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerAdapter> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerAdapter.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerAdapters = new ArrayList(matchingBeans.values());
+				this.handlerAdapters = new ArrayList<HandlerAdapter>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
 				Collections.sort(this.handlerAdapters, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
+				HandlerAdapter ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -571,19 +565,18 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.handlerExceptionResolvers = null;
 
 		if (this.detectAllHandlerExceptionResolvers) {
-			// Find all HandlerExceptionResolvers in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all HandlerExceptionResolvers in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerExceptionResolver> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerExceptionResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
+				this.handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
 				Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object her = context.getBean(
+				HandlerExceptionResolver her = context.getBean(
 						HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
 			}
@@ -608,7 +601,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initRequestToViewNameTranslator(ApplicationContext context) {
 		try {
-			this.viewNameTranslator = (RequestToViewNameTranslator) context.getBean(
+			this.viewNameTranslator = context.getBean(
 					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, RequestToViewNameTranslator.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
@@ -616,8 +609,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
-			this.viewNameTranslator =
-					(RequestToViewNameTranslator) getDefaultStrategy(context, RequestToViewNameTranslator.class);
+			this.viewNameTranslator = getDefaultStrategy(context, RequestToViewNameTranslator.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate RequestToViewNameTranslator with name '" +
 						REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
@@ -635,19 +627,18 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.viewResolvers = null;
 
 		if (this.detectAllViewResolvers) {
-			// Find all ViewResolvers in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all ViewResolvers in the ApplicationContext, including ancestor contexts.
+			Map<String, ViewResolver> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, ViewResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.viewResolvers = new ArrayList(matchingBeans.values());
+				this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
 				Collections.sort(this.viewResolvers, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
+				ViewResolver vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
 				this.viewResolvers = Collections.singletonList(vr);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -698,11 +689,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param context the current WebApplicationContext
 	 * @param strategyInterface the strategy interface
 	 * @return the corresponding strategy object
-	 * @throws BeansException if initialization failed
 	 * @see #getDefaultStrategies
 	 */
-	protected Object getDefaultStrategy(ApplicationContext context, Class strategyInterface) throws BeansException {
-		List strategies = getDefaultStrategies(context, strategyInterface);
+	protected <T> T getDefaultStrategy(ApplicationContext context, Class<T> strategyInterface) {
+		List<T> strategies = getDefaultStrategies(context, strategyInterface);
 		if (strategies.size() != 1) {
 			throw new BeanInitializationException(
 					"DispatcherServlet needs exactly 1 strategy for interface [" + strategyInterface.getName() + "]");
@@ -718,42 +708,36 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param context the current WebApplicationContext
 	 * @param strategyInterface the strategy interface
 	 * @return the List of corresponding strategy objects
-	 * @throws BeansException if initialization failed
 	 */
-	protected List getDefaultStrategies(ApplicationContext context, Class strategyInterface) throws BeansException {
+	@SuppressWarnings("unchecked")
+	protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
 		String key = strategyInterface.getName();
-		List strategies = null;
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
-			strategies = new ArrayList(classNames.length);
-			for (int i = 0; i < classNames.length; i++) {
-				String className = classNames[i];
-				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15 && className.indexOf("Annotation") != -1) {
-					// Skip Java 5 specific strategies when running on JDK 1.4...
-					continue;
-				}
+			List<T> strategies = new ArrayList<T>(classNames.length);
+			for (String className : classNames) {
 				try {
 					Class clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
-					strategies.add(strategy);
+					strategies.add((T) strategy);
 				}
 				catch (ClassNotFoundException ex) {
 					throw new BeanInitializationException(
 							"Could not find DispatcherServlet's default strategy class [" + className +
-							"] for interface [" + key + "]", ex);
+									"] for interface [" + key + "]", ex);
 				}
 				catch (LinkageError err) {
 					throw new BeanInitializationException(
 							"Error loading DispatcherServlet's default strategy class [" + className +
-							"] for interface [" + key + "]: problem with class file or dependent class", err);
+									"] for interface [" + key + "]: problem with class file or dependent class", err);
 				}
 			}
+			return strategies;
 		}
 		else {
-			strategies = Collections.EMPTY_LIST;
+			return new LinkedList<T>();
 		}
-		return strategies;
 	}
 
 	/**
@@ -786,10 +770,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Keep a snapshot of the request attributes in case of an include,
 		// to be able to restore the original attributes after the include.
-		Map attributesSnapshot = null;
+		Map<String, Object> attributesSnapshot = null;
 		if (WebUtils.isIncludeRequest(request)) {
 			logger.debug("Taking snapshot of request attributes before include");
-			attributesSnapshot = new HashMap();
+			attributesSnapshot = new HashMap<String, Object>();
 			Enumeration attrNames = request.getAttributeNames();
 			while (attrNames.hasMoreElements()) {
 				String attrName = (String) attrNames.nextElement();
@@ -1051,12 +1035,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			return handler;
 		}
 
-		Iterator it = this.handlerMappings.iterator();
-		while (it.hasNext()) {
-			HandlerMapping hm = (HandlerMapping) it.next();
+		for (HandlerMapping hm : this.handlerMappings) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Testing handler map [" + hm  + "] in DispatcherServlet with name '" +
-						getServletName() + "'");
+				logger.trace(
+						"Testing handler map [" + hm + "] in DispatcherServlet with name '" + getServletName() + "'");
 			}
 			handler = hm.getHandler(request);
 			if (handler != null) {
@@ -1091,9 +1073,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * This is a fatal error.
 	 */
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
-		Iterator it = this.handlerAdapters.iterator();
-		while (it.hasNext()) {
-			HandlerAdapter ha = (HandlerAdapter) it.next();
+		for (HandlerAdapter ha : this.handlerAdapters) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Testing handler adapter [" + ha + "]");
 			}
@@ -1214,8 +1194,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected View resolveViewName(String viewName, Map model, Locale locale, HttpServletRequest request)
 			throws Exception {
 
-		for (Iterator it = this.viewResolvers.iterator(); it.hasNext();) {
-			ViewResolver viewResolver = (ViewResolver) it.next();
+		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
 			if (view != null) {
 				return view;
@@ -1266,7 +1245,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Need to copy into separate Collection here, to avoid side effects
 		// on the Enumeration when removing attributes.
-		Set attrsToCheck = new HashSet();
+		Set<String> attrsToCheck = new HashSet<String>();
 		Enumeration attrNames = request.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
 			String attrName = (String) attrNames.nextElement();
@@ -1277,8 +1256,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Iterate over the attributes to check, restoring the original value
 		// or removing the attribute, respectively, if appropriate.
-		for (Iterator it = attrsToCheck.iterator(); it.hasNext();) {
-			String attrName = (String) it.next();
+		for (String attrName : attrsToCheck) {
 			Object attrValue = attributesSnapshot.get(attrName);
 			if (attrValue != null) {
 				if (logger.isDebugEnabled()) {

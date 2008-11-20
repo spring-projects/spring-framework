@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class DefaultToStringStyler implements ToStringStyler {
 	}
 
 
-	public void styleStart(StringBuffer buffer, Object obj) {
+	public void styleStart(StringBuilder buffer, Object obj) {
 		if (!obj.getClass().isArray()) {
 			buffer.append('[').append(ClassUtils.getShortName(obj.getClass()));
 			styleIdentityHashCode(buffer, obj);
@@ -65,33 +65,33 @@ public class DefaultToStringStyler implements ToStringStyler {
 		}
 	}
 
-	private void styleIdentityHashCode(StringBuffer buffer, Object obj) {
+	private void styleIdentityHashCode(StringBuilder buffer, Object obj) {
 		buffer.append('@');
 		buffer.append(ObjectUtils.getIdentityHexString(obj));
 	}
 
-	public void styleEnd(StringBuffer buffer, Object o) {
+	public void styleEnd(StringBuilder buffer, Object o) {
 		buffer.append(']');
 	}
 
-	public void styleField(StringBuffer buffer, String fieldName, Object value) {
+	public void styleField(StringBuilder buffer, String fieldName, Object value) {
 		styleFieldStart(buffer, fieldName);
 		styleValue(buffer, value);
 		styleFieldEnd(buffer, fieldName);
 	}
 
-	protected void styleFieldStart(StringBuffer buffer, String fieldName) {
+	protected void styleFieldStart(StringBuilder buffer, String fieldName) {
 		buffer.append(' ').append(fieldName).append(" = ");
 	}
 
-	protected void styleFieldEnd(StringBuffer buffer, String fieldName) {
+	protected void styleFieldEnd(StringBuilder buffer, String fieldName) {
 	}
 
-	public void styleValue(StringBuffer buffer, Object value) {
+	public void styleValue(StringBuilder buffer, Object value) {
 		buffer.append(this.valueStyler.style(value));
 	}
 
-	public void styleFieldSeparator(StringBuffer buffer) {
+	public void styleFieldSeparator(StringBuilder buffer) {
 		buffer.append(',');
 	}
 

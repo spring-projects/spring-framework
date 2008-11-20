@@ -19,7 +19,6 @@ package org.springframework.web.context.request;
 import java.security.Principal;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -87,7 +86,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getRequest().getParameterValues(paramName);
 	}
 
-	public Map getParameterMap() {
+	@SuppressWarnings("unchecked")
+	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}
 
@@ -140,23 +140,23 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	public String getDescription(boolean includeClientInfo) {
 		HttpServletRequest request = getRequest();
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("uri=").append(request.getRequestURI());
+		StringBuilder sb = new StringBuilder();
+		sb.append("uri=").append(request.getRequestURI());
 		if (includeClientInfo) {
 			String client = request.getRemoteAddr();
 			if (StringUtils.hasLength(client)) {
-				buffer.append(";client=").append(client);
+				sb.append(";client=").append(client);
 			}
 			HttpSession session = request.getSession(false);
 			if (session != null) {
-				buffer.append(";session=").append(session.getId());
+				sb.append(";session=").append(session.getId());
 			}
 			String user = request.getRemoteUser();
 			if (StringUtils.hasLength(user)) {
-				buffer.append(";user=").append(user);
+				sb.append(";user=").append(user);
 			}
 		}
-		return buffer.toString();
+		return sb.toString();
 	}
 
 	@Override

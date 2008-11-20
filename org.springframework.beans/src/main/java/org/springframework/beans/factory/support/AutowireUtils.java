@@ -22,10 +22,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -39,10 +37,6 @@ import org.springframework.util.ClassUtils;
  */
 abstract class AutowireUtils {
 
-	private static final String QUALIFIED_ANNOTATION_AUTOWIRE_CANDIDATE_RESOLVER_CLASS_NAME =
-			"org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver";
-
-
 	/**
 	 * Sort the given constructors, preferring public constructors and "greedy" ones
 	 * with a maximum of arguments. The result will contain public constructors first,
@@ -51,10 +45,8 @@ abstract class AutowireUtils {
 	 * @param constructors the constructor array to sort
 	 */
 	public static void sortConstructors(Constructor[] constructors) {
-		Arrays.sort(constructors, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				Constructor c1 = (Constructor) o1;
-				Constructor c2 = (Constructor) o2;
+		Arrays.sort(constructors, new Comparator<Constructor>() {
+			public int compare(Constructor c1, Constructor c2) {
 				boolean p1 = Modifier.isPublic(c1.getModifiers());
 				boolean p2 = Modifier.isPublic(c2.getModifiers());
 				if (p1 != p2) {
@@ -62,7 +54,7 @@ abstract class AutowireUtils {
 				}
 				int c1pl = c1.getParameterTypes().length;
 				int c2pl = c2.getParameterTypes().length;
-				return (new Integer(c1pl)).compareTo(new Integer(c2pl)) * -1;
+				return (new Integer(c1pl)).compareTo(c2pl) * -1;
 			}
 		});
 	}
@@ -78,7 +70,7 @@ abstract class AutowireUtils {
 		if (wm == null) {
 			return false;
 		}
-		if (wm.getDeclaringClass().getName().indexOf("$$") == -1) {
+		if (!wm.getDeclaringClass().getName().contains("$$")) {
 			// Not a CGLIB method so it's OK.
 			return false;
 		}
@@ -95,12 +87,11 @@ abstract class AutowireUtils {
 	 * @param interfaces the Set of interfaces (Class objects)
 	 * @return whether the setter method is defined by an interface
 	 */
-	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set interfaces) {
+	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set<Class> interfaces) {
 		Method setter = pd.getWriteMethod();
 		if (setter != null) {
 			Class targetClass = setter.getDeclaringClass();
-			for (Iterator it = interfaces.iterator(); it.hasNext();) {
-				Class ifc = (Class) it.next();
+			for (Class ifc : interfaces) {
 				if (ifc.isAssignableFrom(targetClass) &&
 						ClassUtils.hasMethod(ifc, setter.getName(), setter.getParameterTypes())) {
 					return true;
@@ -108,27 +99,6 @@ abstract class AutowireUtils {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * If at least Java 1.5, this will return an annotation-aware resolver.
-	 * Otherwise it returns a resolver that checks the bean definition only.
-	 */
-	public static AutowireCandidateResolver createAutowireCandidateResolver() {
-		if (JdkVersion.isAtLeastJava15()) {
-			try {
-				Class resolverClass = ClassUtils.forName(
-						QUALIFIED_ANNOTATION_AUTOWIRE_CANDIDATE_RESOLVER_CLASS_NAME, AutowireUtils.class.getClassLoader());
-				return (AutowireCandidateResolver) resolverClass.newInstance();
-			}
-			catch (Throwable ex) {
-				throw new IllegalStateException("Unable to load Java 1.5 dependent class [" +
-						QUALIFIED_ANNOTATION_AUTOWIRE_CANDIDATE_RESOLVER_CLASS_NAME + "]", ex);
-			}
-		}
-		else {
-			return new SimpleAutowireCandidateResolver();
-		}
 	}
 
 }

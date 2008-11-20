@@ -204,7 +204,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(ClassUtils.getShortName(getClass()));
 		sb.append(" for target bean '").append(this.targetBeanName).append("'");
 		if (this.targetClass != null) {

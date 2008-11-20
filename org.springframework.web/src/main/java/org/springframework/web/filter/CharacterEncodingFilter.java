@@ -17,13 +17,10 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.util.ClassUtils;
 
 /**
  * Servlet 2.3/2.4 Filter that allows one to specify a character encoding for
@@ -44,12 +41,6 @@ import org.springframework.util.ClassUtils;
  * @see javax.servlet.http.HttpServletResponse#setCharacterEncoding
  */
 public class CharacterEncodingFilter extends OncePerRequestFilter {
-
-	// Determine whether the Servlet 2.4 HttpServletResponse.setCharacterEncoding(String)
-	// method is available, for use in the "doFilterInternal" implementation.
-	private final static boolean responseSetCharacterEncodingAvailable = ClassUtils.hasMethod(
-			HttpServletResponse.class, "setCharacterEncoding", new Class[] {String.class});
-
 
 	private String encoding;
 
@@ -90,7 +81,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 		if (this.encoding != null && (this.forceEncoding || request.getCharacterEncoding() == null)) {
 			request.setCharacterEncoding(this.encoding);
-			if (this.forceEncoding && responseSetCharacterEncodingAvailable) {
+			if (this.forceEncoding) {
 				response.setCharacterEncoding(this.encoding);
 			}
 		}

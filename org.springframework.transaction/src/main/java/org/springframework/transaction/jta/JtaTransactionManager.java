@@ -143,7 +143,6 @@ import org.springframework.util.StringUtils;
  * @see #setTransactionManagerName
  * @see #setTransactionManager
  * @see JotmFactoryBean
- * @see WebSphereTransactionManagerFactoryBean
  * @see WebLogicJtaTransactionManager
  */
 public class JtaTransactionManager extends AbstractPlatformTransactionManager

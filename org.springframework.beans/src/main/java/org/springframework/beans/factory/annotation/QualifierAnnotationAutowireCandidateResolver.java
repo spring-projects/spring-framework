@@ -109,7 +109,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		}
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) bdHolder.getBeanDefinition();
 		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
-		Annotation[] annotations = (Annotation[]) descriptor.getAnnotations();
+		Annotation[] annotations = descriptor.getAnnotations();
 		for (Annotation annotation : annotations) {
 			Class<? extends Annotation> type = annotation.annotationType();
 			if (isQualifier(type)) {

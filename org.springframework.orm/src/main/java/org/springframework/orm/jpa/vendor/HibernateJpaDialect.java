@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,19 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	protected Session getSession(EntityManager em) {
-		return ((HibernateEntityManager) em).getSession();
+		if (em instanceof HibernateEntityManager) {
+			return ((HibernateEntityManager) em).getSession();
+		}
+		else {
+			Object delegate = em.getDelegate();
+			if (delegate instanceof Session) {
+				return (Session) delegate;
+			}
+			else {
+				throw new IllegalStateException(
+						"Cannot obtain native Hibernate Session from given JPA EntityManager: " + em.getClass());
+			}
+		}
 	}
 
 

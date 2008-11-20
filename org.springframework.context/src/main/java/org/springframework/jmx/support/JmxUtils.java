@@ -21,7 +21,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.List;
-
 import javax.management.DynamicMBean;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
@@ -33,7 +32,6 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -114,7 +112,7 @@ public abstract class JmxUtils {
 			server = (MBeanServer) servers.get(0);
 		}
 
-		if (server == null && agentId == null && JdkVersion.isAtLeastJava15()) {
+		if (server == null && agentId == null) {
 			// Attempt to load the PlatformMBeanServer.
 			try {
 				server = ManagementFactory.getPlatformMBeanServer();
@@ -221,7 +219,7 @@ public abstract class JmxUtils {
 	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource)
 			throws MalformedObjectNameException {
 
-		Hashtable keyProperties = objectName.getKeyPropertyList();
+		Hashtable<String, String> keyProperties = objectName.getKeyPropertyList();
 		keyProperties.put(IDENTITY_OBJECT_NAME_KEY, ObjectUtils.getIdentityHexString(managedResource));
 		return ObjectNameManager.getInstance(objectName.getDomain(), keyProperties);
 	}
@@ -282,8 +280,7 @@ public abstract class JmxUtils {
 		}
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
 		Class[] implementedInterfaces = clazz.getInterfaces();
-		for (int x = 0; x < implementedInterfaces.length; x++) {
-			Class iface = implementedInterfaces[x];
+		for (Class iface : implementedInterfaces) {
 			if (iface.getName().equals(mbeanInterfaceName)) {
 				return iface;
 			}
@@ -303,13 +300,12 @@ public abstract class JmxUtils {
 			return null;
 		}
 		Class[] implementedInterfaces = clazz.getInterfaces();
-		for (int x = 0; x < implementedInterfaces.length; x++) {
-			Class iface = implementedInterfaces[x];
+		for (Class iface : implementedInterfaces) {
 			boolean isMxBean = iface.getName().endsWith(MXBEAN_SUFFIX);
 			if (mxBeanAnnotationAvailable) {
 				Boolean checkResult = MXBeanChecker.hasMXBeanAnnotation(iface);
 				if (checkResult != null) {
-					isMxBean = checkResult.booleanValue();
+					isMxBean = checkResult;
 				}
 			}
 			if (isMxBean) {
@@ -325,14 +321,9 @@ public abstract class JmxUtils {
 	 */
 	private static class MXBeanChecker {
 
-		public static Boolean hasMXBeanAnnotation(Class iface) {
-			MXBean mxBean = (MXBean) iface.getAnnotation(MXBean.class);
-			if (mxBean != null) {
-				return Boolean.valueOf(mxBean.value());
-			}
-			else {
-				return null;
-			}
+		public static Boolean hasMXBeanAnnotation(Class<?> iface) {
+			MXBean mxBean = iface.getAnnotation(MXBean.class);
+			return (mxBean != null ? mxBean.value() : null);
 		}
 	}
 

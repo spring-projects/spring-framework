@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -28,6 +29,8 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.ClassPathResource;
@@ -59,14 +62,17 @@ public class ConcurrentBeanFactoryTests extends TestCase {
 
 	private BeanFactory factory;
 
-	private Set set = Collections.synchronizedSet(new HashSet());
+	private final Set set = Collections.synchronizedSet(new HashSet());
 
 	private Throwable ex = null;
 
 	protected void setUp() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("concurrent.xml", getClass()));
-		CustomDateEditor editor = new CustomDateEditor(df, false);
-		factory.registerCustomEditor(Date.class, editor);
+		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			public void registerCustomEditors(PropertyEditorRegistry registry) {
+				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) df.clone(), false));
+			}
+		});
 		this.factory = factory;
 	}
 

@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate3;
 
 import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.hibernate.ConnectionReleaseMode;
@@ -111,7 +110,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.1 or later, as of Spring 2.5.
+ * <p>Requires Hibernate 3.2 or later, as of Spring 3.0.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -255,11 +254,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * call <code>Connection.setReadOnly(true)</code> for read-only transactions
 	 * anymore either. If this flag is turned off, no cleanup of a JDBC Connection
 	 * is required after a transaction, since no Connection settings will get modified.
-	 * <p>It is recommended to turn this flag off if running against Hibernate 3.1
-	 * and a connection pool that does not reset connection settings (for example,
-	 * Jakarta Commons DBCP). To keep this flag turned on, you can set the
-	 * "hibernate.connection.release_mode" property to "on_close" instead,
-	 * or consider using a smarter connection pool (for example, C3P0).
 	 * @see java.sql.Connection#setTransactionIsolation
 	 * @see java.sql.Connection#setReadOnly
 	 */
@@ -297,14 +291,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to perform an early flush before proceeding with a commit.
-	 * <p>Default is "false", performing an implicit flush as part of the
-	 * actual commit step. Switch this to "true" in order to enforce an
-	 * explicit flush before the before-commit synchronization phase, making
-	 * flushed state visible to <code>beforeCommit</code> callbacks of registered
+	 * <p>Default is "false", performing an implicit flush as part of the actual
+	 * commit step. Switch this to "true" in order to enforce an explicit early
+	 * flush right <i>before</i> the actual commit step.
+	 * <p>An early flush happens before the before-commit synchronization phase,
+	 * making flushed state visible to <code>beforeCommit</code> callbacks of registered
 	 * {@link org.springframework.transaction.support.TransactionSynchronization}
-	 * objects.
-	 * <p>Such explicit flush behavior is also consistent with Spring-driven
-	 * flushing in a JTA transaction environment, so may also be enforced for
+	 * objects. Such explicit flush behavior is consistent with Spring-driven
+	 * flushing in a JTA transaction environment, so may also get enforced for
 	 * consistency with JTA transaction behavior.
 	 * @see #prepareForCommit
 	 */
@@ -533,7 +527,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to NEVER in case of a new Session for this transaction.
-				session.setFlushMode(FlushMode.NEVER);
+				session.setFlushMode(FlushMode.MANUAL);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
@@ -550,7 +544,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Register transaction timeout.
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1
+				// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1+
 				// Applies to all statements, also to inserts, updates and deletes!
 				hibTx = session.getTransaction();
 				hibTx.setTimeout(timeout);
@@ -633,7 +627,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	@Override
 	protected void prepareForCommit(DefaultTransactionStatus status) {
-		if (this.earlyFlushBeforeCommit) {
+		if (this.earlyFlushBeforeCommit && status.isNewTransaction()) {
 			HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 			Session session = txObject.getSessionHolder().getSession();
 			if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
@@ -645,7 +639,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					throw convertHibernateAccessException(ex);
 				}
 				finally {
-					session.setFlushMode(FlushMode.NEVER);
+					session.setFlushMode(FlushMode.MANUAL);
 				}
 			}
 		}

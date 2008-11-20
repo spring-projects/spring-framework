@@ -115,11 +115,10 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(parameter.getParameterType())) {
-			if (JdkVersion.isAtLeastJava15()) {
-				valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
-			}
+			valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
 			if (valueClass == null) {
-				throw new IllegalArgumentException("Cannot generate variable name for non-typed Collection parameter type");
+				throw new IllegalArgumentException(
+						"Cannot generate variable name for non-typed Collection parameter type");
 			}
 			pluralize = true;
 		}
@@ -182,9 +181,7 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(resolvedType)) {
-			if (JdkVersion.isAtLeastJava15()) {
-				valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
-			}
+			valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
 			if (valueClass == null) {
 				if (!(value instanceof Collection)) {
 					throw new IllegalArgumentException(

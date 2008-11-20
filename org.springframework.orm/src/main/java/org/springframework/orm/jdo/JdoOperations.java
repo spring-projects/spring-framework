@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,36 +216,6 @@ public interface JdoOperations {
 	 * @see javax.jdo.PersistenceManager#detachCopyAll(Collection)
 	 */
 	Collection detachCopyAll(Collection entities);
-
-	/**
-	 * Reattach the given detached instance (for example, a web form object) with
-	 * the current JDO transaction, merging its changes into the current persistence
-	 * instance that represents the corresponding entity.
-	 * <p>Note that as of JDO 2.0 final, this operation is equivalent to a
-	 * <code>makePersistent</code> call, with the latter method returning the
-	 * persistence instance.
-	 * @param detachedEntity the detached instance to attach
-	 * @return the corresponding persistent instance
-	 * @deprecated in favor of {@link #makePersistent(Object)}.
-	 * To be removed in Spring 3.0.
-	 */
-	@Deprecated
-	Object attachCopy(Object detachedEntity);
-
-	/**
-	 * Reattach the given detached instances (for example, web form objects) with
-	 * the current JDO transaction, merging their changes into the current persistence
-	 * instances that represent the corresponding entities.
-	 * <p>Note that as of JDO 2.0 final, this operation is equivalent to a
-	 * <code>makePersistentAll</code> call, with the latter method returning the
-	 * persistence instance.
-	 * @param detachedEntities the detached instances to reattach
-	 * @return the corresponding persistent instances
-	 * @deprecated in favor of {@link #makePersistentAll(java.util.Collection)}.
-	 * To be removed in Spring 3.0.
-	 */
-	@Deprecated
-	Collection attachCopyAll(Collection detachedEntities);
 
 	/**
 	 * Flush all transactional modifications to the database.

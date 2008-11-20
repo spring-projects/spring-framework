@@ -23,7 +23,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.JdkVersion;
+import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.util.StringUtils;
 
@@ -61,10 +61,7 @@ class MBeanExportBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		String beanClassName = (JdkVersion.isAtLeastJava15() ?
-				"org.springframework.jmx.export.annotation.AnnotationMBeanExporter" :
-				"org.springframework.jmx.export.MBeanExporter");
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(beanClassName);
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(AnnotationMBeanExporter.class);
 		
 		// Mark as infrastructure bean and attach source location.
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -94,7 +91,7 @@ class MBeanExportBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		else if (REGISTRATION_REPLACE_EXISTING.equals(registration)) {
 			registrationBehavior = MBeanRegistrationSupport.REGISTRATION_REPLACE_EXISTING;
 		}
-		builder.addPropertyValue("registrationBehavior", new Integer(registrationBehavior));
+		builder.addPropertyValue("registrationBehavior", registrationBehavior);
 
 		return builder.getBeanDefinition();
 	}

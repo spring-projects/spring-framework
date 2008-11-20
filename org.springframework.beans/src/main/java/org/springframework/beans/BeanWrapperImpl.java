@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -349,15 +348,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return false;
 	}
 
-	/**
-	 * @deprecated in favor of <code>convertIfNecessary</code>
-	 * @see #convertIfNecessary(Object, Class)
-	 */
-	@Deprecated
-	public Object doTypeConversionIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
-		return convertIfNecessary(value, requiredType, null);
-	}
-
 	public Object convertIfNecessary(
 			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
 		try {
@@ -584,10 +574,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					else if (value instanceof Map) {
 						Map map = (Map) value;
-						Class mapKeyType = null;
-						if (JdkVersion.isAtLeastJava15()) {
-							mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
-						}
+						Class mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
 						Object convertedMapKey = this.typeConverterDelegate.convertIfNecessary(key, mapKeyType);
@@ -711,11 +698,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			else if (propValue instanceof List) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
-				Class requiredType = null;
-				if (JdkVersion.isAtLeastJava15()) {
-					requiredType = GenericCollectionTypeResolver.getCollectionReturnType(
-							pd.getReadMethod(), tokens.keys.length);
-				}
+				Class requiredType = GenericCollectionTypeResolver.getCollectionReturnType(
+						pd.getReadMethod(), tokens.keys.length);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
 				Object oldValue = null;
@@ -751,14 +735,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			else if (propValue instanceof Map) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
-				Class mapKeyType = null;
-				Class mapValueType = null;
-				if (JdkVersion.isAtLeastJava15()) {
-					mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(
-							pd.getReadMethod(), tokens.keys.length);
-					mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(
-							pd.getReadMethod(), tokens.keys.length);
-				}
+				Class mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(
+						pd.getReadMethod(), tokens.keys.length);
+				Class mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(
+						pd.getReadMethod(), tokens.keys.length);
 				Map map = (Map) propValue;
 				Object convertedMapKey = null;
 				Object convertedMapValue = null;
@@ -870,7 +850,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
+		StringBuilder sb = new StringBuilder(getClass().getName());
 		if (this.object != null) {
 			sb.append(": wrapping object [").append(ObjectUtils.identityToString(this.object)).append("]");
 		}

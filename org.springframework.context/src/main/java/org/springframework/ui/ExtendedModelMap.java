@@ -59,8 +59,8 @@ public class ExtendedModelMap extends ModelMap implements Model {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> asMap() {
 		return this;
 	}
+
 }

@@ -16,15 +16,10 @@
 
 package org.springframework.web.context.request;
 
-import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -55,7 +50,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private volatile HttpSession session;
 
-	private final Map sessionAttributesToUpdate = new HashMap();
+	private final Map<String, Object> sessionAttributesToUpdate = new HashMap<String, Object>();
 
 
 	/**
@@ -164,6 +159,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -195,6 +191,18 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	public Object resolveReference(String key) {
+		if (REFERENCE_REQUEST.equals(key)) {
+			return this.request;
+		}
+		else if (REFERENCE_SESSION.equals(key)) {
+			return getSession(true);
+		}
+		else {
+			return null;
+		}
+	}
+
 	public String getSessionId() {
 		return getSession(true).getId();
 	}
@@ -216,9 +224,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		synchronized (this.sessionAttributesToUpdate) {
 			if (this.session != null) {
 				try {
-					for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-						Map.Entry entry = (Map.Entry) it.next();
-						String name = (String) entry.getKey();
+					for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+						String name = entry.getKey();
 						Object newValue = entry.getValue();
 						Object oldValue = this.session.getAttribute(name);
 						if (oldValue == newValue) {
@@ -249,27 +256,6 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	@Override
 	public String toString() {
 		return this.request.toString();
-	}
-
-
-	/**
-	 * Adapter that implements the Servlet 2.3 HttpSessionBindingListener
-	 * interface, wrapping a session destruction callback.
-	 */
-	private static class DestructionCallbackBindingListener implements HttpSessionBindingListener, Serializable {
-
-		private final Runnable destructionCallback;
-
-		public DestructionCallbackBindingListener(Runnable destructionCallback) {
-			this.destructionCallback = destructionCallback;
-		}
-
-		public void valueBound(HttpSessionBindingEvent event) {
-		}
-
-		public void valueUnbound(HttpSessionBindingEvent event) {
-			this.destructionCallback.run();
-		}
 	}
 
 }

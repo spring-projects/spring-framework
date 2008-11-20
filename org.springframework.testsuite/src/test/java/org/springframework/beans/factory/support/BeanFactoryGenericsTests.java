@@ -32,6 +32,8 @@ import junit.framework.TestCase;
 import org.springframework.beans.GenericBean;
 import org.springframework.beans.GenericIntegerBean;
 import org.springframework.beans.GenericSetOfIntegerBean;
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.ClassPathResource;
@@ -341,7 +343,11 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 	public void testGenericMapWithCollectionValueConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			public void registerCustomEditors(PropertyEditorRegistry registry) {
+				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+			}
+		});
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
 		Map input = new HashMap();
@@ -486,7 +492,11 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 	public void testGenericMapWithCollectionValueFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			public void registerCustomEditors(PropertyEditorRegistry registry) {
+				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+			}
+		});
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 

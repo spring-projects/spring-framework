@@ -46,13 +46,13 @@ public abstract class SystemPropertyUtils {
 	 * @see #PLACEHOLDER_SUFFIX
 	 */
 	public static String resolvePlaceholders(String text) {
-		StringBuffer buf = new StringBuffer(text);
+		StringBuilder result = new StringBuilder(text);
 
-		int startIndex = buf.indexOf(PLACEHOLDER_PREFIX);
+		int startIndex = result.indexOf(PLACEHOLDER_PREFIX);
 		while (startIndex != -1) {
-			int endIndex = buf.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
+			int endIndex = result.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
 			if (endIndex != -1) {
-				String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
+				String placeholder = result.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
 				int nextIndex = endIndex + PLACEHOLDER_SUFFIX.length();
 				try {
 					String propVal = System.getProperty(placeholder);
@@ -61,7 +61,7 @@ public abstract class SystemPropertyUtils {
 						propVal = System.getenv(placeholder);
 					}
 					if (propVal != null) {
-						buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
+						result.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
 						nextIndex = startIndex + propVal.length();
 					}
 					else {
@@ -73,14 +73,14 @@ public abstract class SystemPropertyUtils {
 					System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text +
 							"] as system property: " + ex);
 				}
-				startIndex = buf.indexOf(PLACEHOLDER_PREFIX, nextIndex);
+				startIndex = result.indexOf(PLACEHOLDER_PREFIX, nextIndex);
 			}
 			else {
 				startIndex = -1;
 			}
 		}
 
-		return buf.toString();
+		return result.toString();
 	}
 
 }

@@ -16,14 +16,9 @@
 
 package org.springframework.context.config;
 
-import org.w3c.dom.Element;
-
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.JdkVersion;
-import org.springframework.util.ClassUtils;
+import org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser;
+import org.springframework.context.annotation.ComponentScanBeanDefinitionParser;
 
 /**
  * {@link org.springframework.beans.factory.xml.NamespaceHandler}
@@ -38,36 +33,12 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 	public void init() {
 		registerBeanDefinitionParser("property-placeholder", new PropertyPlaceholderBeanDefinitionParser());
 		registerBeanDefinitionParser("property-override", new PropertyOverrideBeanDefinitionParser());
-		registerJava5DependentParser("annotation-config",
-				"org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser");
-		registerJava5DependentParser("component-scan",
-				"org.springframework.context.annotation.ComponentScanBeanDefinitionParser");
+		registerBeanDefinitionParser("annotation-config", new AnnotationConfigBeanDefinitionParser());
+		registerBeanDefinitionParser("component-scan", new ComponentScanBeanDefinitionParser());
 		registerBeanDefinitionParser("load-time-weaver", new LoadTimeWeaverBeanDefinitionParser());
 		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 		registerBeanDefinitionParser("mbean-export", new MBeanExportBeanDefinitionParser());
 		registerBeanDefinitionParser("mbean-server", new MBeanServerBeanDefinitionParser());
-	}
-
-	private void registerJava5DependentParser(final String elementName, final String parserClassName) {
-		BeanDefinitionParser parser = null;
-		if (JdkVersion.isAtLeastJava15()) {
-			try {
-				Class parserClass = ClassUtils.forName(parserClassName, ContextNamespaceHandler.class.getClassLoader());
-				parser = (BeanDefinitionParser) parserClass.newInstance();
-			}
-			catch (Throwable ex) {
-				throw new IllegalStateException("Unable to create Java 1.5 dependent parser: " + parserClassName, ex);
-			}
-		}
-		else {
-			parser = new BeanDefinitionParser() {
-				public BeanDefinition parse(Element element, ParserContext parserContext) {
-					throw new IllegalStateException("Context namespace element '" + elementName +
-							"' and its parser class [" + parserClassName + "] are only available on JDK 1.5 and higher");
-				}
-			};
-		}
-		registerBeanDefinitionParser(elementName, parser);
 	}
 
 }

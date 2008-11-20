@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,12 +79,11 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			return new LinkedList();
 		}
 
-		List advisors = new LinkedList();
-		for (int i = 0; i < advisorNames.length; i++) {
-			String name = advisorNames[i];
+		List<Advisor> advisors = new LinkedList<Advisor>();
+		for (String name : advisorNames) {
 			if (isEligibleBean(name) && !this.beanFactory.isCurrentlyInCreation(name)) {
 				try {
-					advisors.add(this.beanFactory.getBean(name));
+					advisors.add(this.beanFactory.getBean(name, Advisor.class));
 				}
 				catch (BeanCreationException ex) {
 					Throwable rootCause = ex.getMostSpecificCause();

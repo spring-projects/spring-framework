@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="module" module-name="core" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -22,7 +23,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="core" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,20 +252,20 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Return an identifying description for this transaction definition.
 	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
 	 */
-	protected final StringBuffer getDefinitionDescription() {
-		StringBuffer desc = new StringBuffer();
-		desc.append(constants.toCode(new Integer(this.propagationBehavior), PREFIX_PROPAGATION));
-		desc.append(',');
-		desc.append(constants.toCode(new Integer(this.isolationLevel), PREFIX_ISOLATION));
+	protected final StringBuilder getDefinitionDescription() {
+		StringBuilder result = new StringBuilder();
+		result.append(constants.toCode(this.propagationBehavior, PREFIX_PROPAGATION));
+		result.append(',');
+		result.append(constants.toCode(this.isolationLevel, PREFIX_ISOLATION));
 		if (this.timeout != TIMEOUT_DEFAULT) {
-			desc.append(',');
-			desc.append(PREFIX_TIMEOUT + this.timeout);
+			result.append(',');
+			result.append(PREFIX_TIMEOUT).append(this.timeout);
 		}
 		if (this.readOnly) {
-			desc.append(',');
-			desc.append(READ_ONLY_MARKER);
+			result.append(',');
+			result.append(READ_ONLY_MARKER);
 		}
-		return desc;
+		return result;
 	}
 
 }

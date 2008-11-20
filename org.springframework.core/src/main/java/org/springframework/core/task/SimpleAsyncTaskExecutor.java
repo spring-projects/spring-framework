@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core.task;
 import java.io.Serializable;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
 
@@ -43,15 +42,6 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements AsyncTaskExecutor, Serializable {
-
-	/**
-	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
-	 * @deprecated as of Spring 2.0.3, since the default thread name prefix
-	 * is now taken from the concrete class (could be a subclass)
-	 */
-	@Deprecated
-	public static final String DEFAULT_THREAD_NAME_PREFIX =
-			ClassUtils.getShortName(SimpleAsyncTaskExecutor.class) + "-";
 
 	/**
 	 * Permit any number of concurrent invocations: that is, don't throttle concurrency.

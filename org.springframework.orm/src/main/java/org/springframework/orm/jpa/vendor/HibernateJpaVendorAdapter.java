@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
@@ -30,7 +29,7 @@ import org.hibernate.dialect.H2Dialect;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.InformixDialect;
 import org.hibernate.dialect.MySQLDialect;
-import org.hibernate.dialect.Oracle9Dialect;
+import org.hibernate.dialect.Oracle9iDialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseDialect;
@@ -42,7 +41,7 @@ import org.springframework.orm.jpa.JpaDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
- * Hibernate EntityManager. Developed and tested against Hibernate 3.2.
+ * Hibernate EntityManager. Developed and tested against Hibernate 3.2 and 3.3.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
@@ -106,7 +105,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			case HSQL: return HSQLDialect.class;
 			case INFORMIX: return InformixDialect.class;
 			case MYSQL: return MySQLDialect.class;
-			case ORACLE: return Oracle9Dialect.class;  // deprecated since Hibernate 3.2.5 - to be updated in Spring 3.0
+			case ORACLE: return Oracle9iDialect.class;
 			case POSTGRESQL: return PostgreSQLDialect.class;
 			case SQL_SERVER: return SQLServerDialect.class;
 			case SYBASE: return SybaseDialect.class;

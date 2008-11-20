@@ -18,9 +18,9 @@ package org.springframework.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -38,7 +38,7 @@ import org.springframework.util.StringValueResolver;
 public class SimpleAliasRegistry implements AliasRegistry {
 
 	/** Map from alias to canonical name */
-	private final Map aliasMap = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>();
 
 
 	public void registerAlias(String name, String alias) {
@@ -49,7 +49,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		}
 		else {
 			if (!allowAliasOverriding()) {
-				String registeredName = (String) this.aliasMap.get(alias);
+				String registeredName = this.aliasMap.get(alias);
 				if (registeredName != null && !registeredName.equals(name)) {
 					throw new IllegalStateException("Cannot register alias '" + alias + "' for name '" +
 							name + "': It is already registered for name '" + registeredName + "'.");
@@ -68,7 +68,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	}
 
 	public void removeAlias(String alias) {
-		String name = (String) this.aliasMap.remove(alias);
+		String name = this.aliasMap.remove(alias);
 		if (name == null) {
 			throw new IllegalStateException("No alias '" + alias + "' registered");
 		}
@@ -79,11 +79,10 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	}
 
 	public String[] getAliases(String name) {
-		List aliases = new ArrayList();
+		List<String> aliases = new ArrayList<String>();
 		synchronized (this.aliasMap) {
-			for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String registeredName = (String) entry.getValue();
+			for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
+				String registeredName = entry.getValue();
 				if (registeredName.equals(name)) {
 					aliases.add(entry.getKey());
 				}
@@ -102,18 +101,18 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	public void resolveAliases(StringValueResolver valueResolver) {
 		Assert.notNull(valueResolver, "StringValueResolver must not be null");
 		synchronized (this.aliasMap) {
-			Map aliasCopy = new HashMap(this.aliasMap);
-			for (Iterator it = aliasCopy.keySet().iterator(); it.hasNext();) {
-				String alias = (String) it.next();
-				String registeredName = (String) aliasCopy.get(alias);
+			Map<String, String> aliasCopy = new HashMap<String, String>(this.aliasMap);
+			for (String alias : aliasCopy.keySet()) {
+				String registeredName = aliasCopy.get(alias);
 				String resolvedAlias = valueResolver.resolveStringValue(alias);
 				String resolvedName = valueResolver.resolveStringValue(registeredName);
 				if (!resolvedAlias.equals(alias)) {
-					String existingName = (String) this.aliasMap.get(resolvedAlias);
+					String existingName = this.aliasMap.get(resolvedAlias);
 					if (existingName != null && !existingName.equals(resolvedName)) {
-						throw new IllegalStateException("Cannot register resolved alias '" +
-								resolvedAlias + "' (original: '" + alias + "') for name '" + resolvedName +
-								"': It is already registered for name '" + registeredName + "'.");
+						throw new IllegalStateException(
+								"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
+								"') for name '" + resolvedName + "': It is already registered for name '" +
+								registeredName + "'.");
 					}
 					this.aliasMap.put(resolvedAlias, resolvedName);
 					this.aliasMap.remove(alias);
@@ -135,7 +134,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		// Handle aliasing.
 		String resolvedName = null;
 		do {
-			resolvedName = (String) this.aliasMap.get(canonicalName);
+			resolvedName = this.aliasMap.get(canonicalName);
 			if (resolvedName != null) {
 				canonicalName = resolvedName;
 			}

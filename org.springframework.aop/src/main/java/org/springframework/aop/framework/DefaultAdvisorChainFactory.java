@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,15 @@ import org.springframework.aop.support.MethodMatchers;
  */
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
 
-	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class targetClass) {
+	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
+			Advised config, Method method, Class targetClass) {
+
 		// This is somewhat tricky... we have to process introductions first,
 		// but we need to preserve order in the ultimate list.
-		List interceptorList = new ArrayList(config.getAdvisors().length);
+		List<Object> interceptorList = new ArrayList<Object>(config.getAdvisors().length);
 		boolean hasIntroductions = hasMatchingIntroductions(config, targetClass);
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
-		Advisor[] advisors = config.getAdvisors();
-		for (int i = 0; i < advisors.length; i++) {
-			Advisor advisor = advisors[i];
+		for (Advisor advisor : config.getAdvisors()) {
 			if (advisor instanceof PointcutAdvisor) {
 				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
@@ -64,8 +64,8 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
-							for (int j = 0; j < interceptors.length; j++) {
-								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptors[j], mm));
+							for (MethodInterceptor interceptor : interceptors) {
+								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptor, mm));
 							}
 						}
 						else {

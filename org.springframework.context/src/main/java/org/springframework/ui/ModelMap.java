@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.servlet.ModelAndView
  * @see org.springframework.web.portlet.ModelAndView
  */
-public class ModelMap extends LinkedHashMap {
+public class ModelMap extends LinkedHashMap<String, Object> {
 
 	/**
 	 * Construct a new, empty <code>ModelMap</code>.
@@ -127,8 +127,7 @@ public class ModelMap extends LinkedHashMap {
 	 */
 	public ModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
-			for (Iterator it = attributes.keySet().iterator(); it.hasNext();) {
-				Object key = it.next();
+			for (String key : attributes.keySet()) {
 				if (!containsKey(key)) {
 					put(key, attributes.get(key));
 				}

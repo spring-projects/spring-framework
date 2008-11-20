@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.beans.Mergeable;
  * @author Juergen Hoeller
  * @since 27.05.2003
  */
-public class ManagedList extends ArrayList implements Mergeable, BeanMetadataElement {
+public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetadataElement {
 
 	private Object source;
 

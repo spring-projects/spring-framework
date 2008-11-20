@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.web.portlet.context;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
@@ -125,6 +129,40 @@ public abstract class PortletApplicationContextUtils {
 				return ((PortletRequestAttributes) requestAttr).getRequest().getPortletSession();
 			}
 		});
+	}
+
+	/**
+	 * Register web-specific environment beans with the given BeanFactory,
+	 * as used by the Portlet ApplicationContext.
+	 * @param bf the BeanFactory to configure
+	 * @param pc the PortletContext that we're running within
+	 */
+	static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, PortletContext pc) {
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME)) {
+			Map<String, String> parameterMap = new HashMap<String, String>();
+			if (pc != null) {
+				Enumeration paramNameEnum = pc.getInitParameterNames();
+				while (paramNameEnum.hasMoreElements()) {
+					String paramName = (String) paramNameEnum.nextElement();
+					parameterMap.put(paramName, pc.getInitParameter(paramName));
+				}
+			}
+			bf.registerSingleton(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME,
+					Collections.unmodifiableMap(parameterMap));
+		}
+
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
+			Map<String, Object> attributeMap = new HashMap<String, Object>();
+			if (pc != null) {
+				Enumeration attrNameEnum = pc.getAttributeNames();
+				while (attrNameEnum.hasMoreElements()) {
+					String attrName = (String) attrNameEnum.nextElement();
+					attributeMap.put(attrName, pc.getAttribute(attrName));
+				}
+			}
+			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
+					Collections.unmodifiableMap(attributeMap));
+		}
 	}
 
 }

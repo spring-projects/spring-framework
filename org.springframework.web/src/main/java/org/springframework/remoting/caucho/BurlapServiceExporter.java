@@ -36,9 +36,7 @@ import org.springframework.web.util.NestedServletException;
  * <p>Burlap is a slim, XML-based RPC protocol.
  * For information on Burlap, see the
  * <a href="http://www.caucho.com/burlap">Burlap website</a>.
- *
- * <p>This exporter will work with both Burlap 2.x and 3.x (respectively
- * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
+ * This exporter requires Burlap 3.x.
  *
  * <p>Note: Burlap services exported with this class can be accessed by
  * any Burlap client, as there isn't any special handling involved.

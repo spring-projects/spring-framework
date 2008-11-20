@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,10 +70,12 @@ public abstract class ObjectUtils {
 			return true;
 		}
 		if (declaredExceptions != null) {
-			for (int i = 0; i < declaredExceptions.length; i++) {
+			int i = 0;
+			while (i < declaredExceptions.length) {
 				if (declaredExceptions[i].isAssignableFrom(ex.getClass())) {
 					return true;
 				}
+				i++;
 			}
 		}
 		return false;
@@ -100,8 +102,8 @@ public abstract class ObjectUtils {
 		if (array == null) {
 			return false;
 		}
-		for (int i = 0; i < array.length; i++) {
-			if (nullSafeEquals(array[i], element)) {
+		for (Object arrayEle : array) {
+			if (nullSafeEquals(arrayEle, element)) {
 				return true;
 			}
 		}
@@ -565,18 +567,18 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
-			buffer.append(String.valueOf(array[i]));
+			sb.append(String.valueOf(array[i]));
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -596,19 +598,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
 
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -628,18 +630,18 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -659,18 +661,18 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
-			buffer.append("'").append(array[i]).append("'");
+			sb.append("'").append(array[i]).append("'");
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -690,19 +692,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
 
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -722,19 +724,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
 
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -754,18 +756,18 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -785,18 +787,18 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 	/**
@@ -816,18 +818,18 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			if (i == 0) {
-				buffer.append(ARRAY_START);
+				sb.append(ARRAY_START);
 			}
 			else {
-				buffer.append(ARRAY_ELEMENT_SEPARATOR);
+				sb.append(ARRAY_ELEMENT_SEPARATOR);
 			}
-			buffer.append(array[i]);
+			sb.append(array[i]);
 		}
-		buffer.append(ARRAY_END);
-		return buffer.toString();
+		sb.append(ARRAY_END);
+		return sb.toString();
 	}
 
 }

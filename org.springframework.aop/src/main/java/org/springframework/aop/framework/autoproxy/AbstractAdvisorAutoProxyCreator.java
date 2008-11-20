@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.framework.autoproxy;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -82,9 +83,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #sortAdvisors
 	 * @see #extendAdvisors
 	 */
-	protected List findEligibleAdvisors(Class beanClass, String beanName) {
-		List candidateAdvisors = findCandidateAdvisors();
-		List eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
+	protected List<Advisor> findEligibleAdvisors(Class beanClass, String beanName) {
+		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		if (!eligibleAdvisors.isEmpty()) {
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
@@ -96,7 +97,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * Find all candidate Advisors to use in auto-proxying.
 	 * @return the List of candidate Advisors
 	 */
-	protected List findCandidateAdvisors() {
+	protected List<Advisor> findCandidateAdvisors() {
 		return this.advisorRetrievalHelper.findAdvisorBeans();
 	}
 
@@ -109,7 +110,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @return the List of applicable Advisors
 	 * @see ProxyCreationContext#getCurrentProxiedBeanName()
 	 */
-	protected List findAdvisorsThatCanApply(List candidateAdvisors, Class beanClass, String beanName) {
+	protected List<Advisor> findAdvisorsThatCanApply(
+			List<Advisor> candidateAdvisors, Class beanClass, String beanName) {
+
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
@@ -137,7 +140,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.OrderComparator
 	 */
-	protected List sortAdvisors(List advisors) {
+	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
 		Collections.sort(advisors, new OrderComparator());
 		return advisors;
 	}
@@ -151,7 +154,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @param candidateAdvisors Advisors that have already been identified as
 	 * applying to a given bean
 	 */
-	protected void extendAdvisors(List candidateAdvisors) {
+	protected void extendAdvisors(List<Advisor> candidateAdvisors) {
 	}
 
 	/**

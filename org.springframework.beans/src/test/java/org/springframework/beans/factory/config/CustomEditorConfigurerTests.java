@@ -28,6 +28,8 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -39,13 +41,16 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
  */
 public class CustomEditorConfigurerTests extends TestCase {
 
-	public void testCustomEditorConfigurerWithRequiredTypeAsClassName() throws ParseException {
+	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
-		editors.put(Date.class.getName(), new CustomDateEditor(df, true));
-		cec.setCustomEditors(editors);
+		final DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
+		cec.setPropertyEditorRegistrars(new PropertyEditorRegistrar[] {
+				new PropertyEditorRegistrar() {
+					public void registerCustomEditors(PropertyEditorRegistry registry) {
+						registry.registerCustomEditor(Date.class, new CustomDateEditor(df, true));
+					}
+				}});
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -61,45 +66,11 @@ public class CustomEditorConfigurerTests extends TestCase {
 		assertEquals(df.parse("2.12.1975"), tb2.getSomeMap().get("myKey"));
 	}
 
-	public void testCustomEditorConfigurerWithRequiredTypeAsClass() throws ParseException {
+	public void testCustomEditorConfigurerWithEditorClassName() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
-		editors.put(Date.class, new CustomDateEditor(df, true));
-		cec.setCustomEditors(editors);
-		cec.postProcessBeanFactory(bf);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("date", "2.12.1975");
-		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
-
-		TestBean tb = (TestBean) bf.getBean("tb");
-		assertEquals(df.parse("2.12.1975"), tb.getDate());
-	}
-
-	public void testCustomEditorConfigurerWithEditorAsClassName() throws ParseException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		editors.put(Date.class, MyDateEditor.class.getName());
-		cec.setCustomEditors(editors);
-		cec.postProcessBeanFactory(bf);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("date", "2.12.1975");
-		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
-
-		TestBean tb = (TestBean) bf.getBean("tb");
-		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
-		assertEquals(df.parse("2.12.1975"), tb.getDate());
-	}
-
-	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		editors.put(Date.class, MyDateEditor.class);
+		Map<String, String> editors = new HashMap<String, String>();
+		editors.put(Date.class.getName(), MyDateEditor.class.getName());
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);
 
@@ -115,12 +86,8 @@ public class CustomEditorConfigurerTests extends TestCase {
 	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		editors.put("java.lang.String[]", new PropertyEditorSupport() {
-			public void setAsText(String text) {
-				setValue(new String[] {"test"});
-			}
-		});
+		Map<String, String> editors = new HashMap<String, String>();
+		editors.put("java.lang.String[]", MyTestEditor.class.getName());
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);
 
@@ -136,8 +103,8 @@ public class CustomEditorConfigurerTests extends TestCase {
 	public void testCustomEditorConfigurerWithUnresolvableEditor() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		editors.put(Date.class, "MyNonExistingEditor");
+		Map<String, String> editors = new HashMap<String, String>();
+		editors.put(Date.class.getName(), "MyNonExistingEditor");
 		editors.put("MyNonExistingType", "MyNonExistingEditor");
 		cec.setCustomEditors(editors);
 		try {
@@ -152,8 +119,8 @@ public class CustomEditorConfigurerTests extends TestCase {
 	public void testCustomEditorConfigurerWithIgnoredUnresolvableEditor() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map editors = new HashMap();
-		editors.put(Date.class, "MyNonExistingEditor");
+		Map<String, String> editors = new HashMap<String, String>();
+		editors.put(Date.class.getName(), "MyNonExistingEditor");
 		editors.put("MyNonExistingType", "MyNonExistingEditor");
 		cec.setCustomEditors(editors);
 		cec.setIgnoreUnresolvableEditors(true);
@@ -165,6 +132,14 @@ public class CustomEditorConfigurerTests extends TestCase {
 
 		public MyDateEditor() {
 			super(DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN), true);
+		}
+	}
+
+
+	public static class MyTestEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) {
+			setValue(new String[] {"test"});
 		}
 	}
 

@@ -312,6 +312,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @throws BeansException in dependency resolution failed
 	 */
 	Object resolveDependency(DependencyDescriptor descriptor, String beanName,
-			Set autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
 
 }

@@ -21,12 +21,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -85,7 +83,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	private String persistenceUnitName;
 
-	private final Map jpaPropertyMap = new HashMap();
+	private final Map<Object, Object> jpaPropertyMap = new HashMap<Object, Object>();
 
 	private Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
@@ -168,7 +166,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map jpaProperties) {
+	public void setJpaPropertyMap(Map<?, ?> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -262,10 +260,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			if (this.persistenceProvider == null) {
 				this.persistenceProvider = this.jpaVendorAdapter.getPersistenceProvider();
 			}
-			Map vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
+			Map<?, ?> vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
 			if (vendorPropertyMap != null) {
-				for (Iterator it = vendorPropertyMap.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
+				for (Map.Entry entry : vendorPropertyMap.entrySet()) {
 					if (!this.jpaPropertyMap.containsKey(entry.getKey())) {
 						this.jpaPropertyMap.put(entry.getKey(), entry.getValue());
 					}
@@ -422,7 +419,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				}
 				else if (method.getName().equals("hashCode")) {
 					// Use hashCode of EntityManagerFactory proxy.
-					return new Integer(System.identityHashCode(proxy));
+					return System.identityHashCode(proxy);
 				}
 				else if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 					return method.invoke(this.entityManagerFactoryInfo, args);

@@ -14,6 +14,8 @@
     <orderEntry type="module" module-name="aop" />
     <orderEntry type="module" module-name="beans" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="expression" />
+    <orderEntry type="module" module-name="instrument" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -151,7 +153,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="instrument" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

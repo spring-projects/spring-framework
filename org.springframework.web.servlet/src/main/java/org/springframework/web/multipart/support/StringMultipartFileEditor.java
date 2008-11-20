@@ -67,9 +67,7 @@ public class StringMultipartFileEditor extends PropertyEditorSupport {
 						new String(multipartFile.getBytes()));
 			}
 			catch (IOException ex) {
-				IllegalArgumentException iae = new IllegalArgumentException("Cannot read contents of multipart file");
-				iae.initCause(ex);
-				throw iae;
+				throw new IllegalArgumentException("Cannot read contents of multipart file", ex);
 			}
 		}
 		else {

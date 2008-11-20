@@ -17,7 +17,6 @@
 package org.springframework.web.multipart.commons;
 
 import java.util.List;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,10 +25,8 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -41,7 +38,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Servlet-based {@link org.springframework.web.multipart.MultipartResolver} implementation
  * for <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.1 or above. Commons FileUpload 1.2 or above is recommended.
+ * 1.2 or above.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
  * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
@@ -63,9 +60,6 @@ import org.springframework.web.util.WebUtils;
  */
 public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
-
-	private final boolean commonsFileUpload12Present =
-			ClassUtils.hasMethod(ServletFileUpload.class, "isMultipartContent", new Class[] {HttpServletRequest.class});
 
 	private boolean resolveLazily = false;
 
@@ -127,11 +121,8 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		if (request == null) {
 			return false;
 		}
-		else if (commonsFileUpload12Present) {
-			return ServletFileUpload.isMultipartContent(request);
-		}
 		else {
-			return ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+			return ServletFileUpload.isMultipartContent(request);
 		}
 	}
 

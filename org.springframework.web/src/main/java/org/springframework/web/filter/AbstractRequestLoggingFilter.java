@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,28 +188,28 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * and the supplied prefix and suffix.
 	 */
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(prefix);
-		buffer.append("uri=").append(request.getRequestURI());
+		StringBuilder msg = new StringBuilder();
+		msg.append(prefix);
+		msg.append("uri=").append(request.getRequestURI());
 		if (isIncludeQueryString()) {
-			buffer.append('?').append(request.getQueryString());
+			msg.append('?').append(request.getQueryString());
 		}
 		if (isIncludeClientInfo()) {
 			String client = request.getRemoteAddr();
 			if (StringUtils.hasLength(client)) {
-				buffer.append(";client=").append(client);
+				msg.append(";client=").append(client);
 			}
 			HttpSession session = request.getSession(false);
 			if (session != null) {
-				buffer.append(";session=").append(session.getId());
+				msg.append(";session=").append(session.getId());
 			}
 			String user = request.getRemoteUser();
 			if (user != null) {
-				buffer.append(";user=").append(user);
+				msg.append(";user=").append(user);
 			}
 		}
-		buffer.append(suffix);
-		return buffer.toString();
+		msg.append(suffix);
+		return msg.toString();
 	}
 
 

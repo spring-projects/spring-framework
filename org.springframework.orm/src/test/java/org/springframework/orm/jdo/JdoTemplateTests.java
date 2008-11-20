@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -356,37 +356,6 @@ public class JdoTemplateTests extends TestCase {
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		assertEquals(detached, jt.detachCopyAll(attached));
-	}
-
-	public void testAttachCopy() {
-		pmf.getPersistenceManager();
-		pmfControl.setReturnValue(pm);
-		pm.makePersistent("0x");
-		pmControl.setReturnValue("0", 1);
-		pm.close();
-		pmControl.setVoidCallable(1);
-		pmfControl.replay();
-		pmControl.replay();
-
-		JdoTemplate jt = new JdoTemplate(pmf);
-		assertEquals("0", jt.attachCopy("0x"));
-	}
-
-	public void testAttachCopyAll() {
-		Collection detached = new HashSet();
-		Collection attached = new HashSet();
-
-		pmf.getPersistenceManager();
-		pmfControl.setReturnValue(pm);
-		pm.makePersistentAll(detached);
-		pmControl.setReturnValue(attached, 1);
-		pm.close();
-		pmControl.setVoidCallable(1);
-		pmfControl.replay();
-		pmControl.replay();
-
-		JdoTemplate jt = new JdoTemplate(pmf);
-		assertEquals(attached, jt.attachCopyAll(detached));
 	}
 
 	public void testFlush() {

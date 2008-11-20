@@ -53,6 +53,12 @@ public interface RequestAttributes {
 	int SCOPE_GLOBAL_SESSION = 2;
 
 
+	String REFERENCE_REQUEST = "request";
+
+	String REFERENCE_SESSION = "session";
+
+
+
 	/**
 	 * Return the value for the scoped attribute of the given name, if any.
 	 * @param name the name of the attribute
@@ -107,6 +113,15 @@ public interface RequestAttributes {
 	 * @param scope the scope identifier
 	 */
 	void registerDestructionCallback(String name, Runnable callback, int scope);
+
+	/**
+	 * Resolve the contextual reference for the given key, if any.
+	 * <p>At a minimum: the HttpServletRequest/PortletRequest reference for key
+	 * "request", and the HttpSession/PortletSession reference for key "session".
+	 * @param key the contextual key
+	 * @return the corresponding object, or <code>null</code> if none found
+	 */
+	Object resolveReference(String key);
 
 	/**
 	 * Return an id for the current underlying session.

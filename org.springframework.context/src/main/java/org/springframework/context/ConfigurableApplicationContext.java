@@ -52,6 +52,18 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
+	/**
+	 * Name of the System properties bean in the factory.
+	 * @see java.lang.System#getProperties()
+	 */
+	String SYSTEM_PROPERTIES_BEAN_NAME = "systemProperties";
+
+	/**
+	 * Name of the System environment bean in the factory.
+	 * @see java.lang.System#getenv()
+	 */
+	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
+
 
 	/**
 	 * Set the parent of this application context.

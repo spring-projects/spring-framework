@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,21 @@ public class LoadTimeWeaverAwareProcessor implements BeanPostProcessor, BeanFact
 	 * <code>LoadTimeWeaver</code> will be auto-retrieved from the containing
 	 * {@link BeanFactory}, expecting a bean named
 	 * {@link ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME "loadTimeWeaver"}.
-	 * @param loadTimeWeaver the specific <code>LoadTimeWeaver</code> that is to be used; can be <code>null</code>
+	 * @param loadTimeWeaver the specific <code>LoadTimeWeaver</code> that is to be used
 	 */
 	public LoadTimeWeaverAwareProcessor(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
+	}
+
+	/**
+	 * Create a new <code>LoadTimeWeaverAwareProcessor</code>.
+	 * <p>The <code>LoadTimeWeaver</code> will be auto-retrieved from
+	 * the given {@link BeanFactory}, expecting a bean named
+	 * {@link ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME "loadTimeWeaver"}.
+	 * @param loadTimeWeaver the specific <code>LoadTimeWeaver</code> that is to be used
+	 */
+	public LoadTimeWeaverAwareProcessor(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 
@@ -82,7 +93,7 @@ public class LoadTimeWeaverAwareProcessor implements BeanPostProcessor, BeanFact
 			if (ltw == null) {
 				Assert.state(this.beanFactory != null,
 						"BeanFactory required if no LoadTimeWeaver explicitly specified");
-				ltw = (LoadTimeWeaver) this.beanFactory.getBean(
+				ltw = this.beanFactory.getBean(
 						ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME, LoadTimeWeaver.class);
 			}
 			((LoadTimeWeaverAware) bean).setLoadTimeWeaver(ltw);

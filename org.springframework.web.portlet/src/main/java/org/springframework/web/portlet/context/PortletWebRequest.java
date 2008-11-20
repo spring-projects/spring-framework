@@ -19,7 +19,6 @@ package org.springframework.web.portlet.context;
 import java.security.Principal;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
@@ -82,7 +81,8 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return getRequest().getParameterValues(paramName);
 	}
 
-	public Map getParameterMap() {
+	@SuppressWarnings("unchecked")
+	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}
 
@@ -121,19 +121,19 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 
 	public String getDescription(boolean includeClientInfo) {
 		PortletRequest request = getRequest();
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("context=").append(request.getContextPath());
+		StringBuilder result = new StringBuilder();
+		result.append("context=").append(request.getContextPath());
 		if (includeClientInfo) {
 			PortletSession session = request.getPortletSession(false);
 			if (session != null) {
-				buffer.append(";session=").append(session.getId());
+				result.append(";session=").append(session.getId());
 			}
 			String user = getRequest().getRemoteUser();
 			if (StringUtils.hasLength(user)) {
-				buffer.append(";user=").append(user);
+				result.append(";user=").append(user);
 			}
 		}
-		return buffer.toString();
+		return result.toString();
 	}
 
 	@Override

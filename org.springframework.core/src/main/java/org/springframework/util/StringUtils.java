@@ -38,7 +38,7 @@ import java.util.TreeSet;
  * for a more comprehensive suite of String utilities.
  *
  * <p>This class delivers some simple functionality that should really
- * be provided by the core Java <code>String</code> and {@link StringBuffer}
+ * be provided by the core Java <code>String</code> and {@link StringBuilder}
  * classes, such as the ability to {@link #replace} all occurrences of a given
  * substring in a target string. It also provides easy-to-use methods to convert
  * between delimited strings, such as CSV strings, and collections and arrays.
@@ -180,14 +180,14 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str);
-		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
-			buf.deleteCharAt(0);
+		StringBuilder sb = new StringBuilder(str);
+		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
+			sb.deleteCharAt(0);
 		}
-		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(buf.length() - 1))) {
-			buf.deleteCharAt(buf.length() - 1);
+		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
+			sb.deleteCharAt(sb.length() - 1);
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -201,17 +201,17 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str);
+		StringBuilder sb = new StringBuilder(str);
 		int index = 0;
-		while (buf.length() > index) {
-			if (Character.isWhitespace(buf.charAt(index))) {
-				buf.deleteCharAt(index);
+		while (sb.length() > index) {
+			if (Character.isWhitespace(sb.charAt(index))) {
+				sb.deleteCharAt(index);
 			}
 			else {
 				index++;
 			}
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -224,11 +224,11 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str);
-		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
-			buf.deleteCharAt(0);
+		StringBuilder sb = new StringBuilder(str);
+		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
+			sb.deleteCharAt(0);
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -241,11 +241,11 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str);
-		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(buf.length() - 1))) {
-			buf.deleteCharAt(buf.length() - 1);
+		StringBuilder sb = new StringBuilder(str);
+		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
+			sb.deleteCharAt(sb.length() - 1);
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -258,11 +258,11 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str);
-		while (buf.length() > 0 && buf.charAt(0) == leadingCharacter) {
-			buf.deleteCharAt(0);
+		StringBuilder sb = new StringBuilder(str);
+		while (sb.length() > 0 && sb.charAt(0) == leadingCharacter) {
+			sb.deleteCharAt(0);
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -275,11 +275,11 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str);
-		while (buf.length() > 0 && buf.charAt(buf.length() - 1) == trailingCharacter) {
-			buf.deleteCharAt(buf.length() - 1);
+		StringBuilder sb = new StringBuilder(str);
+		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == trailingCharacter) {
+			sb.deleteCharAt(sb.length() - 1);
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 
@@ -331,7 +331,7 @@ public abstract class StringUtils {
 	/**
 	 * Test whether the given string matches the given substring
 	 * at the given index.
-	 * @param str the original string (or StringBuffer)
+	 * @param str the original string (or StringBuilder)
 	 * @param index the index in the original string to start matching against
 	 * @param substring the substring to match at the given index
 	 */
@@ -374,21 +374,20 @@ public abstract class StringUtils {
 		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
-		StringBuffer sbuf = new StringBuffer();
-		// output StringBuffer we'll build up
+		StringBuilder sb = new StringBuilder();
 		int pos = 0; // our position in the old string
 		int index = inString.indexOf(oldPattern);
 		// the index of an occurrence we've found, or -1
 		int patLen = oldPattern.length();
 		while (index >= 0) {
-			sbuf.append(inString.substring(pos, index));
-			sbuf.append(newPattern);
+			sb.append(inString.substring(pos, index));
+			sb.append(newPattern);
 			pos = index + patLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
-		sbuf.append(inString.substring(pos));
+		sb.append(inString.substring(pos));
 		// remember to append any characters to the right of a match
-		return sbuf.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -412,14 +411,14 @@ public abstract class StringUtils {
 		if (!hasLength(inString) || !hasLength(charsToDelete)) {
 			return inString;
 		}
-		StringBuffer out = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
 			if (charsToDelete.indexOf(c) == -1) {
-				out.append(c);
+				sb.append(c);
 			}
 		}
-		return out.toString();
+		return sb.toString();
 	}
 
 
@@ -493,15 +492,15 @@ public abstract class StringUtils {
 		if (str == null || str.length() == 0) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(str.length());
+		StringBuilder sb = new StringBuilder(str.length());
 		if (capitalize) {
-			buf.append(Character.toUpperCase(str.charAt(0)));
+			sb.append(Character.toUpperCase(str.charAt(0)));
 		}
 		else {
-			buf.append(Character.toLowerCase(str.charAt(0)));
+			sb.append(Character.toLowerCase(str.charAt(0)));
 		}
-		buf.append(str.substring(1));
-		return buf.toString();
+		sb.append(str.substring(1));
+		return sb.toString();
 	}
 
 	/**

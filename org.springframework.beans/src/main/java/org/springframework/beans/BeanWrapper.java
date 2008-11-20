@@ -53,15 +53,6 @@ import java.beans.PropertyDescriptor;
 public interface BeanWrapper extends ConfigurablePropertyAccessor {
 
 	/**
-	 * Change the wrapped JavaBean object.
-	 * @param obj the bean instance to wrap
-	 * @deprecated as of Spring 2.5,
-	 * in favor of recreating a BeanWrapper per target instance
-	 */
-	@Deprecated
-	void setWrappedInstance(Object obj);
-
-	/**
 	 * Return the bean instance wrapped by this object, if any.
 	 * @return the bean instance, or <code>null</code> if none set
 	 */

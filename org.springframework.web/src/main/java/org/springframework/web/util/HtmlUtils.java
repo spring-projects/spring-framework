@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class HtmlUtils {
 		if (input == null) {
 			return null;
 		}
-		StringBuffer escaped = new StringBuffer(input.length() * 2);
+		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
 			String reference = characterEntityReferences.convertToReference(character);
@@ -90,7 +90,7 @@ public abstract class HtmlUtils {
 		if (input == null) {
 			return null;
 		}
-		StringBuffer escaped = new StringBuffer(input.length() * 2);
+		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
 			if (characterEntityReferences.isMappedToReference(character)) {
@@ -121,7 +121,7 @@ public abstract class HtmlUtils {
 		if (input == null) {
 			return null;
 		}
-		StringBuffer escaped = new StringBuffer(input.length() * 2);
+		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
 			if (characterEntityReferences.isMappedToReference(character)) {

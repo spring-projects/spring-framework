@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -797,9 +796,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			return provider.create(report);
 		}
 		catch (JRException ex) {
-			IllegalArgumentException iaex = new IllegalArgumentException("Supplied JRDataSourceProvider is invalid");
-			iaex.initCause(ex);
-			throw iaex;
+			throw new IllegalArgumentException("Supplied JRDataSourceProvider is invalid", ex);
 		}
 	}
 

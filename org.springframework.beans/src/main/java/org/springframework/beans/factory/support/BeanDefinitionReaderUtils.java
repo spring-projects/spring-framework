@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,31 +44,6 @@ public class BeanDefinitionReaderUtils {
 	 */
 	public static final String GENERATED_BEAN_NAME_SEPARATOR = BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 
-
-	/**
-	 * Create a new GenericBeanDefinition for the given
-	 * class name, parent, constructor arguments, and property values.
-	 * @param className the name of the bean class, if any
-	 * @param parentName the name of the parent bean, if any
-	 * @param cargs the constructor arguments, if any
-	 * @param pvs the property values, if any
-	 * @param classLoader the ClassLoader to use for loading bean classes
-	 * (can be <code>null</code> to just register bean classes by name)
-	 * @return the bean definition
-	 * @throws ClassNotFoundException if the bean class could not be loaded
-	 * @deprecated in favor of <code>createBeanDefinition(String, String, ClassLoader)</code>
-	 * @see #createBeanDefinition(String, String, ClassLoader)
-	 */
-	@Deprecated
-	public static AbstractBeanDefinition createBeanDefinition(
-			String className, String parentName, ConstructorArgumentValues cargs,
-			MutablePropertyValues pvs, ClassLoader classLoader) throws ClassNotFoundException {
-
-		AbstractBeanDefinition bd = createBeanDefinition(parentName, className, classLoader);
-		bd.setConstructorArgumentValues(cargs);
-		bd.setPropertyValues(pvs);
-		return bd;
-	}
 
 	/**
 	 * Create a new GenericBeanDefinition for the given parent name and class name,

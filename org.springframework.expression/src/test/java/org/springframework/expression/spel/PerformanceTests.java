@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import junit.framework.TestCase;
@@ -27,14 +28,13 @@ import org.springframework.expression.spel.ast.PropertyOrFieldReference;
  * 
  * @author Andy Clement
  */
-@SuppressWarnings("unused")
 public class PerformanceTests extends TestCase {
 
 	public static final int ITERATIONS = 1000;
 	public static final boolean report = true;
 
 	private static SpelExpressionParser parser = new SpelExpressionParser();
-	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();;
+	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	public void testPerformanceOfSimpleAccess() throws Exception {
 		long starttime = 0;

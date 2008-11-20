@@ -55,6 +55,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
 
+import org.springframework.beans.TestBean;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -62,7 +63,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
@@ -112,7 +112,7 @@ public class HibernateTemplateTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
@@ -1266,7 +1266,7 @@ public class HibernateTemplateTests extends TestCase {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER);
+		sessionControl.setReturnValue(FlushMode.MANUAL);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
@@ -1578,7 +1578,7 @@ public class HibernateTemplateTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);

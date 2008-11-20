@@ -107,10 +107,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 				setValue(this.dateFormat.parse(text));
 			}
 			catch (ParseException ex) {
-				IllegalArgumentException iae =
-						new IllegalArgumentException("Could not parse date: " + ex.getMessage());
-				iae.initCause(ex);
-				throw iae;
+				throw new IllegalArgumentException("Could not parse date: " + ex.getMessage(), ex);
 			}
 		}
 	}

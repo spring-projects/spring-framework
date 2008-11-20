@@ -33,10 +33,6 @@ import java.text.ParseException;
  */
 public abstract class NumberUtils {
 
-	private static final boolean decimalFormatSupportsBigDecimal =
-			ClassUtils.hasMethod(DecimalFormat.class, "setParseBigDecimal", new Class[] {boolean.class});
-
-
 	/**
 	 * Convert the given number into an instance of the given target class.
 	 * @param number the number to convert
@@ -200,8 +196,7 @@ public abstract class NumberUtils {
 			boolean resetBigDecimal = false;
 			if (numberFormat instanceof DecimalFormat) {
 				decimalFormat = (DecimalFormat) numberFormat;
-				if (BigDecimal.class.equals(targetClass) && decimalFormatSupportsBigDecimal &&
-						!decimalFormat.isParseBigDecimal()) {
+				if (BigDecimal.class.equals(targetClass) && !decimalFormat.isParseBigDecimal()) {
 					decimalFormat.setParseBigDecimal(true);
 					resetBigDecimal = true;
 				}
@@ -211,10 +206,7 @@ public abstract class NumberUtils {
 				return convertNumberToTargetClass(number, targetClass);
 			}
 			catch (ParseException ex) {
-				IllegalArgumentException iae =
-						new IllegalArgumentException("Could not parse number: " + ex.getMessage());
-				iae.initCause(ex);
-				throw iae;
+				throw new IllegalArgumentException("Could not parse number: " + ex.getMessage());
 			}
 			finally {
 				if (resetBigDecimal) {

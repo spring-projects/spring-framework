@@ -20,10 +20,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,13 +56,13 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	private static Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
-	private final Map parameterNamesCache = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<Member, String[]> parameterNamesCache = new ConcurrentHashMap<Member, String[]>();
 
-	private final Map classReaderCache = new HashMap();
+	private final Map<Class, ClassReader> classReaderCache = new HashMap<Class, ClassReader>();
 
 
 	public String[] getParameterNames(Method method) {
-		String[] paramNames = (String[]) this.parameterNamesCache.get(method);
+		String[] paramNames = this.parameterNamesCache.get(method);
 		if (paramNames == null) {
 			try {
 				paramNames = visitMethod(method).getParameterNames();
@@ -82,7 +84,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	}
 
 	public String[] getParameterNames(Constructor ctor) {
-		String[] paramNames = (String[]) this.parameterNamesCache.get(ctor);
+		String[] paramNames = this.parameterNamesCache.get(ctor);
 		if (paramNames == null) {
 			try {
 				paramNames = visitConstructor(ctor).getParameterNames();

@@ -377,24 +377,6 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	/**
-	 * @deprecated in favor of {@link #makePersistent(Object)}.
-	 * To be removed in Spring 3.0.
-	 */
-	@Deprecated
-	public Object attachCopy(Object detachedEntity) {
-		return makePersistent(detachedEntity);
-	}
-
-	/**
-	 * @deprecated in favor of {@link #makePersistentAll(java.util.Collection)}.
-	 * To be removed in Spring 3.0.
-	 */
-	@Deprecated
-	public Collection attachCopyAll(Collection detachedEntities) {
-		return makePersistentAll(detachedEntities);
-	}
-
 	public void flush() throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {

@@ -16,14 +16,13 @@
 
 package org.springframework.core;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e.
@@ -34,23 +33,12 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.beans.BeanWrapperImpl} and
  * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
  *
- * <p>Note that this class does not depend on JDK 1.5 API artifacts, in order
- * to remain compatible with JDK 1.4. Concrete generic type resolution
- * via JDK 1.5 API happens in {@link GenericCollectionTypeResolver} only.
- *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
  * @see GenericCollectionTypeResolver
  */
 public class MethodParameter {
-
-	private static final Method methodParameterAnnotationsMethod =
-			ClassUtils.getMethodIfAvailable(Method.class, "getParameterAnnotations", new Class[0]);
-
-	private static final Method constructorParameterAnnotationsMethod =
-			ClassUtils.getMethodIfAvailable(Constructor.class, "getParameterAnnotations", new Class[0]);
-
 
 	private Method method;
 
@@ -60,7 +48,7 @@ public class MethodParameter {
 
 	private Class parameterType;
 
-	private Object[] parameterAnnotations;
+	private Annotation[] parameterAnnotations;
 
 	private ParameterNameDiscoverer parameterNameDiscoverer;
 
@@ -69,7 +57,7 @@ public class MethodParameter {
 	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index */
-	private Map typeIndexesPerLevel;
+	private Map<Integer,Integer> typeIndexesPerLevel;
 
 	Map typeVariableMap;
 
@@ -188,22 +176,13 @@ public class MethodParameter {
 
 	/**
 	 * Return the annotations associated with the method/constructor parameter.
-	 * @return the parameter annotations, or <code>null</code> if there is
-	 * no annotation support (on JDK < 1.5). The return value is an Object array
-	 * instead of an Annotation array simply for compatibility with older JDKs;
-	 * feel free to cast it to <code>Annotation[]</code> on JDK 1.5 or higher.
 	 */
-	public Object[] getParameterAnnotations() {
-		if (this.parameterAnnotations != null) {
-			return this.parameterAnnotations;
+	public Annotation[] getParameterAnnotations() {
+		if (this.parameterAnnotations == null) {
+			Annotation[][] annotationArray = (this.method != null) ?
+					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations();
+			this.parameterAnnotations = annotationArray[this.parameterIndex];
 		}
-		if (methodParameterAnnotationsMethod == null) {
-			return null;
-		}
-		Object[][] annotationArray = (this.method != null ?
-				((Object[][]) ReflectionUtils.invokeMethod(methodParameterAnnotationsMethod, this.method)) :
-				((Object[][]) ReflectionUtils.invokeMethod(constructorParameterAnnotationsMethod, this.constructor)));
-		this.parameterAnnotations = annotationArray[this.parameterIndex];
 		return this.parameterAnnotations;
 	}
 
@@ -250,7 +229,7 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void decreaseNestingLevel() {
-		getTypeIndexesPerLevel().remove(new Integer(this.nestingLevel));
+		getTypeIndexesPerLevel().remove(this.nestingLevel);
 		this.nestingLevel--;
 	}
 
@@ -270,7 +249,7 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
-		getTypeIndexesPerLevel().put(new Integer(this.nestingLevel), new Integer(typeIndex));
+		getTypeIndexesPerLevel().put(this.nestingLevel, typeIndex);
 	}
 
 	/**
@@ -290,15 +269,15 @@ public class MethodParameter {
 	 * if none specified (indicating the default type index)
 	 */
 	public Integer getTypeIndexForLevel(int nestingLevel) {
-		return (Integer) getTypeIndexesPerLevel().get(new Integer(nestingLevel));
+		return getTypeIndexesPerLevel().get(nestingLevel);
 	}
 
 	/**
 	 * Obtain the (lazily constructed) type-indexes-per-level Map.
 	 */
-	private Map getTypeIndexesPerLevel() {
+	private Map<Integer, Integer> getTypeIndexesPerLevel() {
 		if (this.typeIndexesPerLevel == null) {
-			this.typeIndexesPerLevel = new HashMap(4);
+			this.typeIndexesPerLevel = new HashMap<Integer, Integer>(4);
 		}
 		return this.typeIndexesPerLevel;
 	}

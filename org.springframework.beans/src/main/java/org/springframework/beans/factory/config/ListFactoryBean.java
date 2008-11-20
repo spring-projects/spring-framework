@@ -83,7 +83,7 @@ public class ListFactoryBean extends AbstractFactoryBean {
 			result = new ArrayList(this.sourceList.size());
 		}
 		Class valueType = null;
-		if (this.targetListClass != null && JdkVersion.isAtLeastJava15()) {
+		if (this.targetListClass != null) {
 			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
 		}
 		if (valueType != null) {

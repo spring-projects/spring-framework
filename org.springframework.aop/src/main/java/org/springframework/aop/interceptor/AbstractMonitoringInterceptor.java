@@ -95,7 +95,7 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 	 * @see #setSuffix
 	 */
 	protected String createInvocationTraceName(MethodInvocation invocation) {
-		StringBuffer sb = new StringBuffer(getPrefix());
+		StringBuilder sb = new StringBuilder(getPrefix());
 		Method method = invocation.getMethod();
 		Class clazz = method.getDeclaringClass();
 		if (this.logTargetClassInvocation && clazz.isInstance(invocation.getThis())) {

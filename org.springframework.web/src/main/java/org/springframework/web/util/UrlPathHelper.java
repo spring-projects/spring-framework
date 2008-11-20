@@ -41,28 +41,6 @@ import org.springframework.util.StringUtils;
  */
 public class UrlPathHelper {
 
-	/**
-	 * @deprecated as of Spring 2.0, in favor of <code>WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE</code>
-	 * @see org.springframework.web.util.WebUtils#INCLUDE_REQUEST_URI_ATTRIBUTE
-	 */
-	@Deprecated
-	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE;
-
-	/**
-	 * @deprecated as of Spring 2.0, in favor of <code>WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE</code>
-	 * @see org.springframework.web.util.WebUtils#INCLUDE_CONTEXT_PATH_ATTRIBUTE
-	 */
-	@Deprecated
-	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE;
-
-	/**
-	 * @deprecated as of Spring 2.0, in favor of <code>WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE</code>
-	 * @see org.springframework.web.util.WebUtils#INCLUDE_SERVLET_PATH_ATTRIBUTE
-	 */
-	@Deprecated
-	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE;
-
-
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private boolean alwaysUseFullPath = false;

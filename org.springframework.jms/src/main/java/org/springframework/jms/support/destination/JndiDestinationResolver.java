@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jms.support.destination;
 
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
@@ -25,7 +25,6 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.naming.NamingException;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.util.Assert;
 
@@ -61,7 +60,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 
 	private DestinationResolver dynamicDestinationResolver = new DynamicDestinationResolver();
 
-	private final Map destinationCache = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, Destination> destinationCache = new ConcurrentHashMap<String, Destination>();
 
 
 	/**
@@ -103,7 +102,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 			throws JMSException {
 
 		Assert.notNull(destinationName, "Destination name must not be null");
-		Destination dest = (Destination) this.destinationCache.get(destinationName);
+		Destination dest = this.destinationCache.get(destinationName);
 		if (dest != null) {
 			validateDestination(dest, destinationName, pubSubDomain);
 		}

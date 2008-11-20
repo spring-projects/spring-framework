@@ -35,7 +35,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
@@ -54,20 +53,6 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  */
 public class BeanWrapperTests extends TestCase {
-
-	public void testSetWrappedInstanceOfSameClass() throws Exception {
-		TestBean tb = new TestBean();
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		assertTrue(bw.isReadableProperty("age"));
-		tb.setAge(11);
-
-		TestBean tb2 = new TestBean();
-		bw.setWrappedInstance(tb2);
-
-		bw.setPropertyValue("age", new Integer(14));
-		assertTrue("2nd changed", tb2.getAge() == 14);
-		assertTrue("1 didn't change", tb.getAge() == 11);
-	}
 
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
@@ -163,17 +148,6 @@ public class BeanWrapperTests extends TestCase {
 		bw = new BeanWrapperImpl(IndexedTestBean.class);
 		bw.registerCustomEditor(String.class, "map[key0]", new StringTrimmerEditor(false));
 		assertEquals(String.class, bw.getPropertyType("map[key0]"));
-	}
-
-	public void testSetWrappedInstanceOfDifferentClass() {
-		ThrowsException tex = new ThrowsException();
-		BeanWrapper bw = new BeanWrapperImpl(tex);
-
-		TestBean tb2 = new TestBean();
-		bw.setWrappedInstance(tb2);
-
-		bw.setPropertyValue("age", new Integer(14));
-		assertTrue("2nd changed", tb2.getAge() == 14);
 	}
 
 	public void testGetterThrowsException() {
@@ -369,11 +343,11 @@ public class BeanWrapperTests extends TestCase {
 		EnumTester et = new EnumTester();
 		BeanWrapper bw = new BeanWrapperImpl(et);
 
-		bw.setPropertyValue("flushMode", "NEVER");
-		Assert.assertEquals(FlushMode.NEVER, et.getFlushMode());
+		bw.setPropertyValue("flushMode", "MANUAL");
+		assertEquals(FlushMode.MANUAL, et.getFlushMode());
 
 		bw.setPropertyValue("flushMode", "  AUTO ");
-		Assert.assertEquals(FlushMode.AUTO, et.getFlushMode());
+		assertEquals(FlushMode.AUTO, et.getFlushMode());
 
 		try {
 			bw.setPropertyValue("flushMode", "EVER");
@@ -796,36 +770,6 @@ public class BeanWrapperTests extends TestCase {
 				"Lewisham".equals(kbw.getPropertyValue("spouse.spouse.spouse.spouse.company")));
 	}
 
-	public void testNewWrappedInstancePropertyValuesGet() {
-		BeanWrapper bw = new BeanWrapperImpl();
-
-		TestBean t = new TestBean("Tony", 50);
-		bw.setWrappedInstance(t);
-		assertEquals("Bean wrapper returns wrong property value",
-				new Integer(t.getAge()), bw.getPropertyValue("age"));
-
-		TestBean u = new TestBean("Udo", 30);
-		bw.setWrappedInstance(u);
-		assertEquals("Bean wrapper returns cached property value",
-				new Integer(u.getAge()), bw.getPropertyValue("age"));
-	}
-
-	public void testNewWrappedInstanceNestedPropertyValuesGet() {
-		BeanWrapper bw = new BeanWrapperImpl();
-
-		TestBean t = new TestBean("Tony", 50);
-		t.setSpouse(new TestBean("Sue", 40));
-		bw.setWrappedInstance(t);
-		assertEquals("Bean wrapper returns wrong nested property value",
-				new Integer(t.getSpouse().getAge()), bw.getPropertyValue("spouse.age"));
-
-		TestBean u = new TestBean("Udo", 30);
-		u.setSpouse(new TestBean("Vera", 20));
-		bw.setWrappedInstance(u);
-		assertEquals("Bean wrapper returns cached nested property value",
-				new Integer(u.getSpouse().getAge()), bw.getPropertyValue("spouse.age"));
-	}
-
 	public void testNullObject() {
 		try {
 			new BeanWrapperImpl((Object) null);
@@ -1160,7 +1104,7 @@ public class BeanWrapperTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("someProperty", "someValue");
 		assertEquals("someValue", bw.getPropertyValue("someProperty"));
-		Assert.assertEquals("someValue", bean.getSomeProperty());
+		assertEquals("someValue", bean.getSomeProperty());
 	}
 
 	public void testErrorMessageOfNestedProperty() {

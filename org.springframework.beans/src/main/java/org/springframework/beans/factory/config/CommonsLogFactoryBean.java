@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -30,10 +31,10 @@ import org.springframework.beans.factory.InitializingBean;
  * one Log instance per class name, e.g. for common log topics.
  *
  * @author Juergen Hoeller
- * @see org.apache.commons.logging.Log
  * @since 16.11.2003
+ * @see org.apache.commons.logging.Log
  */
-public class CommonsLogFactoryBean implements FactoryBean, InitializingBean {
+public class CommonsLogFactoryBean implements FactoryBean<Log>, InitializingBean {
 
     private Log log;
 
@@ -50,15 +51,15 @@ public class CommonsLogFactoryBean implements FactoryBean, InitializingBean {
 
     public void afterPropertiesSet() {
         if (this.log == null) {
-            throw new IllegalArgumentException("logName is required");
+            throw new IllegalArgumentException("'logName' is required");
         }
     }
 
-    public Object getObject() {
-        return log;
+    public Log getObject() {
+        return this.log;
     }
 
-    public Class getObjectType() {
+    public Class<? extends Log> getObjectType() {
         return (this.log != null ? this.log.getClass() : Log.class);
     }
 

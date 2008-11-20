@@ -43,6 +43,8 @@
         <option name="WHILE_ON_NEW_LINE" value="true" />
         <option name="CATCH_ON_NEW_LINE" value="true" />
         <option name="FINALLY_ON_NEW_LINE" value="true" />
+        <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
+        <option name="ALIGN_MULTILINE_FOR" value="false" />
         <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
         <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
         <option name="BLANK_LINES_AROUND_FIELD" value="1" />
@@ -84,15 +86,6 @@
         <option name="XML_KEEP_WHITESPACES" value="true" />
         <option name="XML_TEXT_WRAP" value="0" />
         <ADDITIONAL_INDENT_OPTIONS fileType="">
-          <option name="INDENT_SIZE" value="4" />
-          <option name="CONTINUATION_INDENT_SIZE" value="8" />
-          <option name="TAB_SIZE" value="4" />
-          <option name="USE_TAB_CHARACTER" value="false" />
-          <option name="SMART_TABS" value="false" />
-          <option name="LABEL_INDENT_SIZE" value="0" />
-          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
-        </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="groovy">
           <option name="INDENT_SIZE" value="2" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
           <option name="TAB_SIZE" value="4" />
@@ -130,6 +123,15 @@
         </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="jsp">
           <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="txt">
+          <option name="INDENT_SIZE" value="2" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
           <option name="TAB_SIZE" value="4" />
           <option name="USE_TAB_CHARACTER" value="false" />
@@ -239,6 +241,7 @@
       <facet-type id="Gant_Grails" />
     </autodetection-disabled>
   </component>
+  <component name="IdProvider" IDEtalkID="C2515F8F9A78051322E588EF85003B36" />
   <component name="InspectionProjectProfileManager">
     <option name="PROJECT_PROFILE" value="Project Default" />
     <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
@@ -273,7 +276,21 @@
           <option name="loggerClassName" value="java.util.logging.Logger" />
         </inspection_tool>
         <inspection_tool class="SimplifiableIfStatement" level="WARNING" enabled="false" />
-        <inspection_tool class="JavaDoc" level="WARNING" enabled="false">
+        <inspection_tool class="EqualsAndHashcode" level="WARNING" enabled="true" />
+        <inspection_tool class="JpaDataSourceORMInspection" level="ERROR" enabled="false" />
+        <inspection_tool class="ProtectedField" level="WARNING" enabled="true" />
+        <inspection_tool class="PublicConstructorInNonPublicClass" level="WARNING" enabled="true" />
+        <inspection_tool class="UtilityClassWithPublicConstructor" level="WARNING" enabled="true" />
+        <inspection_tool class="PublicField" level="WARNING" enabled="true">
+          <option name="ignoreEnums" value="false" />
+        </inspection_tool>
+        <inspection_tool class="RedundantImplements" level="WARNING" enabled="true" />
+        <inspection_tool class="UnnecessaryInterfaceModifier" level="WARNING" enabled="true" />
+        <inspection_tool class="FallthruInSwitchStatement" level="WARNING" enabled="true" />
+        <inspection_tool class="TextLabelInSwitchStatement" level="WARNING" enabled="true" />
+        <inspection_tool class="MissingDeprecatedAnnotation" level="WARNING" enabled="true" />
+        <inspection_tool class="MissingOverrideAnnotation" level="WARNING" enabled="true" />
+        <inspection_tool class="JavaDoc" level="INFO" enabled="true">
           <option name="TOP_LEVEL_CLASS_OPTIONS">
             <value>
               <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
@@ -302,36 +319,16 @@
           <option name="IGNORE_JAVADOC_PERIOD" value="true" />
           <option name="myAdditionalJavadocTags" value="" />
         </inspection_tool>
-        <inspection_tool class="EqualsAndHashcode" level="WARNING" enabled="true" />
-        <inspection_tool class="UNUSED_SYMBOL" level="WARNING" enabled="true">
-          <option name="LOCAL_VARIABLE" value="true" />
-          <option name="FIELD" value="true" />
-          <option name="METHOD" value="true" />
-          <option name="CLASS" value="true" />
-          <option name="PARAMETER" value="true" />
-          <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="true" />
-          <option name="INJECTION_ANNOS">
-            <value>
-              <list size="0" />
-            </value>
-          </option>
-        </inspection_tool>
-        <inspection_tool class="JpaDataSourceORMInspection" level="ERROR" enabled="false" />
-        <inspection_tool class="ProtectedField" level="WARNING" enabled="true" />
-        <inspection_tool class="PublicConstructorInNonPublicClass" level="WARNING" enabled="true" />
-        <inspection_tool class="UtilityClassWithPublicConstructor" level="WARNING" enabled="true" />
-        <inspection_tool class="PublicField" level="WARNING" enabled="true">
-          <option name="ignoreEnums" value="false" />
-        </inspection_tool>
-        <inspection_tool class="RedundantImplements" level="WARNING" enabled="true" />
-        <inspection_tool class="UnnecessaryInterfaceModifier" level="WARNING" enabled="true" />
-        <inspection_tool class="FallthruInSwitchStatement" level="WARNING" enabled="true" />
-        <inspection_tool class="TextLabelInSwitchStatement" level="WARNING" enabled="true" />
-        <inspection_tool class="MissingDeprecatedAnnotation" level="WARNING" enabled="true" />
-        <inspection_tool class="MissingOverrideAnnotation" level="WARNING" enabled="true" />
+        <inspection_tool class="JavadocReference" level="INFO" enabled="true" />
+        <inspection_tool class="IndexOfReplaceableByContains" level="WARNING" enabled="true" />
       </profile>
     </profiles>
-    <list size="0" />
+    <list size="4">
+      <item index="0" class="java.lang.String" itemvalue="SERVER PROBLEM" />
+      <item index="1" class="java.lang.String" itemvalue="INFO" />
+      <item index="2" class="java.lang.String" itemvalue="WARNING" />
+      <item index="3" class="java.lang.String" itemvalue="ERROR" />
+    </list>
   </component>
   <component name="IssueNavigationConfiguration">
     <option name="links">
@@ -533,6 +530,13 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/target" />
   </component>
+  <component name="ResourceManagerContainer">
+    <option name="myResourceBundles">
+      <value>
+        <list size="0" />
+      </value>
+    </option>
+  </component>
   <component name="RmicSettings">
     <option name="IS_EANABLED" value="false" />
     <option name="DEBUGGING_INFO" value="true" />
@@ -603,6 +607,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
   </component>
+  <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="com.intellij.ide.util.scopeChooser.ScopeChooserConfigurable" proportions="" version="1">
     <option name="myLastEditedConfigurable" />
   </component>
@@ -718,11 +723,6 @@
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.apache.commons/com.springsource.org.apache.commons.pool/1.4.0/com.springsource.org.apache.commons.pool-sources-1.4.0.jar!/" />
       </SOURCES>
     </library>
-  </component>
-  <component name="uidesigner-configuration">
-    <option name="INSTRUMENT_CLASSES" value="true" />
-    <option name="COPY_FORMS_RUNTIME_TO_OUTPUT" value="true" />
-    <option name="DEFAULT_LAYOUT_MANAGER" value="GridLayoutManager" />
   </component>
   <UsedPathMacros>
     <macro name="IVY_CACHE" />

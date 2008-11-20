@@ -16,7 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ import org.springframework.util.Assert;
 public abstract class AbstractRequestAttributes implements RequestAttributes {
 
 	/** Map from attribute name String to destruction callback Runnable */
-	protected final Map requestDestructionCallbacks = new LinkedHashMap(8);
+	protected final Map<String, Runnable> requestDestructionCallbacks = new LinkedHashMap<String, Runnable>(8);
 
 	private volatile boolean requestActive = true;
 
@@ -88,8 +87,8 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	 */
 	private void executeRequestDestructionCallbacks() {
 		synchronized (this.requestDestructionCallbacks) {
-			for (Iterator it = this.requestDestructionCallbacks.values().iterator(); it.hasNext();) {
-				((Runnable) it.next()).run();
+			for (Runnable runnable : this.requestDestructionCallbacks.values()) {
+				runnable.run();
 			}
 			this.requestDestructionCallbacks.clear();
 		}

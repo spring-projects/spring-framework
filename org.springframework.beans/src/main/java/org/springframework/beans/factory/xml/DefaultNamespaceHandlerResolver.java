@@ -155,10 +155,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				this.handlerMappings = new HashMap(mappings);
 			}
 			catch (IOException ex) {
-				IllegalStateException ise = new IllegalStateException(
-						"Unable to load NamespaceHandler mappings from location [" + this.handlerMappingsLocation + "]");
-				ise.initCause(ex);
-				throw ise;
+				throw new IllegalStateException(
+						"Unable to load NamespaceHandler mappings from location [" + this.handlerMappingsLocation + "]", ex);
 			}
 		}
 		return this.handlerMappings;

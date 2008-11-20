@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,24 +101,6 @@ public class ContextLoaderTests extends TestCase {
 		};
 		listener.contextInitialized(new ServletContextEvent(sc));
 		assertEquals("customizeContext() should have been called.", expectedContents, buffer.toString());
-	}
-
-	public void testContextLoaderServletWithDefaultContext() throws Exception {
-		MockServletContext sc = new MockServletContext("");
-		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
-				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
-		HttpServlet servlet = new ContextLoaderServlet();
-		ServletConfig config = new MockServletConfig(sc, "test");
-		servlet.init(config);
-		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext",
-				context instanceof XmlWebApplicationContext);
-		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
-		assertTrue("Not destroyed", !lb.isDestroyed());
-		assertFalse(context.containsBean("beans1.bean1"));
-		assertFalse(context.containsBean("beans1.bean2"));
-		servlet.destroy();
-		assertTrue("Destroyed", lb.isDestroyed());
 	}
 
 	public void testContextLoaderWithDefaultContextAndParent() throws Exception {

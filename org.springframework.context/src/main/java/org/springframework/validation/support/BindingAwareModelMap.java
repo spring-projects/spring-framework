@@ -17,7 +17,6 @@
 package org.springframework.validation.support;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.validation.BindingResult;
@@ -32,19 +31,19 @@ import org.springframework.validation.BindingResult;
  *
  * @author Juergen Hoeller
  * @since 2.5.6
- * @see
+ * @see org.springframework.validation.BindingResult
  */
 public class BindingAwareModelMap extends ExtendedModelMap {
 
 	@Override
-	public Object put(Object key, Object value) {
+	public Object put(String key, Object value) {
 		removeBindingResultIfNecessary(key, value);
 		return super.put(key, value);
 	}
 
 	@Override
-	public void putAll(Map map) {
-		for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
+	public void putAll(Map<? extends String, ?> map) {
+		for (Map.Entry entry : map.entrySet()) {
 			removeBindingResultIfNecessary(entry.getKey(), entry.getValue());
 		}
 		super.putAll(map);

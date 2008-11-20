@@ -172,7 +172,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("Child bean with parent '");
+		StringBuilder sb = new StringBuilder("Child bean with parent '");
 		sb.append(this.parentName).append("': ").append(super.toString());
 		return sb.toString();
 	}

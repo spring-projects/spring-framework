@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-20078the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ public class StopWatch {
 	 * For custom reporting, call getTaskInfo() and use the task info directly.
 	 */
 	public String prettyPrint() {
-		StringBuffer sb = new StringBuffer(shortSummary());
+		StringBuilder sb = new StringBuilder(shortSummary());
 		sb.append('\n');
 		if (!this.keepTaskList) {
 			sb.append("No task info kept");
@@ -234,7 +234,7 @@ public class StopWatch {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(shortSummary());
+		StringBuilder sb = new StringBuilder(shortSummary());
 		if (this.keepTaskList) {
 			TaskInfo[] tasks = getTaskInfo();
 			for (int i = 0; i < tasks.length; i++) {

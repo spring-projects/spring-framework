@@ -257,16 +257,16 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
 
 		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
-		for (int i = 0; i < beanNames.length; i++) {
+		for (String curName : beanNames) {
 			// Check that we're not parsing our own bean definition,
 			// to avoid failing on unresolvable placeholders in properties file locations.
-			if (!(beanNames[i].equals(this.beanName) && beanFactoryToProcess.equals(this.beanFactory))) {
-				BeanDefinition bd = beanFactoryToProcess.getBeanDefinition(beanNames[i]);
+			if (!(curName.equals(this.beanName) && beanFactoryToProcess.equals(this.beanFactory))) {
+				BeanDefinition bd = beanFactoryToProcess.getBeanDefinition(curName);
 				try {
 					visitor.visitBeanDefinition(bd);
 				}
 				catch (BeanDefinitionStoreException ex) {
-					throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanNames[i], ex.getMessage());
+					throw new BeanDefinitionStoreException(bd.getResourceDescription(), curName, ex.getMessage());
 				}
 			}
 		}
@@ -287,10 +287,10 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * @throws BeanDefinitionStoreException if invalid values are encountered
 	 * @see #resolvePlaceholder(String, java.util.Properties, int)
 	 */
-	protected String parseStringValue(String strVal, Properties props, Set visitedPlaceholders)
+	protected String parseStringValue(String strVal, Properties props, Set<String> visitedPlaceholders)
 	    throws BeanDefinitionStoreException {
 
-		StringBuffer buf = new StringBuffer(strVal);
+		StringBuilder buf = new StringBuilder(strVal);
 
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
@@ -443,7 +443,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		}
 
 		public String resolveStringValue(String strVal) throws BeansException {
-			String value = parseStringValue(strVal, this.props, new HashSet());
+			String value = parseStringValue(strVal, this.props, new HashSet<String>());
 			return (value.equals(nullValue) ? null : value);
 		}
 	}

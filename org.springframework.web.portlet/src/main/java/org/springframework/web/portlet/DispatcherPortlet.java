@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
@@ -45,7 +45,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -262,16 +261,16 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	private PortletMultipartResolver multipartResolver;
 
 	/** List of HandlerMappings used by this portlet */
-	private List handlerMappings;
+	private List<HandlerMapping> handlerMappings;
 
 	/** List of HandlerAdapters used by this portlet */
-	private List handlerAdapters;
+	private List<HandlerAdapter> handlerAdapters;
 
 	/** List of HandlerExceptionResolvers used by this portlet */
-	private List handlerExceptionResolvers;
+	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
 	/** List of ViewResolvers used by this portlet */
-	private List viewResolvers;
+	private List<ViewResolver> viewResolvers;
 
 
 	/**
@@ -371,8 +370,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	private void initMultipartResolver(ApplicationContext context) {
 		try {
-			this.multipartResolver = (PortletMultipartResolver)
-					context.getBean(MULTIPART_RESOLVER_BEAN_NAME, PortletMultipartResolver.class);
+			this.multipartResolver = context.getBean(MULTIPART_RESOLVER_BEAN_NAME, PortletMultipartResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
@@ -396,19 +394,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		this.handlerMappings = null;
 
 		if (this.detectAllHandlerMappings) {
-			// Find all HandlerMappings in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerMapping> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerMappings = new ArrayList(matchingBeans.values());
+				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
 				Collections.sort(this.handlerMappings, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
+				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -435,19 +432,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		this.handlerAdapters = null;
 
 		if (this.detectAllHandlerAdapters) {
-			// Find all HandlerAdapters in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerAdapter> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerAdapter.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerAdapters = new ArrayList(matchingBeans.values());
+				this.handlerAdapters = new ArrayList<HandlerAdapter>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
 				Collections.sort(this.handlerAdapters, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
+				HandlerAdapter ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -474,19 +470,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		this.handlerExceptionResolvers = null;
 
 		if (this.detectAllHandlerExceptionResolvers) {
-			// Find all HandlerExceptionResolvers in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all HandlerExceptionResolvers in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerExceptionResolver> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerExceptionResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
+				this.handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
 				Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object her = context.getBean(
+				HandlerExceptionResolver her = context.getBean(
 						HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
 			}
@@ -514,19 +509,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		this.viewResolvers = null;
 
 		if (this.detectAllViewResolvers) {
-			// Find all ViewResolvers in the ApplicationContext,
-			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			// Find all ViewResolvers in the ApplicationContext, including ancestor contexts.
+			Map<String, ViewResolver> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, ViewResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.viewResolvers = new ArrayList(matchingBeans.values());
+				this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
 				Collections.sort(this.viewResolvers, new OrderComparator());
 			}
 		}
 		else {
 			try {
-				Object vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
+				ViewResolver vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
 				this.viewResolvers = Collections.singletonList(vr);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -552,11 +546,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param context the current Portlet ApplicationContext
 	 * @param strategyInterface the strategy interface
 	 * @return the corresponding strategy object
-	 * @throws BeansException if initialization failed
 	 * @see #getDefaultStrategies
 	 */
-	protected Object getDefaultStrategy(ApplicationContext context, Class strategyInterface) throws BeansException {
-		List strategies = getDefaultStrategies(context, strategyInterface);
+	protected <T> T getDefaultStrategy(ApplicationContext context, Class<T> strategyInterface) {
+		List<T> strategies = getDefaultStrategies(context, strategyInterface);
 		if (strategies.size() != 1) {
 			throw new BeanInitializationException(
 					"DispatcherPortlet needs exactly 1 strategy for interface [" + strategyInterface.getName() + "]");
@@ -573,42 +566,36 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param context the current Portlet ApplicationContext
 	 * @param strategyInterface the strategy interface
 	 * @return the List of corresponding strategy objects
-	 * @throws BeansException if initialization failed
 	 */
-	protected List getDefaultStrategies(ApplicationContext context, Class strategyInterface) throws BeansException {
+	@SuppressWarnings("unchecked")
+	protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
 		String key = strategyInterface.getName();
-		List strategies = null;
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
-			strategies = new ArrayList(classNames.length);
-			for (int i = 0; i < classNames.length; i++) {
-				String className = classNames[i];
-				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15 && className.indexOf("Annotation") != -1) {
-					// Skip Java 5 specific strategies when running on JDK 1.4...
-					continue;
-				}
+			List<T> strategies = new ArrayList<T>(classNames.length);
+			for (String className : classNames) {
 				try {
 					Class clazz = ClassUtils.forName(className, DispatcherPortlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
-					strategies.add(strategy);
+					strategies.add((T) strategy);
 				}
 				catch (ClassNotFoundException ex) {
 					throw new BeanInitializationException(
 							"Could not find DispatcherPortlet's default strategy class [" + className +
-							"] for interface [" + key + "]", ex);
+									"] for interface [" + key + "]", ex);
 				}
 				catch (LinkageError err) {
 					throw new BeanInitializationException(
 							"Error loading DispatcherPortlet's default strategy class [" + className +
-							"] for interface [" + key + "]: problem with class file or dependent class", err);
+									"] for interface [" + key + "]: problem with class file or dependent class", err);
 				}
 			}
+			return strategies;
 		}
 		else {
-			strategies = Collections.EMPTY_LIST;
+			return new LinkedList<T>();
 		}
-		return strategies;
 	}
 
 	/**
@@ -767,7 +754,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			logger.debug("Bound render request context to thread: " + request);
 		}
 
-		RenderRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
 
@@ -790,9 +776,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				}
 				
 				// Determine handler for the current request.
-				mappedHandler = getHandler(processedRequest, false);
+				mappedHandler = getHandler(request, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
-					noHandlerFound(processedRequest, response);
+					noHandlerFound(request, response);
 					return;
 				}
 
@@ -801,8 +787,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				if (interceptors != null) {
 					for (int i = 0; i < interceptors.length; i++) {
 						HandlerInterceptor interceptor = interceptors[i];
-						if (!interceptor.preHandleRender(processedRequest, response, mappedHandler.getHandler())) {
-							triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+						if (!interceptor.preHandleRender(request, response, mappedHandler.getHandler())) {
+							triggerAfterRenderCompletion(mappedHandler, interceptorIndex, request, response, null);
 							return;
 						}
 						interceptorIndex = i;
@@ -811,13 +797,13 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 				// Actually invoke the handler.
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-				mv = ha.handleRender(processedRequest, response, mappedHandler.getHandler());
+				mv = ha.handleRender(request, response, mappedHandler.getHandler());
 
 				// Apply postHandle methods of registered interceptors.
 				if (interceptors != null) {
 					for (int i = interceptors.length - 1; i >= 0; i--) {
 						HandlerInterceptor interceptor = interceptors[i];
-						interceptor.postHandleRender(processedRequest, response, mappedHandler.getHandler(), mv);
+						interceptor.postHandleRender(request, response, mappedHandler.getHandler(), mv);
 					}
 				}
 			}
@@ -832,7 +818,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 			// Did the handler return a view to render?
 			if (mv != null && !mv.isEmpty()) {
-				render(mv, processedRequest, response);
+				render(mv, request, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
@@ -842,19 +828,19 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 
 			// Trigger after-completion for successful outcome.
-			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, request, response, null);
 		}
 
 		catch (Exception ex) {
 			// Trigger after-completion for thrown exception.
-			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, request, response, ex);
 			throw ex;
 		}
 		catch (Error err) {
 			PortletException ex =
 					new PortletException("Error occured during request processing: " + err.getMessage(), err);
 			// Trigger after-completion for thrown exception.
-			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, request, response, ex);
 			throw ex;
 		}
 
@@ -918,12 +904,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			return handler;
 		}
 
-		Iterator it = this.handlerMappings.iterator();
-		while (it.hasNext()) {
-			HandlerMapping hm = (HandlerMapping) it.next();
+		for (HandlerMapping hm : this.handlerMappings) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Testing handler map [" + hm + "] in DispatcherPortlet with name '" +
-						getPortletName() + "'");
+				logger.debug(
+						"Testing handler map [" + hm + "] in DispatcherPortlet with name '" + getPortletName() + "'");
 			}
 			handler = hm.getHandler(request);
 			if (handler != null) {
@@ -961,9 +945,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * This is a fatal error.
 	 */
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws PortletException {
-		Iterator it = this.handlerAdapters.iterator();
-		while (it.hasNext()) {
-			HandlerAdapter ha = (HandlerAdapter) it.next();
+		for (HandlerAdapter ha : this.handlerAdapters) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Testing handler adapter [" + ha + "]");
 			}
@@ -1070,11 +1052,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			view = (View) viewObject;
 		}
 
-		if (view == null) {
-			throw new PortletException("Could not resolve view with name '" + mv.getViewName() +
-					"' in portlet with name '" + getPortletName() + "'");
-		}
-
 		// Set the content type on the response if needed and if possible.
 		// The Portlet spec requires the content type to be set on the RenderResponse;
 		// it's not sufficient to let the View set it on the ServletResponse.
@@ -1111,8 +1088,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @see ViewResolver#resolveViewName
 	 */
 	protected View resolveViewName(String viewName, Map model, RenderRequest request) throws Exception {
-		for (Iterator it = this.viewResolvers.iterator(); it.hasNext();) {
-			ViewResolver viewResolver = (ViewResolver) it.next();
+		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, request.getLocale());
 			if (view != null) {
 				return view;

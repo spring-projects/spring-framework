@@ -77,8 +77,8 @@ public abstract class AbstractFactoryBean
 
 
 	/**
-	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is <code>true</code>  (a singleton).
+	 * Set if a singleton should be created, or a new object on each request
+	 * otherwise. Default is <code>true</code> (a singleton).
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;

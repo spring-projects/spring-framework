@@ -35,7 +35,6 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.SimpleFormController;
-import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -55,8 +54,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("/form.do", SimpleFormController.class, pvs);
 
 		registerSingleton("/locale.do", LocaleChecker.class);
-
-		registerPrototype("/throwaway.do", TestThrowawayController.class);
 
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
@@ -115,26 +112,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			else {
 				return null;
 			}
-		}
-	}
-
-
-	public static class TestThrowawayController implements ThrowawayController {
-
-		public static int counter = 0;
-
-		private int myInt;
-
-		public TestThrowawayController() {
-			counter++;
-		}
-
-		public void setMyInt(int myInt) {
-			this.myInt = myInt;
-		}
-
-		public ModelAndView execute() throws Exception {
-			return new ModelAndView("view" + this.myInt);
 		}
 	}
 

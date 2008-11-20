@@ -172,7 +172,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
 	 */
-	Map getBeansOfType(Class type) throws BeansException;
+	<T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException;
 
 	/**
 	 * Return the bean instances that match the given object type (including
@@ -207,7 +207,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
-	Map getBeansOfType(Class type, boolean includeNonSingletons, boolean allowEagerInit)
+	<T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 	    throws BeansException;
 
 }

@@ -17,7 +17,6 @@
 package org.springframework.web.portlet.multipart;
 
 import java.util.List;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletContext;
 
@@ -26,10 +25,8 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.portlet.PortletFileUpload;
-import org.apache.commons.fileupload.portlet.PortletRequestContext;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.commons.CommonsFileUploadSupport;
@@ -39,7 +36,7 @@ import org.springframework.web.portlet.util.PortletUtils;
 /**
  * {@link PortletMultipartResolver} implementation for
  * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.1 or above. Commons FileUpload 1.2 or above is recommended.
+ * 1.2 or above.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
  * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
@@ -60,9 +57,6 @@ import org.springframework.web.portlet.util.PortletUtils;
  */
 public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		implements PortletMultipartResolver, PortletContextAware {
-
-	private final boolean commonsFileUpload12Present =
-			ClassUtils.hasMethod(PortletFileUpload.class, "isMultipartContent", new Class[] {ActionRequest.class});
 
 	private boolean resolveLazily = false;
 
@@ -122,11 +116,8 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		if (request == null) {
 			return false;
 		}
-		else if (commonsFileUpload12Present) {
-			return PortletFileUpload.isMultipartContent(request);
-		}
 		else {
-			return PortletFileUpload.isMultipartContent(new PortletRequestContext(request));
+			return PortletFileUpload.isMultipartContent(request);
 		}
 	}
 

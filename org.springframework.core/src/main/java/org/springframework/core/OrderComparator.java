@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.Comparator;
  * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
-public class OrderComparator implements Comparator {
+public class OrderComparator implements Comparator<Object> {
 
 	public int compare(Object o1, Object o2) {
 		boolean p1 = (o1 instanceof PriorityOrdered);

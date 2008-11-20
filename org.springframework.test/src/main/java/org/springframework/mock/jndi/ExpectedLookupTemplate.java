@@ -17,6 +17,7 @@
 package org.springframework.mock.jndi;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 
@@ -32,7 +33,7 @@ import org.springframework.jndi.JndiTemplate;
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 
-	private final Map jndiObjects = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, Object> jndiObjects = new ConcurrentHashMap<String, Object>();
 
 
 	/**

@@ -423,7 +423,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * here for JDK 1.4 compliance reasons only.
 	 */
 	private String escape(String input) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < input.length(); i++) {
 			char c = input.charAt(i);
 			if (c == '\\') {

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.aop.Advice;
 import org.apache.commons.logging.Log;
@@ -46,7 +47,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -136,20 +136,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private BeanFactory beanFactory;
 
-	/**
-	 * Set of bean name Strings, referring to all beans that this auto-proxy creator
-	 * created a custom TargetSource for. Used to detect own pre-built proxies (from
-	 * "postProcessBeforeInstantiation") in the "postProcessAfterInitialization" method.
-	 */
-	private final Set targetSourcedBeans = Collections.synchronizedSet(new HashSet());
+	private final Set<Object> targetSourcedBeans = Collections.synchronizedSet(new HashSet<Object>());
 
-	private final Set earlyProxyReferences = Collections.synchronizedSet(new HashSet());
+	private final Set<Object> earlyProxyReferences = Collections.synchronizedSet(new HashSet<Object>());
 
-	private final Set advisedBeans = Collections.synchronizedSet(new HashSet());
+	private final Set<Object> advisedBeans = Collections.synchronizedSet(new HashSet<Object>());
 
-	private final Set nonAdvisedBeans = Collections.synchronizedSet(new HashSet());
+	private final Set<Object> nonAdvisedBeans = Collections.synchronizedSet(new HashSet<Object>());
 
-	private final Map proxyTypes = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<Object, Class> proxyTypes = new ConcurrentHashMap<Object, Class>();
 
 
 	/**
@@ -260,7 +255,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	public Class predictBeanType(Class beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
-		return (Class) this.proxyTypes.get(cacheKey);
+		return this.proxyTypes.get(cacheKey);
 	}
 
 	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
@@ -280,7 +275,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			if (this.advisedBeans.contains(cacheKey) || this.nonAdvisedBeans.contains(cacheKey)) {
 				return null;
 			}
-			if (isInfrastructureClass(beanClass, beanName) || shouldSkip(beanClass, beanName)) {
+			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
 				this.nonAdvisedBeans.add(cacheKey);
 				return null;
 			}
@@ -355,7 +350,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (this.nonAdvisedBeans.contains(cacheKey)) {
 			return bean;
 		}
-		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
+		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.nonAdvisedBeans.add(cacheKey);
 			return bean;
 		}
@@ -371,17 +366,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 		this.nonAdvisedBeans.add(cacheKey);
 		return bean;
-	}
-
-	/**
-	 * Return whether the given bean class and bean name represents an
-	 * infrastructure class that should never be proxied.
-	 * @deprecated in favor of <code>isInfrastructureClass(beanClass)</code>
-	 * @see #isInfrastructureClass(Class)
-	 */
-	@Deprecated
-	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
-		return isInfrastructureClass(beanClass);
 	}
 
 	/**
@@ -432,8 +416,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// We can't create fancy target sources for directly registered singletons.
 		if (this.customTargetSourceCreators != null &&
 				this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
-			for (int i = 0; i < this.customTargetSourceCreators.length; i++) {
-				TargetSourceCreator tsc = this.customTargetSourceCreators[i];
+			for (TargetSourceCreator tsc : this.customTargetSourceCreators) {
 				TargetSource ts = tsc.getTargetSource(beanClass, beanName);
 				if (ts != null) {
 					// Found a matching TargetSource.
@@ -472,14 +455,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
 			Class[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
-			for (int i = 0; i < targetInterfaces.length; i++) {
-				proxyFactory.addInterface(targetInterfaces[i]);
+			for (Class targetInterface : targetInterfaces) {
+				proxyFactory.addInterface(targetInterface);
 			}
 		}
 
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
-		for (int i = 0; i < advisors.length; i++) {
-			proxyFactory.addAdvisor(advisors[i]);
+		for (Advisor advisor : advisors) {
+			proxyFactory.addAdvisor(advisor);
 		}
 
 		proxyFactory.setTargetSource(targetSource);
@@ -536,7 +519,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// Handle prototypes correctly...
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
-		List allInterceptors = new ArrayList();
+		List<Object> allInterceptors = new ArrayList<Object>();
 		if (specificInterceptors != null) {
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
 			if (commonInterceptors != null) {
@@ -567,17 +550,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #setInterceptorNames
 	 */
 	private Advisor[] resolveInterceptorNames() {
-		ConfigurableBeanFactory cbf =
-				(this.beanFactory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) this.beanFactory : null);
-		List advisors = new ArrayList();
-		for (int i = 0; i < this.interceptorNames.length; i++) {
-			String beanName = this.interceptorNames[i];
+		ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory) ?
+				(ConfigurableBeanFactory) this.beanFactory : null;
+		List<Advisor> advisors = new ArrayList<Advisor>();
+		for (String beanName : this.interceptorNames) {
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
 				Object next = this.beanFactory.getBean(beanName);
 				advisors.add(this.advisorAdapterRegistry.wrap(next));
 			}
 		}
-		return (Advisor[]) advisors.toArray(new Advisor[advisors.size()]);
+		return advisors.toArray(new Advisor[advisors.size()]);
 	}
 
 	/**

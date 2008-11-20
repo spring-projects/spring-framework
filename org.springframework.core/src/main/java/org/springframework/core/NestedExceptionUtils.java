@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ public abstract class NestedExceptionUtils {
 	 */
 	public static String buildMessage(String message, Throwable cause) {
 		if (cause != null) {
-			StringBuffer buf = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			if (message != null) {
-				buf.append(message).append("; ");
+				sb.append(message).append("; ");
 			}
-			buf.append("nested exception is ").append(cause);
-			return buf.toString();
+			sb.append("nested exception is ").append(cause);
+			return sb.toString();
 		}
 		else {
 			return message;

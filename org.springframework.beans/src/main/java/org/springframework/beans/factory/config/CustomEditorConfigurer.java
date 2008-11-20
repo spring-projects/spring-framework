@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -90,7 +89,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
-	private Map customEditors;
+	private Map<String, String> customEditors;
 
 	private boolean ignoreUnresolvableEditors = false;
 
@@ -123,12 +122,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	 * Specify the custom editors to register via a {@link Map}, using the
 	 * class name of the required type as the key and the class name of the
 	 * associated {@link PropertyEditor} as value.
-	 * <p>Also supports {@link PropertyEditor} instances as values; however,
-	 * this is deprecated since Spring 2.0.7 and will be removed in Spring 3.0.
-	 * @param customEditors said <code>Map</code> of editors (can be <code>null</code>) 
+	 * @param customEditors said <code>Map</code> of editors (can be <code>null</code>)
 	 * @see ConfigurableListableBeanFactory#registerCustomEditor
 	 */
-	public void setCustomEditors(Map customEditors) {
+	public void setCustomEditors(Map<String, String> customEditors) {
 		this.customEditors = customEditors;
 	}
 
@@ -151,45 +148,21 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
-			for (int i = 0; i < this.propertyEditorRegistrars.length; i++) {
-				beanFactory.addPropertyEditorRegistrar(this.propertyEditorRegistrars[i]);
+			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
+				beanFactory.addPropertyEditorRegistrar(propertyEditorRegistrar);
 			}
 		}
 
 		if (this.customEditors != null) {
-			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Object key = entry.getKey();
-				Object value = entry.getValue();
+			for (Map.Entry<String, String> entry : this.customEditors.entrySet()) {
+				String key = entry.getKey();
+				String value = entry.getValue();
 				Class requiredType = null;
 
 				try {
-					if (key instanceof Class) {
-						requiredType = (Class) key;
-					}
-					else if (key instanceof String) {
-						requiredType = ClassUtils.forName((String) key, this.beanClassLoader);
-					}
-					else {
-						throw new IllegalArgumentException(
-								"Invalid key [" + key + "] for custom editor: needs to be Class or String.");
-					}
-
-					if (value instanceof PropertyEditor) {
-						beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
-					}
-					else if (value instanceof Class) {
-						beanFactory.registerCustomEditor(requiredType, (Class) value);
-					}
-					else if (value instanceof String) {
-						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
-						beanFactory.registerCustomEditor(requiredType, editorClass);
-					}
-					else {
-						throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
-								key + "] is not of required type [" + PropertyEditor.class.getName() +
-								"] or a corresponding Class or String value indicating a PropertyEditor implementation");
-					}
+					requiredType = ClassUtils.forName(key, this.beanClassLoader);
+					Class editorClass = ClassUtils.forName(value, this.beanClassLoader);
+					beanFactory.registerCustomEditor(requiredType, editorClass);
 				}
 				catch (ClassNotFoundException ex) {
 					if (this.ignoreUnresolvableEditors) {

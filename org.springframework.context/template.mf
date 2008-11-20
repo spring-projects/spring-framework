@@ -27,6 +27,7 @@ Import-Template:
  org.springframework.aop.*;version="[3.0.0, 3.0.1)",
  org.springframework.beans.*;version="[3.0.0, 3.0.1)",
  org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.expression.*;version="[3.0.0, 3.0.1)",
  org.springframework.instrument.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.metadata.*;version="[3.0.0, 3.0.1)",
  org.springframework.util.*;version="[3.0.0, 3.0.1)"

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,10 +29,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -61,7 +59,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
-import org.springframework.core.JdkVersion;
+import org.springframework.context.expression.StandardBeanExpressionResolver;
+import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -71,7 +70,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -151,7 +149,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationContext parent;
 
 	/** BeanFactoryPostProcessors to apply on refresh */
-	private final List beanFactoryPostProcessors = new ArrayList();
+	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors =
+			new ArrayList<BeanFactoryPostProcessor>();
 
 	/** Display name */
 	private String displayName;
@@ -181,7 +180,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 	/** Statically specified listeners */
-	private List applicationListeners = new ArrayList();
+	private List<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
 
 
 	/**
@@ -324,9 +323,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Return the list of BeanFactoryPostProcessors that will get applied
 	 * to the internal BeanFactory.
-	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
 	 */
-	public List getBeanFactoryPostProcessors() {
+	public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
 		return this.beanFactoryPostProcessors;
 	}
 
@@ -336,9 +334,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the list of statically specified ApplicationListeners.
-	 * @see org.springframework.context.ApplicationListener
 	 */
-	public List getApplicationListeners() {
+	public List<ApplicationListener> getApplicationListeners() {
 		return this.applicationListeners;
 	}
 
@@ -439,10 +436,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param beanFactory the BeanFactory to configure
 	 */
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		// Tell the internal bean factory to use the context's class loader.
+		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
-
-		// Populate the bean factory with context-specific resource editors.
+		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
 
 		// Configure the bean factory with context callbacks.
@@ -460,21 +456,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
-		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME) && JdkVersion.isAtLeastJava15()) {
-			// Register the (JDK 1.5 specific) LoadTimeWeaverAwareProcessor.
-			try {
-				Class ltwapClass = ClassUtils.forName(
-						"org.springframework.context.weaving.LoadTimeWeaverAwareProcessor",
-						AbstractApplicationContext.class.getClassLoader());
-				BeanPostProcessor ltwap = (BeanPostProcessor) BeanUtils.instantiateClass(ltwapClass);
-				((BeanFactoryAware) ltwap).setBeanFactory(beanFactory);
-				beanFactory.addBeanPostProcessor(ltwap);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalStateException("Spring's LoadTimeWeaverAwareProcessor class is not available");
-			}
+		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
 			// Set a temporary ClassLoader for type matching.
 			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+		}
+
+		// Register default environment beans.
+		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, System.getProperties());
+		}
+		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, System.getenv());
 		}
 	}
 
@@ -495,8 +488,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke factory processors registered with the context instance.
-		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
-			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
+		for (BeanFactoryPostProcessor factoryProcessor : getBeanFactoryPostProcessors()) {
 			factoryProcessor.postProcessBeanFactory(beanFactory);
 		}
 
@@ -507,18 +499,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Separate between BeanFactoryPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
-		List priorityOrderedPostProcessors = new ArrayList();
-		List orderedPostProcessorNames = new ArrayList();
-		List nonOrderedPostProcessorNames = new ArrayList();
-		for (int i = 0; i < postProcessorNames.length; i++) {
-			if (isTypeMatch(postProcessorNames[i], PriorityOrdered.class)) {
-				priorityOrderedPostProcessors.add(beanFactory.getBean(postProcessorNames[i]));
+		List<BeanFactoryPostProcessor> priorityOrderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+		List<String> orderedPostProcessorNames = new ArrayList<String>();
+		List<String> nonOrderedPostProcessorNames = new ArrayList<String>();
+		for (String ppName : postProcessorNames) {
+			if (isTypeMatch(ppName, PriorityOrdered.class)) {
+				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
 			}
-			else if (isTypeMatch(postProcessorNames[i], Ordered.class)) {
-				orderedPostProcessorNames.add(postProcessorNames[i]);
+			else if (isTypeMatch(ppName, Ordered.class)) {
+				orderedPostProcessorNames.add(ppName);
 			}
 			else {
-				nonOrderedPostProcessorNames.add(postProcessorNames[i]);
+				nonOrderedPostProcessorNames.add(ppName);
 			}
 		}
 
@@ -527,19 +519,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		invokeBeanFactoryPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, invoke the BeanFactoryPostProcessors that implement Ordered.
-		List orderedPostProcessors = new ArrayList();
-		for (Iterator it = orderedPostProcessorNames.iterator(); it.hasNext();) {
-			String postProcessorName = (String) it.next();
-			orderedPostProcessors.add(getBean(postProcessorName));
+		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+		for (String postProcessorName : orderedPostProcessorNames) {
+			orderedPostProcessors.add(getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		Collections.sort(orderedPostProcessors, new OrderComparator());
 		invokeBeanFactoryPostProcessors(beanFactory, orderedPostProcessors);
 
 		// Finally, invoke all other BeanFactoryPostProcessors.
-		List nonOrderedPostProcessors = new ArrayList();
-		for (Iterator it = nonOrderedPostProcessorNames.iterator(); it.hasNext();) {
-			String postProcessorName = (String) it.next();
-			nonOrderedPostProcessors.add(getBean(postProcessorName));
+		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+		for (String postProcessorName : nonOrderedPostProcessorNames) {
+			nonOrderedPostProcessors.add(getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		invokeBeanFactoryPostProcessors(beanFactory, nonOrderedPostProcessors);
 	}
@@ -547,9 +537,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Invoke the given BeanFactoryPostProcessor beans.
 	 */
-	private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory, List postProcessors) {
-		for (Iterator it = postProcessors.iterator(); it.hasNext();) {
-			BeanFactoryPostProcessor postProcessor = (BeanFactoryPostProcessor) it.next();
+	private void invokeBeanFactoryPostProcessors(
+			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> postProcessors) {
+
+		for (BeanFactoryPostProcessor postProcessor : postProcessors) {
 			postProcessor.postProcessBeanFactory(beanFactory);
 		}
 	}
@@ -570,18 +561,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
-		List priorityOrderedPostProcessors = new ArrayList();
-		List orderedPostProcessorNames = new ArrayList();
-		List nonOrderedPostProcessorNames = new ArrayList();
-		for (int i = 0; i < postProcessorNames.length; i++) {
-			if (isTypeMatch(postProcessorNames[i], PriorityOrdered.class)) {
-				priorityOrderedPostProcessors.add(beanFactory.getBean(postProcessorNames[i]));
+		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
+		List<String> orderedPostProcessorNames = new ArrayList<String>();
+		List<String> nonOrderedPostProcessorNames = new ArrayList<String>();
+		for (String ppName : postProcessorNames) {
+			if (isTypeMatch(ppName, PriorityOrdered.class)) {
+				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanPostProcessor.class));
 			}
-			else if (isTypeMatch(postProcessorNames[i], Ordered.class)) {
-				orderedPostProcessorNames.add(postProcessorNames[i]);
+			else if (isTypeMatch(ppName, Ordered.class)) {
+				orderedPostProcessorNames.add(ppName);
 			}
 			else {
-				nonOrderedPostProcessorNames.add(postProcessorNames[i]);
+				nonOrderedPostProcessorNames.add(ppName);
 			}
 		}
 
@@ -590,19 +581,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, register the BeanPostProcessors that implement Ordered.
-		List orderedPostProcessors = new ArrayList();
-		for (Iterator it = orderedPostProcessorNames.iterator(); it.hasNext();) {
-			String postProcessorName = (String) it.next();
-			orderedPostProcessors.add(getBean(postProcessorName));
+		List<BeanPostProcessor> orderedPostProcessors = new ArrayList<BeanPostProcessor>();
+		for (String postProcessorName : orderedPostProcessorNames) {
+			orderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
 		}
 		Collections.sort(orderedPostProcessors, new OrderComparator());
 		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
 		// Finally, register all other BeanPostProcessors.
-		List nonOrderedPostProcessors = new ArrayList();
-		for (Iterator it = nonOrderedPostProcessorNames.iterator(); it.hasNext();) {
-			String postProcessorName = (String) it.next();
-			nonOrderedPostProcessors.add(getBean(postProcessorName));
+		List<BeanPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
+		for (String postProcessorName : nonOrderedPostProcessorNames) {
+			nonOrderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
 		}
 		registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
 	}
@@ -610,9 +599,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Register the given BeanPostProcessor beans.
 	 */
-	private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, List postProcessors) {
-		for (Iterator it = postProcessors.iterator(); it.hasNext();) {
-			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
+	private void registerBeanPostProcessors(
+			ConfigurableListableBeanFactory beanFactory, List<BeanPostProcessor> postProcessors) {
+
+		for (BeanPostProcessor postProcessor : postProcessors) {
 			beanFactory.addBeanPostProcessor(postProcessor);
 		}
 	}
@@ -624,7 +614,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void initMessageSource() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
-			this.messageSource = (MessageSource) beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
+			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
 				HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
@@ -659,7 +649,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void initApplicationEventMulticaster() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
-			this.applicationEventMulticaster = (ApplicationEventMulticaster)
+			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
@@ -693,14 +683,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void registerListeners() {
 		// Register statically specified listeners first.
-		for (Iterator it = getApplicationListeners().iterator(); it.hasNext();) {
-			addListener((ApplicationListener) it.next());
+		for (ApplicationListener listener : getApplicationListeners()) {
+			addListener(listener);
 		}
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
-		Collection listenerBeans = getBeansOfType(ApplicationListener.class, true, false).values();
-		for (Iterator it = listenerBeans.iterator(); it.hasNext();) {
-			addListener((ApplicationListener) it.next());
+		Collection<ApplicationListener> lisBeans = getBeansOfType(ApplicationListener.class, true, false).values();
+		for (ApplicationListener lisBean : lisBeans) {
+			addListener(lisBean);
 		}
 	}
 
@@ -823,9 +813,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent", ex);
 			}
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			Map lifecycleBeans = getLifecycleBeans();
-			for (Iterator it = new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
-				String beanName = (String) it.next();
+			Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
+			for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
 				doStop(lifecycleBeans, beanName);
 			}
 			// Destroy all cached singletons in the context's BeanFactory.
@@ -881,7 +870,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBean(name);
 	}
 
-	public Object getBean(String name, Class requiredType) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return getBeanFactory().getBean(name, requiredType);
 	}
 
@@ -938,11 +927,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeanNamesForType(type, includePrototypes, allowEagerInit);
 	}
 
-	public Map getBeansOfType(Class type) throws BeansException {
+	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		return getBeanFactory().getBeansOfType(type);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean allowEagerInit)
+	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includePrototypes, boolean allowEagerInit)
 			throws BeansException {
 
 		return getBeanFactory().getBeansOfType(type, includePrototypes, allowEagerInit);
@@ -968,7 +957,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected BeanFactory getInternalParentBeanFactory() {
 		return (getParent() instanceof ConfigurableApplicationContext) ?
-				((ConfigurableApplicationContext) getParent()).getBeanFactory() : (BeanFactory) getParent();
+				((ConfigurableApplicationContext) getParent()).getBeanFactory() : getParent();
 	}
 
 
@@ -1025,27 +1014,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public void start() {
-		Map lifecycleBeans = getLifecycleBeans();
-		for (Iterator it = new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
-			String beanName = (String) it.next();
+		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
+		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
 			doStart(lifecycleBeans, beanName);
 		}
 		publishEvent(new ContextStartedEvent(this));
 	}
 
 	public void stop() {
-		Map lifecycleBeans = getLifecycleBeans();
-		for (Iterator it = new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
-			String beanName = (String) it.next();
+		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
+		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
 			doStop(lifecycleBeans, beanName);
 		}
 		publishEvent(new ContextStoppedEvent(this));
 	}
 
 	public boolean isRunning() {
-		Iterator it = getLifecycleBeans().values().iterator();
-		while (it.hasNext()) {
-			Lifecycle lifecycle = (Lifecycle) it.next();
+		for (Lifecycle lifecycle : getLifecycleBeans().values()) {
 			if (!lifecycle.isRunning()) {
 				return false;
 			}
@@ -1058,14 +1043,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Lifecycle interface in this context.
 	 * @return Map of Lifecycle beans with bean name as key
 	 */
-	private Map getLifecycleBeans() {
+	private Map<String, Lifecycle> getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		String[] beanNames = beanFactory.getSingletonNames();
-		Map beans = new LinkedHashMap();
-		for (int i = 0; i < beanNames.length; i++) {
-			Object bean = beanFactory.getSingleton(beanNames[i]);
+		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
+		for (String beanName : beanNames) {
+			Object bean = beanFactory.getSingleton(beanName);
 			if (bean instanceof Lifecycle) {
-				beans.put(beanNames[i], bean);
+				beans.put(beanName, (Lifecycle) bean);
 			}
 		}
 		return beans;
@@ -1081,8 +1066,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
 		if (bean != null) {
 			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
-			for (int i = 0; i < dependenciesForBean.length; i++) {
-				doStart(lifecycleBeans, dependenciesForBean[i]);
+			for (String dependency : dependenciesForBean) {
+				doStart(lifecycleBeans, dependency);
 			}
 			if (!bean.isRunning()) {
 				bean.start();
@@ -1101,8 +1086,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
 		if (bean != null) {
 			String[] dependentBeans = getBeanFactory().getDependentBeans(beanName);
-			for (int i = 0; i < dependentBeans.length; i++) {
-				doStop(lifecycleBeans, dependentBeans[i]);
+			for (String dependentBean : dependentBeans) {
+				doStop(lifecycleBeans, dependentBean);
 			}
 			if (bean.isRunning()) {
 				bean.stop();
@@ -1156,7 +1141,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(getId());
+		StringBuilder sb = new StringBuilder(getId());
 		sb.append(": display name [").append(getDisplayName());
 		sb.append("]; startup date [").append(new Date(getStartupDate()));
 		sb.append("]; ");

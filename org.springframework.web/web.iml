@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="module" module-name="aop" />
     <orderEntry type="module" module-name="beans" />
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="core" />
@@ -111,7 +112,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="aop" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

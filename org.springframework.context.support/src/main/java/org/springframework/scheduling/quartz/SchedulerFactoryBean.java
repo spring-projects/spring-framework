@@ -95,13 +95,17 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
 
-	private static final ThreadLocal configTimeResourceLoaderHolder = new ThreadLocal();
+	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder =
+			new ThreadLocal<ResourceLoader>();
 
-	private static final ThreadLocal configTimeTaskExecutorHolder = new ThreadLocal();
+	private static final ThreadLocal<TaskExecutor> configTimeTaskExecutorHolder =
+			new ThreadLocal<TaskExecutor>();
 
-	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
+			new ThreadLocal<DataSource>();
 
-	private static final ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder =
+			new ThreadLocal<DataSource>();
 
 	/**
 	 * Return the ResourceLoader for the currently configured Quartz Scheduler,
@@ -113,7 +117,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 * @see ResourceLoaderClassLoadHelper
 	 */
 	public static ResourceLoader getConfigTimeResourceLoader() {
-		return (ResourceLoader) configTimeResourceLoaderHolder.get();
+		return configTimeResourceLoaderHolder.get();
 	}
 
 	/**
@@ -126,7 +130,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 * @see LocalTaskExecutorThreadPool
 	 */
 	public static TaskExecutor getConfigTimeTaskExecutor() {
-		return (TaskExecutor) configTimeTaskExecutorHolder.get();
+		return configTimeTaskExecutorHolder.get();
 	}
 
 	/**
@@ -139,7 +143,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 * @see LocalDataSourceJobStore
 	 */
 	public static DataSource getConfigTimeDataSource() {
-		return (DataSource) configTimeDataSourceHolder.get();
+		return configTimeDataSourceHolder.get();
 	}
 
 	/**
@@ -152,7 +156,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 * @see LocalDataSourceJobStore
 	 */
 	public static DataSource getConfigTimeNonTransactionalDataSource() {
-		return (DataSource) configTimeNonTransactionalDataSourceHolder.get();
+		return configTimeNonTransactionalDataSourceHolder.get();
 	}
 
 

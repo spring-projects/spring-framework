@@ -49,8 +49,6 @@ StandardJUnit4FeaturesTests.class,
 
 StandardJUnit4FeaturesSpringRunnerTests.class,
 
-RepeatedSpringMethodRoadieTests.class,
-
 EnabledAndIgnoredSpringRunnerTests.class,
 
 HardCodedProfileValueSourceSpringRunnerTests.class,

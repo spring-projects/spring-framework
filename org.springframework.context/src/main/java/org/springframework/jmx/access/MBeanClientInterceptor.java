@@ -23,7 +23,6 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -73,9 +72,6 @@ import org.springframework.util.ReflectionUtils;
  * {@link #setConnectOnStartup(boolean) connectOnStartup} property to "false",
  * you can defer this process until the first invocation against the proxy.
  *
- * <p>Requires JMX 1.2's <code>MBeanServerConnection</code> feature.
- * As a consequence, this class will not work on JMX 1.0.
- *
  * <p>This functionality is usually used through {@link MBeanProxyFactoryBean}.
  * See the javadoc of that class for more information.
  *
@@ -95,7 +91,7 @@ public class MBeanClientInterceptor
 
 	private JMXServiceURL serviceUrl;
 
-	private Map environment;
+	private Map<String, ?> environment;
 
 	private String agentId;
 
@@ -117,11 +113,11 @@ public class MBeanClientInterceptor
 
 	private MBeanServerInvocationHandler invocationHandler;
 
-	private Map allowedAttributes;
+	private Map<String, MBeanAttributeInfo> allowedAttributes;
 
-	private Map allowedOperations;
+	private Map<MethodCacheKey, MBeanOperationInfo> allowedOperations;
 
-	private final Map signatureCache = new HashMap();
+	private final Map<Method, String[]> signatureCache = new HashMap<Method, String[]>();
 
 	private final Object preparationMonitor = new Object();
 
@@ -145,7 +141,7 @@ public class MBeanClientInterceptor
 	 * Specify the environment for the JMX connector.
 	 * @see javax.management.remote.JMXConnectorFactory#connect(javax.management.remote.JMXServiceURL, java.util.Map)
 	 */
-	public void setEnvironment(Map environment) {
+	public void setEnvironment(Map<String, ?> environment) {
 		this.environment = environment;
 	}
 
@@ -156,7 +152,7 @@ public class MBeanClientInterceptor
 	 * "environment[myKey]". This is particularly useful for
 	 * adding or overriding entries in child bean definitions.
 	 */
-	public Map getEnvironment() {
+	public Map<String, ?> getEnvironment() {
 		return this.environment;
 	}
 
@@ -288,17 +284,16 @@ public class MBeanClientInterceptor
 			MBeanInfo info = this.serverToUse.getMBeanInfo(this.objectName);
 
 			MBeanAttributeInfo[] attributeInfo = info.getAttributes();
-			this.allowedAttributes = new HashMap(attributeInfo.length);
-			for (int x = 0; x < attributeInfo.length; x++) {
-				this.allowedAttributes.put(attributeInfo[x].getName(), attributeInfo[x]);
+			this.allowedAttributes = new HashMap<String, MBeanAttributeInfo>(attributeInfo.length);
+			for (MBeanAttributeInfo infoEle : attributeInfo) {
+				this.allowedAttributes.put(infoEle.getName(), infoEle);
 			}
 
 			MBeanOperationInfo[] operationInfo = info.getOperations();
-			this.allowedOperations = new HashMap(operationInfo.length);
-			for (int x = 0; x < operationInfo.length; x++) {
-				MBeanOperationInfo opInfo = operationInfo[x];
-				Class[] paramTypes = JmxUtils.parameterInfoToTypes(opInfo.getSignature(), this.beanClassLoader);
-				this.allowedOperations.put(new MethodCacheKey(opInfo.getName(), paramTypes), opInfo);
+			this.allowedOperations = new HashMap<MethodCacheKey, MBeanOperationInfo>(operationInfo.length);
+			for (MBeanOperationInfo infoEle : operationInfo) {
+				Class[] paramTypes = JmxUtils.parameterInfoToTypes(infoEle.getSignature(), this.beanClassLoader);
+				this.allowedOperations.put(new MethodCacheKey(infoEle.getName(), paramTypes), infoEle);
 			}
 		}
 		catch (ClassNotFoundException ex) {
@@ -467,7 +462,7 @@ public class MBeanClientInterceptor
 			throws JMException, IOException {
 
 		String attributeName = JmxUtils.getAttributeName(pd, this.useStrictCasing);
-		MBeanAttributeInfo inf = (MBeanAttributeInfo) this.allowedAttributes.get(attributeName);
+		MBeanAttributeInfo inf = this.allowedAttributes.get(attributeName);
 		// If no attribute is returned, we know that it is not defined in the
 		// management interface.
 		if (inf == null) {
@@ -506,14 +501,14 @@ public class MBeanClientInterceptor
 	 */
 	private Object invokeOperation(Method method, Object[] args) throws JMException, IOException {
 		MethodCacheKey key = new MethodCacheKey(method.getName(), method.getParameterTypes());
-		MBeanOperationInfo info = (MBeanOperationInfo) this.allowedOperations.get(key);
+		MBeanOperationInfo info = this.allowedOperations.get(key);
 		if (info == null) {
 			throw new InvalidInvocationException("Operation '" + method.getName() +
 					"' is not exposed on the management interface");
 		}
 		String[] signature = null;
 		synchronized (this.signatureCache) {
-			signature = (String[]) this.signatureCache.get(method);
+			signature = this.signatureCache.get(method);
 			if (signature == null) {
 				signature = JmxUtils.getMethodSignature(method);
 				this.signatureCache.put(method, signature);

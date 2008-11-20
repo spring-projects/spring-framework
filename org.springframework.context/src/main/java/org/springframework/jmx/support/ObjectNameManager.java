@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,11 @@
 package org.springframework.jmx.support;
 
 import java.util.Hashtable;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.springframework.util.ClassUtils;
-
 /**
  * Helper class for the creation of {@link javax.management.ObjectName} instances.
- *
- * <p><code>ObjectName</code> instances will be cached on JMX 1.2,
- * whereas they will be recreated for each request on JMX 1.0.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -35,11 +29,6 @@ import org.springframework.util.ClassUtils;
  * @see javax.management.ObjectName#getInstance(String)
  */
 public class ObjectNameManager {
-
-	// Determine whether the JMX 1.2 <code>ObjectName.getInstance</code> method is available.
-	private static final boolean getInstanceAvailable =
-			ClassUtils.hasMethod(ObjectName.class, "getInstance", new Class[] {String.class});
-
 
 	/**
 	 * Retrieve the <code>ObjectName</code> instance corresponding to the supplied name.
@@ -70,12 +59,7 @@ public class ObjectNameManager {
 	 * @see ObjectName#getInstance(String)
 	 */
 	public static ObjectName getInstance(String objectName) throws MalformedObjectNameException {
-		if (getInstanceAvailable) {
-			return ObjectName.getInstance(objectName);
-		}
-		else {
-			return new ObjectName(objectName);
-		}
+		return ObjectName.getInstance(objectName);
 	}
 
 	/**
@@ -92,12 +76,7 @@ public class ObjectNameManager {
 	public static ObjectName getInstance(String domainName, String key, String value)
 			throws MalformedObjectNameException {
 
-		if (getInstanceAvailable) {
-			return ObjectName.getInstance(domainName, key, value);
-		}
-		else {
-			return new ObjectName(domainName, key, value);
-		}
+		return ObjectName.getInstance(domainName, key, value);
 	}
 
 	/**
@@ -110,15 +89,10 @@ public class ObjectNameManager {
 	 * @see ObjectName#ObjectName(String, java.util.Hashtable)
 	 * @see ObjectName#getInstance(String, java.util.Hashtable)
 	 */
-	public static ObjectName getInstance(String domainName, Hashtable properties)
+	public static ObjectName getInstance(String domainName, Hashtable<String, String> properties)
 			throws MalformedObjectNameException {
 
-		if (getInstanceAvailable) {
-			return ObjectName.getInstance(domainName, properties);
-		}
-		else {
-			return new ObjectName(domainName, properties);
-		}
+		return ObjectName.getInstance(domainName, properties);
 	}
 
 }

@@ -134,13 +134,14 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
-		beanFactory.registerScope(SCOPE_SESSION, new SessionScope(false));
-		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScope(true));
-
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
+		beanFactory.registerResolvableDependency(ServletContext.class, this.servletContext);
+		beanFactory.registerResolvableDependency(ServletConfig.class, this.servletConfig);
+
+		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory);
+		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
 	}
 
 	/**

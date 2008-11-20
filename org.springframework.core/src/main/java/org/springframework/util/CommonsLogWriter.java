@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class CommonsLogWriter extends Writer {
 
 	private final Log logger;
 
-	private final StringBuffer buffer = new StringBuffer();
+	private final StringBuilder buffer = new StringBuilder();
 
 
 	/**
@@ -49,7 +49,7 @@ public class CommonsLogWriter extends Writer {
 			this.buffer.setLength(0);
 		}
 		else {
-			this.buffer.append((char) ch);
+			this.buffer.append(ch);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class CommonsLogWriter extends Writer {
 				this.buffer.setLength(0);
 			}
 			else {
-				this.buffer.append((char) ch);
+				this.buffer.append(ch);
 			}
 		}
 	}

@@ -48,6 +48,8 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -775,8 +777,12 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testCustomEditor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-		lbf.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
+		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			public void registerCustomEditors(PropertyEditorRegistry registry) {
+				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
+			}
+		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("myFloat", "1,1");
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
@@ -786,8 +792,12 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testCustomEditorWithBeanReference() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-		lbf.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
+		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			public void registerCustomEditors(PropertyEditorRegistry registry) {
+				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
+			}
+		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("myFloat", new RuntimeBeanReference("myFloat"));
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));

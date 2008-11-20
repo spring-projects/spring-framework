@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
@@ -104,8 +103,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private int validationMode = VALIDATION_AUTO;
 
-	private Class parserClass;
-
 	private Class documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
@@ -124,8 +121,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
-	private final ThreadLocal resourcesCurrentlyBeingLoaded =
-			new NamedThreadLocal("XML bean definition resources currently being loaded");
+	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
+			new NamedThreadLocal<Set<EncodedResource>>("XML bean definition resources currently being loaded");
 
 
 	/**
@@ -151,16 +148,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public boolean isNamespaceAware() {
 		return this.namespaceAware;
-	}
-
-	/**
-	 * Set if the XML parser should validate the document and thus enforce a DTD.
-	 * @deprecated as of Spring 2.0: superseded by "validationMode"
-	 * @see #setValidationMode
-	 */
-	@Deprecated
-	public void setValidating(boolean validating) {
-		this.validationMode = (validating ? VALIDATION_AUTO : VALIDATION_NONE);
 	}
 
 	/**
@@ -271,21 +258,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set the XmlBeanDefinitionParser implementation to use,
-	 * responsible for the actual parsing of XML bean definitions.
-	 * @deprecated as of Spring 2.0: superseded by "documentReaderClass"
-	 * @see #setDocumentReaderClass
-	 * @see XmlBeanDefinitionParser
-	 */
-	@Deprecated
-	public void setParserClass(Class parserClass) {
-		if (this.parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
-			throw new IllegalArgumentException("'parserClass' must be an XmlBeanDefinitionParser");
-		}
-		this.parserClass = parserClass;
-	}
-
-	/**
 	 * Specify the BeanDefinitionDocumentReader implementation to use,
 	 * responsible for the actual reading of the XML bean definition document.
 	 * <p>Default is DefaultBeanDefinitionDocumentReader.
@@ -325,9 +297,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
 		}
 
-		Set currentResources = (Set) this.resourcesCurrentlyBeingLoaded.get();
+		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
 		if (currentResources == null) {
-			currentResources = new HashSet(4);
+			currentResources = new HashSet<EncodedResource>(4);
 			this.resourcesCurrentlyBeingLoaded.set(currentResources);
 		}
 		if (!currentResources.add(encodedResource)) {
@@ -497,12 +469,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
-		// Support old XmlBeanDefinitionParser SPI for backwards-compatibility.
-		if (this.parserClass != null) {
-			XmlBeanDefinitionParser parser =
-					(XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
-			return parser.registerBeanDefinitions(this, doc, resource);
-		}
 		// Read document based on new BeanDefinitionDocumentReader SPI.
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 		int countBefore = getRegistry().getBeanDefinitionCount();
@@ -513,11 +479,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Create the {@link BeanDefinitionDocumentReader} to use for actually
 	 * reading bean definitions from an XML document.
-	 * <p>Default implementation instantiates the specified "documentReaderClass".
+	 * <p>The default implementation instantiates the specified "documentReaderClass".
 	 * @see #setDocumentReaderClass
 	 */
+	@SuppressWarnings("unchecked")
 	protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
-		return (BeanDefinitionDocumentReader) BeanUtils.instantiateClass(this.documentReaderClass);
+		return BeanDefinitionDocumentReader.class.cast(BeanUtils.instantiateClass(this.documentReaderClass));
 	}
 
 	/**

@@ -143,6 +143,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		beanFactory.registerResolvableDependency(ServletConfig.class, this.servletConfig);
 
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory);
+		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
 	}
 
 	/**

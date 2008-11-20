@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,12 +331,12 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 			if (existingTransaction) {
 				FlushMode previousFlushMode = session.getFlushMode();
 				if (!previousFlushMode.lessThan(FlushMode.COMMIT)) {
-					session.setFlushMode(FlushMode.NEVER);
+					session.setFlushMode(FlushMode.MANUAL);
 					return previousFlushMode;
 				}
 			}
 			else {
-				session.setFlushMode(FlushMode.NEVER);
+				session.setFlushMode(FlushMode.MANUAL);
 			}
 		}
 		else if (getFlushMode() == FLUSH_EAGER) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.transaction.jta;
 
 import java.util.List;
-
 import javax.naming.NamingException;
 
 import com.ibm.websphere.uow.UOWSynchronizationRegistry;
@@ -65,12 +64,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>This transaction manager is compatible with WebSphere 7.0 as well as recent
  * WebSphere 6.0.x and 6.1.x versions. Check the documentation for your specific
- * WebSphere version to find out whether UOWManager support is available. If it
- * is not available, consider using Spring's standard {@link JtaTransactionManager}
- * class, if necessary specifying the {@link WebSphereTransactionManagerFactoryBean}
- * as "transactionManager" through the corresponding bean property. However, note
- * that transaction suspension is not officially supported in such a scenario
- * (despite it being known to work properly).
+ * WebSphere version to find out whether UOWManager support is available.
  *
  * <p>The default JNDI location for the UOWManager is "java:comp/websphere/UOWManager".
  * If the location happens to differ according to your WebSphere documentation,

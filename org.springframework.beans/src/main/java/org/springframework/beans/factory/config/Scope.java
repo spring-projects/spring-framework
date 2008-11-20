@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,14 @@ public interface Scope {
 	 * @see DestructionAwareBeanPostProcessor
 	 */
 	void registerDestructionCallback(String name, Runnable callback);
+
+	/**
+	 * Resolve the contextual object for the given key, if any.
+	 * E.g. the HttpServletRequest object for key "request".
+	 * @param key the contextual key
+	 * @return the corresponding object, or <code>null</code> if none found
+	 */
+	Object resolveContextualObject(String key);
 
 	/**
 	 * Return the <em>conversation ID</em> for the current underlying scope, if any.

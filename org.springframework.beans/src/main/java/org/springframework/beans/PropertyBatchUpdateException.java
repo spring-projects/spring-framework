@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class PropertyBatchUpdateException extends BeansException {
 
 	@Override
 	public String getMessage() {
-		StringBuffer sb = new StringBuffer("Failed properties: ");
+		StringBuilder sb = new StringBuilder("Failed properties: ");
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
 			sb.append(this.propertyAccessExceptions[i].getMessage());
 			if (i < this.propertyAccessExceptions.length - 1) {
@@ -94,7 +94,7 @@ public class PropertyBatchUpdateException extends BeansException {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(getClass().getName()).append("; nested PropertyAccessExceptions (");
 		sb.append(getExceptionCount()).append(") are:");
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {

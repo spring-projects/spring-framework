@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -104,12 +103,13 @@ class BeanDefinitionValueResolver {
 			return resolveReference(argName, ref);
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
-			String ref = ((RuntimeBeanNameReference) value).getBeanName();
-			if (!this.beanFactory.containsBean(ref)) {
+			String refName = ((RuntimeBeanNameReference) value).getBeanName();
+			refName = String.valueOf(evaluate(refName));
+			if (!this.beanFactory.containsBean(refName)) {
 				throw new BeanDefinitionStoreException(
-						"Invalid bean name '" + ref + "' in bean reference for " + argName);
+						"Invalid bean name '" + refName + "' in bean reference for " + argName);
 			}
-			return ref;
+			return refName;
 		}
 		else if (value instanceof BeanDefinitionHolder) {
 			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
@@ -123,21 +123,20 @@ class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof ManagedList) {
 			// May need to resolve contained runtime references.
-			return resolveManagedList(argName, (List) value);
+			return resolveManagedList(argName, (List<?>) value);
 		}
 		else if (value instanceof ManagedSet) {
 			// May need to resolve contained runtime references.
-			return resolveManagedSet(argName, (Set) value);
+			return resolveManagedSet(argName, (Set<?>) value);
 		}
 		else if (value instanceof ManagedMap) {
 			// May need to resolve contained runtime references.
-			return resolveManagedMap(argName, (Map) value);
+			return resolveManagedMap(argName, (Map<?, ?>) value);
 		}
 		else if (value instanceof ManagedProperties) {
 			Properties original = (Properties) value;
 			Properties copy = new Properties();
-			for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
-				Map.Entry propEntry = (Map.Entry) it.next();
+			for (Map.Entry propEntry : original.entrySet()) {
 				Object propKey = propEntry.getKey();
 				Object propValue = propEntry.getValue();
 				if (propKey instanceof TypedStringValue) {
@@ -153,14 +152,14 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof TypedStringValue) {
 			// Convert value to target type here.
 			TypedStringValue typedStringValue = (TypedStringValue) value;
+			Object valueObject = evaluate(typedStringValue.getValue());
 			try {
 				Class resolvedTargetType = resolveTargetType(typedStringValue);
 				if (resolvedTargetType != null) {
-					return this.typeConverter.convertIfNecessary(typedStringValue.getValue(), resolvedTargetType);
+					return this.typeConverter.convertIfNecessary(valueObject, resolvedTargetType);
 				}
 				else {
-					// No target type specified - no conversion necessary...
-					return typedStringValue.getValue();
+					return valueObject;
 				}
 			}
 			catch (Throwable ex) {
@@ -171,7 +170,20 @@ class BeanDefinitionValueResolver {
 			}
 		}
 		else {
-			// No need to resolve value...
+			return evaluate(value);
+		}
+	}
+
+	/**
+	 * Evaluate the given value as an expression, if necessary.
+	 * @param value the candidate value (may be an expression)
+	 * @return the resolved value
+	 */
+	protected Object evaluate(Object value) {
+		if (value instanceof String) {
+			return this.beanFactory.evaluateBeanDefinitionString((String) value, this.beanDefinition);
+		}
+		else {
 			return value;
 		}
 	}
@@ -210,8 +222,7 @@ class BeanDefinitionValueResolver {
 			// Guarantee initialization of beans that the inner bean depends on.
 			String[] dependsOn = mbd.getDependsOn();
 			if (dependsOn != null) {
-				for (int i = 0; i < dependsOn.length; i++) {
-					String dependsOnBean = dependsOn[i];
+				for (String dependsOnBean : dependsOn) {
 					this.beanFactory.getBean(dependsOnBean);
 					this.beanFactory.registerDependentBean(dependsOnBean, actualInnerBeanName);
 				}
@@ -256,18 +267,20 @@ class BeanDefinitionValueResolver {
 	 */
 	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
+			String refName = ref.getBeanName();
+			refName = String.valueOf(evaluate(refName));
 			if (ref.isToParent()) {
 				if (this.beanFactory.getParentBeanFactory() == null) {
 					throw new BeanCreationException(
 							this.beanDefinition.getResourceDescription(), this.beanName,
-							"Can't resolve reference to bean '" + ref.getBeanName() +
+							"Can't resolve reference to bean '" + refName +
 							"' in parent factory: no parent factory available");
 				}
-				return this.beanFactory.getParentBeanFactory().getBean(ref.getBeanName());
+				return this.beanFactory.getParentBeanFactory().getBean(refName);
 			}
 			else {
-				Object bean = this.beanFactory.getBean(ref.getBeanName());
-				this.beanFactory.registerDependentBean(ref.getBeanName(), this.beanName);
+				Object bean = this.beanFactory.getBean(refName);
+				this.beanFactory.registerDependentBean(refName, this.beanName);
 				return bean;
 			}
 		}
@@ -281,7 +294,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private List resolveManagedList(Object argName, List ml) {
+	private List resolveManagedList(Object argName, List<?> ml) {
 		List resolved = new ArrayList(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
@@ -295,14 +308,12 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private Set resolveManagedSet(Object argName, Set ms) {
+	private Set resolveManagedSet(Object argName, Set<?> ms) {
 		Set resolved = new LinkedHashSet(ms.size());
 		int i = 0;
-		for (Iterator it = ms.iterator(); it.hasNext();) {
-			resolved.add(
-			    resolveValueIfNecessary(
-							argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
-							it.next()));
+		for (Object m : ms) {
+			resolved.add(resolveValueIfNecessary(
+					argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX, m));
 			i++;
 		}
 		return resolved;
@@ -311,15 +322,13 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
-	private Map resolveManagedMap(Object argName, Map mm) {
+	private Map resolveManagedMap(Object argName, Map<?, ?> mm) {
 		Map resolved = new LinkedHashMap(mm.size());
-		Iterator it = mm.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry entry : mm.entrySet()) {
 			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
 			Object resolvedValue = resolveValueIfNecessary(
-					argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() + BeanWrapper.PROPERTY_KEY_SUFFIX,
-					entry.getValue());
+					argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() +
+							BeanWrapper.PROPERTY_KEY_SUFFIX, entry.getValue());
 			resolved.put(resolvedKey, resolvedValue);
 		}
 		return resolved;

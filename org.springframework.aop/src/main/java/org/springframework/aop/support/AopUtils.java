@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +34,6 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -88,7 +86,7 @@ public abstract class AopUtils {
 	 * @param clazz the class to check
 	 */
 	public static boolean isCglibProxyClass(Class clazz) {
-		return (clazz != null && clazz.getName().indexOf(ClassUtils.CGLIB_CLASS_SEPARATOR) != -1);
+		return (clazz != null && clazz.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
 	}
 
 	/**
@@ -162,10 +160,7 @@ public abstract class AopUtils {
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
 		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 		// If we are dealing with method with generic parameters, find the original method.
-		if (JdkVersion.isAtLeastJava15()) {
-			resolvedMethod = BridgeMethodResolver.findBridgedMethod(resolvedMethod);
-		}
-		return resolvedMethod;
+		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
 	}
 
 
@@ -202,15 +197,14 @@ public abstract class AopUtils {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
 
-		Set classes = new HashSet(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
+		Set<Class> classes = new HashSet<Class>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 		classes.add(targetClass);
-		for (Iterator it = classes.iterator(); it.hasNext();) {
-			Class clazz = (Class) it.next();
+		for (Class clazz : classes) {
 			Method[] methods = clazz.getMethods();
-			for (int j = 0; j < methods.length; j++) {
+			for (Method method : methods) {
 				if ((introductionAwareMethodMatcher != null &&
-						introductionAwareMethodMatcher.matches(methods[j], targetClass, hasIntroductions)) ||
-						methodMatcher.matches(methods[j], targetClass)) {
+						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions)) ||
+						methodMatcher.matches(method, targetClass)) {
 					return true;
 				}
 			}
@@ -263,20 +257,18 @@ public abstract class AopUtils {
 	 * @return sublist of Advisors that can apply to an object of the given class
 	 * (may be the incoming List as-is)
 	 */
-	public static List findAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
+	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class clazz) {
 		if (candidateAdvisors.isEmpty()) {
 			return candidateAdvisors;
 		}
-		List eligibleAdvisors = new LinkedList();
-		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
-			Advisor candidate = (Advisor) it.next();
+		List<Advisor> eligibleAdvisors = new LinkedList<Advisor>();
+		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
 			}
 		}
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
-		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
-			Advisor candidate = (Advisor) it.next();
+		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor) {
 				// already processed
 				continue;

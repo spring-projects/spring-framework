@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ package org.springframework.beans.factory;
  * @see #isPrototype()
  * @see #isSingleton()
  */
-public interface SmartFactoryBean extends FactoryBean {
+public interface SmartFactoryBean<T> extends FactoryBean<T> {
 
 	/**
 	 * Is the object managed by this factory a prototype? That is,
