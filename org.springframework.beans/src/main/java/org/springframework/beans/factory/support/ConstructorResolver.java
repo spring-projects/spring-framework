@@ -20,7 +20,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -182,7 +181,7 @@ class ConstructorResolver {
 				}
 
 				ArgumentsHolder args = null;
-				List causes = null;
+				List<Exception> causes = null;
 
 				if (resolvedValues != null) {
 					// Try to resolve arguments for current constructor.
@@ -197,8 +196,8 @@ class ConstructorResolver {
 						}
 						if (i == candidates.length - 1 && constructorToUse == null) {
 							if (causes != null) {
-								for (Iterator it = causes.iterator(); it.hasNext();) {
-									this.beanFactory.onSuppressedException((Exception) it.next());
+								for (Exception cause : causes) {
+									this.beanFactory.onSuppressedException(cause);
 								}
 							}
 							throw ex;
@@ -206,7 +205,7 @@ class ConstructorResolver {
 						else {
 							// Swallow and try next constructor.
 							if (causes == null) {
-								causes = new LinkedList();
+								causes = new LinkedList<Exception>();
 							}
 							causes.add(ex);
 							continue;
@@ -348,7 +347,7 @@ class ConstructorResolver {
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
-			List causes = null;
+			List<Exception> causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Method candidate = candidates[i];
@@ -373,8 +372,8 @@ class ConstructorResolver {
 							}
 							if (i == candidates.length - 1 && factoryMethodToUse == null) {
 								if (causes != null) {
-									for (Iterator it = causes.iterator(); it.hasNext();) {
-										this.beanFactory.onSuppressedException((Exception) it.next());
+									for (Exception cause : causes) {
+										this.beanFactory.onSuppressedException(cause);
 									}
 								}
 								throw ex;
@@ -382,7 +381,7 @@ class ConstructorResolver {
 							else {
 								// Swallow and try next overloaded factory method.
 								if (causes == null) {
-									causes = new LinkedList();
+									causes = new LinkedList<Exception>();
 								}
 								causes.add(ex);
 								continue;
@@ -455,9 +454,8 @@ class ConstructorResolver {
 
 		int minNrOfArgs = cargs.getArgumentCount();
 
-		for (Iterator it = cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			int index = ((Integer) entry.getKey()).intValue();
+		for (Map.Entry<Integer, ConstructorArgumentValues.ValueHolder> entry : cargs.getIndexedArgumentValues().entrySet()) {
+			int index = entry.getKey();
 			if (index < 0) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Invalid constructor argument index: " + index);
@@ -465,8 +463,7 @@ class ConstructorResolver {
 			if (index > minNrOfArgs) {
 				minNrOfArgs = index + 1;
 			}
-			ConstructorArgumentValues.ValueHolder valueHolder =
-					(ConstructorArgumentValues.ValueHolder) entry.getValue();
+			ConstructorArgumentValues.ValueHolder valueHolder = entry.getValue();
 			if (valueHolder.isConverted()) {
 				resolvedValues.addIndexedArgumentValue(index, valueHolder);
 			}
@@ -480,9 +477,7 @@ class ConstructorResolver {
 			}
 		}
 
-		for (Iterator it = cargs.getGenericArgumentValues().iterator(); it.hasNext();) {
-			ConstructorArgumentValues.ValueHolder valueHolder =
-					(ConstructorArgumentValues.ValueHolder) it.next();
+		for (ConstructorArgumentValues.ValueHolder valueHolder : cargs.getGenericArgumentValues()) {
 			if (valueHolder.isConverted()) {
 				resolvedValues.addGenericArgumentValue(valueHolder);
 			}
@@ -512,8 +507,9 @@ class ConstructorResolver {
 		TypeConverter converter = (this.typeConverter != null ? this.typeConverter : bw);
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
-		Set usedValueHolders = new HashSet(paramTypes.length);
-		Set autowiredBeanNames = new LinkedHashSet(4);
+		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+				new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+		Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
 		boolean resolveNecessary = false;
 
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
@@ -589,8 +585,7 @@ class ConstructorResolver {
 			}
 		}
 
-		for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
-			String autowiredBeanName = (String) it.next();
+		for (String autowiredBeanName : autowiredBeanNames) {
 			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
 			if (this.beanFactory.logger.isDebugEnabled()) {
 				this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
@@ -612,7 +607,7 @@ class ConstructorResolver {
 	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
 	protected Object resolveAutowiredArgument(
-			MethodParameter param, String beanName, Set autowiredBeanNames, TypeConverter typeConverter) {
+			MethodParameter param, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
 		return this.autowireFactory.resolveDependency(
 				new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);

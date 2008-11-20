@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,5 +37,13 @@ public interface AutowireCandidateResolver {
 	 * @return whether the bean definition qualifies as autowire candidate
 	 */
 	boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor);
+
+	/**
+	 * Determine whether a default value is suggested for the given dependency.
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return the value suggested (typically an expression String),
+	 * or <code>null</code> if none found
+	 */
+	Object getSuggestedValue(DependencyDescriptor descriptor);
 
 }

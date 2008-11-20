@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,20 @@ import org.springframework.util.ObjectUtils;
 /**
  * {@link AutowireCandidateResolver} implementation that matches bean definition
  * qualifiers against qualifier annotations on the field or parameter to be autowired.
+ * Also supports suggested expression values through a value annotation.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
  * @see AutowireCandidateQualifier
  * @see Qualifier
+ * @see Value
  */
 public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver {
 
 	private final Set<Class<? extends Annotation>> qualifierTypes;
+
+	private Class<? extends Annotation> valueAnnotationType = Value.class;
 
 
 	/**
@@ -80,12 +84,31 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 
 	/**
 	 * Register the given type to be used as a qualifier when autowiring.
+	 * <p>This identifies qualifier annotations for direct use (on fields,
+	 * method parameters and constructor parameters) as well as meta
+	 * annotations that in turn identify actual qualifier annotations.
 	 * <p>This implementation only supports annotations as qualifier types.
+	 * The default is Spring's {@link Qualifier} annotation which serves
+	 * as a qualifier for direct use and also as a meta annotation.
 	 * @param qualifierType the annotation type to register
 	 */
 	public void addQualifierType(Class<? extends Annotation> qualifierType) {
 		this.qualifierTypes.add(qualifierType);
 	}
+
+	/**
+	 * Set the 'value' annotation type, to be used on fields, method parameters
+	 * and constructor parameters.
+	 * <p>The default value annotation type is the Spring-provided
+	 * {@link Value} annotation.
+	 * <p>This setter property exists so that developers can provide their own
+	 * (non-Spring-specific) annotation type to indicate a default value
+	 * expression for a specific argument.
+	 */
+	public void setValueAnnotationType(Class<? extends Annotation> valueAnnotationType) {
+		this.valueAnnotationType = valueAnnotationType;
+	}
+
 
 	/**
 	 * Determine if the provided bean definition is an autowire candidate.
@@ -174,6 +197,19 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			}
 		}
 		return false;
+	}
+
+	public Object getSuggestedValue(DependencyDescriptor descriptor) {
+		for (Annotation annotation : descriptor.getAnnotations()) {
+			if (this.valueAnnotationType.isInstance(annotation)) {
+				Object value = AnnotationUtils.getValue(annotation);
+				if (value == null) {
+					throw new IllegalStateException("Value annotation must have a value attribute");
+				}
+				return value;
+			}
+		}
+		return null;
 	}
 
 }
