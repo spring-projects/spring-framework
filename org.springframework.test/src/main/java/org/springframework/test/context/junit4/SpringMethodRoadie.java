@@ -29,10 +29,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assume.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.internal.AssumptionViolatedException;
 
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
