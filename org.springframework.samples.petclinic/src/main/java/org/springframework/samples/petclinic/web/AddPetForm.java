@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.WebDataBinder;
 
@@ -26,9 +27,10 @@ import org.springframework.web.bind.WebDataBinder;
  *
  * @author Juergen Hoeller
  * @author Ken Krebs
+ * @author Arjen Poutsma
  */
 @Controller
-@RequestMapping("/addPet.do")
+@RequestMapping("/owners/{ownerId}/pets/new")
 @SessionAttributes("pet")
 public class AddPetForm {
 
@@ -50,7 +52,7 @@ public class AddPetForm {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-	public String setupForm(@RequestParam("ownerId") int ownerId, Model model) {
+	public String setupForm(@PathVariable("ownerId") int ownerId, Model model) {
 		Owner owner = this.clinic.loadOwner(ownerId);
 		Pet pet = new Pet();
 		owner.addPet(pet);
@@ -67,7 +69,7 @@ public class AddPetForm {
 		else {
 			this.clinic.storePet(pet);
 			status.setComplete();
-			return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
+			return "redirect:/clinic/owners/" + pet.getOwner().getId();
 		}
 	}
 

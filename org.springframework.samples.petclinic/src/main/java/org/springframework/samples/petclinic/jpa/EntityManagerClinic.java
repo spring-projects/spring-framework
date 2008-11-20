@@ -14,6 +14,7 @@ import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataAccessException;
 
 /**
  * JPA implementation of the Clinic interface using EntityManager.
@@ -85,6 +86,11 @@ public class EntityManagerClinic implements Clinic {
 		Visit merged = this.em.merge(visit);
 		this.em.flush();
 		visit.setId(merged.getId());
+	}
+
+	public void deletePet(int id) throws DataAccessException {
+		Pet pet = loadPet(id);
+		this.em.remove(pet);
 	}
 
 }

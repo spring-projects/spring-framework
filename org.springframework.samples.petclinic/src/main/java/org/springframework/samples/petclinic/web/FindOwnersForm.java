@@ -19,9 +19,9 @@ import org.springframework.web.bind.WebDataBinder;
  *
  * @author Juergen Hoeller
  * @author Ken Krebs
+ * @author Arjen Poutsma
  */
 @Controller
-@RequestMapping("/findOwners.do")
 public class FindOwnersForm {
 
 	private final Clinic clinic;
@@ -36,13 +36,13 @@ public class FindOwnersForm {
         dataBinder.setDisallowedFields(new String[] {"id"});
     }
 
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value = "/owners/form", method = RequestMethod.GET)
 	public  String setupForm(Model model) {
 		model.addAttribute("owner", new Owner());
 		return "findOwners";
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(value = "/owners", method = RequestMethod.GET)
 	public  String processSubmit(Owner owner, BindingResult result, Model model) {
 		// find owners by last name
 		Collection<Owner> results = this.clinic.findOwners(owner.getLastName());
@@ -59,7 +59,7 @@ public class FindOwnersForm {
 		else {
 			// 1 owner found
 			owner = results.iterator().next();
-			return "redirect:owner.do?ownerId=" + owner.getId();
+			return "redirect:/clinic/owners/" + owner.getId();
 		}
 	}
 

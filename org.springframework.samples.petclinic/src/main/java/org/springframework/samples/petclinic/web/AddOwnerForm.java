@@ -21,9 +21,10 @@ import org.springframework.web.bind.WebDataBinder;
  *
  * @author Juergen Hoeller
  * @author Ken Krebs
+ * @author Arjen Poutsma
  */
 @Controller
-@RequestMapping("/addOwner.do")
+@RequestMapping("/owners/new")
 @SessionAttributes(types = Owner.class)
 public class AddOwnerForm {
 
@@ -55,7 +56,7 @@ public class AddOwnerForm {
 		else {
 			this.clinic.storeOwner(owner);
 			status.setComplete();
-			return "redirect:owner.do?ownerId=" + owner.getId();
+			return "redirect:/clinic/owners/" + owner.getId();
 		}
 	}
 

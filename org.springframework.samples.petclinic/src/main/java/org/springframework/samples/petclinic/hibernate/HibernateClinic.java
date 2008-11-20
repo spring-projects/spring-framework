@@ -13,6 +13,7 @@ import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Hibernate implementation of the Clinic interface.
@@ -84,6 +85,11 @@ public class HibernateClinic implements Clinic {
 
 	public void storeVisit(Visit visit) {
 		sessionFactory.getCurrentSession().merge(visit);
+	}
+
+	public void deletePet(int id) throws DataAccessException {
+		Pet pet = loadPet(id);
+		sessionFactory.getCurrentSession().delete(pet);
 	}
 
 }

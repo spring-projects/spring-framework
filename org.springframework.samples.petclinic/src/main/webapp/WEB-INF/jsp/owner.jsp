@@ -24,16 +24,10 @@
   <table class="table-buttons">
     <tr>
       <td colspan="2" align="center">
-        <form method="GET" action="<c:url value="/editOwner.do"/>">
-          <input type="hidden" name="ownerId" value="${owner.id}"/>
-          <p class="submit"><input type="submit" value="Edit Owner"/></p>
-        </form>
+        <a href="<spring:url value="${owner.id}/edit"/>">Edit Owner</a>
       </td>
       <td>
-        <form method="GET" action="<c:url value="/addPet.do"/>" name="formAddPet">
-          <input type="hidden" name="ownerId" value="${owner.id}"/>
-          <p class="submit"><input type="submit" value="Add New Pet"/></p>
-        </form>
+        <a href="<spring:url value="${owner.id}/pets/new"/>">Add New Pet</a>
       </td>
     </tr>
   </table>
@@ -80,16 +74,17 @@
     <table class="table-buttons">
       <tr>
         <td>
-          <form method="GET" action="<c:url value="/editPet.do"/>" name="formEditPet${pet.id}">
-            <input type="hidden" name="petId" value="${pet.id}"/>
-            <p class="submit"><input type="submit" value="Edit Pet"/></p>
-          </form>
+          <spring:url value="${owner.id}/pets/{petId}" var="petUrl">
+            <spring:param name="petId" value="${pet.id}"/>
+          </spring:url>
+          <a href="${petUrl}">Edit Pet</a>
         </td>
+        <td></td>
         <td>
-          <form method="GET" action="<c:url value="/addVisit.do"/>" name="formVisitPet${pet.id}">
-            <input type="hidden" name="petId" value="${pet.id}"/>
-            <p class="submit"><input type="submit" value="Add Visit"/></p>
-          </form>
+          <spring:url value="${owner.id}/pets/{petId}/visits/new" var="visitUrl">
+            <spring:param name="petId" value="${pet.id}"/>
+          </spring:url>
+          <a href="${visitUrl}">Add Visit</a>
         </td>
       </tr>
     </table>

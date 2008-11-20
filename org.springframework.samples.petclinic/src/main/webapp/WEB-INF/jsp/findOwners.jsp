@@ -3,13 +3,14 @@
 
 <h2>Find Owners:</h2>
 
-<form:form modelAttribute="owner">
+<spring:url value="/clinic/owners" var="formUrl"/>
+<form:form modelAttribute="owner" action="${formUrl}" method="GET">
   <table>
     <tr>
       <th>
         Last Name: <form:errors path="*" cssClass="errors"/>
         <br/> 
-        <form:input path="lastName" size="30" maxlength="80"/>
+        <form:input path="lastName" size="30" maxlength="80" />
       </th>
     </tr>
     <tr>
@@ -19,6 +20,6 @@
 </form:form>
 
 <br/>
-<a href="<c:url value="/addOwner.do"/>">Add Owner</a>
+<a href='<spring:url value="/clinic/owners/new"/>'>Add Owner</a>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>
