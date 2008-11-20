@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+
+<project name="setupDB" basedir="." default="all">
+
+	<target name="dropHSQLTables" if="useHSQL">
+		<echo message="Drop tables using: ${db.driver} ${db.url}" />
+		<sql driver="${db.driver}" url="${db.url}" userid="${db.user}" password="${db.pw}" onerror="continue">
+			<classpath>
+				<fileset dir="${spring.root}/lib">
+					<include name="hsqldb/hsqldb.jar" />
+				</fileset>
+			</classpath>
+			<transaction src="${db.dir}/dropTables.txt" />
+		</sql>
+	</target>
+
+	<target name="createHSQLTables" if="useHSQL">
+		<echo message="Create tables using: ${db.driver} ${db.url}" />
+		<sql driver="${db.driver}" url="${db.url}" userid="${db.user}" password="${db.pw}" onerror="continue">
+			<classpath>
+				<fileset dir="${spring.root}/lib">
+					<include name="hsqldb/hsqldb.jar" />
+				</fileset>
+			</classpath>
+			<transaction src="${db.dir}/hsqldb/initDB.txt" />
+		</sql>
+	</target>
+
+	<target name="dropMYSQLTables" if="useMYSQL">
+		<echo message="Dropping tables using: ${db.driver} ${db.url}" />
+		<sql driver="${db.driver}" url="${db.url}" userid="${db.user}" password="${db.pw}" onerror="continue">
+			<classpath>
+				<fileset dir="${db.dir}/mysql">
+					<include name="mysql*.jar" />
+				</fileset>
+			</classpath>
+			<transaction src="${db.dir}/dropTables.txt" />
+		</sql>
+	</target>
+
+	<target name="createMYSQLTables" if="useMYSQL">
+		<echo message="Creating tables using: ${db.driver} ${db.url}" />
+		<sql driver="${db.driver}" url="${db.url}" userid="${db.user}" password="${db.pw}" onerror="continue">
+			<classpath>
+				<fileset dir="${db.dir}/mysql">
+					<include name="mysql*.jar" />
+				</fileset>
+			</classpath>
+			<transaction src="${db.dir}/mysql/initDB.txt" />
+		</sql>
+	</target>
+
+	<target name="emptyTables">
+		<echo message="Emptying tables using: ${db.driver} ${db.url}" />
+		<sql driver="${db.driver}" url="${db.url}" userid="${db.user}" password="${db.pw}">
+			<classpath>
+				<fileset dir="${spring.root}/lib">
+					<include name="hsqldb/hsqldb.jar" />
+				</fileset>
+				<fileset dir="${db.dir}/mysql">
+					<include name="mysql*.jar" />
+				</fileset>
+			</classpath>
+			<transaction src="${db.dir}/emptyDB.txt" />
+		</sql>
+	</target>
+
+	<target name="populateTables">
+		<echo message="Populating tables using: ${db.driver} ${db.url}" />
+		<sql driver="${db.driver}" url="${db.url}" userid="${db.user}" password="${db.pw}">
+			<classpath>
+				<fileset dir="${spring.root}/lib">
+					<include name="hsqldb/hsqldb.jar" />
+				</fileset>
+				<fileset dir="${db.dir}/mysql">
+					<include name="mysql*.jar" />
+				</fileset>
+			</classpath>
+			<transaction src="${db.dir}/populateDB.txt" />
+		</sql>
+	</target>
+
+	<target name="all" depends="dropHSQLTables,createHSQLTables,dropMYSQLTables,createMYSQLTables,emptyTables,populateTables" />
+
+</project>

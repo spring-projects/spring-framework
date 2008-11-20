@@ -1,0 +1,26 @@
+================================================================================
+===        Spring PetClinic sample application - MySQL Configuration         ===
+================================================================================
+
+@author Sam Brannen
+
+--------------------------------------------------------------------------------
+
+1) Download and install the MySQL database (e.g., MySQL Community Server 5.0.x),
+   which can be found here: http://dev.mysql.com/downloads/
+
+2) Download Connector/J, the MySQL JDBC driver (e.g., Connector/J 5.1.x), which
+   can be found here: http://dev.mysql.com/downloads/connector/j/
+   Copy the Connector/J JAR file (e.g., mysql-connector-java-5.1.5-bin.jar) into
+   the db/mysql directory.
+
+3) Create the PetClinic database and user by executing the "db/mysql/createDB.txt"
+   script.
+
+4) Open "build.properties" in PetClinic's root directory and follow the
+   instructions in section: "NOTE: To CONFIGURE the DATABASE...".
+
+5) If you did not already do so in step 4, open "src/jdbc.properties", comment
+   out all properties in the "HSQL Settings" section, uncomment all properties
+   in the "MySQL Settings" section, and verify that your connection settings
+   are consistent in both "build.properties" and "src/jdbc.properties".
