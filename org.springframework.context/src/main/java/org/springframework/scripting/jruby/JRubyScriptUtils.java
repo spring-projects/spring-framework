@@ -34,7 +34,6 @@ import org.jruby.ast.Node;
 import org.jruby.exceptions.JumpException;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaEmbedUtils;
-import org.jruby.runtime.DynamicScope;
 import org.jruby.runtime.builtin.IRubyObject;
 
 import org.springframework.core.NestedRuntimeException;
@@ -46,8 +45,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for handling JRuby-scripted objects.
  *
- * <p>As of Spring 2.5, this class supports JRuby 0.9.9, 0.9.9 and 1.0.x.
- * <b>Note that there is no support for JRuby 1.1 at this point!</b>
+ * <p>As of Spring 3.0, this class requires JRuby 1.1 or higher.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -55,11 +53,6 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public abstract class JRubyScriptUtils {
-
-	// Determine whether the old JRuby 0.9 parse method is available (incompatible with 1.0)
-	private final static Method oldParseMethod = ClassUtils.getMethodIfAvailable(
-			Ruby.class, "parse", new Class[] {String.class, String.class, DynamicScope.class});
-
 
 	/**
 	 * Create a new JRuby-scripted object from the given script source,
@@ -85,23 +78,12 @@ public abstract class JRubyScriptUtils {
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
 		Ruby ruby = initializeRuntime();
 
-		Node scriptRootNode = null;
-		/* TODO: make this JRuby 1.1 compliant
-		
-		Node scriptRootNode = (oldParseMethod != null ?
-				(Node) ReflectionUtils.invokeMethod(oldParseMethod, ruby, new Object[] {scriptSource, "", null}) :
-				ruby.parse(scriptSource, "", null, 0));
-		*/
-		IRubyObject rubyObject = null;
-		/** TODO: make this JRuby 1.1 compliant 
-		IRubyObject rubyObject = ruby.eval(scriptRootNode);
-		*/
+		Node scriptRootNode = ruby.parseEval(scriptSource, "", null, 0);
+		IRubyObject rubyObject = ruby.runNormally(scriptRootNode, false);
 
 		if (rubyObject instanceof RubyNil) {
 			String className = findClassName(scriptRootNode);
-			/** TODO: make this JRuby 1.1 compliant 
-			rubyObject = ruby.evalScript("\n" + className + ".new");
-			*/
+			rubyObject = ruby.evalScriptlet("\n" + className + ".new");
 		}
 		// still null?
 		if (rubyObject instanceof RubyNil) {
@@ -141,12 +123,12 @@ public abstract class JRubyScriptUtils {
 		if (node instanceof ClassNode) {
 			return (ClassNode) node;
 		}
-		List children = node.childNodes();
-		for (int i = 0; i < children.size(); i++) {
-			Node child = (Node) children.get(i);
+		List<Node> children = node.childNodes();
+		for (Node child : children) {
 			if (child instanceof ClassNode) {
 				return (ClassNode) child;
-			} else if (child instanceof NewlineNode) {
+			}
+			else if (child instanceof NewlineNode) {
 				NewlineNode nn = (NewlineNode) child;
 				Node found = findClassNode(nn.getNextNode());
 				if (found instanceof ClassNode) {
@@ -154,8 +136,7 @@ public abstract class JRubyScriptUtils {
 				}
 			}
 		}
-		for (int i = 0; i < children.size(); i++) {
-			Node child = (Node) children.get(i);
+		for (Node child : children) {
 			Node found = findClassNode(child);
 			if (found instanceof ClassNode) {
 				return (ClassNode) found;
@@ -184,7 +165,7 @@ public abstract class JRubyScriptUtils {
 				return (isProxyForSameRubyObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
 			}
 			else if (ReflectionUtils.isHashCodeMethod(method)) {
-				return new Integer(this.rubyObject.hashCode());
+				return this.rubyObject.hashCode();
 			}
 			else if (ReflectionUtils.isToStringMethod(method)) {
 				String toStringResult = this.rubyObject.toString();
