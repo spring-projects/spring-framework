@@ -121,11 +121,11 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * including codes, arguments, and default message.
 	 */
 	protected final String resolvableToString() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("codes [").append(StringUtils.arrayToDelimitedString(this.codes, ","));
-		buf.append("]; arguments [" + StringUtils.arrayToDelimitedString(this.arguments, ","));
-		buf.append("]; default message [").append(this.defaultMessage).append(']');
-		return buf.toString();
+		StringBuilder result = new StringBuilder();
+		result.append("codes [").append(StringUtils.arrayToDelimitedString(this.codes, ","));
+		result.append("]; arguments [" + StringUtils.arrayToDelimitedString(this.arguments, ","));
+		result.append("]; default message [").append(this.defaultMessage).append(']');
+		return result.toString();
 	}
 
 	/**

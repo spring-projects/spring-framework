@@ -105,6 +105,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	
 	private boolean requiredParameterValue = true;
 
+	private Class<? extends Annotation> valueAnnotationType = Value.class;
+
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
 	private ConfigurableListableBeanFactory beanFactory;
@@ -193,22 +195,25 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					List<Constructor> candidates = new ArrayList<Constructor>(rawCandidates.length);
 					Constructor requiredConstructor = null;
 					Constructor defaultConstructor = null;
-					for (int i = 0; i < rawCandidates.length; i++) {
-						Constructor<?> candidate = rawCandidates[i];
+					for (Constructor<?> candidate : rawCandidates) {
 						Annotation annotation = candidate.getAnnotation(getAutowiredAnnotationType());
 						if (annotation != null) {
 							if (requiredConstructor != null) {
 								throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
-										". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
+										". Found another constructor with 'required' Autowired annotation: " +
+										requiredConstructor);
 							}
 							if (candidate.getParameterTypes().length == 0) {
-								throw new IllegalStateException("Autowired annotation requires at least one argument: " + candidate);
+								throw new IllegalStateException(
+										"Autowired annotation requires at least one argument: " + candidate);
 							}
 							boolean required = determineRequiredStatus(annotation);
 							if (required) {
 								if (!candidates.isEmpty()) {
-									throw new BeanCreationException("Invalid autowire-marked constructors: " + candidates +
-											". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
+									throw new BeanCreationException(
+											"Invalid autowire-marked constructors: " + candidates +
+													". Found another constructor with 'required' Autowired annotation: " +
+													requiredConstructor);
 								}
 								requiredConstructor = candidate;
 							}
@@ -223,7 +228,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						if (requiredConstructor == null && defaultConstructor != null) {
 							candidates.add(defaultConstructor);
 						}
-						candidateConstructors = (Constructor[]) candidates.toArray(new Constructor[candidates.size()]);
+						candidateConstructors = candidates.toArray(new Constructor[candidates.size()]);
 					}
 					else {
 						candidateConstructors = new Constructor[0];
@@ -329,7 +334,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * @return the target beans, or an empty Collection if no bean of this type is found
 	 * @throws BeansException if bean retrieval failed
 	 */
-	protected Map findAutowireCandidates(Class type) throws BeansException {
+	protected <T> Map<String, T> findAutowireCandidates(Class<T> type) throws BeansException {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException("No BeanFactory configured - " +
 					"override the getBeanOfType method or specify the 'beanFactory' property");
@@ -361,12 +366,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
-			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
-				String autowiredBeanName = (String) it.next();
+			for (String autowiredBeanName : autowiredBeanNames) {
 				beanFactory.registerDependentBean(autowiredBeanName, beanName);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Autowiring by type from bean name '" + beanName +
-							"' to bean named '" + autowiredBeanName + "'");
+					logger.debug(
+							"Autowiring by type from bean name '" + beanName + "' to bean named '" + autowiredBeanName +
+									"'");
 				}
 			}
 		}
@@ -463,7 +468,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				// Explicit value provided as part of the bean definition.
 				this.skip = Boolean.TRUE;
 			}
-			if (this.skip != null && this.skip.booleanValue()) {
+			if (this.skip != null && this.skip) {
 				return;
 			}
 			Method method = (Method) this.member;

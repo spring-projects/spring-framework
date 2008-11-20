@@ -116,7 +116,7 @@ public class Problem {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("Configuration problem: ");
 		sb.append(getMessage());
 		sb.append("\nOffending resource: ").append(getResourceDescription());

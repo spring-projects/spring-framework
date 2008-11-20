@@ -265,7 +265,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	public String toString() {
 		// Don't do toString on target, it may be proxied.
-		StringBuffer sb = new StringBuffer("ReflectiveMethodInvocation: ");
+		StringBuilder sb = new StringBuilder("ReflectiveMethodInvocation: ");
 		sb.append(this.method).append("; ");
 		if (this.target == null) {
 			sb.append("target is null");

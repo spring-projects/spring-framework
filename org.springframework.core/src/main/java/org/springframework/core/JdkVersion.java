@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,12 +68,9 @@ public abstract class JdkVersion {
 		else if (javaVersion.indexOf("1.6.") != -1) {
 			majorJavaVersion = JAVA_16;
 		}
-		else if (javaVersion.indexOf("1.5.") != -1) {
-			majorJavaVersion = JAVA_15;
-		}
 		else {
-			// else leave 1.4 as default (it's either 1.4 or unknown)
-			majorJavaVersion = JAVA_14;
+			// else leave 1.5 as default (it's either 1.5 or unknown)
+			majorJavaVersion = JAVA_15;
 		}
 	}
 
@@ -105,12 +102,14 @@ public abstract class JdkVersion {
 	/**
 	 * Convenience method to determine if the current JVM is at least Java 1.4.
 	 * @return <code>true</code> if the current JVM is at least Java 1.4
+	 * @deprecated as of Spring 3.0 which requires Java 1.5+
 	 * @see #getMajorJavaVersion()
 	 * @see #JAVA_14
 	 * @see #JAVA_15
 	 * @see #JAVA_16
 	 * @see #JAVA_17
 	 */
+	@Deprecated
 	public static boolean isAtLeastJava14() {
 		return true;
 	}
@@ -119,13 +118,15 @@ public abstract class JdkVersion {
 	 * Convenience method to determine if the current JVM is at least
 	 * Java 1.5 (Java 5).
 	 * @return <code>true</code> if the current JVM is at least Java 1.5
+	 * @deprecated as of Spring 3.0 which requires Java 1.5+
 	 * @see #getMajorJavaVersion()
 	 * @see #JAVA_15
 	 * @see #JAVA_16
 	 * @see #JAVA_17
 	 */
+	@Deprecated
 	public static boolean isAtLeastJava15() {
-		return getMajorJavaVersion() >= JAVA_15;
+		return true;
 	}
 
 	/**

@@ -33,7 +33,6 @@ import java.util.WeakHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -64,14 +63,14 @@ public class CachedIntrospectionResults {
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
-	static final Set acceptedClassLoaders = Collections.synchronizedSet(new HashSet());
+	static final Set<ClassLoader> acceptedClassLoaders = Collections.synchronizedSet(new HashSet<ClassLoader>());
 
 	/**
 	 * Map keyed by class containing CachedIntrospectionResults.
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
-	static final Map classCache = Collections.synchronizedMap(new WeakHashMap());
+	static final Map<Class, Object> classCache = Collections.synchronizedMap(new WeakHashMap<Class, Object>());
 
 
 	/**
@@ -150,7 +149,7 @@ public class CachedIntrospectionResults {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 				}
-				classCache.put(beanClass, new WeakReference(results));
+				classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
 			}
 		}
 		return results;
@@ -166,9 +165,9 @@ public class CachedIntrospectionResults {
 	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
 		// Iterate over array copy in order to avoid synchronization for the entire
 		// ClassLoader check (avoiding a synchronized acceptedClassLoaders Iterator).
-		Object[] acceptedLoaderArray = acceptedClassLoaders.toArray();
-		for (int i = 0; i < acceptedLoaderArray.length; i++) {
-			ClassLoader registeredLoader = (ClassLoader) acceptedLoaderArray[i];
+		ClassLoader[] acceptedLoaderArray =
+				acceptedClassLoaders.toArray(new ClassLoader[acceptedClassLoaders.size()]);
+		for (ClassLoader registeredLoader : acceptedLoaderArray) {
 			if (isUnderneathClassLoader(classLoader, registeredLoader)) {
 				return true;
 			}
@@ -204,7 +203,7 @@ public class CachedIntrospectionResults {
 	private final BeanInfo beanInfo;
 
 	/** PropertyDescriptor objects keyed by property name String */
-	private final Map propertyDescriptorCache;
+	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
 
 
 	/**
@@ -233,23 +232,19 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
-			this.propertyDescriptorCache = new HashMap();
+			this.propertyDescriptorCache = new HashMap<String, PropertyDescriptor>();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
-			for (int i = 0; i < pds.length; i++) {
-				PropertyDescriptor pd = pds[i];
+			for (PropertyDescriptor pd : pds) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found bean property '" + pd.getName() + "'" +
-							(pd.getPropertyType() != null ?
-							" of type [" + pd.getPropertyType().getName() + "]" : "") +
+							(pd.getPropertyType() != null ? " of type [" + pd.getPropertyType().getName() + "]" : "") +
 							(pd.getPropertyEditorClass() != null ?
-							"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
+									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-				if (JdkVersion.isAtLeastJava15()) {
-					pd = new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(),
-							pd.getReadMethod(), pd.getWriteMethod(), pd.getPropertyEditorClass());
-				}
+				pd = new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(), pd.getReadMethod(),
+						pd.getWriteMethod(), pd.getPropertyEditorClass());
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 		}
@@ -267,7 +262,7 @@ public class CachedIntrospectionResults {
 	}
 
 	PropertyDescriptor getPropertyDescriptor(String propertyName) {
-		return (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
+		return this.propertyDescriptorCache.get(propertyName);
 	}
 
 }

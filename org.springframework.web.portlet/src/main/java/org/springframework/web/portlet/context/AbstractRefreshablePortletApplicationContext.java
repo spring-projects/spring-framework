@@ -148,6 +148,7 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		beanFactory.registerResolvableDependency(PortletConfig.class, this.portletConfig);
 
 		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory);
+		PortletApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.portletContext);
 	}
 
 	/**

@@ -19,10 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditor;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -134,14 +132,13 @@ abstract class SelectedValueComparator {
 	private static boolean exhaustiveCollectionCompare(
 			Collection collection, Object candidateValue, BindStatus bindStatus) {
 
-		Map convertedValueCache = new HashMap(1);
+		Map<PropertyEditor, Object> convertedValueCache = new HashMap<PropertyEditor, Object>(1);
 		PropertyEditor editor = null;
 		boolean candidateIsString = (candidateValue instanceof String);
 		if (!candidateIsString) {
 			editor = bindStatus.findEditor(candidateValue.getClass());
 		}
-		for (Iterator it = collection.iterator(); it.hasNext();) {
-			Object element = it.next();
+		for (Object element : collection) {
 			if (editor == null && element != null && candidateIsString) {
 				editor = bindStatus.findEditor(element.getClass());
 			}
@@ -152,8 +149,8 @@ abstract class SelectedValueComparator {
 		return false;
 	}
 
-	private static boolean exhaustiveCompare(
-			Object boundValue, Object candidate, PropertyEditor editor, Map convertedValueCache) {
+	private static boolean exhaustiveCompare(Object boundValue, Object candidate,
+			PropertyEditor editor, Map<PropertyEditor, Object> convertedValueCache) {
 
 		String candidateDisplayString = ValueFormatter.getDisplayString(candidate, editor, false);
 		if (boundValue instanceof LabeledEnum) {
@@ -167,7 +164,7 @@ abstract class SelectedValueComparator {
 				return true;
 			}
 		}
-		else if (JdkVersion.isAtLeastJava15() && boundValue.getClass().isEnum()) {
+		else if (boundValue.getClass().isEnum()) {
 			Enum boundEnum = (Enum) boundValue;
 			String enumCodeAsString = ObjectUtils.getDisplayString(boundEnum.name());
 			if (enumCodeAsString.equals(candidateDisplayString)) {

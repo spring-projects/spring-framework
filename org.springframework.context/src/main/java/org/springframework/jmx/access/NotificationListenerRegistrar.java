@@ -40,9 +40,6 @@ import org.springframework.util.CollectionUtils;
  * with one or more MBeans in an {@link javax.management.MBeanServer}
  * (typically via a {@link javax.management.MBeanServerConnection}).
  *
- * <p>Requires JMX 1.2's <code>MBeanServerConnection</code> feature.
- * As a consequence, this class will not work on JMX 1.0.
- *
  * @author Juergen Hoeller
  * @since 2.5.2
  * @see #setServer
@@ -59,7 +56,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 
 	private JMXServiceURL serviceUrl;
 
-	private Map environment;
+	private Map<String, ?> environment;
 
 	private String agentId;
 
@@ -80,7 +77,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	 * Specify the environment for the JMX connector.
 	 * @see javax.management.remote.JMXConnectorFactory#connect(javax.management.remote.JMXServiceURL, java.util.Map)
 	 */
-	public void setEnvironment(Map environment) {
+	public void setEnvironment(Map<String, ?> environment) {
 		this.environment = environment;
 	}
 
@@ -91,7 +88,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	 * "environment[myKey]". This is particularly useful for
 	 * adding or overriding entries in child bean definitions.
 	 */
-	public Map getEnvironment() {
+	public Map<String, ?> getEnvironment() {
 		return this.environment;
 	}
 
@@ -138,9 +135,9 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 			if (logger.isDebugEnabled()) {
 				logger.debug("Registering NotificationListener for MBeans " + Arrays.asList(this.actualObjectNames));
 			}
-			for (int i = 0; i < this.actualObjectNames.length; i++) {
-				this.server.addNotificationListener(this.actualObjectNames[i],
-						getNotificationListener(), getNotificationFilter(), getHandback());
+			for (ObjectName actualObjectName : this.actualObjectNames) {
+				this.server.addNotificationListener(
+						actualObjectName, getNotificationListener(), getNotificationFilter(), getHandback());
 			}
 		}
 		catch (IOException ex) {
@@ -158,10 +155,10 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	public void destroy() {
 		try {
 			if (this.actualObjectNames != null) {
-				for (int i = 0; i < this.actualObjectNames.length; i++) {
+				for (ObjectName actualObjectName : this.actualObjectNames) {
 					try {
-						this.server.removeNotificationListener(this.actualObjectNames[i],
-								getNotificationListener(), getNotificationFilter(), getHandback());
+						this.server.removeNotificationListener(
+								actualObjectName, getNotificationListener(), getNotificationFilter(), getHandback());
 					}
 					catch (Exception ex) {
 						if (logger.isDebugEnabled()) {

@@ -52,7 +52,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see javax.servlet.http.HttpServletRequest#getParameterMap()
 	 */
-	Map getParameterMap();
+	Map<String, String[]> getParameterMap();
 
 	/**
 	 * Return the primary Locale for this request.

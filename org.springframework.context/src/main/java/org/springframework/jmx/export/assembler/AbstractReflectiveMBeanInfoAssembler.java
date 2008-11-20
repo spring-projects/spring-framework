@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.management.Descriptor;
 import javax.management.JMException;
 import javax.management.MBeanOperationInfo;
@@ -31,7 +30,6 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.JdkVersion;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
@@ -252,10 +250,10 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	@Override
 	protected ModelMBeanAttributeInfo[] getAttributeInfo(Object managedBean, String beanKey) throws JMException {
 		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(getClassToExpose(managedBean));
-		List infos = new ArrayList();
+		List<ModelMBeanAttributeInfo> infos = new ArrayList<ModelMBeanAttributeInfo>();
 
-		for (int i = 0; i < props.length; i++) {
-			Method getter = props[i].getReadMethod();
+		for (PropertyDescriptor prop : props) {
+			Method getter = prop.getReadMethod();
 			if (getter != null && getter.getDeclaringClass() == Object.class) {
 				continue;
 			}
@@ -263,15 +261,15 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				getter = null;
 			}
 
-			Method setter = props[i].getWriteMethod();
+			Method setter = prop.getWriteMethod();
 			if (setter != null && !includeWriteAttribute(setter, beanKey)) {
 				setter = null;
 			}
 
 			if (getter != null || setter != null) {
 				// If both getter and setter are null, then this does not need exposing.
-				String attrName = JmxUtils.getAttributeName(props[i], isUseStrictCasing());
-				String description = getAttributeDescription(props[i], beanKey);
+				String attrName = JmxUtils.getAttributeName(prop, isUseStrictCasing());
+				String description = getAttributeDescription(prop, beanKey);
 				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(attrName, description, getter, setter);
 
 				Descriptor desc = info.getDescriptor();
@@ -288,7 +286,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			}
 		}
 
-		return (ModelMBeanAttributeInfo[]) infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
+		return infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
 	}
 
 	/**
@@ -306,11 +304,10 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	@Override
 	protected ModelMBeanOperationInfo[] getOperationInfo(Object managedBean, String beanKey) {
 		Method[] methods = getClassToExpose(managedBean).getMethods();
-		List infos = new ArrayList();
+		List<ModelMBeanOperationInfo> infos = new ArrayList<ModelMBeanOperationInfo>();
 
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
-			if (JdkVersion.isAtLeastJava15() && method.isSynthetic()) {
+		for (Method method : methods) {
+			if (method.isSynthetic()) {
 				continue;
 			}
 			if (method.getDeclaringClass().equals(Object.class)) {
@@ -355,7 +352,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			}
 		}
 
-		return (ModelMBeanOperationInfo[]) infos.toArray(new ModelMBeanOperationInfo[infos.size()]);
+		return infos.toArray(new ModelMBeanOperationInfo[infos.size()]);
 	}
 
 	/**

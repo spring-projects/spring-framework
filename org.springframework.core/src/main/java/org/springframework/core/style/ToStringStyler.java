@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,14 @@ public interface ToStringStyler {
 	 * @param buffer the buffer to print to
 	 * @param obj the object to style
 	 */
-	void styleStart(StringBuffer buffer, Object obj);
+	void styleStart(StringBuilder buffer, Object obj);
 
 	/**
 	 * Style a <code>toString()</code>'ed object after it's fields are styled.
 	 * @param buffer the buffer to print to
 	 * @param obj the object to style
 	 */
-	void styleEnd(StringBuffer buffer, Object obj);
+	void styleEnd(StringBuilder buffer, Object obj);
 
 	/**
 	 * Style a field value as a string.
@@ -46,19 +46,19 @@ public interface ToStringStyler {
 	 * @param fieldName the he name of the field
 	 * @param value the field value
 	 */
-	void styleField(StringBuffer buffer, String fieldName, Object value);
+	void styleField(StringBuilder buffer, String fieldName, Object value);
 
 	/**
 	 * Style the given value.
 	 * @param buffer the buffer to print to
 	 * @param value the field value
 	 */
-	void styleValue(StringBuffer buffer, Object value);
+	void styleValue(StringBuilder buffer, Object value);
 
 	/**
 	 * Style the field separator.
 	 * @param buffer buffer to print to
 	 */
-	void styleFieldSeparator(StringBuffer buffer);
+	void styleFieldSeparator(StringBuilder buffer);
 
 }

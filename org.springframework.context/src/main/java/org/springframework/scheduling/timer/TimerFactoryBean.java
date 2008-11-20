@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -114,26 +113,12 @@ public class TimerFactoryBean implements FactoryBean, BeanNameAware, Initializin
 	 * @see java.util.Timer#Timer(boolean)
 	 */
 	protected Timer createTimer(String name, boolean daemon) {
-		Timer timer = createTimer(daemon);
-		if (timer != null) {
-			return timer;
-		}
-		if (StringUtils.hasText(name) && JdkVersion.isAtLeastJava15()) {
+		if (StringUtils.hasText(name)) {
 			return new Timer(name, daemon);
 		}
 		else {
 			return new Timer(daemon);
 		}
-	}
-
-	/**
-	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>.
-	 * Can be overridden in subclasses to provide custom Timer subclasses.
-	 * @deprecated as of Spring 2.0.1, in favor of {@link #createTimer(String, boolean)}
-	 */
-	@Deprecated
-	protected Timer createTimer(boolean daemon) {
-		return null;
 	}
 
 	/**
@@ -143,8 +128,7 @@ public class TimerFactoryBean implements FactoryBean, BeanNameAware, Initializin
 	 * @param timer the Timer to register the tasks on.
 	 */
 	protected void registerTasks(ScheduledTimerTask[] tasks, Timer timer) {
-		for (int i = 0; i < tasks.length; i++) {
-			ScheduledTimerTask task = tasks[i];
+		for (ScheduledTimerTask task : tasks) {
 			if (task.isOneTimeTask()) {
 				timer.schedule(task.getTimerTask(), task.getDelay());
 			}

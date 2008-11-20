@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,7 +30,7 @@ import org.springframework.beans.Mergeable;
  * @author Rob Harrop
  * @since 21.01.2004
  */
-public class ManagedSet extends LinkedHashSet implements Mergeable, BeanMetadataElement {
+public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMetadataElement {
 
 	private Object source;
 

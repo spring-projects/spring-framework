@@ -411,7 +411,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("AspectJExpressionPointcut: ");
 		if (this.pointcutParameterNames != null && this.pointcutParameterTypes != null) {
 			sb.append("(");

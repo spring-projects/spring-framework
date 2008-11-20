@@ -655,7 +655,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			return new PointcutBody(0, currentToken.substring(bodyStart + 1, currentToken.length() - 1));
 		}
 		else {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			if (bodyStart >= 0 && bodyStart != (currentToken.length() - 1)) {
 				sb.append(currentToken.substring(bodyStart + 1));
 				sb.append(" ");

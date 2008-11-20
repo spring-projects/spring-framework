@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -92,12 +91,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Special key to distinguish <code>owner.(class)=com.myapp.MyClass</code>-
 	 */
 	public static final String CLASS_KEY = "(class)";
-
-	/**
-	 * Special key to distinguish <code>owner.class=com.myapp.MyClass</code>.
-	 * Deprecated in favor of .(class)=
-	 */
-	private static final String DEPRECATED_CLASS_KEY = "class";
 
 	/**
 	 * Special key to distinguish <code>owner.(parent)=parentBeanName</code>.
@@ -295,7 +288,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
 		// Simply create a map and call overloaded method.
-		Map map = new HashMap();
+		Map<String, Object> map = new HashMap<String, Object>();
 		Enumeration keys = rb.getKeys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
@@ -356,8 +349,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		}
 		int beanCount = 0;
 
-		for (Iterator it = map.keySet().iterator(); it.hasNext();) {
-			Object key = it.next();
+		for (Object key : map.keySet()) {
 			if (!(key instanceof String)) {
 				throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
 			}
@@ -408,7 +400,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Map came from (for logging purposes)
 	 * @throws BeansException if the bean definition could not be parsed or registered
 	 */
-	protected void registerBeanDefinition(String beanName, Map map, String prefix, String resourceDescription)
+	protected void registerBeanDefinition(String beanName, Map<?, ?> map, String prefix, String resourceDescription)
 			throws BeansException {
 
 		String className = null;
@@ -420,12 +412,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 
-		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry entry : map.entrySet()) {
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
-				if (isClassKey(property)) {
+				if (CLASS_KEY.equals(property)) {
 					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (PARENT_KEY.equals(property)) {
@@ -442,8 +433,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else if (SINGLETON_KEY.equals(property)) {
 					// Spring 1.2 style
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					scope = ((val == null || TRUE_VALUE.equals(val) ?
-							GenericBeanDefinition.SCOPE_SINGLETON : GenericBeanDefinition.SCOPE_PROTOTYPE));
+					scope = ((val == null || TRUE_VALUE.equals(val) ? GenericBeanDefinition.SCOPE_SINGLETON :
+							GenericBeanDefinition.SCOPE_PROTOTYPE));
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
@@ -470,7 +461,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					Object val = new RuntimeBeanReference(ref);
 					pvs.addPropertyValue(property, val);
 				}
-				else{
+				else {
 					// It's a normal bean property.
 					pvs.addPropertyValue(property, readValue(entry));
 				}
@@ -504,23 +495,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		catch (LinkageError err) {
 			throw new CannotLoadBeanClassException(resourceDescription, beanName, className, err);
 		}
-	}
-
-	/**
-	 * Indicates whether the supplied property matches the class property of
-	 * the bean definition.
-	 */
-	private boolean isClassKey(String property) {
-		if (CLASS_KEY.equals(property)) {
-			return true;
-		}
-		else if (DEPRECATED_CLASS_KEY.equals(property)) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Use of 'class' property in [" + getClass().getName() + "] is deprecated in favor of '(class)'");
-			}
-			return true;
-		}
-		return false;
 	}
 
 	/**

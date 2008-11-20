@@ -144,6 +144,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 		beanFactory.registerResolvableDependency(PortletConfig.class, this.portletConfig);
 
 		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory);
+		PortletApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.portletContext);
 	}
 
 	/**

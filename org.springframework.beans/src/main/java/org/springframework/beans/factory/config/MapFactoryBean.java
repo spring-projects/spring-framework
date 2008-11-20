@@ -84,7 +84,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
 		}
 		Class keyType = null;
 		Class valueType = null;
-		if (this.targetMapClass != null && JdkVersion.isAtLeastJava15()) {
+		if (this.targetMapClass != null) {
 			keyType = GenericCollectionTypeResolver.getMapKeyType(this.targetMapClass);
 			valueType = GenericCollectionTypeResolver.getMapValueType(this.targetMapClass);
 		}

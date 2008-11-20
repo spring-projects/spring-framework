@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.context.event;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.CollectionFactory;
 
 /**
  * Abstract implementation of the {@link ApplicationEventMulticaster} interface,
@@ -46,7 +46,7 @@ import org.springframework.core.CollectionFactory;
 public abstract class AbstractApplicationEventMulticaster implements ApplicationEventMulticaster {
 
 	/** Collection of ApplicationListeners */
-	private Collection applicationListeners = new LinkedHashSet();
+	private Collection<ApplicationListener> applicationListeners = new LinkedHashSet<ApplicationListener>();
 
 
 	/**
@@ -56,7 +56,8 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * without synchronization while still making listener updates thread-safe.
 	 */
 	public void setConcurrentUpdates(boolean concurrent) {
-		Collection newColl = (concurrent ? CollectionFactory.createCopyOnWriteSet() : new LinkedHashSet());
+		Collection<ApplicationListener> newColl = concurrent ?
+				new CopyOnWriteArraySet<ApplicationListener>() : new LinkedHashSet<ApplicationListener>();
 		// Add all previously registered listeners (usually none).
 		newColl.addAll(this.applicationListeners);
 		this.applicationListeners = newColl;
@@ -70,6 +71,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * of the same listener, while a List class will allow for registering
 	 * the same listener multiple times.
 	 */
+	@SuppressWarnings("unchecked")
 	public void setCollectionClass(Class collectionClass) {
 		if (collectionClass == null) {
 			throw new IllegalArgumentException("'collectionClass' must not be null");
@@ -78,7 +80,8 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 			throw new IllegalArgumentException("'collectionClass' must implement [java.util.Collection]");
 		}
 		// Create desired collection instance.
-		Collection newColl = (Collection) BeanUtils.instantiateClass(collectionClass);
+		Collection<ApplicationListener> newColl =
+				(Collection<ApplicationListener>) BeanUtils.instantiateClass(collectionClass);
 		// Add all previously registered listeners (usually none).
 		newColl.addAll(this.applicationListeners);
 		this.applicationListeners = newColl;

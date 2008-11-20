@@ -161,7 +161,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 
 	@Override
 	public String toString() {
-		StringBuffer result = getDefinitionDescription();
+		StringBuilder result = getDefinitionDescription();
 		if (this.rollbackRules != null) {
 			for (Iterator it = this.rollbackRules.iterator(); it.hasNext();) {
 				RollbackRuleAttribute rule = (RollbackRuleAttribute) it.next();

@@ -19,7 +19,6 @@ package org.springframework.web.context.request;
 import java.security.Principal;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
@@ -53,15 +52,15 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 
 	public String getParameter(String paramName) {
-		return (String) getExternalContext().getRequestParameterMap().get(paramName);
+		return getExternalContext().getRequestParameterMap().get(paramName);
 	}
 
 	public String[] getParameterValues(String paramName) {
-		return (String[]) getExternalContext().getRequestParameterValuesMap().get(paramName);
+		return getExternalContext().getRequestParameterValuesMap().get(paramName);
 	}
 
-	public Map getParameterMap() {
-		return getExternalContext().getRequestParameterMap();
+	public Map<String, String[]> getParameterMap() {
+		return getExternalContext().getRequestParameterValuesMap();
 	}
 
 	public Locale getLocale() {
@@ -95,19 +94,19 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 	public String getDescription(boolean includeClientInfo) {
 		ExternalContext externalContext = getExternalContext();
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("context=").append(externalContext.getRequestContextPath());
+		StringBuilder sb = new StringBuilder();
+		sb.append("context=").append(externalContext.getRequestContextPath());
 		if (includeClientInfo) {
 			Object session = externalContext.getSession(false);
 			if (session != null) {
-				buffer.append(";session=").append(getSessionId());
+				sb.append(";session=").append(getSessionId());
 			}
 			String user = externalContext.getRemoteUser();
 			if (StringUtils.hasLength(user)) {
-				buffer.append(";user=").append(user);
+				sb.append(";user=").append(user);
 			}
 		}
-		return buffer.toString();
+		return sb.toString();
 	}
 
 	@Override

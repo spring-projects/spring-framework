@@ -323,7 +323,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
@@ -756,15 +756,15 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 		session.setFlushMode(FlushMode.AUTO);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
@@ -1078,7 +1078,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 2);
@@ -1239,10 +1239,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.isOpen();
 		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 		session.setFlushMode(FlushMode.AUTO);
 		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 3);
@@ -1339,10 +1339,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.isOpen();
 		sessionControl.setReturnValue(true, 2);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 2);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 2);
 		session.setFlushMode(FlushMode.AUTO);
 		sessionControl.setVoidCallable(2);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(2);
 		session.isConnected();
 		sessionControl.setReturnValue(true, 2);
@@ -1465,10 +1465,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx2Control.setVoidCallable(1);
 
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 2);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 2);
 		session.setFlushMode(FlushMode.AUTO);
 		sessionControl.setVoidCallable(2);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(2);
 
 		sfControl.replay();

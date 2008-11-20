@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class HtmlCharacterEntityDecoder {
 
 	private final String originalMessage;
 
-	private final StringBuffer decodedMessage;
+	private final StringBuilder decodedMessage;
 
 	private int currentPosition = 0;
 
@@ -45,7 +45,7 @@ class HtmlCharacterEntityDecoder {
 	public HtmlCharacterEntityDecoder(HtmlCharacterEntityReferences characterEntityReferences, String original) {
 		this.characterEntityReferences = characterEntityReferences;
 		this.originalMessage = original;
-		this.decodedMessage = new StringBuffer(originalMessage.length());
+		this.decodedMessage = new StringBuilder(originalMessage.length());
 	}
 
 	public String decode() {

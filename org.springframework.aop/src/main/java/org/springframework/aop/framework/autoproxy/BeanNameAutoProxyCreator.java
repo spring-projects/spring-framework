@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.aop.TargetSource;
@@ -45,7 +44,7 @@ import org.springframework.util.StringUtils;
  */
 public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
-	private List beanNames;
+	private List<String> beanNames;
 
 
 	/**
@@ -62,9 +61,9 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 */
 	public void setBeanNames(String[] beanNames) {
 		Assert.notEmpty(beanNames, "'beanNames' must not be empty");
-		this.beanNames = new ArrayList(beanNames.length);
-		for (int i = 0; i < beanNames.length; i++) {
-			this.beanNames.add(StringUtils.trimWhitespace(beanNames[i]));
+		this.beanNames = new ArrayList<String>(beanNames.length);
+		for (String mappedName : beanNames) {
+			this.beanNames.add(StringUtils.trimWhitespace(mappedName));
 		}
 	}
 
@@ -75,8 +74,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	@Override
 	protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource targetSource) {
 		if (this.beanNames != null) {
-			for (Iterator it = this.beanNames.iterator(); it.hasNext();) {
-				String mappedName = (String) it.next();
+			for (String mappedName : this.beanNames) {
 				if (FactoryBean.class.isAssignableFrom(beanClass)) {
 					if (!mappedName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
 						continue;

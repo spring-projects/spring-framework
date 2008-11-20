@@ -106,7 +106,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
-	private final Map parameters = new LinkedHashMap(16);
+	private final Map<String, String[]> parameters = new LinkedHashMap<String, String[]>(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -348,8 +348,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void setParameters(Map params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (Iterator it = params.keySet().iterator(); it.hasNext();) {
-			Object key = it.next();
+		for (Object key : params.keySet()) {
 			Assert.isInstanceOf(String.class, key,
 					"Parameter map key must be of type [" + String.class.getName() + "]");
 			Object value = params.get(key);
@@ -360,8 +359,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				this.setParameter((String) key, (String[]) value);
 			}
 			else {
-				throw new IllegalArgumentException("Parameter map value must be single value " +
-						" or array of type [" + String.class.getName() + "]");
+				throw new IllegalArgumentException(
+						"Parameter map value must be single value " + " or array of type [" + String.class.getName() +
+								"]");
 			}
 		}
 	}
@@ -382,7 +382,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void addParameter(String name, String[] values) {
 		Assert.notNull(name, "Parameter name must not be null");
-		String[] oldArr = (String[]) this.parameters.get(name);
+		String[] oldArr = this.parameters.get(name);
 		if (oldArr != null) {
 			String[] newArr = new String[oldArr.length + values.length];
 			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
@@ -401,8 +401,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void addParameters(Map params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (Iterator it = params.keySet().iterator(); it.hasNext();) {
-			Object key = it.next();
+		for (Object key : params.keySet()) {
 			Assert.isInstanceOf(String.class, key,
 					"Parameter map key must be of type [" + String.class.getName() + "]");
 			Object value = params.get(key);
@@ -436,7 +435,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public String getParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
-		String[] arr = (String[]) this.parameters.get(name);
+		String[] arr = this.parameters.get(name);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
@@ -446,7 +445,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public String[] getParameterValues(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
-		return (String[]) this.parameters.get(name);
+		return this.parameters.get(name);
 	}
 
 	public Map getParameterMap() {
@@ -748,14 +747,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public String getRemoteUser() {
 		return this.remoteUser;
-	}
-
-	/**
-	 * @deprecated in favor of addUserRole
-	 * @see #addUserRole
-	 */
-	public void addRole(String role) {
-		addUserRole(role);
 	}
 
 	public void addUserRole(String role) {

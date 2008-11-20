@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,26 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
+import java.io.PrintWriter;
 
+import com.caucho.hessian.io.AbstractHessianOutput;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hessian.io.HessianDebugOutputStream;
+import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
 import org.apache.commons.logging.Log;
 
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CommonsLogWriter;
 
 /**
  * General stream-based protocol exporter for a Hessian endpoint.
@@ -36,11 +43,7 @@ import org.springframework.util.ClassUtils;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.
- *
- * <p>This exporter will work with both Hessian 2.x and 3.x (respectively
- * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
- * As of Spring 2.0, it is also compatible with the new Hessian 2 protocol
- * (a.k.a. Hessian 3.0.20+), while remaining compatible with older versions.
+ * This exporter requires Hessian 3.0.20 or above.
  *
  * @author Juergen Hoeller
  * @since 2.5.1
@@ -50,15 +53,14 @@ import org.springframework.util.ClassUtils;
  */
 public class HessianExporter extends RemoteExporter implements InitializingBean {
 
-	private static final boolean hessian2Available =
-			ClassUtils.isPresent("com.caucho.hessian.io.Hessian2Input", HessianServiceExporter.class.getClassLoader());
-
+	private static final boolean debugOutputStreamAvailable = ClassUtils.isPresent(
+			"com.caucho.hessian.io.HessianDebugOutputStream", HessianExporter.class.getClassLoader());
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
 	private Log debugLogger;
 
-	private HessianSkeletonInvoker skeletonInvoker;
+	private HessianSkeleton skeleton;
 
 
 	/**
@@ -97,35 +99,9 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	 * Initialize this exporter.
 	 */
 	public void prepare() {
-		HessianSkeleton skeleton = null;
-
-		try {
-			try {
-				// Try Hessian 3.x (with service interface argument).
-				Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
-				checkService();
-				checkServiceInterface();
-				skeleton = (HessianSkeleton)
-						ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
-			}
-			catch (NoSuchMethodException ex) {
-				// Fall back to Hessian 2.x (without service interface argument).
-				Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
-				skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
-			}
-		}
-		catch (Throwable ex) {
-			throw new BeanInitializationException("Hessian skeleton initialization failed", ex);
-		}
-
-		if (hessian2Available) {
-			// Hessian 2 (version 3.0.20+).
-			this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory, this.debugLogger);
-		}
-		else {
-			// Hessian 1 (version 3.0.19-).
-			this.skeletonInvoker = new Hessian1SkeletonInvoker(skeleton, this.serializerFactory);
-		}
+		checkService();
+		checkServiceInterface();
+		this.skeleton = new HessianSkeleton(getProxyForService(), getServiceInterface());
 	}
 
 
@@ -136,13 +112,80 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	 * @throws Throwable if invocation failed
 	 */
 	public void invoke(InputStream inputStream, OutputStream outputStream) throws Throwable {
-		Assert.notNull(this.skeletonInvoker, "Hessian exporter has not been initialized");
+		Assert.notNull(this.skeleton, "Hessian exporter has not been initialized");
 		ClassLoader originalClassLoader = overrideThreadContextClassLoader();
 		try {
-			this.skeletonInvoker.invoke(inputStream, outputStream);
+			doInvoke(inputStream, outputStream);
 		}
 		finally {
 			resetThreadContextClassLoader(originalClassLoader);
+		}
+	}
+
+	public void doInvoke(final InputStream inputStream, final OutputStream outputStream) throws Throwable {
+		InputStream isToUse = inputStream;
+		OutputStream osToUse = outputStream;
+
+		if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
+			PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
+			isToUse = new HessianDebugInputStream(inputStream, debugWriter);
+			if (debugOutputStreamAvailable) {
+				osToUse = DebugStreamFactory.createDebugOutputStream(outputStream, debugWriter);
+			}
+		}
+
+		Hessian2Input in = new Hessian2Input(isToUse);
+		if (this.serializerFactory != null) {
+			in.setSerializerFactory(this.serializerFactory);
+		}
+
+		int code = in.read();
+		if (code != 'c') {
+			throw new IOException("expected 'c' in hessian input at " + code);
+		}
+
+		AbstractHessianOutput out = null;
+		int major = in.read();
+		int minor = in.read();
+		if (major >= 2) {
+			out = new Hessian2Output(osToUse);
+		}
+		else {
+			out = new HessianOutput(osToUse);
+		}
+		if (this.serializerFactory != null) {
+			out.setSerializerFactory(this.serializerFactory);
+		}
+
+		try {
+			this.skeleton.invoke(in, out);
+		}
+		finally {
+			try {
+				in.close();
+				isToUse.close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+			try {
+				out.close();
+				osToUse.close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid hard dependency on Hessian 3.1.3's HessianDebugOutputStream.
+	 */
+	private static class DebugStreamFactory {
+
+		public static OutputStream createDebugOutputStream(OutputStream os, PrintWriter debug) {
+			return new HessianDebugOutputStream(os, debug);
 		}
 	}
 

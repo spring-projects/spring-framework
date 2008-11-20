@@ -19,13 +19,12 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.CollectionFactory;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -55,7 +54,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Canonical value held in cache to indicate no transaction attribute was
 	 * found for this method, and we don't need to look again.
 	 */
-	private final static Object NULL_TRANSACTION_ATTRIBUTE = new Object();
+	private final static TransactionAttribute NULL_TRANSACTION_ATTRIBUTE = new DefaultTransactionAttribute();
 
 
 	/**
@@ -70,7 +69,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map attributeCache = CollectionFactory.createConcurrentMapIfPossible(16);
+	final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<Object, TransactionAttribute>();
 
 
 	/**
@@ -139,9 +138,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 		// If we are dealing with method with generic parameters, find the original method.
-		if (JdkVersion.isAtLeastJava15()) {
-			specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-		}
+		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
 		// First try is the method in the target class.
 		TransactionAttribute txAtt = findTransactionAttribute(specificMethod);

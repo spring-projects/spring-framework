@@ -36,11 +36,7 @@ import org.springframework.web.util.NestedServletException;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.
- *
- * <p>This exporter will work with both Hessian 2.x and 3.x (respectively
- * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
- * As of Spring 2.0, it is also compatible with the new Hessian 2 protocol
- * (a.k.a. Hessian 3.0.20+), while remaining compatible with older versions.
+ * This exporter requires Hessian 3.0.20 or above.
  *
  * <p>Note: Hessian services exported with this class can be accessed by
  * any Hessian client, as there isn't any special handling involved.

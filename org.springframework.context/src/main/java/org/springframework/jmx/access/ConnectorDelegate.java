@@ -50,7 +50,7 @@ class ConnectorDelegate {
 	 * @param environment the JMX environment for the connector (may be <code>null</code>)
 	 * @param agentId the local JMX MBeanServer's agent id (may be <code>null</code>)
 	 */
-	public MBeanServerConnection connect(JMXServiceURL serviceUrl, Map environment, String agentId)
+	public MBeanServerConnection connect(JMXServiceURL serviceUrl, Map<String, ?> environment, String agentId)
 			throws MBeanServerNotFoundException {
 
 		if (serviceUrl != null) {

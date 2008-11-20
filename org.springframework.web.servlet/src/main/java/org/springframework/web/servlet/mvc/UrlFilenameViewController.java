@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package org.springframework.web.servlet.mvc;
 
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -55,7 +54,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	private String suffix = "";
 
 	/** Request URL path String --> view name String */
-	private final Map viewNameCache = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, String> viewNameCache = new ConcurrentHashMap<String, String>();
 
 
 	/**
@@ -125,7 +124,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #postProcessViewName
 	 */
 	protected String getViewNameForUrlPath(String uri) {
-		String viewName = (String) this.viewNameCache.get(uri);
+		String viewName = this.viewNameCache.get(uri);
 		if (viewName == null) {
 			viewName = extractViewNameFromUrlPath(uri);
 			viewName = postProcessViewName(viewName);

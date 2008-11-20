@@ -29,7 +29,6 @@ import javax.servlet.ServletContextListener;
  *
  * @author Juergen Hoeller
  * @since 17.02.2003
- * @see ContextLoaderServlet
  * @see org.springframework.web.util.Log4jConfigListener
  */
 public class ContextLoaderListener implements ServletContextListener {

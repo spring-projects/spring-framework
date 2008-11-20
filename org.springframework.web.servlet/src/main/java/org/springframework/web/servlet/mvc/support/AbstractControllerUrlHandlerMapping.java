@@ -19,11 +19,8 @@ package org.springframework.web.servlet.mvc.support;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.core.JdkVersion;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping;
 
 /**
@@ -37,32 +34,19 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  */
 public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetectingUrlHandlerMapping  {
 
-	private static final String ANNOTATION_PREDICATE_NAME =
-			"org.springframework.web.servlet.mvc.support.AnnotationControllerTypePredicate";
+	private ControllerTypePredicate predicate = new AnnotationControllerTypePredicate();
 
-	private ControllerTypePredicate predicate;
+	private Set<String> excludedPackages = Collections.singleton("org.springframework.web.servlet.mvc");
 
-	private Set excludedPackages = Collections.singleton("org.springframework.web.servlet.mvc");
-
-	private Set excludedClasses = Collections.EMPTY_SET;
-
-
-	/**
-	 * Activates detection of annotated controllers when running on JDK 1.5 or higher.
-	 */
-	public AbstractControllerUrlHandlerMapping() {
-		this.predicate = (JdkVersion.isAtLeastJava15() ?
-				instantiateAnnotationPredicate() : new ControllerTypePredicate());
-	}
+	private Set<Class> excludedClasses = Collections.emptySet();
 
 
 	/**
 	 * Set whether to activate or deactivate detection of annotated controllers.
-	 * <p>Annotated controllers will by included by default when runnong on JDK 1.5 or higher.
 	 */
 	public void setIncludeAnnotatedControllers(boolean includeAnnotatedControllers) {
 		this.predicate = (includeAnnotatedControllers ?
-				instantiateAnnotationPredicate() : new ControllerTypePredicate());
+				new AnnotationControllerTypePredicate() : new ControllerTypePredicate());
 	}
 
 	/**
@@ -77,8 +61,8 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * alongside this ControllerClassNameHandlerMapping for application controllers.
 	 */
 	public void setExcludedPackages(String[] excludedPackages) {
-		this.excludedPackages =
-				(excludedPackages != null ? new HashSet(Arrays.asList(excludedPackages)) : Collections.EMPTY_SET);
+		this.excludedPackages = (excludedPackages != null) ?
+				new HashSet<String>(Arrays.asList(excludedPackages)) : new HashSet<String>();
 	}
 
 	/**
@@ -86,19 +70,8 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * Any such classes will simply be ignored by this HandlerMapping.
 	 */
 	public void setExcludedClasses(Class[] excludedClasses) {
-		this.excludedClasses =
-				(excludedClasses != null ? new HashSet(Arrays.asList(excludedClasses)) : Collections.EMPTY_SET);
-	}
-
-
-	private ControllerTypePredicate instantiateAnnotationPredicate() {
-		try {
-			return (ControllerTypePredicate) ClassUtils.forName(ANNOTATION_PREDICATE_NAME,
-					AbstractControllerUrlHandlerMapping.class.getClassLoader()).newInstance();
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Cannot load AnnotationControllerTypePredicate", ex);
-		}
+		this.excludedClasses = (excludedClasses != null) ?
+				new HashSet<Class>(Arrays.asList(excludedClasses)) : new HashSet<Class>();
 	}
 
 
@@ -141,8 +114,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 			return false;
 		}
 		String beanClassName = beanClass.getName();
-		for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
-			String packageName = (String) it.next();
+		for (String packageName : this.excludedPackages) {
 			if (beanClassName.startsWith(packageName)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Excluding controller bean '" + beanName + "' from class name mapping " +

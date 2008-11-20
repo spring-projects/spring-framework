@@ -319,10 +319,7 @@ public abstract class ReflectionUtils {
 	 * @param ex the unexpected exception
 	 */
 	private static void handleUnexpectedException(Throwable ex) {
-		// Needs to avoid the chained constructor for JDK 1.4 compatibility.
-		IllegalStateException isex = new IllegalStateException("Unexpected exception thrown");
-		isex.initCause(ex);
-		throw isex;
+		throw new IllegalStateException("Unexpected exception thrown", ex);
 	}
 
 	/**
@@ -337,8 +334,7 @@ public abstract class ReflectionUtils {
 	public static boolean declaresException(Method method, Class exceptionType) {
 		Assert.notNull(method, "Method must not be null");
 		Class[] declaredExceptions = method.getExceptionTypes();
-		for (int i = 0; i < declaredExceptions.length; i++) {
-			Class declaredException = declaredExceptions[i];
+		for (Class declaredException : declaredExceptions) {
 			if (declaredException.isAssignableFrom(exceptionType)) {
 				return true;
 			}

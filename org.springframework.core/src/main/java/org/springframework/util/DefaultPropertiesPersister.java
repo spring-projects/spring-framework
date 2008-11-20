@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 	protected String unescape(String str) {
-		StringBuffer outBuffer = new StringBuffer(str.length());
+		StringBuilder result = new StringBuilder(str.length());
 		for (int index = 0; index < str.length();) {
 			char c = str.charAt(index++);
 			if (c == '\\') {
@@ -151,9 +151,9 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 					c = '\f';
 				}
 			}
-			outBuffer.append(c);
+			result.append(c);
 		}
-		return outBuffer.toString();
+		return result.toString();
 	}
 
 
@@ -191,39 +191,39 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 
 	protected String escape(String str, boolean isKey) {
 		int len = str.length();
-		StringBuffer outBuffer = new StringBuffer(len * 2);
+		StringBuilder result = new StringBuilder(len * 2);
 		for (int index = 0; index < len; index++) {
 			char c = str.charAt(index);
 			switch (c) {
 				case ' ':
 					if (index == 0 || isKey) {
-						outBuffer.append('\\');
+						result.append('\\');
 					}
-					outBuffer.append(' ');
+					result.append(' ');
 					break;
 				case '\\':
-					outBuffer.append("\\\\");
+					result.append("\\\\");
 					break;
 				case '\t':
-					outBuffer.append("\\t");
+					result.append("\\t");
 					break;
 				case '\n':
-					outBuffer.append("\\n");
+					result.append("\\n");
 					break;
 				case '\r':
-					outBuffer.append("\\r");
+					result.append("\\r");
 					break;
 				case '\f':
-					outBuffer.append("\\f");
+					result.append("\\f");
 					break;
 				default:
 					if ("=: \t\r\n\f#!".indexOf(c) != -1) {
-						outBuffer.append('\\');
+						result.append('\\');
 					}
-					outBuffer.append(c);
+					result.append(c);
 			}
 		}
-		return outBuffer.toString();
+		return result.toString();
 	}
 
 

@@ -654,10 +654,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		@Override
 		@SuppressWarnings({"unchecked"})
-		protected Object resolvePathVariable(String pathVarName,
-										   MethodParameter methodParam,
-										   NativeWebRequest webRequest,
-										   Object handlerForInitBinderCall) throws Exception {
+		protected Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
+				NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
+
 			Class paramType = methodParam.getParameterType();
 			if (pathVarName.length() == 0) {
 				pathVarName = methodParam.getParameterName();

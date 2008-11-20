@@ -50,10 +50,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>The goal of this class is to avoid runtime dependencies on JDK 1.5+ and
  * Commons Collections 3.x, simply using the best collection implementation
- * that is available at runtime. As of Spring 2.5, JDK 1.4 is required,
- * so former adapter methods for JDK 1.3/1.4 always return the JDK 1.4
- * collections now. The adapter methods are still kept for supporting
- * Spring-based applications/frameworks which were built to support JDK 1.3.
+ * that is available at runtime.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -167,7 +164,7 @@ public abstract class CollectionFactory {
 	/**
 	 * Create a concurrent Map if possible: This implementation always
 	 * creates a {@link java.util.concurrent.ConcurrentHashMap}, since Spring 3.0
-	 * required JDK 1.5 anyway.
+	 * requires JDK 1.5 anyway.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new Map instance
 	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
@@ -180,7 +177,7 @@ public abstract class CollectionFactory {
 	/**
 	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface:
 	 * This implementation always creates a {@link java.util.concurrent.ConcurrentHashMap},
-	 * since Spring 3.0 required JDK 1.5 anyway.
+	 * since Spring 3.0 requires JDK 1.5 anyway.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new ConcurrentMap instance
 	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher

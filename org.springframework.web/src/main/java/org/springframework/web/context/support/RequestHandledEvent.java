@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * the most important context data.
 	 */
 	public String getShortDescription() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("session=[").append(this.sessionId).append("]; ");
 		sb.append("user=[").append(this.userName).append("]; ");
 		return sb.toString();
@@ -135,7 +135,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * all available context data.
 	 */
 	public String getDescription() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("session=[").append(this.sessionId).append("]; ");
 		sb.append("user=[").append(this.userName).append("]; ");
 		sb.append("time=[").append(this.processingTimeMillis).append("ms]; ");

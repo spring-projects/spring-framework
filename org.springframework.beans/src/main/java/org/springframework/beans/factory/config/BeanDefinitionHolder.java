@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see #getAliases()
 	 */
 	public String getShortDescription() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("Bean definition with name '").append(this.beanName).append("'");
 		if (this.aliases != null) {
 			sb.append(" and aliases [").append(StringUtils.arrayToCommaDelimitedString(this.aliases)).append("]");
@@ -134,7 +134,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see #getBeanDefinition()
 	 */
 	public String getLongDescription() {
-		StringBuffer sb = new StringBuffer(getShortDescription());
+		StringBuilder sb = new StringBuilder(getShortDescription());
 		sb.append(": ").append(this.beanDefinition);
 		return sb.toString();
 	}

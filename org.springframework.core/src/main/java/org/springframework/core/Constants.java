@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -329,7 +329,7 @@ public class Constants {
 	 * @see #toCodeForProperty
 	 */
 	public String propertyToConstantNamePrefix(String propertyName) {
-	  StringBuffer parsedPrefix = new StringBuffer();
+	  StringBuilder parsedPrefix = new StringBuilder();
 	  for(int i = 0; i < propertyName.length(); i++) {
 	    char c = propertyName.charAt(i);
 	    if (Character.isUpperCase(c)) {

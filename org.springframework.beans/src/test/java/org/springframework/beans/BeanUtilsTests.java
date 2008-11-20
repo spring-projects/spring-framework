@@ -169,7 +169,7 @@ public class BeanUtilsTests extends TestCase {
 	}
 
 	public void testResolveSimpleSignature() throws Exception {
-		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomething", null);
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
@@ -205,7 +205,7 @@ public class BeanUtilsTests extends TestCase {
 
 	public void testResolveOverloadedSignature() throws Exception {
 		// test resolve with no args
-		Method desiredMethod = MethodSignatureBean.class.getMethod("overloaded", null);
+		Method desiredMethod = MethodSignatureBean.class.getMethod("overloaded");
 		assertSignatureEquals(desiredMethod, "overloaded()");
 
 		// resolve with single arg

@@ -18,13 +18,11 @@ package org.springframework.web.servlet.view;
 
 import java.util.Enumeration;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
@@ -52,12 +50,6 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 * available to Spring's macros: e.g. for creating BindStatus objects.
 	 */
 	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
-
-
-	// Determine whether the Servlet 2.4 HttpServletResponse.getContentType()
-	// method is available.
-	private static boolean responseGetContentTypeAvailable =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getContentType", new Class[0]);
 
 
 	private boolean exposeRequestAttributes = false;
@@ -185,18 +177,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 * @see #setContentType
 	 */
 	protected void applyContentType(HttpServletResponse response)	{
-		boolean apply = true;
-		if (responseGetContentTypeAvailable) {
-			try {
-				apply = (response.getContentType() == null);
-			}
-			catch (Throwable ex) {
-				// Probably Servlet 2.4 API present but not implemented.
-				// Behave like on Servlet 2.3...
-				apply = true;
-			}
-		}
-		if (apply) {
+		if (response.getContentType() == null) {
 			response.setContentType(getContentType());
 		}
 	}

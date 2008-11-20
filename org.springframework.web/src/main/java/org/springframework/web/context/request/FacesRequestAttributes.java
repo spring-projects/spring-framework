@@ -18,7 +18,6 @@ package org.springframework.web.context.request;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
@@ -71,7 +70,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	/**
 	 * Return the JSF FacesContext that this adapter operates on.
 	 */
-	protected FacesContext getFacesContext() {
+	protected final FacesContext getFacesContext() {
 		return this.facesContext;
 	}
 
@@ -79,7 +78,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	 * Return the JSF ExternalContext that this adapter operates on.
 	 * @see javax.faces.context.FacesContext#getExternalContext()
 	 */
-	protected ExternalContext getExternalContext() {
+	protected final ExternalContext getExternalContext() {
 		return getFacesContext().getExternalContext();
 	}
 
@@ -90,7 +89,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	 * @see #SCOPE_REQUEST
 	 * @see #SCOPE_SESSION
 	 */
-	protected Map getAttributeMap(int scope) {
+	protected Map<String, Object> getAttributeMap(int scope) {
 		if (scope == SCOPE_REQUEST) {
 			return getExternalContext().getRequestMap();
 		}
@@ -113,13 +112,61 @@ public class FacesRequestAttributes implements RequestAttributes {
 	}
 
 	public String[] getAttributeNames(int scope) {
-		return StringUtils.toStringArray(getAttributeMap(scope).entrySet());
+		return StringUtils.toStringArray(getAttributeMap(scope).keySet());
 	}
 
 	public void registerDestructionCallback(String name, Runnable callback, int scope) {
 		if (logger.isWarnEnabled()) {
 			logger.warn("Could not register destruction callback [" + callback + "] for attribute '" + name +
 					"' because FacesRequestAttributes does not support such callbacks");
+		}
+	}
+
+	public Object resolveReference(String key) {
+		if (REFERENCE_REQUEST.equals(key)) {
+			return getExternalContext().getRequest();
+		}
+		else if (REFERENCE_SESSION.equals(key)) {
+			return getExternalContext().getSession(true);
+		}
+		else if ("application".equals(key)) {
+			return getExternalContext().getContext();
+		}
+		else if ("requestScope".equals(key)) {
+			return getExternalContext().getRequestMap();
+		}
+		else if ("sessionScope".equals(key)) {
+			return getExternalContext().getSessionMap();
+		}
+		else if ("applicationScope".equals(key)) {
+			return getExternalContext().getApplicationMap();
+		}
+		else if ("cookie".equals(key)) {
+			return getExternalContext().getRequestCookieMap();
+		}
+		else if ("header".equals(key)) {
+			return getExternalContext().getRequestHeaderMap();
+		}
+		else if ("headerValues".equals(key)) {
+			return getExternalContext().getRequestHeaderValuesMap();
+		}
+		else if ("param".equals(key)) {
+			return getExternalContext().getRequestParameterMap();
+		}
+		else if ("paramValues".equals(key)) {
+			return getExternalContext().getRequestParameterValuesMap();
+		}
+		else if ("initParam".equals(key)) {
+			return getExternalContext().getInitParameterMap();
+		}
+		else if ("view".equals(key)) {
+			return getFacesContext().getViewRoot();
+		}
+		else if ("facesContext".equals(key)) {
+			return getFacesContext();
+		}
+		else {
+			return null;
 		}
 	}
 

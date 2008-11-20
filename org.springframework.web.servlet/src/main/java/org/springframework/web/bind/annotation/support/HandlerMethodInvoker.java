@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.annotation.support;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -86,6 +87,7 @@ public class HandlerMethodInvoker {
 
 	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
+
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver) {
 		this(methodResolver, null);
 	}
@@ -94,11 +96,9 @@ public class HandlerMethodInvoker {
 		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null);
 	}
 
-	public HandlerMethodInvoker(HandlerMethodResolver methodResolver,
-								WebBindingInitializer bindingInitializer,
-								SessionAttributeStore sessionAttributeStore,
-								ParameterNameDiscoverer parameterNameDiscoverer,
-								WebArgumentResolver... customArgumentResolvers) {
+	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
+			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer,
+			WebArgumentResolver... customArgumentResolvers) {
 
 		this.methodResolver = methodResolver;
 		this.bindingInitializer = bindingInitializer;
@@ -107,10 +107,9 @@ public class HandlerMethodInvoker {
 		this.customArgumentResolvers = customArgumentResolvers;
 	}
 
-	public final Object invokeHandlerMethod(Method handlerMethod,
-											Object handler,
-											NativeWebRequest webRequest,
-											ExtendedModelMap implicitModel) throws Exception {
+
+	public final Object invokeHandlerMethod(Method handlerMethod, Object handler,
+			NativeWebRequest webRequest, ExtendedModelMap implicitModel) throws Exception {
 
 		Method handlerMethodToInvoke = BridgeMethodResolver.findBridgedMethod(handlerMethod);
 		try {
@@ -145,9 +144,9 @@ public class HandlerMethodInvoker {
 
 	@SuppressWarnings("unchecked")
 	private Object[] resolveHandlerArguments(Method handlerMethod,
-											 Object handler,
-											 NativeWebRequest webRequest,
-											 ExtendedModelMap implicitModel) throws Exception {
+			Object handler,
+			NativeWebRequest webRequest,
+			ExtendedModelMap implicitModel) throws Exception {
 
 		Class[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
@@ -161,9 +160,9 @@ public class HandlerMethodInvoker {
 			String paramDefaultValue = null;
 			String pathVarName = null;
 			String attrName = null;
-			Object[] paramAnns = methodParam.getParameterAnnotations();
+			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
-			for (Object paramAnn : paramAnns) {
+			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
@@ -174,7 +173,8 @@ public class HandlerMethodInvoker {
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
 					ModelAttribute attr = (ModelAttribute) paramAnn;
 					attrName = attr.value();
-				} else if (PathVariable.class.isInstance(paramAnn)) {
+				}
+				else if (PathVariable.class.isInstance(paramAnn)) {
 					PathVariable pathVar = (PathVariable) paramAnn;
 					pathVarName = pathVar.value();
 				}
@@ -185,7 +185,7 @@ public class HandlerMethodInvoker {
 						"choices - do not specify both on the same parameter: " + handlerMethod);
 			}
 
-			if (paramName == null && attrName == null && pathVarName == null)  {
+			if (paramName == null && attrName == null && pathVarName == null) {
 				Object argValue = resolveCommonArgument(methodParam, webRequest);
 				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					args[i] = argValue;
@@ -227,7 +227,8 @@ public class HandlerMethodInvoker {
 					i++;
 				}
 				implicitModel.putAll(binder.getBindingResult().getModel());
-			} else if (pathVarName != null) {
+			}
+			else if (pathVarName != null) {
 				args[i] = resolvePathVariable(pathVarName, methodParam, webRequest, handler);
 			}
 		}
@@ -265,10 +266,8 @@ public class HandlerMethodInvoker {
 		}
 	}
 
-	private Object[] resolveInitBinderArguments(Object handler,
-												Method initBinderMethod,
-												WebDataBinder binder,
-												NativeWebRequest webRequest) throws Exception {
+	private Object[] resolveInitBinderArguments(Object handler, Method initBinderMethod,
+			WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
 
 		Class[] initBinderParams = initBinderMethod.getParameterTypes();
 		Object[] initBinderArgs = new Object[initBinderParams.length];
@@ -281,9 +280,9 @@ public class HandlerMethodInvoker {
 			boolean paramRequired = false;
 			String paramDefaultValue = null;
 			String pathVarName = null;
-			Object[] paramAnns = methodParam.getParameterAnnotations();
+			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
-			for (Object paramAnn : paramAnns) {
+			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
@@ -315,16 +314,18 @@ public class HandlerMethodInvoker {
 						paramName = "";
 					}
 					else {
-						throw new IllegalStateException("Unsupported argument [" + paramType.getName() +
-								"] for @InitBinder method: " + initBinderMethod);
+						throw new IllegalStateException(
+								"Unsupported argument [" + paramType.getName() + "] for @InitBinder method: " +
+										initBinderMethod);
 					}
 				}
 			}
 
 			if (paramName != null) {
-				initBinderArgs[i] =
-						resolveRequestParam(paramName, paramRequired, paramDefaultValue, methodParam, webRequest, null);
-			} else if (pathVarName != null) {
+				initBinderArgs[i] = resolveRequestParam(
+						paramName, paramRequired, paramDefaultValue, methodParam, webRequest, null);
+			}
+			else if (pathVarName != null) {
 				initBinderArgs[i] = resolvePathVariable(pathVarName, methodParam, webRequest, null);
 			}
 		}
@@ -332,19 +333,17 @@ public class HandlerMethodInvoker {
 		return initBinderArgs;
 	}
 
-	private Object resolveRequestParam(String paramName,
-									   boolean paramRequired,
-									   String paramDefaultValue,
-									   MethodParameter methodParam,
-									   NativeWebRequest webRequest,
-									   Object handlerForInitBinderCall) throws Exception {
+	private Object resolveRequestParam(String paramName, boolean paramRequired, String paramDefaultValue,
+			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
+			throws Exception {
 
 		Class paramType = methodParam.getParameterType();
 		if (paramName.length() == 0) {
 			paramName = methodParam.getParameterName();
 			if (paramName == null) {
-				throw new IllegalStateException("No parameter specified for @RequestParam argument of type [" +
-						paramType.getName() + "], and no parameter name information found in class file either.");
+				throw new IllegalStateException(
+						"No parameter specified for @RequestParam argument of type [" + paramType.getName() +
+								"], and no parameter name information found in class file either.");
 			}
 		}
 		Object paramValue = null;
@@ -375,11 +374,9 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
 	}
 
-	private WebDataBinder resolveModelAttribute(String attrName,
-												MethodParameter methodParam,
-												ExtendedModelMap implicitModel,
-												NativeWebRequest webRequest,
-												Object handler) throws Exception {
+	private WebDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
+			ExtendedModelMap implicitModel, NativeWebRequest webRequest, Object handler)
+			throws Exception {
 
 		// Bind request parameter onto object...
 		String name = attrName;
@@ -406,22 +403,21 @@ public class HandlerMethodInvoker {
 	}
 
 	/**
-	 * Resolves the given {@link org.springframework.web.bind.annotation.PathVariable @PathVariable} variable. Overriden in
-	 * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.ServletHandlerMethodInvoker},
-	 * throws an UnsupportedOperationException by default.
+	 * Resolves the given {@link org.springframework.web.bind.annotation.PathVariable @PathVariable}
+	 * variable. Throws an UnsupportedOperationException by default. Overridden in
+	 * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.ServletHandlerMethodInvoker}.
 	 */
-	protected Object resolvePathVariable(String pathVarName,
-										 MethodParameter methodParam,
-										 NativeWebRequest webRequest,
-										 Object handlerForInitBinderCall) throws Exception {
+	protected Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
+			NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
+
 		throw new UnsupportedOperationException("@PathVariable not supported");
 	}
 
 	@SuppressWarnings("unchecked")
 	public final void updateModelAttributes(Object handler,
-											Map mavModel,
-											ExtendedModelMap implicitModel,
-											NativeWebRequest webRequest) throws Exception {
+			Map mavModel,
+			ExtendedModelMap implicitModel,
+			NativeWebRequest webRequest) throws Exception {
 
 		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
 			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
@@ -511,9 +507,10 @@ public class HandlerMethodInvoker {
 		Class paramType = methodParameter.getParameterType();
 		Object value = resolveStandardArgument(paramType, webRequest);
 		if (value != WebArgumentResolver.UNRESOLVED && !ClassUtils.isAssignableValue(paramType, value)) {
-			throw new IllegalStateException("Standard argument type [" + paramType.getName() +
-					"] resolved to incompatible value of type [" + (value != null ? value.getClass() : null) +
-					"]. Consider declaring the argument type in a less specific fashion.");
+			throw new IllegalStateException(
+					"Standard argument type [" + paramType.getName() + "] resolved to incompatible value of type [" +
+							(value != null ? value.getClass() : null) +
+							"]. Consider declaring the argument type in a less specific fashion.");
 		}
 		return value;
 	}

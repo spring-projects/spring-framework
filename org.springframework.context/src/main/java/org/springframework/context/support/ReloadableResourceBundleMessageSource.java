@@ -405,7 +405,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		String language = locale.getLanguage();
 		String country = locale.getCountry();
 		String variant = locale.getVariant();
-		StringBuffer temp = new StringBuffer(basename);
+		StringBuilder temp = new StringBuilder(basename);
 
 		if (language.length() > 0) {
 			temp.append('_').append(language);

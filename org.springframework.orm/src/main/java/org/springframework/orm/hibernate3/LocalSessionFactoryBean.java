@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
@@ -90,7 +89,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p><b>Requires Hibernate 3.1 or later.</b> Note that this factory will use
+ * <p><b>Requires Hibernate 3.2 or later.</b> Note that this factory will use
  * "on_close" as default Hibernate connection release mode, unless in the
  * case of a "jtaTransactionManager" specified, for the reason that
  * this is appropriate for most Spring-based applications (in particular when
@@ -447,8 +446,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 *     &lt;prop key="com.mycompany.Product"&gt;read-only,myRegion&lt;/prop&gt;
 	 *   &lt;/props&gt;
 	 * &lt;/property&gt;</pre>
-	 * Note that appending a cache region name (with a comma separator) is only
-	 * supported on Hibernate 3.1, where this functionality is publically available.
 	 * @param entityCacheStrategies properties that define entity cache strategies,
 	 * with class names as keys and cache concurrency strategies as values
 	 * @see org.hibernate.cfg.Configuration#setCacheConcurrencyStrategy(String, String)
@@ -469,8 +466,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 *     &lt;prop key="com.mycompany.Product.categories"&gt;read-only,myRegion&lt;/prop&gt;
 	 *   &lt;/props&gt;
 	 * &lt;/property&gt;</pre>
-	 * Note that appending a cache region name (with a comma separator) is only
-	 * supported on Hibernate 3.1, where this functionality is publically available.
 	 * @param collectionCacheStrategies properties that define collection cache strategies,
 	 * with collection roles as keys and cache concurrency strategies as values
 	 * @see org.hibernate.cfg.Configuration#setCollectionCacheConcurrencyStrategy(String, String)
@@ -481,10 +476,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	/**
 	 * Specify the Hibernate event listeners to register, with listener types
-	 * as keys and listener objects as values.
-	 * <p>Instead of a single listener object, you can also pass in a list
-	 * or set of listeners objects as value. However, this is only supported
-	 * on Hibernate 3.1.
+	 * as keys and listener objects as values. Instead of a single listener object,
+	 * you can also pass in a list or set of listeners objects as value.
 	 * <p>See the Hibernate documentation for further details on listener types
 	 * and associated listener interfaces.
 	 * @param eventListeners Map with listener type Strings as keys and
@@ -549,7 +542,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 		try {
 			if (isExposeTransactionAwareSessionFactory()) {
-				// Set Hibernate 3.1 CurrentSessionContext implementation,
+				// Set Hibernate 3.1+ CurrentSessionContext implementation,
 				// providing the Spring-managed Session as current Session.
 				// Can be overridden by a custom value for the corresponding Hibernate property.
 				config.setProperty(

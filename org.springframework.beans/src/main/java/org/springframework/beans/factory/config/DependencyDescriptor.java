@@ -16,15 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Descriptor for a specific dependency that is about to be injected.
@@ -36,10 +33,6 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DependencyDescriptor {
 
-	private static final Method fieldAnnotationsMethod =
-			ClassUtils.getMethodIfAvailable(Field.class, "getAnnotations", new Class[0]);
-
-
 	private MethodParameter methodParameter;
 
 	private Field field;
@@ -48,7 +41,7 @@ public class DependencyDescriptor {
 
 	private final boolean eager;
 
-	private Object[] fieldAnnotations;
+	private Annotation[] fieldAnnotations;
 
 
 	/**
@@ -147,9 +140,6 @@ public class DependencyDescriptor {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public Class getCollectionType() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return null;
-		}
 		return (this.field != null ?
 				GenericCollectionTypeResolver.getCollectionFieldType(this.field) :
 				GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter));
@@ -160,9 +150,6 @@ public class DependencyDescriptor {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public Class getMapKeyType() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return null;
-		}
 		return (this.field != null ?
 				GenericCollectionTypeResolver.getMapKeyFieldType(this.field) :
 				GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter));
@@ -173,9 +160,6 @@ public class DependencyDescriptor {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public Class getMapValueType() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return null;
-		}
 		return (this.field != null ?
 				GenericCollectionTypeResolver.getMapValueFieldType(this.field) :
 				GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter));
@@ -183,20 +167,12 @@ public class DependencyDescriptor {
 
 	/**
 	 * Obtain the annotations associated with the wrapped parameter/field, if any.
-	 * @return the parameter/field annotations, or <code>null</code> if there is
-	 * no annotation support (on JDK < 1.5). The return value is an Object array
-	 * instead of an Annotation array simply for compatibility with older JDKs;
-	 * feel free to cast it to <code>Annotation[]</code> on JDK 1.5 or higher.
 	 */
-	public Object[] getAnnotations() {
+	public Annotation[] getAnnotations() {
 		if (this.field != null) {
-			if (this.fieldAnnotations != null) {
-				return this.fieldAnnotations;
+			if (this.fieldAnnotations == null) {
+				this.fieldAnnotations = this.field.getAnnotations();
 			}
-			if (fieldAnnotationsMethod == null) {
-				return null;
-			}
-			this.fieldAnnotations = (Object[]) ReflectionUtils.invokeMethod(fieldAnnotationsMethod, this.field);
 			return this.fieldAnnotations;
 		}
 		else {

@@ -41,7 +41,6 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -131,9 +130,7 @@ class ConstructorResolver {
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
 						MethodParameter methodParam = new MethodParameter(constructorToUse, i);
-						if (JdkVersion.isAtLeastJava15()) {
-							GenericTypeResolver.resolveParameterType(methodParam, constructorToUse.getDeclaringClass());
-						}
+						GenericTypeResolver.resolveParameterType(methodParam, constructorToUse.getDeclaringClass());
 						if (argValue instanceof AutowiredArgumentMarker) {
 							argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
 						}
@@ -318,9 +315,7 @@ class ConstructorResolver {
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
 						MethodParameter methodParam = new MethodParameter(factoryMethodToUse, i);
-						if (JdkVersion.isAtLeastJava15()) {
-							GenericTypeResolver.resolveParameterType(methodParam, factoryClass);
-						}
+						GenericTypeResolver.resolveParameterType(methodParam, factoryClass);
 						if (argValue instanceof AutowiredArgumentMarker) {
 							argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
 						}

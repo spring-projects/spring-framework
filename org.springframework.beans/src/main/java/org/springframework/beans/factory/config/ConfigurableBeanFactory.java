@@ -122,6 +122,19 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean isCacheBeanMetadata();
 
 	/**
+	 * Specify the resolution strategy for expressions in bean definition values.
+	 * <p>There is no expression support active in a BeanFactory by default.
+	 * An ApplicationContext will typically set a standard expression strategy
+	 * here, supporting "#{...}" expressions in a Unified EL compatible style.
+	 */
+	void setBeanExpressionResolver(BeanExpressionResolver resolver);
+
+	/**
+	 * Return the resolution strategy for expressions in bean definition values.
+	 */
+	BeanExpressionResolver getBeanExpressionResolver();
+
+	/**
 	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.
 	 * <p>Such a registrar creates new PropertyEditor instances and registers them
 	 * on the given registry, fresh for each bean creation attempt. This avoids
@@ -141,22 +154,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param requiredType type of the property
 	 * @param propertyEditorClass the {@link PropertyEditor} class to register
 	 */
-	void registerCustomEditor(Class requiredType, Class propertyEditorClass);
-
-	/**
-	 * Register the given custom property editor for all properties of the
-	 * given type. To be invoked during factory configuration.
-	 * <p>Note that this method will register a shared custom editor instance;
-	 * access to that instance will be synchronized for thread-safety. It is
-	 * generally preferable to use {@link #addPropertyEditorRegistrar} instead
-	 * of this method, to avoid for the need for synchronization on custom editors.
-	 * @param requiredType type of the property
-	 * @param propertyEditor editor to register
-	 * @deprecated as of Spring 2.0.7, in favor of {@link #addPropertyEditorRegistrar}
-	 * and {@link #registerCustomEditor(Class, Class)}
-	 */
-	@Deprecated
-	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
+	void registerCustomEditor(Class requiredType, Class<PropertyEditor> propertyEditorClass);
 
 	/**
 	 * Initialize the given PropertyEditorRegistry with the custom editors
@@ -186,7 +184,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
-	 * @param beanPostProcessor the bean processor to register
+	 * <p>Note: Post-processors submitted here will be applied in the order of
+	 * registration; any ordering semantics expressed through implementing the
+	 * {@link org.springframework.core.Ordered} interface will be ignored. Note
+	 * that autodetected post-processors (e.g. as beans in an ApplicationContext)
+	 * will always be applied after programmatically registered ones.
+	 * @param beanPostProcessor the post-processor to register
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 

@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.support;
 
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
 
 /**
  * Internal helper class that identifies controller types.
@@ -29,12 +28,11 @@ import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
 class ControllerTypePredicate {
 
 	public boolean isControllerType(Class beanClass) {
-		return (Controller.class.isAssignableFrom(beanClass) ||
-				ThrowawayController.class.isAssignableFrom(beanClass));
+		return Controller.class.isAssignableFrom(beanClass);
 	}
 
 	public boolean isMultiActionControllerType(Class beanClass) {
-		return (MultiActionController.class.isAssignableFrom(beanClass));
+		return MultiActionController.class.isAssignableFrom(beanClass);
 	}
 
 }

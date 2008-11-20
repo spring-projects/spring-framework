@@ -176,10 +176,17 @@ public class BeanDefinitionVisitor {
 			visitBeanDefinition(((BeanDefinitionHolder) value).getBeanDefinition());
 		}
 		else if (value instanceof RuntimeBeanReference) {
-      RuntimeBeanReference ref = (RuntimeBeanReference) value;
-      String newBeanName = resolveStringValue(ref.getBeanName());
+			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanReference(newBeanName);
+			}
+		}
+		else if (value instanceof RuntimeBeanNameReference) {
+			RuntimeBeanNameReference ref = (RuntimeBeanNameReference) value;
+			String newBeanName = resolveStringValue(ref.getBeanName());
+			if (!newBeanName.equals(ref.getBeanName())) {
+				return new RuntimeBeanNameReference(newBeanName);
 			}
 		}
 		else if (value instanceof List) {

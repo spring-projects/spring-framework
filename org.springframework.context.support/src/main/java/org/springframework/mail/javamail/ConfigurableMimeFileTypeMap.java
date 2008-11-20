@@ -19,7 +19,6 @@ package org.springframework.mail.javamail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 
@@ -119,10 +118,8 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 				this.fileTypeMap = createFileTypeMap(this.mappingLocation, this.mappings);
 			}
 			catch (IOException ex) {
-				IllegalStateException ise = new IllegalStateException(
-						"Could not load specified MIME type mapping file: " + this.mappingLocation);
-				ise.initCause(ex);
-				throw ise;
+				throw new IllegalStateException(
+						"Could not load specified MIME type mapping file: " + this.mappingLocation, ex);
 			}
 		}
 		return this.fileTypeMap;

@@ -66,8 +66,8 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	public ShadowingClassLoader(ClassLoader enclosingClassLoader) {
 		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
-		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
-			excludePackage(DEFAULT_EXCLUDED_PACKAGES[i]);
+		for (String excludedPackage : DEFAULT_EXCLUDED_PACKAGES) {
+			excludePackage(excludedPackage);
 		}
 	}
 
@@ -113,8 +113,8 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	 * @return whether the specified class should be shadowed
 	 */
 	private boolean shouldShadow(String className) {
-		return (!className.equals(getClass().getName()) && !className.endsWith("ShadowingClassLoader")
-				&& isEligibleForShadowing(className) && !isClassNameExcludedFromShadowing(className));
+		return (!className.equals(getClass().getName()) && !className.endsWith("ShadowingClassLoader") &&
+				isEligibleForShadowing(className));
 	}
 
 	/**
@@ -126,18 +126,6 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	 */
 	protected boolean isEligibleForShadowing(String className) {
 		return !isExcluded(className);
-	}
-
-	/**
-	 * Subclasses can override this method to specify whether or not a
-	 * particular class should be excluded from shadowing.
-	 * @param className the class name to test
-	 * @return whether the specified class is excluded
-	 * @deprecated in favor of {@link #isEligibleForShadowing}
-	 */
-	@Deprecated
-	protected boolean isClassNameExcludedFromShadowing(String className) {
-		return false;
 	}
 
 

@@ -18,7 +18,6 @@ package org.springframework.beans.factory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,10 +145,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List resultList = new ArrayList();
+				List<String> resultList = new ArrayList<String>();
 				resultList.addAll(Arrays.asList(result));
-				for (int i = 0; i < parentResult.length; i++) {
-					String beanName = parentResult[i];
+				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
 						resultList.add(beanName);
 					}
@@ -190,10 +188,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				List resultList = new ArrayList();
+				List<String> resultList = new ArrayList<String>();
 				resultList.addAll(Arrays.asList(result));
-				for (int i = 0; i < parentResult.length; i++) {
-					String beanName = parentResult[i];
+				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
 						resultList.add(beanName);
 					}
@@ -216,20 +213,19 @@ public abstract class BeanFactoryUtils {
 	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
 	 */
-	public static Map beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
-	    throws BeansException {
+	public static <T> Map<String, T> beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
+			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map result = new LinkedHashMap(4);
+		Map<String, T> result = new LinkedHashMap<String, T>(4);
 		result.putAll(lbf.getBeansOfType(type));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				Map parentResult = beansOfTypeIncludingAncestors(
+				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					String beanName = (String) entry.getKey();
+				for (Map.Entry<String, T> entry : parentResult.entrySet()) {
+					String beanName = entry.getKey();
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
 						result.put(beanName, entry.getValue());
 					}
@@ -261,21 +257,20 @@ public abstract class BeanFactoryUtils {
 	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
 	 */
-	public static Map beansOfTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit)
-	    throws BeansException {
+	public static <T> Map<String, T> beansOfTypeIncludingAncestors(
+			ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
+			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map result = new LinkedHashMap(4);
+		Map<String, T> result = new LinkedHashMap<String, T>(4);
 		result.putAll(lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				Map parentResult = beansOfTypeIncludingAncestors(
+				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					String beanName = (String) entry.getKey();
+				for (Map.Entry<String, T> entry : parentResult.entrySet()) {
+					String beanName = entry.getKey();
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
 						result.put(beanName, entry.getValue());
 					}

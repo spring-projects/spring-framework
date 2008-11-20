@@ -110,15 +110,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.oracle.toplink/com.springsource.oracle.toplink/10.1.3/com.springsource.oracle.toplink-10.1.3.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/net.sourceforge.jasperreports/com.springsource.net.sf.jasperreports/2.0.5/com.springsource.net.sf.jasperreports-2.0.5.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -510,17 +501,6 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$IVY_CACHE$/com.caucho/com.springsource.com.caucho/3.1.5/com.springsource.com.caucho-sources-3.1.5.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock.classextension/2.3.0/com.springsource.org.easymock.classextension-2.3.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock.classextension/2.3.0/com.springsource.org.easymock.classextension-sources-2.3.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

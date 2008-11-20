@@ -18,7 +18,6 @@ package org.springframework.beans.factory;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class BeanCreationException extends FatalBeanException {
 
 	private String resourceDescription;
 
-	private List relatedCauses;
+	private List<Throwable> relatedCauses;
 
 
 	/**
@@ -129,7 +128,7 @@ public class BeanCreationException extends FatalBeanException {
 	 */
 	public void addRelatedCause(Throwable ex) {
 		if (this.relatedCauses == null) {
-			this.relatedCauses = new LinkedList();
+			this.relatedCauses = new LinkedList<Throwable>();
 		}
 		this.relatedCauses.add(ex);
 	}
@@ -142,16 +141,15 @@ public class BeanCreationException extends FatalBeanException {
 		if (this.relatedCauses == null) {
 			return null;
 		}
-		return (Throwable[]) this.relatedCauses.toArray(new Throwable[this.relatedCauses.size()]);
+		return this.relatedCauses.toArray(new Throwable[this.relatedCauses.size()]);
 	}
 
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(super.toString());
+		StringBuilder sb = new StringBuilder(super.toString());
 		if (this.relatedCauses != null) {
-			for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
-				Throwable relatedCause = (Throwable) it.next();
+			for (Throwable relatedCause : this.relatedCauses) {
 				sb.append("\nRelated cause: ");
 				sb.append(relatedCause);
 			}
@@ -164,8 +162,7 @@ public class BeanCreationException extends FatalBeanException {
 		synchronized (ps) {
 			super.printStackTrace(ps);
 			if (this.relatedCauses != null) {
-				for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
-					Throwable relatedCause = (Throwable) it.next();
+				for (Throwable relatedCause : this.relatedCauses) {
 					ps.println("Related cause:");
 					relatedCause.printStackTrace(ps);
 				}
@@ -178,8 +175,7 @@ public class BeanCreationException extends FatalBeanException {
 		synchronized (pw) {
 			super.printStackTrace(pw);
 			if (this.relatedCauses != null) {
-				for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
-					Throwable relatedCause = (Throwable) it.next();
+				for (Throwable relatedCause : this.relatedCauses) {
 					pw.println("Related cause:");
 					relatedCause.printStackTrace(pw);
 				}
@@ -193,8 +189,7 @@ public class BeanCreationException extends FatalBeanException {
 			return true;
 		}
 		if (this.relatedCauses != null) {
-			for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
-				Throwable relatedCause = (Throwable) it.next();
+			for (Throwable relatedCause : this.relatedCauses) {
 				if (relatedCause instanceof NestedRuntimeException &&
 						((NestedRuntimeException) relatedCause).contains(exClass)) {
 					return true;

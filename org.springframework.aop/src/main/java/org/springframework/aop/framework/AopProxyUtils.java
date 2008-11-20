@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.aop.framework;
 import java.util.Arrays;
 
 import org.springframework.aop.SpringProxy;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -34,27 +33,6 @@ import org.springframework.util.Assert;
  * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AopProxyUtils {
-
-	/**
-	 * Determine the target class of the given bean instance,
-	 * which might be an AOP proxy.
-	 * <p>Returns the target class for an AOP proxy and the plain class else.
-	 * @param candidate the instance to check (might be an AOP proxy)
-	 * @return the target class (or the plain class of the given object as fallback)
-	 * @deprecated as of Spring 2.0.3, in favor of <code>AopUtils.getTargetClass</code>
-	 * @see org.springframework.aop.support.AopUtils#getTargetClass(Object)
-	 */
-	@Deprecated
-	public static Class getTargetClass(Object candidate) {
-		Assert.notNull(candidate, "Candidate object must not be null");
-		if (AopUtils.isCglibProxy(candidate)) {
-			return candidate.getClass().getSuperclass();
-		}
-		if (candidate instanceof Advised) {
-			return ((Advised) candidate).getTargetSource().getTargetClass();
-		}
-		return candidate.getClass();
-	}
 
 	/**
 	 * Determine the complete set of interfaces to proxy for the given AOP configuration.

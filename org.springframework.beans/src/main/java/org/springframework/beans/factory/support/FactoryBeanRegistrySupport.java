@@ -20,13 +20,13 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
-import org.springframework.core.CollectionFactory;
 
 /**
  * Support base class for singleton registries which need to handle
@@ -41,7 +41,7 @@ import org.springframework.core.CollectionFactory;
 public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanRegistry {
 
 	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
-	private final Map factoryBeanObjectCache = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<String, Object>();
 
 
 	/**
@@ -113,7 +113,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			throws BeanCreationException {
 
 		AccessControlContext acc = AccessController.getContext();
-		return AccessController.doPrivileged(new PrivilegedAction() {
+		return AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				Object object;
 

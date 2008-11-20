@@ -34,8 +34,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * TestContext encapsulates the context in which a test is executed, agnostic of
- * the actual testing framework in use.
+ * TestContext encapsulates the context in which a test is executed,
+ * agnostic of the actual testing framework in use.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -43,11 +43,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class TestContext extends AttributeAccessorSupport {
 
-	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericXmlContextLoader";
-
 	private static final long serialVersionUID = -5827157174866681233L;
 
+	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME =
+			"org.springframework.test.context.support.GenericXmlContextLoader";
+
 	private static final Log logger = LogFactory.getLog(TestContext.class);
+
 
 	private final ContextCache contextCache;
 
@@ -117,8 +119,7 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Retrieve {@link ApplicationContext} resource locations for the supplied
 	 * {@link Class class}, using the supplied {@link ContextLoader} to
-	 * {@link ContextLoader#processLocations(Class, String...) process} the
-	 * locations.
+	 * {@link ContextLoader#processLocations(Class, String...) process} the locations.
 	 * <p>Note that the
 	 * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
 	 * {@link ContextConfiguration @ContextConfiguration} will be taken into
@@ -160,23 +161,21 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Build an {@link ApplicationContext} for this test context using the
-	 * configured {@link #getContextLoader() ContextLoader} and
-	 * {@link #getLocations() resource locations}.
+	 * Build an ApplicationContext for this test context using the
+	 * configured ContextLoader and resource locations.
 	 * @throws Exception if an error occurs while building the application context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {
-		Assert.notNull(getContextLoader(),
-				"Can not build an ApplicationContext with a NULL 'contextLoader'. Consider annotating your test class with @ContextConfiguration.");
-		Assert.notNull(getLocations(),
-				"Can not build an ApplicationContext with a NULL 'locations' array. Consider annotating your test class with @ContextConfiguration.");
-		return getContextLoader().loadContext(getLocations());
+		Assert.notNull(this.contextLoader, "Can not build an ApplicationContext with a NULL 'contextLoader'. " +
+				"Consider annotating your test class with @ContextConfiguration.");
+		Assert.notNull(this.locations, "Can not build an ApplicationContext with a NULL 'locations' array. " +
+				"Consider annotating your test class with @ContextConfiguration.");
+		return this.contextLoader.loadContext(this.locations);
 	}
 
 	/**
 	 * Convert the supplied context <code>key</code> to a String
 	 * representation for use in caching, logging, etc.
-	 * @param key the context key to convert to a String
 	 */
 	private String contextKeyString(Serializable key) {
 		return ObjectUtils.nullSafeToString(key);
@@ -190,50 +189,19 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @throws IllegalStateException if an error occurs while retrieving the application context
 	 */
 	public ApplicationContext getApplicationContext() {
-		ApplicationContext context = null;
-		ContextCache cache = getContextCache();
-		synchronized (cache) {
-			context = cache.get(contextKeyString(getLocations()));
+		synchronized (this.contextCache) {
+			ApplicationContext context = this.contextCache.get(contextKeyString(this.locations));
 			if (context == null) {
 				try {
 					context = loadApplicationContext();
-					cache.put(contextKeyString(getLocations()), context);
+					this.contextCache.put(contextKeyString(this.locations), context);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);
 				}
 			}
+			return context;
 		}
-		return context;
-	}
-
-	/**
-	 * Get the {@link ContextCache context cache} for this test context.
-	 * @return the context cache (never <code>null</code>)
-	 */
-	ContextCache getContextCache() {
-		return this.contextCache;
-	}
-
-	/**
-	 * Get the {@link ContextLoader} to use for loading the
-	 * {@link ApplicationContext} for this test context.
-	 * @return the context loader. May be <code>null</code> if the current
-	 * test context is not configured to use an application context.
-	 */
-	ContextLoader getContextLoader() {
-		return this.contextLoader;
-	}
-
-	/**
-	 * Get the resource locations to use for loading the
-	 * {@link ApplicationContext} for this test context.
-	 * @return the application context resource locations.
-	 * May be <code>null</code> if the current test context is
-	 * not configured to use an application context.
-	 */
-	String[] getLocations() {
-		return this.locations;
 	}
 
 	/**
@@ -245,7 +213,7 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Gets the current {@link Object test instance} for this test context.
+	 * Get the current {@link Object test instance} for this test context.
 	 * <p>Note: this is a mutable property.
 	 * @return the current test instance (may be <code>null</code>)
 	 * @see #updateState(Object,Method,Throwable)
@@ -255,7 +223,7 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Gets the current {@link Method test method} for this test context.
+	 * Get the current {@link Method test method} for this test context.
 	 * <p>Note: this is a mutable property.
 	 * @return the current test method (may be <code>null</code>)
 	 * @see #updateState(Object, Method, Throwable)
@@ -265,7 +233,7 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Gets the {@link Throwable exception} that was thrown during execution of
+	 * Get the {@link Throwable exception} that was thrown during execution of
 	 * the {@link #getTestMethod() test method}.
 	 * <p>Note: this is a mutable property.
 	 * @return the exception that was thrown, or <code>null</code> if no
@@ -283,36 +251,31 @@ public class TestContext extends AttributeAccessorSupport {
 	 * modified the context (for example, by replacing a bean definition).
 	 */
 	public void markApplicationContextDirty() {
-		getContextCache().setDirty(contextKeyString(getLocations()));
+		this.contextCache.setDirty(contextKeyString(this.locations));
 	}
 
 	/**
-	 * Updates this test context to reflect the state of the currently executing test.
+	 * Update this test context to reflect the state of the currently executing test.
 	 * @param testInstance the current test instance (may be <code>null</code>)
 	 * @param testMethod the current test method (may be <code>null</code>)
 	 * @param testException the exception that was thrown in the test method,
 	 * or <code>null</code> if no exception was thrown
 	 */
-	synchronized void updateState(Object testInstance, Method testMethod, Throwable testException) {
+	void updateState(Object testInstance, Method testMethod, Throwable testException) {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testException = testException;
 	}
 
 	/**
-	 * Provides a string representation of this test context's
-	 * {@link #getTestClass() test class},
-	 * {@link #getLocations() application context resource locations},
-	 * {@link #getTestInstance() test instance},
-	 * {@link #getTestMethod() test method}, and
-	 * {@link #getTestException() test exception}.
+	 * Provide a String representation of this test context's state.
 	 */
 	@Override
 	public String toString() {
 		return new ToStringCreator(this).
-				append("testClass", getTestClass()).
-				append("locations", getLocations()).append("testInstance", getTestInstance()).
-				append("testMethod", getTestMethod()).append("testException", getTestException()).
+				append("testClass", this.testClass).
+				append("locations", this.locations).append("testInstance", this.testInstance).
+				append("testMethod", this.testMethod).append("testException", this.testException).
 				toString();
 	}
 

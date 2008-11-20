@@ -93,7 +93,6 @@ import org.springframework.util.SystemPropertyUtils;
  * @since 12.08.2003
  * @see org.springframework.util.Log4jConfigurer
  * @see Log4jConfigListener
- * @see Log4jConfigServlet
  */
 public abstract class Log4jWebConfigurer {
 

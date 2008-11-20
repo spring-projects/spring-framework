@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,14 +84,14 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 
 
 	private static String toCommaDelimitedString(Class[] classes) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < classes.length; ++i) {
 			if (i > 0) {
-				buffer.append(",");
+				sb.append(",");
 			}
-			buffer.append(ClassUtils.getQualifiedName(classes[i]));
+			sb.append(ClassUtils.getQualifiedName(classes[i]));
 		}
-		return buffer.toString();
+		return sb.toString();
 	}
 
 }

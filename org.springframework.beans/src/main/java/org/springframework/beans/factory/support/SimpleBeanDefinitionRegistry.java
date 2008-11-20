@@ -17,11 +17,11 @@
 package org.springframework.beans.factory.support;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.SimpleAliasRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 public class SimpleBeanDefinitionRegistry extends SimpleAliasRegistry implements BeanDefinitionRegistry {
 
 	/** Map of bean definition objects, keyed by bean name */
-	private final Map beanDefinitionMap = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>();
 
 
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
@@ -55,7 +55,7 @@ public class SimpleBeanDefinitionRegistry extends SimpleAliasRegistry implements
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
+		BeanDefinition bd = this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
 			throw new NoSuchBeanDefinitionException(beanName);
 		}

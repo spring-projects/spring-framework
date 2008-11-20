@@ -23,7 +23,6 @@ import java.util.Set;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 
 /**
  * Simple factory for shared Set instances. Allows for central setup
@@ -83,7 +82,7 @@ public class SetFactoryBean extends AbstractFactoryBean {
 			result = new LinkedHashSet(this.sourceSet.size());
 		}
 		Class valueType = null;
-		if (this.targetSetClass != null && JdkVersion.isAtLeastJava15()) {
+		if (this.targetSetClass != null) {
 			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetSetClass);
 		}
 		if (valueType != null) {

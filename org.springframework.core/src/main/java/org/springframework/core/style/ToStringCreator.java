@@ -36,7 +36,7 @@ public class ToStringCreator {
 			new DefaultToStringStyler(StylerUtils.DEFAULT_VALUE_STYLER);
 
 
-	private StringBuffer buffer = new StringBuffer(512);
+	private StringBuilder buffer = new StringBuilder(512);
 
 	private ToStringStyler styler;
 

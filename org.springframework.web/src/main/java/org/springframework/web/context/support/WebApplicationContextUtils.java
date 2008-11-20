@@ -16,6 +16,10 @@
 
 package org.springframework.web.context.support;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpSession;
@@ -53,8 +57,7 @@ public abstract class WebApplicationContextUtils {
 	
 	/**
 	 * Find the root WebApplicationContext for this web application, which is
-	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener} or
-	 * {@link org.springframework.web.context.ContextLoaderServlet}.
+	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
@@ -74,8 +77,7 @@ public abstract class WebApplicationContextUtils {
 
 	/**
 	 * Find the root WebApplicationContext for this web application, which is
-	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener} or
-	 * {@link org.springframework.web.context.ContextLoaderServlet}.
+	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
@@ -105,9 +107,7 @@ public abstract class WebApplicationContextUtils {
 			throw (Error) attr;
 		}
 		if (attr instanceof Exception) {
-			IllegalStateException ex = new IllegalStateException();
-			ex.initCause((Exception) attr);
-			throw ex;
+			throw new IllegalStateException((Exception) attr);
 		}
 		if (!(attr instanceof WebApplicationContext)) {
 			throw new IllegalStateException("Context attribute is not of type WebApplicationContext: " + attr);
@@ -121,7 +121,7 @@ public abstract class WebApplicationContextUtils {
 	 * as used by the WebApplicationContext.
 	 * @param beanFactory the BeanFactory to configure
 	 */
-	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
+	static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
 		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
@@ -144,6 +144,40 @@ public abstract class WebApplicationContextUtils {
 				return ((ServletRequestAttributes) requestAttr).getRequest().getSession();
 			}
 		});
+	}
+
+	/**
+	 * Register web-specific environment beans with the given BeanFactory,
+	 * as used by the WebApplicationContext.
+	 * @param bf the BeanFactory to configure
+	 * @param sc the ServletContext that we're running within
+	 */
+	static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, ServletContext sc) {
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME)) {
+			Map<String, String> parameterMap = new HashMap<String, String>();
+			if (sc != null) {
+				Enumeration paramNameEnum = sc.getInitParameterNames();
+				while (paramNameEnum.hasMoreElements()) {
+					String paramName = (String) paramNameEnum.nextElement();
+					parameterMap.put(paramName, sc.getInitParameter(paramName));
+				}
+			}
+			bf.registerSingleton(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME,
+					Collections.unmodifiableMap(parameterMap));
+		}
+
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
+			Map<String, Object> attributeMap = new HashMap<String, Object>();
+			if (sc != null) {
+				Enumeration attrNameEnum = sc.getAttributeNames();
+				while (attrNameEnum.hasMoreElements()) {
+					String attrName = (String) attrNameEnum.nextElement();
+					attributeMap.put(attrName, sc.getAttribute(attrName));
+				}
+			}
+			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
+					Collections.unmodifiableMap(attributeMap));
+		}
 	}
 
 }

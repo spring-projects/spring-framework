@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
@@ -136,7 +135,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 
-	private Map argumentBindings = null;
+	private Map<String, Integer> argumentBindings = null;
 
 	private boolean argumentsIntrospected = false;
 
@@ -454,7 +453,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private void bindExplicitArguments(int numArgumentsLeftToBind) {
-		this.argumentBindings = new HashMap();
+		this.argumentBindings = new HashMap<String, Integer>();
 
 		int numExpectedArgumentNames = this.aspectJAdviceMethod.getParameterTypes().length;
 		if (this.argumentNames.length != numExpectedArgumentNames) {
@@ -466,7 +465,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		// So we match in number...
 		int argumentIndexOffset = this.adviceInvocationArgumentCount - numArgumentsLeftToBind;
 		for (int i = argumentIndexOffset; i < this.argumentNames.length; i++) {
-			this.argumentBindings.put(this.argumentNames[i],new Integer(i));
+			this.argumentBindings.put(this.argumentNames[i], i);
 		}
 
 		// Check that returning and throwing were in the argument names list if
@@ -477,12 +476,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 						+ this.returningName + "' was not bound in advice arguments");
 			} 
 			else {
-				Integer index = (Integer) this.argumentBindings.get(this.returningName);
-				this.discoveredReturningType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];
-				if (JdkVersion.isAtLeastJava15()) {
-					this.discoveredReturningGenericType =
-							this.aspectJAdviceMethod.getGenericParameterTypes()[index.intValue()];
-				}
+				Integer index = this.argumentBindings.get(this.returningName);
+				this.discoveredReturningType = this.aspectJAdviceMethod.getParameterTypes()[index];
+				this.discoveredReturningGenericType = this.aspectJAdviceMethod.getGenericParameterTypes()[index];
 			}
 		}
 		if (this.throwingName != null) {
@@ -491,8 +487,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 						+ this.throwingName + "' was not bound in advice arguments");
 			} 
 			else {
-				Integer index = (Integer) this.argumentBindings.get(this.throwingName);
-				this.discoveredThrowingType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];				
+				Integer index = this.argumentBindings.get(this.throwingName);
+				this.discoveredThrowingType = this.aspectJAdviceMethod.getParameterTypes()[index];
 			}
 		}
 
@@ -564,24 +560,23 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			// binding from pointcut match
 			if (jpMatch != null) {
 				PointcutParameter[] parameterBindings = jpMatch.getParameterBindings();
-				for (int i = 0; i < parameterBindings.length; i++) {
-					PointcutParameter parameter = parameterBindings[i];
+				for (PointcutParameter parameter : parameterBindings) {
 					String name = parameter.getName();
-					Integer index = (Integer) this.argumentBindings.get(name);
-					adviceInvocationArgs[index.intValue()] = parameter.getBinding();
+					Integer index = this.argumentBindings.get(name);
+					adviceInvocationArgs[index] = parameter.getBinding();
 					numBound++;
 				}
 			}
 			// binding from returning clause
 			if (this.returningName != null) {
-				Integer index = (Integer) this.argumentBindings.get(this.returningName);
-				adviceInvocationArgs[index.intValue()] = returnValue;
+				Integer index = this.argumentBindings.get(this.returningName);
+				adviceInvocationArgs[index] = returnValue;
 				numBound++;
 			}
 			// binding from thrown exception
 			if (this.throwingName != null) {
-				Integer index = (Integer) this.argumentBindings.get(this.throwingName);
-				adviceInvocationArgs[index.intValue()] = ex;
+				Integer index = this.argumentBindings.get(this.throwingName);
+				adviceInvocationArgs[index] = ex;
 				numBound++;
 			}
 		}

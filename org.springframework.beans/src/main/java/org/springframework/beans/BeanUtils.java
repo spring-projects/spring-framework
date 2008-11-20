@@ -56,7 +56,8 @@ public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
-	private static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
+	private static final Map<Class, Boolean> unknownEditorTypes =
+			Collections.synchronizedMap(new WeakHashMap<Class, Boolean>());
 
 
 	/**
@@ -75,7 +76,7 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor((Class[]) null), null);
+			return instantiateClass(clazz.getDeclaredConstructor());
 		}
 		catch (NoSuchMethodException ex) {
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
@@ -93,7 +94,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 */
-	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeanInstantiationException {
+	public static Object instantiateClass(Constructor ctor, Object... args) throws BeanInstantiationException {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
@@ -224,12 +225,11 @@ public abstract class BeanUtils {
 
 		Method targetMethod = null;
 		int numMethodsFoundWithCurrentMinimumArgs = 0;
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().equals(methodName)) {
-				int numParams = methods[i].getParameterTypes().length;
-				if (targetMethod == null ||
-						numParams < targetMethod.getParameterTypes().length) {
-					targetMethod = methods[i];
+		for (Method method : methods) {
+			if (method.getName().equals(methodName)) {
+				int numParams = method.getParameterTypes().length;
+				if (targetMethod == null || numParams < targetMethod.getParameterTypes().length) {
+					targetMethod = method;
 					numMethodsFoundWithCurrentMinimumArgs = 1;
 				}
 				else {
@@ -341,8 +341,7 @@ public abstract class BeanUtils {
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
 		Assert.notNull(method, "Method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(method.getDeclaringClass());
-		for (int i = 0; i < pds.length; i++) {
-			PropertyDescriptor pd = pds[i];
+		for (PropertyDescriptor pd : pds) {
 			if (method.equals(pd.getReadMethod()) || method.equals(pd.getWriteMethod())) {
 				return pd;
 			}
@@ -360,7 +359,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding editor, or <code>null</code> if none found
 	 */
 	public static PropertyEditor findEditorByConvention(Class targetType) {
-		if (targetType == null || unknownEditorTypes.containsKey(targetType)) {
+		if (targetType == null || targetType.isArray() || unknownEditorTypes.containsKey(targetType)) {
 			return null;
 		}
 		ClassLoader cl = targetType.getClassLoader();
@@ -400,8 +399,8 @@ public abstract class BeanUtils {
 	 */
 	public static Class findPropertyType(String propertyName, Class[] beanClasses) {
 		if (beanClasses != null) {
-			for (int i = 0; i < beanClasses.length; i++) {
-				PropertyDescriptor pd = getPropertyDescriptor(beanClasses[i], propertyName);
+			for (Class beanClass : beanClasses) {
+				PropertyDescriptor pd = getPropertyDescriptor(beanClass, propertyName);
 				if (pd != null) {
 					return pd.getPropertyType();
 				}
@@ -453,36 +452,6 @@ public abstract class BeanUtils {
 				Number.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz) ||
 				clazz.equals(URI.class) || clazz.equals(URL.class) ||
 				clazz.equals(Locale.class) || clazz.equals(Class.class);
-	}
-
-	/**
-	 * Determine if the given target type is assignable from the given value
-	 * type, assuming setting by reflection. Considers primitive wrapper
-	 * classes as assignable to the corresponding primitive types.
-	 * @param targetType the target type
-	 * @param valueType the value type that should be assigned to the target type
-	 * @return if the target type is assignable from the value type
-	 * @deprecated as of Spring 2.0, in favor of <code>ClassUtils.isAssignable</code>
-	 * @see org.springframework.util.ClassUtils#isAssignable(Class, Class)
-	 */
-	@Deprecated
-	public static boolean isAssignable(Class targetType, Class valueType) {
-		return ClassUtils.isAssignable(targetType, valueType);
-	}
-
-	/**
-	 * Determine if the given type is assignable from the given value,
-	 * assuming setting by reflection. Considers primitive wrapper classes
-	 * as assignable to the corresponding primitive types.
-	 * @param type the target type
-	 * @param value the value that should be assigned to the type
-	 * @return if the type is assignable from the value
-	 * @deprecated as of Spring 2.0, in favor of <code>ClassUtils.isAssignableValue</code>
-	 * @see org.springframework.util.ClassUtils#isAssignableValue(Class, Object)
-	 */
-	@Deprecated
-	public static boolean isAssignable(Class type, Object value) {
-		return ClassUtils.isAssignableValue(type, value);
 	}
 
 
@@ -571,8 +540,7 @@ public abstract class BeanUtils {
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
 		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
 
-		for (int i = 0; i < targetPds.length; i++) {
-			PropertyDescriptor targetPd = targetPds[i];
+		for (PropertyDescriptor targetPd : targetPds) {
 			if (targetPd.getWriteMethod() != null &&
 					(ignoreProperties == null || (!ignoreList.contains(targetPd.getName())))) {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
@@ -582,12 +550,12 @@ public abstract class BeanUtils {
 						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 							readMethod.setAccessible(true);
 						}
-						Object value = readMethod.invoke(source, new Object[0]);
+						Object value = readMethod.invoke(source);
 						Method writeMethod = targetPd.getWriteMethod();
 						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 							writeMethod.setAccessible(true);
 						}
-						writeMethod.invoke(target, new Object[] {value});
+						writeMethod.invoke(target, value);
 					}
 					catch (Throwable ex) {
 						throw new FatalBeanException("Could not copy properties from source to target", ex);

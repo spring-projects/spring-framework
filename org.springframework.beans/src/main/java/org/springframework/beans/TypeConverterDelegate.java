@@ -18,21 +18,17 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -52,8 +48,6 @@ import org.springframework.util.StringUtils;
 class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
-
-	private static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -195,7 +189,7 @@ class TypeConverterDelegate {
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
 					String strValue = ((String) convertedValue).trim();
-					if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(strValue)) {
+					if (requiredType.isEnum() && "".equals(strValue)) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
@@ -216,7 +210,7 @@ class TypeConverterDelegate {
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
 				// Definitely doesn't match: throw IllegalArgumentException.
-				StringBuffer msg = new StringBuffer();
+				StringBuilder msg = new StringBuilder();
 				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
 				msg.append("] to required type [").append(ClassUtils.getQualifiedName(requiredType)).append("]");
 				if (propertyName != null) {
@@ -244,15 +238,7 @@ class TypeConverterDelegate {
 	protected PropertyEditor findDefaultEditor(Class requiredType, PropertyDescriptor descriptor) {
 		PropertyEditor editor = null;
 		if (descriptor != null) {
-			if (JdkVersion.isAtLeastJava15()) {
-				editor = descriptor.createPropertyEditor(this.targetObject);
-			}
-			else {
-				Class editorClass = descriptor.getPropertyEditorClass();
-				if (editorClass != null) {
-					editor = (PropertyEditor) BeanUtils.instantiateClass(editorClass);
-				}
-			}
+			editor = descriptor.createPropertyEditor(this.targetObject);
 		}
 		if (editor == null && requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
@@ -260,19 +246,6 @@ class TypeConverterDelegate {
 			if (editor == null && !String.class.equals(requiredType)) {
 				// No BeanWrapper default editor -> check standard JavaBean editor.
 				editor = BeanUtils.findEditorByConvention(requiredType);
-				if (editor == null && !unknownEditorTypes.containsKey(requiredType)) {
-					// Deprecated global PropertyEditorManager fallback...
-					editor = PropertyEditorManager.findEditor(requiredType);
-					if (editor == null) {
-						// Regular case as of Spring 2.5
-						unknownEditorTypes.put(requiredType, Boolean.TRUE);
-					}
-					else {
-						logger.warn("PropertyEditor [" + editor.getClass().getName() +
-								"] found through deprecated global PropertyEditorManager fallback - " +
-								"consider using a more isolated form of registration, e.g. on the BeanWrapper/BeanFactory!");
-					}
-				}
 			}
 		}
 		return editor;
@@ -425,7 +398,7 @@ class TypeConverterDelegate {
 			Collection original, String propertyName, MethodParameter methodParam) {
 
 		Class elementType = null;
-		if (methodParam != null && JdkVersion.isAtLeastJava15()) {
+		if (methodParam != null) {
 			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 		}
 		if (elementType == null &&
@@ -475,7 +448,7 @@ class TypeConverterDelegate {
 	protected Map convertToTypedMap(Map original, String propertyName, MethodParameter methodParam) {
 		Class keyType = null;
 		Class valueType = null;
-		if (methodParam != null && JdkVersion.isAtLeastJava15()) {
+		if (methodParam != null) {
 			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
 			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
 		}

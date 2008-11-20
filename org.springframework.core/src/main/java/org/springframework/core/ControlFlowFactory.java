@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class ControlFlowFactory {
 
 		@Override
 		public String toString() {
-			StringBuffer sb = new StringBuffer("Jdk14ControlFlow: ");
+			StringBuilder sb = new StringBuilder("Jdk14ControlFlow: ");
 			for (int i = 0; i < this.stack.length; i++) {
 				if (i > 0) {
 					sb.append("\n\t@");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,15 +290,15 @@ public class ModelAndView {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer("ModelAndView: ");
+		StringBuilder result = new StringBuilder("ModelAndView: ");
 		if (isReference()) {
-			buf.append("reference to view with name '").append(this.view).append("'");
+			result.append("reference to view with name '").append(this.view).append("'");
 		}
 		else {
-			buf.append("materialized View is [").append(this.view).append(']');
+			result.append("materialized View is [").append(this.view).append(']');
 		}
-		buf.append("; model is ").append(this.model);
-		return buf.toString();
+		result.append("; model is ").append(this.model);
+		return result.toString();
 	}
 
 }

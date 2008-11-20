@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,14 +78,14 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	private String buildDescription(BeanReference adviceReference, BeanDefinition pointcutDefinition) {
-		return new StringBuffer("Advisor <advice(ref)='").
+		return new StringBuilder("Advisor <advice(ref)='").
 				append(adviceReference.getBeanName()).append("', pointcut(expression)=[").
 				append(pointcutDefinition.getPropertyValues().getPropertyValue("expression").getValue()).
 				append("]>").toString();
 	}
 
 	private String buildDescription(BeanReference adviceReference, BeanReference pointcutReference) {
-		return new StringBuffer("Advisor <advice(ref)='").
+		return new StringBuilder("Advisor <advice(ref)='").
 				append(adviceReference.getBeanName()).append("', pointcut(ref)='").
 				append(pointcutReference.getBeanName()).append("'>").toString();
 	}

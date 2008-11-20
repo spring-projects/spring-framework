@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.mvc.multiaction;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -43,7 +43,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	private String suffix = "";
 
 	/** Request URL path String --> method name String */
-	private final Map methodNameCache = CollectionFactory.createConcurrentMapIfPossible(16);
+	private final Map<String, String> methodNameCache = new ConcurrentHashMap<String, String>();
 
 
 	/**
@@ -86,7 +86,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	 */
 	@Override
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
-		String methodName = (String) this.methodNameCache.get(urlPath);
+		String methodName = this.methodNameCache.get(urlPath);
 		if (methodName == null) {
 			methodName = extractHandlerMethodNameFromUrlPath(urlPath);
 			methodName = postProcessHandlerMethodName(methodName);
