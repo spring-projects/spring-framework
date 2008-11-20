@@ -252,8 +252,13 @@ public abstract class JmsUtils {
 	public static String buildExceptionMessage(JMSException ex) {
 		String message = ex.getMessage();
 		Exception linkedEx = ex.getLinkedException();
-		if (linkedEx != null && message.indexOf(linkedEx.getMessage()) == -1) {
-			message = message + "; nested exception is " + linkedEx;
+		if (linkedEx != null) {
+			if (message == null) {
+				message = linkedEx.toString();
+			}
+			else if (!message.contains(linkedEx.getMessage())) {
+				message = message + "; nested exception is " + linkedEx;
+			}
 		}
 		return message;
 	}
