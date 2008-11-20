@@ -171,6 +171,9 @@
       <entry name="?*.tld" />
       <entry name="?*.xsd" />
       <entry name="?*.types" />
+      <entry name="?*.bsh" />
+      <entry name="?*.rb" />
+      <entry name="?*.groovy" />
     </wildcardResourcePatterns>
   </component>
   <component name="DependenciesAnalyzeManager">
