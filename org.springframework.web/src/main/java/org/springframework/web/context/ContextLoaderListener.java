@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import javax.servlet.ServletContextListener;
  * @since 17.02.2003
  * @see org.springframework.web.util.Log4jConfigListener
  */
-public class ContextLoaderListener implements ServletContextListener {
+public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
 	private ContextLoader contextLoader;
 
@@ -41,21 +41,30 @@ public class ContextLoaderListener implements ServletContextListener {
 	 */
 	public void contextInitialized(ServletContextEvent event) {
 		this.contextLoader = createContextLoader();
+		if (this.contextLoader == null) {
+			this.contextLoader = this;
+		}
 		this.contextLoader.initWebApplicationContext(event.getServletContext());
 	}
 
 	/**
 	 * Create the ContextLoader to use. Can be overridden in subclasses.
 	 * @return the new ContextLoader
+	 * @deprecated in favor of simply subclassing ContextLoaderListener itself
+	 * (which extends ContextLoader, as of Spring 3.0)
 	 */
+	@Deprecated
 	protected ContextLoader createContextLoader() {
-		return new ContextLoader();
+		return null;
 	}
 
 	/**
 	 * Return the ContextLoader used by this listener.
 	 * @return the current ContextLoader
+	 * @deprecated in favor of simply subclassing ContextLoaderListener itself
+	 * (which extends ContextLoader, as of Spring 3.0)
 	 */
+	@Deprecated
 	public ContextLoader getContextLoader() {
 		return this.contextLoader;
 	}

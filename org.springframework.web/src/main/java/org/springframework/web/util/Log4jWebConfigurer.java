@@ -183,7 +183,7 @@ public abstract class Log4jWebConfigurer {
 	 */
 	private static boolean exposeWebAppRoot(ServletContext servletContext) {
 		String exposeWebAppRootParam = servletContext.getInitParameter(EXPOSE_WEB_APP_ROOT_PARAM);
-		return (exposeWebAppRootParam == null || Boolean.valueOf(exposeWebAppRootParam).booleanValue());
+		return (exposeWebAppRootParam == null || Boolean.valueOf(exposeWebAppRootParam));
 	}
 
 }
