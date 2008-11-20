@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -32,7 +33,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher
- * @since 2.0
  */
 public class RequestScopeTests extends TestCase {
 
@@ -41,6 +41,7 @@ public class RequestScopeTests extends TestCase {
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.beanFactory.registerScope("request", new RequestScope());
+		this.beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("requestScopeTests.xml", getClass()));
 		this.beanFactory.preInstantiateSingletons();
@@ -48,6 +49,7 @@ public class RequestScopeTests extends TestCase {
 
 	public void testGetFromScope() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContextPath("/path");
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
@@ -55,6 +57,7 @@ public class RequestScopeTests extends TestCase {
 			String name = "requestScopedObject";
 			assertNull(request.getAttribute(name));
 			TestBean bean = (TestBean) this.beanFactory.getBean(name);
+			assertEquals("/path", bean.getName());
 			assertSame(bean, request.getAttribute(name));
 			assertSame(bean, this.beanFactory.getBean(name));
 		}
