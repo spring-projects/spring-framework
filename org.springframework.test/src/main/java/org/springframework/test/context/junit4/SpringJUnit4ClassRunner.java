@@ -54,6 +54,11 @@ import org.springframework.test.context.TestContextManager;
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
+ * <p><b>NOTE:</b> As of Spring 3.0 M1, SpringJUnit4ClassRunner requires
+ * JUnit 4.5, while internally still being based on JUnit 4.4 SPI.
+ * This will be rewritten based on JUnit 4.5's BlockJUnit4ClassRunner
+ * in a later Spring 3.0 release.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

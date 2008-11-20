@@ -29,10 +29,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.internal.AssumptionViolatedException;
 
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
@@ -97,6 +97,7 @@ class SpringMethodRoadie {
 		this.notifier = notifier;
 		this.description = description;
 	}
+
 
 	/**
 	 * Runs the <em>test</em>, including notification of events to the
@@ -333,6 +334,7 @@ class SpringMethodRoadie {
 				runTestMethod();
 			}
 			catch (FailedBefore ex) {
+				// ignore
 			}
 			finally {
 				runAfters();
