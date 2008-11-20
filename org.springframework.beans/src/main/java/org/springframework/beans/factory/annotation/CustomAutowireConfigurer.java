@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
@@ -83,6 +82,7 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.customQualifierTypes != null) {
 			if (!(beanFactory instanceof DefaultListableBeanFactory)) {
@@ -91,14 +91,12 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 			}
 			DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;
 			if (!(dlbf.getAutowireCandidateResolver() instanceof QualifierAnnotationAutowireCandidateResolver)) {
-				throw new IllegalStateException(
-						"CustomAutowireConfigurer needs to operate on a QualifierAnnotationAutowireCandidateResolver");
+				dlbf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 			}
 			QualifierAnnotationAutowireCandidateResolver resolver =
 					(QualifierAnnotationAutowireCandidateResolver) dlbf.getAutowireCandidateResolver();
-			for (Iterator it = this.customQualifierTypes.iterator(); it.hasNext();) {
+			for (Object value : this.customQualifierTypes) {
 				Class customType = null;
-				Object value = it.next();
 				if (value instanceof Class) {
 					customType = (Class) value;
 				}

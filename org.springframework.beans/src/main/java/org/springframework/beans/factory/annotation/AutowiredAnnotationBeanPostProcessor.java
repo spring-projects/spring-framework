@@ -18,6 +18,7 @@ package org.springframework.beans.factory.annotation;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -99,13 +100,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
 
-	private Class<? extends Annotation> autowiredAnnotationType = Autowired.class;
+	@SuppressWarnings("unchecked")
+	private Class<? extends Annotation>[] autowiredAnnotationTypes =
+			new Class[] {Autowired.class, Qualifier.class, Value.class};
 	
 	private String requiredParameterName = "required";
 	
 	private boolean requiredParameterValue = true;
-
-	private Class<? extends Annotation> valueAnnotationType = Value.class;
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
@@ -127,16 +128,24 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * (non-Spring-specific) annotation type to indicate that a member is
 	 * supposed to be autowired.
 	 */
-	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
-		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
-		this.autowiredAnnotationType = autowiredAnnotationType;
+	public void setAutowiredAnnotationTypes(Class<? extends Annotation>[] autowiredAnnotationTypes) {
+		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
+		this.autowiredAnnotationTypes = autowiredAnnotationTypes;
 	}
 
 	/**
-	 * Return the 'autowired' annotation type.
+	 * Set the 'autowired' annotation type, to be used on constructors, fields,
+	 * setter methods and arbitrary config methods.
+	 * <p>The default autowired annotation type is the Spring-provided
+	 * {@link Autowired} annotation.
+	 * <p>This setter property exists so that developers can provide their own
+	 * (non-Spring-specific) annotation type to indicate that a member is
+	 * supposed to be autowired.
 	 */
-	protected Class<? extends Annotation> getAutowiredAnnotationType() {
-		return this.autowiredAnnotationType;
+	@SuppressWarnings("unchecked")
+	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
+		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
+		this.autowiredAnnotationTypes = new Class[] {autowiredAnnotationType};
 	}
 
 	/**
@@ -196,7 +205,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					Constructor requiredConstructor = null;
 					Constructor defaultConstructor = null;
 					for (Constructor<?> candidate : rawCandidates) {
-						Annotation annotation = candidate.getAnnotation(getAutowiredAnnotationType());
+						Annotation annotation = findAutowiredAnnotation(candidate);
 						if (annotation != null) {
 							if (requiredConstructor != null) {
 								throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
@@ -212,8 +221,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								if (!candidates.isEmpty()) {
 									throw new BeanCreationException(
 											"Invalid autowire-marked constructors: " + candidates +
-													". Found another constructor with 'required' Autowired annotation: " +
-													requiredConstructor);
+											". Found another constructor with 'required' Autowired annotation: " +
+											requiredConstructor);
 								}
 								requiredConstructor = candidate;
 							}
@@ -294,7 +303,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					final InjectionMetadata newMetadata = new InjectionMetadata(clazz);
 					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
 						public void doWith(Field field) {
-							Annotation annotation = field.getAnnotation(getAutowiredAnnotationType());
+							Annotation annotation = findAutowiredAnnotation(field);
 							if (annotation != null) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("Autowired annotation is not supported on static fields");
@@ -306,7 +315,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					});
 					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 						public void doWith(Method method) {
-							Annotation annotation = method.getAnnotation(getAutowiredAnnotationType());
+							Annotation annotation = findAutowiredAnnotation(method);
 							if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Autowired annotation is not supported on static methods");
@@ -326,6 +335,16 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			}
 		}
 		return metadata;
+	}
+
+	private Annotation findAutowiredAnnotation(AccessibleObject ao) {
+		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+			Annotation annotation = ao.getAnnotation(type);
+			if (annotation != null) {
+				return annotation;
+			}
+		}
+		return null;
 	}
 
 	/**

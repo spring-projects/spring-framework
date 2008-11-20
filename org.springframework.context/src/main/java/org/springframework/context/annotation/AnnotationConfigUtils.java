@@ -146,7 +146,7 @@ public class AnnotationConfigUtils {
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 
 		// Default infrastructure bean: lowest order value; role infrastructure.
-		definition.getPropertyValues().addPropertyValue("order", new Integer(Ordered.LOWEST_PRECEDENCE));
+		definition.getPropertyValues().addPropertyValue("order", Ordered.LOWEST_PRECEDENCE);
 		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		registry.registerBeanDefinition(beanName, definition);

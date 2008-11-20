@@ -20,8 +20,13 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -31,6 +36,8 @@ public class ApplicationContextExpressionTests extends TestCase {
 
 	public void testGenericApplicationContext() {
 		GenericApplicationContext ac = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+
 		ac.getBeanFactory().registerScope("myScope", new Scope() {
 			public Object get(String name, ObjectFactory objectFactory) {
 				return objectFactory.getObject();
@@ -52,27 +59,142 @@ public class ApplicationContextExpressionTests extends TestCase {
 				return null;
 			}
 		});
+
+		GenericBeanDefinition bd0 = new GenericBeanDefinition();
+		bd0.setBeanClass(TestBean.class);
+		bd0.getPropertyValues().addPropertyValue("name", "myName");
+		bd0.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "original"));
+		ac.registerBeanDefinition("tb0", bd0);
+
 		GenericBeanDefinition bd1 = new GenericBeanDefinition();
 		bd1.setBeanClass(TestBean.class);
-		bd1.getPropertyValues().addPropertyValue("name", "myName");
+		bd1.setScope("myScope");
+		bd1.getConstructorArgumentValues().addGenericArgumentValue("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ");
+		bd1.getConstructorArgumentValues().addGenericArgumentValue("#{mySpecialAttr}");
 		ac.registerBeanDefinition("tb1", bd1);
+
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
 		bd2.setBeanClass(TestBean.class);
 		bd2.setScope("myScope");
-		bd2.getPropertyValues().addPropertyValue("name", "XXX#{tb1.name}YYY#{mySpecialAttr}ZZZ");
+		bd2.getPropertyValues().addPropertyValue("name", "XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ");
 		bd2.getPropertyValues().addPropertyValue("age", "#{mySpecialAttr}");
 		bd2.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("tb2", bd2);
+
+		GenericBeanDefinition bd3 = new GenericBeanDefinition();
+		bd3.setBeanClass(ValueTestBean.class);
+		bd3.setScope("myScope");
+		ac.registerBeanDefinition("tb3", bd3);
+
+		GenericBeanDefinition bd4 = new GenericBeanDefinition();
+		bd4.setBeanClass(ConstructorValueTestBean.class);
+		bd4.setScope("myScope");
+		ac.registerBeanDefinition("tb4", bd4);
+
+		GenericBeanDefinition bd5 = new GenericBeanDefinition();
+		bd5.setBeanClass(MethodValueTestBean.class);
+		bd5.setScope("myScope");
+		ac.registerBeanDefinition("tb5", bd5);
+
 		System.getProperties().put("country", "UK");
 		try {
 			ac.refresh();
-			TestBean tb2 = (TestBean) ac.getBean("tb2");
+
+			TestBean tb0 = ac.getBean("tb0", TestBean.class);
+
+			TestBean tb1 = ac.getBean("tb1", TestBean.class);
+			assertEquals("XXXmyNameYYY42ZZZ", tb1.getName());
+			assertEquals(42, tb1.getAge());
+
+			TestBean tb2 = ac.getBean("tb2", TestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb2.getName());
 			assertEquals(42, tb2.getAge());
 			assertEquals("UK", tb2.getCountry());
+
+			ValueTestBean tb3 = ac.getBean("tb3", ValueTestBean.class);
+			assertEquals("XXXmyNameYYY42ZZZ", tb3.name);
+			assertEquals(42, tb3.age);
+			assertEquals("UK", tb3.country);
+			assertSame(tb0, tb3.tb);
+
+			ConstructorValueTestBean tb4 = ac.getBean("tb4", ConstructorValueTestBean.class);
+			assertEquals("XXXmyNameYYY42ZZZ", tb4.name);
+			assertEquals(42, tb4.age);
+			assertEquals("UK", tb4.country);
+			assertSame(tb0, tb4.tb);
+
+			MethodValueTestBean tb5 = ac.getBean("tb5", MethodValueTestBean.class);
+			assertEquals("XXXmyNameYYY42ZZZ", tb5.name);
+			assertEquals(42, tb5.age);
+			assertEquals("UK", tb5.country);
+			assertSame(tb0, tb5.tb);
 		}
 		finally {
 			System.getProperties().remove("country");
+		}
+	}
+
+
+	public static class ValueTestBean {
+
+		@Autowired @Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")
+		public String name;
+
+		@Autowired @Value("#{mySpecialAttr}")
+		public int age;
+
+		@Value("#{systemProperties.country}")
+		public String country;
+
+		@Qualifier("original")
+		public TestBean tb;
+	}
+
+
+	public static class ConstructorValueTestBean {
+
+		public String name;
+
+		public int age;
+
+		public String country;
+
+		public TestBean tb;
+
+		@Autowired
+		public ConstructorValueTestBean(
+				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
+				@Value("#{mySpecialAttr}")int age,
+				@Qualifier("original") TestBean tb,
+				@Value("#{systemProperties.country}") String country) {
+			this.name = name;
+			this.age = age;
+			this.country = country;
+			this.tb = tb;
+		}
+	}
+
+
+	public static class MethodValueTestBean {
+
+		public String name;
+
+		public int age;
+
+		public String country;
+
+		public TestBean tb;
+
+		@Autowired
+		public void configure(
+				@Qualifier("original") TestBean tb,
+				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
+				@Value("#{mySpecialAttr}")int age,
+				@Value("#{systemProperties.country}") String country) {
+			this.name = name;
+			this.age = age;
+			this.country = country;
+			this.tb = tb;
 		}
 	}
 

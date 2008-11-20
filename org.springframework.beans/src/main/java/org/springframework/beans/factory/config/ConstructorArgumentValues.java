@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ConstructorArgumentValues {
 
-	private final Map indexedArgumentValues = new HashMap();
+	private final Map<Integer, ValueHolder> indexedArgumentValues = new HashMap<Integer, ValueHolder>();
 
-	private final List genericArgumentValues = new LinkedList();
+	private final List<ValueHolder> genericArgumentValues = new LinkedList<ValueHolder>();
 
 
 	/**
@@ -61,6 +61,7 @@ public class ConstructorArgumentValues {
 		addArgumentValues(original);
 	}
 
+
 	/**
 	 * Copy all given argument values into this object, using separate holder
 	 * instances to keep the values independent from the original object.
@@ -70,13 +71,10 @@ public class ConstructorArgumentValues {
 	 */
 	public void addArgumentValues(ConstructorArgumentValues other) {
 		if (other != null) {
-			for (Iterator it = other.indexedArgumentValues.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				ValueHolder valueHolder = (ValueHolder) entry.getValue();
-				addOrMergeIndexedArgumentValue(entry.getKey(), valueHolder.copy());
+			for (Map.Entry<Integer, ValueHolder> entry : other.indexedArgumentValues.entrySet()) {
+				addOrMergeIndexedArgumentValue(entry.getKey(), entry.getValue().copy());
 			}
-			for (Iterator it = other.genericArgumentValues.iterator(); it.hasNext();) {
-				ValueHolder valueHolder = (ValueHolder) it.next();
+			for (ValueHolder valueHolder : other.genericArgumentValues) {
 				if (!this.genericArgumentValues.contains(valueHolder)) {
 					this.genericArgumentValues.add(valueHolder.copy());
 				}
@@ -112,7 +110,7 @@ public class ConstructorArgumentValues {
 	public void addIndexedArgumentValue(int index, ValueHolder newValue) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		Assert.notNull(newValue, "ValueHolder must not be null");
-		addOrMergeIndexedArgumentValue(new Integer(index), newValue);
+		addOrMergeIndexedArgumentValue(index, newValue);
 	}
 
 	/**
@@ -122,8 +120,8 @@ public class ConstructorArgumentValues {
 	 * @param key the index in the constructor argument list
 	 * @param newValue the argument value in the form of a ValueHolder
 	 */
-	private void addOrMergeIndexedArgumentValue(Object key, ValueHolder newValue) {
-		ValueHolder currentValue = (ValueHolder) this.indexedArgumentValues.get(key);
+	private void addOrMergeIndexedArgumentValue(Integer key, ValueHolder newValue) {
+		ValueHolder currentValue = this.indexedArgumentValues.get(key);
 		if (currentValue != null && newValue.getValue() instanceof Mergeable) {
 			Mergeable mergeable = (Mergeable) newValue.getValue();
 			if (mergeable.isMergeEnabled()) {
@@ -142,7 +140,7 @@ public class ConstructorArgumentValues {
 	 */
 	public ValueHolder getIndexedArgumentValue(int index, Class requiredType) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
-		ValueHolder valueHolder = (ValueHolder) this.indexedArgumentValues.get(new Integer(index));
+		ValueHolder valueHolder = this.indexedArgumentValues.get(index);
 		if (valueHolder != null) {
 			if (valueHolder.getType() == null ||
 					(requiredType != null && requiredType.getName().equals(valueHolder.getType()))) {
@@ -157,7 +155,7 @@ public class ConstructorArgumentValues {
 	 * @return unmodifiable Map with Integer index as key and ValueHolder as value
 	 * @see ValueHolder
 	 */
-	public Map getIndexedArgumentValues() {
+	public Map<Integer, ValueHolder> getIndexedArgumentValues() {
 		return Collections.unmodifiableMap(this.indexedArgumentValues);
 	}
 
@@ -220,8 +218,7 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or <code>null</code> if none found
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType, Set usedValueHolders) {
-		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
-			ValueHolder valueHolder = (ValueHolder) it.next();
+		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			if (usedValueHolders == null || !usedValueHolders.contains(valueHolder)) {
 				if (requiredType != null) {
 					// Check matching type.
@@ -250,7 +247,7 @@ public class ConstructorArgumentValues {
 	 * @return unmodifiable List of ValueHolders
 	 * @see ValueHolder
 	 */
-	public List getGenericArgumentValues() {
+	public List<ValueHolder> getGenericArgumentValues() {
 		return Collections.unmodifiableList(this.genericArgumentValues);
 	}
 
@@ -334,10 +331,9 @@ public class ConstructorArgumentValues {
 				return false;
 			}
 		}
-		for (Iterator it = this.indexedArgumentValues.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			ValueHolder vh1 = (ValueHolder) entry.getValue();
-			ValueHolder vh2 = (ValueHolder) that.indexedArgumentValues.get(entry.getKey());
+		for (Map.Entry<Integer, ValueHolder> entry : this.indexedArgumentValues.entrySet()) {
+			ValueHolder vh1 = entry.getValue();
+			ValueHolder vh2 = that.indexedArgumentValues.get(entry.getKey());
 			if (!vh1.contentEquals(vh2)) {
 				return false;
 			}
@@ -348,16 +344,12 @@ public class ConstructorArgumentValues {
 	@Override
 	public int hashCode() {
 		int hashCode = 7;
-		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
-			ValueHolder valueHolder = (ValueHolder) it.next();
+		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			hashCode = 31 * hashCode + valueHolder.contentHashCode();
 		}
 		hashCode = 29 * hashCode;
-		for (Iterator it = this.indexedArgumentValues.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			Integer key = (Integer) entry.getKey();
-			ValueHolder value = (ValueHolder) entry.getValue();
-			hashCode = 31 * hashCode + (value.contentHashCode() ^ key.hashCode());
+		for (Map.Entry<Integer, ValueHolder> entry : this.indexedArgumentValues.entrySet()) {
+			hashCode = 31 * hashCode + (entry.getValue().contentHashCode() ^ entry.getKey().hashCode());
 		}
 		return hashCode;
 	}

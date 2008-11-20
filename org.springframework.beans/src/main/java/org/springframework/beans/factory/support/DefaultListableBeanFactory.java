@@ -38,7 +38,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
-import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -87,8 +86,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Whether to allow eager class loading even for lazy-init beans */
 	private boolean allowEagerClassLoading = true;
 
-	/** Whether bean definition metadata may be cached for all beans */
-	private boolean configurationFrozen = false;
+	/** Resolver to use for checking if a bean definition is an autowire candidate */
+	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
+
+	/** Map from dependency type to corresponding autowired value */
+	private final Map<Class, Object> resolvableDependencies = new HashMap<Class, Object>();
 
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>();
@@ -96,14 +98,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** List of bean definition names, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>();
 
+	/** Whether bean definition metadata may be cached for all beans */
+	private boolean configurationFrozen = false;
+
 	/** Cached array of bean definition names in case of frozen configuration */
 	private String[] frozenBeanDefinitionNames;
-
-	/** Resolver to use for checking if a bean definition is an autowire candidate */
-	private AutowireCandidateResolver autowireCandidateResolver = new QualifierAnnotationAutowireCandidateResolver();
-
-	/** Map from dependency type to corresponding autowired value */
-	private final Map<Class, Object> resolvableDependencies = new HashMap<Class, Object>();
 
 
 	/**
@@ -121,23 +120,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		super(parentBeanFactory);
 	}
 
-
-	/**
-	 * Set a custom autowire candidate resolver for this BeanFactory to use
-	 * when deciding whether a bean definition should be considered as a
-	 * candidate for autowiring.
-	 */
-	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
-		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
-		this.autowireCandidateResolver = autowireCandidateResolver;
-	}
-
-	/**
-	 * Return the autowire candidate resolver for this BeanFactory (never <code>null</code>).
-	 */
-	public AutowireCandidateResolver getAutowireCandidateResolver() {
-		return this.autowireCandidateResolver;
-	}
 
 	/**
 	 * Set whether it should be allowed to override bean definitions by registering
@@ -164,6 +146,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		this.allowEagerClassLoading = allowEagerClassLoading;
 	}
 
+	/**
+	 * Set a custom autowire candidate resolver for this BeanFactory to use
+	 * when deciding whether a bean definition should be considered as a
+	 * candidate for autowiring.
+	 */
+	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
+		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
+		this.autowireCandidateResolver = autowireCandidateResolver;
+	}
+
+	/**
+	 * Return the autowire candidate resolver for this BeanFactory (never <code>null</code>).
+	 */
+	public AutowireCandidateResolver getAutowireCandidateResolver() {
+		return this.autowireCandidateResolver;
+	}
+
 
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
@@ -172,6 +171,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			DefaultListableBeanFactory otherListableFactory = (DefaultListableBeanFactory) otherFactory;
 			this.allowBeanDefinitionOverriding = otherListableFactory.allowBeanDefinitionOverriding;
 			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
+			this.autowireCandidateResolver = otherListableFactory.autowireCandidateResolver;
+			this.resolvableDependencies.putAll(otherListableFactory.resolvableDependencies);
 		}
 	}
 
@@ -542,6 +543,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
 		Class type = descriptor.getDependencyType();
+
+		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
+		if (value != null) {
+			if (value instanceof String) {
+				value = evaluateBeanDefinitionString((String) value, getMergedBeanDefinition(beanName));
+			}
+			return typeConverter.convertIfNecessary(value, type);
+		}
+
 		if (type.isArray()) {
 			Class componentType = type.getComponentType();
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType, descriptor);

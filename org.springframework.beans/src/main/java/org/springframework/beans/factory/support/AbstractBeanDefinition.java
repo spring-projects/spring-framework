@@ -134,7 +134,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean autowireCandidate = true;
 
-	private final Map qualifiers = new LinkedHashMap();
+	private final Map<String, AutowireCandidateQualifier> qualifiers =
+			new LinkedHashMap<String, AutowireCandidateQualifier>();
 
 	private boolean primary = false;
 
@@ -521,8 +522,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			// If it has a no-arg constructor it's deemed to be setter autowiring,
 			// otherwise we'll try constructor autowiring.
 			Constructor[] constructors = getBeanClass().getConstructors();
-			for (int i = 0; i < constructors.length; i++) {
-				if (constructors[i].getParameterTypes().length == 0) {
+			for (Constructor constructor : constructors) {
+				if (constructor.getParameterTypes().length == 0) {
 					return AUTOWIRE_BY_TYPE;
 				}
 			}
@@ -605,15 +606,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return the qualifier mapped to the provided type name.
 	 */
 	public AutowireCandidateQualifier getQualifier(String typeName) {
-		return (AutowireCandidateQualifier) this.qualifiers.get(typeName);
+		return this.qualifiers.get(typeName);
 	}
 
 	/**
 	 * Return all registered qualifiers.
 	 * @return the Set of {@link AutowireCandidateQualifier} objects.
 	 */
-	public Set getQualifiers() {
-		return new LinkedHashSet(this.qualifiers.values());
+	public Set<AutowireCandidateQualifier> getQualifiers() {
+		return new LinkedHashSet<AutowireCandidateQualifier>(this.qualifiers.values());
 	}
 
 	/**
@@ -885,8 +886,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		// Check that lookup methods exists.
 		MethodOverrides methodOverrides = getMethodOverrides();
 		if (!methodOverrides.isEmpty()) {
-			for (Iterator it = methodOverrides.getOverrides().iterator(); it.hasNext(); ) {
-				MethodOverride mo = (MethodOverride) it.next();
+			for (MethodOverride mo : methodOverrides.getOverrides()) {
 				prepareMethodOverride(mo);
 			}
 		}

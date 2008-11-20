@@ -181,9 +181,9 @@ public class InjectionMetadata {
 			}
 			else {
 				if (this.skip == null) {
-					this.skip = Boolean.valueOf(checkPropertySkipping(pvs));
+					this.skip = checkPropertySkipping(pvs);
 				}
-				if (this.skip.booleanValue()) {
+				if (this.skip) {
 					return;
 				}
 				try {

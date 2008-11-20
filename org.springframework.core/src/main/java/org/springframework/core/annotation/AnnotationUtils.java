@@ -51,7 +51,7 @@ import org.springframework.util.Assert;
 public abstract class AnnotationUtils {
 
 	/** The attribute name for annotations with a single element */
-	static final String	VALUE	= "value";
+	static final String	VALUE = "value";
 
 
 	/**

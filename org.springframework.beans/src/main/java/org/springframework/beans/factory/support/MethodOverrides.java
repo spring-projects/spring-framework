@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -35,7 +34,7 @@ import java.util.Set;
  */
 public class MethodOverrides {
 
-	private final Set overrides = new HashSet();
+	private final Set<MethodOverride> overrides = new HashSet<MethodOverride>();
 
 
 	/**
@@ -73,7 +72,7 @@ public class MethodOverrides {
 	 * @return Set of MethodOverride objects
 	 * @see MethodOverride
 	 */
-	public Set getOverrides() {
+	public Set<MethodOverride> getOverrides() {
 		return this.overrides;
 	}
 
@@ -90,25 +89,25 @@ public class MethodOverrides {
 	 * @return the method override, or <code>null</code> if none
 	 */
 	public MethodOverride getOverride(Method method) {
-		for (Iterator it = this.overrides.iterator(); it.hasNext();) {
-			MethodOverride methodOverride = (MethodOverride) it.next();
-			if (methodOverride.matches(method)) {
-				return methodOverride;
-			}			
+		for (MethodOverride override : this.overrides) {
+			if (override.matches(method)) {
+				return override;
+			}
 		}
 		return null;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof MethodOverrides)) {
+			return false;
+		}
+		MethodOverrides that = (MethodOverrides) other;
+		return this.overrides.equals(that.overrides);
 
-		MethodOverrides that = (MethodOverrides) o;
-
-		if (!this.overrides.equals(that.overrides)) return false;
-
-		return true;
 	}
 
 	@Override
