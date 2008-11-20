@@ -1,0 +1,7 @@
+DELETE FROM vets;
+DELETE FROM specialties;
+DELETE FROM vet_specialties;
+DELETE FROM types;
+DELETE FROM owners;
+DELETE FROM pets;
+DELETE FROM visits;
