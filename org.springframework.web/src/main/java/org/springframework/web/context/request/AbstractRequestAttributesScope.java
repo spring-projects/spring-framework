@@ -64,7 +64,8 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 	}
 
 	public Object resolveContextualObject(String key) {
-		return null;
+		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
+		return attributes.resolveReference(key);
 	}
 
 
