@@ -19,10 +19,8 @@ package org.springframework.web.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -177,7 +175,7 @@ public abstract class WebUtils {
 			return false;
 		}
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
-		return Boolean.valueOf(param).booleanValue();
+		return Boolean.valueOf(param);
 	}
 
 	/**
@@ -421,7 +419,7 @@ public abstract class WebUtils {
 	 * @param servletName the name of the offending servlet
 	 */
 	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex, String servletName) {
-		exposeRequestAttributeIfNotPresent(request, ERROR_STATUS_CODE_ATTRIBUTE, new Integer(HttpServletResponse.SC_OK));
+		exposeRequestAttributeIfNotPresent(request, ERROR_STATUS_CODE_ATTRIBUTE, HttpServletResponse.SC_OK);
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_TYPE_ATTRIBUTE, ex.getClass());
 		exposeRequestAttributeIfNotPresent(request, ERROR_MESSAGE_ATTRIBUTE, ex.getMessage());
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_ATTRIBUTE, ex);
@@ -467,16 +465,10 @@ public abstract class WebUtils {
 	 * @param request current HTTP request
 	 * @param attributes the attributes Map
 	 */
-	public static void exposeRequestAttributes(ServletRequest request, Map attributes) {
+	public static void exposeRequestAttributes(ServletRequest request, Map<String, Object> attributes) {
 		Assert.notNull(request, "Request must not be null");
-		Iterator it = attributes.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			if (!(entry.getKey() instanceof String)) {
-				throw new IllegalArgumentException(
-						"Invalid key [" + entry.getKey() + "] in attributes Map - only Strings allowed as attribute keys");
-			}
-			request.setAttribute((String) entry.getKey(), entry.getValue());
+		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+			request.setAttribute(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -491,9 +483,9 @@ public abstract class WebUtils {
 		Assert.notNull(request, "Request must not be null");
 		Cookie cookies[] = request.getCookies();
 		if (cookies != null) {
-			for (int i = 0; i < cookies.length; i++) {
-				if (name.equals(cookies[i].getName())) {
-					return cookies[i];
+			for (Cookie cookie : cookies) {
+				if (name.equals(cookie.getName())) {
+					return cookie;
 				}
 			}
 		}
@@ -515,8 +507,7 @@ public abstract class WebUtils {
 		if (request.getParameter(name) != null) {
 			return true;
 		}
-		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
-			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+		for (String suffix : SUBMIT_IMAGE_SUFFIXES) {
 			if (request.getParameter(name + suffix) != null) {
 				return true;
 			}
@@ -533,6 +524,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or <code>null</code>
 	 * if the parameter does not exist in given request
 	 */
+	@SuppressWarnings("unchecked")
 	public static String findParameterValue(ServletRequest request, String name) {
 		return findParameterValue(request.getParameterMap(), name);
 	}
@@ -560,21 +552,22 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or <code>null</code>
 	 * if the parameter does not exist in given request
 	 */
-	public static String findParameterValue(Map parameters, String name) {
+	public static String findParameterValue(Map<String, ?> parameters, String name) {
 		// First try to get it as a normal name=value parameter
-		String value = (String) parameters.get(name);
-		if (value != null) {
-			return value;
+		Object value = parameters.get(name);
+		if (value instanceof String[]) {
+			String[] values = (String[]) value;
+			return (values.length > 0 ? values[0] : null);
+		}
+		else if (value != null) {
+			return value.toString();
 		}
 		// If no value yet, try to get it as a name_value=xyz parameter
 		String prefix = name + "_";
-		Iterator paramNames = parameters.keySet().iterator();
-		while (paramNames.hasNext()) {
-			String paramName = (String) paramNames.next();
+		for (String paramName : parameters.keySet()) {
 			if (paramName.startsWith(prefix)) {
 				// Support images buttons, which would submit parameters as name_value.x=123
-				for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
-					String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+				for (String suffix : SUBMIT_IMAGE_SUFFIXES) {
 					if (paramName.endsWith(suffix)) {
 						return paramName.substring(prefix.length(), paramName.length() - suffix.length());
 					}
@@ -600,10 +593,10 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletRequest#getParameterValues
 	 * @see javax.servlet.ServletRequest#getParameterMap
 	 */
-	public static Map getParametersStartingWith(ServletRequest request, String prefix) {
+	public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
 		Assert.notNull(request, "Request must not be null");
 		Enumeration paramNames = request.getParameterNames();
-		Map params = new TreeMap();
+		Map<String, Object> params = new TreeMap<String, Object>();
 		if (prefix == null) {
 			prefix = "";
 		}

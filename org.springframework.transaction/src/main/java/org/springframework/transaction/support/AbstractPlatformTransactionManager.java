@@ -19,7 +19,6 @@ package org.springframework.transaction.support;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -471,7 +470,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (isValidateExistingTransaction()) {
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
-				if (currentIsolationLevel == null || currentIsolationLevel.intValue() != definition.getIsolationLevel()) {
+				if (currentIsolationLevel == null || currentIsolationLevel != definition.getIsolationLevel()) {
 					Constants isoConstants = DefaultTransactionDefinition.constants;
 					throw new IllegalTransactionStateException("Participating transaction with definition [" +
 							definition + "] specifies isolation level which is incompatible with existing transaction: " +
@@ -505,7 +504,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			TransactionSynchronizationManager.setActualTransactionActive(transaction != null);
 			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
 					(definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) ?
-							new Integer(definition.getIsolationLevel()) : null);
+							definition.getIsolationLevel() : null);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
 			TransactionSynchronizationManager.initSynchronization();
@@ -637,10 +636,11 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * synchronization for the current thread.
 	 * @return the List of suspended TransactionSynchronization objects
 	 */
-	private List doSuspendSynchronization() {
-		List suspendedSynchronizations = TransactionSynchronizationManager.getSynchronizations();
-		for (Iterator it = suspendedSynchronizations.iterator(); it.hasNext();) {
-			((TransactionSynchronization) it.next()).suspend();
+	private List<TransactionSynchronization> doSuspendSynchronization() {
+		List<TransactionSynchronization> suspendedSynchronizations =
+				TransactionSynchronizationManager.getSynchronizations();
+		for (TransactionSynchronization synchronization : suspendedSynchronizations) {
+			synchronization.suspend();
 		}
 		TransactionSynchronizationManager.clearSynchronization();
 		return suspendedSynchronizations;
@@ -651,10 +651,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * and resume all given synchronizations.
 	 * @param suspendedSynchronizations List of TransactionSynchronization objects
 	 */
-	private void doResumeSynchronization(List suspendedSynchronizations) {
+	private void doResumeSynchronization(List<TransactionSynchronization> suspendedSynchronizations) {
 		TransactionSynchronizationManager.initSynchronization();
-		for (Iterator it = suspendedSynchronizations.iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+		for (TransactionSynchronization synchronization : suspendedSynchronizations) {
 			synchronization.resume();
 			TransactionSynchronizationManager.registerSynchronization(synchronization);
 		}

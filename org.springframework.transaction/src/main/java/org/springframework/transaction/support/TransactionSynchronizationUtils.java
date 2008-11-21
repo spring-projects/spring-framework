@@ -16,7 +16,6 @@
 
 package org.springframework.transaction.support;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -67,8 +66,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
 	public static void triggerBeforeCommit(boolean readOnly) {
-		for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
 			synchronization.beforeCommit(readOnly);
 		}
 	}
@@ -78,8 +76,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#beforeCompletion()
 	 */
 	public static void triggerBeforeCompletion() {
-		for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
 			try {
 				synchronization.beforeCompletion();
 			}
@@ -96,8 +93,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#afterCommit()
 	 */
 	public static void triggerAfterCommit() {
-		List synchronizations = TransactionSynchronizationManager.getSynchronizations();
-		invokeAfterCommit(synchronizations);
+		invokeAfterCommit(TransactionSynchronizationManager.getSynchronizations());
 	}
 
 	/**
@@ -106,19 +102,10 @@ public abstract class TransactionSynchronizationUtils {
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @see TransactionSynchronization#afterCommit()
 	 */
-	public static void invokeAfterCommit(List synchronizations) {
+	public static void invokeAfterCommit(List<TransactionSynchronization> synchronizations) {
 		if (synchronizations != null) {
-			for (Iterator it = synchronizations.iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				try {
-					synchronization.afterCommit();
-				}
-				catch (AbstractMethodError tserr) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Spring 2.0's TransactionSynchronization.afterCommit method not implemented in " +
-								"synchronization class [" + synchronization.getClass().getName() + "]", tserr);
-					}
-				}
+			for (TransactionSynchronization synchronization : synchronizations) {
+				synchronization.afterCommit();
 			}
 		}
 	}
@@ -149,10 +136,9 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
-	public static void invokeAfterCompletion(List synchronizations, int completionStatus) {
+	public static void invokeAfterCompletion(List<TransactionSynchronization> synchronizations, int completionStatus) {
 		if (synchronizations != null) {
-			for (Iterator it = synchronizations.iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			for (TransactionSynchronization synchronization : synchronizations) {
 				try {
 					synchronization.afterCompletion(completionStatus);
 				}

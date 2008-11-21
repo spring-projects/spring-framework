@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import javax.sql.DataSource;
@@ -52,7 +51,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -108,13 +106,17 @@ import org.springframework.util.StringUtils;
  */
 public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implements BeanClassLoaderAware {
 
-	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
+			new ThreadLocal<DataSource>();
 
-	private static final ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
+	private static final ThreadLocal<TransactionManager> configTimeTransactionManagerHolder =
+			new ThreadLocal<TransactionManager>();
 
-	private static final ThreadLocal configTimeCacheProviderHolder = new ThreadLocal();
+	private static final ThreadLocal<CacheProvider> configTimeCacheProviderHolder =
+			new ThreadLocal<CacheProvider>();
 
-	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+	private static final ThreadLocal<LobHandler> configTimeLobHandlerHolder =
+			new ThreadLocal<LobHandler>();
 
 	/**
 	 * Return the DataSource for the currently configured Hibernate SessionFactory,
@@ -126,7 +128,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see LocalDataSourceConnectionProvider
 	 */
 	public static DataSource getConfigTimeDataSource() {
-		return (DataSource) configTimeDataSourceHolder.get();
+		return configTimeDataSourceHolder.get();
 	}
 
 	/**
@@ -139,7 +141,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see LocalTransactionManagerLookup
 	 */
 	public static TransactionManager getConfigTimeTransactionManager() {
-		return (TransactionManager) configTimeTransactionManagerHolder.get();
+		return configTimeTransactionManagerHolder.get();
 	}
 
 	/**
@@ -151,7 +153,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see #setCacheProvider
 	 */
 	public static CacheProvider getConfigTimeCacheProvider() {
-		return (CacheProvider) configTimeCacheProviderHolder.get();
+		return configTimeCacheProviderHolder.get();
 	}
 
 	/**
@@ -166,7 +168,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see org.springframework.orm.hibernate3.support.BlobSerializableType
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
-		return (LobHandler) configTimeLobHandlerHolder.get();
+		return configTimeLobHandlerHolder.get();
 	}
 
 
@@ -204,7 +206,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private Properties collectionCacheStrategies;
 
-	private Map eventListeners;
+	private Map<String, Object> eventListeners;
 
 	private boolean schemaUpdate = false;
 
@@ -484,7 +486,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * listener objects as values
 	 * @see org.hibernate.cfg.Configuration#setListener(String, Object)
 	 */
-	public void setEventListeners(Map eventListeners) {
+	public void setEventListeners(Map<String, Object> eventListeners) {
 		this.eventListeners = eventListeners;
 	}
 
@@ -506,6 +508,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected SessionFactory buildSessionFactory() throws Exception {
 		// Create Configuration instance.
 		Configuration config = newConfiguration();
@@ -576,23 +579,22 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			if (this.typeDefinitions != null) {
 				// Register specified Hibernate type definitions.
 				Mappings mappings = config.createMappings();
-				for (int i = 0; i < this.typeDefinitions.length; i++) {
-					TypeDefinitionBean typeDef = this.typeDefinitions[i];
+				for (TypeDefinitionBean typeDef : this.typeDefinitions) {
 					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
 				}
 			}
 
 			if (this.filterDefinitions != null) {
 				// Register specified Hibernate FilterDefinitions.
-				for (int i = 0; i < this.filterDefinitions.length; i++) {
-					config.addFilterDefinition(this.filterDefinitions[i]);
+				for (FilterDefinition filterDef : this.filterDefinitions) {
+					config.addFilterDefinition(filterDef);
 				}
 			}
 
 			if (this.configLocations != null) {
-				for (int i = 0; i < this.configLocations.length; i++) {
+				for (Resource resource : this.configLocations) {
 					// Load Hibernate configuration from given location.
-					config.configure(this.configLocations[i].getURL());
+					config.configure(resource.getURL());
 				}
 			}
 
@@ -620,42 +622,40 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.mappingResources != null) {
 				// Register given Hibernate mapping definitions, contained in resource files.
-				for (int i = 0; i < this.mappingResources.length; i++) {
-					Resource resource = new ClassPathResource(this.mappingResources[i].trim(), this.beanClassLoader);
+				for (String mapping : this.mappingResources) {
+					Resource resource = new ClassPathResource(mapping.trim(), this.beanClassLoader);
 					config.addInputStream(resource.getInputStream());
 				}
 			}
 
 			if (this.mappingLocations != null) {
 				// Register given Hibernate mapping definitions, contained in resource files.
-				for (int i = 0; i < this.mappingLocations.length; i++) {
-					config.addInputStream(this.mappingLocations[i].getInputStream());
+				for (Resource resource : this.mappingLocations) {
+					config.addInputStream(resource.getInputStream());
 				}
 			}
 
 			if (this.cacheableMappingLocations != null) {
 				// Register given cacheable Hibernate mapping definitions, read from the file system.
-				for (int i = 0; i < this.cacheableMappingLocations.length; i++) {
-					config.addCacheableFile(this.cacheableMappingLocations[i].getFile());
+				for (Resource resource : this.cacheableMappingLocations) {
+					config.addCacheableFile(resource.getFile());
 				}
 			}
 
 			if (this.mappingJarLocations != null) {
 				// Register given Hibernate mapping definitions, contained in jar files.
-				for (int i = 0; i < this.mappingJarLocations.length; i++) {
-					Resource resource = this.mappingJarLocations[i];
+				for (Resource resource : this.mappingJarLocations) {
 					config.addJar(resource.getFile());
 				}
 			}
 
 			if (this.mappingDirectoryLocations != null) {
 				// Register all Hibernate mapping definitions in the given directories.
-				for (int i = 0; i < this.mappingDirectoryLocations.length; i++) {
-					File file = this.mappingDirectoryLocations[i].getFile();
+				for (Resource resource : this.mappingDirectoryLocations) {
+					File file = resource.getFile();
 					if (!file.isDirectory()) {
 						throw new IllegalArgumentException(
-								"Mapping directory location [" + this.mappingDirectoryLocations[i] +
-								"] does not denote a directory");
+								"Mapping directory location [" + resource + "] does not denote a directory");
 					}
 					config.addDirectory(file);
 				}
@@ -698,13 +698,11 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.eventListeners != null) {
 				// Register specified Hibernate event listeners.
-				for (Iterator it = this.eventListeners.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					Assert.isTrue(entry.getKey() instanceof String, "Event listener key needs to be of type String");
-					String listenerType = (String) entry.getKey();
+				for (Map.Entry<String, Object> entry : this.eventListeners.entrySet()) {
+					String listenerType = entry.getKey();
 					Object listenerObject = entry.getValue();
 					if (listenerObject instanceof Collection) {
-						Collection listeners = (Collection) listenerObject;
+						Collection<Object> listeners = (Collection<Object>) listenerObject;
 						EventListeners listenerRegistry = config.getEventListeners();
 						Object[] listenerArray =
 								(Object[]) Array.newInstance(listenerRegistry.getListenerClassFor(listenerType), listeners.size());
@@ -979,8 +977,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			try {
 				Statement stmt = con.createStatement();
 				try {
-					for (int i = 0; i < sql.length; i++) {
-						executeSchemaStatement(stmt, sql[i]);
+					for (String sqlStmt : sql) {
+						executeSchemaStatement(stmt, sqlStmt);
 					}
 				}
 				finally {

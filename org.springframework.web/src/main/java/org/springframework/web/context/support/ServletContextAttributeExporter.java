@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -50,7 +48,8 @@ public class ServletContextAttributeExporter implements ServletContextAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Map attributes;
+	private Map<String, Object> attributes;
+
 
 	/**
 	 * Set the ServletContext attributes to expose as key-value pairs.
@@ -59,19 +58,17 @@ public class ServletContextAttributeExporter implements ServletContextAware {
 	 * <p>Usually, you will use bean references for the values,
 	 * to export Spring-defined beans as ServletContext attributes.
 	 * Of course, it is also possible to define plain values to export.
-	 * @param attributes Map with String keys and Object values
 	 */
-	public void setAttributes(Map attributes) {
+	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
 	}
 
 	public void setServletContext(ServletContext servletContext) {
-		for (Iterator it = this.attributes.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String attributeName = (String) entry.getKey();
+		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (logger.isWarnEnabled()) {
 				if (servletContext.getAttribute(attributeName) != null) {
-					logger.warn("Overwriting existing ServletContext attribute with name '" + attributeName + "'");
+					logger.warn("Replacing existing ServletContext attribute with name '" + attributeName + "'");
 				}
 			}
 			servletContext.setAttribute(attributeName, entry.getValue());

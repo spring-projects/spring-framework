@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.core.io.Resource;
@@ -68,12 +67,14 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see javax.servlet.ServletContext#getResourcePaths
 	 */
 	@Override
-	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
+	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
+			throws IOException {
+
 		if (rootDirResource instanceof ServletContextResource) {
 			ServletContextResource scResource = (ServletContextResource) rootDirResource;
 			ServletContext sc = scResource.getServletContext();
 			String fullPattern = scResource.getPath() + subPattern;
-			Set result = new LinkedHashSet(8);
+			Set<Resource> result = new LinkedHashSet<Resource>(8);
 			doRetrieveMatchingServletContextResources(sc, fullPattern, scResource.getPath(), result);
 			return result;
 		}
@@ -95,11 +96,12 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see javax.servlet.ServletContext#getResourcePaths
 	 */
 	protected void doRetrieveMatchingServletContextResources(
-			ServletContext servletContext, String fullPattern, String dir, Set result) throws IOException {
+			ServletContext servletContext, String fullPattern, String dir, Set<Resource> result)
+			throws IOException {
 
 		Set candidates = servletContext.getResourcePaths(dir);
 		if (candidates != null) {
-			boolean dirDepthNotFixed = (fullPattern.indexOf("**") != -1);
+			boolean dirDepthNotFixed = fullPattern.contains("**");
 			for (Iterator it = candidates.iterator(); it.hasNext();) {
 				String currPath = (String) it.next();
 				if (!currPath.startsWith(dir)) {

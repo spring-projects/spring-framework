@@ -17,8 +17,6 @@
 package org.springframework.web.jsf;
 
 import java.util.Collection;
-import java.util.Iterator;
-
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -68,19 +66,13 @@ public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 	}
 
 	public void beforePhase(PhaseEvent event) {
-		Collection listeners = getDelegates(event.getFacesContext());
-		Iterator it = listeners.iterator();
-		while (it.hasNext()) {
-			PhaseListener listener = (PhaseListener) it.next();
+		for (PhaseListener listener : getDelegates(event.getFacesContext())) {
 			listener.beforePhase(event);
 		}
 	}
 
 	public void afterPhase(PhaseEvent event) {
-		Collection listeners = getDelegates(event.getFacesContext());
-		Iterator it = listeners.iterator();
-		while (it.hasNext()) {
-			PhaseListener listener = (PhaseListener) it.next();
+		for (PhaseListener listener : getDelegates(event.getFacesContext())) {
 			listener.afterPhase(event);
 		}
 	}
@@ -93,7 +85,7 @@ public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 	 * @see #getBeanFactory
 	 * @see org.springframework.beans.factory.ListableBeanFactory#getBeansOfType(Class)
 	 */
-	protected Collection getDelegates(FacesContext facesContext) {
+	protected Collection<PhaseListener> getDelegates(FacesContext facesContext) {
 		ListableBeanFactory bf = getBeanFactory(facesContext);
 		return BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PhaseListener.class, true, false).values();
 	}
