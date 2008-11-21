@@ -4,7 +4,7 @@
 <h2>Find Owners:</h2>
 
 <spring:url value="/clinic/owners" var="formUrl"/>
-<form:form modelAttribute="owner" action="${formUrl}" method="GET">
+<form:form modelAttribute="owner" action="${fn:escapeXml(formUrl)}" method="get">
   <table>
     <tr>
       <th>
@@ -20,6 +20,6 @@
 </form:form>
 
 <br/>
-<a href='<spring:url value="/clinic/owners/new"/>'>Add Owner</a>
+<a href='<spring:url value="/clinic/owners/new" escapeXml="true"/>'>Add Owner</a>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>
