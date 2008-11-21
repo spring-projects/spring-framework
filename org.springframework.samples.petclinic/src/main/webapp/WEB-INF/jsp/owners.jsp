@@ -19,7 +19,7 @@
           <spring:url value="owners/{ownerId}" var="ownerUrl">
               <spring:param name="ownerId" value="${owner.id}"/>
           </spring:url>
-          <a href="${ownerUrl}">${owner.firstName} ${owner.lastName}</a>
+          <a href="${fn:escapeXml(ownerUrl)}">${owner.firstName} ${owner.lastName}</a>
       </td>
       <td>${owner.address}</td>
       <td>${owner.city}</td>
