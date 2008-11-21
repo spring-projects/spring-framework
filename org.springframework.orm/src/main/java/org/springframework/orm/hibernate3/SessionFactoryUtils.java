@@ -17,11 +17,9 @@
 package org.springframework.orm.hibernate3;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Transaction;
@@ -108,8 +106,8 @@ public abstract class SessionFactoryUtils {
 
 	static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
-	private static final ThreadLocal deferredCloseHolder =
-			new NamedThreadLocal("Hibernate Sessions registered for deferred close");
+	private static final ThreadLocal<Map<SessionFactory, Set<Session>>> deferredCloseHolder =
+			new NamedThreadLocal<Map<SessionFactory, Set<Session>>>("Hibernate Sessions registered for deferred close");
 
 
 	/**
@@ -297,7 +295,7 @@ public abstract class SessionFactoryUtils {
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false));
 					sessionHolder.setSynchronizedWithTransaction(true);
 					// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
-					// with FlushMode.NEVER, which needs to allow flushing within the transaction.
+					// with FlushMode.MANUAL, which needs to allow flushing within the transaction.
 					FlushMode flushMode = session.getFlushMode();
 					if (flushMode.lessThan(FlushMode.COMMIT) &&
 							!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
@@ -332,7 +330,7 @@ public abstract class SessionFactoryUtils {
 				holderToUse.addSession(session);
 			}
 			if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-				session.setFlushMode(FlushMode.NEVER);
+				session.setFlushMode(FlushMode.MANUAL);
 			}
 			TransactionSynchronizationManager.registerSynchronization(
 					new SpringSessionSynchronization(holderToUse, sessionFactory, jdbcExceptionTranslator, true));
@@ -685,7 +683,7 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static boolean isDeferredCloseActive(SessionFactory sessionFactory) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
-		Map holderMap = (Map) deferredCloseHolder.get();
+		Map<SessionFactory, Set<Session>> holderMap = deferredCloseHolder.get();
 		return (holderMap != null && holderMap.containsKey(sessionFactory));
 	}
 
@@ -705,12 +703,12 @@ public abstract class SessionFactoryUtils {
 	public static void initDeferredClose(SessionFactory sessionFactory) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 		logger.debug("Initializing deferred close of Hibernate Sessions");
-		Map holderMap = (Map) deferredCloseHolder.get();
+		Map<SessionFactory, Set<Session>> holderMap = deferredCloseHolder.get();
 		if (holderMap == null) {
-			holderMap = new HashMap();
+			holderMap = new HashMap<SessionFactory, Set<Session>>();
 			deferredCloseHolder.set(holderMap);
 		}
-		holderMap.put(sessionFactory, new LinkedHashSet(4));
+		holderMap.put(sessionFactory, new LinkedHashSet<Session>(4));
 	}
 
 	/**
@@ -722,18 +720,15 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static void processDeferredClose(SessionFactory sessionFactory) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
-
-		Map holderMap = (Map) deferredCloseHolder.get();
+		Map<SessionFactory, Set<Session>> holderMap = deferredCloseHolder.get();
 		if (holderMap == null || !holderMap.containsKey(sessionFactory)) {
 			throw new IllegalStateException("Deferred close not active for SessionFactory [" + sessionFactory + "]");
 		}
-
 		logger.debug("Processing deferred close of Hibernate Sessions");
-		Set sessions = (Set) holderMap.remove(sessionFactory);
-		for (Iterator it = sessions.iterator(); it.hasNext();) {
-			closeSession((Session) it.next());
+		Set<Session> sessions = holderMap.remove(sessionFactory);
+		for (Session session : sessions) {
+			closeSession(session);
 		}
-
 		if (holderMap.isEmpty()) {
 			deferredCloseHolder.set(null);
 		}
@@ -765,12 +760,12 @@ public abstract class SessionFactoryUtils {
 	 * @see #processDeferredClose
 	 */
 	static void closeSessionOrRegisterDeferredClose(Session session, SessionFactory sessionFactory) {
-		Map holderMap = (Map) deferredCloseHolder.get();
+		Map<SessionFactory, Set<Session>> holderMap = deferredCloseHolder.get();
 		if (holderMap != null && sessionFactory != null && holderMap.containsKey(sessionFactory)) {
 			logger.debug("Registering Hibernate Session for deferred close");
-			// Switch Session to FlushMode.NEVER for remaining lifetime.
-			session.setFlushMode(FlushMode.NEVER);
-			Set sessions = (Set) holderMap.get(sessionFactory);
+			// Switch Session to FlushMode.MANUAL for remaining lifetime.
+			session.setFlushMode(FlushMode.MANUAL);
+			Set<Session> sessions = holderMap.get(sessionFactory);
 			sessions.add(session);
 		}
 		else {

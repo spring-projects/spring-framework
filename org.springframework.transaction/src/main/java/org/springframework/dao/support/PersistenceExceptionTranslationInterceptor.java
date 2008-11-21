@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.dao.support;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -119,15 +118,15 @@ public class PersistenceExceptionTranslationInterceptor
 	 */
 	protected PersistenceExceptionTranslator detectPersistenceExceptionTranslators(ListableBeanFactory beanFactory) {
 		// Find all translators, being careful not to activate FactoryBeans.
-		Map pets = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+		Map<String, PersistenceExceptionTranslator> pets = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				beanFactory, PersistenceExceptionTranslator.class, false, false);
 		if (pets.isEmpty()) {
 			throw new IllegalStateException(
 					"No persistence exception translators found in bean factory. Cannot perform exception translation.");
 		}
 		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
-		for (Iterator it = pets.values().iterator(); it.hasNext();) {
-			cpet.addDelegate((PersistenceExceptionTranslator) it.next());
+		for (PersistenceExceptionTranslator pet : pets.values()) {
+			cpet.addDelegate(pet);
 		}
 		return cpet;
 	}

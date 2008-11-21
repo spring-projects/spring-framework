@@ -27,11 +27,11 @@ import junit.framework.TestCase;
 public class WebUtilsTests extends TestCase {
 
 	public void testFindParameterValue() {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("myKey1", "myValue1");
 		params.put("myKey2_myValue2", "xxx");
 		params.put("myKey3_myValue3.x", "xxx");
-		params.put("myKey4_myValue4.y", "yyy");
+		params.put("myKey4_myValue4.y", new String[] {"yyy"});
 
 		assertNull(WebUtils.findParameterValue(params, "myKey0"));
 		assertEquals("myValue1", WebUtils.findParameterValue(params, "myKey1"));
