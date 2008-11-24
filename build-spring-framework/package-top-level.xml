@@ -39,7 +39,8 @@
 			<fileset dir="${basedir}/..">
 				<exclude name="**/target/**"/>
 				<exclude name="integration-repo/**"/>
-				<exclude name="ivy-cache/repository/org.apache.velocity/org.apache.velocity.docbookframework.dist/**"/>
+				<exclude name="ivy-cache/**"/>
+				<!--exclude name="ivy-cache/repository/org.apache.velocity/org.apache.velocity.docbookframework.dist/**"/-->
 				<exclude name="spring-build/lib/docbook/**" />
 				<exclude name="**/*OLD*/**"/>
 			</fileset>
@@ -64,9 +65,9 @@
 			</zipfileset>
 		</zip>
 
-		<zip destfile="${artifacts.dir}/${package.basename}-with-dependencies.zip">
+		<!--zip destfile="${artifacts.dir}/${package.basename}-with-dependencies.zip">
 			<zipfileset dir="${package.dir}"/>
-		</zip>
+		</zip-->
 	</target>
 
 </project>
