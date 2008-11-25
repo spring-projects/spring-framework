@@ -21,10 +21,8 @@ import java.lang.reflect.Method;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.xml.namespace.QName;
 import javax.xml.rpc.Call;
 import javax.xml.rpc.JAXRPCException;
@@ -94,7 +92,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	private boolean maintainSession;
 
 	/** Map of custom properties, keyed by property name (String) */
-	private final Map	customPropertyMap = new HashMap();
+	private final Map<String, Object> customPropertyMap = new HashMap<String, Object>();
 
 	private Class serviceInterface;
 
@@ -228,16 +226,10 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see javax.xml.rpc.Stub#_setProperty
 	 * @see javax.xml.rpc.Call#setProperty
 	 */
-	public void setCustomPropertyMap(Map customProperties) {
+	public void setCustomPropertyMap(Map<String, Object> customProperties) {
 		if (customProperties != null) {
-			Iterator it = customProperties.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				if (!(entry.getKey() instanceof String)) {
-					throw new IllegalArgumentException(
-							"Illegal property key [" + entry.getKey() + "]: only Strings allowed");
-				}
-				addCustomProperty((String) entry.getKey(), entry.getValue());
+			for (Map.Entry<String, Object> entry : customProperties.entrySet()) {
+				addCustomProperty(entry.getKey(), entry.getValue());
 			}
 		}
 	}
@@ -249,7 +241,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * "customPropertyMap[myKey]". This is particularly useful for
 	 * adding or overriding entries in child bean definitions.
 	 */
-	public Map getCustomPropertyMap() {
+	public Map<String, Object> getCustomPropertyMap() {
 		return this.customPropertyMap;
 	}
 
@@ -513,9 +505,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			stub._setProperty(Stub.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
 		if (this.customPropertyMap != null) {
-			for (Iterator it = this.customPropertyMap.keySet().iterator(); it.hasNext();) {
-				String key = (String) it.next();
-				stub._setProperty(key, this.customPropertyMap.get(key));
+			for (Map.Entry<String, Object> entry : this.customPropertyMap.entrySet()) {
+				stub._setProperty(entry.getKey(), entry.getValue());
 			}
 		}
 	}
@@ -687,9 +678,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			call.setProperty(Call.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
 		if (this.customPropertyMap != null) {
-			for (Iterator it = this.customPropertyMap.keySet().iterator(); it.hasNext();) {
-				String key = (String) it.next();
-				call.setProperty(key, this.customPropertyMap.get(key));
+			for (Map.Entry<String, Object> entry : this.customPropertyMap.entrySet()) {
+				call.setProperty(entry.getKey(), entry.getValue());
 			}
 		}
 	}
@@ -750,8 +740,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
 	 */
 	protected boolean isConnectFailure(RemoteException ex) {
-		return (ex.getClass().getName().indexOf("Fault") == -1 &&
-				ex.getClass().getSuperclass().getName().indexOf("Fault") == -1);
+		return (!ex.getClass().getName().contains("Fault") &&
+				!ex.getClass().getSuperclass().getName().contains("Fault"));
 	}
 
 }

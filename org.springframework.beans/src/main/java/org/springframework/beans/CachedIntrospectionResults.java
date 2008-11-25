@@ -103,16 +103,16 @@ public class CachedIntrospectionResults {
 			return;
 		}
 		synchronized (classCache) {
-			for (Iterator it = classCache.keySet().iterator(); it.hasNext();) {
-				Class beanClass = (Class) it.next();
+			for (Iterator<Class> it = classCache.keySet().iterator(); it.hasNext();) {
+				Class beanClass = it.next();
 				if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
 					it.remove();
 				}
 			}
 		}
 		synchronized (acceptedClassLoaders) {
-			for (Iterator it = acceptedClassLoaders.iterator(); it.hasNext();) {
-				ClassLoader registeredLoader = (ClassLoader) it.next();
+			for (Iterator<ClassLoader> it = acceptedClassLoaders.iterator(); it.hasNext();) {
+				ClassLoader registeredLoader = it.next();
 				if (isUnderneathClassLoader(registeredLoader, classLoader)) {
 					it.remove();
 				}

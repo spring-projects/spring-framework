@@ -17,7 +17,6 @@
 package org.springframework.core;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.util.Assert;
@@ -33,9 +32,9 @@ import org.springframework.util.Assert;
  */
 public abstract class DecoratingClassLoader extends ClassLoader {
 
-	private final Set excludedPackages = new HashSet();
+	private final Set<String> excludedPackages = new HashSet<String>();
 
-	private final Set excludedClasses = new HashSet();
+	private final Set<String> excludedClasses = new HashSet<String>();
 
 	private final Object exclusionMonitor = new Object();
 
@@ -95,8 +94,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 			if (this.excludedClasses.contains(className)) {
 				return true;
 			}
-			for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
-				String packageName = (String) it.next();
+			for (String packageName : this.excludedPackages) {
 				if (className.startsWith(packageName)) {
 					return true;
 				}

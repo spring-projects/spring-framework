@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ public class ParsedSql {
 
 	private String originalSql;
 
-	private List parameterNames = new ArrayList();
+	private List<String> parameterNames = new ArrayList<String>();
 
-	private List parameterIndexes = new ArrayList();
+	private List<int[]> parameterIndexes = new ArrayList<int[]>();
 
 	private int namedParameterCount;
 
@@ -72,7 +72,7 @@ public class ParsedSql {
 	 * Return all of the parameters (bind variables) in the parsed SQL statement.
 	 * Repeated occurences of the same parameter name are included here.
 	 */
-	List getParameterNames() {
+	List<String> getParameterNames() {
 		return this.parameterNames;
 	}
 
@@ -84,7 +84,7 @@ public class ParsedSql {
 	 * a int array of length 2
 	 */
 	int[] getParameterIndexes(int parameterPosition) {
-		return (int[]) this.parameterIndexes.get(parameterPosition);
+		return this.parameterIndexes.get(parameterPosition);
 	}
 
 	/**

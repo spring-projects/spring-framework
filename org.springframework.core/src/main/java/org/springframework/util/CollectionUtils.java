@@ -72,13 +72,14 @@ public abstract class CollectionUtils {
 	 * @param array the array to merge (may be <code>null</code>)
 	 * @param collection the target Collection to merge the array into
 	 */
+	@SuppressWarnings("unchecked")
 	public static void mergeArrayIntoCollection(Object array, Collection collection) {
 		if (collection == null) {
 			throw new IllegalArgumentException("Collection must not be null");
 		}
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		for (int i = 0; i < arr.length; i++) {
-			collection.add(arr[i]);
+		for (Object elem : arr) {
+			collection.add(elem);
 		}
 	}
 
@@ -90,6 +91,7 @@ public abstract class CollectionUtils {
 	 * @param props the Properties instance to merge (may be <code>null</code>)
 	 * @param map the target Map to merge the properties into
 	 */
+	@SuppressWarnings("unchecked")
 	public static void mergePropertiesIntoMap(Properties props, Map map) {
 		if (map == null) {
 			throw new IllegalArgumentException("Map must not be null");
@@ -149,8 +151,7 @@ public abstract class CollectionUtils {
 	 */
 	public static boolean containsInstance(Collection collection, Object element) {
 		if (collection != null) {
-			for (Iterator it = collection.iterator(); it.hasNext();) {
-				Object candidate = it.next();
+			for (Object candidate : collection) {
 				if (candidate == element) {
 					return true;
 				}
@@ -170,8 +171,8 @@ public abstract class CollectionUtils {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return false;
 		}
-		for (Iterator it = candidates.iterator(); it.hasNext();) {
-			if (source.contains(it.next())) {
+		for (Object candidate : candidates) {
+			if (source.contains(candidate)) {
 				return true;
 			}
 		}
@@ -191,8 +192,7 @@ public abstract class CollectionUtils {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
-		for (Iterator it = candidates.iterator(); it.hasNext();) {
-			Object candidate = it.next();
+		for (Object candidate : candidates) {
 			if (source.contains(candidate)) {
 				return candidate;
 			}
@@ -207,19 +207,19 @@ public abstract class CollectionUtils {
 	 * @return a value of the given type found if there is a clear match,
 	 * or <code>null</code> if none or more than one such value found
 	 */
-	public static Object findValueOfType(Collection collection, Class type) {
+	@SuppressWarnings("unchecked")
+	public static <T> T findValueOfType(Collection collection, Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
 		}
-		Object value = null;
-		for (Iterator it = collection.iterator(); it.hasNext();) {
-			Object obj = it.next();
-			if (type == null || type.isInstance(obj)) {
+		T value = null;
+		for (Object element : collection) {
+			if (type == null || type.isInstance(element)) {
 				if (value != null) {
 					// More than one value found... no clear single value.
 					return null;
 				}
-				value = obj;
+				value = (T) element;
 			}
 		}
 		return value;
@@ -238,8 +238,8 @@ public abstract class CollectionUtils {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
 			return null;
 		}
-		for (int i = 0; i < types.length; i++) {
-			Object value = findValueOfType(collection, types[i]);
+		for (Class type : types) {
+			Object value = findValueOfType(collection, type);
 			if (value != null) {
 				return value;
 			}

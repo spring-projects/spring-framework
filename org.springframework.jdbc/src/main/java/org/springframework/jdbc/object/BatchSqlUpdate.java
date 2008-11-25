@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -56,9 +55,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	private boolean trackRowsAffected = true;
 
-	private final LinkedList parameterQueue = new LinkedList();
+	private final LinkedList<Object[]> parameterQueue = new LinkedList<Object[]>();
 
-	private final List rowsAffected = new ArrayList();
+	private final List<Integer> rowsAffected = new ArrayList<Integer>();
 
 
 	/**
@@ -189,19 +188,18 @@ public class BatchSqlUpdate extends SqlUpdate {
 						return parameterQueue.size();
 					}
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
-						Object[] params = (Object[]) parameterQueue.removeFirst();
+						Object[] params = parameterQueue.removeFirst();
 						newPreparedStatementSetter(params).setValues(ps);
 					}
 				});
 
-		if (this.trackRowsAffected) {
-			for (int i = 0; i < rowsAffected.length; i++) {
-				this.rowsAffected.add(new Integer(rowsAffected[i]));
+		for (int rowCount : rowsAffected) {
+			checkRowsAffected(rowCount);
+			if (this.trackRowsAffected) {
+				this.rowsAffected.add(rowCount);
 			}
 		}
-		for (int i = 0; i < rowsAffected.length; i++) {
-			checkRowsAffected(rowsAffected[i]);
-		}
+
 		return rowsAffected;
 	}
 
@@ -230,9 +228,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 	public int[] getRowsAffected() {
 		int[] result = new int[this.rowsAffected.size()];
 		int i = 0;
-		for (Iterator it = this.rowsAffected.iterator(); it.hasNext(); i++) {
-			Integer rowCount = (Integer) it.next();
-			result[i] = rowCount.intValue();
+		for (Iterator<Integer> it = this.rowsAffected.iterator(); it.hasNext(); i++) {
+			result[i] = it.next();
 		}
 		return result;
 	}

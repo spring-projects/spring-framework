@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.context.event;
-
-import java.util.Iterator;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -71,8 +69,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 
 	public void multicastEvent(final ApplicationEvent event) {
-		for (Iterator it = getApplicationListeners().iterator(); it.hasNext();) {
-			final ApplicationListener listener = (ApplicationListener) it.next();
+		for (final ApplicationListener listener : getApplicationListeners()) {
 			getTaskExecutor().execute(new Runnable() {
 				public void run() {
 					listener.onApplicationEvent(event);

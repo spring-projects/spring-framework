@@ -23,8 +23,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 /**
  * Implementation of {@link org.springframework.web.servlet.HandlerMapping} that
  * follows a simple convention for generating URL path mappings from the <i>class names</i>
- * of registered {@link org.springframework.web.servlet.mvc.Controller} and
- * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController} beans
+ * of registered {@link org.springframework.web.servlet.mvc.Controller} beans
  * as well as <code>@Controller</code> annotated beans.
  *
  * <p>For simple {@link org.springframework.web.servlet.mvc.Controller} implementations
@@ -56,7 +55,6 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.Controller
- * @see org.springframework.web.servlet.mvc.throwaway.ThrowawayController
  * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
  */
 public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHandlerMapping {

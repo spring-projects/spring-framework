@@ -24,8 +24,7 @@ import org.springframework.util.StringUtils;
 /**
  * Implementation of {@link org.springframework.web.servlet.HandlerMapping} that
  * follows a simple convention for generating URL path mappings from the <i>bean names</i>
- * of registered {@link org.springframework.web.servlet.mvc.Controller} and
- * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController} beans
+ * of registered {@link org.springframework.web.servlet.mvc.Controller} beans
  * as well as <code>@Controller</code> annotated beans.
  *
  * <p>This is similar to {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}

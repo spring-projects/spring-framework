@@ -18,7 +18,6 @@ package org.springframework.scheduling.quartz;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -63,11 +62,11 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	private String[] jobSchedulingDataLocations;
 
-	private List jobDetails;
+	private List<JobDetail> jobDetails;
 
-	private Map calendars;
+	private Map<String, Calendar> calendars;
 
-	private List triggers;
+	private List<Trigger> triggers;
 
 
 	private SchedulerListener[] schedulerListeners;
@@ -132,7 +131,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	public void setJobDetails(JobDetail[] jobDetails) {
 		// Use modifiable ArrayList here, to allow for further adding of
 		// JobDetail objects during autodetection of JobDetailAwareTriggers.
-		this.jobDetails = new ArrayList(Arrays.asList(jobDetails));
+		this.jobDetails = new ArrayList<JobDetail>(Arrays.asList(jobDetails));
 	}
 
 	/**
@@ -143,7 +142,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @see org.quartz.Calendar
 	 * @see org.quartz.Trigger#setCalendarName
 	 */
-	public void setCalendars(Map calendars) {
+	public void setCalendars(Map<String, Calendar> calendars) {
 		this.calendars = calendars;
 	}
 
@@ -242,37 +241,33 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				ClassLoadHelper clh = new ResourceLoaderClassLoadHelper(this.resourceLoader);
 				clh.initialize();
 				JobSchedulingDataProcessor dataProcessor = new JobSchedulingDataProcessor(clh, true, true);
-				for (int i = 0; i < this.jobSchedulingDataLocations.length; i++) {
-					dataProcessor.processFileAndScheduleJobs(
-					    this.jobSchedulingDataLocations[i], getScheduler(), this.overwriteExistingJobs);
+				for (String location : this.jobSchedulingDataLocations) {
+					dataProcessor.processFileAndScheduleJobs(location, getScheduler(), this.overwriteExistingJobs);
 				}
 			}
 
 			// Register JobDetails.
 			if (this.jobDetails != null) {
-				for (Iterator it = this.jobDetails.iterator(); it.hasNext();) {
-					JobDetail jobDetail = (JobDetail) it.next();
+				for (JobDetail jobDetail : this.jobDetails) {
 					addJobToScheduler(jobDetail);
 				}
 			}
 			else {
 				// Create empty list for easier checks when registering triggers.
-				this.jobDetails = new LinkedList();
+				this.jobDetails = new LinkedList<JobDetail>();
 			}
 
 			// Register Calendars.
 			if (this.calendars != null) {
-				for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
-					String calendarName = (String) it.next();
-					Calendar calendar = (Calendar) this.calendars.get(calendarName);
+				for (String calendarName : this.calendars.keySet()) {
+					Calendar calendar = this.calendars.get(calendarName);
 					getScheduler().addCalendar(calendarName, calendar, true, true);
 				}
 			}
 
 			// Register Triggers.
 			if (this.triggers != null) {
-				for (Iterator it = this.triggers.iterator(); it.hasNext();) {
-					Trigger trigger = (Trigger) it.next();
+				for (Trigger trigger : this.triggers) {
 					addTriggerToScheduler(trigger);
 				}
 			}
@@ -292,8 +287,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				throw (SchedulerException) ex;
 			}
 			if (ex instanceof Exception) {
-				throw new SchedulerException(
-						"Registration of jobs and triggers failed: " + ex.getMessage(), (Exception) ex);
+				throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage(), ex);
 			}
 			throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage());
 		}
@@ -371,28 +365,28 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 */
 	protected void registerListeners() throws SchedulerException {
 		if (this.schedulerListeners != null) {
-			for (int i = 0; i < this.schedulerListeners.length; i++) {
-				getScheduler().addSchedulerListener(this.schedulerListeners[i]);
+			for (SchedulerListener listener : this.schedulerListeners) {
+				getScheduler().addSchedulerListener(listener);
 			}
 		}
 		if (this.globalJobListeners != null) {
-			for (int i = 0; i < this.globalJobListeners.length; i++) {
-				getScheduler().addGlobalJobListener(this.globalJobListeners[i]);
+			for (JobListener listener : this.globalJobListeners) {
+				getScheduler().addGlobalJobListener(listener);
 			}
 		}
 		if (this.jobListeners != null) {
-			for (int i = 0; i < this.jobListeners.length; i++) {
-				getScheduler().addJobListener(this.jobListeners[i]);
+			for (JobListener listener : this.jobListeners) {
+				getScheduler().addJobListener(listener);
 			}
 		}
 		if (this.globalTriggerListeners != null) {
-			for (int i = 0; i < this.globalTriggerListeners.length; i++) {
-				getScheduler().addGlobalTriggerListener(this.globalTriggerListeners[i]);
+			for (TriggerListener listener : this.globalTriggerListeners) {
+				getScheduler().addGlobalTriggerListener(listener);
 			}
 		}
 		if (this.triggerListeners != null) {
-			for (int i = 0; i < this.triggerListeners.length; i++) {
-				getScheduler().addTriggerListener(this.triggerListeners[i]);
+			for (TriggerListener listener : this.triggerListeners) {
+				getScheduler().addTriggerListener(listener);
 			}
 		}
 	}

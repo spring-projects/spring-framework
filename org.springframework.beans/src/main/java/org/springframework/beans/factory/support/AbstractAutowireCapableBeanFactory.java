@@ -1124,8 +1124,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (filtered == null) {
 				List<PropertyDescriptor> pds =
 						new LinkedList<PropertyDescriptor>(Arrays.asList(bw.getPropertyDescriptors()));
-				for (Iterator it = pds.iterator(); it.hasNext();) {
-					PropertyDescriptor pd = (PropertyDescriptor) it.next();
+				for (Iterator<PropertyDescriptor> it = pds.iterator(); it.hasNext();) {
+					PropertyDescriptor pd = it.next();
 					if (isExcludedFromDependencyCheck(pd)) {
 						it.remove();
 					}

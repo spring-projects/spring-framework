@@ -214,10 +214,11 @@ class TypeConverterDelegate {
 				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
 				msg.append("] to required type [").append(ClassUtils.getQualifiedName(requiredType)).append("]");
 				if (propertyName != null) {
-					msg.append(" for property '" + propertyName + "'");
+					msg.append(" for property '").append(propertyName).append("'");
 				}
 				if (editor != null) {
-					msg.append(": PropertyEditor [" + editor.getClass().getName() + "] returned inappropriate value");
+					msg.append(": PropertyEditor [").append(editor.getClass().getName()).append(
+							"] returned inappropriate value");
 				}
 				else {
 					msg.append(": no matching editors or conversion strategy found");
@@ -242,7 +243,7 @@ class TypeConverterDelegate {
 		}
 		if (editor == null && requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
-			editor = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
+			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
 			if (editor == null && !String.class.equals(requiredType)) {
 				// No BeanWrapper default editor -> check standard JavaBean editor.
 				editor = BeanUtils.findEditorByConvention(requiredType);
@@ -394,6 +395,7 @@ class TypeConverterDelegate {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Collection convertToTypedCollection(
 			Collection original, String propertyName, MethodParameter methodParam) {
 
@@ -445,6 +447,7 @@ class TypeConverterDelegate {
 		return (actuallyConverted ? convertedCopy : original);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Map convertToTypedMap(Map original, String propertyName, MethodParameter methodParam) {
 		Class keyType = null;
 		Class valueType = null;
@@ -466,6 +469,7 @@ class TypeConverterDelegate {
 					logger.debug("Map of type [" + original.getClass().getName() +
 							"] returned null Iterator - injecting original Map as-is");
 				}
+				return original;
 			}
 			convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 		}

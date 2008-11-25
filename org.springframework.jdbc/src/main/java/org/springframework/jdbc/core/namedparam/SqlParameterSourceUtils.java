@@ -98,9 +98,7 @@ public class SqlParameterSourceUtils {
 			}
 		}
 		else if (parameterSource instanceof MapSqlParameterSource) {
-			for (Iterator it = ((MapSqlParameterSource) parameterSource).getValues().keySet().iterator(); it.hasNext();)
-			{
-				String name = (String) it.next();
+			for (String name : ((MapSqlParameterSource) parameterSource).getValues().keySet()) {
 				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
 			}
 		}

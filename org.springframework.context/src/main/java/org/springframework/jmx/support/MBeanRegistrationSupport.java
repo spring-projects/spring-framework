@@ -16,10 +16,8 @@
 
 package org.springframework.jmx.support;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -106,7 +104,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The beans that have been registered by this exporter.
 	 */
-	protected final Set registeredBeans = new LinkedHashSet();
+	protected final Set<ObjectName> registeredBeans = new LinkedHashSet<ObjectName>();
 
 	/**
 	 * The action take when registering an MBean and finding that it already exists.
@@ -207,8 +205,8 @@ public class MBeanRegistrationSupport {
 	 * Unregisters all beans that have been registered by an instance of this class.
 	 */
 	protected void unregisterBeans() {
-		for (Iterator it = this.registeredBeans.iterator(); it.hasNext();) {
-			doUnregister((ObjectName) it.next());
+		for (ObjectName objectName : this.registeredBeans) {
+			doUnregister(objectName);
 		}
 		this.registeredBeans.clear();
 	}
@@ -242,7 +240,7 @@ public class MBeanRegistrationSupport {
 	 * Return the {@link ObjectName ObjectNames} of all registered beans.
 	 */
 	protected final ObjectName[] getRegisteredObjectNames() {
-		return (ObjectName[]) this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
+		return this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
 	}
 
 

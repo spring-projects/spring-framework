@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -70,6 +69,7 @@ public class SetFactoryBean extends AbstractFactoryBean {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object createInstance() {
 		if (this.sourceSet == null) {
 			throw new IllegalArgumentException("'sourceSet' is required");
@@ -87,8 +87,8 @@ public class SetFactoryBean extends AbstractFactoryBean {
 		}
 		if (valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();
-			for (Iterator it = this.sourceSet.iterator(); it.hasNext();) {
-				result.add(converter.convertIfNecessary(it.next(), valueType));
+			for (Object elem : this.sourceSet) {
+				result.add(converter.convertIfNecessary(elem, valueType));
 			}
 		}
 		else {

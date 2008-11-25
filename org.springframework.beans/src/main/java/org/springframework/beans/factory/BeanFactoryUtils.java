@@ -85,7 +85,7 @@ public abstract class BeanFactoryUtils {
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */
 	public static boolean isGeneratedBeanName(String name) {
-		return (name != null && name.indexOf(GENERATED_BEAN_NAME_SEPARATOR) != -1);
+		return (name != null && name.contains(GENERATED_BEAN_NAME_SEPARATOR));
 	}
 
 	/**
@@ -298,10 +298,10 @@ public abstract class BeanFactoryUtils {
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */
-	public static Object beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
+	public static <T> T beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
 			throws BeansException {
 
-		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type);
+		Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}
@@ -335,11 +335,11 @@ public abstract class BeanFactoryUtils {
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */
-	public static Object beanOfTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit)
-	    throws BeansException {
+	public static <T> T beanOfTypeIncludingAncestors(
+			ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
+			throws BeansException {
 
-		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includeNonSingletons, allowEagerInit);
+		Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type, includeNonSingletons, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}
@@ -364,9 +364,9 @@ public abstract class BeanFactoryUtils {
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */
-	public static Object beanOfType(ListableBeanFactory lbf, Class type) throws BeansException {
+	public static <T> T beanOfType(ListableBeanFactory lbf, Class<T> type) throws BeansException {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map beansOfType = lbf.getBeansOfType(type);
+		Map<String, T> beansOfType = lbf.getBeansOfType(type);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}
@@ -399,12 +399,12 @@ public abstract class BeanFactoryUtils {
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */
-	public static Object beanOfType(
-			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit)
-	    throws BeansException {
+	public static <T> T beanOfType(
+			ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
+			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map beansOfType = lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit);
+		Map<String, T> beansOfType = lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}

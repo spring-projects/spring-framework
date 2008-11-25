@@ -62,7 +62,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	private ConfigurableBeanFactory beanFactory;
 
 	/** Internally used DefaultListableBeanFactory instances, keyed by bean name */
-	private final Map internalBeanFactories = new HashMap();
+	private final Map<String, DefaultListableBeanFactory> internalBeanFactories =
+			new HashMap<String, DefaultListableBeanFactory>();
 
 
 	public final void setBeanFactory(BeanFactory beanFactory) {
@@ -121,15 +122,14 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * @return the internal BeanFactory to be used
 	 */
 	protected DefaultListableBeanFactory getInternalBeanFactoryForBean(String beanName) {
-		DefaultListableBeanFactory internalBeanFactory = null;
 		synchronized (this.internalBeanFactories) {
-			internalBeanFactory = (DefaultListableBeanFactory) this.internalBeanFactories.get(beanName);
+			DefaultListableBeanFactory internalBeanFactory = this.internalBeanFactories.get(beanName);
 			if (internalBeanFactory == null) {
 				internalBeanFactory = buildInternalBeanFactory(this.beanFactory);
 				this.internalBeanFactories.put(beanName, internalBeanFactory);
 			}
+			return internalBeanFactory;
 		}
-		return internalBeanFactory;
 	}
 
 	/**
@@ -146,9 +146,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
-		for (Iterator it = internalBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
-			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
-			if (postProcessor instanceof AopInfrastructureBean) {
+		for (Iterator<BeanPostProcessor> it = internalBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
+			if (it.next() instanceof AopInfrastructureBean) {
 				it.remove();
 			}
 		}
@@ -162,8 +161,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 */
 	public void destroy() {
 		synchronized (this.internalBeanFactories) {
-			for (Iterator it = this.internalBeanFactories.values().iterator(); it.hasNext();) {
-				((DefaultListableBeanFactory) it.next()).destroySingletons();
+			for (DefaultListableBeanFactory bf : this.internalBeanFactories.values()) {
+				bf.destroySingletons();
 			}
 		}
 	}

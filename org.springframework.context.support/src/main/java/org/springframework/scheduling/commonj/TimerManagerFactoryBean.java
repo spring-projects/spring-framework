@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 
 	private ScheduledTimerListener[] scheduledTimerListeners;
 
-	private final List timers = new LinkedList();
+	private final List<Timer> timers = new LinkedList<Timer>();
 
 
 	/**
@@ -145,20 +145,20 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 		}
 
 		if (this.scheduledTimerListeners != null) {
-			for (int i = 0; i < this.scheduledTimerListeners.length; i++) {
-				ScheduledTimerListener scheduledTask = this.scheduledTimerListeners[i];
+			for (ScheduledTimerListener scheduledTask : this.scheduledTimerListeners) {
 				Timer timer = null;
 				if (scheduledTask.isOneTimeTask()) {
 					timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
 				}
 				else {
 					if (scheduledTask.isFixedRate()) {
-						timer = this.timerManager.scheduleAtFixedRate(
-								scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+						timer = this.timerManager
+								.scheduleAtFixedRate(scheduledTask.getTimerListener(), scheduledTask.getDelay(),
+										scheduledTask.getPeriod());
 					}
 					else {
-						timer = this.timerManager.schedule(
-								scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+						timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay(),
+								scheduledTask.getPeriod());
 					}
 				}
 				this.timers.add(timer);
@@ -231,8 +231,7 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 	 */
 	public void destroy() {
 		// Cancel all registered timers.
-		for (Iterator it = this.timers.iterator(); it.hasNext();) {
-			Timer timer = (Timer) it.next();
+		for (Timer timer : this.timers) {
 			try {
 				timer.cancel();
 			}

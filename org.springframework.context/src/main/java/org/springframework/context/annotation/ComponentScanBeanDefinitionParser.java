@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -134,8 +133,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		Object source = readerContext.extractSource(element);
 		CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
 
-		for (Iterator it = beanDefinitions.iterator(); it.hasNext();) {
-			BeanDefinitionHolder beanDefHolder = (BeanDefinitionHolder) it.next();
+		for (BeanDefinitionHolder beanDefHolder : beanDefinitions) {
 			compositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));
 		}
 

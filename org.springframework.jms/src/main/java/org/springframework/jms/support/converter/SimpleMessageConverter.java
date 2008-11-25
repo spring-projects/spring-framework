@@ -19,9 +19,7 @@ package org.springframework.jms.support.converter;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -150,10 +148,9 @@ public class SimpleMessageConverter implements MessageConverter {
 	 * @throws JMSException if thrown by JMS methods
 	 * @see javax.jms.Session#createMapMessage
 	 */
-	protected MapMessage createMessageForMap(Map map, Session session) throws JMSException {
+	protected MapMessage createMessageForMap(Map<?, ?> map, Session session) throws JMSException {
 		MapMessage message = session.createMapMessage();
-		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry entry : map.entrySet()) {
 			if (!(entry.getKey() instanceof String)) {
 				throw new MessageConversionException("Cannot convert non-String key of type [" +
 						ObjectUtils.nullSafeClassName(entry.getKey()) + "] to JMS MapMessage entry");
@@ -205,7 +202,7 @@ public class SimpleMessageConverter implements MessageConverter {
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	protected Map extractMapFromMessage(MapMessage message) throws JMSException {
-		Map map = new HashMap();
+		Map<String, Object> map = new HashMap<String, Object>();
 		Enumeration en = message.getMapNames();
 		while (en.hasMoreElements()) {
 			String key = (String) en.nextElement();

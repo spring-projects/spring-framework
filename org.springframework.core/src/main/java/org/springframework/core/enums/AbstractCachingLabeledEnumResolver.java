@@ -18,7 +18,6 @@ package org.springframework.core.enums;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -46,48 +45,16 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 
 	protected transient final Log logger = LogFactory.getLog(getClass());
 
-
-	private final CachingMapDecorator labeledEnumCache = new CachingMapDecorator(true) {
-		@Override
-		protected Object create(Object key) {
-			Class enumType = (Class) key;
-			Set typeEnums = findLabeledEnums(enumType);
-			if (typeEnums == null || typeEnums.isEmpty()) {
-				throw new IllegalArgumentException(
-						"Unsupported labeled enumeration type '" + key + "': " +
-						"make sure you've properly defined this enumeration! " +
-						"If it is static, are the class and its fields public/static/final?");
-			}
-			Map typeEnumMap = new HashMap(typeEnums.size());
-			for (Iterator it = typeEnums.iterator(); it.hasNext();) {
-				LabeledEnum labeledEnum = (LabeledEnum) it.next();
-				typeEnumMap.put(labeledEnum.getCode(), labeledEnum);
-			}
-			return Collections.unmodifiableMap(typeEnumMap);
-		}
-		@Override
-		protected boolean useWeakValue(Object key, Object value) {
-			Class enumType = (Class) key;
-			if (!ClassUtils.isCacheSafe(enumType, AbstractCachingLabeledEnumResolver.this.getClass().getClassLoader())) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Not strongly caching class [" + enumType.getName() + "] because it is not cache-safe");
-				}
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	};
+	private final LabeledEnumCache labeledEnumCache = new LabeledEnumCache();
 
 
-	public Set getLabeledEnumSet(Class type) throws IllegalArgumentException {
-		return new TreeSet(getLabeledEnumMap(type).values());
+	public Set<LabeledEnum> getLabeledEnumSet(Class type) throws IllegalArgumentException {
+		return new TreeSet<LabeledEnum>(getLabeledEnumMap(type).values());
 	}
 
-	public Map getLabeledEnumMap(Class type) throws IllegalArgumentException {
+	public Map<Comparable, LabeledEnum> getLabeledEnumMap(Class type) throws IllegalArgumentException {
 		Assert.notNull(type, "No type specified");
-		return (Map) this.labeledEnumCache.get(type);
+		return this.labeledEnumCache.get(type);
 	}
 
 	public LabeledEnum getLabeledEnumByCode(Class type, Comparable code) throws IllegalArgumentException {
@@ -104,10 +71,8 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	}
 
 	public LabeledEnum getLabeledEnumByLabel(Class type, String label) throws IllegalArgumentException {
-		Map typeEnums = getLabeledEnumMap(type);
-		Iterator it = typeEnums.values().iterator();
-		while (it.hasNext()) {
-			LabeledEnum value = (LabeledEnum) it.next();
+		Map<Comparable, LabeledEnum> typeEnums = getLabeledEnumMap(type);
+		for (LabeledEnum value : typeEnums.values()) {
 			if (value.getLabel().equalsIgnoreCase(label)) {
 				return value;
 			}
@@ -126,6 +91,43 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	 * @return the Set of LabeledEnum instances
 	 * @see org.springframework.core.enums.LabeledEnum
 	 */
-	protected abstract Set findLabeledEnums(Class type);
+	protected abstract Set<LabeledEnum> findLabeledEnums(Class type);
+
+
+	private class LabeledEnumCache extends CachingMapDecorator<Class, Map<Comparable, LabeledEnum>> {
+
+		public LabeledEnumCache() {
+			super(true);
+		}
+
+		@Override
+		protected Map<Comparable, LabeledEnum> create(Class key) {
+			Set<LabeledEnum> typeEnums = findLabeledEnums(key);
+			if (typeEnums == null || typeEnums.isEmpty()) {
+				throw new IllegalArgumentException(
+						"Unsupported labeled enumeration type '" + key + "': " +
+						"make sure you've properly defined this enumeration! " +
+						"If it is static, are the class and its fields public/static/final?");
+			}
+			Map<Comparable, LabeledEnum> typeEnumMap = new HashMap<Comparable, LabeledEnum>(typeEnums.size());
+			for (LabeledEnum labeledEnum : typeEnums) {
+				typeEnumMap.put(labeledEnum.getCode(), labeledEnum);
+			}
+			return Collections.unmodifiableMap(typeEnumMap);
+		}
+
+		@Override
+		protected boolean useWeakValue(Class key, Map<Comparable, LabeledEnum> value) {
+			if (!ClassUtils.isCacheSafe(key, AbstractCachingLabeledEnumResolver.this.getClass().getClassLoader())) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Not strongly caching class [" + key.getName() + "] because it is not cache-safe");
+				}
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+	}
 
 }

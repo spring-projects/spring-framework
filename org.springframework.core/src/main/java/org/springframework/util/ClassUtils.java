@@ -492,7 +492,7 @@ public abstract class ClassUtils {
 	 * @return whether the class has a corresponding constructor
 	 * @see java.lang.Class#getMethod
 	 */
-	public static boolean hasConstructor(Class clazz, Class[] paramTypes) {
+	public static boolean hasConstructor(Class clazz, Class... paramTypes) {
 		return (getConstructorIfAvailable(clazz, paramTypes) != null);
 	}
 
@@ -505,7 +505,7 @@ public abstract class ClassUtils {
 	 * @return the constructor, or <code>null</code> if not found
 	 * @see java.lang.Class#getConstructor
 	 */
-	public static Constructor getConstructorIfAvailable(Class clazz, Class[] paramTypes) {
+	public static Constructor getConstructorIfAvailable(Class clazz, Class... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
 			return clazz.getConstructor(paramTypes);
@@ -524,7 +524,7 @@ public abstract class ClassUtils {
 	 * @return whether the class has a corresponding method
 	 * @see java.lang.Class#getMethod
 	 */
-	public static boolean hasMethod(Class clazz, String methodName, Class[] paramTypes) {
+	public static boolean hasMethod(Class clazz, String methodName, Class... paramTypes) {
 		return (getMethodIfAvailable(clazz, methodName, paramTypes) != null);
 	}
 
@@ -538,7 +538,7 @@ public abstract class ClassUtils {
 	 * @return the method, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 */
-	public static Method getMethodIfAvailable(Class clazz, String methodName, Class[] paramTypes) {
+	public static Method getMethodIfAvailable(Class clazz, String methodName, Class... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
@@ -640,7 +640,7 @@ public abstract class ClassUtils {
 	 * @return the static method, or <code>null</code> if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
-	public static Method getStaticMethod(Class clazz, String methodName, Class[] args) {
+	public static Method getStaticMethod(Class clazz, String methodName, Class... args) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
@@ -809,7 +809,7 @@ public abstract class ClassUtils {
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(Class[] classes) {
+	public static String classNamesToString(Class... classes) {
 		return classNamesToString(Arrays.asList(classes));
 	}
 
@@ -822,13 +822,13 @@ public abstract class ClassUtils {
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(Collection classes) {
+	public static String classNamesToString(Collection<Class> classes) {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
 		StringBuilder sb = new StringBuilder("[");
-		for (Iterator it = classes.iterator(); it.hasNext(); ) {
-			Class clazz = (Class) it.next();
+		for (Iterator<Class> it = classes.iterator(); it.hasNext(); ) {
+			Class clazz = it.next();
 			sb.append(clazz.getName());
 			if (it.hasNext()) {
 				sb.append(", ");
@@ -894,7 +894,7 @@ public abstract class ClassUtils {
 	 * @param instance the instance to analyse for interfaces
 	 * @return all interfaces that the given instance implements as Set
 	 */
-	public static Set getAllInterfacesAsSet(Object instance) {
+	public static Set<Class> getAllInterfacesAsSet(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
 		return getAllInterfacesForClassAsSet(instance.getClass());
 	}

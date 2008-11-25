@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,26 @@ import javax.servlet.http.HttpServletResponse;
  * MVC framework SPI interface, allowing parameterization of core MVC workflow.
  *
  * <p>Interface that must be implemented for each handler type to handle a request.
- * This interface is used to allow the DispatcherServlet to be indefinitely
+ * This interface is used to allow the {@link DispatcherServlet} to be indefinitely
  * extensible. The DispatcherServlet accesses all installed handlers through this
  * interface, meaning that it does not contain code specific to any handler type.
  *
- * <p>Note that a handler can be of type Object. This is to enable handlers from
- * other frameworks to be integrated with this framework without custom coding.
+ * <p>Note that a handler can be of type <code>Object</code>. This is to enable
+ * handlers from other frameworks to be integrated with this framework without
+ * custom coding, as well as to allow for annotation handler objects that do
+ * not obey any specific Java interface.
  *
  * <p>This interface is not intended for application developers. It is available
  * to handlers who want to develop their own web workflow.
  *
- * <p>Note: Implementations can implement the Ordered interface to be able to
- * specify a sorting order and thus a priority for getting applied by
- * DispatcherServlet. Non-Ordered instances get treated as lowest priority.
+ * <p>Note: HandlerAdaptger implementators may implement the
+ * {@link org.springframework.core.Ordered} interface to be able to specify a
+ * sorting order (and thus a priority) for getting applied by DispatcherServlet.
+ * Non-Ordered instances get treated as lowest priority.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
- * @see org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter
  * @see org.springframework.web.servlet.handler.SimpleServletHandlerAdapter
  */
 public interface HandlerAdapter {

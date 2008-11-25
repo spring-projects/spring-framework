@@ -19,9 +19,7 @@ package org.springframework.jdbc.datasource.lookup;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -41,13 +39,13 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRoutingDataSource extends AbstractDataSource implements InitializingBean {
 
-	private Map targetDataSources;
+	private Map<Object, Object> targetDataSources;
 
 	private Object defaultTargetDataSource;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
-	private Map resolvedDataSources;
+	private Map<Object, DataSource> resolvedDataSources;
 
 	private DataSource resolvedDefaultDataSource;
 
@@ -62,7 +60,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * be handled by {@link #resolveSpecifiedLookupKey(Object)} and
 	 * {@link #determineCurrentLookupKey()}.
 	 */
-	public void setTargetDataSources(Map targetDataSources) {
+	public void setTargetDataSources(Map<Object, Object> targetDataSources) {
 		this.targetDataSources = targetDataSources;
 	}
 
@@ -92,11 +90,10 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 
 	public void afterPropertiesSet() {
 		if (this.targetDataSources == null) {
-			throw new IllegalArgumentException("targetDataSources is required");
+			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}
-		this.resolvedDataSources = new HashMap(this.targetDataSources.size());
-		for (Iterator it = this.targetDataSources.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		this.resolvedDataSources = new HashMap<Object, DataSource>(this.targetDataSources.size());
+		for (Map.Entry entry : this.targetDataSources.entrySet()) {
 			Object lookupKey = resolveSpecifiedLookupKey(entry.getKey());
 			DataSource dataSource = resolveSpecifiedDataSource(entry.getValue());
 			this.resolvedDataSources.put(lookupKey, dataSource);
@@ -148,7 +145,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	protected DataSource determineTargetDataSource() {
 		Assert.notNull(this.resolvedDataSources, "DataSource router not initialized");
 		Object lookupKey = determineCurrentLookupKey();
-		DataSource dataSource = (DataSource) this.resolvedDataSources.get(lookupKey);
+		DataSource dataSource = this.resolvedDataSources.get(lookupKey);
 		if (dataSource == null) {
 			dataSource = this.resolvedDefaultDataSource;
 		}

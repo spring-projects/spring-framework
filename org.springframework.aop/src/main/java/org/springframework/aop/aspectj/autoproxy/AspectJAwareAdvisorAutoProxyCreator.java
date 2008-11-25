@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,27 +64,27 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	 * advisor should run last.
 	 */
 	@Override
-	protected List sortAdvisors(List advisors) {
+	@SuppressWarnings("unchecked")
+	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
 		// build list for sorting
-		List partiallyComparableAdvisors = new LinkedList();
-		for (Iterator it = advisors.iterator(); it.hasNext();) {
-			Advisor element = (Advisor) it.next();
-			PartiallyComparableAdvisorHolder advisor =
-					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR);
-			partiallyComparableAdvisors.add(advisor);
+		List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors =
+				new LinkedList<PartiallyComparableAdvisorHolder>();
+		for (Advisor element : advisors) {
+			partiallyComparableAdvisors.add(
+					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR));
 		}		
 		
 		// sort it
-		List sorted = PartialOrder.sort(partiallyComparableAdvisors);
+		List<PartiallyComparableAdvisorHolder> sorted =
+				(List<PartiallyComparableAdvisorHolder>) PartialOrder.sort(partiallyComparableAdvisors);
 		if (sorted == null) {
-			// TODO: work much harder to give a better error message here.
+			// TODO: work harder to give a better error message here.
 			throw new IllegalArgumentException("Advice precedence circularity error");
 		}
 		
 		// extract results again
-		List result = new LinkedList();
-		for (Iterator it = sorted.iterator(); it.hasNext();) {
-			PartiallyComparableAdvisorHolder pcAdvisor = (PartiallyComparableAdvisorHolder) it.next();
+		List<Advisor> result = new LinkedList<Advisor>();
+		for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
 			result.add(pcAdvisor.getAdvisor());
 		}
 		
@@ -98,24 +97,24 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	 * and when using AspectJ-style advice.
 	 */
 	@Override
-	protected void extendAdvisors(List candidateAdvisors) {
+	protected void extendAdvisors(List<Advisor> candidateAdvisors) {
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
 
 	@Override
 	protected boolean shouldSkip(Class beanClass, String beanName) {
 		// TODO: Consider optimization by caching the list of the aspect names
-		List candidtate = findCandidateAdvisors();
-		for (Iterator it = candidtate.iterator(); it.hasNext();) {
-			Advisor advisor = (Advisor) it.next();
+		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		for (Advisor advisor : candidateAdvisors) {
 			if (advisor instanceof AspectJPointcutAdvisor) {
-				if(((AbstractAspectJAdvice) advisor.getAdvice()).getAspectName().equals(beanName)) {
+				if (((AbstractAspectJAdvice) advisor.getAdvice()).getAspectName().equals(beanName)) {
 					return true;
 				}
 			}
 		}
 		return super.shouldSkip(beanClass, beanName);
 	}
+
 
 	/**
 	 * Implements AspectJ PartialComparable interface for defining partial orderings.
@@ -124,9 +123,9 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 		private final Advisor advisor;
 
-		private final Comparator comparator;
+		private final Comparator<Advisor> comparator;
 
-		public PartiallyComparableAdvisorHolder(Advisor advisor, Comparator comparator) {
+		public PartiallyComparableAdvisorHolder(Advisor advisor, Comparator<Advisor> comparator) {
 			this.advisor = advisor;
 			this.comparator = comparator;
 		}
@@ -151,7 +150,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			sb.append(ClassUtils.getShortName(advice.getClass()));
 			sb.append(": ");
 			if (this.advisor instanceof Ordered) {
-				sb.append("order " + ((Ordered) this.advisor).getOrder() + ", ");
+				sb.append("order ").append(((Ordered) this.advisor).getOrder()).append(", ");
 			}
 			if (advice instanceof AbstractAspectJAdvice) {
 				AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;

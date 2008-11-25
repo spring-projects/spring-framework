@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.Types;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -69,11 +72,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 	
 	private String[] generatedKeysColumnNames = null;
 
-	/** SQL statement */
 	private String sql;
 
-	/** List of SqlParameter objects */
-	private final List declaredParameters = new LinkedList();
+	private final List<SqlParameter> declaredParameters = new LinkedList<SqlParameter>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -254,8 +255,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
 		}
 		if (types != null) {
-			for (int i = 0; i < types.length; i++) {
-				declareParameter(new SqlParameter(types[i]));
+			for (int type : types) {
+				declareParameter(new SqlParameter(type));
 			}
 		}
 	}
@@ -376,11 +377,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
-
 		int declaredInParameters = 0;
-		Iterator it = this.declaredParameters.iterator();
-		while (it.hasNext()) {
-			SqlParameter param = (SqlParameter) it.next();
+		for (SqlParameter param : this.declaredParameters) {
 			if (param.isInputValueProvided()) {
 				if (!supportsLobParameters() &&
 						(param.getSqlType() == Types.BLOB || param.getSqlType() == Types.CLOB)) {
@@ -390,7 +388,6 @@ public abstract class RdbmsOperation implements InitializingBean {
 				declaredInParameters++;
 			}
 		}
-
 		validateParameterCount((parameters != null ? parameters.length : 0), declaredInParameters);
 	}
 
@@ -401,14 +398,11 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @param parameters parameter Map supplied. May be <code>null</code>.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
-	protected void validateNamedParameters(Map parameters) throws InvalidDataAccessApiUsageException {
+	protected void validateNamedParameters(Map<String, Object> parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
-		Map paramsToUse = (parameters != null ? parameters : Collections.EMPTY_MAP);
-
+		Map paramsToUse = (parameters != null ? parameters : Collections.emptyMap());
 		int declaredInParameters = 0;
-		Iterator it = this.declaredParameters.iterator();
-		while (it.hasNext()) {
-			SqlParameter param = (SqlParameter) it.next();
+		for (SqlParameter param : this.declaredParameters) {
 			if (param.isInputValueProvided()) {
 				if (!supportsLobParameters() &&
 						(param.getSqlType() == Types.BLOB || param.getSqlType() == Types.CLOB)) {
@@ -422,7 +416,6 @@ public abstract class RdbmsOperation implements InitializingBean {
 				declaredInParameters++;
 			}
 		}
-
 		validateParameterCount(paramsToUse.size(), declaredInParameters);
 	}
 

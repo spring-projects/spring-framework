@@ -22,7 +22,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -41,12 +41,12 @@ import java.util.WeakHashMap;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-public class CachingMapDecorator implements Map, Serializable {
+public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 
 	protected static Object NULL_VALUE = new Object();
 
 
-	private final Map targetMap;
+	private final Map<K, Object> targetMap;
 
 	private final boolean synchronize;
 
@@ -67,7 +67,7 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * @param weak whether to use weak references for keys and values
 	 */
 	public CachingMapDecorator(boolean weak) {
-		Map internalMap = weak ? (Map) new WeakHashMap() : new HashMap();
+		Map<K, Object> internalMap = (weak ? new WeakHashMap<K, Object>() : new HashMap<K, Object>());
 		this.targetMap = Collections.synchronizedMap(internalMap);
 		this.synchronize = true;
 		this.weak = weak;
@@ -80,7 +80,7 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * @param size the initial cache size
 	 */
 	public CachingMapDecorator(boolean weak, int size) {
-		Map internalMap = weak ? (Map) new WeakHashMap(size) : new HashMap(size);
+		Map<K, Object> internalMap = weak ? new WeakHashMap<K, Object> (size) : new HashMap<K, Object>(size);
 		this.targetMap = Collections.synchronizedMap(internalMap);
 		this.synchronize = true;
 		this.weak = weak;
@@ -92,7 +92,7 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * so make sure to pass in a properly synchronized Map, if desired.
 	 * @param targetMap the Map to decorate
 	 */
-	public CachingMapDecorator(Map targetMap) {
+	public CachingMapDecorator(Map<K, V> targetMap) {
 		this(targetMap, false, false);
 	}
 
@@ -104,9 +104,10 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * @param synchronize whether to synchronize on the given Map
 	 * @param weak whether to use weak references for values
 	 */
-	public CachingMapDecorator(Map targetMap, boolean synchronize, boolean weak) {
+	@SuppressWarnings("unchecked")
+	public CachingMapDecorator(Map<K, V> targetMap, boolean synchronize, boolean weak) {
 		Assert.notNull(targetMap, "Target Map is required");
-		this.targetMap = (synchronize ? Collections.synchronizedMap(targetMap) : targetMap);
+		this.targetMap = (Map<K, Object>) (synchronize ? Collections.synchronizedMap(targetMap) : targetMap);
 		this.synchronize = synchronize;
 		this.weak = weak;
 	}
@@ -125,10 +126,7 @@ public class CachingMapDecorator implements Map, Serializable {
 	}
 
 	public boolean containsValue(Object value) {
-		Object valueToCheck = value;
-		if (valueToCheck == null) {
-			valueToCheck = NULL_VALUE;
-		}
+		Object valueToCheck = (value != null ? value : NULL_VALUE);
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
 				return containsValueOrReference(valueToCheck);
@@ -143,8 +141,7 @@ public class CachingMapDecorator implements Map, Serializable {
 		if (this.targetMap.containsValue(value)) {
 			return true;
 		}
-		for (Iterator it = this.targetMap.values().iterator(); it.hasNext();) {
-			Object mapVal = it.next();
+		for (Object mapVal : this.targetMap.values()) {
 			if (mapVal instanceof Reference && value.equals(((Reference) mapVal).get())) {
 				return true;
 			}
@@ -152,11 +149,11 @@ public class CachingMapDecorator implements Map, Serializable {
 		return false;
 	}
 
-	public Object remove(Object key) {
-		return this.targetMap.remove(key);
+	public V remove(Object key) {
+		return unwrapIfNecessary(this.targetMap.remove(key));
 	}
 
-	public void putAll(Map map) {
+	public void putAll(Map<? extends K, ? extends V> map) {
 		this.targetMap.putAll(map);
 	}
 
@@ -164,18 +161,18 @@ public class CachingMapDecorator implements Map, Serializable {
 		this.targetMap.clear();
 	}
 
-	public Set keySet() {
+	public Set<K> keySet() {
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
-				return new LinkedHashSet(this.targetMap.keySet());
+				return new LinkedHashSet<K>(this.targetMap.keySet());
 			}
 		}
 		else {
-			return new LinkedHashSet(this.targetMap.keySet());
+			return new LinkedHashSet<K>(this.targetMap.keySet());
 		}
 	}
 
-	public Collection values() {
+	public Collection<V> values() {
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
 				return valuesCopy();
@@ -186,24 +183,32 @@ public class CachingMapDecorator implements Map, Serializable {
 		}
 	}
 
-	private Collection valuesCopy() {
-		LinkedList values = new LinkedList();
-		for (Iterator it = this.targetMap.values().iterator(); it.hasNext();) {
-			Object value = it.next();
-			values.add(value instanceof Reference ? ((Reference) value).get() : value);
+	@SuppressWarnings("unchecked")
+	private Collection<V> valuesCopy() {
+		LinkedList<V> values = new LinkedList<V>();
+		for (Object value : this.targetMap.values()) {
+			values.add(value instanceof Reference ? ((Reference<V>) value).get() : (V) value);
 		}
 		return values;
 	}
 
-	public Set entrySet() {
+	public Set<Map.Entry<K, V>> entrySet() {
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
-				return new LinkedHashSet(this.targetMap.entrySet());
+				return entryCopy();
 			}
 		}
 		else {
-			return new LinkedHashSet(this.targetMap.entrySet());
+			return entryCopy();
 		}
+	}
+
+	private Set<Map.Entry<K, V>> entryCopy() {
+		Map<K,V> entries = new LinkedHashMap<K, V>();
+		for (Entry<K, Object> entry : this.targetMap.entrySet()) {
+			entries.put(entry.getKey(), unwrapIfNecessary(entry.getValue()));
+		}
+		return entries.entrySet();
 	}
 
 
@@ -212,15 +217,15 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * reference.
 	 * @see #useWeakValue(Object, Object)
 	 */
-	public Object put(Object key, Object value) {
+	public V put(K key, V value) {
 		Object newValue = value;
-		if (newValue == null) {
+		if (value == null) {
 			newValue = NULL_VALUE;
 		}
-		if (useWeakValue(key, newValue)) {
-			newValue = new WeakReference(newValue);
+		else if (useWeakValue(key, value)) {
+			newValue = new WeakReference<V>(value);
 		}
-		return this.targetMap.put(key, newValue);
+		return unwrapIfNecessary(this.targetMap.put(key, newValue));
 	}
 
 	/**
@@ -231,7 +236,7 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * @return <code>true</code> in order to use a weak reference;
 	 * <code>false</code> otherwise.
 	 */
-	protected boolean useWeakValue(Object key, Object value) {
+	protected boolean useWeakValue(K key, V value) {
 		return this.weak;
 	}
 
@@ -244,18 +249,30 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * Consider overriding this method to synchronize it, if desired.
 	 * @see #create(Object)
 	 */
-	public Object get(Object key) {
+	@SuppressWarnings("unchecked")
+	public V get(Object key) {
 		Object value = this.targetMap.get(key);
-		if (value instanceof Reference) {
-			value = ((Reference) value).get();
-		}
 		if (value == null) {
-			value = create(key);
-			if (value != null) {
-				put(key, value);
+			V newVal = create((K) key);
+			if (newVal != null) {
+				put((K) key, newVal);
 			}
+			return newVal;
 		}
-		return (value == NULL_VALUE ? null : value);
+		return unwrapIfNecessary(value);
+	}
+
+	@SuppressWarnings("unchecked")
+	private V unwrapIfNecessary(Object value) {
+		if (value instanceof Reference) {
+			return ((Reference<V>) value).get();
+		}
+		else if (value != null) {
+			return (V) value;
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -264,7 +281,7 @@ public class CachingMapDecorator implements Map, Serializable {
 	 * @param key the cache key
 	 * @see #get(Object)
 	 */
-	protected Object create(Object key) {
+	protected V create(K key) {
 		return null;
 	}
 

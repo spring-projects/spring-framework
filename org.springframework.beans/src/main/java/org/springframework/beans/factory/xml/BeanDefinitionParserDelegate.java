@@ -19,7 +19,6 @@ package org.springframework.beans.factory.xml;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -737,9 +736,8 @@ public class BeanDefinitionParserDelegate {
 				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
 				ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
 				// Look for arg-type match elements.
-				List argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
-				for (Iterator it = argTypeEles.iterator(); it.hasNext();) {
-					Element argTypeEle = (Element) it.next();
+				List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
+				for (Element argTypeEle : argTypeEles) {
 					replaceOverride.addTypeIdentifier(argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE));
 				}
 				replaceOverride.setSource(extractSource(replacedMethodEle));
@@ -1109,17 +1107,15 @@ public class BeanDefinitionParserDelegate {
 		String defaultKeyTypeClassName = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
 		String defaultValueTypeClassName = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 
-		List entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
+		List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		ManagedMap map = new ManagedMap(entryEles.size());
 		map.setMergeEnabled(parseMergeAttribute(mapEle));
 		map.setSource(extractSource(mapEle));
 
-		for (Iterator it = entryEles.iterator(); it.hasNext();) {
-			Element entryEle = (Element) it.next();
+		for (Element entryEle : entryEles) {
 			// Should only have one value child element: ref, value, list, etc.
 			// Optionally, there might be a key child element.
 			NodeList entrySubNodes = entryEle.getChildNodes();
-
 			Element keyEle = null;
 			Element valueEle = null;
 			for (int j = 0; j < entrySubNodes.getLength(); j++) {
@@ -1254,14 +1250,12 @@ public class BeanDefinitionParserDelegate {
 		props.setSource(extractSource(propsEle));
 		props.setMergeEnabled(parseMergeAttribute(propsEle));
 
-		List propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
-		for (Iterator it = propEles.iterator(); it.hasNext();) {
-			Element propEle = (Element) it.next();
+		List<Element> propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
+		for (Element propEle : propEles) {
 			String key = propEle.getAttribute(KEY_ATTRIBUTE);
 			// Trim the text value to avoid unwanted whitespace
 			// caused by typical XML formatting.
 			String value = DomUtils.getTextValue(propEle).trim();
-
 			TypedStringValue keyHolder = new TypedStringValue(key);
 			keyHolder.setSource(extractSource(propEle));
 			TypedStringValue valueHolder = new TypedStringValue(value);

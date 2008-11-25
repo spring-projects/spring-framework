@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -112,10 +111,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	/** Cache to hold filename lists per Locale */
-	private final Map cachedFilenames = new HashMap();
+	private final Map<String, Map<Locale, List<String>>> cachedFilenames =
+			new HashMap<String, Map<Locale, List<String>>>();
 
 	/** Cache to hold already loaded properties per filename */
-	private final Map cachedProperties = new HashMap();
+	private final Map<String, PropertiesHolder> cachedProperties = new HashMap<String, PropertiesHolder>();
 
 	/** Cache to hold merged loaded properties per basename */
 	private final Map cachedMergedProperties = new HashMap();
@@ -271,10 +271,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			}
 		}
 		else {
-			for (int i = 0; i < this.basenames.length; i++) {
-				List filenames = calculateAllFilenames(this.basenames[i], locale);
-				for (int j = 0; j < filenames.size(); j++) {
-					String filename = (String) filenames.get(j);
+			for (String basename : this.basenames) {
+				List<String> filenames = calculateAllFilenames(basename, locale);
+				for (String filename : filenames) {
 					PropertiesHolder propHolder = getProperties(filename);
 					String result = propHolder.getProperty(code);
 					if (result != null) {
@@ -300,8 +299,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			}
 		}
 		else {
-			for (int i = 0; i < this.basenames.length; i++) {
-				List filenames = calculateAllFilenames(this.basenames[i], locale);
+			for (String basename : this.basenames) {
+				List filenames = calculateAllFilenames(basename, locale);
 				for (int j = 0; j < filenames.size(); j++) {
 					String filename = (String) filenames.get(j);
 					PropertiesHolder propHolder = getProperties(filename);
@@ -357,21 +356,20 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see #setFallbackToSystemLocale
 	 * @see #calculateFilenamesForLocale
 	 */
-	protected List calculateAllFilenames(String basename, Locale locale) {
+	protected List<String> calculateAllFilenames(String basename, Locale locale) {
 		synchronized (this.cachedFilenames) {
-			Map localeMap = (Map) this.cachedFilenames.get(basename);
+			Map<Locale, List<String>> localeMap = this.cachedFilenames.get(basename);
 			if (localeMap != null) {
-				List filenames = (List) localeMap.get(locale);
+				List<String> filenames = localeMap.get(locale);
 				if (filenames != null) {
 					return filenames;
 				}
 			}
-			List filenames = new ArrayList(7);
+			List<String> filenames = new ArrayList<String>(7);
 			filenames.addAll(calculateFilenamesForLocale(basename, locale));
 			if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
-				List fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
-				for (Iterator it = fallbackFilenames.iterator(); it.hasNext();) {
-					String fallbackFilename = (String) it.next();
+				List<String> fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
+				for (String fallbackFilename : fallbackFilenames) {
 					if (!filenames.contains(fallbackFilename)) {
 						// Entry for fallback locale that isn't already in filenames list.
 						filenames.add(fallbackFilename);
@@ -383,7 +381,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				localeMap.put(locale, filenames);
 			}
 			else {
-				localeMap = new HashMap();
+				localeMap = new HashMap<Locale, List<String>>();
 				localeMap.put(locale, filenames);
 				this.cachedFilenames.put(basename, localeMap);
 			}
@@ -400,8 +398,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @param locale the locale
 	 * @return the List of filenames to check
 	 */
-	protected List calculateFilenamesForLocale(String basename, Locale locale) {
-		List result = new ArrayList(3);
+	protected List<String> calculateFilenamesForLocale(String basename, Locale locale) {
+		List<String> result = new ArrayList<String>(3);
 		String language = locale.getLanguage();
 		String country = locale.getCountry();
 		String variant = locale.getVariant();
@@ -434,7 +432,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected PropertiesHolder getProperties(String filename) {
 		synchronized (this.cachedProperties) {
-			PropertiesHolder propHolder = (PropertiesHolder) this.cachedProperties.get(filename);
+			PropertiesHolder propHolder = this.cachedProperties.get(filename);
 			if (propHolder != null &&
 					(propHolder.getRefreshTimestamp() < 0 ||
 					 propHolder.getRefreshTimestamp() > System.currentTimeMillis() - this.cacheMillis)) {
@@ -603,7 +601,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		private long refreshTimestamp = -1;
 
 		/** Cache to hold already generated MessageFormats per message code */
-		private final Map cachedMessageFormats = new HashMap();
+		private final Map<String, Map<Locale, MessageFormat>> cachedMessageFormats =
+				new HashMap<String, Map<Locale, MessageFormat>>();
 
 		public PropertiesHolder(Properties properties, long fileTimestamp) {
 			this.properties = properties;
@@ -641,9 +640,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				return null;
 			}
 			synchronized (this.cachedMessageFormats) {
-				Map localeMap = (Map) this.cachedMessageFormats.get(code);
+				Map<Locale, MessageFormat> localeMap = this.cachedMessageFormats.get(code);
 				if (localeMap != null) {
-					MessageFormat result = (MessageFormat) localeMap.get(locale);
+					MessageFormat result = localeMap.get(locale);
 					if (result != null) {
 						return result;
 					}
@@ -651,7 +650,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				String msg = this.properties.getProperty(code);
 				if (msg != null) {
 					if (localeMap == null) {
-						localeMap = new HashMap();
+						localeMap = new HashMap<Locale, MessageFormat>();
 						this.cachedMessageFormats.put(code, localeMap);
 					}
 					MessageFormat result = createMessageFormat(msg, locale);

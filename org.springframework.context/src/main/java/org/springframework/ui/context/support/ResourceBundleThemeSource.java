@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.ui.context.support;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -51,7 +50,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	private String basenamePrefix = "";
 
 	/** Map from theme name to Theme instance */
-	private final Map themeCache = new HashMap();
+	private final Map<String, Theme> themeCache = new HashMap<String, Theme>();
 
 
 	public void setParentThemeSource(ThemeSource parent) {
@@ -60,9 +59,8 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 		// Update existing Theme objects.
 		// Usually there shouldn't be any at the time of this call.
 		synchronized (this.themeCache) {
-			Iterator it = this.themeCache.values().iterator();
-			while (it.hasNext()) {
-				initParent((Theme) it.next());
+			for (Theme theme : this.themeCache.values()) {
+				initParent(theme);
 			}
 		}
 	}
@@ -100,7 +98,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 			return null;
 		}
 		synchronized (this.themeCache) {
-			Theme theme = (Theme) this.themeCache.get(themeName);
+			Theme theme = this.themeCache.get(themeName);
 			if (theme == null) {
 				String basename = this.basenamePrefix + themeName;
 				MessageSource messageSource = createMessageSource(basename);
