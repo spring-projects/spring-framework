@@ -13,7 +13,7 @@
 				<include name="license.txt" />
 				<include name="readme.txt" />
 			</fileset>
-			<fileset dir="${package.output.dir}/docs" />
+			<fileset dir="${package.docs.dir}" />
 		</scp>
 
 		<sshexec host="spring02.managed.contegix.com" username="${username}" keyfile="${key.file}" passphrase="${passphrase}"
