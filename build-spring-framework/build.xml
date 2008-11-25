@@ -25,6 +25,7 @@
 	<property file="${basedir}/../build.properties"/>
 	<import file="${basedir}/package-top-level.xml"/>
 	<import file="${basedir}/publish-top-level.xml"/>
+	<import file="${basedir}/publish-documentation.xml"/>
 	<import file="${basedir}/../spring-build/multi-bundle/default.xml"/>
 
 	<target name="precommit" depends="clean,clean-integration,test"/>
