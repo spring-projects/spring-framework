@@ -44,10 +44,7 @@ Import-Template:
  org.springframework.validation.*;version="[3.0.0, 3.0.1)",
  org.springframework.web.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
- javax.sql.*,
- javax.xml.transform.*,
- org.w3c.dom.*,
- org.xml.sax.*
+ *
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,

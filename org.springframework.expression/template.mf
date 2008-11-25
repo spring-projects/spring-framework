@@ -5,4 +5,5 @@ Bundle-ManifestVersion: 2
 Import-Template: 
  org.springframework.core;version="[3.0.0, 3.0.1)",
  org.apache.commons.logging;version="[1.1.1, 2.0.0)",
- org.antlr.runtime;version="[3.0.0,3.0.1)", org.antlr.runtime.tree;version="[3.0.0,3.0.1)"
+ org.antlr.runtime;version="[3.0.0,3.0.1)",
+ org.antlr.runtime.tree;version="[3.0.0,3.0.1)"

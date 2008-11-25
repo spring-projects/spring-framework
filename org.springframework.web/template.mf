@@ -27,10 +27,7 @@ Import-Template:
  org.springframework.ui.*;version="[3.0.0, 3.0.1)",
  org.springframework.util.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
- com.sun.net.*,
- javax.jws.*,
- javax.xml.namespace.*,
- org.xml.sax.*
+ *
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,
