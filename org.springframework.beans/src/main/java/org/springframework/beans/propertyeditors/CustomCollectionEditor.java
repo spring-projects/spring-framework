@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,8 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			// Convert Collection elements.
 			Collection source = (Collection) value;
 			Collection target = createCollection(this.collectionType, source.size());
-			for (Iterator it = source.iterator(); it.hasNext();) {
-				target.add(convertElement(it.next()));
+			for (Object elem : source) {
+				target.add(convertElement(elem));
 			}
 			super.setValue(target);
 		}

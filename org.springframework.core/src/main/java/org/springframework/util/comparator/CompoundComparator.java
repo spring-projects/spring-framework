@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.util.comparator;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.util.Assert;
@@ -40,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public class CompoundComparator implements Comparator, Serializable {
 
-	private final List comparators;
+	private final List<InvertibleComparator> comparators;
 
 
 	/**
@@ -49,7 +48,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * IllegalStateException is thrown.
 	 */
 	public CompoundComparator() {
-		this.comparators = new ArrayList();
+		this.comparators = new ArrayList<InvertibleComparator>();
 	}
 
 	/**
@@ -60,9 +59,9 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @see InvertibleComparator
 	 */
 	public CompoundComparator(Comparator[] comparators) {
-		this.comparators = new ArrayList(comparators.length);
-		for (int i = 0; i < comparators.length; i++) {
-			addComparator(comparators[i]);
+		this.comparators = new ArrayList<InvertibleComparator>(comparators.length);
+		for (Comparator comparator : comparators) {
+			addComparator(comparator);
 		}
 	}
 
@@ -76,7 +75,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 */
 	public void addComparator(Comparator comparator) {
 		if (comparator instanceof InvertibleComparator) {
-			this.comparators.add(comparator);
+			this.comparators.add((InvertibleComparator) comparator);
 		}
 		else {
 			this.comparators.add(new InvertibleComparator(comparator));
@@ -102,7 +101,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 */
 	public void setComparator(int index, Comparator comparator) {
 		if (comparator instanceof InvertibleComparator) {
-			this.comparators.set(index, comparator);
+			this.comparators.set(index, (InvertibleComparator) comparator);
 		}
 		else {
 			InvertibleComparator invComp = new InvertibleComparator(comparator);
@@ -117,8 +116,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
 	public void setComparator(int index, Comparator comparator, boolean ascending) {
-		InvertibleComparator invComp = new InvertibleComparator(comparator, ascending);
-		this.comparators.set(index, invComp);
+		this.comparators.set(index, new InvertibleComparator(comparator, ascending));
 	}
 
 	/**
@@ -126,9 +124,8 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * comparator.
 	 */
 	public void invertOrder() {
-		Iterator it = this.comparators.iterator();
-		while (it.hasNext()) {
-			((InvertibleComparator) it.next()).invertOrder();
+		for (InvertibleComparator comparator : this.comparators) {
+			comparator.invertOrder();
 		}
 	}
 
@@ -137,7 +134,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param index the index of the comparator to invert
 	 */
 	public void invertOrder(int index) {
-		getInvertibleComparator(index).invertOrder();
+		this.comparators.get(index).invertOrder();
 	}
 
 	/**
@@ -145,7 +142,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param index the index of the comparator to change
 	 */
 	public void setAscendingOrder(int index) {
-		getInvertibleComparator(index).setAscending(true);
+		this.comparators.get(index).setAscending(true);
 	}
 
 	/**
@@ -153,30 +150,22 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param index the index of the comparator to change
 	 */
 	public void setDescendingOrder(int index) {
-		getInvertibleComparator(index).setAscending(false);
-	}
-
-	/**
-	 * Return the InvertibleComparator for the given index, if any.
-	 */
-	private InvertibleComparator getInvertibleComparator(int index) {
-		return (InvertibleComparator) this.comparators.get(index);
+		this.comparators.get(index).setAscending(false);
 	}
 
 	/**
 	 * Returns the number of aggregated comparators.
 	 */
 	public int getComparatorCount() {
-		return comparators.size();
+		return this.comparators.size();
 	}
 
 
 	public int compare(Object o1, Object o2) {
 		Assert.state(this.comparators.size() > 0,
 				"No sort definitions have been added to this CompoundComparator to compare");
-		for (Iterator it = this.comparators.iterator(); it.hasNext();) {
-			InvertibleComparator def = (InvertibleComparator) it.next();
-			int result = def.compare(o1, o2);
+		for (InvertibleComparator comparator : this.comparators) {
+			int result = comparator.compare(o1, o2);
 			if (result != 0) {
 				return result;
 			}

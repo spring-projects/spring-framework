@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +45,9 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
-	private final List errors = new LinkedList();
+	private final List<ObjectError> errors = new LinkedList<ObjectError>();
 
-	private final Set suppressedFields = new HashSet();
+	private final Set<String> suppressedFields = new HashSet<String>();
 
 
 	/**
@@ -146,16 +145,15 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
-	public List getAllErrors() {
+	public List<ObjectError> getAllErrors() {
 		return Collections.unmodifiableList(this.errors);
 	}
 
-	public List getGlobalErrors() {
-		List result = new LinkedList();
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (!(error instanceof FieldError)) {
-				result.add(error);
+	public List<ObjectError> getGlobalErrors() {
+		List<ObjectError> result = new LinkedList<ObjectError>();
+		for (ObjectError objectError : this.errors) {
+			if (!(objectError instanceof FieldError)) {
+				result.add(objectError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -163,8 +161,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public ObjectError getGlobalError() {
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			ObjectError objectError = (ObjectError) it.next();
+		for (ObjectError objectError : this.errors) {
 			if (!(objectError instanceof FieldError)) {
 				return objectError;
 			}
@@ -172,12 +169,11 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return null;
 	}
 
-	public List getFieldErrors() {
-		List result = new LinkedList();
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (error instanceof FieldError) {
-				result.add(error);
+	public List<FieldError> getFieldErrors() {
+		List<FieldError> result = new LinkedList<FieldError>();
+		for (ObjectError objectError : this.errors) {
+			if (objectError instanceof FieldError) {
+				result.add((FieldError) objectError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -185,23 +181,21 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public FieldError getFieldError() {
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (error instanceof FieldError) {
-				return (FieldError) error;
+		for (ObjectError objectError : this.errors) {
+			if (objectError instanceof FieldError) {
+				return (FieldError) objectError;
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public List getFieldErrors(String field) {
-		List result = new LinkedList();
+	public List<FieldError> getFieldErrors(String field) {
+		List<FieldError> result = new LinkedList<FieldError>();
 		String fixedField = fixedField(field);
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (error instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) error)) {
-				result.add(error);
+		for (ObjectError objectError : this.errors) {
+			if (objectError instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
+				result.add((FieldError) objectError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -210,12 +204,11 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	@Override
 	public FieldError getFieldError(String field) {
 		String fixedField = fixedField(field);
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (error instanceof FieldError) {
-				FieldError fe = (FieldError) error;
-				if (isMatchingFieldError(fixedField, fe)) {
-					return fe;
+		for (ObjectError objectError : this.errors) {
+			if (objectError instanceof FieldError) {
+				FieldError fieldError = (FieldError) objectError;
+				if (isMatchingFieldError(fixedField, fieldError)) {
+					return fieldError;
 				}
 			}
 		}
@@ -223,17 +216,12 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	public Object getFieldValue(String field) {
-		FieldError fe = getFieldError(field);
+		FieldError fieldError = getFieldError(field);
 		// Use rejected value in case of error, current bean property value else.
-		Object value = null;
-		if (fe != null) {
-			value = fe.getRejectedValue();
-		}
-		else {
-			value = getActualFieldValue(fixedField(field));
-		}
+		Object value = (fieldError != null ? fieldError.getRejectedValue() :
+				getActualFieldValue(fixedField(field)));
 		// Apply formatting, but not on binding failures like type mismatches.
-		if (fe == null || !fe.isBindingFailure()) {
+		if (fieldError == null || !fieldError.isBindingFailure()) {
 			value = formatFieldValue(field, value);
 		}
 		return value;
@@ -277,8 +265,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see org.springframework.web.servlet.tags.BindTag
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
-	public Map getModel() {
-		Map model = new HashMap(2);
+	public Map<String, Object> getModel() {
+		Map<String, Object> model = new HashMap<String, Object>(2);
 		// Errors instance, even if no errors.
 		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
 		// Mapping from name to target object.

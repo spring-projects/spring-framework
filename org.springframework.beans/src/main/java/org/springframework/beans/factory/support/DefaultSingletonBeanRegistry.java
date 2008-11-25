@@ -500,9 +500,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 		// Remove destroyed bean from other beans' dependencies.
 		synchronized (this.dependentBeanMap) {
-			for (Iterator it = this.dependentBeanMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Set dependenciesToClean = (Set) entry.getValue();
+			for (Iterator<Map.Entry<String, Set<String>>> it = this.dependentBeanMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<String, Set<String>> entry = it.next();
+				Set<String> dependenciesToClean = entry.getValue();
 				dependenciesToClean.remove(beanName);
 				if (dependenciesToClean.isEmpty()) {
 					it.remove();

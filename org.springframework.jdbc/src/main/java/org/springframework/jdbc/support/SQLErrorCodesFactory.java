@@ -18,9 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -82,13 +80,12 @@ public class SQLErrorCodesFactory {
 	 * Map to hold error codes for all databases defined in the config file.
 	 * Key is the database product name, value is the SQLErrorCodes instance.
 	 */
-	private final Map errorCodesMap;
+	private final Map<String, SQLErrorCodes> errorCodesMap;
 
 	/**
 	 * Map to cache the SQLErrorCodes instance per DataSource.
-	 * Key is the DataSource, value is the SQLErrorCodes instance.
 	 */
-	private final Map dataSourceCache = new HashMap(16);
+	private final Map<DataSource, SQLErrorCodes> dataSourceCache = new HashMap<DataSource, SQLErrorCodes>(16);
 
 
 	/**
@@ -100,7 +97,7 @@ public class SQLErrorCodesFactory {
 	 * @see #loadResource(String)
 	 */
 	protected SQLErrorCodesFactory() {
-		Map errorCodes = null;
+		Map<String, SQLErrorCodes> errorCodes = null;
 
 		try {
 			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -130,7 +127,7 @@ public class SQLErrorCodesFactory {
 		}
 		catch (BeansException ex) {
 			logger.warn("Error loading SQL error codes from config file", ex);
-			errorCodes = Collections.EMPTY_MAP;
+			errorCodes = Collections.emptyMap();
 		}
 
 		this.errorCodesMap = errorCodes;
@@ -162,10 +159,9 @@ public class SQLErrorCodesFactory {
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		Assert.notNull(dbName, "Database product name must not be null");
 
-		SQLErrorCodes sec = (SQLErrorCodes) this.errorCodesMap.get(dbName);
+		SQLErrorCodes sec = this.errorCodesMap.get(dbName);
 		if (sec == null) {
-			for (Iterator it = this.errorCodesMap.values().iterator(); it.hasNext();) {
-				SQLErrorCodes candidate = (SQLErrorCodes) it.next();
+			for (SQLErrorCodes candidate : this.errorCodesMap.values()) {
 				if (PatternMatchUtils.simpleMatch(candidate.getDatabaseProductNames(), dbName)) {
 					sec = candidate;
 					break;
@@ -203,7 +199,7 @@ public class SQLErrorCodesFactory {
 
 		synchronized (this.dataSourceCache) {
 			// Let's avoid looking up database product info if we can.
-			SQLErrorCodes sec = (SQLErrorCodes) this.dataSourceCache.get(dataSource);
+			SQLErrorCodes sec = this.dataSourceCache.get(dataSource);
 			if (sec != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("SQLErrorCodes found in cache for DataSource [" +
@@ -213,8 +209,7 @@ public class SQLErrorCodesFactory {
 			}
 			// We could not find it - got to look it up.
 			try {
-				String dbName = (String)
-						JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+				String dbName = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
 				if (dbName != null) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Database product name cached for DataSource [" +

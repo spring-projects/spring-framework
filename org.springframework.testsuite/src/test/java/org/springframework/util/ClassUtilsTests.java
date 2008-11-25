@@ -273,7 +273,7 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("[java.util.LinkedList, java.lang.Integer]", ClassUtils.classNamesToString(classes));
 
 		assertEquals("[interface java.util.List]", Collections.singletonList(List.class).toString());
-		assertEquals("[java.util.List]", ClassUtils.classNamesToString(Collections.singletonList(List.class)));
+		assertEquals("[java.util.List]", ClassUtils.classNamesToString(List.class));
 
 		assertEquals("[]", Collections.EMPTY_LIST.toString());
 		assertEquals("[]", ClassUtils.classNamesToString(Collections.EMPTY_LIST));

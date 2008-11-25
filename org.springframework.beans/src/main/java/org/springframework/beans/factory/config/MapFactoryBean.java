@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -36,7 +34,7 @@ import org.springframework.core.JdkVersion;
  */
 public class MapFactoryBean extends AbstractFactoryBean {
 
-	private Map sourceMap;
+	private Map<?, ?> sourceMap;
 
 	private Class targetMapClass;
 
@@ -71,6 +69,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object createInstance() {
 		if (this.sourceMap == null) {
 			throw new IllegalArgumentException("'sourceMap' is required");
@@ -90,8 +89,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
 		}
 		if (keyType != null || valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();
-			for (Iterator it = this.sourceMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
+			for (Map.Entry entry : this.sourceMap.entrySet()) {
 				Object convertedKey = converter.convertIfNecessary(entry.getKey(), keyType);
 				Object convertedValue = converter.convertIfNecessary(entry.getValue(), valueType);
 				result.put(convertedKey, convertedValue);

@@ -18,7 +18,6 @@ package org.springframework.context.support;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,12 +36,12 @@ import org.springframework.util.Assert;
 public class StaticMessageSource extends AbstractMessageSource {
 
 	/** Map from 'code + locale' keys to message Strings */
-	private final Map messages = new HashMap();
+	private final Map<String, MessageFormat> messages = new HashMap<String, MessageFormat>();
 
 
 	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		return (MessageFormat) this.messages.get(code + "_" + locale.toString());
+		return this.messages.get(code + "_" + locale.toString());
 	}
 
 	/**
@@ -65,13 +64,12 @@ public class StaticMessageSource extends AbstractMessageSource {
 	 * Associate the given message values with the given keys as codes.
 	 * @param messages the messages to register, with messages codes
 	 * as keys and message texts as values
-   * @param locale the locale that the messages should be found within
+	 * @param locale the locale that the messages should be found within
 	 */
-	public void addMessages(Map messages, Locale locale) {
+	public void addMessages(Map<String, String> messages, Locale locale) {
 		Assert.notNull(messages, "Messages Map must not be null");
-		for (Iterator it = messages.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			addMessage(entry.getKey().toString(), locale, entry.getValue().toString());
+		for (Map.Entry<String, String> entry : messages.entrySet()) {
+			addMessage(entry.getKey(), locale, entry.getValue());
 		}
 	}
 

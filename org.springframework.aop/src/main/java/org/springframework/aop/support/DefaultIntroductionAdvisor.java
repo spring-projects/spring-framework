@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
@@ -43,7 +42,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	private final Advice advice;
 	
-	private final Set interfaces = new HashSet();
+	private final Set<Class> interfaces = new HashSet<Class>();
 
 	private int order = Integer.MAX_VALUE;
 
@@ -72,8 +71,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 			if (introducedInterfaces.length == 0) {
 				throw new IllegalArgumentException("IntroductionAdviceSupport implements no interfaces");
 			}
-			for (int i = 0; i < introducedInterfaces.length; i++) {
-				addInterface(introducedInterfaces[i]);
+			for (Class ifc : introducedInterfaces) {
+				addInterface(ifc);
 			}
 		}
 	}
@@ -103,12 +102,11 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	}
 
 	public Class[] getInterfaces() {
-		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
+		return this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
 	public void validateInterfaces() throws IllegalArgumentException {
-		for (Iterator it = this.interfaces.iterator(); it.hasNext();) {
-			Class ifc = (Class) it.next();
+		for (Class ifc : this.interfaces) {
 			if (this.advice instanceof DynamicIntroductionAdvice &&
 					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
 			 throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +

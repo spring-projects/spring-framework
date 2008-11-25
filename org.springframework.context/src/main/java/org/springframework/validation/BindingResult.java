@@ -75,7 +75,7 @@ public interface BindingResult extends Errors {
 	 * @see org.springframework.web.servlet.tags.BindTag
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
-	Map getModel();
+	Map<String, Object> getModel();
 
 	/**
 	 * Extract the raw field value for the given field.

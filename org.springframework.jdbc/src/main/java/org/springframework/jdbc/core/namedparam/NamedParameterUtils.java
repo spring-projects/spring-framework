@@ -71,7 +71,7 @@ public abstract class NamedParameterUtils {
 	public static ParsedSql parseSqlStatement(String sql) {
 		Assert.notNull(sql, "SQL must not be null");
 
-		Set namedParameters = new HashSet();
+		Set<String> namedParameters = new HashSet<String>();
 		ParsedSql parsedSql = new ParsedSql(sql);
 
 		char[] statement = sql.toCharArray();
@@ -249,7 +249,9 @@ public abstract class NamedParameterUtils {
 	 * be built into the value array in the form of SqlParameterValue objects.
 	 * @return the array of values
 	 */
-	public static Object[] buildValueArray(ParsedSql parsedSql, SqlParameterSource paramSource, List declaredParams) {
+	public static Object[] buildValueArray(
+			ParsedSql parsedSql, SqlParameterSource paramSource, List<SqlParameter> declaredParams) {
+
 		Object[] paramArray = new Object[parsedSql.getTotalParameterCount()];
 		if (parsedSql.getNamedParameterCount() > 0 && parsedSql.getUnnamedParameterCount() > 0) {
 			throw new InvalidDataAccessApiUsageException(
@@ -258,9 +260,9 @@ public abstract class NamedParameterUtils {
 					parsedSql.getUnnamedParameterCount() + " traditonal placeholder(s) in [" +
 					parsedSql.getOriginalSql() + "]");
 		}
-		List paramNames = parsedSql.getParameterNames();
+		List<String> paramNames = parsedSql.getParameterNames();
 		for (int i = 0; i < paramNames.size(); i++) {
-			String paramName = (String) paramNames.get(i);
+			String paramName = paramNames.get(i);
 			try {
 				Object value = paramSource.getValue(paramName);
 				SqlParameter param = findParameter(declaredParams, paramName, i);
@@ -281,18 +283,17 @@ public abstract class NamedParameterUtils {
 	 * @param paramIndex the index of the desired parameter
 	 * @return the declared SqlParameter, or <code>null</code> if none found
 	 */
-	private static SqlParameter findParameter(List declaredParams, String paramName, int paramIndex) {
+	private static SqlParameter findParameter(List<SqlParameter> declaredParams, String paramName, int paramIndex) {
 		if (declaredParams != null) {
 			// First pass: Look for named parameter match.
-			for (Iterator it = declaredParams.iterator(); it.hasNext();) {
-				SqlParameter declaredParam = (SqlParameter) it.next();
+			for (SqlParameter declaredParam : declaredParams) {
 				if (paramName.equals(declaredParam.getName())) {
 					return declaredParam;
 				}
 			}
 			// Second pass: Look for parameter index match.
 			if (paramIndex < declaredParams.size()) {
-				SqlParameter declaredParam = (SqlParameter) declaredParams.get(paramIndex);
+				SqlParameter declaredParam = declaredParams.get(paramIndex);
 				// Only accept unnamed parameters for index matches.
 				if (declaredParam.getName() == null) {
 					return declaredParam;
@@ -310,8 +311,8 @@ public abstract class NamedParameterUtils {
 		if (Character.isWhitespace(c)) {
 			return true;
 		}
-		for (int i = 0; i < PARAMETER_SEPARATORS.length; i++) {
-			if (c == PARAMETER_SEPARATORS[i]) {
+		for (char separator : PARAMETER_SEPARATORS) {
+			if (c == separator) {
 				return true;
 			}
 		}

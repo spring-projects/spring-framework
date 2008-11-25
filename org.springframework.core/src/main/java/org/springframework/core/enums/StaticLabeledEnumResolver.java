@@ -51,17 +51,15 @@ public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolve
 
 
 	@Override
-	protected Set findLabeledEnums(Class type) {
-		Set typeEnums = new TreeSet();
-		Field[] fields = type.getFields();
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
+	protected Set<LabeledEnum> findLabeledEnums(Class type) {
+		Set<LabeledEnum> typeEnums = new TreeSet<LabeledEnum>();
+		for (Field field : type.getFields()) {
 			if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
 				if (type.isAssignableFrom(field.getType())) {
 					try {
 						Object value = field.get(null);
 						Assert.isTrue(value instanceof LabeledEnum, "Field value must be a LabeledEnum instance");
-						typeEnums.add(value);
+						typeEnums.add((LabeledEnum) value);
 					}
 					catch (IllegalAccessException ex) {
 						logger.warn("Unable to access field value: " + field, ex);

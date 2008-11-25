@@ -108,7 +108,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
 	 */
-	protected Collection getApplicationListeners() {
+	protected Collection<ApplicationListener> getApplicationListeners() {
 		return this.applicationListeners;
 	}
 

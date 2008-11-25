@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -62,7 +62,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private final boolean enforceDestroyMethod;
 
-	private List beanPostProcessors;
+	private List<DestructionAwareBeanPostProcessor> beanPostProcessors;
 
 
 	/**
@@ -73,8 +73,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param postProcessors the List of BeanPostProcessors
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
-	public DisposableBeanAdapter(
-			Object bean, String beanName, RootBeanDefinition beanDefinition, List postProcessors) {
+	public DisposableBeanAdapter(Object bean, String beanName, RootBeanDefinition beanDefinition,
+			List<BeanPostProcessor> postProcessors) {
 
 		Assert.notNull(bean, "Bean must not be null");
 		this.bean = bean;
@@ -100,7 +100,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param postProcessors the List of DestructionAwareBeanPostProcessors, if any
 	 */
 	private DisposableBeanAdapter(Object bean, String beanName, boolean invokeDisposableBean,
-			String destroyMethodName, boolean enforceDestroyMethod, List postProcessors) {
+			String destroyMethodName, boolean enforceDestroyMethod,
+			List<DestructionAwareBeanPostProcessor> postProcessors) {
 
 		this.bean = bean;
 		this.beanName = beanName;
@@ -110,19 +111,19 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.beanPostProcessors = postProcessors;
 	}
 
+
 	/**
 	 * Search for all DestructionAwareBeanPostProcessors in the List.
 	 * @param postProcessors the List to search
 	 * @return the filtered List of DestructionAwareBeanPostProcessors
 	 */
-	private List filterPostProcessors(List postProcessors) {
-		List filteredPostProcessors = null;
+	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> postProcessors) {
+		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
 		if (postProcessors != null && !postProcessors.isEmpty()) {
-			filteredPostProcessors = new ArrayList(postProcessors.size());
-			for (Iterator it = postProcessors.iterator(); it.hasNext();) {
-				Object postProcessor = it.next();
+			filteredPostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>(postProcessors.size());
+			for (BeanPostProcessor postProcessor : postProcessors) {
 				if (postProcessor instanceof DestructionAwareBeanPostProcessor) {
-					filteredPostProcessors.add(postProcessor);
+					filteredPostProcessors.add((DestructionAwareBeanPostProcessor) postProcessor);
 				}
 			}
 		}
@@ -137,8 +138,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	public void destroy() {
 		if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
 			for (int i = this.beanPostProcessors.size() - 1; i >= 0; i--) {
-				((DestructionAwareBeanPostProcessor) this.beanPostProcessors.get(i)).postProcessBeforeDestruction(
-						this.bean, this.beanName);
+				this.beanPostProcessors.get(i).postProcessBeforeDestruction(this.bean, this.beanName);
 			}
 		}
 
@@ -237,11 +237,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * filtering out non-serializable BeanPostProcessors.
 	 */
 	protected Object writeReplace() {
-		List serializablePostProcessors = null;
+		List<DestructionAwareBeanPostProcessor> serializablePostProcessors = null;
 		if (this.beanPostProcessors != null) {
-			serializablePostProcessors = new ArrayList();
-			for (Iterator it = this.beanPostProcessors.iterator(); it.hasNext();) {
-				Object postProcessor = it.next();
+			serializablePostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>();
+			for (DestructionAwareBeanPostProcessor postProcessor : this.beanPostProcessors) {
 				if (postProcessor instanceof Serializable) {
 					serializablePostProcessors.add(postProcessor);
 				}

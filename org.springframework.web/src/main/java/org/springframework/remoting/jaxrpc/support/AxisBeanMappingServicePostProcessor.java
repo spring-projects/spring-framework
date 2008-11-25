@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package org.springframework.remoting.jaxrpc.support;
 
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.xml.namespace.QName;
 import javax.xml.rpc.Service;
 import javax.xml.rpc.encoding.TypeMapping;
@@ -62,7 +60,7 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 
 	private String typeNamespaceUri;
 
-	private Map beanMappings;
+	private Map<Object, String> beanMappings;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -95,7 +93,7 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 	 */
 	public void setBeanMappings(Properties beanMappingProps) {
 		if (beanMappingProps != null) {
-			this.beanMappings = new HashMap(beanMappingProps.size());
+			this.beanMappings = new HashMap<Object, String>(beanMappingProps.size());
 			Enumeration propertyNames = beanMappingProps.propertyNames();
 			while (propertyNames.hasMoreElements()) {
 				String javaTypeName = (String) propertyNames.nextElement();
@@ -115,9 +113,8 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 	 */
 	public void setBeanClasses(Class[] beanClasses) {
 		if (beanClasses != null) {
-			this.beanMappings = new HashMap(beanClasses.length);
-			for (int i = 0; i < beanClasses.length; i++) {
-				Class beanClass = beanClasses[i];
+			this.beanMappings = new HashMap<Object, String>(beanClasses.length);
+			for (Class beanClass : beanClasses) {
 				String wsdlTypeName = ClassUtils.getShortName(beanClass);
 				this.beanMappings.put(beanClass, wsdlTypeName);
 			}
@@ -142,9 +139,7 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 	public void postProcessJaxRpcService(Service service) {
 		TypeMappingRegistry registry = service.getTypeMappingRegistry();
 		TypeMapping mapping = registry.createTypeMapping();
-
 		registerBeanMappings(mapping);
-
 		if (this.encodingStyleUri != null) {
 			registry.register(this.encodingStyleUri, mapping);
 		}
@@ -161,18 +156,10 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 	 */
 	protected void registerBeanMappings(TypeMapping mapping) {
 		if (this.beanMappings != null) {
-			for (Iterator it = this.beanMappings.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Object key = entry.getKey();
-				Class javaType = null;
-				if (key instanceof Class) {
-					javaType = (Class) key;
-				}
-				else {
-					javaType = ClassUtils.resolveClassName((String) key, this.beanClassLoader);
-				}
-				String wsdlTypeName = (String) entry.getValue();
-				registerBeanMapping(mapping, javaType, wsdlTypeName);
+			for (Map.Entry<Object, String> entry : this.beanMappings.entrySet()) {
+				Class javaType = (entry.getKey() instanceof Class ? (Class) entry.getKey() :
+						ClassUtils.resolveClassName(entry.getKey().toString(), this.beanClassLoader));
+				registerBeanMapping(mapping, javaType, entry.getValue());
 			}
 		}
 	}

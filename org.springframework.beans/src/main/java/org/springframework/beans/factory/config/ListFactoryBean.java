@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,11 @@
 package org.springframework.beans.factory.config;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -71,6 +69,7 @@ public class ListFactoryBean extends AbstractFactoryBean {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object createInstance() {
 		if (this.sourceList == null) {
 			throw new IllegalArgumentException("'sourceList' is required");
@@ -88,8 +87,8 @@ public class ListFactoryBean extends AbstractFactoryBean {
 		}
 		if (valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();
-			for (Iterator it = this.sourceList.iterator(); it.hasNext();) {
-				result.add(converter.convertIfNecessary(it.next(), valueType));
+			for (Object elem : this.sourceList) {
+				result.add(converter.convertIfNecessary(elem, valueType));
 			}
 		}
 		else {

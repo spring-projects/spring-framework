@@ -54,16 +54,16 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List getChildElementsByTagName(Element ele, String[] childEleNames) {
+	public static List<Element> getChildElementsByTagName(Element ele, String[] childEleNames) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleNames, "Element names collection must not be null");
-		List childEleNameList = Arrays.asList(childEleNames);
+		List<String> childEleNameList = Arrays.asList(childEleNames);
 		NodeList nl = ele.getChildNodes();
-		List childEles = new ArrayList();
+		List<Element> childEles = new ArrayList<Element>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && nodeNameMatch(node, childEleNameList)) {
-				childEles.add(node);
+				childEles.add((Element) node);
 			}
 		}
 		return childEles;
@@ -80,7 +80,7 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List getChildElementsByTagName(Element ele, String childEleName) {
+	public static List<Element> getChildElementsByTagName(Element ele, String childEleName) {
 		return getChildElementsByTagName(ele, new String[] {childEleName});
 	}
 

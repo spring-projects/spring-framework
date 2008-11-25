@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -138,8 +137,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			return Collections.EMPTY_LIST;
 		}
 		List<Advisor> advisors = new LinkedList<Advisor>();
-		for (Iterator it = aspectNames.iterator(); it.hasNext();) {
-			String aspectName = (String) it.next();
+		for (String aspectName : aspectNames) {
 			List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
 			if (cachedAdvisors != null) {
 				advisors.addAll(cachedAdvisors);

@@ -168,7 +168,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
 	/** Map from bean name String to ScriptSource object */
-	private final Map scriptSourceCache = new HashMap();
+	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<String, ScriptSource>();
 
 
 	/**
@@ -202,9 +202,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
-		for (Iterator it = this.scriptBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
-			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
-			if (postProcessor instanceof AopInfrastructureBean) {
+		for (Iterator<BeanPostProcessor> it = this.scriptBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
+			if (it.next() instanceof AopInfrastructureBean) {
 				it.remove();
 			}
 		}
@@ -233,8 +232,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
 			prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
-			ScriptFactory scriptFactory =
-					(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
+			ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
 			ScriptSource scriptSource =
 					getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 			Class[] interfaces = scriptFactory.getScriptInterfaces();
@@ -284,8 +282,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
 		prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
-		ScriptFactory scriptFactory = 
-				(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
+		ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
 		ScriptSource scriptSource =
 				getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 		boolean isFactoryBean = false;
@@ -334,8 +331,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 				this.scriptBeanFactory.registerBeanDefinition(
 						scriptFactoryBeanName, createScriptFactoryBeanDefinition(bd));
-				ScriptFactory scriptFactory =
-						(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
+				ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
 				ScriptSource scriptSource =
 						getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 				Class[] interfaces = scriptFactory.getScriptInterfaces();
@@ -410,7 +406,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 */
 	protected ScriptSource getScriptSource(String beanName, String scriptSourceLocator) {
 		synchronized (this.scriptSourceCache) {
-			ScriptSource scriptSource = (ScriptSource) this.scriptSourceCache.get(beanName);
+			ScriptSource scriptSource = this.scriptSourceCache.get(beanName);
 			if (scriptSource == null) {
 				scriptSource = convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader);
 				this.scriptSourceCache.put(beanName, scriptSource);
@@ -457,8 +453,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	protected Class createConfigInterface(BeanDefinition bd, Class[] interfaces) {
 		InterfaceMaker maker = new InterfaceMaker();
 		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
-		for (int i = 0; i < pvs.length; i++) {
-			String propertyName = pvs[i].getName();
+		for (PropertyValue pv : pvs) {
+			String propertyName = pv.getName();
 			Class propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
 			String setterName = "set" + StringUtils.capitalize(propertyName);
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});

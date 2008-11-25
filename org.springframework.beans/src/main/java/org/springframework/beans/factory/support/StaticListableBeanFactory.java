@@ -18,10 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -56,7 +54,7 @@ import org.springframework.util.StringUtils;
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	/** Map from bean name to bean instance */
-	private final Map beans = new HashMap();
+	private final Map<String, Object> beans = new HashMap<String, Object>();
 
 
 	/**
@@ -99,13 +97,13 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		}
 		return bean;
 	}
-	
-	public Object getBean(String name, Class requiredType) throws BeansException {
+
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		Object bean = getBean(name);
 		if (requiredType != null && !requiredType.isAssignableFrom(bean.getClass())) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
-		return bean;
+		return (T) bean;
 	}
 
 	public Object getBean(String name, Object[] args) throws BeansException {
@@ -181,22 +179,19 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
-		List matches = new ArrayList();
-		Set keys = this.beans.keySet();
-		Iterator it = keys.iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		List<String> matches = new ArrayList<String>();
+		for (String name : this.beans.keySet()) {
 			Object beanInstance = this.beans.get(name);
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
 				if (includeFactoryBeans) {
 					Class objectType = ((FactoryBean) beanInstance).getObjectType();
-					if (objectType != null && type.isAssignableFrom(objectType)) {
+					if (objectType != null && (type == null || type.isAssignableFrom(objectType))) {
 						matches.add(name);
 					}
 				}
 			}
 			else {
-				if (type.isInstance(beanInstance)) {
+				if (type == null || type.isInstance(beanInstance)) {
 					matches.add(name);
 				}
 			}
@@ -204,22 +199,19 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return StringUtils.toStringArray(matches);
 	}
 
-	public Map getBeansOfType(Class type) throws BeansException {
+	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		return getBeansOfType(type, true, true);
 	}
 
-	public Map getBeansOfType(Class type, boolean includeNonSingletons, boolean includeFactoryBeans)
+	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean includeFactoryBeans)
 			throws BeansException {
 
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
-		Map matches = new HashMap();
+		Map<String, T> matches = new HashMap<String, T>();
 
-		Iterator it = this.beans.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String beanName = (String) entry.getKey();
+		for (Map.Entry<String, Object> entry : beans.entrySet()) {
+			String beanName = entry.getKey();
 			Object beanInstance = entry.getValue();
-
 			// Is bean a FactoryBean?
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
 				if (includeFactoryBeans) {
@@ -227,19 +219,19 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					FactoryBean factory = (FactoryBean) beanInstance;
 					Class objectType = factory.getObjectType();
 					if ((includeNonSingletons || factory.isSingleton()) &&
-							objectType != null && type.isAssignableFrom(objectType)) {
-						matches.put(beanName, getBean(beanName));
+							objectType != null && (type == null || type.isAssignableFrom(objectType))) {
+						matches.put(beanName, getBean(beanName, type));
 					}
 				}
 			}
 			else {
-				if (type.isInstance(beanInstance)) {
+				if (type == null || type.isInstance(beanInstance)) {
 					// If type to match is FactoryBean, return FactoryBean itself.
 					// Else, return bean instance.
 					if (isFactoryType) {
 						beanName = FACTORY_BEAN_PREFIX + beanName;
 					}
-					matches.put(beanName, beanInstance);
+					matches.put(beanName, (T) beanInstance);
 				}
 			}
 		}

@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -137,8 +136,7 @@ public class BeanDefinitionVisitor {
 
 	protected void visitPropertyValues(MutablePropertyValues pvs) {
 		PropertyValue[] pvArray = pvs.getPropertyValues();
-		for (int i = 0; i < pvArray.length; i++) {
-			PropertyValue pv = pvArray[i];
+		for (PropertyValue pv : pvArray) {
 			Object newVal = resolveValue(pv.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
 				pvs.addPropertyValue(pv.getName(), newVal);
@@ -146,10 +144,8 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	protected void visitIndexedArgumentValues(Map ias) {
-		for (Iterator it = ias.values().iterator(); it.hasNext();) {
-			ConstructorArgumentValues.ValueHolder valueHolder =
-					(ConstructorArgumentValues.ValueHolder) it.next();
+	protected void visitIndexedArgumentValues(Map<Integer, ConstructorArgumentValues.ValueHolder> ias) {
+		for (ConstructorArgumentValues.ValueHolder valueHolder : ias.values()) {
 			Object newVal = resolveValue(valueHolder.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
 				valueHolder.setValue(newVal);
@@ -157,10 +153,8 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	protected void visitGenericArgumentValues(List gas) {
-		for (Iterator it = gas.iterator(); it.hasNext();) {
-			ConstructorArgumentValues.ValueHolder valueHolder =
-					(ConstructorArgumentValues.ValueHolder) it.next();
+	protected void visitGenericArgumentValues(List<ConstructorArgumentValues.ValueHolder> gas) {
+		for (ConstructorArgumentValues.ValueHolder valueHolder : gas) {
 			Object newVal = resolveValue(valueHolder.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
 				valueHolder.setValue(newVal);
@@ -212,6 +206,7 @@ public class BeanDefinitionVisitor {
 		return value;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void visitList(List listVal) {
 		for (int i = 0; i < listVal.size(); i++) {
 			Object elem = listVal.get(i);
@@ -222,11 +217,11 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void visitSet(Set setVal) {
 		Set newContent = new LinkedHashSet();
 		boolean entriesModified = false;
-		for (Iterator it = setVal.iterator(); it.hasNext();) {
-			Object elem = it.next();
+		for (Object elem : setVal) {
 			int elemHash = (elem != null ? elem.hashCode() : 0);
 			Object newVal = resolveValue(elem);
 			int newValHash = (newVal != null ? newVal.hashCode() : 0);
@@ -239,11 +234,11 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	protected void visitMap(Map mapVal) {
+	@SuppressWarnings("unchecked")
+	protected void visitMap(Map<?, ?> mapVal) {
 		Map newContent = new LinkedHashMap();
 		boolean entriesModified = false;
-		for (Iterator it = mapVal.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry entry : mapVal.entrySet()) {
 			Object key = entry.getKey();
 			int keyHash = (key != null ? key.hashCode() : 0);
 			Object newKey = resolveValue(key);

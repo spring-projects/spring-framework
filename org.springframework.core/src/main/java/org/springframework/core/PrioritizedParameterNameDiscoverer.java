@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ import java.util.List;
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
 	
-	private final List parameterNameDiscoverers = new LinkedList();
+	private final List<ParameterNameDiscoverer> parameterNameDiscoverers =
+			new LinkedList<ParameterNameDiscoverer>();
 
 
 	/**
@@ -49,8 +50,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 
 
 	public String[] getParameterNames(Method method) {
-		for (Iterator it = this.parameterNameDiscoverers.iterator(); it.hasNext(); ) {
-			ParameterNameDiscoverer pnd = (ParameterNameDiscoverer) it.next();
+		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(method);
 			if (result != null) {
 				return result;
@@ -60,8 +60,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	}
 
 	public String[] getParameterNames(Constructor ctor) {
-		for (Iterator it = this.parameterNameDiscoverers.iterator(); it.hasNext(); ) {
-			ParameterNameDiscoverer pnd = (ParameterNameDiscoverer) it.next();
+		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(ctor);
 			if (result != null) {
 				return result;

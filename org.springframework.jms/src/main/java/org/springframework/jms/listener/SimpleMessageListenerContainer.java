@@ -72,9 +72,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private TaskExecutor taskExecutor;
 
-	private Set sessions;
+	private Set<Session> sessions;
 
-	private Set consumers;
+	private Set<MessageConsumer> consumers;
 
 	private final Object consumersMonitor = new Object();
 
@@ -221,8 +221,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		// Register Sessions and MessageConsumers.
 		synchronized (this.consumersMonitor) {
 			if (this.consumers == null) {
-				this.sessions = new HashSet(this.concurrentConsumers);
-				this.consumers = new HashSet(this.concurrentConsumers);
+				this.sessions = new HashSet<Session>(this.concurrentConsumers);
+				this.consumers = new HashSet<MessageConsumer>(this.concurrentConsumers);
 				Connection con = getSharedConnection();
 				for (int i = 0; i < this.concurrentConsumers; i++) {
 					Session session = createSession(con);
@@ -301,13 +301,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	protected void doShutdown() throws JMSException {
 		logger.debug("Closing JMS MessageConsumers");
-		for (Iterator it = this.consumers.iterator(); it.hasNext();) {
-			MessageConsumer consumer = (MessageConsumer) it.next();
+		for (MessageConsumer consumer : this.consumers) {
 			JmsUtils.closeMessageConsumer(consumer);
 		}
 		logger.debug("Closing JMS Sessions");
-		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
-			Session session = (Session) it.next();
+		for (Session session : this.sessions) {
 			JmsUtils.closeSession(session);
 		}
 	}

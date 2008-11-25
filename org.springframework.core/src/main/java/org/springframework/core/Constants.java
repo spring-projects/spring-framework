@@ -19,7 +19,6 @@ package org.springframework.core;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +49,7 @@ public class Constants {
 	private final String className;
 
 	/** Map from String field name to object value */
-	private final Map fieldCache = new HashMap();
+	private final Map<String, Object> fieldCache = new HashMap<String, Object>();
 
 
 	/**
@@ -63,8 +62,7 @@ public class Constants {
 		Assert.notNull(clazz);
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
+		for (Field field : fields) {
 			if (ReflectionUtils.isPublicStaticFinal(field)) {
 				String name = field.getName();
 				try {
@@ -97,7 +95,7 @@ public class Constants {
 	 * Exposes the field cache to subclasses:
 	 * a Map from String field name to object value.
 	 */
-	protected final Map getFieldCache() {
+	protected final Map<String, Object> getFieldCache() {
 		return this.fieldCache;
 	}
 
@@ -159,11 +157,10 @@ public class Constants {
 	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
 	 * @return the set of constant names
 	 */
-	public Set getNames(String namePrefix) {
+	public Set<String> getNames(String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set names = new HashSet();
-		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
-			String code = (String) it.next();
+		Set<String> names = new HashSet<String>();
+		for (String code : this.fieldCache.keySet()) {
 			if (code.startsWith(prefixToUse)) {
 				names.add(code);
 			}
@@ -178,7 +175,7 @@ public class Constants {
 	 * @return the set of values
 	 * @see #propertyToConstantNamePrefix
 	 */
-	public Set getNamesForProperty(String propertyName) {
+	public Set<String> getNamesForProperty(String propertyName) {
 		return getNames(propertyToConstantNamePrefix(propertyName));
 	}
 
@@ -194,9 +191,8 @@ public class Constants {
 	 */
 	public Set getNamesForSuffix(String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set names = new HashSet();
-		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
-			String code = (String) it.next();
+		Set<String> names = new HashSet<String>();
+		for (String code : this.fieldCache.keySet()) {
 			if (code.endsWith(suffixToUse)) {
 				names.add(code);
 			}
@@ -215,11 +211,10 @@ public class Constants {
 	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
 	 * @return the set of values
 	 */
-	public Set getValues(String namePrefix) {
+	public Set<Object> getValues(String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set values = new HashSet();
-		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
-			String code = (String) it.next();
+		Set<Object> values = new HashSet<Object>();
+		for (String code : this.fieldCache.keySet()) {
 			if (code.startsWith(prefixToUse)) {
 				values.add(this.fieldCache.get(code));
 			}
@@ -234,7 +229,7 @@ public class Constants {
 	 * @return the set of values
 	 * @see #propertyToConstantNamePrefix
 	 */
-	public Set getValuesForProperty(String propertyName) {
+	public Set<Object> getValuesForProperty(String propertyName) {
 		return getValues(propertyToConstantNamePrefix(propertyName));
 	}
 
@@ -248,11 +243,10 @@ public class Constants {
 	 * @param nameSuffix suffix of the constant names to search (may be <code>null</code>)
 	 * @return the set of values
 	 */
-	public Set getValuesForSuffix(String nameSuffix) {
+	public Set<Object> getValuesForSuffix(String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set values = new HashSet();
-		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
-			String code = (String) it.next();
+		Set<Object> values = new HashSet<Object>();
+		for (String code : this.fieldCache.keySet()) {
 			if (code.endsWith(suffixToUse)) {
 				values.add(this.fieldCache.get(code));
 			}
@@ -271,11 +265,9 @@ public class Constants {
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : null);
-		for (Iterator it = this.fieldCache.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String key = (String) entry.getKey();
-			if (key.startsWith(prefixToUse) && entry.getValue().equals(value)) {
-				return key;
+		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
+			if (entry.getKey().startsWith(prefixToUse) && entry.getValue().equals(value)) {
+				return entry.getKey();
 			}
 		}
 		throw new ConstantException(this.className, prefixToUse, value);
@@ -304,11 +296,9 @@ public class Constants {
 	 */
 	public String toCodeForSuffix(Object value, String nameSuffix) throws ConstantException {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : null);
-		for (Iterator it = this.fieldCache.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String key = (String) entry.getKey();
-			if (key.endsWith(suffixToUse) && entry.getValue().equals(value)) {
-				return key;
+		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
+			if (entry.getKey().endsWith(suffixToUse) && entry.getValue().equals(value)) {
+				return entry.getKey();
 			}
 		}
 		throw new ConstantException(this.className, suffixToUse, value);

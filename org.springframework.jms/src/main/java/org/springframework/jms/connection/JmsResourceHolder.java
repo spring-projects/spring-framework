@@ -17,11 +17,9 @@
 package org.springframework.jms.connection;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -55,11 +53,12 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private boolean frozen = false;
 
-	private final List connections = new LinkedList();
+	private final List<Connection> connections = new LinkedList<Connection>();
 
-	private final List sessions = new LinkedList();
+	private final List<Session> sessions = new LinkedList<Session>();
 
-	private final Map sessionsPerConnection = new HashMap();
+	private final Map<Connection, List<Session>> sessionsPerConnection =
+			new HashMap<Connection, List<Session>>();
 
 
 	/**
@@ -136,9 +135,9 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		if (!this.sessions.contains(session)) {
 			this.sessions.add(session);
 			if (connection != null) {
-				List sessions = (List) this.sessionsPerConnection.get(connection);
+				List<Session> sessions = this.sessionsPerConnection.get(connection);
 				if (sessions == null) {
-					sessions = new LinkedList();
+					sessions = new LinkedList<Session>();
 					this.sessionsPerConnection.put(connection, sessions);
 				}
 				sessions.add(session);
@@ -152,34 +151,34 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 
 	public Connection getConnection() {
-		return (!this.connections.isEmpty() ? (Connection) this.connections.get(0) : null);
+		return (!this.connections.isEmpty() ? this.connections.get(0) : null);
 	}
 
-	public Connection getConnection(Class connectionType) {
-		return (Connection) CollectionUtils.findValueOfType(this.connections, connectionType);
+	public Connection getConnection(Class<? extends Connection> connectionType) {
+		return CollectionUtils.findValueOfType(this.connections, connectionType);
 	}
 
 	public Session getSession() {
-		return (!this.sessions.isEmpty() ? (Session) this.sessions.get(0) : null);
+		return (!this.sessions.isEmpty() ? this.sessions.get(0) : null);
 	}
 
-	public Session getSession(Class sessionType) {
+	public Session getSession(Class<? extends Session> sessionType) {
 		return getSession(sessionType, null);
 	}
 
-	public Session getSession(Class sessionType, Connection connection) {
-		List sessions = this.sessions;
+	public Session getSession(Class<? extends Session> sessionType, Connection connection) {
+		List<Session> sessions = this.sessions;
 		if (connection != null) {
-			sessions = (List) this.sessionsPerConnection.get(connection);
+			sessions = this.sessionsPerConnection.get(connection);
 		}
-		return (Session) CollectionUtils.findValueOfType(sessions, sessionType);
+		return CollectionUtils.findValueOfType(sessions, sessionType);
 	}
 
 
 	public void commitAll() throws JMSException {
-		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
+		for (Session session : this.sessions) {
 			try {
-				((Session) it.next()).commit();
+				session.commit();
 			}
 			catch (TransactionInProgressException ex) {
 				// Ignore -> can only happen in case of a JTA transaction.
@@ -191,16 +190,15 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	}
 
 	public void closeAll() {
-		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
+		for (Session session : this.sessions) {
 			try {
-				((Session) it.next()).close();
+				session.close();
 			}
 			catch (Throwable ex) {
 				logger.debug("Could not close synchronized JMS Session after transaction", ex);
 			}
 		}
-		for (Iterator it = this.connections.iterator(); it.hasNext();) {
-			Connection con = (Connection) it.next();
+		for (Connection con : this.connections) {
 			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory, true);
 		}
 		this.connections.clear();

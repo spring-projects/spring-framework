@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.aop.Advisor;
@@ -40,12 +39,11 @@ public abstract class AspectJProxyUtils {
 	 * @param advisors Advisors available
 	 * @return <code>true</code> if any special {@link Advisor Advisors} were added, otherwise <code>false</code>.
 	 */
-	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List advisors) {
+	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
 		// Don't add advisors to an empty list; may indicate that proxying is just not required
 		if (!advisors.isEmpty()) {
 			boolean foundAspectJAdvice = false;
-			for (Iterator it = advisors.iterator(); it.hasNext() && !foundAspectJAdvice; ) {
-				Advisor advisor = (Advisor) it.next();
+			for (Advisor advisor : advisors) {
 				// Be careful not to get the Advice without a guard, as
 				// this might eagerly instantiate a non-singleton AspectJ aspect
 				if (isAspectJAdvice(advisor)) {

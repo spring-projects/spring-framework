@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -105,10 +104,9 @@ public class CustomMapEditor extends PropertyEditorSupport {
 		}
 		else if (value instanceof Map) {
 			// Convert Map elements.
-			Map source = (Map) value;
+			Map<?, ?> source = (Map) value;
 			Map target = createMap(this.mapType, source.size());
-			for (Iterator it = source.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
+			for (Map.Entry entry : source.entrySet()) {
 				target.put(convertKey(entry.getKey()), convertValue(entry.getValue()));
 			}
 			super.setValue(target);

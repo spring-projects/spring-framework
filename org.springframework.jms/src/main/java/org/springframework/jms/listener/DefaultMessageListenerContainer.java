@@ -179,7 +179,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int idleTaskExecutionLimit = 1;
 
-	private final Set scheduledInvokers = new HashSet();
+	private final Set<AsyncMessageListenerInvoker> scheduledInvokers = new HashSet<AsyncMessageListenerInvoker>();
 
 	private int activeInvokerCount = 0;
 
@@ -658,8 +658,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	private int getIdleInvokerCount() {
 		int count = 0;
-		for (Iterator it = this.scheduledInvokers.iterator(); it.hasNext();) {
-			AsyncMessageListenerInvoker invoker = (AsyncMessageListenerInvoker) it.next();
+		for (AsyncMessageListenerInvoker invoker : this.scheduledInvokers) {
 			if (invoker.isIdle()) {
 				count++;
 			}

@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -87,7 +86,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	private volatile boolean active = true;
 
-	private final Map cachedSessions = new HashMap();
+	private final Map<Integer, LinkedList<Session>> cachedSessions =
+			new HashMap<Integer, LinkedList<Session>>();
 
 
 	/**
@@ -177,11 +177,9 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	public void resetConnection() {
 		this.active = false;
 		synchronized (this.cachedSessions) {
-			for (Iterator it = this.cachedSessions.values().iterator(); it.hasNext();) {
-				LinkedList sessionList = (LinkedList) it.next();
+			for (LinkedList<Session> sessionList : this.cachedSessions.values()) {
 				synchronized (sessionList) {
-					for (Iterator it2 = sessionList.iterator(); it2.hasNext();) {
-						Session session = (Session) it2.next();
+					for (Session session : sessionList) {
 						try {
 							session.close();
 						}
@@ -203,18 +201,18 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * Checks for a cached Session for the given mode.
 	 */
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
-		LinkedList sessionList = null;
+		LinkedList<Session> sessionList = null;
 		synchronized (this.cachedSessions) {
-			sessionList = (LinkedList) this.cachedSessions.get(mode);
+			sessionList = this.cachedSessions.get(mode);
 			if (sessionList == null) {
-				sessionList = new LinkedList();
+				sessionList = new LinkedList<Session>();
 				this.cachedSessions.put(mode, sessionList);
 			}
 		}
 		Session session = null;
 		synchronized (sessionList) {
 			if (!sessionList.isEmpty()) {
-				session = (Session) sessionList.removeFirst();
+				session = sessionList.removeFirst();
 			}
 		}
 		if (session != null) {
@@ -241,8 +239,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @param sessionList the List of cached Sessions that the given Session belongs to
 	 * @return the wrapped Session
 	 */
-	protected Session getCachedSessionProxy(Session target, LinkedList sessionList) {
-		List classes = new ArrayList(3);
+	protected Session getCachedSessionProxy(Session target, LinkedList<Session> sessionList) {
+		List<Class> classes = new ArrayList<Class>(3);
 		classes.add(SessionProxy.class);
 		if (target instanceof QueueSession) {
 			classes.add(QueueSession.class);
@@ -252,7 +250,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 		return (Session) Proxy.newProxyInstance(
 				SessionProxy.class.getClassLoader(),
-				(Class[]) classes.toArray(new Class[classes.size()]),
+				classes.toArray(new Class[classes.size()]),
 				new CachedSessionInvocationHandler(target, sessionList));
 	}
 
@@ -264,15 +262,17 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Session target;
 
-		private final LinkedList sessionList;
+		private final LinkedList<Session> sessionList;
 
-		private final Map cachedProducers = new HashMap();
+		private final Map<Destination, MessageProducer> cachedProducers =
+				new HashMap<Destination, MessageProducer>();
 
-		private final Map cachedConsumers = new HashMap();
+		private final Map<ConsumerCacheKey, MessageConsumer> cachedConsumers =
+				new HashMap<ConsumerCacheKey, MessageConsumer>();
 
 		private boolean transactionOpen = false;
 
-		public CachedSessionInvocationHandler(Session target, LinkedList sessionList) {
+		public CachedSessionInvocationHandler(Session target, LinkedList<Session> sessionList) {
 			this.target = target;
 			this.sessionList = sessionList;
 		}
@@ -285,7 +285,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 			else if (methodName.equals("hashCode")) {
 				// Use hashCode of Session proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (methodName.equals("toString")) {
 				return "Cached JMS Session: " + this.target;
@@ -295,7 +295,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				if (active) {
 					synchronized (this.sessionList) {
 						if (this.sessionList.size() < getSessionCacheSize()) {
-							logicalClose(proxy);
+							logicalClose((Session) proxy);
 							// Remain open in the session list.
 							return null;
 						}
@@ -321,11 +321,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				else if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") ||
 						methodName.equals("createSubscriber")) && isCacheConsumers()) {
 					return getCachedConsumer((Destination) args[0], (args.length > 1 ? (String) args[1] : null),
-							(args.length > 2 && ((Boolean) args[2]).booleanValue()), null);
+							(args.length > 2 && (Boolean) args[2]), null);
 				}
 				else if (methodName.equals("createDurableSubscriber") && isCacheConsumers()) {
 					return getCachedConsumer((Destination) args[0], (args.length > 2 ? (String) args[2] : null),
-							(args.length > 3 && ((Boolean) args[3]).booleanValue()), (String) args[1]);
+							(args.length > 3 && (Boolean) args[3]), (String) args[1]);
 				}
 			}
 			try {
@@ -337,7 +337,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		private MessageProducer getCachedProducer(Destination dest) throws JMSException {
-			MessageProducer producer = (MessageProducer) this.cachedProducers.get(dest);
+			MessageProducer producer = this.cachedProducers.get(dest);
 			if (producer != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found cached JMS MessageProducer for destination [" + dest + "]: " + producer);
@@ -356,8 +356,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		private MessageConsumer getCachedConsumer(
 				Destination dest, String selector, boolean noLocal, String subscription) throws JMSException {
 
-			Object cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription);
-			MessageConsumer consumer = (MessageConsumer) this.cachedConsumers.get(cacheKey);
+			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription);
+			MessageConsumer consumer = this.cachedConsumers.get(cacheKey);
 			if (consumer != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
@@ -380,18 +380,17 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return new CachedMessageConsumer(consumer);
 		}
 
-		private void logicalClose(Object proxy) throws JMSException {
+		private void logicalClose(Session proxy) throws JMSException {
 			// Preserve rollback-on-close semantics.
 			if (this.transactionOpen && this.target.getTransacted()) {
 				this.transactionOpen = false;
 				this.target.rollback();
 			}
 			// Physically close durable subscribers at time of Session close call.
-			for (Iterator it = this.cachedConsumers.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				ConsumerCacheKey key = (ConsumerCacheKey) entry.getKey();
-				if (key.subscription != null) {
-					((MessageConsumer) entry.getValue()).close();
+			for (Iterator<Map.Entry<ConsumerCacheKey, MessageConsumer>> it = this.cachedConsumers.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<ConsumerCacheKey, MessageConsumer> entry = it.next();
+				if (entry.getKey().subscription != null) {
+					entry.getValue().close();
 					it.remove();
 				}
 			}
@@ -411,11 +410,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			// Explicitly close all MessageProducers and MessageConsumers that
 			// this Session happens to cache...
 			try {
-				for (Iterator it = this.cachedProducers.values().iterator(); it.hasNext();) {
-					((MessageProducer) it.next()).close();
+				for (MessageProducer producer : this.cachedProducers.values()) {
+					producer.close();
 				}
-				for (Iterator it = this.cachedConsumers.values().iterator(); it.hasNext();) {
-					((MessageConsumer) it.next()).close();
+				for (MessageConsumer consumer : this.cachedConsumers.values()) {
+					consumer.close();
 				}
 			}
 			finally {

@@ -151,8 +151,8 @@ public abstract class PropertiesLoaderSupport {
 		}
 
 		if (this.localProperties != null) {
-			for (int i = 0; i < this.localProperties.length; i++) {
-				CollectionUtils.mergePropertiesIntoMap(this.localProperties[i], result);
+			for (Properties localProp : this.localProperties) {
+				CollectionUtils.mergePropertiesIntoMap(localProp, result);
 			}
 		}
 
@@ -172,8 +172,7 @@ public abstract class PropertiesLoaderSupport {
 	 */
 	protected void loadProperties(Properties props) throws IOException {
 		if (this.locations != null) {
-			for (int i = 0; i < this.locations.length; i++) {
-				Resource location = this.locations[i];
+			for (Resource location : this.locations) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading properties file from " + location);
 				}

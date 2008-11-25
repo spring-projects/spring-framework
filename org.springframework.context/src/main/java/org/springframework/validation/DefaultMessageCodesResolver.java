@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.validation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.util.StringUtils;
@@ -121,19 +120,17 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * @return the list of codes
 	 */
 	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
-		List codeList = new ArrayList();
-		List fieldList = new ArrayList();
+		List<String> codeList = new ArrayList<String>();
+		List<String> fieldList = new ArrayList<String>();
 		buildFieldList(field, fieldList);
-		for (Iterator it = fieldList.iterator(); it.hasNext();) {
-			String fieldInList = (String) it.next();
+		for (String fieldInList : fieldList) {
 			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName + CODE_SEPARATOR + fieldInList));
 		}
 		int dotIndex = field.lastIndexOf('.');
 		if (dotIndex != -1) {
 			buildFieldList(field.substring(dotIndex + 1), fieldList);
 		}
-		for (Iterator it = fieldList.iterator(); it.hasNext();) {
-			String fieldInList = (String) it.next();
+		for (String fieldInList : fieldList) {
 			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldInList));
 		}
 		if (fieldType != null) {
@@ -147,7 +144,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * Add both keyed and non-keyed entries for the supplied <code>field</code>
 	 * to the supplied field list.
 	 */
-	protected void buildFieldList(String field, List fieldList) {
+	protected void buildFieldList(String field, List<String> fieldList) {
 		fieldList.add(field);
 		String plainField = field;
 		int keyIndex = plainField.lastIndexOf('[');
