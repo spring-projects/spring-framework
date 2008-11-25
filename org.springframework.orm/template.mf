@@ -62,11 +62,7 @@ Import-Template:
  org.springframework.web.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.ui.*;version="[3.0.0, 3.0.1)";resolution:=optional
 Unversioned-Imports: 
- javax.naming.*,
- javax.sql.*,
- javax.xml.parsers.*,
- org.w3c.dom.*,
- org.xml.sax
+ *
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  DynamicImport-Package,

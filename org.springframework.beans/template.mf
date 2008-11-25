@@ -9,6 +9,5 @@ Import-Template:
  org.springframework.core.*;version="[3.0.0, 3.0.1)",
  org.springframework.util.*;version="[3.0.0, 3.0.1)",
 Unversioned-Imports: 
- javax.xml.parsers.*,
- org.w3c.dom.*,
- org.xml.sax.*
+ *
+

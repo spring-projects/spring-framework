@@ -4,6 +4,9 @@ Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Package: 
  org.springframework.stereotype;version="[3.0.0, 3.0.1)"
+ com.ibm.ws.Transaction;resolution:=optional,
+ oracle.j2ee.transaction;resolution:=optional,
+ weblogic.transaction;resolution:=optional
 Import-Template: 
  com.ibm.wsspi.uow.*;version="[6.0.2.17, 6.1.0)";resolution:=optional,
  javax.ejb.*;version="[3.0.0, 4.0.0)";resolution:=optional, 
@@ -21,6 +24,4 @@ Import-Template:
  org.springframework.scheduling.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.util.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
- javax.management.*,
- javax.naming.*,
- org.w3c.dom.*
+ *

@@ -20,8 +20,7 @@ Import-Template:
  org.springframework.transaction.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.util.*;version="[3.0.0, 3.0.1)"
 Unversioned-Imports: 
- javax.naming.*,
- org.w3c.dom.*
+ *
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,

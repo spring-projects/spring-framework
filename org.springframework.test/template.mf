@@ -14,11 +14,10 @@ Import-Template:
  org.apache.taglibs.standard.*;version="[1.1.2, 2.0.0)";resolution:=optional,
  org.aspectj.weaver.*;version="[1.5.4, 2.0.0)";resolution:=optional,
  org.junit.*;version="[4.5.0, 5.0.0)";resolution:=optional,
- org.springframework.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
+ org.springframework.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.testng.*;version="[5.8.0, 6.0.0)";resolution:=optional
 Unversioned-Imports: 
- javax.naming.*,
- javax.sql
+ *
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,
