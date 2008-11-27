@@ -34,8 +34,8 @@
 		<dependency org="javax.mail" name="com.springsource.javax.mail" rev="1.4.0" conf="test->compile"/>
 		<dependency org="javax.portlet" name="com.springsource.javax.portlet" rev="1.0.0" conf="test->compile"/>
 		<dependency org="javax.resource" name="com.springsource.javax.resource" rev="1.5.0" conf="test->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.4.0" conf="test->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.0.0" conf="test->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="test->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.1.0" conf="test->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2" conf="test->compile"/>
 		<dependency org="javax.xml.rpc" name="com.springsource.javax.xml.rpc" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="test->compile"/>
@@ -80,7 +80,7 @@
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.portlet" rev="latest.integration" conf="test->compile"/>
 		<!-- test dependencies -->
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
