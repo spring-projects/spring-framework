@@ -55,7 +55,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * @param expectedType expected type of the model value
 	 * @return the model value
 	 */
-	protected Object assertAndReturnModelAttributeOfType(ModelAndView mav, Object modelName, Class expectedType) {
+	protected <T> T assertAndReturnModelAttributeOfType(ModelAndView mav, String modelName, Class<T> expectedType) {
 		try {
 			return ModelAndViewAssert.assertAndReturnModelAttributeOfType(mav, modelName, expectedType);
 		}
@@ -71,7 +71,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * <code>null</code>)
 	 * @param expectedList the expected list
 	 */
-	protected void assertCompareListModelAttribute(ModelAndView mav, Object modelName, List expectedList) {
+	protected void assertCompareListModelAttribute(ModelAndView mav, String modelName, List expectedList) {
 		try {
 			ModelAndViewAssert.assertCompareListModelAttribute(mav, modelName, expectedList);
 		}
@@ -86,7 +86,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
 	 */
-	protected void assertModelAttributeAvailable(ModelAndView mav, Object modelName) {
+	protected void assertModelAttributeAvailable(ModelAndView mav, String modelName) {
 		try {
 			ModelAndViewAssert.assertModelAttributeAvailable(mav, modelName);
 		}
@@ -103,7 +103,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * <code>null</code>)
 	 * @param expectedValue the model value
 	 */
-	protected void assertModelAttributeValue(ModelAndView mav, Object modelName, Object expectedValue) {
+	protected void assertModelAttributeValue(ModelAndView mav, String modelName, Object expectedValue) {
 		try {
 			ModelAndViewAssert.assertModelAttributeValue(mav, modelName, expectedValue);
 		}
@@ -118,7 +118,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedModel the expected model
 	 */
-	protected void assertModelAttributeValues(ModelAndView mav, Map expectedModel) {
+	protected void assertModelAttributeValues(ModelAndView mav, Map<String, Object> expectedModel) {
 		try {
 			ModelAndViewAssert.assertModelAttributeValues(mav, expectedModel);
 		}
@@ -139,7 +139,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * any comparator.
 	 */
 	protected void assertSortAndCompareListModelAttribute(
-			ModelAndView mav, Object modelName, List expectedList, Comparator comparator) {
+			ModelAndView mav, String modelName, List expectedList, Comparator comparator) {
 		try {
 			ModelAndViewAssert.assertSortAndCompareListModelAttribute(mav, modelName, expectedList, comparator);
 		}
