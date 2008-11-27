@@ -142,8 +142,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		ProxyFactory proxyFactory = new ProxyFactory();
 
 		if (this.preInterceptors != null) {
-			for (int i = 0; i < this.preInterceptors.length; i++) {
-				proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.preInterceptors[i]));
+			for (Object interceptor : this.preInterceptors) {
+				proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(interceptor));
 			}
 		}
 
@@ -151,8 +151,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(createMainInterceptor()));
 
 		if (this.postInterceptors != null) {
-			for (int i = 0; i < this.postInterceptors.length; i++) {
-				proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.postInterceptors[i]));
+			for (Object interceptor : this.postInterceptors) {
+				proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(interceptor));
 			}
 		}
 
@@ -170,7 +170,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.proxyClassLoader));
 		}
 
-		this.proxy = getProxy(proxyFactory);
+		this.proxy = proxyFactory.getProxy(this.proxyClassLoader);
 	}
 
 	/**
@@ -186,19 +186,6 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		else {
 			return new SingletonTargetSource(target);
 		}
-	}
-
-	/**
-	 * Return the proxy object to expose.
-	 * <p>The default implementation uses a <code>getProxy</code> call with
-	 * the factory's bean class loader. Can be overridden to specify a
-	 * custom class loader.
-	 * @param aopProxy the prepared AopProxy instance to get the proxy from
-	 * @return the proxy object to expose
-	 * @see AopProxy#getProxy(ClassLoader)
-	 */
-	protected Object getProxy(AopProxy aopProxy) {
-		return aopProxy.getProxy(this.proxyClassLoader);
 	}
 
 

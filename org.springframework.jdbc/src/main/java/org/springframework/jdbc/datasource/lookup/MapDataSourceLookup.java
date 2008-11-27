@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.datasource.lookup;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.util.Assert;
@@ -37,7 +36,7 @@ import org.springframework.util.Assert;
  */
 public class MapDataSourceLookup implements DataSourceLookup {
 
-	private final Map dataSources = new HashMap(4);
+	private final Map<String, DataSource> dataSources = new HashMap<String, DataSource>(4);
 
 
 	/**
@@ -51,7 +50,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	 * @param dataSources the {@link Map} of {@link DataSource DataSources}; the keys
 	 * are {@link String Strings}, the values are actual {@link DataSource} instances.
 	 */
-	public MapDataSourceLookup(Map dataSources) {
+	public MapDataSourceLookup(Map<String, DataSource> dataSources) {
 		setDataSources(dataSources);
 	}
 
@@ -72,7 +71,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	 * call effectively has no effect. 
 	 * @param dataSources said {@link Map} of {@link DataSource DataSources}
 	 */
-	public void setDataSources(Map dataSources) {
+	public void setDataSources(Map<String, DataSource> dataSources) {
 		if (dataSources != null) {
 			this.dataSources.putAll(dataSources);
 		}
@@ -83,7 +82,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	 * <p>The returned {@link Map} is {@link Collections#unmodifiableMap(java.util.Map) unmodifiable}.
 	 * @return said {@link Map} of {@link DataSource DataSources} (never <code>null</code>) 
 	 */
-	public Map getDataSources() {
+	public Map<String, DataSource> getDataSources() {
 		return Collections.unmodifiableMap(this.dataSources);
 	}
 
@@ -101,17 +100,12 @@ public class MapDataSourceLookup implements DataSourceLookup {
 
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		Assert.notNull(dataSourceName, "DataSource name must not be null");
-		Object value = this.dataSources.get(dataSourceName);
-		if (value == null) {
+		DataSource dataSource = this.dataSources.get(dataSourceName);
+		if (dataSource == null) {
 			throw new DataSourceLookupFailureException(
 					"No DataSource with name '" + dataSourceName + "' registered");
 		}
-		if (!(value instanceof DataSource)) {
-			throw new DataSourceLookupFailureException(
-					"The object [" + value + "] with name '" + dataSourceName +
-					"' in the DataSource map is not a [javax.sql.DataSource]");
-		}
-		return (DataSource) value;
+		return dataSource;
 	}
 
 }

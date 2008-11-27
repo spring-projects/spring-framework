@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.dao.DataAccessException;
  * @see RowMapper
  * @see org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor
  */
-public interface ResultSetExtractor {
+public interface ResultSetExtractor<T> {
 
 	/**
 	 * Implementations must implement this method to process the entire ResultSet.
@@ -58,6 +58,6 @@ public interface ResultSetExtractor {
 	 * values or navigating (that is, there's no need to catch SQLException)
 	 * @throws DataAccessException in case of custom exceptions
 	 */
-	Object extractData(ResultSet rs) throws SQLException, DataAccessException;
+	T extractData(ResultSet rs) throws SQLException, DataAccessException;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Comparator;
  * @author Keith Donald
  * @since 1.2.2
  */
-public final class BooleanComparator implements Comparator, Serializable {
+public final class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 	/**
 	 * A shared default instance of this comparator, treating true lower
@@ -58,9 +58,7 @@ public final class BooleanComparator implements Comparator, Serializable {
 	}
 
 
-	public int compare(Object o1, Object o2) {
-		boolean v1 = ((Boolean) o1).booleanValue();
-		boolean v2 = ((Boolean) o2).booleanValue();
+	public int compare(Boolean v1, Boolean v2) {
 		return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
 	}
 

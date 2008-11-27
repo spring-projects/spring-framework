@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.vendor;
 
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -115,7 +114,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 		return null;
 	}
 
-	public Map getJpaPropertyMap() {
+	public Map<String, ?> getJpaPropertyMap() {
 		return null;
 	}
 

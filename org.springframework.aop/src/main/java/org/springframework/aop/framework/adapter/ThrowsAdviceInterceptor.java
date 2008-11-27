@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	private final Object throwsAdvice;
 
 	/** Methods on throws advice, keyed by exception class */
-	private final Map exceptionHandlerMap = new HashMap();
+	private final Map<Class, Method> exceptionHandlerMap = new HashMap<Class, Method>();
 
 
 	/**
@@ -75,10 +75,8 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		this.throwsAdvice = throwsAdvice;
 
 		Method[] methods = throwsAdvice.getClass().getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
+		for (Method method : methods) {
 			if (method.getName().equals(AFTER_THROWING) &&
-					//m.getReturnType() == null &&
 					(method.getParameterTypes().length == 1 || method.getParameterTypes().length == 4) &&
 					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
 				) {
@@ -110,10 +108,10 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
 		}
-		Method handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
+		Method handler = this.exceptionHandlerMap.get(exceptionClass);
 		while (handler == null && !exceptionClass.equals(Throwable.class)) {
 			exceptionClass = exceptionClass.getSuperclass();
-			handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
+			handler = this.exceptionHandlerMap.get(exceptionClass);
 		}
 		if (handler != null && logger.isDebugEnabled()) {
 			logger.debug("Found handler for exception of type [" + exceptionClass.getName() + "]: " + handler);

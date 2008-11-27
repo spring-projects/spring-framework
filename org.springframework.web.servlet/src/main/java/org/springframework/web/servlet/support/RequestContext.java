@@ -91,7 +91,7 @@ public class RequestContext {
 
 	private HttpServletRequest request;
 
-	private Map model;
+	private Map<String, Object> model;
 
 	private WebApplicationContext webApplicationContext;
 
@@ -103,7 +103,7 @@ public class RequestContext {
 
 	private UrlPathHelper urlPathHelper;
 
-	private Map errorsMap;
+	private Map<String, Errors> errorsMap;
 
 
 	/**
@@ -153,7 +153,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext, Map)
 	 */
-	public RequestContext(HttpServletRequest request, Map model) {
+	public RequestContext(HttpServletRequest request, Map<String, Object> model) {
 		initContext(request, null, model);
 	}
 
@@ -172,7 +172,7 @@ public class RequestContext {
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
-	public RequestContext(HttpServletRequest request, ServletContext servletContext, Map model) {
+	public RequestContext(HttpServletRequest request, ServletContext servletContext, Map<String, Object> model) {
 		initContext(request, servletContext, model);
 	}
 
@@ -199,7 +199,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE
 	 * @see org.springframework.web.servlet.DispatcherServlet#THEME_RESOLVER_ATTRIBUTE
 	 */
-	protected void initContext(HttpServletRequest request, ServletContext servletContext, Map model) {
+	protected void initContext(HttpServletRequest request, ServletContext servletContext, Map<String, Object> model) {
 		this.request = request;
 		this.model = model;
 
@@ -326,7 +326,7 @@ public class RequestContext {
 	 * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
-		this.defaultHtmlEscape = Boolean.valueOf(defaultHtmlEscape);
+		this.defaultHtmlEscape = defaultHtmlEscape;
 	}
 
 	/**
@@ -334,7 +334,7 @@ public class RequestContext {
 	 * Falls back to <code>false</code> in case of no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
-		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
+		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape);
 	}
 
 	/**
@@ -640,16 +640,13 @@ public class RequestContext {
 	 */
 	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
-			this.errorsMap = new HashMap();
+			this.errorsMap = new HashMap<String, Errors>();
 		}
-		Errors errors = (Errors) this.errorsMap.get(name);
+		Errors errors = this.errorsMap.get(name);
 		boolean put = false;
 		if (errors == null) {
 			errors = (Errors) getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
 			// Check old BindException prefix for backwards compatibility.
-			if (errors == null) {
-				errors = (Errors) getModelObject(BindException.ERROR_KEY_PREFIX + name);
-			}
 			if (errors instanceof BindException) {
 				errors = ((BindException) errors).getBindingResult();
 			}

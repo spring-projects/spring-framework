@@ -16,9 +16,6 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 /**
@@ -49,24 +46,8 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * @since 2.5
  * @see ParameterizedRowMapper
  */
-public class ParameterizedBeanPropertyRowMapper<T> extends BeanPropertyRowMapper
+public class ParameterizedBeanPropertyRowMapper<T> extends BeanPropertyRowMapper<T>
 		implements ParameterizedRowMapper<T> {
-
-	/**
-	 * Create a new ParameterizedBeanPropertyRowMapper.
-	 * <p>Generally prefer the {@link #newInstance(Class)} method instead,
-	 * which avoids the need for specifying the mapped type twice.
-	 * @see #setMappedClass
-	 */
-	public ParameterizedBeanPropertyRowMapper() {
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
-		return (T) super.mapRow(rs, rowNumber);
-	}
-
 
 	/**
 	 * Static factory method to create a new ParameterizedBeanPropertyRowMapper

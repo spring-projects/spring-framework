@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,14 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.app.tools.VelocityFormatter;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -40,7 +34,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.util.NestedServletException;
@@ -90,9 +83,7 @@ import org.springframework.web.util.NestedServletException;
  */
 public class VelocityView extends AbstractTemplateView {
 
-	private Map toolAttributes;
-
-	private String velocityFormatterAttribute;
+	private Map<String, Class> toolAttributes;
 
 	private String dateToolAttribute;
 
@@ -135,31 +126,8 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see #setDateToolAttribute
 	 * @see #setNumberToolAttribute
 	 */
-	public void setToolAttributes(Properties toolAttributes) {
-		this.toolAttributes = new HashMap(toolAttributes.size());
-		for (Enumeration attributeNames = toolAttributes.propertyNames(); attributeNames.hasMoreElements();) {
-			String attributeName = (String) attributeNames.nextElement();
-			String className = toolAttributes.getProperty(attributeName);
-			Class toolClass = null;
-			try {
-				toolClass = ClassUtils.forName(className);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException(
-						"Invalid definition for tool '" + attributeName + "' - tool class not found: " + ex.getMessage());
-			}
-			this.toolAttributes.put(attributeName, toolClass);
-		}
-	}
-
-	/**
-	 * Set the name of the VelocityFormatter helper object to expose in the
-	 * Velocity context of this view, or <code>null</code> if not needed.
-	 * <p>VelocityFormatter is part of the standard Velocity distribution.
-	 * @see org.apache.velocity.app.tools.VelocityFormatter
-	 */
-	public void setVelocityFormatterAttribute(String velocityFormatterAttribute) {
-		this.velocityFormatterAttribute = velocityFormatterAttribute;
+	public void setToolAttributes(Map<String, Class> toolAttributes) {
+		this.toolAttributes = toolAttributes;
 	}
 
 	/**
@@ -269,9 +237,8 @@ public class VelocityView extends AbstractTemplateView {
 	 */
 	protected VelocityEngine autodetectVelocityEngine() throws BeansException {
 		try {
-			VelocityConfig velocityConfig = (VelocityConfig)
-					BeanFactoryUtils.beanOfTypeIncludingAncestors(
-							getApplicationContext(), VelocityConfig.class, true, false);
+			VelocityConfig velocityConfig = BeanFactoryUtils.beanOfTypeIncludingAncestors(
+					getApplicationContext(), VelocityConfig.class, true, false);
 			return velocityConfig.getVelocityEngine();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -311,7 +278,7 @@ public class VelocityView extends AbstractTemplateView {
 	 */
 	@Override
 	protected void renderMergedTemplateModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		exposeHelpers(model, request);
 
@@ -332,7 +299,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * @throws Exception if there's a fatal error while we're adding model attributes
 	 * @see #renderMergedTemplateModel
 	 */
-	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
+	protected void exposeHelpers(Map<String, Object> model, HttpServletRequest request) throws Exception {
 	}
 
 	/**
@@ -356,7 +323,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see VelocityToolboxView
 	 */
 	protected Context createVelocityContext(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		return createVelocityContext(model);
 	}
@@ -372,7 +339,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * @throws Exception if there's a fatal error while creating the context
 	 * @see org.apache.velocity.VelocityContext
 	 */
-	protected Context createVelocityContext(Map model) throws Exception {
+	protected Context createVelocityContext(Map<String, Object> model) throws Exception {
 		return new VelocityContext(model);
 	}
 
@@ -415,7 +382,6 @@ public class VelocityView extends AbstractTemplateView {
 	 * @param velocityContext Velocity context that will be passed to the template
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding model attributes
-	 * @see #setVelocityFormatterAttribute
 	 * @see #setDateToolAttribute
 	 * @see #setNumberToolAttribute
 	 * @see #exposeHelpers(Map, HttpServletRequest)
@@ -424,10 +390,9 @@ public class VelocityView extends AbstractTemplateView {
 	protected void exposeToolAttributes(Context velocityContext, HttpServletRequest request) throws Exception {
 		// Expose generic attributes.
 		if (this.toolAttributes != null) {
-			for (Iterator it = this.toolAttributes.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String attributeName = (String) entry.getKey();
-				Class toolClass = (Class) entry.getValue();
+			for (Map.Entry<String, Class> entry : this.toolAttributes.entrySet()) {
+				String attributeName = entry.getKey();
+				Class toolClass = entry.getValue();
 				try {
 					Object tool = toolClass.newInstance();
 					initTool(tool, velocityContext);
@@ -437,11 +402,6 @@ public class VelocityView extends AbstractTemplateView {
 					throw new NestedServletException("Could not instantiate Velocity tool '" + attributeName + "'", ex);
 				}
 			}
-		}
-
-		// Expose VelocityFormatter attribute.
-		if (this.velocityFormatterAttribute != null) {
-			velocityContext.put(this.velocityFormatterAttribute, new VelocityFormatter(velocityContext));
 		}
 
 		// Expose locale-aware DateTool/NumberTool attributes.

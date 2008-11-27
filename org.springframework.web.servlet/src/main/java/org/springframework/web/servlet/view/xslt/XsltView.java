@@ -20,10 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
@@ -48,7 +46,6 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleTransformErrorListener;
 import org.springframework.util.xml.TransformerUtils;
@@ -222,7 +219,8 @@ public class XsltView extends AbstractUrlBasedView {
 
 
 	@Override
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+	protected void renderMergedOutputModel(
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		Templates templates = this.cachedTemplates;
@@ -270,7 +268,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setSourceKey
 	 * @see #convertSource
 	 */
-	protected Source locateSource(Map model) throws Exception {
+	protected Source locateSource(Map<String, Object> model) throws Exception {
 		if (this.sourceKey != null) {
 			return convertSource(model.get(this.sourceKey));
 		}
@@ -335,7 +333,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #copyOutputProperties(Transformer)
 	 * @see #configureIndentation(Transformer)
 	 */
-	protected void configureTransformer(Map model, HttpServletResponse response, Transformer transformer) {
+	protected void configureTransformer(Map<String, Object> model, HttpServletResponse response, Transformer transformer) {
 		copyModelParameters(model, transformer);
 		copyOutputProperties(transformer);
 		configureIndentation(transformer);
@@ -379,8 +377,10 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @param model merged output Map (never <code>null</code>)
 	 * @param transformer the target transformer
 	 */
-	protected final void copyModelParameters(Map model, Transformer transformer) {
-		copyMapEntriesToTransformerParameters(model, transformer);
+	protected final void copyModelParameters(Map<String, Object> model, Transformer transformer) {
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			transformer.setParameter(entry.getKey(), entry.getValue());
+		}
 	}
 
 	/**
@@ -394,7 +394,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @param response current HTTP response
 	 * @param transformer the target transformer
 	 */
-	protected void configureResponse(Map model, HttpServletResponse response, Transformer transformer) {
+	protected void configureResponse(Map<String, Object> model, HttpServletResponse response, Transformer transformer) {
 		String contentType = getContentType();
 		String mediaType = transformer.getOutputProperty(OutputKeys.MEDIA_TYPE);
 		String encoding = transformer.getOutputProperty(OutputKeys.ENCODING);
@@ -403,7 +403,7 @@ public class XsltView extends AbstractUrlBasedView {
 		}
 		if (StringUtils.hasText(encoding)) {
 			// Only apply encoding if content type is specified but does not contain charset clause already.
-			if (contentType != null && contentType.toLowerCase().indexOf(WebUtils.CONTENT_TYPE_CHARSET_PREFIX) == -1) {
+			if (contentType != null && !contentType.toLowerCase().contains(WebUtils.CONTENT_TYPE_CHARSET_PREFIX)) {
 				contentType = contentType + WebUtils.CONTENT_TYPE_CHARSET_PREFIX + encoding;
 			}
 		}
@@ -465,18 +465,6 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Copy all {@link Map.Entry entries} from the supplied {@link Map} into the
-	 * {@link Transformer#setParameter(String, Object) parameter set} of the supplied
-	 * {@link Transformer}.
-	 */
-	private void copyMapEntriesToTransformerParameters(Map map, Transformer transformer) {
-		for (Iterator iterator = map.entrySet().iterator(); iterator.hasNext();) {
-			Map.Entry entry = (Map.Entry) iterator.next();
-			transformer.setParameter(ObjectUtils.nullSafeToString(entry.getKey()), entry.getValue());
-		}
-	}
-
-	/**
 	 * Close the underlying resource managed by the supplied {@link Source} if applicable.
 	 * <p>Only works for {@link StreamSource StreamSources}.
 	 * @param source the XSLT Source to close (may be <code>null</code>)
@@ -489,6 +477,7 @@ public class XsltView extends AbstractUrlBasedView {
 					streamSource.getReader().close();
 				}
 				catch (IOException ex) {
+					// ignore
 				}
 			}
 			if (streamSource.getInputStream() != null) {
@@ -496,6 +485,7 @@ public class XsltView extends AbstractUrlBasedView {
 					streamSource.getInputStream().close();
 				}
 				catch (IOException ex) {
+					// ignore
 				}
 			}
 		}

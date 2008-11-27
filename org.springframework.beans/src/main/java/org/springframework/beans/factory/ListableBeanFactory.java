@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -209,5 +210,43 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 */
 	<T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 	    throws BeansException;
+
+	/**
+	 * Find all beans whose <code>Class</code> has the supplied {@link java.lang.annotation.Annotation} type.
+	 * @param annotationType the type of annotation to look for
+	 * @return a Map with the matching beans, containing the bean names as
+	 * keys and the corresponding bean instances as values
+	 * @throws BeansException if a bean could not be created
+	 */
+	Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException;
+
+	/**
+	 * Find all beans whose <code>Class</code> has the supplied {@link java.lang.annotation.Annotation} type.
+	 * @param annotationType the type of annotation to look for
+	 * @return a Map with the matching beans, containing the bean names as
+	 * keys and the corresponding bean instances as values
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 * @throws BeansException if a bean could not be created
+	 */
+	Map<String, Object> getBeansWithAnnotation(
+			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit)
+			throws BeansException;
+
+	/**
+	 * Find a {@link Annotation} of <code>annotationType</code> on the specified
+	 * bean, traversing its interfaces and super classes if no annotation can be
+	 * found on the given class itself.
+	 * @param beanName the name of the bean to look for annotations on
+	 * @param annotationType the annotation class to look for
+	 * @return the annotation of the given type found, or <code>null</code>
+	 */
+	<A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType);
 
 }

@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.HashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
@@ -69,24 +70,24 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
-	public Map getJpaPropertyMap() {
-		Properties jpaProperties = new Properties();
+	public Map<String, Object> getJpaPropertyMap() {
+		Map<String, Object> jpaProperties = new HashMap<String, Object>();
 
 		if (getDatabasePlatform() != null) {
-			jpaProperties.setProperty(Environment.DIALECT, getDatabasePlatform());
+			jpaProperties.put(Environment.DIALECT, getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
 			Class databaseDialectClass = determineDatabaseDialectClass(getDatabase());
 			if (databaseDialectClass != null) {
-				jpaProperties.setProperty(Environment.DIALECT, databaseDialectClass.getName());
+				jpaProperties.put(Environment.DIALECT, databaseDialectClass.getName());
 			}
 		}
 
 		if (isGenerateDdl()) {
-			jpaProperties.setProperty(Environment.HBM2DDL_AUTO, "update");
+			jpaProperties.put(Environment.HBM2DDL_AUTO, "update");
 		}
 		if (isShowSql()) {
-			jpaProperties.setProperty(Environment.SHOW_SQL, "true");
+			jpaProperties.put(Environment.SHOW_SQL, "true");
 		}
 
 		return jpaProperties;

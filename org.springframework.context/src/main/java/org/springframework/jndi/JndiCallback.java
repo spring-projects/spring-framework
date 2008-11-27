@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,21 +29,21 @@ import javax.naming.NamingException;
  * interface, as JndiTemplate provides all usual JNDI operations via
  * convenience methods.
  *
+ * @author Rod Johnson
  * @see JndiTemplate
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @author Rod Johnson
  */
-public interface JndiCallback {
+public interface JndiCallback<T> {
     
 	/**
 	 * Do something with the given JNDI context.
-	 * Implementations don't need to worry about error handling
+	 * <p>Implementations don't need to worry about error handling
 	 * or cleanup, as the JndiTemplate class will handle this.
 	 * @param ctx the current JNDI context
 	 * @throws NamingException if thrown by JNDI methods
 	 * @return a result object, or <code>null</code>
 	 */
-  Object doInContext(Context ctx) throws NamingException;
+  T doInContext(Context ctx) throws NamingException;
 
 }
 

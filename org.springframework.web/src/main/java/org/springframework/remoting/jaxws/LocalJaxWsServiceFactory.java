@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@ package org.springframework.remoting.jaxws;
 
 import java.net.URL;
 import java.util.concurrent.Executor;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.handler.HandlerResolver;
 
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 
 /**
  * Factory for locally defined JAX-WS {@link javax.xml.ws.Service} references.
@@ -112,7 +110,7 @@ public class LocalJaxWsServiceFactory {
 	 * @see javax.xml.ws.Service#setExecutor
 	 */
 	public void setTaskExecutor(TaskExecutor executor) {
-		this.executor = new ConcurrentExecutorAdapter(executor);
+		this.executor = executor;
 	}
 
 	/**

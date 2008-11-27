@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.mock.web.portlet;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
-
+import java.util.Map;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
@@ -34,11 +35,11 @@ import javax.portlet.WindowState;
  */
 public class MockPortalContext implements PortalContext {
 
-	private final Properties properties = new Properties();
+	private final Map<String, String> properties = new HashMap<String, String>();
 
-	private final Vector portletModes;
+	private final List<PortletMode> portletModes;
 
-	private final Vector windowStates;
+	private final List<WindowState> windowStates;
 
 
 	/**
@@ -49,12 +50,12 @@ public class MockPortalContext implements PortalContext {
 	 * @see javax.portlet.WindowState
 	 */
 	public MockPortalContext() {
-		this.portletModes = new Vector(3);
+		this.portletModes = new ArrayList<PortletMode>(3);
 		this.portletModes.add(PortletMode.VIEW);
 		this.portletModes.add(PortletMode.EDIT);
 		this.portletModes.add(PortletMode.HELP);
 
-		this.windowStates = new Vector(3);
+		this.windowStates = new ArrayList<WindowState>(3);
 		this.windowStates.add(WindowState.NORMAL);
 		this.windowStates.add(WindowState.MAXIMIZED);
 		this.windowStates.add(WindowState.MINIMIZED);
@@ -67,9 +68,9 @@ public class MockPortalContext implements PortalContext {
 	 * @see javax.portlet.PortletMode
 	 * @see javax.portlet.WindowState
 	 */
-	public MockPortalContext(List supportedPortletModes, List supportedWindowStates) {
-		this.portletModes = new Vector(supportedPortletModes);
-		this.windowStates = new Vector(supportedWindowStates);
+	public MockPortalContext(List<PortletMode> supportedPortletModes, List<WindowState> supportedWindowStates) {
+		this.portletModes = new ArrayList<PortletMode>(supportedPortletModes);
+		this.windowStates = new ArrayList<WindowState>(supportedWindowStates);
 	}
 
 
@@ -77,20 +78,24 @@ public class MockPortalContext implements PortalContext {
 		return "MockPortal/1.0";
 	}
 
+	public void setProperty(String name, String value) {
+		this.properties.put(name, value);
+	}
+
 	public String getProperty(String name) {
-		return this.properties.getProperty(name);
+		return this.properties.get(name);
 	}
 
-	public Enumeration getPropertyNames() {
-		return this.properties.propertyNames();
+	public Enumeration<String> getPropertyNames() {
+		return Collections.enumeration(this.properties.keySet());
 	}
 
-	public Enumeration getSupportedPortletModes() {
-		return this.portletModes.elements();
+	public Enumeration<PortletMode> getSupportedPortletModes() {
+		return Collections.enumeration(this.portletModes);
 	}
 
-	public Enumeration getSupportedWindowStates() {
-		return this.windowStates.elements();
+	public Enumeration<WindowState> getSupportedWindowStates() {
+		return Collections.enumeration(this.windowStates);
 	}
 
 }

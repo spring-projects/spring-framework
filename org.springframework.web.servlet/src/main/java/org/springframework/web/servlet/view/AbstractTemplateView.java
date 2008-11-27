@@ -114,7 +114,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	@Override
 	protected final void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		if (this.exposeRequestAttributes) {
 			for (Enumeration en = request.getAttributeNames(); en.hasMoreElements();) {
@@ -191,6 +191,6 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 * @throws Exception if rendering failed
 	 */
 	protected abstract void renderMergedTemplateModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

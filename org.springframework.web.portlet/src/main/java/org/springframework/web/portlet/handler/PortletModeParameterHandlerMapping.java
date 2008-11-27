@@ -17,17 +17,13 @@
 package org.springframework.web.portlet.handler;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
@@ -82,7 +78,7 @@ import org.springframework.util.ObjectUtils;
  * @since 2.0
  * @see ParameterMappingInterceptor
  */
-public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
+public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerMapping<PortletModeParameterLookupKey> {
 
 	/**
 	 * Default request parameter name to use for mapping to handlers: "action".
@@ -92,11 +88,11 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 
 	private String parameterName = DEFAULT_PARAMETER_NAME;
 
-	private Map portletModeParameterMap;
+	private Map<String, Map<String, ?>> portletModeParameterMap;
 
 	private boolean allowDuplicateParameters = false;
 
-	private final Set parametersUsed = new HashSet();
+	private final Set<String> parametersUsed = new HashSet<String>();
 
 
 	/**
@@ -114,7 +110,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	 * <p>Convenient for population with bean references.
 	 * @param portletModeParameterMap two-level map of portlet modes and parameters to handler beans
 	 */
-	public void setPortletModeParameterMap(Map portletModeParameterMap) {
+	public void setPortletModeParameterMap(Map<String, Map<String, ?>> portletModeParameterMap) {
 		this.portletModeParameterMap = portletModeParameterMap;
 	}
 
@@ -140,45 +136,28 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
-		registerHandlers(this.portletModeParameterMap);
+		registerHandlersByModeAndParameter(this.portletModeParameterMap);
 	}
 
 	/**
 	 * Register all handlers specified in the Portlet mode map for the corresponding modes.
 	 * @param portletModeParameterMap Map with mode names as keys and parameter Maps as values
-	 * @throws BeansException if the handler couldn't be registered
 	 */
-	@Override
-	protected void registerHandlers(Map portletModeParameterMap) throws BeansException {
-		if (CollectionUtils.isEmpty(portletModeParameterMap)) {
-			logger.warn("'portletModeParameterMap' not set on PortletModeParameterHandlerMapping");
-		}
-		else {
-			for (Iterator it = portletModeParameterMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String modeKey = (String) entry.getKey();
-				PortletMode mode = new PortletMode(modeKey);
-				Object parameterMap = entry.getValue();
-				if (!(parameterMap instanceof Map)) {
-					throw new IllegalArgumentException(
-							"The value for the portlet mode must be a Map of parameter Strings to handler Objects");
-				}
-				registerHandler(mode, (Map) parameterMap);
-			}
+	protected void registerHandlersByModeAndParameter(Map<String, Map<String, ?>> portletModeParameterMap) {
+		Assert.notNull(portletModeParameterMap, "'portletModeParameterMap' must not be null");
+		for (Map.Entry<String, Map<String, ?>> entry : portletModeParameterMap.entrySet()) {
+			PortletMode mode = new PortletMode(entry.getKey());
+			registerHandler(mode, entry.getValue());
 		}
 	}
 
 	/**
 	 * Register all handlers specified in the given parameter map.
 	 * @param parameterMap Map with parameter names as keys and handler beans or bean names as values
-	 * @throws BeansException if the handler couldn't be registered
 	 */
-	protected void registerHandler(PortletMode mode, Map parameterMap) throws BeansException {
-		for (Iterator it = parameterMap.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String parameter = (String) entry.getKey();
-			Object handler = entry.getValue();
-			registerHandler(mode, parameter, handler);
+	protected void registerHandler(PortletMode mode, Map<String, ?> parameterMap) {
+		for (Map.Entry<String, ?> entry : parameterMap.entrySet()) {
+			registerHandler(mode, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -202,9 +181,8 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 		}
 		this.parametersUsed.add(parameter);
 
-		registerHandler(new LookupKey(mode, parameter), handler);
+		registerHandler(new PortletModeParameterLookupKey(mode, parameter), handler);
 	}
-
 
 	/**
 	 * Returns a lookup key that combines the current PortletMode and the current
@@ -213,49 +191,10 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	 * @see #setParameterName
 	 */
 	@Override
-	protected Object getLookupKey(PortletRequest request) throws Exception {
+	protected PortletModeParameterLookupKey getLookupKey(PortletRequest request) throws Exception {
 		PortletMode mode = request.getPortletMode();
 		String parameter = request.getParameter(this.parameterName);
-		return new LookupKey(mode, parameter);
-	}
-
-
-	/**
-	 * Internal class used as lookup key, combining PortletMode and parameter value.
-	 */
-	private static class LookupKey {
-
-		private final PortletMode mode;
-
-		private final String parameter;
-
-		public LookupKey(PortletMode portletMode, String parameter) {
-			this.mode = portletMode;
-			this.parameter = parameter;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof LookupKey)) {
-				return false;
-			}
-			LookupKey otherKey = (LookupKey) other;
-			return (this.mode.equals(otherKey.mode) &&
-					ObjectUtils.nullSafeEquals(this.parameter, otherKey.parameter));
-		}
-
-		@Override
-		public int hashCode() {
-			return (this.mode.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.parameter));
-		}
-
-		@Override
-		public String toString() {
-			return "Portlet mode '" + this.mode + "', parameter '" + this.parameter + "'";
-		}
+		return new PortletModeParameterLookupKey(mode, parameter);
 	}
 
 }

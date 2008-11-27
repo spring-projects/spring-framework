@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,13 @@ public class JdbcTestUtils {
 
 	/**
 	 * Read a script from the LineNumberReaded and build a String containing the lines.
-	 * 
 	 * @param lineNumberReader the <code>LineNumberReader</> containing the script to be processed
 	 * @return <code>String</code> containing the script lines
 	 * @throws IOException
 	 */
 	public static String readScript(LineNumberReader lineNumberReader) throws IOException {
 		String currentStatement = lineNumberReader.readLine();
-		StringBuffer scriptBuilder = new StringBuffer();
+		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
 			if (StringUtils.hasText(currentStatement)) {
 				if (scriptBuilder.length() > 0) {
@@ -55,17 +54,15 @@ public class JdbcTestUtils {
 
 	/**
 	 * Does the provided SQL script contain the specified delimiter?
-	 * 
 	 * @param script the SQL script
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, char delim) {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
-
 		for (int i = 0; i < script.length(); i++) {
 			if (content[i] == '\'') {
-				inLiteral = inLiteral ? false : true;
+				inLiteral = !inLiteral;
 			}
 			if (content[i] == delim && !inLiteral) {
 				return true;
@@ -81,19 +78,18 @@ public class JdbcTestUtils {
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 * @param statements the List that will contain the individual statements
 	 */
-	public static void splitSqlScript(String script, char delim, List statements) {
-		StringBuffer sb = new StringBuffer();
+	public static void splitSqlScript(String script, char delim, List<String> statements) {
+		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
-
 		for (int i = 0; i < script.length(); i++) {
 			if (content[i] == '\'') {
-				inLiteral = inLiteral ? false : true;
+				inLiteral = !inLiteral;
 			}
 			if (content[i] == delim && !inLiteral) {
 				if (sb.length() > 0) {
 					statements.add(sb.toString());
-					sb = new StringBuffer();
+					sb = new StringBuilder();
 				}
 			}
 			else {

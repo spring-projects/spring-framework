@@ -516,14 +516,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	// Convenience methods for loading individual objects
 	//-------------------------------------------------------------------------
 
-	public Object get(Class entityClass, Serializable id) throws DataAccessException {
+	public <T> T get(Class<T> entityClass, Serializable id) throws DataAccessException {
 		return get(entityClass, id, null);
 	}
 
-	public Object get(final Class entityClass, final Serializable id, final LockMode lockMode)
+	@SuppressWarnings("unchecked")
+	public <T> T get(final Class<T> entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
 
-		return executeWithNativeSession(new HibernateCallback() {
+		return (T) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return session.get(entityClass, id, lockMode);
@@ -554,14 +555,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public Object load(Class entityClass, Serializable id) throws DataAccessException {
+	public <T> T load(Class<T> entityClass, Serializable id) throws DataAccessException {
 		return load(entityClass, id, null);
 	}
 
-	public Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
+	@SuppressWarnings("unchecked")
+	public <T> T load(final Class<T> entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
 
-		return executeWithNativeSession(new HibernateCallback() {
+		return (T) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return session.load(entityClass, id, lockMode);
@@ -592,8 +594,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public List loadAll(final Class entityClass) throws DataAccessException {
-		return (List) executeWithNativeSession(new HibernateCallback() {
+	@SuppressWarnings("unchecked")
+	public <T> List<T> loadAll(final Class<T> entityClass) throws DataAccessException {
+		return (List<T>) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria criteria = session.createCriteria(entityClass);
 				criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
@@ -631,12 +634,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public boolean contains(final Object entity) throws DataAccessException {
-		Boolean result = (Boolean) executeWithNativeSession(new HibernateCallback() {
+		return (Boolean) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) {
-				return (session.contains(entity) ? Boolean.TRUE : Boolean.FALSE);
+				return session.contains(entity);
 			}
 		});
-		return result.booleanValue();
 	}
 
 	public void evict(final Object entity) throws DataAccessException {
@@ -769,8 +771,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
-				for (Iterator it = entities.iterator(); it.hasNext();) {
-					session.saveOrUpdate(it.next());
+				for (Object entity : entities) {
+					session.saveOrUpdate(entity);
 				}
 				return null;
 			}
@@ -879,8 +881,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
-				for (Iterator it = entities.iterator(); it.hasNext();) {
-					session.delete(it.next());
+				for (Object entity : entities) {
+					session.delete(entity);
 				}
 				return null;
 			}
@@ -918,7 +920,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return find(queryString, new Object[] {value});
 	}
 
-	public List find(final String queryString, final Object[] values) throws DataAccessException {
+	public List find(final String queryString, final Object... values) throws DataAccessException {
 		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
@@ -985,7 +987,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return findByNamedQuery(queryName, new Object[] {value});
 	}
 
-	public List findByNamedQuery(final String queryName, final Object[] values) throws DataAccessException {
+	public List findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
 		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
@@ -1115,7 +1117,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return iterate(queryString, new Object[] {value});
 	}
 
-	public Iterator iterate(final String queryString, final Object[] values) throws DataAccessException {
+	public Iterator iterate(final String queryString, final Object... values) throws DataAccessException {
 		return (Iterator) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
@@ -1147,8 +1149,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return bulkUpdate(queryString, new Object[] {value});
 	}
 
-	public int bulkUpdate(final String queryString, final Object[] values) throws DataAccessException {
-		Integer updateCount = (Integer) executeWithNativeSession(new HibernateCallback() {
+	public int bulkUpdate(final String queryString, final Object... values) throws DataAccessException {
+		return (Integer) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -1157,10 +1159,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 						queryObject.setParameter(i, values[i]);
 					}
 				}
-				return new Integer(queryObject.executeUpdate());
+				return queryObject.executeUpdate();
 			}
 		});
-		return updateCount.intValue();
 	}
 
 
@@ -1282,7 +1283,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Session proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: suppress, not valid.

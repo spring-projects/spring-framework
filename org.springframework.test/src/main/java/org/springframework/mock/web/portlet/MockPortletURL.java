@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class MockPortletURL implements PortletURL {
 
 	private PortletMode portletMode;
 
-	private final Map parameters = new LinkedHashMap(16);
+	private final Map<String, String[]> parameters = new LinkedHashMap<String, String[]>();
 
 	private boolean secure = false;
 
@@ -116,24 +116,24 @@ public class MockPortletURL implements PortletURL {
 			Map.Entry entry = (Map.Entry) it.next();
 			Assert.isTrue(entry.getKey() instanceof String, "Key must be of type String");
 			Assert.isTrue(entry.getValue() instanceof String[], "Value must be of type String[]");
-			this.parameters.put(entry.getKey(), entry.getValue());
+			this.parameters.put((String) entry.getKey(), (String[]) entry.getValue());
 		}
 	}
 
-	public Set getParameterNames() {
+	public Set<String> getParameterNames() {
 		return this.parameters.keySet();
 	}
 
 	public String getParameter(String name) {
-		String[] arr = (String[]) this.parameters.get(name);
+		String[] arr = this.parameters.get(name);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
 	public String[] getParameterValues(String name) {
-		return (String[]) this.parameters.get(name);
+		return this.parameters.get(name);
 	}
 
-	public Map getParameterMap() {
+	public Map<String, String[]> getParameterMap() {
 		return Collections.unmodifiableMap(this.parameters);
 	}
 
@@ -142,33 +142,13 @@ public class MockPortletURL implements PortletURL {
 	}
 
 	public boolean isSecure() {
-		return secure;
-	}
-
-	public String toString() {
-		StringBuffer query = new StringBuffer();
-		query.append(encodeParameter("urlType", this.urlType));
-		if (this.windowState != null) {
-			query.append(";" + encodeParameter("windowState", this.windowState.toString()));
-		}
-		if (this.portletMode != null) {
-			query.append(";" + encodeParameter("portletMode", this.portletMode.toString()));
-		}
-		for (Iterator it = this.parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String name = (String) entry.getKey();
-			String[] values = (String[]) entry.getValue();
-			query.append(";" + encodeParameter("param_" + name, values));
-		}
-		return (this.secure ? "https:" : "http:") +
-				"//localhost/mockportlet?" + query.toString();
+		return this.secure;
 	}
 
 
 	private String encodeParameter(String name, String value) {
 		try {
-			return URLEncoder.encode(name, ENCODING) + "=" +
-					URLEncoder.encode(value, ENCODING);
+			return URLEncoder.encode(name, ENCODING) + "=" + URLEncoder.encode(value, ENCODING);
 		}
 		catch (UnsupportedEncodingException ex) {
 			return null;
@@ -177,17 +157,34 @@ public class MockPortletURL implements PortletURL {
 
 	private String encodeParameter(String name, String[] values) {
 		try {
-			StringBuffer buf = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			for (int i = 0, n = values.length; i < n; i++) {
-				buf.append((i > 0 ? ";" : "") +
+				sb.append((i > 0 ? ";" : "") +
 						URLEncoder.encode(name, ENCODING) + "=" +
 						URLEncoder.encode(values[i], ENCODING));
 			}
-			return buf.toString();
+			return sb.toString();
 		}
 		catch (UnsupportedEncodingException ex) {
 			return null;
 		}
+	}
+
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(encodeParameter("urlType", this.urlType));
+		if (this.windowState != null) {
+			sb.append(";").append(encodeParameter("windowState", this.windowState.toString()));
+		}
+		if (this.portletMode != null) {
+			sb.append(";").append(encodeParameter("portletMode", this.portletMode.toString()));
+		}
+		for (Map.Entry<String, String[]> entry : this.parameters.entrySet()) {
+			sb.append(";").append(encodeParameter("param_" + entry.getKey(), entry.getValue()));
+		}
+		return (this.secure ? "https:" : "http:") +
+				"//localhost/mockportlet?" + sb.toString();
 	}
 
 }

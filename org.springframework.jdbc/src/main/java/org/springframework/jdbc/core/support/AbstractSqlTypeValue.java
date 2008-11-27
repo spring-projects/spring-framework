@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
  * <pre class="code">proc.declareParameter(new SqlParameter("myarray", Types.ARRAY, "NUMBERS"));
  * ...
  *
- * Map in = new HashMap();
+ * Map&lt;String, Object&gt; in = new HashMap&lt;String, Object&gt;();
  * in.put("myarray", new AbstractSqlTypeValue() {
  *   public Object createTypeValue(Connection con, int sqlType, String typeName) throws SQLException {
  *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor(typeName, con);

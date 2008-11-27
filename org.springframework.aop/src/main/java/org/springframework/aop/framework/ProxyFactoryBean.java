@@ -433,8 +433,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			}
 
 			// Materialize interceptor chain from bean names.
-			for (int i = 0; i < this.interceptorNames.length; i++) {
-				String name = this.interceptorNames[i];
+			for (String name : this.interceptorNames) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Configuring advisor or advice '" + name + "'");
 				}
@@ -452,16 +451,16 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 					// If we get here, we need to add a named interceptor.
 					// We must check if it's a singleton or prototype.
 					Object advice = null;
-					if (this.singleton || this.beanFactory.isSingleton(this.interceptorNames[i])) {
+					if (this.singleton || this.beanFactory.isSingleton(name)) {
 						// Add the real Advisor/Advice to the chain.
-						advice = this.beanFactory.getBean(this.interceptorNames[i]);
+						advice = this.beanFactory.getBean(name);
 					}
 					else {
 						// It's a prototype Advice or Advisor: replace with a prototype.
 						// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
-						advice = new PrototypePlaceholderAdvisor(this.interceptorNames[i]);
+						advice = new PrototypePlaceholderAdvisor(name);
 					}
-					addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
+					addAdvisorOnChainCreation(advice, name);
 				}
 			}
 		}
@@ -477,11 +476,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	private List freshAdvisorChain() {		
 		Advisor[] advisors = getAdvisors();
-		List freshAdvisors = new ArrayList(advisors.length);
-
-		for (int i = 0; i < advisors.length; i++) {
-			if (advisors[i] instanceof PrototypePlaceholderAdvisor) {
-				PrototypePlaceholderAdvisor pa = (PrototypePlaceholderAdvisor) advisors[i];
+		List<Advisor> freshAdvisors = new ArrayList<Advisor>(advisors.length);
+		for (Advisor advisor : advisors) {
+			if (advisor instanceof PrototypePlaceholderAdvisor) {
+				PrototypePlaceholderAdvisor pa = (PrototypePlaceholderAdvisor) advisor;
 				if (logger.isDebugEnabled()) {
 					logger.debug("Refreshing bean named '" + pa.getBeanName() + "'");
 				}
@@ -497,7 +495,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			}
 			else {
 				// Add the shared instance.
-				freshAdvisors.add(advisors[i]);
+				freshAdvisors.add(advisor);
 			}
 		}
 		return freshAdvisors;
@@ -511,24 +509,21 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Advisor.class);
 		String[] globalInterceptorNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Interceptor.class);
-		List beans = new ArrayList(globalAdvisorNames.length + globalInterceptorNames.length);
-		Map names = new HashMap();
-		for (int i = 0; i < globalAdvisorNames.length; i++) {
-			String name = globalAdvisorNames[i];
+		List<Object> beans = new ArrayList<Object>(globalAdvisorNames.length + globalInterceptorNames.length);
+		Map<Object, String> names = new HashMap<Object, String>(beans.size());
+		for (String name : globalAdvisorNames) {
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);
 			names.put(bean, name);
 		}
-		for (int i = 0; i < globalInterceptorNames.length; i++) {
-			String name = globalInterceptorNames[i];
+		for (String name : globalInterceptorNames) {
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);
 			names.put(bean, name);
 		}
 		Collections.sort(beans, new OrderComparator());
-		for (Iterator it = beans.iterator(); it.hasNext();) {
-			Object bean = it.next();
-			String name = (String) names.get(bean);
+		for (Object bean : beans) {
+			String name = names.get(bean);
 			if (name.startsWith(prefix)) {
 				addAdvisorOnChainCreation(bean, name);
 			}
@@ -551,7 +546,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		if (logger.isTraceEnabled()) {
 			logger.trace("Adding advisor with name '" + name + "'");
 		}			
-		addAdvisor((Advisor) advisor);
+		addAdvisor(advisor);
 	}
 	
 	/**

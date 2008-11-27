@@ -34,7 +34,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a simple
@@ -120,7 +119,7 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 	 * @see com.sun.net.httpserver.HttpServer#setExecutor
 	 */
 	public void setTaskExecutor(TaskExecutor executor) {
-		this.executor = new ConcurrentExecutorAdapter(executor);
+		this.executor = executor;
 	}
 
 	/**

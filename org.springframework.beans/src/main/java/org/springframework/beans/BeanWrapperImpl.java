@@ -100,7 +100,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Map with cached nested BeanWrappers: nested path -> BeanWrapper instance.
 	 */
-	private Map nestedBeanWrappers;
+	private Map<String, BeanWrapperImpl> nestedBeanWrappers;
 
 
 	/**
@@ -431,7 +431,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 */
 	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) {
 		if (this.nestedBeanWrappers == null) {
-			this.nestedBeanWrappers = new HashMap();
+			this.nestedBeanWrappers = new HashMap<String, BeanWrapperImpl>();
 		}
 		// Get value of bean property.
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
@@ -442,7 +442,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 
 		// Lookup cached sub-BeanWrapper, create new one if not found.
-		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(canonicalName);
+		BeanWrapperImpl nestedBw = this.nestedBeanWrappers.get(canonicalName);
 		if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested BeanWrapper for property '" + canonicalName + "'");
@@ -805,7 +805,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								readMethod.setAccessible(true);
 							}
 							try {
-								oldValue = readMethod.invoke(this.object, new Object[0]);
+								oldValue = readMethod.invoke(this.object);
 							}
 							catch (Exception ex) {
 								if (logger.isDebugEnabled()) {
@@ -816,13 +816,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						}
 						valueToApply = this.typeConverterDelegate.convertIfNecessary(oldValue, originalValue, pd);
 					}
-					pv.getOriginalPropertyValue().conversionNecessary = Boolean.valueOf(valueToApply != originalValue);
+					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
 				Method writeMethod = pd.getWriteMethod();
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 					writeMethod.setAccessible(true);
 				}
-				writeMethod.invoke(this.object, new Object[] {valueToApply});
+				writeMethod.invoke(this.object, valueToApply);
 			}
 			catch (InvocationTargetException ex) {
 				PropertyChangeEvent propertyChangeEvent =

@@ -32,7 +32,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see SetFactoryBean
  * @see ListFactoryBean
  */
-public class MapFactoryBean extends AbstractFactoryBean {
+public class MapFactoryBean extends AbstractFactoryBean<Map> {
 
 	private Map<?, ?> sourceMap;
 
@@ -64,13 +64,13 @@ public class MapFactoryBean extends AbstractFactoryBean {
 
 
 	@Override
-	public Class getObjectType() {
+	public Class<Map> getObjectType() {
 		return Map.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object createInstance() {
+	protected Map createInstance() {
 		if (this.sourceMap == null) {
 			throw new IllegalArgumentException("'sourceMap' is required");
 		}

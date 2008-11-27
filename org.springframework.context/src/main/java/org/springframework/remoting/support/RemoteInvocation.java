@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class RemoteInvocation implements Serializable {
 
 	private Object[] arguments;
 
-	private Map attributes;
+	private Map<String, Serializable> attributes;
 
 
 	/**
@@ -143,7 +143,7 @@ public class RemoteInvocation implements Serializable {
 	 */
 	public void addAttribute(String key, Serializable value) throws IllegalStateException {
 		if (this.attributes == null) {
-			this.attributes = new HashMap();
+			this.attributes = new HashMap<String, Serializable>();
 		}
 		if (this.attributes.containsKey(key)) {
 			throw new IllegalStateException("There is already an attribute with key '" + key + "' bound");
@@ -162,7 +162,7 @@ public class RemoteInvocation implements Serializable {
 		if (this.attributes == null) {
 			return null;
 		}
-		return (Serializable) this.attributes.get(key);
+		return this.attributes.get(key);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
-	public void setAttributes(Map attributes) {
+	public void setAttributes(Map<String, Serializable> attributes) {
 		this.attributes = attributes;
 	}
 
@@ -183,7 +183,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
-	public Map getAttributes() {
+	public Map<String, Serializable> getAttributes() {
 		return this.attributes;
 	}
 

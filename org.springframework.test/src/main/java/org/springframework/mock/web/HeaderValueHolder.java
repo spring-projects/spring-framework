@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.mock.web;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ import org.springframework.util.CollectionUtils;
  */
 class HeaderValueHolder {
 
-	private final List values = new LinkedList();
+	private final List<Object> values = new LinkedList<Object>();
 
 
 	public void setValue(Object value) {
@@ -47,7 +46,7 @@ class HeaderValueHolder {
 		this.values.add(value);
 	}
 
-	public void addValues(Collection values) {
+	public void addValues(Collection<?> values) {
 		this.values.addAll(values);
 	}
 
@@ -55,7 +54,7 @@ class HeaderValueHolder {
 		CollectionUtils.mergeArrayIntoCollection(values, this.values);
 	}
 
-	public List getValues() {
+	public List<Object> getValues() {
 		return Collections.unmodifiableList(this.values);
 	}
 
@@ -71,12 +70,11 @@ class HeaderValueHolder {
 	 * @return the corresponding HeaderValueHolder,
 	 * or <code>null</code> if none found
 	 */
-	public static HeaderValueHolder getByName(Map headers, String name) {
+	public static HeaderValueHolder getByName(Map<String, HeaderValueHolder> headers, String name) {
 		Assert.notNull(name, "Header name must not be null");
-		for (Iterator it = headers.keySet().iterator(); it.hasNext();) {
-			String headerName = (String) it.next();
+		for (String headerName : headers.keySet()) {
 			if (headerName.equalsIgnoreCase(name)) {
-				return (HeaderValueHolder) headers.get(headerName);
+				return headers.get(headerName);
 			}
 		}
 		return null;

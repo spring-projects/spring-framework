@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.core.task;
 
-import org.springframework.core.NestedRuntimeException;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Exception thrown when a {@link TaskExecutor} rejects to accept
@@ -27,7 +27,7 @@ import org.springframework.core.NestedRuntimeException;
  * @see TaskExecutor#execute(Runnable)
  * @see TaskTimeoutException
  */
-public class TaskRejectedException extends NestedRuntimeException {
+public class TaskRejectedException extends RejectedExecutionException {
 
 	/**
 	 * Create a new <code>TaskRejectedException</code>

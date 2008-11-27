@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Implementation of MethodNameResolver which supports several strategies for
- * mapping parameter values to the names of methods to invoke.
+ * Implementation of {@link MethodNameResolver} which supports several strategies
+ * for mapping parameter values to the names of methods to invoke.
  * 
  * <p>The simplest strategy looks for a specific named parameter, whose value is
  * considered the name of the method to invoke. The name of the parameter may be
@@ -163,8 +163,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 		// Check parameter names where the very existence of each parameter
 		// means that a method of the same name should be invoked, if any.
 		if (this.methodParamNames != null) {
-			for (int i = 0; i < this.methodParamNames.length; ++i) {
-				String candidate = this.methodParamNames[i];
+			for (String candidate : this.methodParamNames) {
 				if (WebUtils.hasSubmitParameter(request, candidate)) {
 					methodName = candidate;
 					if (logger.isDebugEnabled()) {

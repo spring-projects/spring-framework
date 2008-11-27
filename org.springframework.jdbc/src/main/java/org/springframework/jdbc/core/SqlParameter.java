@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class SqlParameter {
 	 */
 	public SqlParameter(int sqlType, int scale) {
 		this.sqlType = sqlType;
-		this.scale = new Integer(scale);
+		this.scale = scale;
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class SqlParameter {
 	public SqlParameter(String name, int sqlType, int scale) {
 		this.name = name;
 		this.sqlType = sqlType;
-		this.scale = new Integer(scale);
+		this.scale = scale;
 	}
 
 	/**
@@ -177,11 +177,11 @@ public class SqlParameter {
 	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,
 	 * to a List of SqlParameter objects as used in this package.
 	 */
-	public static List sqlTypesToAnonymousParameterList(int[] types) {
-		List result = new LinkedList();
+	public static List<SqlParameter> sqlTypesToAnonymousParameterList(int[] types) {
+		List<SqlParameter> result = new LinkedList<SqlParameter>();
 		if (types != null) {
-			for (int i = 0; i < types.length; i++) {
-				result.add(new SqlParameter(types[i]));
+			for (int type : types) {
+				result.add(new SqlParameter(type));
 			}
 		}
 		return result;

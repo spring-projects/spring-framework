@@ -69,7 +69,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * Create a new MapSqlParameterSource based on a Map.
 	 * @param values a Map holding existing parameter values (can be <code>null</code>)
 	 */
-	public MapSqlParameterSource(Map<String, Object> values) {
+	public MapSqlParameterSource(Map<String, ?> values) {
 		addValues(values);
 	}
 
@@ -128,9 +128,9 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValues(Map<String, Object> values) {
+	public MapSqlParameterSource addValues(Map<String, ?> values) {
 		if (values != null) {
-			for (Map.Entry<String, Object> entry : values.entrySet()) {
+			for (Map.Entry<String, ?> entry : values.entrySet()) {
 				this.values.put(entry.getKey(), entry.getValue());
 				if (entry.getValue() instanceof SqlParameterValue) {
 					SqlParameterValue value = (SqlParameterValue) entry.getValue();

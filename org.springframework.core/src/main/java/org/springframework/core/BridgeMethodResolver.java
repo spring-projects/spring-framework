@@ -64,10 +64,9 @@ public abstract class BridgeMethodResolver {
 		}
 
 		// Gather all methods with matching name and parameter size.
-		List candidateMethods = new ArrayList();
+		List<Method> candidateMethods = new ArrayList<Method>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
-		for (int i = 0; i < methods.length; i++) {
-			Method candidateMethod = methods[i];
+		for (Method candidateMethod : methods) {
 			if (isBridgedCandidateFor(candidateMethod, bridgeMethod)) {
 				candidateMethods.add(candidateMethod);
 			}
@@ -76,7 +75,7 @@ public abstract class BridgeMethodResolver {
 		Method result;
 		// Now perform simple quick checks.
 		if (candidateMethods.size() == 1) {
-			result = (Method) candidateMethods.get(0);
+			result = candidateMethods.get(0);
 		}
 		else {
 			result = searchCandidates(candidateMethods, bridgeMethod);
@@ -86,7 +85,6 @@ public abstract class BridgeMethodResolver {
 			throw new IllegalStateException(
 					"Unable to locate bridged method for bridge method '" + bridgeMethod + "'");
 		}
-
 		return result;
 	}
 
@@ -96,10 +94,9 @@ public abstract class BridgeMethodResolver {
 	 * @param bridgeMethod the bridge method
 	 * @return the bridged method, or <code>null</code> if none found
 	 */
-	private static Method searchCandidates(List candidateMethods, Method bridgeMethod) {
-		Map typeParameterMap = GenericTypeResolver.getTypeVariableMap(bridgeMethod.getDeclaringClass());
-		for (int i = 0; i < candidateMethods.size(); i++) {
-			Method candidateMethod = (Method) candidateMethods.get(i);
+	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
+		Map<TypeVariable, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(bridgeMethod.getDeclaringClass());
+		for (Method candidateMethod : candidateMethods) {
 			if (isBridgeMethodFor(bridgeMethod, candidateMethod, typeParameterMap)) {
 				return candidateMethod;
 			}
@@ -123,7 +120,7 @@ public abstract class BridgeMethodResolver {
 	 * Determines whether or not the bridge {@link Method} is the bridge for the
 	 * supplied candidate {@link Method}.
 	 */
-	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map typeVariableMap) {
+	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map<TypeVariable, Type> typeVariableMap) {
 		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, typeVariableMap)) {
 			return true;
 		}
@@ -149,9 +146,8 @@ public abstract class BridgeMethodResolver {
 
 		// Search interfaces.
 		Class[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
-		for (int i = 0; i < interfaces.length; i++) {
-			Class anInterface = interfaces[i];
-			Method method = searchForMatch(anInterface, bridgeMethod);
+		for (Class ifc : interfaces) {
+			Method method = searchForMatch(ifc, bridgeMethod);
 			if (method != null && !method.isBridge()) {
 				return method;
 			}
@@ -166,7 +162,9 @@ public abstract class BridgeMethodResolver {
 	 * are equal after resolving all {@link TypeVariable TypeVariables} using the supplied
 	 * TypeVariable Map, otherwise returns <code>false</code>.
 	 */
-	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Map typeVariableMap) {
+	private static boolean isResolvedTypeMatch(
+			Method genericMethod, Method candidateMethod, Map<TypeVariable, Type> typeVariableMap) {
+
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		Class[] candidateParameters = candidateMethod.getParameterTypes();
 		if (genericParameters.length != candidateParameters.length) {

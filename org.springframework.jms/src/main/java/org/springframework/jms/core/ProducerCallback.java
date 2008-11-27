@@ -38,7 +38,7 @@ import javax.jms.Session;
  * @see JmsTemplate#execute(javax.jms.Destination, ProducerCallback)
  * @see JmsTemplate#execute(String, ProducerCallback)
  */
-public interface ProducerCallback {
+public interface ProducerCallback<T> {
 
 	/**
 	 * Perform operations on the given {@link Session} and {@link MessageProducer}.
@@ -49,6 +49,6 @@ public interface ProducerCallback {
 	 * @return a result object from working with the <code>Session</code>, if any (can be <code>null</code>) 
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
-	Object doInJms(Session session, MessageProducer producer) throws JMSException;
+	T doInJms(Session session, MessageProducer producer) throws JMSException;
 
 }

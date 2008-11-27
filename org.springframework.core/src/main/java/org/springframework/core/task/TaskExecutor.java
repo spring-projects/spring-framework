@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.task;
 
+import java.util.concurrent.Executor;
+
 /**
  * Simple task executor interface that abstracts the execution
  * of a {@link Runnable}.
@@ -24,15 +26,16 @@ package org.springframework.core.task;
  * such as: synchronous, asynchronous, using a thread pool, and more.
  *
  * <p>Equivalent to JDK 1.5's {@link java.util.concurrent.Executor}
- * interface. Separate mainly for compatibility with JDK 1.4.
- * Implementations can simply implement the JDK 1.5 <code>Executor</code>
- * interface as well, as it defines the exact same method signature.
+ * interface; extending it now in Spring 3.0, so that clients may declare
+ * a dependency on an Executor and receive any TaskExecutor implementation.
+ * This interface remains separate from the standard Executor interface
+ * mainly for backwards compatibility with JDK 1.4 in Spring 2.x.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see java.util.concurrent.Executor
  */
-public interface TaskExecutor {
+public interface TaskExecutor extends Executor {
 
 	/**
 	 * Execute the given <code>task</code>.

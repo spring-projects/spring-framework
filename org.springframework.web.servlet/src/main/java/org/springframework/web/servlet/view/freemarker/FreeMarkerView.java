@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.servlet.view.freemarker;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -171,7 +171,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	protected FreeMarkerConfig autodetectConfiguration() throws BeansException {
 		try {
-			return (FreeMarkerConfig) BeanFactoryUtils.beanOfTypeIncludingAncestors(
+			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
 					getApplicationContext(), FreeMarkerConfig.class, true, false);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -221,7 +221,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	@Override
 	protected void renderMergedTemplateModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		exposeHelpers(model, request);
 		doRender(model, request, response);
@@ -237,7 +237,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @throws Exception if there's a fatal error while we're adding information to the context
 	 * @see #renderMergedTemplateModel
 	 */
-	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
+	protected void exposeHelpers(Map<String, Object> model, HttpServletRequest request) throws Exception {
 	}
 
 	/**
@@ -263,7 +263,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @see #processTemplate
 	 * @see freemarker.ext.servlet.FreemarkerServlet
 	 */
-	protected void doRender(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void doRender(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// Expose model to JSP tags (as request attributes).
 		exposeModelAsRequestAttributes(model, request);
 
@@ -340,7 +340,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @throws TemplateException if thrown by FreeMarker
 	 * @see freemarker.template.Template#process(Object, java.io.Writer)
 	 */
-	protected void processTemplate(Template template, Map model, HttpServletResponse response)
+	protected void processTemplate(Template template, Map<String, Object> model, HttpServletResponse response)
 			throws IOException, TemplateException {
 
 		template.process(model, response.getWriter());
@@ -378,8 +378,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 			return null;
 		}
 
-		public Enumeration getInitParameterNames() {
-			return Collections.enumeration(Collections.EMPTY_SET);
+		public Enumeration<String> getInitParameterNames() {
+			return Collections.enumeration(new HashSet<String>());
 		}
 	}
 

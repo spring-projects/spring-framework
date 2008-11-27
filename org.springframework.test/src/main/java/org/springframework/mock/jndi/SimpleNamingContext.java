@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.Name;
@@ -57,9 +56,9 @@ public class SimpleNamingContext implements Context {
 
 	private final String root;
 
-	private final Hashtable boundObjects;
+	private final Hashtable<String, Object> boundObjects;
 
-	private final Hashtable environment = new Hashtable();
+	private final Hashtable<String, Object> environment = new Hashtable<String, Object>();
 
 
 	/**
@@ -74,32 +73,32 @@ public class SimpleNamingContext implements Context {
 	 */
 	public SimpleNamingContext(String root) {
 		this.root = root;
-		this.boundObjects = new Hashtable();
+		this.boundObjects = new Hashtable<String, Object>();
 	}
 
 	/**
 	 * Create a new naming context with the given naming root,
 	 * the given name/object map, and the JNDI environment entries.
 	 */
-	public SimpleNamingContext(String root, Hashtable boundObjects, Hashtable environment) {
+	public SimpleNamingContext(String root, Hashtable<String, Object> boundObjects, Hashtable<String, Object> env) {
 		this.root = root;
 		this.boundObjects = boundObjects;
-		if (environment != null) {
-			this.environment.putAll(environment);
+		if (env != null) {
+			this.environment.putAll(env);
 		}
 	}
 
 
 	// Actual implementations of Context methods follow
 
-	public NamingEnumeration list(String root) throws NamingException {
+	public NamingEnumeration<NameClassPair> list(String root) throws NamingException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Listing name/class pairs under [" + root + "]");
 		}
 		return new NameClassPairEnumeration(this, root);
 	}
 
-	public NamingEnumeration listBindings(String root) throws NamingException {
+	public NamingEnumeration<Binding> listBindings(String root) throws NamingException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Listing bindings under [" + root + "]");
 		}
@@ -125,8 +124,7 @@ public class SimpleNamingContext implements Context {
 			if (!name.endsWith("/")) {
 				name = name + "/";
 			}
-			for (Iterator it = this.boundObjects.keySet().iterator(); it.hasNext();) {
-				String boundName = (String) it.next();
+			for (String boundName : this.boundObjects.keySet()) {
 				if (boundName.startsWith(name)) {
 					return new SimpleNamingContext(name, this.boundObjects, this.environment);
 				}
@@ -191,7 +189,7 @@ public class SimpleNamingContext implements Context {
 		return prefix + name;
 	}
 
-	public Hashtable getEnvironment() {
+	public Hashtable<String, Object> getEnvironment() {
 		return this.environment;
 	}
 
@@ -209,11 +207,11 @@ public class SimpleNamingContext implements Context {
 
 	// Unsupported methods follow: no support for javax.naming.Name
 
-	public NamingEnumeration list(Name name) throws NamingException {
+	public NamingEnumeration<NameClassPair> list(Name name) throws NamingException {
 		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public NamingEnumeration listBindings(Name name) throws NamingException {
+	public NamingEnumeration<Binding> listBindings(Name name) throws NamingException {
 		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
@@ -266,19 +264,17 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static abstract class AbstractNamingEnumeration implements NamingEnumeration {
+	private static abstract class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
 
-		private Iterator iterator;
+		private Iterator<T> iterator;
 
 		private AbstractNamingEnumeration(SimpleNamingContext context, String proot) throws NamingException {
 			if (!"".equals(proot) && !proot.endsWith("/")) {
 				proot = proot + "/";
 			}
 			String root = context.root + proot;
-			Map contents = new HashMap();
-			Iterator it = context.boundObjects.keySet().iterator();
-			while (it.hasNext()) {
-				String boundName = (String) it.next();
+			Map<String, T> contents = new HashMap<String, T>();
+			for (String boundName : context.boundObjects.keySet()) {
 				if (boundName.startsWith(root)) {
 					int startIndex = root.length();
 					int endIndex = boundName.indexOf('/', startIndex);
@@ -300,13 +296,13 @@ public class SimpleNamingContext implements Context {
 			this.iterator = contents.values().iterator();
 		}
 
-		protected abstract Object createObject(String strippedName, Object obj);
+		protected abstract T createObject(String strippedName, Object obj);
 
 		public boolean hasMore() {
 			return this.iterator.hasNext();
 		}
 
-		public Object next() {
+		public T next() {
 			return this.iterator.next();
 		}
 
@@ -314,7 +310,7 @@ public class SimpleNamingContext implements Context {
 			return this.iterator.hasNext();
 		}
 
-		public Object nextElement() {
+		public T nextElement() {
 			return this.iterator.next();
 		}
 
@@ -323,25 +319,25 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static class NameClassPairEnumeration extends AbstractNamingEnumeration {
+	private static class NameClassPairEnumeration extends AbstractNamingEnumeration<NameClassPair> {
 
 		private NameClassPairEnumeration(SimpleNamingContext context, String root) throws NamingException {
 			super(context, root);
 		}
 
-		protected Object createObject(String strippedName, Object obj) {
+		protected NameClassPair createObject(String strippedName, Object obj) {
 			return new NameClassPair(strippedName, obj.getClass().getName());
 		}
 	}
 
 
-	private static class BindingEnumeration extends AbstractNamingEnumeration {
+	private static class BindingEnumeration extends AbstractNamingEnumeration<Binding> {
 
 		private BindingEnumeration(SimpleNamingContext context, String root) throws NamingException {
 			super(context, root);
 		}
 
-		protected Object createObject(String strippedName, Object obj) {
+		protected Binding createObject(String strippedName, Object obj) {
 			return new Binding(strippedName, obj);
 		}
 	}

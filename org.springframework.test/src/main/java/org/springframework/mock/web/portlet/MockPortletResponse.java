@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class MockPortletResponse implements PortletResponse {
 
 	private final PortalContext portalContext;
 
-	private final Map properties = new LinkedHashMap(16);
+	private final Map<String, String[]> properties = new LinkedHashMap<String, String[]>();
 
 
 	/**
@@ -61,7 +61,7 @@ public class MockPortletResponse implements PortletResponse {
 	 * defining the supported PortletModes and WindowStates.
 	 */
 	public PortalContext getPortalContext() {
-		return portalContext;
+		return this.portalContext;
 	}
 
 
@@ -71,7 +71,7 @@ public class MockPortletResponse implements PortletResponse {
 
 	public void addProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
-		String[] oldArr = (String[]) this.properties.get(key);
+		String[] oldArr = this.properties.get(key);
 		if (oldArr != null) {
 			String[] newArr = new String[oldArr.length + 1];
 			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
@@ -94,13 +94,13 @@ public class MockPortletResponse implements PortletResponse {
 
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
-		String[] arr = (String[]) this.properties.get(key);
+		String[] arr = this.properties.get(key);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
 	public String[] getProperties(String key) {
 		Assert.notNull(key, "Property key must not be null");
-		return (String[]) this.properties.get(key);
+		return this.properties.get(key);
 	}
 
 	public String encodeURL(String path) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@ package org.springframework.jmx.export.assembler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.springframework.jmx.export.metadata.JmxMetadataUtils;
@@ -41,7 +39,8 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 
 	private ModelMBeanNotificationInfo[] notificationInfos;
 
-	private final Map notificationInfoMappings = new HashMap();
+	private final Map<String, ModelMBeanNotificationInfo[]> notificationInfoMappings =
+			new HashMap<String, ModelMBeanNotificationInfo[]>();
 
 
 	public void setNotificationInfos(ManagedNotification[] notificationInfos) {
@@ -53,13 +52,8 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 		this.notificationInfos = infos;
 	}
 
-	public void setNotificationInfoMappings(Map notificationInfoMappings) {
-		Iterator entries = notificationInfoMappings.entrySet().iterator();
-		while (entries.hasNext()) {
-			Map.Entry entry = (Map.Entry) entries.next();
-			if (!(entry.getKey() instanceof String)) {
-				throw new IllegalArgumentException("Property [notificationInfoMappings] only accepts Strings for Map keys");
-			}
+	public void setNotificationInfoMappings(Map<String, Object> notificationInfoMappings) {
+		for (Map.Entry<String, Object> entry : notificationInfoMappings.entrySet()) {
 			this.notificationInfoMappings.put(entry.getKey(), extractNotificationMetadata(entry.getValue()));
 		}
 	}
@@ -68,16 +62,13 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 	@Override
 	protected ModelMBeanNotificationInfo[] getNotificationInfo(Object managedBean, String beanKey) {
 		ModelMBeanNotificationInfo[] result = null;
-
 		if (StringUtils.hasText(beanKey)) {
-			result = (ModelMBeanNotificationInfo[]) this.notificationInfoMappings.get(beanKey);
+			result = this.notificationInfoMappings.get(beanKey);
 		}
-
 		if (result == null) {
 			result = this.notificationInfos;
 		}
-
-		return (result == null) ? new ModelMBeanNotificationInfo[0] : result;
+		return (result != null ? result : new ModelMBeanNotificationInfo[0]);
 	}
 
 	private ModelMBeanNotificationInfo[] extractNotificationMetadata(Object mapValue) {
@@ -87,9 +78,8 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 		}
 		else if (mapValue instanceof Collection) {
 			Collection col = (Collection) mapValue;
-			List result = new ArrayList();
-			for (Iterator iterator = col.iterator(); iterator.hasNext();) {
-				Object colValue = iterator.next();
+			List<ModelMBeanNotificationInfo> result = new ArrayList<ModelMBeanNotificationInfo>();
+			for (Object colValue : col) {
 				if (!(colValue instanceof ManagedNotification)) {
 					throw new IllegalArgumentException(
 							"Property 'notificationInfoMappings' only accepts ManagedNotifications for Map values");
@@ -97,7 +87,7 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 				ManagedNotification mn = (ManagedNotification) colValue;
 				result.add(JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn));
 			}
-			return (ModelMBeanNotificationInfo[]) result.toArray(new ModelMBeanNotificationInfo[result.size()]);
+			return result.toArray(new ModelMBeanNotificationInfo[result.size()]);
 		}
 		else {
 			throw new IllegalArgumentException(

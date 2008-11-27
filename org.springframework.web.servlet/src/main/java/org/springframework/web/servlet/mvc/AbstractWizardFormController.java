@@ -73,7 +73,9 @@ import org.springframework.web.util.WebUtils;
  * @see #validatePage
  * @see #processFinish
  * @see #processCancel
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class AbstractWizardFormController extends AbstractFormController {
 
 	/**

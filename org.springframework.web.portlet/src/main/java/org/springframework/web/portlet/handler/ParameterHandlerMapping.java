@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@
 package org.springframework.web.portlet.handler;
 
 import java.util.Map;
-
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
@@ -51,7 +49,7 @@ import org.springframework.util.CollectionUtils;
  * @since 2.0
  * @see ParameterMappingInterceptor
  */
-public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
+public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping<String> {
 
 	/**
 	 * Default request parameter name to use for mapping to handlers: "action".
@@ -61,7 +59,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 
 	private String parameterName = DEFAULT_PARAMETER_NAME;
 
-	private Map parameterMap;
+	private Map<String, ?> parameterMap;
 
 
 	/**
@@ -78,7 +76,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * Convenient for population with bean references.
 	 * @param parameterMap map with parameters as keys and beans as values
 	 */
-	public void setParameterMap(Map parameterMap) {
+	public void setParameterMap(Map<String, ?> parameterMap) {
 		this.parameterMap = parameterMap;
 	}
 
@@ -95,27 +93,11 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 	}
 
 	/**
-	 * Register all handlers specified in the Portlet mode map for the corresponding modes.
-	 * @param parameterMap Map with parameter names as keys and handler beans or bean names as values
-	 * @throws BeansException if the handler couldn't be registered
-	 */
-	@Override
-	protected void registerHandlers(Map parameterMap) throws BeansException {
-		if (CollectionUtils.isEmpty(parameterMap)) {
-			logger.warn("'parameterMap' is empty on ParameterHandlerMapping");
-		}
-		else {
-			super.registerHandlers(parameterMap);
-		}
-	}
-
-
-	/**
 	 * Uses the value of the specified parameter as lookup key.
 	 * @see #setParameterName
 	 */
 	@Override
-	protected Object getLookupKey(PortletRequest request) throws Exception {
+	protected String getLookupKey(PortletRequest request) throws Exception {
 		return request.getParameter(this.parameterName);
 	}
 

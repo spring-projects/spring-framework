@@ -32,7 +32,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see ListFactoryBean
  * @see MapFactoryBean
  */
-public class SetFactoryBean extends AbstractFactoryBean {
+public class SetFactoryBean extends AbstractFactoryBean<Set> {
 
 	private Set sourceSet;
 
@@ -64,13 +64,13 @@ public class SetFactoryBean extends AbstractFactoryBean {
 
 
 	@Override
-	public Class getObjectType() {
+	public Class<Set> getObjectType() {
 		return Set.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object createInstance() {
+	protected Set createInstance() {
 		if (this.sourceSet == null) {
 			throw new IllegalArgumentException("'sourceSet' is required");
 		}

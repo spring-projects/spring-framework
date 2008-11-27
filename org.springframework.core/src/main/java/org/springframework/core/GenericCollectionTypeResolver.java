@@ -34,12 +34,8 @@ import java.util.Map;
  * target type of values to be added to a collection or map
  * (to be able to attempt type conversion if appropriate).
  *
- * <p>Only usable on Java 5. Use an appropriate {@link JdkVersion} check
- * before calling this class, if a fallback for JDK 1.4 is desirable.
- *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.beans.BeanWrapper
  */
 public abstract class GenericCollectionTypeResolver {
 
@@ -283,7 +279,7 @@ public abstract class GenericCollectionTypeResolver {
 
 		Type resolvedType = type;
 		if (type instanceof TypeVariable && methodParam != null && methodParam.typeVariableMap != null) {
-			Type mappedType = (Type) methodParam.typeVariableMap.get(type);
+			Type mappedType = methodParam.typeVariableMap.get((TypeVariable) type);
 			if (mappedType != null) {
 				resolvedType = mappedType;
 			}
@@ -322,7 +318,7 @@ public abstract class GenericCollectionTypeResolver {
 			int nextLevel = currentLevel + 1;
 			Integer currentTypeIndex = (methodParam != null ? methodParam.getTypeIndexForLevel(nextLevel) : null);
 			// Default is last parameter type: Collection element or Map value.
-			int indexToUse = (currentTypeIndex != null ? currentTypeIndex.intValue() : paramTypes.length - 1);
+			int indexToUse = (currentTypeIndex != null ? currentTypeIndex : paramTypes.length - 1);
 			Type paramType = paramTypes[indexToUse];
 			return extractType(methodParam, paramType, source, typeIndex, nestingLevel, nextLevel);
 		}
@@ -339,7 +335,7 @@ public abstract class GenericCollectionTypeResolver {
 		}
 		Type paramType = paramTypes[typeIndex];
 		if (paramType instanceof TypeVariable && methodParam != null && methodParam.typeVariableMap != null) {
-			Type mappedType = (Type) methodParam.typeVariableMap.get(paramType);
+			Type mappedType = methodParam.typeVariableMap.get((TypeVariable) paramType);
 			if (mappedType != null) {
 				paramType = mappedType;
 			}
@@ -399,8 +395,7 @@ public abstract class GenericCollectionTypeResolver {
 		}
 		Type[] ifcs = clazz.getGenericInterfaces();
 		if (ifcs != null) {
-			for (int i = 0; i < ifcs.length; i++) {
-				Type ifc = ifcs[i];
+			for (Type ifc : ifcs) {
 				Type rawType = ifc;
 				if (ifc instanceof ParameterizedType) {
 					rawType = ((ParameterizedType) ifc).getRawType();

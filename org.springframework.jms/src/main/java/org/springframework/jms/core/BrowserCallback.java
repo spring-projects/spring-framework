@@ -31,7 +31,7 @@ import javax.jms.Session;
  * @see JmsTemplate#browse(BrowserCallback)
  * @see JmsTemplate#browseSelected(String, BrowserCallback)
  */
-public interface BrowserCallback {
+public interface BrowserCallback<T> {
 
 	/**
 	 * Perform operations on the given {@link javax.jms.Session} and {@link javax.jms.QueueBrowser}.
@@ -41,6 +41,6 @@ public interface BrowserCallback {
 	 * @return a result object from working with the <code>Session</code>, if any (can be <code>null</code>)
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
-	Object doInJms(Session session, QueueBrowser browser) throws JMSException;
+	T doInJms(Session session, QueueBrowser browser) throws JMSException;
 
 }

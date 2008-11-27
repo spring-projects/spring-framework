@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,7 +107,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testCreateTypeVariableMap() throws Exception {
-		Map<String, Class> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
+		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		TypeVariable barT = findTypeVariable(InterBar.class, "T");
 		assertEquals(String.class, typeVariableMap.get(barT));
 

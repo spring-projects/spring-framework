@@ -51,7 +51,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 
 
 	/** Cache for byte array per class name */
-	private final Map bytesCache = new HashMap();
+	private final Map<String, byte[]> bytesCache = new HashMap<String, byte[]>();
 
 
 	public ContextTypeMatchClassLoader(ClassLoader parent) {
@@ -96,7 +96,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 
 		@Override
 		protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
-			byte[] bytes = (byte[]) bytesCache.get(name);
+			byte[] bytes = bytesCache.get(name);
 			if (bytes == null) {
 				bytes = loadBytesForClass(name);
 				if (bytes != null) {

@@ -188,12 +188,12 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 			}
 			else if (method.getName().equals("toString")) {
 				// Allow for differentiating between the proxy and the raw Connection.
-				StringBuffer buf = new StringBuffer("Transaction-aware proxy for target Connection ");
+				StringBuilder sb = new StringBuilder("Transaction-aware proxy for target Connection ");
 				if (this.target != null) {
-					buf.append("[").append(this.target.toString()).append("]");
+					sb.append("[").append(this.target.toString()).append("]");
 				}
 				else {
-					buf.append(" from DataSource [").append(this.targetDataSource).append("]");
+					sb.append(" from DataSource [").append(this.targetDataSource).append("]");
 				}
 			}
 			else if (method.getName().equals("close")) {

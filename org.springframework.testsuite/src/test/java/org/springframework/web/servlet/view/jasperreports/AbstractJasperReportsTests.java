@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rob Harrop
- * @since 18.11.2004
+ * @author Juergen Hoeller
  */
 public abstract class AbstractJasperReportsTests extends TestCase {
 
@@ -71,7 +71,7 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	}
 
 
-	protected Map getModel() {
+	protected Map<String, Object> getModel() {
 		Map model = new HashMap();
 		model.put("ReportTitle", "Dear Lord!");
 		model.put("dataSource", new JRBeanCollectionDataSource(getData()));
@@ -82,7 +82,7 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	/**
 	 * Subclasses can extend the model if they need to.
 	 */
-	protected void extendModel(Map model) {
+	protected void extendModel(Map<String, Object> model) {
 	}
 
 	protected List getData() {

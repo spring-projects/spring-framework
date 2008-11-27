@@ -109,7 +109,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	private EntityManagerFactory entityManagerFactory;
 
-	private final Map jpaPropertyMap = new HashMap();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
 
 	private DataSource dataSource;
 
@@ -167,7 +167,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map jpaProperties) {
+	public void setJpaPropertyMap(Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -178,7 +178,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * provider, with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
 	 */
-	public Map getJpaPropertyMap() {
+	public Map<String, Object> getJpaPropertyMap() {
 		return this.jpaPropertyMap;
 	}
 
@@ -315,8 +315,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 					"on a single DataSource, no matter whether JPA or JDBC access.");
 		}
 
-		EntityManager em = null;
-
 		try {
 			if (txObject.getEntityManagerHolder() == null ||
 					txObject.getEntityManagerHolder().isSynchronizedWithTransaction()) {
@@ -327,7 +325,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				txObject.setEntityManagerHolder(new EntityManagerHolder(newEm), true);
 			}
 
-			em = txObject.getEntityManagerHolder().getEntityManager();
+			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
 
 			// Delegate to JpaDialect for actual transaction begin.
 			Object transactionData = getJpaDialect().beginTransaction(em, definition);
@@ -391,7 +389,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		if (emf instanceof EntityManagerFactoryInfo) {
 			emf = ((EntityManagerFactoryInfo) emf).getNativeEntityManagerFactory();
 		}
-		Map properties = getJpaPropertyMap();
+		Map<String, Object> properties = getJpaPropertyMap();
 		return (!CollectionUtils.isEmpty(properties) ?
 				emf.createEntityManager(properties) : emf.createEntityManager());
 	}

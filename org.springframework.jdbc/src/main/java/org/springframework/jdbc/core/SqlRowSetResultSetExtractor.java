@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.sql.rowset.CachedRowSet;
 
 import com.sun.rowset.CachedRowSetImpl;
@@ -32,9 +31,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  *
  * <p>The default implementation uses a standard JDBC CachedRowSet underneath.
  * This means that JDBC RowSet support needs to be available at runtime:
- * by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code> class is
- * used, which is part of JDK 1.5+ and also available separately as part of
- * Sun's JDBC RowSet Implementations download (rowset.jar).
+ * by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code> class.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -43,9 +40,9 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * @see JdbcTemplate#queryForRowSet(String)
  * @see javax.sql.rowset.CachedRowSet
  */
-public class SqlRowSetResultSetExtractor implements ResultSetExtractor {
+public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet> {
 
-	public Object extractData(ResultSet rs) throws SQLException {
+	public SqlRowSet extractData(ResultSet rs) throws SQLException {
 		return createSqlRowSet(rs);
 	}
 
@@ -71,9 +68,7 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor {
 	 * Create a new CachedRowSet instance, to be populated by
 	 * the <code>createSqlRowSet</code> implementation.
 	 * <p>The default implementation creates a new instance of
-	 * Sun's <code>com.sun.rowset.CachedRowSetImpl</code> class,
-	 * which is part of JDK 1.5+ and also available separately
-	 * as part of Sun's JDBC RowSet Implementations download.
+	 * Sun's <code>com.sun.rowset.CachedRowSetImpl</code> class.
 	 * @return a new CachedRowSet instance
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #createSqlRowSet

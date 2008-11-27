@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,9 @@ public interface SimpleJdbcOperations {
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * and a map containing the arguments.
 	 * @param sql the SQL query to run.
-	 * @param args the map containing the arguments for the query.
+	 * @param args the map containing the arguments for the query
 	 */
-	int queryForInt(String sql, Map args) throws DataAccessException;
+	int queryForInt(String sql, Map<String, Object> args) throws DataAccessException;
 
 	/**
 	 * Query for an <code>int</code> passing in a SQL query
@@ -77,7 +77,7 @@ public interface SimpleJdbcOperations {
 	 * using the standard '?' placeholders for parameters
 	 * and a variable number of arguments.
 	 * @param sql the SQL query to run.
-	 * @param args the variable number of arguments for the query.
+	 * @param args the variable number of arguments for the query
 	 */
 	int queryForInt(String sql, Object... args) throws DataAccessException;
 
@@ -87,9 +87,9 @@ public interface SimpleJdbcOperations {
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * and a map containing the arguments.
 	 * @param sql the SQL query to run.
-	 * @param args the map containing the arguments for the query.
+	 * @param args the map containing the arguments for the query
 	 */
-	long queryForLong(String sql, Map args) throws DataAccessException;
+	long queryForLong(String sql, Map<String, Object> args) throws DataAccessException;
 
 	/**
 	 * Query for an <code>long</code> passing in a SQL query
@@ -97,7 +97,7 @@ public interface SimpleJdbcOperations {
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * and a <code>SqlParameterSource</code> containing the arguments.
 	 * @param sql the SQL query to run.
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query.
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 */
 	long queryForLong(String sql, SqlParameterSource args) throws DataAccessException;
 
@@ -106,7 +106,7 @@ public interface SimpleJdbcOperations {
 	 * using the standard '?' placeholders for parameters
 	 * and a variable number of arguments.
 	 * @param sql the SQL query to run.
-	 * @param args the variable number of arguments for the query.
+	 * @param args the variable number of arguments for the query
 	 */
 	long queryForLong(String sql, Object... args) throws DataAccessException;
 
@@ -114,22 +114,22 @@ public interface SimpleJdbcOperations {
 	 * Query for an object of type <code>T</code> identified by the supplied @{@link Class}.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
-	 * @param requiredType the required type of the return value.
-	 * @param args the map containing the arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param requiredType the required type of the return value
+	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, Class)
 	 * @see JdbcOperations#queryForObject(String, Object[], Class)
 	 */
-	<T> T queryForObject(String sql, Class<T> requiredType, Map args)
+	<T> T queryForObject(String sql, Class<T> requiredType, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
 	 * Query for an object of type <code>T</code> identified by the supplied @{@link Class}.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
-	 * @param requiredType the required type of the return value.
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param requiredType the required type of the return value
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, Class)
 	 * @see JdbcOperations#queryForObject(String, Object[], Class)
 	 */
@@ -139,9 +139,9 @@ public interface SimpleJdbcOperations {
 	/**
 	 * Query for an object of type <code>T</code> identified by the supplied @{@link Class}.
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL query to run.
-	 * @param requiredType the required type of the return value.
-	 * @param args the variable number of arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param requiredType the required type of the return value
+	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForObject(String, Class)
 	 * @see JdbcOperations#queryForObject(String, Object[], Class)
 	 */
@@ -153,13 +153,13 @@ public interface SimpleJdbcOperations {
 	 * {@link ParameterizedRowMapper} to the query results to the object.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
+	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
-	 * @param args the map containing the arguments for the query.
+	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map args)
+	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
@@ -167,9 +167,9 @@ public interface SimpleJdbcOperations {
 	 * {@link ParameterizedRowMapper} to the query results to the object.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
+	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query.
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
@@ -180,9 +180,9 @@ public interface SimpleJdbcOperations {
 	 * Query for an object of type <code>T</code> using the supplied
 	 * {@link ParameterizedRowMapper} to the query results to the object.
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL query to run.
+	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
-	 * @param args the variable number of arguments for the query.
+	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
@@ -194,13 +194,13 @@ public interface SimpleJdbcOperations {
 	 * the supplied {@link ParameterizedRowMapper} to the query results to the object.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
+	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
-	 * @param args the map containing the arguments for the query.
+	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map args)
+	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
@@ -208,9 +208,9 @@ public interface SimpleJdbcOperations {
 	 * the supplied {@link ParameterizedRowMapper} to the query results to the object.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
+	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query.
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
@@ -221,9 +221,9 @@ public interface SimpleJdbcOperations {
 	 * Query for a {@link List} of <code>Objects</code> of type <code>T</code> using
 	 * the supplied {@link ParameterizedRowMapper} to the query results to the object.
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL query to run.
+	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
-	 * @param args the variable number of arguments for the query.
+	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
@@ -233,25 +233,25 @@ public interface SimpleJdbcOperations {
 	/**
 	 * Execute the supplied query with the supplied arguments.
 	 * <p>The query is expected to be a single row query; the result row will be
-	 * mapped to a Map (one entry for each column, using the column name as the key).
+	 * mapped to a Map<String, Object> (one entry for each column, using the column name as the key).
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
-	 * @param args the map containing the arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForMap(String)
 	 * @see JdbcOperations#queryForMap(String, Object[])
 	 */
-	Map<String, Object> queryForMap(String sql, Map args)
+	Map<String, Object> queryForMap(String sql, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
 	 * Execute the supplied query with the supplied arguments.
 	 * <p>The query is expected to be a single row query; the result row will be
-	 * mapped to a Map (one entry for each column, using the column name as the key).
+	 * mapped to a Map<String, Object> (one entry for each column, using the column name as the key).
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForMap(String)
 	 * @see JdbcOperations#queryForMap(String, Object[])
 	 */
@@ -261,10 +261,10 @@ public interface SimpleJdbcOperations {
 	/**
 	 * Execute the supplied query with the (optional) supplied arguments.
 	 * <p>The query is expected to be a single row query; the result row will be
-	 * mapped to a Map (one entry for each column, using the column name as the key).
+	 * mapped to a Map<String, Object> (one entry for each column, using the column name as the key).
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL query to run.
-	 * @param args the variable number of arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForMap(String)
 	 * @see JdbcOperations#queryForMap(String, Object[])
 	 */
@@ -277,12 +277,12 @@ public interface SimpleJdbcOperations {
 	 * as described in {@link #queryForMap}
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
-	 * @param args the map containing the arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForList(String)
 	 * @see JdbcOperations#queryForList(String, Object[])
 	 */
-	List<Map<String, Object>> queryForList(String sql, Map args)
+	List<Map<String, Object>> queryForList(String sql, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
@@ -291,8 +291,8 @@ public interface SimpleJdbcOperations {
 	 * as described in {@link #queryForMap}
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL query to run.
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForList(String)
 	 * @see JdbcOperations#queryForList(String, Object[])
 	 */
@@ -304,8 +304,8 @@ public interface SimpleJdbcOperations {
 	 * <p>Each element in the returned {@link List} is constructed as a {@link Map}
 	 * as described in {@link #queryForMap}
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL query to run.
-	 * @param args the variable number of arguments for the query.
+	 * @param sql the SQL query to run
+	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForList(String)
 	 * @see JdbcOperations#queryForList(String, Object[])
 	 */
@@ -316,20 +316,20 @@ public interface SimpleJdbcOperations {
 	 * Execute the supplied SQL statement with (optional) supplied arguments.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL statement to execute.
-	 * @param args the map containing the arguments for the query.
-	 * @return the numbers of rows affected by the update.
+	 * @param sql the SQL statement to execute
+	 * @param args the map containing the arguments for the query
+	 * @return the numbers of rows affected by the update
 	 * @see NamedParameterJdbcOperations#update(String, Map)
 	 */
-	int update(String sql, Map args) throws DataAccessException;
+	int update(String sql, Map<String, Object> args) throws DataAccessException;
 
 	/**
 	 * Execute the supplied SQL statement with supplied arguments.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
-	 * @param sql the SQL statement to execute.
-	 * @param args the <code>SqlParameterSource</code> containing the arguments for the statement.
-	 * @return the numbers of rows affected by the update.
+	 * @param sql the SQL statement to execute
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the statement
+	 * @return the numbers of rows affected by the update
 	 * @see NamedParameterJdbcOperations#update(String, SqlParameterSource)
 	 */
 	int update(String sql, SqlParameterSource args) throws DataAccessException;
@@ -337,9 +337,9 @@ public interface SimpleJdbcOperations {
 	/**
 	 * Execute the supplied SQL statement with supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL statement to execute.
-	 * @param args the variable number of arguments for the query.
-	 * @return the numbers of rows affected by the update.
+	 * @param sql the SQL statement to execute
+	 * @param args the variable number of arguments for the query
+	 * @return the numbers of rows affected by the update
 	 * @see JdbcOperations#update(String)
 	 * @see JdbcOperations#update(String, Object[])
 	 */
@@ -348,27 +348,27 @@ public interface SimpleJdbcOperations {
 	/**
 	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the named parameter support.
-	 * @param sql the SQL statement to execute.
-	 * @param batchValues the array of Maps containing the batch of arguments for the query.
-	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 * @param sql the SQL statement to execute
+	 * @param batchValues the array of Maps containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, Map[] batchValues);
+	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues);
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the named parameter support.
-	 * @param sql the SQL statement to execute.
-	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of arguments for the query.
-	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * @param sql the SQL statement to execute.
-	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query.
-	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs);
 
@@ -376,10 +376,10 @@ public interface SimpleJdbcOperations {
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
 	 * @param sql the SQL statement to execute.
-	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query.
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
-	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes);
 

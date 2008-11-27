@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,12 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
-
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
@@ -64,11 +60,11 @@ public class MockPortletRequest implements PortletRequest {
 
 	private PortletPreferences portletPreferences = new MockPortletPreferences();
 
-	private final Map properties = new LinkedHashMap(16);
+	private final Map<String, List<String>> properties = new LinkedHashMap<String, List<String>>();
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
-	private final Map parameters = new LinkedHashMap(16);
+	private final Map<String, String[]> parameters = new LinkedHashMap<String, String[]>();
 
 	private String authType = null;
 
@@ -78,15 +74,15 @@ public class MockPortletRequest implements PortletRequest {
 
 	private Principal userPrincipal = null;
 
-	private final Set userRoles = new HashSet();
+	private final Set<String> userRoles = new HashSet<String>();
 
 	private boolean secure = false;
 
 	private boolean requestedSessionIdValid = true;
 
-	private final Vector responseContentTypes = new Vector();
+	private final List<String> responseContentTypes = new LinkedList<String>();
 
-	private final Vector locales = new Vector();
+	private final List<Locale> locales = new LinkedList<Locale>();
 
 	private String scheme = "http";
 
@@ -227,7 +223,7 @@ public class MockPortletRequest implements PortletRequest {
 	 */
 	public void setProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
-		List list = new LinkedList();
+		List<String> list = new LinkedList<String>();
 		list.add(value);
 		this.properties.put(key, list);
 	}
@@ -239,12 +235,12 @@ public class MockPortletRequest implements PortletRequest {
 	 */
 	public void addProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
-		List oldList = (List) this.properties.get(key);
+		List<String> oldList = this.properties.get(key);
 		if (oldList != null) {
 			oldList.add(value);
 		}
 		else {
-			List list = new LinkedList();
+			List<String> list = new LinkedList<String>();
 			list.add(value);
 			this.properties.put(key, list);
 		}
@@ -252,16 +248,16 @@ public class MockPortletRequest implements PortletRequest {
 
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
-		List list = (List) this.properties.get(key);
+		List list = this.properties.get(key);
 		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
 	}
 
-	public Enumeration getProperties(String key) {
+	public Enumeration<String> getProperties(String key) {
 		Assert.notNull(key, "property key must not be null");
-		return Collections.enumeration((List) this.properties.get(key));
+		return Collections.enumeration(this.properties.get(key));
 	}
 
-	public Enumeration getPropertyNames() {
+	public Enumeration<String> getPropertyNames() {
 		return Collections.enumeration(this.properties.keySet());
 	}
 
@@ -314,20 +310,15 @@ public class MockPortletRequest implements PortletRequest {
 		return this.attributes.get(name);
 	}
 
-	public Enumeration getAttributeNames() {
+	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return this.attributes.keys();
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
-	public void setParameters(Map parameters) {
+	public void setParameters(Map<String, String[]> parameters) {
 		Assert.notNull(parameters, "Parameters Map must not be null");
 		this.parameters.clear();
-		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			Assert.isTrue(entry.getKey() instanceof String, "Key must be of type String");
-			Assert.isTrue(entry.getValue() instanceof String[], "Value must be of type String[]");
-			this.parameters.put(entry.getKey(), entry.getValue());
-		}
+		this.parameters.putAll(parameters);
 	}
 
 	public void setParameter(String key, String value) {
@@ -347,7 +338,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void addParameter(String name, String[] values) {
-		String[] oldArr = (String[]) this.parameters.get(name);
+		String[] oldArr = this.parameters.get(name);
 		if (oldArr != null) {
 			String[] newArr = new String[oldArr.length + values.length];
 			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
@@ -360,16 +351,16 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public String getParameter(String name) {
-		String[] arr = (String[]) this.parameters.get(name);
+		String[] arr = this.parameters.get(name);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
-	public Enumeration getParameterNames() {
+	public Enumeration<String> getParameterNames() {
 		return Collections.enumeration(this.parameters.keySet());
 	}
 
 	public String[] getParameterValues(String name) {
-		return (String[]) this.parameters.get(name);
+		return this.parameters.get(name);
 	}
 
 	public Map getParameterMap() {
@@ -421,11 +412,11 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public String getResponseContentType() {
-		return (String) this.responseContentTypes.get(0);
+		return this.responseContentTypes.get(0);
 	}
 
-	public Enumeration getResponseContentTypes() {
-		return this.responseContentTypes.elements();
+	public Enumeration<String> getResponseContentTypes() {
+		return Collections.enumeration(this.responseContentTypes);
 	}
 
 	public void addLocale(Locale locale) {
@@ -437,11 +428,11 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public Locale getLocale() {
-		return (Locale) this.locales.get(0);
+		return this.locales.get(0);
 	}
 
-	public Enumeration getLocales() {
-		return this.locales.elements();
+	public Enumeration<Locale> getLocales() {
+		return Collections.enumeration(this.locales);
 	}
 
 	public void setScheme(String scheme) {
@@ -449,7 +440,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public String getScheme() {
-		return scheme;
+		return this.scheme;
 	}
 
 	public void setServerName(String serverName) {
@@ -457,7 +448,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public String getServerName() {
-		return serverName;
+		return this.serverName;
 	}
 
 	public void setServerPort(int serverPort) {
@@ -465,7 +456,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public int getServerPort() {
-		return serverPort;
+		return this.serverPort;
 	}
 
 }

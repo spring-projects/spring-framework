@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -191,10 +190,11 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	@Override
 	protected void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws IOException {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 
 		// Prepare target URL.
-		StringBuffer targetUrl = new StringBuffer();
+		StringBuilder targetUrl = new StringBuilder();
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
 			targetUrl.append(request.getContextPath());
@@ -217,13 +217,13 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Append query properties to the redirect URL.
 	 * Stringifies, URL-encodes and formats model attributes as query properties.
-	 * @param targetUrl the StringBuffer to append the properties to
+	 * @param targetUrl the StringBuilder to append the properties to
 	 * @param model Map that contains model attributes
 	 * @param encodingScheme the encoding scheme to use
 	 * @throws UnsupportedEncodingException if string encoding failed
 	 * @see #queryProperties
 	 */
-	protected void appendQueryProperties(StringBuffer targetUrl, Map model, String encodingScheme)
+	protected void appendQueryProperties(StringBuilder targetUrl, Map<String, Object> model, String encodingScheme)
 			throws UnsupportedEncodingException {
 
 		// Extract anchor fragment, if any.
@@ -236,10 +236,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 		// If there aren't already some parameters, we need a "?".
 		boolean first = (getUrl().indexOf('?') < 0);
-		Iterator entries = queryProperties(model).entrySet().iterator();
-		while (entries.hasNext()) {
-			Map.Entry entry = (Map.Entry) entries.next();
-			String key = entry.getKey().toString();
+		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
 			Iterator valueIter = null;
 			if (rawValue != null && rawValue.getClass().isArray()) {
@@ -260,7 +257,7 @@ public class RedirectView extends AbstractUrlBasedView {
 				else {
 					targetUrl.append('&');
 				}
-				String encodedKey = urlEncode(key, encodingScheme);
+				String encodedKey = urlEncode(entry.getKey(), encodingScheme);
 				String encodedValue = (value != null ? urlEncode(value.toString(), encodingScheme) : "");
 				targetUrl.append(encodedKey).append('=').append(encodedValue);
 			}
@@ -282,14 +279,11 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @return the filtered Map of eligible query properties
 	 * @see #isEligibleProperty(String, Object)
 	 */
-	protected Map queryProperties(Map model) {
-		Map result = new LinkedHashMap();
-		for (Iterator it = model.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String key = entry.getKey().toString();
-			Object value = entry.getValue();
-			if (isEligibleProperty(key, value)) {
-				result.put(key, value);
+	protected Map<String, Object> queryProperties(Map<String, Object> model) {
+		Map<String, Object> result = new LinkedHashMap<String, Object>();
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			if (isEligibleProperty(entry.getKey(), entry.getValue())) {
+				result.put(entry.getKey(), entry.getValue());
 			}
 		}
 		return result;
@@ -332,8 +326,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			if (coll.isEmpty()) {
 				return false;
 			}
-			for (Iterator it = coll.iterator(); it.hasNext();) {
-				Object element = it.next();
+			for (Object element : coll) {
 				if (!isEligibleValue(element)) {
 					return false;
 				}

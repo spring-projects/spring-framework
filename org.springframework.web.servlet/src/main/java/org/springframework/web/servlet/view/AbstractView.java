@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -69,7 +68,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	private String requestContextAttribute;
 
 	/** Map of static attributes, keyed by attribute name (String) */
-	private final Map	staticAttributes = new HashMap();
+	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
 
 
 	/**
@@ -178,17 +177,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @param attributes Map with name Strings as keys and attribute objects as values
 	 */
-	public void setAttributesMap(Map attributes) {
+	public void setAttributesMap(Map<String, ?> attributes) {
 		if (attributes != null) {
-			Iterator it = attributes.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Object key = entry.getKey();
-				if (!(key instanceof String)) {
-					throw new IllegalArgumentException(
-							"Invalid attribute key [" + key + "]: only Strings allowed");
-				}
-				addStaticAttribute((String) key, entry.getValue());
+			for (Map.Entry<String, ?> entry : attributes.entrySet()) {
+				addStaticAttribute(entry.getKey(), entry.getValue());
 			}
 		}
 	}
@@ -200,7 +192,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * "attributesMap[myKey]". This is particularly useful for
 	 * adding or overriding entries in child view definitions.
 	 */
-	public Map getAttributesMap() {
+	public Map<String, Object> getAttributesMap() {
 		return this.staticAttributes;
 	}
 
@@ -235,14 +227,15 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Delegates to renderMergedOutputModel for the actual rendering.
 	 * @see #renderMergedOutputModel
 	 */
-	public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
 				" and static attributes " + this.staticAttributes);
 		}
 
 		// Consolidate static and dynamic model attributes.
-		Map mergedModel = new HashMap(this.staticAttributes.size() + (model != null ? model.size() : 0));
+		Map<String, Object> mergedModel =
+				new HashMap<String, Object>(this.staticAttributes.size() + (model != null ? model.size() : 0));
 		mergedModel.putAll(this.staticAttributes);
 		if (model != null) {
 			mergedModel.putAll(model);
@@ -268,7 +261,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @see #setRequestContextAttribute
 	 * @see org.springframework.web.servlet.support.RequestContext
 	 */
-	protected RequestContext createRequestContext(HttpServletRequest request, Map model) {
+	protected RequestContext createRequestContext(HttpServletRequest request, Map<String, Object> model) {
 		return new RequestContext(request, getServletContext(), model);
 	}
 
@@ -313,7 +306,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @throws Exception if rendering failed
 	 */
 	protected abstract void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 
 	/**
@@ -323,15 +316,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param model Map of model objects to expose
 	 * @param request current HTTP request
 	 */
-	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws Exception {
-		Iterator it = model.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			if (!(entry.getKey() instanceof String)) {
-				throw new IllegalArgumentException(
-						"Invalid key [" + entry.getKey() + "] in model Map: only Strings allowed as model keys");
-			}
-			String modelName = (String) entry.getKey();
+	protected void exposeModelAsRequestAttributes(Map<String, Object> model, HttpServletRequest request) throws Exception {
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			String modelName = entry.getKey();
 			Object modelValue = entry.getValue();
 			if (modelValue != null) {
 				request.setAttribute(modelName, modelValue);
@@ -379,7 +366,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
+		StringBuilder sb = new StringBuilder(getClass().getName());
 		if (getBeanName() != null) {
 			sb.append(": name '").append(getBeanName()).append("'");
 		}

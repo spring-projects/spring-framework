@@ -20,6 +20,7 @@ import java.util.List;
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletContext;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -113,12 +114,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(ActionRequest request) {
-		if (request == null) {
-			return false;
-		}
-		else {
-			return PortletFileUpload.isMultipartContent(request);
-		}
+		return (request != null && PortletFileUpload.isMultipartContent(request));
 	}
 
 	public MultipartActionRequest resolveMultipart(final ActionRequest request) throws MultipartException {
@@ -146,11 +142,12 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	 * @return the parsing result
 	 * @throws MultipartException if multipart resolution failed.
 	 */
+	@SuppressWarnings("unchecked")
 	protected MultipartParsingResult parseRequest(ActionRequest request) throws MultipartException {
 		String encoding = determineEncoding(request);
 		FileUpload fileUpload = prepareFileUpload(encoding);
 		try {
-			List fileItems = ((PortletFileUpload) fileUpload).parseRequest(request);
+			List<FileItem> fileItems = ((PortletFileUpload) fileUpload).parseRequest(request);
 			return parseFileItems(fileItems, encoding);
 		}
 		catch (FileUploadBase.SizeLimitExceededException ex) {

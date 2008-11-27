@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,21 +38,21 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  */
 public class GeneratedKeyHolder implements KeyHolder {
 
-	private final List keyList;
+	private final List<Map<String, Object>> keyList;
 
 
 	/**
 	 * Create a new GeneratedKeyHolder with a default list.
 	 */
 	public GeneratedKeyHolder() {
-		this.keyList = new LinkedList();
+		this.keyList = new LinkedList<Map<String, Object>>();
 	}
 
 	/**
 	 * Create a new GeneratedKeyHolder with a given list.
 	 * @param keyList a list to hold maps of keys
 	 */
-	public GeneratedKeyHolder(List keyList) {
+	public GeneratedKeyHolder(List<Map<String, Object>> keyList) {
 		this.keyList = keyList;
 	}
 
@@ -61,12 +61,12 @@ public class GeneratedKeyHolder implements KeyHolder {
 		if (this.keyList.size() == 0) {
 			return null;
 		}
-		if (this.keyList.size() > 1 || ((Map) this.keyList.get(0)).size() > 1) {
+		if (this.keyList.size() > 1 || this.keyList.get(0).size() > 1) {
 			throw new InvalidDataAccessApiUsageException(
 					"The getKey method should only be used when a single key is returned.  " +
 					"The current key entry contains multiple keys: " + this.keyList);
 		}
-		Iterator keyIter = ((Map) this.keyList.get(0)).values().iterator();
+		Iterator<Object> keyIter = this.keyList.get(0).values().iterator();
 		if (keyIter.hasNext()) {
 			Object key = keyIter.next();
 			if (!(key instanceof Number)) {
@@ -83,7 +83,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		}
 	}
 
-	public Map getKeys() throws InvalidDataAccessApiUsageException {
+	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
 		if (this.keyList.size() == 0) {
 			return null;
 		}
@@ -91,10 +91,10 @@ public class GeneratedKeyHolder implements KeyHolder {
 			throw new InvalidDataAccessApiUsageException(
 					"The getKeys method should only be used when keys for a single row are returned.  " +
 					"The current key list contains keys for multiple rows: " + this.keyList);
-		return (Map) this.keyList.get(0);
+		return this.keyList.get(0);
 	}
 
-	public List getKeyList() {
+	public List<Map<String, Object>> getKeyList() {
 		return this.keyList;
 	}
 

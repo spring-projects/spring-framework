@@ -57,8 +57,8 @@ import org.springframework.util.ReflectionUtils;
  * @see #setSingleton
  * @see #createInstance()
  */
-public abstract class AbstractFactoryBean
-		implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
+public abstract class AbstractFactoryBean<T>
+		implements FactoryBean<T>, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -71,9 +71,9 @@ public abstract class AbstractFactoryBean
 
 	private boolean initialized = false;
 
-	private Object singletonInstance;
+	private T singletonInstance;
 
-	private Object earlySingletonInstance;
+	private T earlySingletonInstance;
 
 
 	/**
@@ -138,7 +138,7 @@ public abstract class AbstractFactoryBean
 	 * @see #createInstance()
 	 * @see #getEarlySingletonInterfaces()
 	 */
-	public final Object getObject() throws Exception {
+	public final T getObject() throws Exception {
 		if (isSingleton()) {
 			return (this.initialized ? this.singletonInstance : getEarlySingletonInstance());
 		}
@@ -151,14 +151,15 @@ public abstract class AbstractFactoryBean
 	 * Determine an 'eager singleton' instance, exposed in case of a
 	 * circular reference. Not called in a non-circular scenario.
 	 */
-	private Object getEarlySingletonInstance() throws Exception {
+	@SuppressWarnings("unchecked")
+	private T getEarlySingletonInstance() throws Exception {
 		Class[] ifcs = getEarlySingletonInterfaces();
 		if (ifcs == null) {
 			throw new FactoryBeanNotInitializedException(
 					getClass().getName() + " does not support circular references");
 		}
 		if (this.earlySingletonInstance == null) {
-			this.earlySingletonInstance = Proxy.newProxyInstance(
+			this.earlySingletonInstance = (T) Proxy.newProxyInstance(
 					this.beanClassLoader, ifcs, new EarlySingletonInvocationHandler());
 		}
 		return this.earlySingletonInstance;
@@ -169,7 +170,7 @@ public abstract class AbstractFactoryBean
 	 * @return the singleton instance that this FactoryBean holds
 	 * @throws IllegalStateException if the singleton instance is not initialized
 	 */
-	private Object getSingletonInstance() throws IllegalStateException {
+	private T getSingletonInstance() throws IllegalStateException {
 		if (!this.initialized) {
 			throw new IllegalStateException("Singleton instance not initialized yet");
 		}
@@ -192,7 +193,7 @@ public abstract class AbstractFactoryBean
 	 * interface, for a consistent offering of abstract template methods.
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
-	public abstract Class getObjectType();
+	public abstract Class<? extends T> getObjectType();
 
 	/**
 	 * Template method that subclasses must override to construct
@@ -203,7 +204,7 @@ public abstract class AbstractFactoryBean
 	 * @throws Exception if an exception occured during object creation
 	 * @see #getObject()
 	 */
-	protected abstract Object createInstance() throws Exception;
+	protected abstract T createInstance() throws Exception;
 
 	/**
 	 * Return an array of interfaces that a singleton object exposed by this
@@ -231,7 +232,7 @@ public abstract class AbstractFactoryBean
 	 * @throws Exception in case of shutdown errors
 	 * @see #createInstance()
 	 */
-	protected void destroyInstance(Object instance) throws Exception {
+	protected void destroyInstance(T instance) throws Exception {
 	}
 
 
@@ -240,11 +241,11 @@ public abstract class AbstractFactoryBean
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (ReflectionUtils.isHashCodeMethod(method)) {
 				// Use hashCode of reference proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (!initialized && ReflectionUtils.isToStringMethod(method)) {
 				return "Early singleton proxy for interfaces " +

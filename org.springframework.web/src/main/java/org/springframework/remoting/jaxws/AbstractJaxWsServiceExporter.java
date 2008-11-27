@@ -20,7 +20,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 
@@ -30,7 +29,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 
 /**
  * Abstract exporter for JAX-WS services, autodetecting annotated service beans
@@ -82,7 +80,7 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @see javax.xml.ws.Endpoint#setExecutor
 	 */
 	public void setTaskExecutor(TaskExecutor executor) {
-		this.executor = new ConcurrentExecutorAdapter(executor);
+		this.executor = executor;
 	}
 
 	/**

@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +49,7 @@ public class PreparedStatementCreatorFactory {
 	private final String sql;
 
 	/** List of SqlParameter objects. May not be <code>null</code>. */
-	private final List declaredParameters;
+	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
@@ -69,7 +68,7 @@ public class PreparedStatementCreatorFactory {
 	 */
 	public PreparedStatementCreatorFactory(String sql) {
 		this.sql = sql;
-		this.declaredParameters = new LinkedList();
+		this.declaredParameters = new LinkedList<SqlParameter>();
 	}
 
 	/**
@@ -88,7 +87,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param declaredParameters list of {@link SqlParameter} objects
 	 * @see SqlParameter
 	 */
-	public PreparedStatementCreatorFactory(String sql, List declaredParameters) {
+	public PreparedStatementCreatorFactory(String sql, List<SqlParameter> declaredParameters) {
 		this.sql = sql;
 		this.declaredParameters = declaredParameters;
 	}
@@ -148,7 +147,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params list of parameters (may be <code>null</code>)
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(List params) {
-		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
 	/**
@@ -156,15 +155,15 @@ public class PreparedStatementCreatorFactory {
 	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
-		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params list of parameters (may be <code>null</code>)
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(List params) {
-		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
+	public PreparedStatementCreator newPreparedStatementCreator(List<?> params) {
+		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
 	/**
@@ -172,7 +171,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
 	/**
@@ -183,7 +182,7 @@ public class PreparedStatementCreatorFactory {
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
 		return new PreparedStatementCreatorImpl(
-				sqlToUse, params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
+				sqlToUse, params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
 
@@ -197,7 +196,7 @@ public class PreparedStatementCreatorFactory {
 
 		private final List parameters;
 
-		public PreparedStatementCreatorImpl(List parameters) {
+		public PreparedStatementCreatorImpl(List<?> parameters) {
 			this(sql, parameters);
 		}
 
@@ -207,11 +206,11 @@ public class PreparedStatementCreatorFactory {
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size()) {
 				// account for named parameters being used multiple times
-				Set names = new HashSet();
+				Set<String> names = new HashSet<String>();
 				for (int i = 0; i < parameters.size(); i++) {
-					Object o = parameters.get(i);
-					if (o instanceof SqlParameterValue) {
-						names.add(((SqlParameterValue)o).getName());
+					Object param = parameters.get(i);
+					if (param instanceof SqlParameterValue) {
+						names.add(((SqlParameterValue) param).getName());
 					}
 					else {
 						names.add("Parameter #" + i);
@@ -279,16 +278,14 @@ public class PreparedStatementCreatorFactory {
 								" given only " + declaredParameters.size() + " parameters");
 
 					}
-					declaredParameter = (SqlParameter) declaredParameters.get(i);
+					declaredParameter = declaredParameters.get(i);
 				}
 				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
 					Collection entries = (Collection) in;
-					for (Iterator it = entries.iterator(); it.hasNext();) {
-						Object entry = it.next();
+					for (Object entry : entries) {
 						if (entry instanceof Object[]) {
 							Object[] valueArray = ((Object[])entry);
-							for (int k = 0; k < valueArray.length; k++) {
-								Object argValue = valueArray[k];
+							for (Object argValue : valueArray) {
 								StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, argValue);
 							}
 						}
@@ -313,9 +310,10 @@ public class PreparedStatementCreatorFactory {
 
 		@Override
 		public String toString() {
-			StringBuffer buf = new StringBuffer("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql=[");
-			buf.append(sql).append("]; parameters=").append(this.parameters);
-			return buf.toString();
+			StringBuilder sb = new StringBuilder();
+			sb.append("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql=[");
+			sb.append(sql).append("]; parameters=").append(this.parameters);
+			return sb.toString();
 		}
 	}
 

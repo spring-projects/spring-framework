@@ -50,8 +50,8 @@ import org.springframework.web.util.WebUtils;
 public class TilesView extends AbstractUrlBasedView {
 
 	@Override
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	protected void renderMergedOutputModel(
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		ServletContext servletContext = getServletContext();
 		TilesContainer container = TilesAccess.getContainer(servletContext);
@@ -73,7 +73,7 @@ public class TilesView extends AbstractUrlBasedView {
 			}
 		}
 
-		container.render(getUrl(), new Object[] {request, response});
+		container.render(getUrl(), request, response);
 	}
 
 }

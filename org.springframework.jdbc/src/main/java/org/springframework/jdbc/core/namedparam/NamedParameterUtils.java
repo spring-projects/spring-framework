@@ -191,7 +191,7 @@ public abstract class NamedParameterUtils {
 	 */
 	public static String substituteNamedParameters(ParsedSql parsedSql, SqlParameterSource paramSource) {
 		String originalSql = parsedSql.getOriginalSql();
-		StringBuffer actualSql = new StringBuffer();
+		StringBuilder actualSql = new StringBuilder();
 		List paramNames = parsedSql.getParameterNames();
 		int lastIndex = 0;
 		for (int i = 0; i < paramNames.size(); i++) {
@@ -379,7 +379,7 @@ public abstract class NamedParameterUtils {
 	 * @param paramMap the Map of parameters
 	 * @return the array of values
 	 */
-	public static Object[] buildValueArray(String sql, Map paramMap) {
+	public static Object[] buildValueArray(String sql, Map<String, ?> paramMap) {
 		ParsedSql parsedSql = parseSqlStatement(sql);
 		return buildValueArray(parsedSql, new MapSqlParameterSource(paramMap), null);
 	}

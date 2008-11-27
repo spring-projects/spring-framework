@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -325,6 +327,44 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return result;
+	}
+
+	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
+		return getBeansWithAnnotation(annotationType, true, true);
+	}
+
+	public Map<String, Object> getBeansWithAnnotation(
+			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit) {
+
+		Map<String, Object> results = new LinkedHashMap<String, Object>();
+		for (String beanName : getBeanNamesForType(Object.class, includeNonSingletons, allowEagerInit)) {
+			if (findAnnotationOnBean(beanName, annotationType) != null) {
+				results.put(beanName, getBean(beanName));
+			}
+		}
+		return results;
+	}
+
+	/**
+	 * Find a {@link Annotation} of <code>annotationType</code> on the specified
+	 * bean, traversing its interfaces and super classes if no annotation can be
+	 * found on the given class itself, as well as checking its raw bean class
+	 * if not found on the exposed bean reference (e.g. in case of a proxy).
+	 */
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+		Class<?> handlerType = getType(beanName);
+		A ann = AnnotationUtils.findAnnotation(handlerType, annotationType);
+		if (ann == null && containsBeanDefinition(beanName)) {
+			BeanDefinition bd = getMergedBeanDefinition(beanName);
+			if (bd instanceof AbstractBeanDefinition) {
+				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+				if (abd.hasBeanClass()) {
+					Class<?> beanClass = abd.getBeanClass();
+					ann = AnnotationUtils.findAnnotation(beanClass, annotationType);
+				}
+			}
+		}
+		return ann;
 	}
 
 

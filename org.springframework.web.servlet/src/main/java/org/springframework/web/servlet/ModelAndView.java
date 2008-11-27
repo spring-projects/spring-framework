@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class ModelAndView {
 	 * (Objects). Model entries may not be <code>null</code>, but the
 	 * model Map may be <code>null</code> if there is no model data.
 	 */
-	public ModelAndView(String viewName, Map model) {
+	public ModelAndView(String viewName, Map<String, ?> model) {
 		this.view = viewName;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -109,7 +109,7 @@ public class ModelAndView {
 	 * (Objects). Model entries may not be <code>null</code>, but the
 	 * model Map may be <code>null</code> if there is no model data.
 	 */
-	public ModelAndView(View view, Map model) {
+	public ModelAndView(View view, Map<String, ?> model) {
 		this.view = view;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -194,7 +194,7 @@ public class ModelAndView {
 	 * Return the model map. May return <code>null</code>.
 	 * Called by DispatcherServlet for evaluation of the model.
 	 */
-	protected Map getModelInternal() {
+	protected Map<String, Object> getModelInternal() {
 		return this.model;
 	}
 
@@ -212,7 +212,7 @@ public class ModelAndView {
 	 * Return the model map. Never returns <code>null</code>.
 	 * To be called by application code for modifying the model.
 	 */
-	public Map getModel() {
+	public Map<String, Object> getModel() {
 		return getModelMap();
 	}
 
@@ -246,7 +246,7 @@ public class ModelAndView {
 	 * @see ModelMap#addAllAttributes(Map)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addAllObjects(Map modelMap) {
+	public ModelAndView addAllObjects(Map<String, ?> modelMap) {
 		getModelMap().addAllAttributes(modelMap);
 		return this;
 	}
@@ -291,14 +291,14 @@ public class ModelAndView {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer("ModelAndView: ");
+		StringBuilder sb = new StringBuilder("ModelAndView: ");
 		if (isReference()) {
-			buf.append("reference to view with name '").append(this.view).append("'");
+			sb.append("reference to view with name '").append(this.view).append("'");
 		}
 		else {
-			buf.append("materialized View is [").append(this.view).append(']');
+			sb.append("materialized View is [").append(this.view).append(']');
 		}
-		buf.append("; model is ").append(this.model);
-		return buf.toString();
+		sb.append("; model is ").append(this.model);
+		return sb.toString();
 	}
 }

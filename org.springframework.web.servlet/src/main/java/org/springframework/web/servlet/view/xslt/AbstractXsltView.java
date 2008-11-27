@@ -20,10 +20,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
@@ -320,7 +318,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	@Override
 	protected final void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		response.setContentType(getContentType());
 
@@ -330,7 +328,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		Object singleModel = null;
 
 		if (this.useSingleModelNameAsRoot && model.size() == 1) {
-			docRoot = (String) model.keySet().iterator().next();
+			docRoot = model.keySet().iterator().next();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Single model object received, key [" + docRoot + "] will be used as root tag");
 			}
@@ -370,7 +368,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @throws Exception if an error occurs
 	 */
 	protected Source createXsltSource(
-			Map model, String root, HttpServletRequest request, HttpServletResponse response)
+			Map<String, Object> model, String root, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		return null;
@@ -393,10 +391,10 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see #useWriter()
 	 */
 	protected void doTransform(
-			Map model, Source source, HttpServletRequest request, HttpServletResponse response)
+			Map<String, Object> model, Source source, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		Map parameters = getParameters(model, request);
+		Map<String, Object> parameters = getParameters(model, request);
 		Result result = (useWriter() ?
 				new StreamResult(response.getWriter()) :
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())));
@@ -416,7 +414,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see #getParameters()
 	 * @see javax.xml.transform.Transformer#setParameter
 	 */
-	protected Map getParameters(Map model, HttpServletRequest request) {
+	protected Map getParameters(Map<String, Object> model, HttpServletRequest request) {
 		return getParameters(request);
 	}
 
@@ -424,25 +422,13 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Return a Map of transformer parameters to be applied to the stylesheet.
 	 * <p>Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
-	 * <p>The default implementation delegates to the simple
-	 * {@link #getParameters()} variant.
+	 * <p>The default implementation simply returns <code>null</code>.
 	 * @param request current HTTP request
 	 * @return a Map of parameters to apply to the transformation process
 	 * @see #getParameters(Map, HttpServletRequest)
 	 * @see javax.xml.transform.Transformer#setParameter
 	 */
 	protected Map getParameters(HttpServletRequest request) {
-		return getParameters();
-	}
-
-	/**
-	 * Return a Map of transformer parameters to be applied to the stylesheet.
-	 * @return a Map of parameters to apply to the transformation process
-	 * @deprecated as of Spring 2.0.4, in favor of the
-	 * {@link #getParameters(HttpServletRequest)} variant
-	 */
-	@Deprecated
-	protected Map getParameters() {
 		return null;
 	}
 
@@ -471,7 +457,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param encoding the preferred character encoding that the underlying Transformer should use
 	 * @throws Exception if an error occurs
 	 */
-	protected void doTransform(Source source, Map parameters, Result result, String encoding)
+	protected void doTransform(Source source, Map<String, Object> parameters, Result result, String encoding)
 			throws Exception {
 
 		try {
@@ -519,7 +505,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @throws TransformerConfigurationException if the Transformer object
 	 * could not be built
 	 */
-	protected Transformer buildTransformer(Map parameters) throws TransformerConfigurationException {
+	protected Transformer buildTransformer(Map<String, Object> parameters) throws TransformerConfigurationException {
 		Templates templates = getTemplates();
 		Transformer transformer =
 				(templates != null ? templates.newTransformer() : getTransformerFactory().newTransformer());
@@ -562,11 +548,10 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * (as determined by {@link #getParameters(Map, HttpServletRequest)})
 	 * @param transformer the Transformer to aply the parameters
 	 */
-	protected void applyTransformerParameters(Map parameters, Transformer transformer) {
+	protected void applyTransformerParameters(Map<String, Object> parameters, Transformer transformer) {
 		if (parameters != null) {
-			for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				transformer.setParameter(entry.getKey().toString(), entry.getValue());
+			for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+				transformer.setParameter(entry.getKey(), entry.getValue());
 			}
 		}
 	}

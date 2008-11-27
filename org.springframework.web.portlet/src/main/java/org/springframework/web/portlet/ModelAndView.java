@@ -91,7 +91,7 @@ public class ModelAndView {
 	 * (Objects). Model entries may not be <code>null</code>, but the
 	 * model Map may be <code>null</code> if there is no model data.
 	 */
-	public ModelAndView(String viewName, Map model) {
+	public ModelAndView(String viewName, Map<String, ?> model) {
 		this.view = viewName;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -105,7 +105,7 @@ public class ModelAndView {
 	 * (Objects). Model entries may not be <code>null</code>, but the
 	 * model Map may be <code>null</code> if there is no model data.
 	 */
-	public ModelAndView(Object view, Map model) {
+	public ModelAndView(Object view, Map<String, ?> model) {
 		this.view = view;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -193,7 +193,7 @@ public class ModelAndView {
 	 * Return the model map. May return <code>null</code>.
 	 * Called by DispatcherPortlet for evaluation of the model.
 	 */
-	protected Map getModelInternal() {
+	protected Map<String, Object> getModelInternal() {
 		return this.model;
 	}
 
@@ -211,7 +211,7 @@ public class ModelAndView {
 	 * Return the model map. Never returns <code>null</code>.
 	 * To be called by application code for modifying the model.
 	 */
-	public Map getModel() {
+	public Map<String, Object> getModel() {
 		return getModelMap();
 	}
 
@@ -245,7 +245,7 @@ public class ModelAndView {
 	 * @see ModelMap#addAllAttributes(Map)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addAllObjects(Map modelMap) {
+	public ModelAndView addAllObjects(Map<String, ?> modelMap) {
 		getModelMap().addAllAttributes(modelMap);
 		return this;
 	}

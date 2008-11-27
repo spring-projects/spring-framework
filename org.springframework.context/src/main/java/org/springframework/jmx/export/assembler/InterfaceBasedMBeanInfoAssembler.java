@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,10 +88,9 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 */
 	public void setManagedInterfaces(Class[] managedInterfaces) {
 		if (managedInterfaces != null) {
-			for (int x = 0; x < managedInterfaces.length; x++) {
-				if (!managedInterfaces[x].isInterface()) {
-					throw new IllegalArgumentException(
-							"Management interface [" + managedInterfaces[x].getName() + "] is no interface");
+			for (Class ifc : managedInterfaces) {
+				if (ifc.isInterface()) {
+					throw new IllegalArgumentException("Management interface [" + ifc.getName() + "] is no interface");
 				}
 			}
 		}
@@ -126,7 +125,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @return the resolved interface mappings (with Class objects as values)
 	 */
 	private Map resolveInterfaceMappings(Properties mappings) {
-		Map resolvedMappings = new HashMap(mappings.size());
+		Map<String, Class[]> resolvedMappings = new HashMap<String, Class[]>(mappings.size());
 		for (Enumeration en = mappings.propertyNames(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
@@ -229,12 +228,10 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 		}
 
 		if (ifaces != null) {
-			for (int i = 0; i < ifaces.length; i++) {
-				Method[] methods = ifaces[i].getMethods();
-				for (int j = 0; j < methods.length; j++) {
-					Method ifaceMethod = methods[j];
-					if (ifaceMethod.getName().equals(method.getName()) &&
-							Arrays.equals(ifaceMethod.getParameterTypes(), method.getParameterTypes())) {
+			for (Class ifc : ifaces) {
+				for (Method ifcMethod : ifc.getMethods()) {
+					if (ifcMethod.getName().equals(method.getName()) &&
+							Arrays.equals(ifcMethod.getParameterTypes(), method.getParameterTypes())) {
 						return true;
 					}
 				}

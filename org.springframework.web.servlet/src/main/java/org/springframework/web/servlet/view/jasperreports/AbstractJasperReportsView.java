@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
@@ -35,11 +34,10 @@ import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.design.JRCompiler;
-import net.sf.jasperreports.engine.design.JRDefaultCompiler;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
@@ -151,22 +149,17 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Stores the exporter parameters passed in by the user as passed in by the user. May be keyed as
 	 * <code>String</code>s with the fully qualified name of the exporter parameter field.
 	 */
-	private Map exporterParameters = new HashMap();
+	private Map<?, ?> exporterParameters = new HashMap<Object, Object>();
 
 	/**
 	 * Stores the converted exporter parameters - keyed by <code>JRExporterParameter</code>.
 	 */
-	private Map convertedExporterParameters;
+	private Map<JRExporterParameter, Object> convertedExporterParameters;
 
 	/**
 	 * Stores the <code>DataSource</code>, if any, used as the report data source.
 	 */
 	private DataSource jdbcDataSource;
-
-	/**
-	 * Holds the JRCompiler implementation to use for compiling reports on-the-fly.
-	 */
-	private JRCompiler reportCompiler = JRDefaultCompiler.getInstance();
 
 	/**
 	 * The <code>JasperReport</code> that is used to render the view.
@@ -176,7 +169,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Holds mappings between sub-report keys and <code>JasperReport</code> objects.
 	 */
-	private Map subReports;
+	private Map<String, JasperReport> subReports;
 
 
 	/**
@@ -251,26 +244,21 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * (e.g. "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI")
 	 * and the value you wish to assign to the parameter as value
 	 */
-	public void setExporterParameters(Map parameters) {
-		// NOTE: Removed conversion from here since configuration of parameters
-		// can also happen through access to the underlying Map using
-		// getExporterParameters(). Conversion now happens in initApplicationContext,
-		// and subclasses use getConvertedExporterParameters() to access the converted
-		// parameter Map - robh.
+	public void setExporterParameters(Map<?, ?> parameters) {
 		this.exporterParameters = parameters;
 	}
 
 	/**
 	 * Return the exporter parameters that this view uses, if any.
 	 */
-	public Map getExporterParameters() {
+	public Map<?, ?> getExporterParameters() {
 		return this.exporterParameters;
 	}
 
 	/**
 	 * Allows subclasses to retrieve the converted exporter parameters.
 	 */
-	protected Map getConvertedExporterParameters() {
+	protected Map<JRExporterParameter, Object> getConvertedExporterParameters() {
 		return this.convertedExporterParameters;
 	}
 
@@ -287,24 +275,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected DataSource getJdbcDataSource() {
 		return this.jdbcDataSource;
-	}
-
-	/**
-	 * Specify the JRCompiler implementation to use for compiling a ".jrxml"
-	 * report file on-the-fly into a report class.
-	 * <p>By default, a JRDefaultCompiler will be used, delegating to the
-	 * Eclipse JDT compiler or the Sun JDK compiler underneath.
-	 * @see net.sf.jasperreports.engine.design.JRDefaultCompiler
-	 */
-	public void setReportCompiler(JRCompiler reportCompiler) {
-		this.reportCompiler = (reportCompiler != null ? reportCompiler : JRDefaultCompiler.getInstance());
-	}
-
-	/**
-	 * Return the JRCompiler instance to use for compiling ".jrxml" report files.
-	 */
-	protected JRCompiler getReportCompiler() {
-		return this.reportCompiler;
 	}
 
 
@@ -333,7 +303,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 				throw new ApplicationContextException(
 						"'reportDataKey' for main report is required when specifying a value for 'subReportDataKeys'");
 			}
-			this.subReports = new HashMap(this.subReportUrls.size());
+			this.subReports = new HashMap<String, JasperReport>(this.subReportUrls.size());
 			for (Enumeration urls = this.subReportUrls.propertyNames(); urls.hasMoreElements();) {
 				String key = (String) urls.nextElement();
 				String path = this.subReportUrls.getProperty(key);
@@ -373,9 +343,8 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected final void convertExporterParameters() {
 		if (!CollectionUtils.isEmpty(this.exporterParameters)) {
-			this.convertedExporterParameters = new HashMap(this.exporterParameters.size());
-			for (Iterator it = this.exporterParameters.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
+			this.convertedExporterParameters = new HashMap<JRExporterParameter, Object>(this.exporterParameters.size());
+			for (Map.Entry<?, ?> entry : this.exporterParameters.entrySet()) {
 				JRExporterParameter exporterParameter = getExporterParameter(entry.getKey());
 				this.convertedExporterParameters.put(
 						exporterParameter, convertParameterValue(exporterParameter, entry.getValue()));
@@ -522,7 +491,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 					logger.info("Compiling Jasper Report loaded from " + resource);
 				}
 				JasperDesign design = JRXmlLoader.load(resource.getInputStream());
-				return getReportCompiler().compileReport(design);
+				return JasperCompileManager.compileReport(design);
 			}
 			else {
 				throw new IllegalArgumentException(
@@ -549,8 +518,8 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getReportData
 	 */
 	@Override
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	protected void renderMergedOutputModel(
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		if (this.subReports != null) {
 			// Expose sub-reports as model attributes.
@@ -558,8 +527,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 			// Transform any collections etc into JRDataSources for sub reports.
 			if (this.subReportDataKeys != null) {
-				for (int i = 0; i < this.subReportDataKeys.length; i++) {
-					String key = this.subReportDataKeys[i];
+				for (String key : this.subReportDataKeys) {
 					model.put(key, convertReportData(model.get(key)));
 				}
 			}
@@ -591,7 +559,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see net.sf.jasperreports.engine.JRParameter#REPORT_RESOURCE_BUNDLE
 	 * @see org.springframework.web.servlet.support.JstlUtils#exposeLocalizationContext
 	 */
-	protected void exposeLocalizationContext(Map model, HttpServletRequest request) {
+	protected void exposeLocalizationContext(Map<String, Object> model, HttpServletRequest request) {
 		RequestContext rc = new RequestContext(request, getServletContext());
 		model.put(JRParameter.REPORT_LOCALE, rc.getLocale());
 		JasperReport report = getReport();
@@ -623,7 +591,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getReportData
 	 * @see #setJdbcDataSource
 	 */
-	protected JasperPrint fillReport(Map model) throws Exception {
+	protected JasperPrint fillReport(Map<String, Object> model) throws Exception {
 		// Determine main report.
 		JasperReport report = getReport();
 		if (report == null) {
@@ -646,15 +614,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		}
 		else {
 			Collection values = model.values();
-			jrDataSource = (JRDataSource) CollectionUtils.findValueOfType(values, JRDataSource.class);
+			jrDataSource = CollectionUtils.findValueOfType(values, JRDataSource.class);
 			if (jrDataSource == null) {
-				JRDataSourceProvider provider =
-						(JRDataSourceProvider) CollectionUtils.findValueOfType(values, JRDataSourceProvider.class);
+				JRDataSourceProvider provider = CollectionUtils.findValueOfType(values, JRDataSourceProvider.class);
 				if (provider != null) {
 					jrDataSource = createReport(provider);
 				}
 				else {
-					jdbcDataSourceToUse = (DataSource) CollectionUtils.findValueOfType(values, DataSource.class);
+					jdbcDataSourceToUse = CollectionUtils.findValueOfType(values, DataSource.class);
 					if (jdbcDataSourceToUse == null) {
 						jdbcDataSourceToUse = this.jdbcDataSource;
 					}
@@ -689,12 +656,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Fill the given report using the given JDBC DataSource and model.
 	 */
-	private JasperPrint doFillReport(JasperReport report, Map model, DataSource dataSource) throws Exception {
+	private JasperPrint doFillReport(JasperReport report, Map<String, Object> model, DataSource ds) throws Exception {
 		// Use the JDBC DataSource.
 		if (logger.isDebugEnabled()) {
-			logger.debug("Filling report using JDBC DataSource [" + dataSource + "]");
+			logger.debug("Filling report using JDBC DataSource [" + ds + "]");
 		}
-		Connection con = dataSource.getConnection();
+		Connection con = ds.getConnection();
 		try {
 			return JasperFillManager.fillReport(report, model, con);
 		}
@@ -747,7 +714,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #convertReportData
 	 * @see #getReportDataTypes
 	 */
-	protected JRDataSource getReportData(Map model) {
+	protected JRDataSource getReportData(Map<String, Object> model) {
 		// Try to find matching attribute, of given prioritized types.
 		Object value = CollectionUtils.findValueOfType(model.values(), getReportDataTypes());
 		return (value != null ? convertReportData(value) : null);
@@ -820,7 +787,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @param model the map containing report parameters
 	 * @throws Exception if post-processing failed
 	 */
-	protected void postProcessReport(JasperPrint populatedReport, Map model) throws Exception {
+	protected void postProcessReport(JasperPrint populatedReport, Map<String, Object> model) throws Exception {
 	}
 
 	/**
@@ -841,7 +808,8 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see javax.servlet.ServletResponse#setContentType
 	 * @see javax.servlet.ServletResponse#setCharacterEncoding
 	 */
-	protected abstract void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
+	protected abstract void renderReport(
+			JasperPrint populatedReport, Map<String, Object> model, HttpServletResponse response)
 			throws Exception;
 
 }

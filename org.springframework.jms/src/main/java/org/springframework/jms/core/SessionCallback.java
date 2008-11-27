@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import javax.jms.Session;
  * @since 1.1
  * @see JmsTemplate#execute(SessionCallback)
  */
-public interface SessionCallback {
+public interface SessionCallback<T> {
 
 	/**
 	 * Execute any number of operations against the supplied JMS
@@ -39,6 +39,6 @@ public interface SessionCallback {
 	 * @return a result object from working with the <code>Session</code>, if any (so can be <code>null</code>) 
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
-	Object doInJms(Session session) throws JMSException;
+	T doInJms(Session session) throws JMSException;
 
 }

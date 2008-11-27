@@ -17,7 +17,6 @@
 package org.springframework.jca.cci.core;
 
 import java.sql.SQLException;
-
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -188,9 +187,8 @@ public class CciTemplate implements CciOperations {
 	}
 
 
-	public Object execute(ConnectionCallback action) throws DataAccessException {
+	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
-
 		Connection con = ConnectionFactoryUtils.getConnection(getConnectionFactory(), getConnectionSpec());
 		try {
 			return action.doInConnection(con, getConnectionFactory());
@@ -209,13 +207,11 @@ public class CciTemplate implements CciOperations {
 		}
 	}
 
-	public Object execute(final InteractionCallback action) throws DataAccessException {
+	public <T> T execute(final InteractionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
-
-		return execute(new ConnectionCallback() {
-			public Object doInConnection(Connection connection, ConnectionFactory connectionFactory)
+		return execute(new ConnectionCallback<T>() {
+			public T doInConnection(Connection connection, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
-
 				Interaction interaction = connection.createInteraction();
 				try {
 					return action.doInInteraction(interaction, connectionFactory);
@@ -228,7 +224,7 @@ public class CciTemplate implements CciOperations {
 	}
 
 	public Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException {
-		return (Record) doExecute(spec, inputRecord, null, null);
+		return doExecute(spec, inputRecord, null, new SimpleRecordExtractor());
 	}
 
 	public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord) throws DataAccessException {
@@ -236,16 +232,16 @@ public class CciTemplate implements CciOperations {
 	}
 
 	public Record execute(InteractionSpec spec, RecordCreator inputCreator) throws DataAccessException {
-		return (Record) doExecute(spec, createRecord(inputCreator), null, null);
+		return doExecute(spec, createRecord(inputCreator), null, new SimpleRecordExtractor());
 	}
 
-	public Object execute(InteractionSpec spec, Record inputRecord, RecordExtractor outputExtractor)
+	public <T> T execute(InteractionSpec spec, Record inputRecord, RecordExtractor<T> outputExtractor)
 			throws DataAccessException {
 
 		return doExecute(spec, inputRecord, null, outputExtractor);
 	}
 
-	public Object execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor outputExtractor)
+	public <T> T execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor<T> outputExtractor)
 			throws DataAccessException {
 
 		return doExecute(spec, createRecord(inputCreator), null, outputExtractor);
@@ -262,14 +258,13 @@ public class CciTemplate implements CciOperations {
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem
 	 */
-	protected Object doExecute(
+	protected <T> T doExecute(
 			final InteractionSpec spec, final Record inputRecord, final Record outputRecord,
-			final RecordExtractor outputExtractor) throws DataAccessException {
+			final RecordExtractor<T> outputExtractor) throws DataAccessException {
 
-		return execute(new InteractionCallback() {
-			public Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
+		return execute(new InteractionCallback<T>() {
+			public T doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
-
 				Record outputRecordToUse = outputRecord;
 				try {
 					if (outputRecord != null || getOutputRecordCreator() != null) {
@@ -283,12 +278,7 @@ public class CciTemplate implements CciOperations {
 					else {
 						outputRecordToUse = interaction.execute(spec, inputRecord);
 					}
-					if (outputExtractor != null) {
-						return outputExtractor.extractData(outputRecordToUse);
-					}
-					else {
-						return outputRecordToUse;
-					}
+					return (outputExtractor != null ? outputExtractor.extractData(outputRecordToUse) : null);
 				}
 				finally {
 					if (outputRecordToUse instanceof ResultSet) {
@@ -378,7 +368,7 @@ public class CciTemplate implements CciOperations {
 	 */
 	protected RecordFactory getRecordFactory(ConnectionFactory connectionFactory) throws ResourceException {
 		try {
-			return getConnectionFactory().getRecordFactory();
+			return connectionFactory.getRecordFactory();
 		}
 		catch (NotSupportedException ex) {
 			return new NotSupportedRecordFactory();
@@ -425,6 +415,14 @@ public class CciTemplate implements CciOperations {
 				// We don't trust the CCI driver: It might throw RuntimeException or Error.
 				logger.trace("Unexpected exception on closing CCI ResultSet", ex);
 			}
+		}
+	}
+
+
+	private static class SimpleRecordExtractor implements RecordExtractor<Record> {
+
+		public Record extractData(Record record) {
+			return record;
 		}
 	}
 

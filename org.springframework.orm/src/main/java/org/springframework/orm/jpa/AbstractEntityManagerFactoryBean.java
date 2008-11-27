@@ -83,7 +83,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	private String persistenceUnitName;
 
-	private final Map<Object, Object> jpaPropertyMap = new HashMap<Object, Object>();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
 
 	private Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
@@ -166,7 +166,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map<?, ?> jpaProperties) {
+	public void setJpaPropertyMap(Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -178,7 +178,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * <p>Useful for specifying entries directly, for example via
 	 * "jpaPropertyMap[myKey]".
 	 */
-	public Map getJpaPropertyMap() {
+	public Map<String, Object> getJpaPropertyMap() {
 		return this.jpaPropertyMap;
 	}
 
@@ -260,9 +260,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			if (this.persistenceProvider == null) {
 				this.persistenceProvider = this.jpaVendorAdapter.getPersistenceProvider();
 			}
-			Map<?, ?> vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
+			Map<String, ?> vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
 			if (vendorPropertyMap != null) {
-				for (Map.Entry entry : vendorPropertyMap.entrySet()) {
+				for (Map.Entry<String, ?> entry : vendorPropertyMap.entrySet()) {
 					if (!this.jpaPropertyMap.containsKey(entry.getKey())) {
 						this.jpaPropertyMap.put(entry.getKey(), entry.getValue());
 					}

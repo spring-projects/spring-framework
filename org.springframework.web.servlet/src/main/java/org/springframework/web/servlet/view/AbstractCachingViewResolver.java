@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Whether we should cache views, once resolved */
 	private boolean cache = true;
 
-	/** Map from view name to View instance */
-	private final Map viewCache = new HashMap();
+	/** Map from view key to View instance */
+	private final Map<Object, View> viewCache = new HashMap<Object, View>();
 
 
 	/**
@@ -72,7 +72,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
 			synchronized (this.viewCache) {
-				View view = (View) this.viewCache.get(cacheKey);
+				View view = this.viewCache.get(cacheKey);
 				if (view == null) {
 					// Ask the subclass to create the View object.
 					view = createView(viewName, locale);

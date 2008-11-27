@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,23 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperReportsMultiFormatViewTests {
 
 	protected AbstractJasperReportsView getViewImplementation() {
 		JasperReportsMultiFormatView view = new JasperReportsMultiFormatView();
 		view.setFormatKey("fmt");
-
-		Properties props = new Properties();
-		props.setProperty("csv", JasperReportsCsvView.class.getName());
-		props.setProperty("comma-separated", JasperReportsCsvView.class.getName());
-		props.setProperty("html", JasperReportsHtmlView.class.getName());
-
-		view.setFormatMappings(props);
+		Map<String, Class> mappings = new HashMap<String, Class>();
+		mappings.put("csv", JasperReportsCsvView.class);
+		mappings.put("comma-separated", JasperReportsCsvView.class);
+		mappings.put("html", JasperReportsHtmlView.class);
+		view.setFormatMappings(mappings);
 		return view;
 	}
 
@@ -41,7 +40,7 @@ public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperR
 		return "fmt";
 	}
 
-	protected void extendModel(Map model) {
+	protected void extendModel(Map<String, Object> model) {
 		model.put(getDiscriminatorKey(), "comma-separated");
 	}
 

@@ -37,9 +37,9 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-public class CompoundComparator implements Comparator, Serializable {
+public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
-	private final List<InvertibleComparator> comparators;
+	private final List<InvertibleComparator<T>> comparators;
 
 
 	/**
@@ -48,7 +48,7 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * IllegalStateException is thrown.
 	 */
 	public CompoundComparator() {
-		this.comparators = new ArrayList<InvertibleComparator>();
+		this.comparators = new ArrayList<InvertibleComparator<T>>();
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @see InvertibleComparator
 	 */
 	public CompoundComparator(Comparator[] comparators) {
-		this.comparators = new ArrayList<InvertibleComparator>(comparators.length);
-		for (Comparator comparator : comparators) {
+		this.comparators = new ArrayList<InvertibleComparator<T>>(comparators.length);
+		for (Comparator<T> comparator : comparators) {
 			addComparator(comparator);
 		}
 	}
@@ -73,12 +73,12 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param comparator the Comparator to add to the end of the chain
 	 * @see InvertibleComparator
 	 */
-	public void addComparator(Comparator comparator) {
+	public void addComparator(Comparator<T> comparator) {
 		if (comparator instanceof InvertibleComparator) {
-			this.comparators.add((InvertibleComparator) comparator);
+			this.comparators.add((InvertibleComparator<T>) comparator);
 		}
 		else {
-			this.comparators.add(new InvertibleComparator(comparator));
+			this.comparators.add(new InvertibleComparator<T>(comparator));
 		}
 	}
 
@@ -87,8 +87,8 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param comparator the Comparator to add to the end of the chain
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
-	public void addComparator(Comparator comparator, boolean ascending) {
-		this.comparators.add(new InvertibleComparator(comparator, ascending));
+	public void addComparator(Comparator<T> comparator, boolean ascending) {
+		this.comparators.add(new InvertibleComparator<T>(comparator, ascending));
 	}
 
 	/**
@@ -99,13 +99,12 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param comparator the Comparator to place at the given index
 	 * @see InvertibleComparator
 	 */
-	public void setComparator(int index, Comparator comparator) {
+	public void setComparator(int index, Comparator<T> comparator) {
 		if (comparator instanceof InvertibleComparator) {
-			this.comparators.set(index, (InvertibleComparator) comparator);
+			this.comparators.set(index, (InvertibleComparator<T>) comparator);
 		}
 		else {
-			InvertibleComparator invComp = new InvertibleComparator(comparator);
-			this.comparators.set(index, invComp);
+			this.comparators.set(index, new InvertibleComparator<T>(comparator));
 		}
 	}
 
@@ -115,8 +114,8 @@ public class CompoundComparator implements Comparator, Serializable {
 	 * @param comparator the Comparator to place at the given index
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
-	public void setComparator(int index, Comparator comparator, boolean ascending) {
-		this.comparators.set(index, new InvertibleComparator(comparator, ascending));
+	public void setComparator(int index, Comparator<T> comparator, boolean ascending) {
+		this.comparators.set(index, new InvertibleComparator<T>(comparator, ascending));
 	}
 
 	/**
@@ -161,10 +160,10 @@ public class CompoundComparator implements Comparator, Serializable {
 	}
 
 
-	public int compare(Object o1, Object o2) {
+	public int compare(T o1, T o2) {
 		Assert.state(this.comparators.size() > 0,
 				"No sort definitions have been added to this CompoundComparator to compare");
-		for (InvertibleComparator comparator : this.comparators) {
+		for (InvertibleComparator<T> comparator : this.comparators) {
 			int result = comparator.compare(o1, o2);
 			if (result != 0) {
 				return result;

@@ -57,7 +57,9 @@ import org.springframework.web.util.WebUtils;
  * @see #setCancelView
  * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
  * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public class CancellableFormController extends SimpleFormController {
 
 	/**

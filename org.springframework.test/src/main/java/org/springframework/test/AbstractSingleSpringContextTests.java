@@ -65,7 +65,10 @@ import org.springframework.util.StringUtils;
  * @see #contextKey()
  * @see #loadContext(Object)
  * @see #getApplicationContext()
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class AbstractSingleSpringContextTests extends AbstractSpringContextTests {
 
 	/** Application context this test will run against */

@@ -499,8 +499,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected void checkAllowedFields(MutablePropertyValues mpvs) {
 		PropertyValue[] pvs = mpvs.getPropertyValues();
-		for (int i = 0; i < pvs.length; i++) {
-			PropertyValue pv = pvs[i];
+		for (PropertyValue pv : pvs) {
 			String field = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
 			if (!isAllowed(field)) {
 				mpvs.removePropertyValue(pv);
@@ -545,16 +544,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
 		String[] requiredFields = getRequiredFields();
 		if (!ObjectUtils.isEmpty(requiredFields)) {
-			Map propertyValues = new HashMap();
+			Map<String, PropertyValue> propertyValues = new HashMap<String, PropertyValue>();
 			PropertyValue[] pvs = mpvs.getPropertyValues();
-			for (int i = 0; i < pvs.length; i++) {
-				PropertyValue pv = pvs[i];
+			for (PropertyValue pv : pvs) {
 				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
 				propertyValues.put(canonicalName, pv);
 			}
-			for (int i = 0; i < requiredFields.length; i++) {
-				String field = requiredFields[i];
-				PropertyValue pv = (PropertyValue) propertyValues.get(field);
+			for (String field : requiredFields) {
+				PropertyValue pv = propertyValues.get(field);
 				if (pv == null || pv.getValue() == null ||
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
 					// Use bind error processor to create FieldError.
@@ -589,9 +586,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 		catch (PropertyBatchUpdateException ex) {
 			// Use bind error processor to create FieldErrors.
-			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
-			for (int i = 0; i < exs.length; i++) {
-				getBindingErrorProcessor().processPropertyAccessException(exs[i], getInternalBindingResult());
+			for (PropertyAccessException pae : ex.getPropertyAccessExceptions()) {
+				getBindingErrorProcessor().processPropertyAccessException(pae, getInternalBindingResult());
 			}
 		}
 	}

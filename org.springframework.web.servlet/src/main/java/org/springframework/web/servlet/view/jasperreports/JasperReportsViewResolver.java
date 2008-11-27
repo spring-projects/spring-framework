@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import net.sf.jasperreports.engine.design.JRCompiler;
@@ -45,7 +44,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 
 	private Properties headers;
 
-	private Map exporterParameters = new HashMap();
+	private Map<String, Object> exporterParameters = new HashMap<String, Object>();
 
 	private DataSource jdbcDataSource;
 
@@ -96,7 +95,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	 * Set the <code>exporterParameters</code> the view class should use.
 	 * @see AbstractJasperReportsView#setExporterParameters
 	 */
-	public void setExporterParameters(Map exporterParameters) {
+	public void setExporterParameters(Map<String, Object> exporterParameters) {
 		this.exporterParameters = exporterParameters;
 	}
 
@@ -108,30 +107,16 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 		this.jdbcDataSource = jdbcDataSource;
 	}
 
-	/**
-	 * Set the {@link JRCompiler} the view class should use.
-	 * @see AbstractJasperReportsView#setReportCompiler
-	 */
-	public void setReportCompiler(JRCompiler reportCompiler) {
-		this.reportCompiler = reportCompiler;
-	}
-
 
 	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractJasperReportsView view = (AbstractJasperReportsView) super.buildView(viewName);
-
 		view.setReportDataKey(this.reportDataKey);
 		view.setSubReportUrls(this.subReportUrls);
 		view.setSubReportDataKeys(this.subReportDataKeys);
 		view.setHeaders(this.headers);
 		view.setExporterParameters(this.exporterParameters);
 		view.setJdbcDataSource(this.jdbcDataSource);
-
-		if (this.reportCompiler != null) {
-			view.setReportCompiler(this.reportCompiler);
-		}
-
 		return view;
 	}
 

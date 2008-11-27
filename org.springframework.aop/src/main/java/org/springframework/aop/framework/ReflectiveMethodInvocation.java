@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	/**
 	 * Lazily initialized map of user-specific attributes for this invocation.
 	 */
-	private Map userAttributes;
+	private Map<String, Object> userAttributes;
 
 	/**
 	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
@@ -102,7 +102,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 */
 	protected ReflectiveMethodInvocation(
 	    Object proxy, Object target, Method method, Object[] arguments,
-	    Class targetClass, List interceptorsAndDynamicMethodMatchers) {
+	    Class targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 
 		this.proxy = proxy;
 		this.target = target;
@@ -213,7 +213,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		// Force initialization of the user attributes Map,
 		// for having a shared Map reference in the clone.
 		if (this.userAttributes == null) {
-			this.userAttributes = new HashMap();
+			this.userAttributes = new HashMap<String, Object>();
 		}
 
 		// Create the MethodInvocation clone.
@@ -232,7 +232,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	public void setUserAttribute(String key, Object value) {
 		if (value != null) {
 			if (this.userAttributes == null) {
-				this.userAttributes = new HashMap();
+				this.userAttributes = new HashMap<String, Object>();
 			}
 			this.userAttributes.put(key, value);
 		}
@@ -254,9 +254,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @return any user attributes associated with this invocation
 	 * (never <code>null</code>)
 	 */
-	public Map getUserAttributes() {
+	public Map<String, Object> getUserAttributes() {
 		if (this.userAttributes == null) {
-			this.userAttributes = new HashMap();
+			this.userAttributes = new HashMap<String, Object>();
 		}
 		return this.userAttributes;
 	}

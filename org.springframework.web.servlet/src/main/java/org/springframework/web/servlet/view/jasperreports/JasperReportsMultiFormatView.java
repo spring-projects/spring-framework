@@ -16,18 +16,15 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Jasper Reports view class that allows for the actual rendering format to be
@@ -41,7 +38,7 @@ import org.springframework.util.ClassUtils;
  * <code>Controller</code>:
  *
  * <pre>
- * Map model = new HashMap();
+ * Map<String, Object> model = new HashMap<String, Object>();
  * model.put("format", "pdf");</pre>
  *
  * Here <code>format</code> is the format key and <code>pdf</code> is
@@ -85,7 +82,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * Stores the format mappings, with the format discriminator
 	 * as key and the corresponding view class as value.
 	 */
-	private Map formatMappings;
+	private Map<String, Class> formatMappings;
 
 	/**
 	 * Stores the mappings of mapping keys to Content-Disposition header values.
@@ -98,7 +95,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * with a default set of mappings.
 	 */
 	public JasperReportsMultiFormatView() {
-		this.formatMappings = new HashMap(4);
+		this.formatMappings = new HashMap<String, Class>(4);
 		this.formatMappings.put("csv", JasperReportsCsvView.class);
 		this.formatMappings.put("html", JasperReportsHtmlView.class);
 		this.formatMappings.put("pdf", JasperReportsPdfView.class);
@@ -123,26 +120,11 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * <li><code>xls</code> - <code>JasperReportsXlsView</code></li>
 	 * </ul>
 	 */
-	public void setFormatMappings(Properties mappingsWithClassNames) {
-		if (mappingsWithClassNames == null || mappingsWithClassNames.isEmpty()) {
-			throw new IllegalArgumentException("formatMappings must not be empty");
+	public void setFormatMappings(Map<String, Class> formatMappings) {
+		if (CollectionUtils.isEmpty(formatMappings)) {
+			throw new IllegalArgumentException("'formatMappings' must not be empty");
 		}
-
-		this.formatMappings = new HashMap(mappingsWithClassNames.size());
-		for (Enumeration discriminators = mappingsWithClassNames.propertyNames(); discriminators.hasMoreElements();) {
-			String discriminator = (String) discriminators.nextElement();
-			String className = mappingsWithClassNames.getProperty(discriminator);
-			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Mapped view class [" + className + "] to mapping key [" + discriminator + "]");
-				}
-				this.formatMappings.put(discriminator, ClassUtils.forName(className));
-			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException(
-						"Class [" + className + "] mapped to format [" + discriminator + "] cannot be found", ex);
-			}
-		}
+		this.formatMappings = formatMappings;
 	}
 
 	/**
@@ -179,7 +161,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * report is then delegated to an instance of that view class.
 	 */
 	@Override
-	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
+	protected void renderReport(JasperPrint populatedReport, Map<String, Object> model, HttpServletResponse response)
 			throws Exception {
 
 		String format = (String) model.get(this.formatKey);
@@ -191,7 +173,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 			logger.debug("Rendering report using format mapping key [" + format + "]");
 		}
 
-		Class viewClass = (Class) this.formatMappings.get(format);
+		Class viewClass = this.formatMappings.get(format);
 		if (viewClass == null) {
 			throw new IllegalArgumentException("Format discriminator [" + format + "] is not a configured mapping");
 		}

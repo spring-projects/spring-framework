@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,10 @@ import org.springframework.util.Assert;
  * @since 1.2.2
  * @see Comparable
  */
-public class ComparableComparator implements Comparator {
+public class ComparableComparator<T extends Comparable<T>> implements Comparator<T> {
 
-	public int compare(Object o1, Object o2) {
-		Assert.isTrue(o1 instanceof Comparable, "The first object provided is not Comparable");
-		Assert.isTrue(o2 instanceof Comparable, "The second object provided is not Comparable");
-		return ((Comparable) o1).compareTo(o2);
+	public int compare(T o1, T o2) {
+		return o1.compareTo(o2);
 	}
 
 }

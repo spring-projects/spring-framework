@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,9 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.jstl.core.Config;
-
-import org.springframework.util.ClassUtils;
 
 /**
  * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
@@ -57,7 +54,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * @param model the model attributes for the current view
 	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 */
-	public JspAwareRequestContext(PageContext pageContext, Map model) {
+	public JspAwareRequestContext(PageContext pageContext, Map<String, Object> model) {
 		initContext(pageContext, model);
 	}
 
@@ -68,7 +65,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * @param model the model attributes for the current view
 	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 */
-	protected void initContext(PageContext pageContext, Map model) {
+	protected void initContext(PageContext pageContext, Map<String, Object> model) {
 		if (!(pageContext.getRequest() instanceof HttpServletRequest)) {
 			throw new IllegalArgumentException("RequestContext only supports HTTP requests");
 		}

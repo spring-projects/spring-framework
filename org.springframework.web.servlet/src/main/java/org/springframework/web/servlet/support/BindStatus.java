@@ -325,7 +325,7 @@ public class BindStatus {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("BindStatus: ");
+		StringBuilder sb = new StringBuilder("BindStatus: ");
 		sb.append("expression=[").append(this.expression).append("]; ");
 		sb.append("value=[").append(this.value).append("]");
 		if (isError()) {

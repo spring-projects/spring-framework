@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Default implementation of the
@@ -37,22 +38,22 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	private Map multipartParameters;
+	private Map<String, String[]> multipartParameters;
 
 
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
 	 * @param request the servlet request to wrap
-	 * @param multipartFiles a map of the multipart files
-	 * @param multipartParameters a map of the parameters to expose,
+	 * @param mpFiles a map of the multipart files
+	 * @param mpParams a map of the parameters to expose,
 	 * with Strings as keys and String arrays as values
 	 */
 	public DefaultMultipartHttpServletRequest(
-			HttpServletRequest request, Map multipartFiles, Map multipartParameters) {
+			HttpServletRequest request, Map<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
 
 		super(request);
-		setMultipartFiles(multipartFiles);
-		setMultipartParameters(multipartParameters);
+		setMultipartFiles(mpFiles);
+		setMultipartParameters(mpParams);
 	}
 
 	/**
@@ -65,11 +66,11 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 
 	@Override
-	public Enumeration getParameterNames() {
-		Set paramNames = new HashSet();
+	public Enumeration<String> getParameterNames() {
+		Set<String> paramNames = new HashSet<String>();
 		Enumeration paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
-			paramNames.add(paramEnum.nextElement());
+			paramNames.add((String) paramEnum.nextElement());
 		}
 		paramNames.addAll(getMultipartParameters().keySet());
 		return Collections.enumeration(paramNames);
@@ -77,7 +78,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	@Override
 	public String getParameter(String name) {
-		String[] values = (String[]) getMultipartParameters().get(name);
+		String[] values = getMultipartParameters().get(name);
 		if (values != null) {
 			return (values.length > 0 ? values[0] : null);
 		}
@@ -86,7 +87,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	@Override
 	public String[] getParameterValues(String name) {
-		String[] values = (String[]) getMultipartParameters().get(name);
+		String[] values = getMultipartParameters().get(name);
 		if (values != null) {
 			return values;
 		}
@@ -94,8 +95,9 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 	@Override
-	public Map getParameterMap() {
-		Map paramMap = new HashMap();
+	@SuppressWarnings("unchecked")
+	public Map<String, String[]> getParameterMap() {
+		Map<String, String[]> paramMap = new HashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());
 		paramMap.putAll(getMultipartParameters());
 		return paramMap;
@@ -106,7 +108,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	 * Set a Map with parameter names as keys and String array objects as values.
 	 * To be invoked by subclasses on initialization.
 	 */
-	protected final void setMultipartParameters(Map multipartParameters) {
+	protected final void setMultipartParameters(Map<String, String[]> multipartParameters) {
 		this.multipartParameters = multipartParameters;
 	}
 
@@ -115,7 +117,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
-	protected Map getMultipartParameters() {
+	protected Map<String, String[]> getMultipartParameters() {
 		if (this.multipartParameters == null) {
 			initializeMultipart();
 		}

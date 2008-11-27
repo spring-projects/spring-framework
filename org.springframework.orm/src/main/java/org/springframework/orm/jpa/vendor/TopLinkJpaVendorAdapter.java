@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import javax.persistence.EntityManager;
@@ -59,27 +60,27 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
-	public Map getJpaPropertyMap() {
-		Properties jpaProperties = new Properties();
+	public Map<String, Object> getJpaPropertyMap() {
+		Map<String, Object> jpaProperties = new HashMap<String, Object>();
 
 		if (getDatabasePlatform() != null) {
-			jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE, getDatabasePlatform());
+			jpaProperties.put(TopLinkProperties.TARGET_DATABASE, getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
 			String targetDatabase = determineTargetDatabaseName(getDatabase());
 			if (targetDatabase != null) {
-				jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE, targetDatabase);
+				jpaProperties.put(TopLinkProperties.TARGET_DATABASE, targetDatabase);
 			}
 		}
 
 		if (isGenerateDdl()) {
-			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION,
+			jpaProperties.put(EntityManagerFactoryProvider.DDL_GENERATION,
 					EntityManagerFactoryProvider.CREATE_ONLY);
-			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION_MODE,
+			jpaProperties.put(EntityManagerFactoryProvider.DDL_GENERATION_MODE,
 					EntityManagerFactoryProvider.DDL_DATABASE_GENERATION);
 		}
 		if (isShowSql()) {
-			jpaProperties.setProperty(TopLinkProperties.LOGGING_LEVEL, Level.FINE.toString());
+			jpaProperties.put(TopLinkProperties.LOGGING_LEVEL, Level.FINE.toString());
 		}
 
 		return jpaProperties;
