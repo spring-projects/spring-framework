@@ -188,7 +188,7 @@ public class MockServletContext implements ServletContext {
 		return MimeTypeResolver.getMimeType(filePath);
 	}
 
-	public Set getResourcePaths(String path) {
+	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
 		try {

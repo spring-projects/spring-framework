@@ -34,6 +34,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
+import javax.el.ELContext;
 
 import org.springframework.util.Assert;
 
@@ -277,8 +278,12 @@ public class MockPageContext extends PageContext {
 		return new MockExpressionEvaluator(this);
 	}
 
+	public ELContext getELContext() {
+		throw new UnsupportedOperationException("getELContext");
+	}
+
 	public VariableResolver getVariableResolver() {
-		return null;
+		throw new UnsupportedOperationException("getVariableResolver");
 	}
 
 	public HttpSession getSession() {

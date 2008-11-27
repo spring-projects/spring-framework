@@ -41,7 +41,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
- * interface. Supports the Servlet 2.4 API level.
+ * interface. Supports the Servlet 2.5 API level.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
