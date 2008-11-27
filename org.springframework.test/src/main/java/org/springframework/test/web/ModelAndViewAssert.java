@@ -52,14 +52,11 @@ public abstract class ModelAndViewAssert {
 	 * @return the model value
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T assertAndReturnModelAttributeOfType(ModelAndView mav, Object modelName, Class<T> expectedType)
-			throws AssertionError {
-
+	public static <T> T assertAndReturnModelAttributeOfType(ModelAndView mav, String modelName, Class<T> expectedType) {
 		assertCondition(mav != null, "ModelAndView is null");
 		assertCondition(mav.getModel() != null, "Model is null");
 		Object obj = mav.getModel().get(modelName);
 		assertCondition(obj != null, "Model attribute with name '" + modelName + "' is null");
-
 		assertCondition(expectedType.isAssignableFrom(obj.getClass()), "Model attribute is not of expected type '" +
 				expectedType.getName() + "' but rather of type '" + obj.getClass().getName() + "'");
 		return (T) obj;
@@ -72,11 +69,9 @@ public abstract class ModelAndViewAssert {
 	 * <code>null</code>)
 	 * @param expectedList the expected list
 	 */
-	public static void assertCompareListModelAttribute(ModelAndView mav, Object modelName, List expectedList)
-			throws AssertionError {
-
+	public static void assertCompareListModelAttribute(ModelAndView mav, String modelName, List expectedList) {
 		assertCondition(mav != null, "ModelAndView is null");
-		List modelList = (List) assertAndReturnModelAttributeOfType(mav, modelName, List.class);
+		List modelList = assertAndReturnModelAttributeOfType(mav, modelName, List.class);
 		assertCondition(expectedList.size() == modelList.size(), "Size of model list is '" + modelList.size() +
 				"' while size of expected list is '" + expectedList.size() + "'");
 		assertCondition(expectedList.equals(modelList), "List in model under name '" + modelName +
@@ -89,7 +84,7 @@ public abstract class ModelAndViewAssert {
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
 	 */
-	public static void assertModelAttributeAvailable(ModelAndView mav, Object modelName) throws AssertionError {
+	public static void assertModelAttributeAvailable(ModelAndView mav, String modelName) {
 		assertCondition(mav != null, "ModelAndView is null");
 		assertCondition(mav.getModel() != null, "Model is null");
 		assertCondition(mav.getModel().containsKey(modelName), "Model attribute with name '" + modelName +
@@ -104,7 +99,7 @@ public abstract class ModelAndViewAssert {
 	 * <code>null</code>)
 	 * @param expectedValue the model value
 	 */
-	public static void assertModelAttributeValue(ModelAndView mav, Object modelName, Object expectedValue) {
+	public static void assertModelAttributeValue(ModelAndView mav, String modelName, Object expectedValue) {
 		assertCondition(mav != null, "ModelAndView is null");
 		Object modelValue = assertAndReturnModelAttributeOfType(mav, modelName, Object.class);
 		assertCondition(modelValue.equals(expectedValue), "Model value with name '" + modelName +
@@ -156,7 +151,7 @@ public abstract class ModelAndViewAssert {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void assertSortAndCompareListModelAttribute(
-			ModelAndView mav, Object modelName, List expectedList, Comparator comparator) {
+			ModelAndView mav, String modelName, List expectedList, Comparator comparator) {
 
 		assertCondition(mav != null, "ModelAndView is null");
 		List modelList = assertAndReturnModelAttributeOfType(mav, modelName, List.class);
@@ -214,17 +209,19 @@ public abstract class ModelAndViewAssert {
 		}
 	}
 
-	private static void appendNonMatchingSetsErrorMessage(Set<String> assertionSet, Set<String> incorrectSet, StringBuilder buf) {
+	private static void appendNonMatchingSetsErrorMessage(
+			Set<String> assertionSet, Set<String> incorrectSet, StringBuilder sb) {
+
 		Set<String> tempSet = new HashSet<String>();
 		tempSet.addAll(incorrectSet);
 		tempSet.removeAll(assertionSet);
 
 		if (tempSet.size() > 0) {
-			buf.append("Set has too many elements:\n");
+			sb.append("Set has too many elements:\n");
 			for (Object element : tempSet) {
-				buf.append('-');
-				buf.append(element);
-				buf.append('\n');
+				sb.append('-');
+				sb.append(element);
+				sb.append('\n');
 			}
 		}
 
@@ -233,11 +230,11 @@ public abstract class ModelAndViewAssert {
 		tempSet.removeAll(incorrectSet);
 
 		if (tempSet.size() > 0) {
-			buf.append("Set is missing elements:\n");
+			sb.append("Set is missing elements:\n");
 			for (Object element : tempSet) {
-				buf.append('-');
-				buf.append(element);
-				buf.append('\n');
+				sb.append('-');
+				sb.append(element);
+				sb.append('\n');
 			}
 		}
 	}
