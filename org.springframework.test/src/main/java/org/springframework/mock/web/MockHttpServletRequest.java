@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface. Supports the Servlet 2.4 API level.
+ * interface. Supports the Servlet 2.5 API level.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
@@ -447,7 +447,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.parameters.get(name);
 	}
 
-	public Map getParameterMap() {
+	public Map<String, String[]> getParameterMap() {
 		return Collections.unmodifiableMap(this.parameters);
 	}
 
