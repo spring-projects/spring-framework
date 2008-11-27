@@ -71,7 +71,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	private boolean ignoreInvalidKeys = false;
 
 	/** Contains names of beans that have overrides */
-	private Set beanNames = Collections.synchronizedSet(new HashSet());
+	private Set<String> beanNames = Collections.synchronizedSet(new HashSet<String>());
 
 
 	/**

@@ -48,7 +48,7 @@ public abstract class Conventions {
 	 * Set of interfaces that are supposed to be ignored
 	 * when searching for the 'primary' interface of a proxy.
 	 */
-	private static final Set ignoredInterfaces = new HashSet();
+	private static final Set<Class> ignoredInterfaces = new HashSet<Class>();
 
 	static {
 		ignoredInterfaces.add(Serializable.class);
@@ -212,15 +212,14 @@ public abstract class Conventions {
 	 */
 	public static String attributeNameToPropertyName(String attributeName) {
 		Assert.notNull(attributeName, "'attributeName' must not be null");
-		if (attributeName.indexOf("-") == -1) {
+		if (!attributeName.contains("-")) {
 			return attributeName;
 		}
 		char[] chars = attributeName.toCharArray();
 		char[] result = new char[chars.length -1]; // not completely accurate but good guess
 		int currPos = 0;
 		boolean upperCaseNext = false;
-		for (int i = 0; i < chars.length; i++) {
-			char c = chars[i];
+		for (char c : chars) {
 			if (c == '-') {
 				upperCaseNext = true;
 			}
@@ -260,8 +259,7 @@ public abstract class Conventions {
 		Class valueClass = value.getClass();
 		if (Proxy.isProxyClass(valueClass)) {
 			Class[] ifcs = valueClass.getInterfaces();
-			for (int i = 0; i < ifcs.length; i++) {
-				Class ifc = ifcs[i];
+			for (Class ifc : ifcs) {
 				if (!ignoredInterfaces.contains(ifc)) {
 					return ifc;
 				}

@@ -72,7 +72,7 @@ public abstract class GenericPortletBean extends GenericPortlet {
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this portlet.
 	 */
-	private final Set requiredProperties = new HashSet();
+	private final Set<String> requiredProperties = new HashSet<String>();
 
 	
 	/**
@@ -174,11 +174,11 @@ public abstract class GenericPortletBean extends GenericPortlet {
 		 * we can't accept default values
 		 * @throws PortletException if any required properties are missing
 		 */
-		private PortletConfigPropertyValues(PortletConfig config, Set requiredProperties)
+		private PortletConfigPropertyValues(PortletConfig config, Set<String> requiredProperties)
 			throws PortletException {
 				
-			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
-					new HashSet(requiredProperties) : null;
+			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
+					new HashSet<String>(requiredProperties) : null;
 
 			Enumeration en = config.getInitParameterNames();
 			while (en.hasMoreElements()) {

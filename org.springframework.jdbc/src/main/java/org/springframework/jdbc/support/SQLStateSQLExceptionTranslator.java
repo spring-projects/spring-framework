@@ -44,15 +44,15 @@ import org.springframework.jdbc.BadSqlGrammarException;
  */
 public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLExceptionTranslator {
 
-	private static final Set BAD_SQL_GRAMMAR_CODES = new HashSet(8);
+	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<String>(8);
 
-	private static final Set DATA_INTEGRITY_VIOLATION_CODES = new HashSet(8);
+	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<String>(8);
 
-	private static final Set DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet(8);
+	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<String>(8);
 
-	private static final Set TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet(8);
+	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<String>(8);
 
-	private static final Set CONCURRENCY_FAILURE_CODES = new HashSet(4);
+	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<String>(4);
 
 
 	static {

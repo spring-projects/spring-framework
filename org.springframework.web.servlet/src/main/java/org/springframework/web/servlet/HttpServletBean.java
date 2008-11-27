@@ -81,7 +81,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
-	private final Set requiredProperties = new HashSet();
+	private final Set<String> requiredProperties = new HashSet<String>();
 
 
 	/**
@@ -187,11 +187,11 @@ public abstract class HttpServletBean extends HttpServlet {
 		 * we can't accept default values
 		 * @throws ServletException if any required properties are missing
 		 */
-		public ServletConfigPropertyValues(ServletConfig config, Set requiredProperties)
+		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 		    throws ServletException {
 			
-			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
-					new HashSet(requiredProperties) : null;
+			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
+					new HashSet<String>(requiredProperties) : null;
 
 			Enumeration en = config.getInitParameterNames();
 			while (en.hasMoreElements()) {

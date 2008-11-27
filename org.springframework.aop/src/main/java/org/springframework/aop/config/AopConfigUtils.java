@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,14 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Utility class for handling registration of AOP auto-proxy creators.
@@ -53,25 +52,17 @@ public abstract class AopConfigUtils {
 			"org.springframework.aop.config.internalAutoProxyCreator";
 
 	/**
-	 * The class name of the <code>AnnotationAwareAspectJAutoProxyCreator</code> class.
-	 * Only available with AspectJ and Java 5.
-	 */
-	private static final String ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME =
-			"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
-
-
-	/**
 	 * Stores the auto proxy creator classes in escalation order.
 	 */
-	private static final List APC_PRIORITY_LIST = new ArrayList();
+	private static final List<Class> APC_PRIORITY_LIST = new ArrayList<Class>();
 
 	/**
 	 * Setup the escalation list.
 	 */
 	static {
-		APC_PRIORITY_LIST.add(InfrastructureAdvisorAutoProxyCreator.class.getName());
-		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class.getName());
-		APC_PRIORITY_LIST.add(ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME);
+		APC_PRIORITY_LIST.add(InfrastructureAdvisorAutoProxyCreator.class);
+		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class);
+		APC_PRIORITY_LIST.add(AnnotationAwareAspectJAutoProxyCreator.class);
 	}
 
 
@@ -96,8 +87,7 @@ public abstract class AopConfigUtils {
 	}
 
 	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry, Object source) {
-		Class cls = getAspectJAnnotationAutoProxyCreatorClassIfPossible();
-		return registerOrEscalateApcAsRequired(cls, registry, source);
+		return registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class, registry, source);
 	}
 
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
@@ -114,7 +104,7 @@ public abstract class AopConfigUtils {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
-				int requiredPriority = findPriorityForClass(cls.getName());
+				int requiredPriority = findPriorityForClass(cls);
 				if (currentPriority < requiredPriority) {
 					apcDefinition.setBeanClassName(cls.getName());
 				}
@@ -123,32 +113,20 @@ public abstract class AopConfigUtils {
 		}
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
-		beanDefinition.getPropertyValues().addPropertyValue("order", new Integer(Ordered.HIGHEST_PRECEDENCE));
+		beanDefinition.getPropertyValues().addPropertyValue("order", Ordered.HIGHEST_PRECEDENCE);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 		return beanDefinition;
 	}
 
-	private static Class getAspectJAnnotationAutoProxyCreatorClassIfPossible() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			throw new IllegalStateException(
-					"AnnotationAwareAspectJAutoProxyCreator is only available on Java 1.5 and higher");
-		}
-		try {
-			return ClassUtils.forName(
-					ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME, AopConfigUtils.class.getClassLoader());
-		}
-		catch (Throwable ex) {
-			throw new IllegalStateException("Unable to load Java 1.5 dependent class [" +
-					ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME + "]", ex);
-		}
+	private static int findPriorityForClass(Class clazz) {
+		return APC_PRIORITY_LIST.indexOf(clazz);
 	}
 
 	private static int findPriorityForClass(String className) {
-		Assert.notNull(className, "Class name must not be null");
 		for (int i = 0; i < APC_PRIORITY_LIST.size(); i++) {
-			String str = (String) APC_PRIORITY_LIST.get(i);
-			if (className.equals(str)) {
+			Class clazz = APC_PRIORITY_LIST.get(i);
+			if (clazz.getName().equals(className)) {
 				return i;
 			}
 		}

@@ -77,7 +77,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean running = false;
 
-	private final List pausedTasks = new LinkedList();
+	private final List<Object> pausedTasks = new LinkedList<Object>();
 
 	protected final Object lifecycleMonitor = new Object();
 

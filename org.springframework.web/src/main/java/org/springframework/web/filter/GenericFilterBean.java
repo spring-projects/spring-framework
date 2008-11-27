@@ -83,7 +83,7 @@ public abstract class GenericFilterBean implements
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this filter.
 	 */
-	private final Set requiredProperties = new HashSet();
+	private final Set<String> requiredProperties = new HashSet<String>();
 
 	/* The FilterConfig of this filter */
 	private FilterConfig filterConfig;
@@ -275,11 +275,11 @@ public abstract class GenericFilterBean implements
 		 * we can't accept default values
 		 * @throws ServletException if any required properties are missing
 		 */
-		public FilterConfigPropertyValues(FilterConfig config, Set requiredProperties)
+		public FilterConfigPropertyValues(FilterConfig config, Set<String> requiredProperties)
 		    throws ServletException {
 
-			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
-					new HashSet(requiredProperties) : null;
+			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
+					new HashSet<String>(requiredProperties) : null;
 
 			Enumeration en = config.getInitParameterNames();
 			while (en.hasMoreElements()) {

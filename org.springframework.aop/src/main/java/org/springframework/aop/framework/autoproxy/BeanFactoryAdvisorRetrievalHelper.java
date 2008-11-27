@@ -62,7 +62,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
 	 */
-	public List findAdvisorBeans() {
+	public List<Advisor> findAdvisorBeans() {
 		// Determine list of advisor bean names, if not cached already.
 		String[] advisorNames = null;
 		synchronized (this) {
@@ -76,7 +76,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			}
 		}
 		if (advisorNames.length == 0) {
-			return new LinkedList();
+			return new LinkedList<Advisor>();
 		}
 
 		List<Advisor> advisors = new LinkedList<Advisor>();

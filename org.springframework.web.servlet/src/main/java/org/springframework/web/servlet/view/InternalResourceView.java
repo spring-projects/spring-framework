@@ -74,7 +74,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean exposeContextBeansAsAttributes = false;
 
-	private Set exposedContextBeanNames;
+	private Set<String> exposedContextBeanNames;
 
 	private boolean preventDispatchLoop = false;
 
@@ -158,7 +158,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * flag on but do not list specific bean names for this property.
 	 */
 	public void setExposedContextBeanNames(String[] exposedContextBeanNames) {
-		this.exposedContextBeanNames = new HashSet(Arrays.asList(exposedContextBeanNames));
+		this.exposedContextBeanNames = new HashSet<String>(Arrays.asList(exposedContextBeanNames));
 	}
 
 	/**

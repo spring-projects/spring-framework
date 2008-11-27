@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
 
-	private final List adapters = new ArrayList(3);
+	private final List<AdvisorAdapter> adapters = new ArrayList<AdvisorAdapter>(3);
 
 
 	/**
@@ -64,9 +64,8 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 			// So well-known it doesn't even need an adapter.
 			return new DefaultPointcutAdvisor(advice);
 		}
-		for (int i = 0; i < this.adapters.size(); i++) {
+		for (AdvisorAdapter adapter : this.adapters) {
 			// Check that it is supported.
-			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
 			if (adapter.supportsAdvice(advice)) {
 				return new DefaultPointcutAdvisor(advice);
 			}
@@ -75,13 +74,12 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	}
 
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
-		List interceptors = new ArrayList(3);
+		List<MethodInterceptor> interceptors = new ArrayList<MethodInterceptor>(3);
 		Advice advice = advisor.getAdvice();
 		if (advice instanceof MethodInterceptor) {
-			interceptors.add(advice);
+			interceptors.add((MethodInterceptor) advice);
 		}
-		for (int i = 0; i < this.adapters.size(); i++) {
-			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
+		for (AdvisorAdapter adapter : this.adapters) {
 			if (adapter.supportsAdvice(advice)) {
 				interceptors.add(adapter.getInterceptor(advisor));
 			}
@@ -89,7 +87,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		if (interceptors.isEmpty()) {
 			throw new UnknownAdviceTypeException(advisor.getAdvice());
 		}
-		return (MethodInterceptor[]) interceptors.toArray(new MethodInterceptor[interceptors.size()]);
+		return interceptors.toArray(new MethodInterceptor[interceptors.size()]);
 	}
 
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {

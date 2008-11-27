@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
@@ -169,7 +168,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	@Override
 	protected void exposeAttributes() throws JspException {
-		List errorMessages = new ArrayList();
+		List<String> errorMessages = new ArrayList<String>();
 		errorMessages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
 		this.oldMessages = this.pageContext.getAttribute(MESSAGES_ATTRIBUTE, PageContext.PAGE_SCOPE);
 		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages, PageContext.PAGE_SCOPE);

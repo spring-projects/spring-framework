@@ -73,8 +73,8 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 
 
 	private void findInnerBeanDefinitionsAndBeanReferences(BeanDefinition beanDefinition) {
-		List innerBeans = new ArrayList();
-		List references = new ArrayList();
+		List<BeanDefinition> innerBeans = new ArrayList<BeanDefinition>();
+		List<BeanReference> references = new ArrayList<BeanReference>();
 		PropertyValues propertyValues = beanDefinition.getPropertyValues();
 		for (int i = 0; i < propertyValues.getPropertyValues().length; i++) {
 			PropertyValue propertyValue = propertyValues.getPropertyValues()[i];
@@ -83,14 +83,14 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());
 			}
 			else if (value instanceof BeanDefinition) {
-				innerBeans.add(value);
+				innerBeans.add((BeanDefinition) value);
 			}
 			else if (value instanceof BeanReference) {
-				references.add(value);
+				references.add((BeanReference) value);
 			}
 		}
-		this.innerBeanDefinitions = (BeanDefinition[]) innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
-		this.beanReferences = (BeanReference[]) references.toArray(new BeanReference[references.size()]);
+		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
+		this.beanReferences = references.toArray(new BeanReference[references.size()]);
 	}
 
 

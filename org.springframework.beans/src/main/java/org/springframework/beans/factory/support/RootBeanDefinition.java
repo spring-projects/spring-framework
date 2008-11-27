@@ -45,11 +45,11 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	private final Set externallyManagedConfigMembers = Collections.synchronizedSet(new HashSet());
+	private final Set<Member> externallyManagedConfigMembers = Collections.synchronizedSet(new HashSet<Member>());
 
-	private final Set externallyManagedInitMethods = Collections.synchronizedSet(new HashSet());
+	private final Set<String> externallyManagedInitMethods = Collections.synchronizedSet(new HashSet<String>());
 
-	private final Set externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet());
+	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>());
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	volatile Object resolvedConstructorOrFactoryMethod;
