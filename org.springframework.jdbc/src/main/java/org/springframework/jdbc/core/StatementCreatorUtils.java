@@ -61,32 +61,32 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
-	private static Map javaTypeToSqlTypeMap = new HashMap(32);
+	private static Map<Class, Integer> javaTypeToSqlTypeMap = new HashMap<Class, Integer>(32);
 
 	static {
 		/* JDBC 3.0 only - not compatible with e.g. MySQL at present
 		javaTypeToSqlTypeMap.put(boolean.class, new Integer(Types.BOOLEAN));
 		javaTypeToSqlTypeMap.put(Boolean.class, new Integer(Types.BOOLEAN));
 		*/
-		javaTypeToSqlTypeMap.put(byte.class, new Integer(Types.TINYINT));
-		javaTypeToSqlTypeMap.put(Byte.class, new Integer(Types.TINYINT));
-		javaTypeToSqlTypeMap.put(short.class, new Integer(Types.SMALLINT));
-		javaTypeToSqlTypeMap.put(Short.class, new Integer(Types.SMALLINT));
-		javaTypeToSqlTypeMap.put(int.class, new Integer(Types.INTEGER));
-		javaTypeToSqlTypeMap.put(Integer.class, new Integer(Types.INTEGER));
-		javaTypeToSqlTypeMap.put(long.class, new Integer(Types.BIGINT));
-		javaTypeToSqlTypeMap.put(Long.class, new Integer(Types.BIGINT));
-		javaTypeToSqlTypeMap.put(BigInteger.class, new Integer(Types.BIGINT));
-		javaTypeToSqlTypeMap.put(float.class, new Integer(Types.FLOAT));
-		javaTypeToSqlTypeMap.put(Float.class, new Integer(Types.FLOAT));
-		javaTypeToSqlTypeMap.put(double.class, new Integer(Types.DOUBLE));
-		javaTypeToSqlTypeMap.put(Double.class, new Integer(Types.DOUBLE));
-		javaTypeToSqlTypeMap.put(BigDecimal.class, new Integer(Types.DECIMAL));
-		javaTypeToSqlTypeMap.put(java.sql.Date.class, new Integer(Types.DATE));
-		javaTypeToSqlTypeMap.put(java.sql.Time.class, new Integer(Types.TIME));
-		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, new Integer(Types.TIMESTAMP));
-		javaTypeToSqlTypeMap.put(Blob.class, new Integer(Types.BLOB));
-		javaTypeToSqlTypeMap.put(Clob.class, new Integer(Types.CLOB));
+		javaTypeToSqlTypeMap.put(byte.class, Types.TINYINT);
+		javaTypeToSqlTypeMap.put(Byte.class, Types.TINYINT);
+		javaTypeToSqlTypeMap.put(short.class, Types.SMALLINT);
+		javaTypeToSqlTypeMap.put(Short.class, Types.SMALLINT);
+		javaTypeToSqlTypeMap.put(int.class, Types.INTEGER);
+		javaTypeToSqlTypeMap.put(Integer.class, Types.INTEGER);
+		javaTypeToSqlTypeMap.put(long.class, Types.BIGINT);
+		javaTypeToSqlTypeMap.put(Long.class, Types.BIGINT);
+		javaTypeToSqlTypeMap.put(BigInteger.class, Types.BIGINT);
+		javaTypeToSqlTypeMap.put(float.class, Types.FLOAT);
+		javaTypeToSqlTypeMap.put(Float.class, Types.FLOAT);
+		javaTypeToSqlTypeMap.put(double.class, Types.DOUBLE);
+		javaTypeToSqlTypeMap.put(Double.class, Types.DOUBLE);
+		javaTypeToSqlTypeMap.put(BigDecimal.class, Types.DECIMAL);
+		javaTypeToSqlTypeMap.put(java.sql.Date.class, Types.DATE);
+		javaTypeToSqlTypeMap.put(java.sql.Time.class, Types.TIME);
+		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);
+		javaTypeToSqlTypeMap.put(Blob.class, Types.BLOB);
+		javaTypeToSqlTypeMap.put(Clob.class, Types.CLOB);
 	}
 
 
@@ -96,9 +96,9 @@ public abstract class StatementCreatorUtils {
 	 * @return the corresponding SQL type, or <code>null</code> if none found
 	 */
 	public static int javaTypeToSqlParameterType(Class javaType) {
-		Integer sqlType = (Integer) javaTypeToSqlTypeMap.get(javaType);
+		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
 		if (sqlType != null) {
-			return sqlType.intValue();
+			return sqlType;
 		}
 		if (Number.class.isAssignableFrom(javaType)) {
 			return Types.NUMERIC;
@@ -273,7 +273,7 @@ public abstract class StatementCreatorUtils {
 				ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
 			}
 			else if (scale != null) {
-				ps.setObject(paramIndex, inValue, sqlType, scale.intValue());
+				ps.setObject(paramIndex, inValue, sqlType, scale);
 			}
 			else {
 				ps.setObject(paramIndex, inValue, sqlType);
@@ -394,8 +394,7 @@ public abstract class StatementCreatorUtils {
 	 */
 	public static void cleanupParameters(Collection paramValues) {
 		if (paramValues != null) {
-			for (Iterator it = paramValues.iterator(); it.hasNext();) {
-				Object inValue = it.next();
+			for (Object inValue : paramValues) {
 				if (inValue instanceof DisposableSqlTypeValue) {
 					((DisposableSqlTypeValue) inValue).cleanup();
 				}

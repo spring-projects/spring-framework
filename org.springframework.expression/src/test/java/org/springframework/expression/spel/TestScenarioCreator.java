@@ -198,7 +198,7 @@ public class TestScenarioCreator {
 	}
 
 	public static String reverseString(String input) {
-		StringBuffer backwards = new StringBuffer();
+		StringBuilder backwards = new StringBuilder();
 		for (int i = 0; i < input.length(); i++) {
 			backwards.append(input.charAt(input.length() - 1 - i));
 		}

@@ -24,6 +24,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.springframework.util.Assert;
@@ -118,12 +119,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(HttpServletRequest request) {
-		if (request == null) {
-			return false;
-		}
-		else {
-			return ServletFileUpload.isMultipartContent(request);
-		}
+		return (request != null && ServletFileUpload.isMultipartContent(request));
 	}
 
 	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
@@ -151,11 +147,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	 * @return the parsing result
 	 * @throws MultipartException if multipart resolution failed.
 	 */
+	@SuppressWarnings("unchecked")
 	protected MultipartParsingResult parseRequest(HttpServletRequest request) throws MultipartException {
 		String encoding = determineEncoding(request);
 		FileUpload fileUpload = prepareFileUpload(encoding);
 		try {
-			List fileItems = ((ServletFileUpload) fileUpload).parseRequest(request);
+			List<FileItem> fileItems = ((ServletFileUpload) fileUpload).parseRequest(request);
 			return parseFileItems(fileItems, encoding);
 		}
 		catch (FileUploadBase.SizeLimitExceededException ex) {

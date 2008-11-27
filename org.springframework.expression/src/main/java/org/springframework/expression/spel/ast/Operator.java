@@ -54,16 +54,18 @@ public abstract class Operator extends SpelNode {
 	 */
 	@Override
 	public String toStringAST() {
-		StringBuffer sb = new StringBuffer();
-		if (getChildCount() > 0)
+		StringBuilder sb = new StringBuilder();
+		if (getChildCount() > 0) {
 			sb.append("(");
+		}
 		sb.append(getChild(0).toStringAST());
 		for (int i = 1; i < getChildCount(); i++) {
 			sb.append(" ").append(getOperatorName()).append(" ");
 			sb.append(getChild(i).toStringAST());
 		}
-		if (getChildCount() > 0)
+		if (getChildCount() > 0) {
 			sb.append(")");
+		}
 		return sb.toString();
 	}
 

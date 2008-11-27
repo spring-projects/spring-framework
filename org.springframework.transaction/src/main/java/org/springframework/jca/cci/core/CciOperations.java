@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public interface CciOperations {
 	 * @return the result object returned by the action, if any
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(ConnectionCallback action) throws DataAccessException;
+	<T> T execute(ConnectionCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute a request on an EIS with CCI, implemented as callback action
@@ -62,7 +62,7 @@ public interface CciOperations {
 	 * @return the result object returned by the action, if any
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(InteractionCallback action) throws DataAccessException;
+	<T> T execute(InteractionCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute the specified interaction on an EIS with CCI.
@@ -103,7 +103,7 @@ public interface CciOperations {
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(InteractionSpec spec, Record inputRecord, RecordExtractor outputExtractor)
+	<T> T execute(InteractionSpec spec, Record inputRecord, RecordExtractor<T> outputExtractor)
 			throws DataAccessException;
 
 	/**
@@ -115,7 +115,7 @@ public interface CciOperations {
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor outputExtractor)
+	<T> T execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor<T> outputExtractor)
 			throws DataAccessException;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -362,7 +362,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * <p>Use with care, and remember to {@link #updateAdvisorArray() refresh the advisor array}
 	 * and {@link #adviceChanged() fire advice changed events} when making any modifications.
 	 */
-	protected final List getAdvisorsInternal() {
+	protected final List<Advisor> getAdvisorsInternal() {
 		return this.advisors;
 	}
 
@@ -454,7 +454,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param targetClass the target class
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	public List getInterceptorsAndDynamicInterceptionAdvice(Method method, Class targetClass) {
+	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class targetClass) {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
 		List<Object> cached = this.methodCache.get(cacheKey);
 		if (cached == null) {

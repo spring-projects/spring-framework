@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("SimpleMailMessage: ");
+		StringBuilder sb = new StringBuilder("SimpleMailMessage: ");
 		sb.append("from=").append(this.from).append("; ");
 		sb.append("replyTo=").append(this.replyTo).append("; ");
 		sb.append("to=").append(StringUtils.arrayToCommaDelimitedString(this.to)).append("; ");

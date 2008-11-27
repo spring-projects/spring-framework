@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	 * This Map needs to be synchronized because there might be multi-threaded
 	 * access in the case of JTA with remote transaction propagation.
 	 */
-	private final Map sessionMap = Collections.synchronizedMap(new HashMap(1));
+	private final Map<Object, Session> sessionMap = Collections.synchronizedMap(new HashMap<Object, Session>(1));
 
 	private Transaction transaction;
 
@@ -68,7 +68,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public Session getSession(Object key) {
-		return (Session) this.sessionMap.get(key);
+		return this.sessionMap.get(key);
 	}
 
 	public Session getValidatedSession() {
@@ -76,7 +76,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public Session getValidatedSession(Object key) {
-		Session session = (Session) this.sessionMap.get(key);
+		Session session = this.sessionMap.get(key);
 		// Check for dangling Session that's around but already closed.
 		// Effectively an assertion: that should never happen in practice.
 		// We'll seamlessly remove the Session here, to not let it cause
@@ -91,7 +91,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	public Session getAnySession() {
 		synchronized (this.sessionMap) {
 			if (!this.sessionMap.isEmpty()) {
-				return (Session) this.sessionMap.values().iterator().next();
+				return this.sessionMap.values().iterator().next();
 			}
 			return null;
 		}
@@ -108,7 +108,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public Session removeSession(Object key) {
-		return (Session) this.sessionMap.remove(key);
+		return this.sessionMap.remove(key);
 	}
 
 	public boolean containsSession(Session session) {

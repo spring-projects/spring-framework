@@ -29,6 +29,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Default implementation of the {@link NamespaceHandlerResolver} interface.
@@ -63,7 +64,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	private final String handlerMappingsLocation;
 
 	/** Stores the mappings from namespace URI to NamespaceHandler class name / instance */
-	private Map handlerMappings;
+	private Map<String, NamespaceHandler> handlerMappings;
 
 
 	/**
@@ -109,7 +110,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @return the located {@link NamespaceHandler}, or <code>null</code> if none found
 	 */
 	public NamespaceHandler resolve(String namespaceUri) {
-		Map handlerMappings = getHandlerMappings();
+		Map<String, NamespaceHandler> handlerMappings = getHandlerMappings();
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
 		if (handlerOrClassName == null) {
 			return null;
@@ -144,7 +145,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * Load the specified NamespaceHandler mappings lazily.
 	 */
-	private Map getHandlerMappings() {
+	private Map<String, NamespaceHandler> getHandlerMappings() {
 		if (this.handlerMappings == null) {
 			try {
 				Properties mappings =
@@ -152,7 +153,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				if (logger.isDebugEnabled()) {
 					logger.debug("Loaded mappings [" + mappings + "]");
 				}
-				this.handlerMappings = new HashMap(mappings);
+				this.handlerMappings = new HashMap<String, NamespaceHandler>();
+				CollectionUtils.mergePropertiesIntoMap(mappings, this.handlerMappings);
 			}
 			catch (IOException ex) {
 				throw new IllegalStateException(

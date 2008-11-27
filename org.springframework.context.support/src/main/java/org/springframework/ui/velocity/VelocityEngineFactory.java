@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.ui.velocity;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,6 +32,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -76,7 +76,7 @@ public class VelocityEngineFactory {
 
 	private Resource configLocation;
 
-	private final Map velocityProperties = new HashMap();
+	private final Map<String, Object> velocityProperties = new HashMap<String, Object>();
 
 	private String resourceLoaderPath;
 
@@ -110,7 +110,7 @@ public class VelocityEngineFactory {
 	 * @see #setResourceLoaderPath
 	 */
 	public void setVelocityProperties(Properties velocityProperties) {
-		setVelocityPropertiesMap(velocityProperties);
+		CollectionUtils.mergePropertiesIntoMap(velocityProperties, this.velocityProperties);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class VelocityEngineFactory {
 	 * like "ds.resource.loader.instance".
 	 * @see #setVelocityProperties
 	 */
-	public void setVelocityPropertiesMap(Map velocityPropertiesMap) {
+	public void setVelocityPropertiesMap(Map<String, Object> velocityPropertiesMap) {
 		if (velocityPropertiesMap != null) {
 			this.velocityProperties.putAll(velocityPropertiesMap);
 		}
@@ -214,14 +214,14 @@ public class VelocityEngineFactory {
 	 */
 	public VelocityEngine createVelocityEngine() throws IOException, VelocityException {
 		VelocityEngine velocityEngine = newVelocityEngine();
-		Properties props = new Properties();
+		Map<String, Object> props = new HashMap<String, Object>();
 
 		// Load config file if set.
 		if (this.configLocation != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Loading Velocity config from [" + this.configLocation + "]");
 			}
-			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
+			CollectionUtils.mergePropertiesIntoMap(PropertiesLoaderUtils.loadProperties(this.configLocation), props);
 		}
 
 		// Merge local properties if set.
@@ -240,13 +240,8 @@ public class VelocityEngineFactory {
 		}
 
 		// Apply properties to VelocityEngine.
-		for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			if (!(entry.getKey() instanceof String)) {
-				throw new IllegalArgumentException(
-						"Illegal property key [" + entry.getKey() + "]: only Strings allowed");
-			}
-			velocityEngine.setProperty((String) entry.getKey(), entry.getValue());
+		for (Map.Entry<String, Object> entry : props.entrySet()) {
+			velocityEngine.setProperty(entry.getKey(), entry.getValue());
 		}
 
 		postProcessVelocityEngine(velocityEngine);
@@ -301,7 +296,7 @@ public class VelocityEngineFactory {
 			// Try to load via the file system, fall back to SpringResourceLoader
 			// (for hot detection of template changes, if possible).
 			try {
-				StringBuffer resolvedPath = new StringBuffer();
+				StringBuilder resolvedPath = new StringBuilder();
 				String[] paths = StringUtils.commaDelimitedListToStringArray(resourceLoaderPath);
 				for (int i = 0; i < paths.length; i++) {
 					String path = paths[i];

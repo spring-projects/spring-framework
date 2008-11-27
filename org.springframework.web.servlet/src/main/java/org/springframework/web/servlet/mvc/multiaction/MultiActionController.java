@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -164,13 +162,13 @@ public class MultiActionController extends AbstractController implements LastMod
 	private WebBindingInitializer webBindingInitializer;
 
 	/** Handler methods, keyed by name */
-	private final Map handlerMethodMap = new HashMap();
+	private final Map<String, Method> handlerMethodMap = new HashMap<String, Method>();
 
 	/** LastModified methods, keyed by handler method name (without LAST_MODIFIED_SUFFIX) */
-	private final Map lastModifiedMethodMap = new HashMap();
+	private final Map<String, Method> lastModifiedMethodMap = new HashMap<String, Method>();
 
 	/** Methods, keyed by exception class */
-	private final Map exceptionHandlerMap = new HashMap();
+	private final Map<Class, Method> exceptionHandlerMap = new HashMap<Class, Method>();
 
 
 	/**
@@ -271,9 +269,8 @@ public class MultiActionController extends AbstractController implements LastMod
 		// Look at all methods in the subclass, trying to find
 		// methods that are validators according to our criteria
 		Method[] methods = delegate.getClass().getMethods();
-		for (int i = 0; i < methods.length; i++) {
+		for (Method method : methods) {
 			// We're looking for methods with given parameters.
-			Method method = methods[i];
 			if (isExceptionHandlerMethod(method)) {
 				registerExceptionHandlerMethod(method);
 			}
@@ -370,12 +367,12 @@ public class MultiActionController extends AbstractController implements LastMod
 	public long getLastModified(HttpServletRequest request) {
 		try {
 			String handlerMethodName = this.methodNameResolver.getHandlerMethodName(request);
-			Method lastModifiedMethod = (Method) this.lastModifiedMethodMap.get(handlerMethodName);
+			Method lastModifiedMethod = this.lastModifiedMethodMap.get(handlerMethodName);
 			if (lastModifiedMethod != null) {
 				try {
 					// Invoke the last-modified method...
-					Long wrappedLong = (Long) lastModifiedMethod.invoke(this.delegate, new Object[] {request});
-					return (wrappedLong != null ? wrappedLong.longValue() : -1);
+					Long wrappedLong = (Long) lastModifiedMethod.invoke(this.delegate, request);
+					return (wrappedLong != null ? wrappedLong : -1);
 				}
 				catch (Exception ex) {
 					// We encountered an error invoking the last-modified method.
@@ -443,14 +440,14 @@ public class MultiActionController extends AbstractController implements LastMod
 	protected final ModelAndView invokeNamedMethod(
 			String methodName, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		Method method = (Method) this.handlerMethodMap.get(methodName);
+		Method method = this.handlerMethodMap.get(methodName);
 		if (method == null) {
 			throw new NoSuchRequestHandlingMethodException(methodName, getClass());
 		}
 
 		try {
 			Class[] paramTypes = method.getParameterTypes();
-			List params = new ArrayList(4);
+			List<Object> params = new ArrayList<Object>(4);
 			params.add(request);
 			params.add(response);
 
@@ -489,6 +486,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * <code>null</code> or an instance of {@link ModelAndView}. When returning a {@link Map},
 	 * the {@link Map} instance is wrapped in a new {@link ModelAndView} instance.
 	 */
+	@SuppressWarnings("unchecked")
 	private ModelAndView massageReturnValueIfNecessary(Object returnValue) {
 		if (returnValue instanceof ModelAndView) {
 			return (ModelAndView) returnValue;
@@ -533,9 +531,9 @@ public class MultiActionController extends AbstractController implements LastMod
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
 		if (this.validators != null) {
-			for (int i = 0; i < this.validators.length; i++) {
-				if (this.validators[i].supports(command.getClass())) {
-					ValidationUtils.invokeValidator(this.validators[i], command, binder.getBindingResult());
+			for (Validator validator : this.validators) {
+				if (validator.supports(command.getClass())) {
+					ValidationUtils.invokeValidator(validator, command, binder.getBindingResult());
 				}
 			}
 		}
@@ -594,16 +592,6 @@ public class MultiActionController extends AbstractController implements LastMod
 		if (this.webBindingInitializer != null) {
 			this.webBindingInitializer.initBinder(binder, new ServletWebRequest(request));
 		}
-		initBinder((ServletRequest) request, binder);
-	}
-
-	/**
-	 * Initialize the given binder instance, for example with custom editors.
-	 * @deprecated as of Spring 2.0:
-	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder)</code> instead
-	 */
-	@Deprecated
-	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder) throws Exception {
 	}
 
 
@@ -618,13 +606,13 @@ public class MultiActionController extends AbstractController implements LastMod
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to find handler for exception class [" + exceptionClass.getName() + "]");
 		}
-		Method handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
+		Method handler = this.exceptionHandlerMap.get(exceptionClass);
 		while (handler == null && !exceptionClass.equals(Throwable.class)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Trying to find handler for exception superclass [" + exceptionClass.getName() + "]");
 			}
 			exceptionClass = exceptionClass.getSuperclass();
-			handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
+			handler = this.exceptionHandlerMap.get(exceptionClass);
 		}
 		return handler;
 	}
@@ -646,7 +634,7 @@ public class MultiActionController extends AbstractController implements LastMod
 				logger.debug("Invoking exception handler [" + handler + "] for exception: " + ex);
 			}
 			try {
-				Object returnValue = handler.invoke(this.delegate, new Object[] {request, response, ex});
+				Object returnValue = handler.invoke(this.delegate, request, response, ex);
 				return massageReturnValueIfNecessary(returnValue);
 			}
 			catch (InvocationTargetException ex2) {

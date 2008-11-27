@@ -47,7 +47,7 @@ public abstract class EntityManagerFactoryAccessor {
 
 	private EntityManagerFactory entityManagerFactory;
 
-	private final Map jpaPropertyMap = new HashMap();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
 
 
 	/**
@@ -85,7 +85,7 @@ public abstract class EntityManagerFactoryAccessor {
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map jpaProperties) {
+	public void setJpaPropertyMap(Map<String, Object> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -96,7 +96,7 @@ public abstract class EntityManagerFactoryAccessor {
 	 * provider, with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
 	 */
-	public Map getJpaPropertyMap() {
+	public Map<String, Object> getJpaPropertyMap() {
 		return this.jpaPropertyMap;
 	}
 
@@ -112,7 +112,7 @@ public abstract class EntityManagerFactoryAccessor {
 	protected EntityManager createEntityManager() throws IllegalStateException {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		Assert.state(emf != null, "No EntityManagerFactory specified");
-		Map properties = getJpaPropertyMap();
+		Map<String, Object> properties = getJpaPropertyMap();
 		return (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 	}
 

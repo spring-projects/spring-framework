@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ import org.springframework.util.Assert;
  * @see JdbcTemplate
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
-public class RowMapperResultSetExtractor implements ResultSetExtractor {
+public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
 
-	private final RowMapper rowMapper;
+	private final RowMapper<T> rowMapper;
 
 	private final int rowsExpected;
 
@@ -68,7 +68,7 @@ public class RowMapperResultSetExtractor implements ResultSetExtractor {
 	 * Create a new RowMapperResultSetExtractor.
 	 * @param rowMapper the RowMapper which creates an object for each row
 	 */
-	public RowMapperResultSetExtractor(RowMapper rowMapper) {
+	public RowMapperResultSetExtractor(RowMapper<T> rowMapper) {
 		this(rowMapper, 0);
 	}
 
@@ -78,15 +78,15 @@ public class RowMapperResultSetExtractor implements ResultSetExtractor {
 	 * @param rowsExpected the number of expected rows
 	 * (just used for optimized collection handling)
 	 */
-	public RowMapperResultSetExtractor(RowMapper rowMapper, int rowsExpected) {
+	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected) {
 		Assert.notNull(rowMapper, "RowMapper is required");
 		this.rowMapper = rowMapper;
 		this.rowsExpected = rowsExpected;
 	}
 
 
-	public Object extractData(ResultSet rs) throws SQLException {
-		List results = (this.rowsExpected > 0 ? new ArrayList(this.rowsExpected) : new ArrayList());
+	public List<T> extractData(ResultSet rs) throws SQLException {
+		List<T> results = (this.rowsExpected > 0 ? new ArrayList<T>(this.rowsExpected) : new ArrayList<T>());
 		int rowNum = 0;
 		while (rs.next()) {
 			results.add(this.rowMapper.mapRow(rs, rowNum++));

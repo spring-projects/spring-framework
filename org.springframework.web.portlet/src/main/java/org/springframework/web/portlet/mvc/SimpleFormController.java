@@ -132,7 +132,9 @@ import org.springframework.web.portlet.ModelAndView;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public class SimpleFormController extends AbstractFormController {
 
 	private String formView;

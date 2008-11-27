@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @since 14.03.2003
  */
-public class ProxyFactory extends ProxyCreatorSupport implements AopProxy {
+public class ProxyFactory extends ProxyCreatorSupport {
 
 	/**
 	 * Create a new ProxyFactory.
@@ -93,8 +93,9 @@ public class ProxyFactory extends ProxyCreatorSupport implements AopProxy {
 	 * (if necessary for proxy creation).
 	 * @return the proxy object
 	 */
-	public Object getProxy() {
-		return createAopProxy().getProxy();
+	@SuppressWarnings("unchecked")
+	public <T> T getProxy() {
+		return (T) createAopProxy().getProxy();
 	}
 
 	/**
@@ -106,8 +107,9 @@ public class ProxyFactory extends ProxyCreatorSupport implements AopProxy {
 	 * (or <code>null</code> for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
-	public Object getProxy(ClassLoader classLoader) {
-		return createAopProxy().getProxy(classLoader);
+	@SuppressWarnings("unchecked")
+	public <T> T  getProxy(ClassLoader classLoader) {
+		return (T) createAopProxy().getProxy(classLoader);
 	}
 
 

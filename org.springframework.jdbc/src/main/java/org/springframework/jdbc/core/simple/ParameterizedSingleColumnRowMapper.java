@@ -16,9 +16,6 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 /**
@@ -36,24 +33,8 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
  * @author Juergen Hoeller
  * @since 2.5.2
  */
-public class ParameterizedSingleColumnRowMapper<T> extends SingleColumnRowMapper
+public class ParameterizedSingleColumnRowMapper<T> extends SingleColumnRowMapper<T>
 		implements ParameterizedRowMapper<T> {
-
-	/**
-	 * Create a new ParameterizedSingleColumnRowMapper.
-	 * <p>Generally prefer the {@link #newInstance(Class)} method instead,
-	 * which avoids the need for specifying the mapped type twice.
-	 * @see #setRequiredType
-	 */
-	public ParameterizedSingleColumnRowMapper() {
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
-		return (T) super.mapRow(rs, rowNumber);
-	}
-
 
 	/**
 	 * Static factory method to create a new ParameterizedSingleColumnRowMapper

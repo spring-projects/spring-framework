@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.ClassUtils;
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
 	/** Cache for singleton aspect instances */
-	private static final Map aspectCache = new HashMap();
+	private static final Map<Class, Object> aspectCache = new HashMap<Class, Object>();
 
 	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
 
@@ -199,6 +199,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * (if necessary for proxy creation).
 	 * @return the new proxy
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T getProxy() {
 		return (T) createAopProxy().getProxy();
 	}
@@ -211,6 +212,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * @param classLoader the class loader to create the proxy with
 	 * @return the new proxy
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T getProxy(ClassLoader classLoader) {
 		return (T) createAopProxy().getProxy(classLoader);
 	}

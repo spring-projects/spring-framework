@@ -167,7 +167,9 @@ import org.springframework.web.servlet.ModelAndView;
  * @see #processFormSubmission
  * @see SimpleFormController
  * @see AbstractWizardFormController
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class AbstractFormController extends BaseCommandController {
 
 	private boolean bindOnNewForm = false;

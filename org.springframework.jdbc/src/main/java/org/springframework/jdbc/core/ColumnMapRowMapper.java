@@ -45,12 +45,12 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @see JdbcTemplate#queryForList(String)
  * @see JdbcTemplate#queryForMap(String)
  */
-public class ColumnMapRowMapper implements RowMapper {
+public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 
-	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		Map mapOfColValues = createColumnMap(columnCount);
+		Map<String, Object> mapOfColValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
 			String key = getColumnKey(JdbcUtils.lookupColumnName(rsmd, i));
 			Object obj = getColumnValue(rs, i);
@@ -68,8 +68,9 @@ public class ColumnMapRowMapper implements RowMapper {
 	 * @return the new Map instance
 	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
 	 */
-	protected Map createColumnMap(int columnCount) {
-		return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(columnCount);
+	@SuppressWarnings("unchecked")
+	protected Map<String, Object> createColumnMap(int columnCount) {
+		return (Map<String, Object>) CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(columnCount);
 	}
 
 	/**

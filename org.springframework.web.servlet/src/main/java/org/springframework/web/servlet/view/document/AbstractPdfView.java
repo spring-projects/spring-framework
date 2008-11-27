@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view.document;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -63,7 +62,7 @@ public abstract class AbstractPdfView extends AbstractView {
 
 	@Override
 	protected final void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// IE workaround: write into byte array first.
 		ByteArrayOutputStream baos = createTemporaryOutputStream();
@@ -120,7 +119,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @see com.lowagie.text.pdf.PdfWriter#setViewerPreferences
 	 * @see #getViewerPreferences()
 	 */
-	protected void prepareWriter(Map model, PdfWriter writer, HttpServletRequest request)
+	protected void prepareWriter(Map<String, Object> model, PdfWriter writer, HttpServletRequest request)
 			throws DocumentException {
 
 		writer.setViewerPreferences(getViewerPreferences());
@@ -137,7 +136,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @see com.lowagie.text.pdf.PdfWriter#PageLayoutSinglePage
 	 */
 	protected int getViewerPreferences() {
-		return PdfWriter.AllowPrinting | PdfWriter.PageLayoutSinglePage;
+		return PdfWriter.ALLOW_PRINTING | PdfWriter.PageLayoutSinglePage;
 	}
 
 	/**
@@ -158,7 +157,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @see com.lowagie.text.Document#addCreationDate
 	 * @see com.lowagie.text.Document#addHeader
 	*/
-	protected void buildPdfMetadata(Map model, Document document, HttpServletRequest request) {
+	protected void buildPdfMetadata(Map<String, Object> model, Document document, HttpServletRequest request) {
 	}
 
 	/**
@@ -177,9 +176,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @see com.lowagie.text.Document#open()
 	 * @see com.lowagie.text.Document#close()
 	 */
-	protected abstract void buildPdfDocument(
-			Map model, Document document, PdfWriter writer,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception;
+	protected abstract void buildPdfDocument(Map<String, Object> model, Document document, PdfWriter writer,
+			HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

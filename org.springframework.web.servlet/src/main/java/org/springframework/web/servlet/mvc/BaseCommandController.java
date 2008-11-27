@@ -131,7 +131,9 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class BaseCommandController extends AbstractController {
 
 	/** Default command name used for binding command objects: "command" */

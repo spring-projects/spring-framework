@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.mock.web.portlet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-
+import java.util.LinkedHashMap;
+import java.util.Collections;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 
@@ -40,9 +42,9 @@ public class MockPortletConfig implements PortletConfig {
 
 	private final String portletName;
 
-	private final HashMap resourceBundles = new HashMap();
+	private final Map<Locale, ResourceBundle> resourceBundles = new HashMap<Locale, ResourceBundle>();
 
-	private final Properties initParameters = new Properties();
+	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
 
 
 	/**
@@ -94,21 +96,21 @@ public class MockPortletConfig implements PortletConfig {
 
 	public ResourceBundle getResourceBundle(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
-		return (ResourceBundle) this.resourceBundles.get(locale);
+		return this.resourceBundles.get(locale);
 	}
 
 	public void addInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
-		this.initParameters.setProperty(name, value);
+		this.initParameters.put(name, value);
 	}
 
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
-		return this.initParameters.getProperty(name);
+		return this.initParameters.get(name);
 	}
 
-	public Enumeration getInitParameterNames() {
-		return this.initParameters.keys();
+	public Enumeration<String> getInitParameterNames() {
+		return Collections.enumeration(this.initParameters.keySet());
 	}
 
 }

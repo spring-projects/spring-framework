@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,10 +78,12 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	private Locale[] localesToInitialize;
 
 	/* Locale -> BeanFactory */
-	private final Map localeCache = new HashMap();
+	private final Map<Locale, BeanFactory> localeCache =
+			new HashMap<Locale, BeanFactory>();
 
 	/* List of ResourceBundle -> BeanFactory */
-	private final Map bundleCache = new HashMap();
+	private final Map<List<ResourceBundle>, ConfigurableApplicationContext> bundleCache =
+			new HashMap<List<ResourceBundle>, ConfigurableApplicationContext>();
 
 
 	public void setOrder(int order) {
@@ -177,8 +179,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	@Override
 	protected void initApplicationContext() throws BeansException {
 		if (this.localesToInitialize != null) {
-			for (int i = 0; i < this.localesToInitialize.length; i++) {
-				initFactory(this.localesToInitialize[i]);
+			for (Locale locale : this.localesToInitialize) {
+				initFactory(locale);
 			}
 		}
 	}
@@ -187,7 +189,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		BeanFactory factory = initFactory(locale);
 		try {
-			return (View) factory.getBean(viewName, View.class);
+			return factory.getBean(viewName, View.class);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// to allow for ViewResolver chaining
@@ -207,23 +209,23 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		// Try to find cached factory for Locale:
 		// Have we already encountered that Locale before?
 		if (isCache()) {
-			BeanFactory cachedFactory = (BeanFactory) this.localeCache.get(locale);
+			BeanFactory cachedFactory = this.localeCache.get(locale);
 			if (cachedFactory != null) {
 				return cachedFactory;
 			}
 		}
 
 		// Build list of ResourceBundle references for Locale.
-		List bundles = new LinkedList();
-		for (int i = 0; i < this.basenames.length; i++) {
-			ResourceBundle bundle = getBundle(this.basenames[i], locale);
+		List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
+		for (String basename : this.basenames) {
+			ResourceBundle bundle = getBundle(basename, locale);
 			bundles.add(bundle);
 		}
 
 		// Try to find cached factory for ResourceBundle list:
 		// even if Locale was different, same bundles might have been found.
 		if (isCache()) {
-			BeanFactory cachedFactory = (BeanFactory) this.bundleCache.get(bundles);
+			BeanFactory cachedFactory = this.bundleCache.get(bundles);
 			if (cachedFactory != null) {
 				this.localeCache.put(locale, cachedFactory);
 				return cachedFactory;
@@ -238,8 +240,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		// Load bean definitions from resource bundle.
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(factory);
 		reader.setDefaultParentBean(this.defaultParentView);
-		for (int i = 0; i < bundles.size(); i++) {
-			ResourceBundle bundle = (ResourceBundle) bundles.get(i);
+		for (ResourceBundle bundle : bundles) {
 			reader.registerBeanDefinitions(bundle);
 		}
 
@@ -271,8 +272,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * Close the bundle View factories on context shutdown.
 	 */
 	public void destroy() throws BeansException {
-		for (Iterator it = this.bundleCache.values().iterator(); it.hasNext();) {
-			ConfigurableApplicationContext factory = (ConfigurableApplicationContext) it.next();
+		for (ConfigurableApplicationContext factory : this.bundleCache.values()) {
 			factory.close();
 		}
 		this.localeCache.clear();

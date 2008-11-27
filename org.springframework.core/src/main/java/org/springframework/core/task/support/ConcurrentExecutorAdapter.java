@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,19 @@
 package org.springframework.core.task.support;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionException;
 
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.TaskRejectedException;
 import org.springframework.util.Assert;
 
 /**
- * Adapter that exposes the {@link java.util.concurrent.Executor java.util.concurrent.Executor}
+ * Adapter that exposes the {@link java.util.concurrent.Executor}
  * interface for any Spring {@link org.springframework.core.task.TaskExecutor}.
- * Follows the JDK executor contract for exception handling.
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see java.util.concurrent.Executor
  * @see org.springframework.core.task.TaskExecutor
+ * @deprecated as of Spring 3.0 since TaskExecutor itself implements the Executor interface now
  */
 public class ConcurrentExecutorAdapter implements Executor {
 
@@ -49,12 +47,7 @@ public class ConcurrentExecutorAdapter implements Executor {
 
 
 	public void execute(Runnable command) {
-		try {
-			this.taskExecutor.execute(command);
-		}
-		catch (TaskRejectedException ex) {
-			throw new RejectedExecutionException(ex.getMessage(), ex);
-		}
+		this.taskExecutor.execute(command);
 	}
 
 }

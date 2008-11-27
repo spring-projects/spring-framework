@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,12 +104,13 @@ public class ViewRendererServlet extends HttpServlet {
 	 * @throws Exception in case of any kind of processing failure
 	 * @see org.springframework.web.servlet.View#render
 	 */
+	@SuppressWarnings("unchecked")
 	protected void renderView(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		View view = (View) request.getAttribute(VIEW_ATTRIBUTE);
 		if (view == null) {
 			throw new ServletException("Could not complete render request: View is null");
 		}
-		Map model = (Map) request.getAttribute(MODEL_ATTRIBUTE);
+		Map<String, Object> model = (Map<String, Object>) request.getAttribute(MODEL_ATTRIBUTE);
 		view.render(model, request, response);
 	}
 

@@ -117,8 +117,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	/** Cache to hold already loaded properties per filename */
 	private final Map<String, PropertiesHolder> cachedProperties = new HashMap<String, PropertiesHolder>();
 
-	/** Cache to hold merged loaded properties per basename */
-	private final Map cachedMergedProperties = new HashMap();
+	/** Cache to hold merged loaded properties per locale */
+	private final Map<Locale, PropertiesHolder> cachedMergedProperties = new HashMap<Locale, PropertiesHolder>();
 
 
 	/**
@@ -300,9 +300,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		}
 		else {
 			for (String basename : this.basenames) {
-				List filenames = calculateAllFilenames(basename, locale);
-				for (int j = 0; j < filenames.size(); j++) {
-					String filename = (String) filenames.get(j);
+				List<String> filenames = calculateAllFilenames(basename, locale);
+				for (String filename : filenames) {
 					PropertiesHolder propHolder = getProperties(filename);
 					MessageFormat result = propHolder.getMessageFormat(code, locale);
 					if (result != null) {
@@ -325,7 +324,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected PropertiesHolder getMergedProperties(Locale locale) {
 		synchronized (this.cachedMergedProperties) {
-			PropertiesHolder mergedHolder = (PropertiesHolder) this.cachedMergedProperties.get(locale);
+			PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
 			if (mergedHolder != null) {
 				return mergedHolder;
 			}

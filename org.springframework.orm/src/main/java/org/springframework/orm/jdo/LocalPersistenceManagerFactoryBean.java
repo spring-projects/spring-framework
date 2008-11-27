@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class LocalPersistenceManagerFactoryBean
 
 	private Resource configLocation;
 
-	private final Map jdoPropertyMap = new HashMap();
+	private final Map<String, Object> jdoPropertyMap = new HashMap<String, Object>();
 
 	private ClassLoader beanClassLoader;
 
@@ -165,7 +165,7 @@ public class LocalPersistenceManagerFactoryBean
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Map)
 	 */
-	public void setJdoPropertyMap(Map jdoProperties) {
+	public void setJdoPropertyMap(Map<String, Object> jdoProperties) {
 		if (jdoProperties != null) {
 			this.jdoPropertyMap.putAll(jdoProperties);
 		}
@@ -177,7 +177,7 @@ public class LocalPersistenceManagerFactoryBean
 	 * <p>Useful for specifying entries directly, for example via
 	 * "jdoPropertyMap[myKey]".
 	 */
-	public Map getJdoPropertyMap() {
+	public Map<String, Object> getJdoPropertyMap() {
 		return this.jdoPropertyMap;
 	}
 	/**
@@ -218,18 +218,15 @@ public class LocalPersistenceManagerFactoryBean
 		}
 
 		else {
-			Map mergedProps = new HashMap();
-
+			Map<String, Object> mergedProps = new HashMap<String, Object>();
 			if (this.configLocation != null) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading JDO config from [" + this.configLocation + "]");
 				}
-				mergedProps.putAll(PropertiesLoaderUtils.loadProperties(this.configLocation));
+				CollectionUtils.mergePropertiesIntoMap(
+						PropertiesLoaderUtils.loadProperties(this.configLocation), mergedProps);
 			}
-
 			mergedProps.putAll(this.jdoPropertyMap);
-
-			// Build PersistenceManagerFactory instance.
 			logger.info("Building new JDO PersistenceManagerFactory");
 			this.persistenceManagerFactory = newPersistenceManagerFactory(mergedProps);
 		}

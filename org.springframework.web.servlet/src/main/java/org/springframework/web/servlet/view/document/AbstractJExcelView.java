@@ -56,16 +56,18 @@ import org.springframework.web.servlet.view.AbstractView;
  * 
  * <p>As an example, you can try this snippet:
  * 
- * <pre>
- * protected void buildExcelDocument(Map model, WritableWorkbook workbook, HttpServletRequest request,
- * 		HttpServletResponse response) {
- * 	if (workbook.getNumberOfSheets() == 0) {
- * 		workbook.createSheet(&quot;Spring&quot;, 0);
- * 	}
+ * <pre class="code">
+ * protected void buildExcelDocument(
+ *      Map&lt;String, Object&gt; model, WritableWorkbook workbook,
+ * 		HttpServletRequest request, HttpServletResponse response) {
+ *
+ * 	 if (workbook.getNumberOfSheets() == 0) {
+ * 	     workbook.createSheet(&quot;Spring&quot;, 0);
+ *   }
  * 
- * 	WritableSheet sheet = workbook.getSheet(&quot;Spring&quot;);
- * 	Label label = new Label(0, 0, &quot;This is a nice label&quot;);
- * 	sheet.addCell(label);
+ * 	 WritableSheet sheet = workbook.getSheet(&quot;Spring&quot;);
+ * 	 Label label = new Label(0, 0, &quot;This is a nice label&quot;);
+ * 	 sheet.addCell(label);
  * }</pre>
  * 
  * The use of this view is close to the AbstractExcelView class,
@@ -117,7 +119,7 @@ public abstract class AbstractJExcelView extends AbstractView {
 	 */
 	@Override
 	protected final void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		// Set the content type and get the output stream.
 		response.setContentType(getContentType());
@@ -171,8 +173,7 @@ public abstract class AbstractJExcelView extends AbstractView {
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 * @throws Exception in case of failure
 	 */
-	protected abstract void buildExcelDocument(
-			Map model, WritableWorkbook workbook, HttpServletRequest request, HttpServletResponse response)
-			throws Exception;
+	protected abstract void buildExcelDocument(Map<String, Object> model, WritableWorkbook workbook,
+			HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

@@ -20,15 +20,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.app.tools.VelocityFormatter;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -310,7 +307,6 @@ public class VelocityViewTests extends TestCase {
 				assertTrue(response == expectedResponse);
 
 				assertEquals("myValue", context.get("myHelper"));
-				assertTrue(context.get("velocityFormatter") instanceof VelocityFormatter);
 				assertTrue(context.get("math") instanceof MathTool);
 
 				assertTrue(context.get("dateTool") instanceof DateTool);
@@ -329,10 +325,9 @@ public class VelocityViewTests extends TestCase {
 
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
-		Properties toolAttributes = new Properties();
-		toolAttributes.setProperty("math", MathTool.class.getName());
+		Map<String, Class> toolAttributes = new HashMap<String, Class>();
+		toolAttributes.put("math", MathTool.class);
 		vv.setToolAttributes(toolAttributes);
-		vv.setVelocityFormatterAttribute("velocityFormatter");
 		vv.setDateToolAttribute("dateTool");
 		vv.setNumberToolAttribute("numberTool");
 		vv.setExposeSpringMacroHelpers(false);
@@ -383,9 +378,9 @@ public class VelocityViewTests extends TestCase {
 
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
-		Properties toolAttributes = new Properties();
-		toolAttributes.setProperty("math", MathTool.class.getName());
-		toolAttributes.setProperty("link2", LinkTool.class.getName());
+		Map<String, Class> toolAttributes = new HashMap<String, Class>();
+		toolAttributes.put("math", MathTool.class);
+		toolAttributes.put("link2", LinkTool.class);
 		vv.setToolAttributes(toolAttributes);
 		vv.setToolboxConfigLocation("org/springframework/web/servlet/view/velocity/toolbox.xml");
 		vv.setExposeSpringMacroHelpers(false);

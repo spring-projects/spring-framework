@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -907,8 +908,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
-	public boolean containsBeanDefinition(String name) {
-		return getBeanFactory().containsBeanDefinition(name);
+	public boolean containsBeanDefinition(String beanName) {
+		return getBeanFactory().containsBeanDefinition(beanName);
 	}
 
 	public int getBeanDefinitionCount() {
@@ -935,6 +936,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			throws BeansException {
 
 		return getBeanFactory().getBeansOfType(type, includePrototypes, allowEagerInit);
+	}
+
+	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException {
+
+		return getBeanFactory().getBeansWithAnnotation(annotationType);
+	}
+
+	public Map<String, Object> getBeansWithAnnotation(
+			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit)
+			throws BeansException {
+
+		return getBeanFactory().getBeansWithAnnotation(annotationType, includeNonSingletons, allowEagerInit);
+	}
+
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+		return getBeanFactory().findAnnotationOnBean(beanName, annotationType);
 	}
 
 

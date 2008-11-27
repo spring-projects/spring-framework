@@ -59,7 +59,7 @@ public interface JpaVendorAdapter {
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
-	Map getJpaPropertyMap();
+	Map<String, ?> getJpaPropertyMap();
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this

@@ -39,9 +39,9 @@ import org.springframework.util.NumberUtils;
  * @see JdbcTemplate#queryForList(String, Class)
  * @see JdbcTemplate#queryForObject(String, Class)
  */
-public class SingleColumnRowMapper implements RowMapper {
+public class SingleColumnRowMapper<T> implements RowMapper<T> {
 
-	private Class requiredType;
+	private Class<T> requiredType;
 
 
 	/**
@@ -55,7 +55,7 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * Create a new SingleColumnRowMapper.
 	 * @param requiredType the type that each result object is expected to match
 	 */
-	public SingleColumnRowMapper(Class requiredType) {
+	public SingleColumnRowMapper(Class<T> requiredType) {
 		this.requiredType = requiredType;
 	}
 
@@ -64,7 +64,7 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * <p>If not specified, the column value will be exposed as
 	 * returned by the JDBC driver.
 	 */
-	public void setRequiredType(Class requiredType) {
+	public void setRequiredType(Class<T> requiredType) {
 		this.requiredType = requiredType;
 	}
 
@@ -78,7 +78,8 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
 	 * @see #convertValueToRequiredType(Object, Class)
 	 */
-	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+	@SuppressWarnings("unchecked")
+	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// Validate column count.
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int nrOfColumns = rsmd.getColumnCount();
@@ -91,7 +92,7 @@ public class SingleColumnRowMapper implements RowMapper {
 		if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
 			// Extracted value does not match already: try to convert it.
 			try {
-				return convertValueToRequiredType(result, this.requiredType);
+				return (T) convertValueToRequiredType(result, this.requiredType);
 			}
 			catch (IllegalArgumentException ex) {
 				throw new TypeMismatchDataAccessException(
@@ -99,7 +100,7 @@ public class SingleColumnRowMapper implements RowMapper {
 						rsmd.getColumnTypeName(1) + "': " + ex.getMessage());
 			}
 		}
-		return result;
+		return (T) result;
 	}
 
 	/**

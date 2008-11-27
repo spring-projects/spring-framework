@@ -108,7 +108,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * Return the ResultSetExtractor held by this parameter, if any.
 	 */
 	public ResultSetExtractor getResultSetExtractor() {
-		return resultSetExtractor;
+		return this.resultSetExtractor;
 	}
 
 	/**

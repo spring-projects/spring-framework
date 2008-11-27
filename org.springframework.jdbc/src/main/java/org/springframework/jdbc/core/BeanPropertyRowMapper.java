@@ -61,22 +61,22 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class BeanPropertyRowMapper implements RowMapper {
+public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** The class we are mapping to */
-	private Class mappedClass;
+	private Class<T> mappedClass;
 
 	/** Whether we're strictly validating */
 	private boolean checkFullyPopulated = false;
 
 	/** Map of the fields we provide mapping for */
-	private Map mappedFields;
+	private Map<String, PropertyDescriptor> mappedFields;
 
 	/** Set of bean properties we provide mapping for */
-	private Set mappedProperties;
+	private Set<String> mappedProperties;
 
 
 	/**
@@ -92,7 +92,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 * in the target bean.
 	 * @param mappedClass the class that each row should be mapped to
 	 */
-	public BeanPropertyRowMapper(Class mappedClass) {
+	public BeanPropertyRowMapper(Class<T> mappedClass) {
 		initialize(mappedClass);
 	}
 
@@ -102,7 +102,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 * @param checkFullyPopulated whether we're strictly validating that
 	 * all bean properties have been mapped from corresponding database fields
 	 */
-	public BeanPropertyRowMapper(Class mappedClass, boolean checkFullyPopulated) {
+	public BeanPropertyRowMapper(Class<T> mappedClass, boolean checkFullyPopulated) {
 		initialize(mappedClass);
 		this.checkFullyPopulated = checkFullyPopulated;
 	}
@@ -111,7 +111,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 	/**
 	 * Set the class that each row should be mapped to.
 	 */
-	public void setMappedClass(Class mappedClass) {
+	public void setMappedClass(Class<T> mappedClass) {
 		if (this.mappedClass == null) {
 			initialize(mappedClass);
 		}
@@ -127,13 +127,12 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 * Initialize the mapping metadata for the given class.
 	 * @param mappedClass the mapped class.
 	 */
-	protected void initialize(Class mappedClass) {
+	protected void initialize(Class<T> mappedClass) {
 		this.mappedClass = mappedClass;
-		this.mappedFields = new HashMap();
-		this.mappedProperties = new HashSet();
+		this.mappedFields = new HashMap<String, PropertyDescriptor>();
+		this.mappedProperties = new HashSet<String>();
 		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
-		for (int i = 0; i < pds.length; i++) {
-			PropertyDescriptor pd = pds[i];
+		for (PropertyDescriptor pd : pds) {
 			if (pd.getWriteMethod() != null) {
 				this.mappedFields.put(pd.getName().toLowerCase(), pd);
 				String underscoredName = underscoreName(pd.getName());
@@ -152,7 +151,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 * @return the converted name
 	 */
 	private String underscoreName(String name) {
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		if (name != null && name.length() > 0) {
 			result.append(name.substring(0, 1).toLowerCase());
 			for (int i = 1; i < name.length(); i++) {
@@ -172,7 +171,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 	/**
 	 * Get the class that we are mapping to.
 	 */
-	public final Class getMappedClass() {
+	public final Class<T> getMappedClass() {
 		return this.mappedClass;
 	}
 
@@ -200,19 +199,19 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 * <p>Utilizes public setters and result set metadata.
 	 * @see java.sql.ResultSetMetaData
 	 */
-	public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
+	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
-		Object mappedObject = BeanUtils.instantiateClass(this.mappedClass);
+		T mappedObject = BeanUtils.instantiate(this.mappedClass);
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
 		initBeanWrapper(bw);
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		Set populatedProperties = (isCheckFullyPopulated() ? new HashSet() : null);
+		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<String>() : null);
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index).toLowerCase();
-			PropertyDescriptor pd = (PropertyDescriptor) this.mappedFields.get(column);
+			PropertyDescriptor pd = this.mappedFields.get(column);
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);

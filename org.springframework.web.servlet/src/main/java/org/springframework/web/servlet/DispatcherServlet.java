@@ -1101,9 +1101,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Check registerer HandlerExceptionResolvers...
 		ModelAndView exMv = null;
-		for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-			HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
-			exMv = resolver.resolveException(request, response, handler, ex);
+		for (Iterator<HandlerExceptionResolver> it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+			exMv = it.next().resolveException(request, response, handler, ex);
 		}
 		if (exMv != null) {
 			if (logger.isDebugEnabled()) {
@@ -1191,7 +1190,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
-	protected View resolveViewName(String viewName, Map model, Locale locale, HttpServletRequest request)
+	protected View resolveViewName(
+			String viewName, Map<String, Object> model, Locale locale, HttpServletRequest request)
 			throws Exception {
 
 		for (ViewResolver viewResolver : this.viewResolvers) {

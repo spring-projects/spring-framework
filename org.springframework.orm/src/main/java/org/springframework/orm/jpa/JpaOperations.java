@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,12 @@ public interface JpaOperations {
 
 	List find(String queryString, Object... values) throws DataAccessException;
 
-	List findByNamedParams(String queryString, Map<String,? extends Object> params) throws DataAccessException;
+	List findByNamedParams(String queryString, Map<String, ?> params) throws DataAccessException;
 
 	List findByNamedQuery(String queryName) throws DataAccessException;
 
 	List findByNamedQuery(String queryName, Object... values) throws DataAccessException;
 
-	List findByNamedQueryAndNamedParams(String queryName, Map<String,? extends Object> params) throws DataAccessException;
+	List findByNamedQueryAndNamedParams(String queryName, Map<String, ?> params) throws DataAccessException;
 
 }

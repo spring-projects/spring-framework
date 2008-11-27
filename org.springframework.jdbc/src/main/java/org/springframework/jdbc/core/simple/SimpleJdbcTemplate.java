@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 
-	public int queryForInt(String sql, Map args) throws DataAccessException {
+	public int queryForInt(String sql, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForInt(sql, args);
 	}
 
@@ -121,7 +121,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 					getJdbcOperations().queryForInt(sql, getArguments(args)));
 	}
 
-	public long queryForLong(String sql, Map args) throws DataAccessException {
+	public long queryForLong(String sql, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForLong(sql, args);
 	}
 
@@ -136,61 +136,61 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql, Class<T> requiredType, Map args) throws DataAccessException {
-		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
+	public <T> T queryForObject(String sql, Class<T> requiredType, Map<String, Object> args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, Class<T> requiredType, SqlParameterSource args)
 			throws DataAccessException {
-		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
+		return getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException {
-		return (T) (ObjectUtils.isEmpty(args) ?
+		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, requiredType) :
 				getJdbcOperations().queryForObject(sql, getArguments(args), requiredType));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map args) throws DataAccessException {
-		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
+	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
-		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
+		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
-		return (T) (ObjectUtils.isEmpty(args) ?
+		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, rm):
 				getJdbcOperations().queryForObject(sql, getArguments(args), rm));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map args) throws DataAccessException {
-		return (List<T>) getNamedParameterJdbcOperations().query(sql, args, rm);
+	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().query(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
-		return (List<T>) getNamedParameterJdbcOperations().query(sql, args, rm);
+		return getNamedParameterJdbcOperations().query(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
-		return (List<T>) (ObjectUtils.isEmpty(args) ?
+		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().query(sql, rm) :
 				getJdbcOperations().query(sql, getArguments(args), rm));
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> queryForMap(String sql, Map args) throws DataAccessException {
+	public Map<String, Object> queryForMap(String sql, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForMap(sql, args);
 	}
 
@@ -208,7 +208,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> queryForList(String sql, Map args) throws DataAccessException {
+	public List<Map<String, Object>> queryForList(String sql, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForList(sql, args);
 	}
 
@@ -225,7 +225,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 				getJdbcOperations().queryForList(sql, getArguments(args)));
 	}
 
-	public int update(String sql, Map args) throws DataAccessException {
+	public int update(String sql, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().update(sql, args);
 	}
 
@@ -247,10 +247,10 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 		return doExecuteBatchUpdate(sql, batchArgs, argTypes);
 	}
 
-	public int[] batchUpdate(String sql, Map[] batchValues) {
+	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues) {
 		SqlParameterSource[] batchArgs = new SqlParameterSource[batchValues.length];
 		int i = 0;
-		for (Map values : batchValues) {
+		for (Map<String, Object> values : batchValues) {
 			batchArgs[i] = new MapSqlParameterSource(values);
 			i++;
 		}

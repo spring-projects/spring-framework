@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
  */
 public class MockMultipartActionRequest extends MockActionRequest implements MultipartActionRequest {
 
-	private final Map multipartFiles = new LinkedHashMap(4);
+	private final Map<String, MultipartFile> multipartFiles = new LinkedHashMap<String, MultipartFile>();
 
 
 	/**
@@ -52,15 +52,15 @@ public class MockMultipartActionRequest extends MockActionRequest implements Mul
 		this.multipartFiles.put(file.getName(), file);
 	}
 
-	public Iterator getFileNames() {
+	public Iterator<String> getFileNames() {
 		return getFileMap().keySet().iterator();
 	}
 
 	public MultipartFile getFile(String name) {
-		return (MultipartFile) this.multipartFiles.get(name);
+		return this.multipartFiles.get(name);
 	}
 
-	public Map getFileMap() {
+	public Map<String, MultipartFile> getFileMap() {
 		return Collections.unmodifiableMap(this.multipartFiles);
 	}
 

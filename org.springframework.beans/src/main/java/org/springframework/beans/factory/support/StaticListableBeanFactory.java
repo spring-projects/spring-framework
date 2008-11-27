@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -95,9 +98,12 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 			}
 		}
-		return bean;
+		else {
+			return bean;
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		Object bean = getBean(name);
 		if (requiredType != null && !requiredType.isAssignableFrom(bean.getClass())) {
@@ -106,6 +112,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return (T) bean;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object getBean(String name, Object[] args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
@@ -203,6 +210,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return getBeansOfType(type, true, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean includeFactoryBeans)
 			throws BeansException {
 
@@ -236,6 +244,29 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			}
 		}
 		return matches;
+	}
+
+	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException {
+
+		return getBeansWithAnnotation(annotationType, true, true);
+	}
+
+	public Map<String, Object> getBeansWithAnnotation(
+			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit) {
+
+		Map<String, Object> results = new LinkedHashMap<String, Object>();
+		for (String beanName : this.beans.keySet()) {
+			if (findAnnotationOnBean(beanName, annotationType) != null) {
+				results.put(beanName, getBean(beanName));
+			}
+		}
+		return results;
+	}
+
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+		Class<?> handlerType = getType(beanName);
+		return AnnotationUtils.findAnnotation(handlerType, annotationType);
 	}
 
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.multiaction;
 
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 
 /**
- * The most flexible out-of-the-box implementation of the MethodNameResolver
+ * The most flexible out-of-the-box implementation of the {@link MethodNameResolver}
  * interface. Uses <code>java.util.Properties</code> to define the mapping
  * between the URL of incoming requests and the corresponding method name.
  * Such properties can be held in an XML document.
@@ -85,8 +85,9 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		if (methodName != null) {
 			return methodName;
 		}
-		for (Iterator it = this.mappings.keySet().iterator(); it.hasNext();) {
-			String registeredPath = (String) it.next();
+		Enumeration propNames = this.mappings.propertyNames();
+		while (propNames.hasMoreElements()) {
+			String registeredPath = (String) propNames.nextElement();
 			if (this.pathMatcher.match(registeredPath, urlPath)) {
 				return (String) this.mappings.get(registeredPath);
 			}

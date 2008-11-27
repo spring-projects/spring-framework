@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * @since 1.2.2
  * @see Comparable
  */
-public class NullSafeComparator implements Comparator {
+public class NullSafeComparator<T> implements Comparator<T> {
 
 	/**
 	 * A shared default instance of this comparator, treating nulls lower
@@ -44,7 +44,7 @@ public class NullSafeComparator implements Comparator {
 	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator(false);
 
 
-	private final Comparator nonNullComparator;
+	private final Comparator<T> nonNullComparator;
 
 	private final boolean nullsLow;
 
@@ -63,8 +63,10 @@ public class NullSafeComparator implements Comparator {
 	 * @see #NULLS_LOW
 	 * @see #NULLS_HIGH
 	 */
+	@SuppressWarnings("unchecked")
 	private NullSafeComparator(boolean nullsLow) {
-		this(new ComparableComparator(), nullsLow);
+		this.nonNullComparator = new ComparableComparator();
+		this.nullsLow = nullsLow;
 	}
 
 	/**
@@ -76,14 +78,14 @@ public class NullSafeComparator implements Comparator {
 	 * @param comparator the comparator to use when comparing two non-null objects
 	 * @param nullsLow whether to treat nulls lower or higher than non-null objects
 	 */
-	public NullSafeComparator(Comparator comparator, boolean nullsLow) {
+	public NullSafeComparator(Comparator<T> comparator, boolean nullsLow) {
 		Assert.notNull(comparator, "The non-null comparator is required");
 		this.nonNullComparator = comparator;
 		this.nullsLow = nullsLow;
 	}
 
 
-	public int compare(Object o1, Object o2) {
+	public int compare(T o1, T o2) {
 		if (o1 == o2) {
 			return 0;
 		}

@@ -18,7 +18,6 @@ package org.springframework.aop.target;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.aop.IntroductionAdvisor;
@@ -26,6 +25,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.core.NamedThreadLocal;
 
 /**
  * Alternative to an object pool. This TargetSource uses a threading model in which
@@ -56,17 +56,13 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	 * thread. Unlike most ThreadLocals, which are static, this variable
 	 * is meant to be per thread per instance of the ThreadLocalTargetSource class.
 	 */
-	private final ThreadLocal targetInThread = new ThreadLocal() {
-		@Override
-		public String toString() {
-			return "Thread-local instance of bean '" + getTargetBeanName() + "'";
-		}
-	};
+	private final ThreadLocal<Object> targetInThread =
+			new NamedThreadLocal<Object>("Thread-local instance of bean '" + getTargetBeanName() + "'");
 
 	/**
 	 * Set of managed targets, enabling us to keep track of the targets we've created.
 	 */
-	private final Set targetSet = Collections.synchronizedSet(new HashSet());
+	private final Set<Object> targetSet = Collections.synchronizedSet(new HashSet<Object>());
 	
 	private int invocationCount;
 	
@@ -104,8 +100,8 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	public void destroy() {
 		logger.debug("Destroying ThreadLocalTargetSource bindings");
 		synchronized (this.targetSet) {
-			for (Iterator it = this.targetSet.iterator(); it.hasNext(); ) {
-				destroyPrototypeInstance(it.next());
+			for (Object target : this.targetSet) {
+				destroyPrototypeInstance(target);
 			}
 			this.targetSet.clear();
 		}

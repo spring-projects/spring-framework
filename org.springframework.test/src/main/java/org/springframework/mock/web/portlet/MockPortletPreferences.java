@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ public class MockPortletPreferences implements PortletPreferences {
 
 	private PreferencesValidator preferencesValidator;
 
-	private final Map preferences = new LinkedHashMap(16);
+	private final Map<String, String[]> preferences = new LinkedHashMap<String, String[]>();
 
-	private final Set readOnly = new HashSet();
+	private final Set<String> readOnly = new HashSet<String>();
 
 
 	public void setReadOnly(String key, boolean readOnly) {
@@ -64,13 +64,13 @@ public class MockPortletPreferences implements PortletPreferences {
 
 	public String getValue(String key, String def) {
 		Assert.notNull(key, "Key must not be null");
-		String[] values = (String[]) this.preferences.get(key);
+		String[] values = this.preferences.get(key);
 		return (values != null && values.length > 0 ? values[0] : def);
 	}
 
 	public String[] getValues(String key, String[] def) {
 		Assert.notNull(key, "Key must not be null");
-		String[] values = (String[]) this.preferences.get(key);
+		String[] values = this.preferences.get(key);
 		return (values != null && values.length > 0 ? values : def);
 	}
 
@@ -86,11 +86,11 @@ public class MockPortletPreferences implements PortletPreferences {
 		this.preferences.put(key, values);
 	}
 
-	public Enumeration getNames() {
+	public Enumeration<String> getNames() {
 		return Collections.enumeration(this.preferences.keySet());
 	}
 
-	public Map getMap() {
+	public Map<String, String[]> getMap() {
 		return Collections.unmodifiableMap(this.preferences);
 	}
 

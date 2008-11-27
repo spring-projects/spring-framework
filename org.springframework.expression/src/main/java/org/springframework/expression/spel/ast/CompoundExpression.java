@@ -110,7 +110,7 @@ public class CompoundExpression extends SpelNode {
 
 	@Override
 	public String toStringAST() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < getChildCount(); i++) {
 			sb.append(getChild(i).toStringAST());
 		}

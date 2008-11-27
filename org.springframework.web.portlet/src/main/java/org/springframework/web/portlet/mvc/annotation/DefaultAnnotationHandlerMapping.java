@@ -19,15 +19,11 @@ package org.springframework.web.portlet.mvc.annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
@@ -77,7 +73,7 @@ import org.springframework.web.portlet.handler.AbstractMapBasedHandlerMapping;
  * @see RequestMapping
  * @see AnnotationMethodHandlerAdapter
  */
-public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping {
+public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping<PortletMode> {
 
 	/**
 	 * Calls the <code>registerHandlers</code> method in addition
@@ -99,10 +95,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		String[] beanNames = context.getBeanNamesForType(Object.class);
 		for (String beanName : beanNames) {
 			Class<?> handlerType = context.getType(beanName);
-			ListableBeanFactory bf = (context instanceof ConfigurableApplicationContext ?
-					((ConfigurableApplicationContext) context).getBeanFactory() : context);
-			GenericBeanFactoryAccessor bfa = new GenericBeanFactoryAccessor(bf);
-			RequestMapping mapping = bfa.findAnnotationOnBean(beanName, RequestMapping.class);
+			RequestMapping mapping = context.findAnnotationOnBean(beanName, RequestMapping.class);
 			if (mapping != null) {
 				String[] modeKeys = mapping.value();
 				String[] params = mapping.params();
@@ -167,7 +160,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 * Uses the current PortletMode as lookup key.
 	 */
 	@Override
-	protected Object getLookupKey(PortletRequest request) throws Exception {
+	protected PortletMode getLookupKey(PortletRequest request) throws Exception {
 		return request.getPortletMode();
 	}
 

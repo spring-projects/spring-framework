@@ -19,14 +19,12 @@ package org.springframework.transaction.annotation;
 import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Map;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -54,7 +52,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	public void testIsProxy() throws Exception {
 		TransactionalTestBean bean = getTestBean();
 		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
-		Map services = new GenericBeanFactoryAccessor(this.context).getBeansWithAnnotation(Service.class);
+		Map services = this.context.getBeansWithAnnotation(Service.class);
 		assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
 	}
 

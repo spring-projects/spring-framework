@@ -243,7 +243,9 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * @see #showForm(RenderRequest, RenderResponse, BindException)
  * @see SimpleFormController
  * @see AbstractWizardFormController
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class AbstractFormController extends BaseCommandController {
 
 	/**

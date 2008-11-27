@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Properties;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
-
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequestDispatcher;
 
@@ -57,9 +57,9 @@ public class MockPortletContext implements PortletContext {
 	
 	private final ResourceLoader resourceLoader;
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
-	private final Properties initParameters = new Properties();
+	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
 
 	private String portletContextName = "MockPortletContext";
 
@@ -171,15 +171,15 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	public Set getResourcePaths(String path) {
+	public Set<String> getResourcePaths(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
 			File file = resource.getFile();
 			String[] fileList = file.list();
 			String prefix = (path.endsWith("/") ? path : path + "/");
-			Set resourcePaths = new HashSet(fileList.length);
-			for (int i = 0; i < fileList.length; i++) {
-				resourcePaths.add(prefix + fileList[i]);
+			Set<String> resourcePaths = new HashSet<String>(fileList.length);
+			for (String fileEntry : fileList) {
+				resourcePaths.add(prefix + fileEntry);
 			}
 			return resourcePaths;
 		}
@@ -204,8 +204,8 @@ public class MockPortletContext implements PortletContext {
 		return this.attributes.get(name);
 	}
 
-	public Enumeration getAttributeNames() {
-		return this.attributes.keys();
+	public Enumeration<String> getAttributeNames() {
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public void setAttribute(String name, Object value) {
@@ -223,16 +223,16 @@ public class MockPortletContext implements PortletContext {
 
 	public void addInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
-		this.initParameters.setProperty(name, value);
+		this.initParameters.put(name, value);
 	}
 
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
-		return this.initParameters.getProperty(name);
+		return this.initParameters.get(name);
 	}
 
-	public Enumeration getInitParameterNames() {
-		return this.initParameters.keys();
+	public Enumeration<String> getInitParameterNames() {
+		return Collections.enumeration(this.initParameters.keySet());
 	}
 
 	public void log(String message) {

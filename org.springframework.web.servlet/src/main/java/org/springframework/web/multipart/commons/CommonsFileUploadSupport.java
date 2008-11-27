@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -212,13 +212,12 @@ public abstract class CommonsFileUploadSupport {
 	 * @return the Spring MultipartParsingResult
 	 * @see CommonsMultipartFile#CommonsMultipartFile(org.apache.commons.fileupload.FileItem)
 	 */
-	protected MultipartParsingResult parseFileItems(List fileItems, String encoding) {
-		Map multipartFiles = new HashMap();
-		Map multipartParameters = new HashMap();
+	protected MultipartParsingResult parseFileItems(List<FileItem> fileItems, String encoding) {
+		Map<String, MultipartFile> multipartFiles = new HashMap<String, MultipartFile>();
+		Map<String, String[]> multipartParameters = new HashMap<String, String[]>();
 
 		// Extract multipart files and multipart parameters.
-		for (Iterator it = fileItems.iterator(); it.hasNext();) {
-			FileItem fileItem = (FileItem) it.next();
+		for (FileItem fileItem : fileItems) {
 			if (fileItem.isFormField()) {
 				String value = null;
 				if (encoding != null) {
@@ -236,10 +235,10 @@ public abstract class CommonsFileUploadSupport {
 				else {
 					value = fileItem.getString();
 				}
-				String[] curParam = (String[]) multipartParameters.get(fileItem.getFieldName());
+				String[] curParam = multipartParameters.get(fileItem.getFieldName());
 				if (curParam == null) {
 					// simple form field
-					multipartParameters.put(fileItem.getFieldName(), new String[] { value });
+					multipartParameters.put(fileItem.getFieldName(), new String[] {value});
 				}
 				else {
 					// array of simple form fields
@@ -251,8 +250,8 @@ public abstract class CommonsFileUploadSupport {
 				// multipart file field
 				CommonsMultipartFile file = new CommonsMultipartFile(fileItem);
 				if (multipartFiles.put(file.getName(), file) != null) {
-					throw new MultipartException(
-							"Multiple files for field name [" + file.getName() + "] found - not supported by MultipartResolver");
+					throw new MultipartException("Multiple files for field name [" + file.getName() +
+							"] found - not supported by MultipartResolver");
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
@@ -271,14 +270,16 @@ public abstract class CommonsFileUploadSupport {
 	 * @param multipartFiles Collection of MultipartFile instances
 	 * @see org.apache.commons.fileupload.FileItem#delete()
 	 */
-	protected void cleanupFileItems(Collection multipartFiles) {
-		for (Iterator it = multipartFiles.iterator(); it.hasNext();) {
-			CommonsMultipartFile file = (CommonsMultipartFile) it.next();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleaning up multipart file [" + file.getName() + "] with original filename [" +
-						file.getOriginalFilename() + "], stored " + file.getStorageDescription());
+	protected void cleanupFileItems(Collection<MultipartFile> multipartFiles) {
+		for (MultipartFile file : multipartFiles) {
+			if (file instanceof CommonsMultipartFile) {
+				CommonsMultipartFile cmf = (CommonsMultipartFile) file;
+				cmf.getFileItem().delete();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cleaning up multipart file [" + cmf.getName() + "] with original filename [" +
+							cmf.getOriginalFilename() + "], stored " + cmf.getStorageDescription());
+				}
 			}
-			file.getFileItem().delete();
 		}
 	}
 
@@ -289,31 +290,31 @@ public abstract class CommonsFileUploadSupport {
 	 */
 	protected static class MultipartParsingResult {
 
-		private final Map multipartFiles;
+		private final Map<String, MultipartFile> multipartFiles;
 
-		private final Map multipartParameters;
+		private final Map<String, String[]> multipartParameters;
 
 		/**
 		 * Create a new MultipartParsingResult.
-		 * @param multipartFiles Map of field name to MultipartFile instance
+		 * @param mpFiles Map of field name to MultipartFile instance
 		 * @param multipartParameters Map of field name to form field String value
 		 */
-		public MultipartParsingResult(Map multipartFiles, Map multipartParameters) {
-			this.multipartFiles = multipartFiles;
-			this.multipartParameters = multipartParameters;
+		public MultipartParsingResult(Map<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
+			this.multipartFiles = mpFiles;
+			this.multipartParameters = mpParams;
 		}
 
 		/**
 		 * Return the multipart files as Map of field name to MultipartFile instance.
 		 */
-		public Map getMultipartFiles() {
+		public Map<String, MultipartFile> getMultipartFiles() {
 			return this.multipartFiles;
 		}
 
 		/**
 		 * Return the multipart parameters as Map of field name to form field String value.
 		 */
-		public Map getMultipartParameters() {
+		public Map<String, String[]> getMultipartParameters() {
 			return this.multipartParameters;
 		}
 	}

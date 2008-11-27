@@ -18,7 +18,6 @@ package org.springframework.jndi;
 
 import java.util.Hashtable;
 import java.util.Properties;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
@@ -82,7 +81,7 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by the callback implementation
 	 * @see #createInitialContext
 	 */
-	public Object execute(JndiCallback contextCallback) throws NamingException {
+	public <T> T execute(JndiCallback<T> contextCallback) throws NamingException {
 		Context ctx = getContext();
 		try {
 			return contextCallback.doInContext(ctx);
@@ -174,13 +173,14 @@ public class JndiTemplate {
 	 * @throws NamingException if there is no object with the given
 	 * name bound to JNDI
 	 */
-	public Object lookup(String name, Class requiredType) throws NamingException {
+	@SuppressWarnings("unchecked")
+	public <T> T lookup(String name, Class<T> requiredType) throws NamingException {
 		Object jndiObject = lookup(name);
 		if (requiredType != null && !requiredType.isInstance(jndiObject)) {
 			throw new TypeMismatchNamingException(
 					name, requiredType, (jndiObject != null ? jndiObject.getClass() : null));
 		}
-		return jndiObject;
+		return (T) jndiObject;
 	}
 
 	/**

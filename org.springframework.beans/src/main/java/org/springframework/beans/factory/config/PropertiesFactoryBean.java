@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,11 @@ import org.springframework.core.io.support.PropertiesLoaderSupport;
  * @see java.util.Properties
  */
 public class PropertiesFactoryBean extends PropertiesLoaderSupport
-		implements FactoryBean, InitializingBean {
+		implements FactoryBean<Properties>, InitializingBean {
 
 	private boolean singleton = true;
 
-	private Object singletonInstance;
+	private Properties singletonInstance;
 
 
 	/**
@@ -66,36 +66,21 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 
 	public final void afterPropertiesSet() throws IOException {
 		if (this.singleton) {
-			this.singletonInstance = createInstance();
+			this.singletonInstance = mergeProperties();
 		}
 	}
 
-	public final Object getObject() throws IOException {
+	public final Properties getObject() throws IOException {
 		if (this.singleton) {
 			return this.singletonInstance;
 		}
 		else {
-			return createInstance();
+			return mergeProperties();
 		}
 	}
 
-	public Class getObjectType() {
+	public Class<Properties> getObjectType() {
 		return Properties.class;
-	}
-
-
-	/**
-	 * Template method that subclasses may override to construct the object
-	 * returned by this factory. The default implementation returns the
-	 * plain merged Properties instance.
-	 * <p>Invoked on initialization of this FactoryBean in case of a
-	 * shared singleton; else, on each {@link #getObject()} call.
-	 * @return the object returned by this factory
-	 * @throws IOException if an exception occured during properties loading
-	 * @see #mergeProperties()
-	 */
-	protected Object createInstance() throws IOException {
-		return mergeProperties();
 	}
 
 }

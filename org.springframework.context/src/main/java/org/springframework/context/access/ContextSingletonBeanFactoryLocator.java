@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	private static final String DEFAULT_RESOURCE_LOCATION = "classpath*:beanRefContext.xml";
 
 	/** The keyed singleton instances */
-	private static final Map instances = new HashMap();
+	private static final Map<String, BeanFactoryLocator> instances = new HashMap<String, BeanFactoryLocator>();
 
 
 	/**
@@ -101,7 +101,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 				logger.trace("ContextSingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
 						instances.hashCode() + ", instances=" + instances);
 			}
-			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(resourceLocation);
+			BeanFactoryLocator bfl = instances.get(resourceLocation);
 			if (bfl == null) {
 				bfl = new ContextSingletonBeanFactoryLocator(resourceLocation);
 				instances.put(resourceLocation, bfl);

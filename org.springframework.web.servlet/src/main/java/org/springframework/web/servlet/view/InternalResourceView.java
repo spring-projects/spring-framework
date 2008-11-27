@@ -128,7 +128,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * feature exists for Servlet 2.3 containers and misbehaving 2.4 containers.
 	 */
 	public void setExposeForwardAttributes(boolean exposeForwardAttributes) {
-		this.exposeForwardAttributes = Boolean.valueOf(exposeForwardAttributes);
+		this.exposeForwardAttributes = exposeForwardAttributes;
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	@Override
 	protected void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// Determine which request handle to expose to the RequestDispatcher.
 		HttpServletRequest requestToExpose = getRequestToExpose(request);
@@ -331,7 +331,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
-		if (this.exposeForwardAttributes != null && this.exposeForwardAttributes.booleanValue()) {
+		if (this.exposeForwardAttributes != null && this.exposeForwardAttributes) {
 			WebUtils.exposeForwardRequestAttributes(request);
 		}
 	}

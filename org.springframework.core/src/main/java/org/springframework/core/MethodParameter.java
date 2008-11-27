@@ -19,6 +19,8 @@ package org.springframework.core;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +61,7 @@ public class MethodParameter {
 	/** Map from Integer level to Integer type index */
 	private Map<Integer,Integer> typeIndexesPerLevel;
 
-	Map typeVariableMap;
+	Map<TypeVariable, Type> typeVariableMap;
 
 
 	/**

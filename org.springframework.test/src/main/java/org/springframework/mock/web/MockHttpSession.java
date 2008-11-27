@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.mock.web;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -60,7 +60,7 @@ public class MockHttpSession implements HttpSession {
 
 	private final ServletContext servletContext;
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private boolean invalid = false;
 
@@ -136,12 +136,12 @@ public class MockHttpSession implements HttpSession {
 		return getAttribute(name);
 	}
 
-	public Enumeration getAttributeNames() {
-		return this.attributes.keys();
+	public Enumeration<String> getAttributeNames() {
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public String[] getValueNames() {
-		return (String[]) this.attributes.keySet().toArray(new String[this.attributes.size()]);
+		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
 	}
 
 	public void setAttribute(String name, Object value) {
@@ -177,9 +177,9 @@ public class MockHttpSession implements HttpSession {
 	 * Clear all of this session's attributes.
 	 */
 	public void clearAttributes() {
-		for (Iterator it = this.attributes.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String name = (String) entry.getKey();
+		for (Iterator<Map.Entry<String, Object>> it = this.attributes.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, Object> entry = it.next();
+			String name = entry.getKey();
 			Object value = entry.getValue();
 			it.remove();
 			if (value instanceof HttpSessionBindingListener) {
@@ -212,14 +212,14 @@ public class MockHttpSession implements HttpSession {
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
-		HashMap state = new HashMap();
-		for (Iterator it = this.attributes.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String name = (String) entry.getKey();
+		HashMap<String, Serializable> state = new HashMap<String, Serializable>();
+		for (Iterator<Map.Entry<String, Object>> it = this.attributes.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, Object> entry = it.next();
+			String name = entry.getKey();
 			Object value = entry.getValue();
 			it.remove();
 			if (value instanceof Serializable) {
-				state.put(name, value);
+				state.put(name, (Serializable) value);
 			}
 			else {
 				// Not serializable... Servlet containers usually automatically
@@ -237,9 +237,10 @@ public class MockHttpSession implements HttpSession {
 	 * created by {@link #serializeState()}.
 	 * @param state a representation of this session's serialized state
 	 */
+	@SuppressWarnings("unchecked")
 	public void deserializeState(Serializable state) {
 		Assert.isTrue(state instanceof Map, "Serialized state needs to be of type [java.util.Map]");
-		this.attributes.putAll((Map) state);
+		this.attributes.putAll((Map<String, Object>) state);
 	}
 
 }

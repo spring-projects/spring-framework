@@ -18,12 +18,10 @@ package org.springframework.web.portlet.handler;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
@@ -40,11 +38,11 @@ import org.springframework.util.Assert;
  * @see #getLookupKey(javax.portlet.PortletRequest)
  * @see #registerHandler(Object, Object)
  */
-public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapping {
+public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerMapping {
 
 	private boolean lazyInitHandlers = false;
 
-	private final Map handlerMap = new HashMap();
+	private final Map<K, Object> handlerMap = new HashMap<K, Object>();
 
 
 	/**
@@ -67,18 +65,20 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * @see #getLookupKey
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object getHandlerInternal(PortletRequest request) throws Exception {
-		Object lookupKey = getLookupKey(request);
+		K lookupKey = getLookupKey(request);
 		Object handler = this.handlerMap.get(lookupKey);
 		if (handler != null && logger.isDebugEnabled()) {
 			logger.debug("Key [" + lookupKey + "] -> handler [" + handler + "]");
 		}
 		if (handler instanceof Map) {
-			Map predicateMap = (Map) handler;
-			List predicates = new LinkedList(predicateMap.keySet());
+			Map<PortletRequestMappingPredicate, Object> predicateMap =
+					(Map<PortletRequestMappingPredicate, Object>) handler;
+			List<PortletRequestMappingPredicate> predicates =
+					new LinkedList<PortletRequestMappingPredicate>(predicateMap.keySet());
 			Collections.sort(predicates);
-			for (Iterator it = predicates.iterator(); it.hasNext();) {
-				PortletRequestMappingPredicate predicate = (PortletRequestMappingPredicate) it.next();
+			for (PortletRequestMappingPredicate predicate : predicates) {
 				if (predicate.match(request)) {
 					return predicateMap.get(predicate);
 				}
@@ -94,7 +94,7 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * @return the lookup key (never <code>null</code>)
 	 * @throws Exception if key computation failed
 	 */
-	protected abstract Object getLookupKey(PortletRequest request) throws Exception;
+	protected abstract K getLookupKey(PortletRequest request) throws Exception;
 
 
 	/**
@@ -102,10 +102,9 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * @param handlerMap Map with lookup keys as keys and handler beans or bean names as values
 	 * @throws BeansException if the handler couldn't be registered
 	 */
-	protected void registerHandlers(Map handlerMap) throws BeansException {
+	protected void registerHandlers(Map<K, ?> handlerMap) throws BeansException {
 		Assert.notNull(handlerMap, "Handler Map must not be null");
-		for (Iterator it = handlerMap.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry<K, ?> entry : handlerMap.entrySet()) {
 			registerHandler(entry.getKey(), entry.getValue());
 		}
 	}
@@ -118,7 +117,7 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(Object lookupKey, Object handler) throws BeansException, IllegalStateException {
+	protected void registerHandler(K lookupKey, Object handler) throws BeansException, IllegalStateException {
 		registerHandler(lookupKey, handler, null);
 	}
 
@@ -132,7 +131,8 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(Object lookupKey, Object handler, PortletRequestMappingPredicate predicate)
+	@SuppressWarnings("unchecked")
+	protected void registerHandler(K lookupKey, Object handler, PortletRequestMappingPredicate predicate)
 			throws BeansException, IllegalStateException {
 
 		Assert.notNull(lookupKey, "Lookup key must not be null");
@@ -158,9 +158,10 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 		else {
 			if (predicate != null) {
 				// Add the handler to the predicate map.
-				Map predicateMap = (Map) mappedHandler;
+				Map<PortletRequestMappingPredicate, Object> predicateMap =
+						(Map<PortletRequestMappingPredicate, Object>) mappedHandler;
 				if (predicateMap == null) {
-					predicateMap = new LinkedHashMap();
+					predicateMap = new LinkedHashMap<PortletRequestMappingPredicate, Object>();
 					this.handlerMap.put(lookupKey, predicateMap);
 				}
 				predicateMap.put(predicate, resolvedHandler);

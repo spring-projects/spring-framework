@@ -123,7 +123,7 @@ public class Selection extends SpelNode {
 
 	@Override
 	public String toStringAST() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		switch (variant) {
 		case ALL:
 			sb.append("?{");

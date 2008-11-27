@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Hashtable;
-
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -59,7 +60,7 @@ public class MockPageContext extends PageContext {
 
 	private final ServletConfig servletConfig;
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new HashMap<String, Object>();
 
 	private JspWriter out;
 
@@ -244,11 +245,12 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
-	public Enumeration getAttributeNames() {
-		return this.attributes.keys();
+	public Enumeration<String> getAttributeNames() {
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
-	public Enumeration getAttributeNamesInScope(int scope) {
+	@SuppressWarnings("unchecked")
+	public Enumeration<String> getAttributeNamesInScope(int scope) {
 		switch (scope) {
 			case PAGE_SCOPE:
 				return getAttributeNames();

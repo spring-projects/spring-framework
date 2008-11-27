@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,12 @@ import junit.framework.TestCase;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * <p>
  * Convenient JUnit 3.8 base class for tests dealing with Spring Web MVC
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
- * </p>
- * <p>
- * All <code>assert*()</code> methods throw {@link AssertionFailedError}s.
- * </p>
- * <p>
- * Consider the use of {@link ModelAndViewAssert} with JUnit 4 and TestNG.
- * </p>
+ *
+ * <p>All <code>assert*()</code> methods throw {@link AssertionFailedError}s.
+ *
+ * <p>Consider the use of {@link ModelAndViewAssert} with JUnit 4 and TestNG.
  *
  * @author Alef Arendsen
  * @author Bram Smeets
@@ -43,14 +39,16 @@ import org.springframework.web.servlet.ModelAndView;
  * @since 2.0
  * @see org.springframework.web.servlet.ModelAndView
  * @see ModelAndViewAssert
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
 	 * Checks whether the model value under the given <code>modelName</code>
 	 * exists and checks it type, based on the <code>expectedType</code>. If
 	 * the model entry exists and the type matches, the model value is returned.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -58,7 +56,6 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * @return the model value
 	 */
 	protected Object assertAndReturnModelAttributeOfType(ModelAndView mav, Object modelName, Class expectedType) {
-
 		try {
 			return ModelAndViewAssert.assertAndReturnModelAttributeOfType(mav, modelName, expectedType);
 		}
@@ -69,14 +66,12 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
 	 * Compare each individual entry in a list, without first sorting the lists.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
 	 * @param expectedList the expected list
 	 */
 	protected void assertCompareListModelAttribute(ModelAndView mav, Object modelName, List expectedList) {
-
 		try {
 			ModelAndViewAssert.assertCompareListModelAttribute(mav, modelName, expectedList);
 		}
@@ -87,13 +82,11 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
 	 * Assert whether or not a model attribute is available.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
 	 */
 	protected void assertModelAttributeAvailable(ModelAndView mav, Object modelName) {
-
 		try {
 			ModelAndViewAssert.assertModelAttributeAvailable(mav, modelName);
 		}
@@ -105,14 +98,12 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	/**
 	 * Compare a given <code>expectedValue</code> to the value from the model
 	 * bound under the given <code>modelName</code>.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
 	 * @param expectedValue the model value
 	 */
 	protected void assertModelAttributeValue(ModelAndView mav, Object modelName, Object expectedValue) {
-
 		try {
 			ModelAndViewAssert.assertModelAttributeValue(mav, modelName, expectedValue);
 		}
@@ -124,12 +115,10 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	/**
 	 * Inspect the <code>expectedModel</code> to see if all elements in the
 	 * model appear and are equal.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedModel the expected model
 	 */
 	protected void assertModelAttributeValues(ModelAndView mav, Map expectedModel) {
-
 		try {
 			ModelAndViewAssert.assertModelAttributeValues(mav, expectedModel);
 		}
@@ -141,7 +130,6 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	/**
 	 * Compare each individual entry in a list after having sorted both lists
 	 * (optionally using a comparator).
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -152,7 +140,6 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 */
 	protected void assertSortAndCompareListModelAttribute(
 			ModelAndView mav, Object modelName, List expectedList, Comparator comparator) {
-
 		try {
 			ModelAndViewAssert.assertSortAndCompareListModelAttribute(mav, modelName, expectedList, comparator);
 		}
@@ -164,12 +151,10 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	/**
 	 * Check to see if the view name in the ModelAndView matches the given
 	 * <code>expectedName</code>.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedName the name of the model value
 	 */
 	protected void assertViewName(ModelAndView mav, String expectedName) {
-
 		try {
 			ModelAndViewAssert.assertViewName(mav, expectedName);
 		}

@@ -432,7 +432,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	// JmsOperations execute methods
 	//-------------------------------------------------------------------------
 
-	public Object execute(SessionCallback action) throws JmsException {
+	public <T> T execute(SessionCallback<T> action) throws JmsException {
 		return execute(action, false);
 	}
 
@@ -450,7 +450,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #execute(SessionCallback)
 	 * @see #receive
 	 */
-	public Object execute(SessionCallback action, boolean startConnection) throws JmsException {
+	public <T> T execute(SessionCallback<T> action, boolean startConnection) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		Connection conToClose = null;
 		Session sessionToClose = null;
@@ -479,7 +479,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	public Object execute(ProducerCallback action) throws JmsException {
+	public <T> T execute(ProducerCallback<T> action) throws JmsException {
 		String defaultDestinationName = getDefaultDestinationName();
 		if (defaultDestinationName != null) {
 			return execute(defaultDestinationName, action);
@@ -489,10 +489,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	public Object execute(final Destination destination, final ProducerCallback action) throws JmsException {
+	public <T> T execute(final Destination destination, final ProducerCallback<T> action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
-		return execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
+		return execute(new SessionCallback<T>() {
+			public T doInJms(Session session) throws JMSException {
 				MessageProducer producer = createProducer(session, destination);
 				try {
 					return action.doInJms(session, producer);
@@ -504,10 +504,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}, false);
 	}
 
-	public Object execute(final String destinationName, final ProducerCallback action) throws JmsException {
+	public <T> T execute(final String destinationName, final ProducerCallback<T> action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
-		return execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
+		return execute(new SessionCallback<T>() {
+			public T doInJms(Session session) throws JMSException {
 				Destination destination = resolveDestinationName(session, destinationName);
 				MessageProducer producer = createProducer(session, destination);
 				try {
@@ -826,7 +826,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	// Convenience methods for browsing messages
 	//-------------------------------------------------------------------------
 
-	public Object browse(BrowserCallback action) throws JmsException {
+	public <T> T browse(BrowserCallback<T> action) throws JmsException {
 		Queue defaultQueue = getDefaultQueue();
 		if (defaultQueue != null) {
 			return browse(defaultQueue, action);
@@ -836,15 +836,15 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	public Object browse(Queue queue, BrowserCallback action) throws JmsException {
+	public <T> T browse(Queue queue, BrowserCallback<T> action) throws JmsException {
 		return browseSelected(queue, null, action);
 	}
 
-	public Object browse(String queueName, BrowserCallback action) throws JmsException {
+	public <T> T browse(String queueName, BrowserCallback<T> action) throws JmsException {
 		return browseSelected(queueName, null, action);
 	}
 
-	public Object browseSelected(String messageSelector, BrowserCallback action) throws JmsException {
+	public <T> T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException {
 		Queue defaultQueue = getDefaultQueue();
 		if (defaultQueue != null) {
 			return browseSelected(defaultQueue, messageSelector, action);
@@ -854,12 +854,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	public Object browseSelected(final Queue queue, final String messageSelector, final BrowserCallback action)
+	public <T> T browseSelected(final Queue queue, final String messageSelector, final BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");
-		return execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
+		return execute(new SessionCallback<T>() {
+			public T doInJms(Session session) throws JMSException {
 				QueueBrowser browser = createBrowser(session, queue, messageSelector);
 				try {
 					return action.doInJms(session, browser);
@@ -871,12 +871,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}, true);
 	}
 
-	public Object browseSelected(final String queueName, final String messageSelector, final BrowserCallback action)
+	public <T> T browseSelected(final String queueName, final String messageSelector, final BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");
-		return execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
+		return execute(new SessionCallback<T>() {
+			public T doInJms(Session session) throws JMSException {
 				Queue queue = (Queue) getDestinationResolver().resolveDestinationName(session, queueName, false);
 				QueueBrowser browser = createBrowser(session, queue, messageSelector);
 				try {

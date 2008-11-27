@@ -18,7 +18,6 @@ package org.springframework.test.jdbc;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +30,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.util.StringUtils;
 
 /**
  * A Java-5-based collection of JDBC related utility functions intended to
@@ -65,11 +63,11 @@ public abstract class SimpleJdbcTestUtils {
 	 */
 	public static int deleteFromTables(SimpleJdbcTemplate simpleJdbcTemplate, String... tableNames) {
 		int totalRowCount = 0;
-		for (int i = 0; i < tableNames.length; i++) {
-			int rowCount = simpleJdbcTemplate.update("DELETE FROM " + tableNames[i]);
+		for (String tableName : tableNames) {
+			int rowCount = simpleJdbcTemplate.update("DELETE FROM " + tableName);
 			totalRowCount += rowCount;
 			if (logger.isInfoEnabled()) {
-				logger.info("Deleted " + rowCount + " rows from table " + tableNames[i]);
+				logger.info("Deleted " + rowCount + " rows from table " + tableName);
 			}
 		}
 		return totalRowCount;
@@ -145,8 +143,7 @@ public abstract class SimpleJdbcTestUtils {
 				delimiter = '\n';			
 			}
 			JdbcTestUtils.splitSqlScript(script, delimiter, statements);
-			for (Iterator<String> itr = statements.iterator(); itr.hasNext();) {
-				String statement = itr.next();
+			for (String statement : statements) {
 				try {
 					int rowsAffected = simpleJdbcTemplate.update(statement);
 					if (logger.isDebugEnabled()) {

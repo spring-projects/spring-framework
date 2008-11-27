@@ -738,7 +738,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
 			}
 			else {
-				StringBuffer msg = new StringBuffer();
+				StringBuilder msg = new StringBuilder();
 				msg.append("Setup of JMS message listener invoker failed for destination '");
 				msg.append(getDestinationDescription()).append("' - trying to recover. Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
@@ -791,7 +791,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
-				StringBuffer msg = new StringBuffer();
+				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying in ");
 				msg.append(this.recoveryInterval).append(" ms. Cause: ");

@@ -17,9 +17,7 @@
 package org.springframework.web.portlet.mvc;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
@@ -83,7 +81,9 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @see #validatePage
  * @see #processFinish
  * @see #processCancel
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class AbstractWizardFormController extends AbstractFormController {
 
 	/**
@@ -480,10 +480,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected void setTargetRenderParameter(ActionRequest request, ActionResponse response) {
 		try {
-			Iterator it = PortletUtils.getParametersStartingWith(request, PARAM_TARGET).entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String param = PARAM_TARGET + (String) entry.getKey();
+			Map<String, Object> params = PortletUtils.getParametersStartingWith(request, PARAM_TARGET);
+			for (Map.Entry<String, Object> entry : params.entrySet()) {
+				String param = PARAM_TARGET + entry.getKey();
 				Object value = entry.getValue();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Setting target render parameter [" + param + "]");

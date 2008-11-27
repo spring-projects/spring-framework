@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,17 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Iterator;
-
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JRExporterParameter;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsViewTests {
 
-	protected void extendModel(Map model) {
+	protected void extendModel(Map<String, Object> model) {
 		model.put(getDiscriminatorKey(), "csv");
 	}
 
@@ -42,7 +40,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
-		Map model = getBaseModel();
+		Map<String, Object> model = getBaseModel();
 		model.put(getDiscriminatorKey(), "html");
 
 		view.render(model, request, response);
@@ -57,7 +55,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
-		Map model = getBaseModel();
+		Map<String, Object> model = getBaseModel();
 		model.put(getDiscriminatorKey(), "csv");
 
 		String headerValue = "inline; filename=foo.txt";
@@ -80,10 +78,10 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 		JasperReportsMultiFormatView view = (JasperReportsMultiFormatView) getView(UNCOMPILED_REPORT);
 
-		Properties mappings = new Properties();
-		mappings.put("test", ExporterParameterTestView.class.getName());
+		Map<String, Class> mappings = new HashMap<String, Class>();
+		mappings.put("test", ExporterParameterTestView.class);
 
-		Map exporterParameters = new HashMap();
+		Map<String, String> exporterParameters = new HashMap<String, String>();
 
 		// test view class performs the assertions - robh
 		exporterParameters.put(ExporterParameterTestView.TEST_PARAM, "foo");
@@ -92,7 +90,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		view.setFormatMappings(mappings);
 		view.initApplicationContext();
 
-		Map model = getBaseModel();
+		Map<String, Object> model = getBaseModel();
 		model.put(getDiscriminatorKey(), "test");
 
 		view.render(model, request, response);
@@ -110,8 +108,8 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		return "text/csv";
 	}
 
-	private Map getBaseModel() {
-		Map model = new HashMap();
+	private Map<String, Object> getBaseModel() {
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("ReportTitle", "Foo");
 		model.put("dataSource", getData());
 		return model;

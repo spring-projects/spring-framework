@@ -74,7 +74,7 @@ import org.springframework.util.StringUtils;
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
-	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
+	private static final Set<PointcutPrimitive> DEFAULT_SUPPORTED_PRIMITIVES = new HashSet<PointcutPrimitive>();
 
 	static {
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
@@ -92,7 +92,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
-	private final Map shadowMapCache = new HashMap();
+	private final Map<Method, ShadowMatch> shadowMatchCache = new HashMap<Method, ShadowMatch>();
 
 	private PointcutParser pointcutParser;
 
@@ -364,8 +364,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
-		synchronized (this.shadowMapCache) {
-			ShadowMatch shadowMatch = (ShadowMatch) this.shadowMapCache.get(targetMethod);
+		synchronized (this.shadowMatchCache) {
+			ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
 			if (shadowMatch == null) {
 				try {
 					shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
@@ -378,7 +378,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 					}
 					shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
 				}
-				this.shadowMapCache.put(targetMethod, shadowMatch);
+				this.shadowMatchCache.put(targetMethod, shadowMatch);
 			}
 			return shadowMatch;
 		}
@@ -520,8 +520,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			}
 			if (beanFactory != null) {
 				String[] aliases = beanFactory.getAliases(advisedBeanName);
-				for (int i = 0; i < aliases.length; i++) {
-					if (this.expressionPattern.matches(aliases[i])) {
+				for (String alias : aliases) {
+					if (this.expressionPattern.matches(alias)) {
 						return true;
 					}
 				}

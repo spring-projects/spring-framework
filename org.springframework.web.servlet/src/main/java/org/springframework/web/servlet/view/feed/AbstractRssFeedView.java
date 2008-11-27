@@ -26,56 +26,55 @@ import com.sun.syndication.feed.rss.Channel;
 import com.sun.syndication.feed.rss.Item;
 
 /**
- * Abstract superclass for RSS Feed views, using java.net's <a href="https://rome.dev.java.net/">ROME</a> package.
- * Application-specific view classes will extend this class. The view will be held in the subclass itself, not in a
- * template.
+ * Abstract superclass for RSS Feed views, using java.net's
+ * <a href="https://rome.dev.java.net/">ROME</a> package.
  *
- * <p/>Main entry points are the {@link #buildFeedMetadata(Map, WireFeed , HttpServletRequest)} and {@link
- * #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)}.
+ * <p>Application-specific view classes will extend this class.
+ * The view will be held in the subclass itself, not in a template.
  *
- * @author Jettro Coenradie
- * @author Sergio Bossa
+ * <p/>Main entry points are the {@link #buildFeedMetadata(Map, WireFeed , HttpServletRequest)}
+ * and {@link #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)}.
+ *
+ * <p>Thanks to Jettro Coenradie and Sergio Bossa for the original feed view prototype!
+ *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @since 3.0
  * @see #buildFeedMetadata(Map, WireFeed , HttpServletRequest)
  * @see #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)
- * @since 3.0
  */
 public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 
-	/** Sets the appropriate content type: "application/rss+xml". */
-	protected AbstractRssFeedView() {
+	public AbstractRssFeedView() {
 		setContentType("application/rss+xml");
 	}
 
 	/**
-	 * Create a new channel to hold the entries.
-	 *
-	 * <p/>By default returns an RSS 2.0 channel, but the subclass can specify any channel.
-	 *
-	 * @return the newly created Feed instance
-	 * @see Channel#Channel(String)
+	 * Create a new Channel instance to hold the entries.
+	 * <p>By default returns an RSS 2.0 channel, but the subclass can specify any channel.
 	 */
 	@Override
 	protected Channel newFeed() {
 		return new Channel("rss_2.0");
 	}
 
-	/** Invokes {@link #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)} to get a list of feed items. */
+	/**
+	 * Invokes {@link #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)}
+	 * to get a list of feed items.
+	 */
 	@Override
-	protected final void buildFeedEntries(Map model,
-										  Channel channel,
-										  HttpServletRequest request,
-										  HttpServletResponse response) throws Exception {
+	protected final void buildFeedEntries(Map<String, Object> model, Channel channel,
+			HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		List<Item> items = buildFeedItems(model, request, response);
 		channel.setItems(items);
 	}
 
 	/**
 	 * Subclasses must implement this method to build feed items, given the model.
-	 *
-	 * <p/>Note that the passed-in HTTP response is just supposed to be used for setting cookies or other HTTP headers. The
-	 * built feed itself will automatically get written to the response after this method returns.
-	 *
+	 * <p>Note that the passed-in HTTP response is just supposed to be used for
+	 * setting cookies or other HTTP headers. The built feed itself will automatically
+	 * get written to the response after this method returns.
 	 * @param model	the model Map
 	 * @param request  in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
@@ -83,6 +82,8 @@ public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 	 * @throws Exception any exception that occured during document building
 	 * @see Item
 	 */
-	protected abstract List<Item> buildFeedItems(Map model, HttpServletRequest request, HttpServletResponse response)
+	protected abstract List<Item> buildFeedItems(
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
+
 }

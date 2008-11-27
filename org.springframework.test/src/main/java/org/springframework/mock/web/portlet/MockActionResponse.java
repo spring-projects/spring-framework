@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.mock.web.portlet;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.LinkedHashMap;
-
+import java.util.Map;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletMode;
@@ -29,7 +28,6 @@ import javax.portlet.PortletModeException;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -48,7 +46,7 @@ public class MockActionResponse extends MockPortletResponse implements ActionRes
 
 	private String redirectedUrl;
 
-	private final Map renderParameters = new LinkedHashMap(16);
+	private final Map<String, String[]> renderParameters = new LinkedHashMap<String, String[]>();
 
 
 	/**
@@ -120,7 +118,7 @@ public class MockActionResponse extends MockPortletResponse implements ActionRes
 			Map.Entry entry = (Map.Entry) it.next();
 			Assert.isTrue(entry.getKey() instanceof String, "Key must be of type String");
 			Assert.isTrue(entry.getValue() instanceof String[], "Value must be of type String[]");
-			this.renderParameters.put(entry.getKey(), entry.getValue());
+			this.renderParameters.put((String) entry.getKey(), (String[]) entry.getValue());
 		}
 	}
 
@@ -133,8 +131,9 @@ public class MockActionResponse extends MockPortletResponse implements ActionRes
 		this.renderParameters.put(key, new String[] {value});
 	}
 
-	public String getRenderParameter(String name) {
-		String[] arr = (String[]) this.renderParameters.get(name);
+	public String getRenderParameter(String key) {
+		Assert.notNull(key, "Parameter key must not be null");
+		String[] arr = this.renderParameters.get(key);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
@@ -149,7 +148,7 @@ public class MockActionResponse extends MockPortletResponse implements ActionRes
 
 	public String[] getRenderParameterValues(String key) {
 		Assert.notNull(key, "Parameter key must not be null");
-		return (String[]) this.renderParameters.get(key);
+		return this.renderParameters.get(key);
 	}
 
 	public Iterator getRenderParameterNames() {

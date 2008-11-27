@@ -29,13 +29,12 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
@@ -121,7 +120,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String remoteHost = DEFAULT_REMOTE_HOST;
 
 	/** List of locales in descending order */
-	private final Vector locales = new Vector();
+	private final List<Locale> locales = new LinkedList<Locale>();
 
 	private boolean secure = false;
 
@@ -147,7 +146,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
 	 */
-	private final Hashtable headers = new Hashtable();
+	private final Map<String, HeaderValueHolder> headers = new Hashtable<String, HeaderValueHolder>();
 
 	private String method;
 
@@ -159,7 +158,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteUser;
 
-	private final Set userRoles = new HashSet();
+	private final Set<String> userRoles = new HashSet<String>();
 
 	private Principal userPrincipal;
 
@@ -284,7 +283,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.attributes.get(name);
 	}
 
-	public Enumeration getAttributeNames() {
+	public Enumeration<String> getAttributeNames() {
 		checkActive();
 		return this.attributes.keys();
 	}
@@ -439,7 +438,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
-	public Enumeration getParameterNames() {
+	public Enumeration<String> getParameterNames() {
 		return Collections.enumeration(this.parameters.keySet());
 	}
 
@@ -545,11 +544,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public Locale getLocale() {
-		return (Locale) this.locales.get(0);
+		return this.locales.get(0);
 	}
 
-	public Enumeration getLocales() {
-		return this.locales.elements();
+	public Enumeration<Locale> getLocales() {
+		return Collections.enumeration(this.locales);
 	}
 
 	public void setSecure(boolean secure) {
@@ -679,13 +678,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return (header != null ? header.getValue().toString() : null);
 	}
 
-	public Enumeration getHeaders(String name) {
+	public Enumeration<Object> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return Collections.enumeration(header != null ? header.getValues() : Collections.EMPTY_LIST);
+		return Collections.enumeration(header != null ? header.getValues() : Collections.emptyList());
 	}
 
-	public Enumeration getHeaderNames() {
-		return this.headers.keys();
+	public Enumeration<String> getHeaderNames() {
+		return Collections.enumeration(this.headers.keySet());
 	}
 
 	public int getIntHeader(String name) {

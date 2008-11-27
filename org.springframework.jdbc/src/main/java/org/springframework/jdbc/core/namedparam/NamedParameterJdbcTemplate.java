@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	private final JdbcOperations classicJdbcTemplate;
 
 	/** Map of original SQL String to ParsedSql representation */
-	private final Map parsedSqlCache = new HashMap();
+	private final Map<String, ParsedSql> parsedSqlCache = new HashMap<String, ParsedSql>();
 
 
 	/**
@@ -97,23 +97,27 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 
-	public Object execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback action)
+	public <T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return getJdbcOperations().execute(getPreparedStatementCreator(sql, paramSource), action);
 	}
 
-	public Object execute(String sql, Map paramMap, PreparedStatementCallback action) throws DataAccessException {
+	public <T> T execute(String sql, Map<String, Object> paramMap, PreparedStatementCallback<T> action)
+			throws DataAccessException {
+
 		return execute(sql, new MapSqlParameterSource(paramMap), action);
 	}
 
-	public Object query(String sql, SqlParameterSource paramSource, ResultSetExtractor rse)
+	public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rse);
 	}
 
-	public Object query(String sql, Map paramMap, ResultSetExtractor rse) throws DataAccessException {
+	public <T> T query(String sql, Map<String, Object> paramMap, ResultSetExtractor<T> rse)
+			throws DataAccessException {
+
 		return query(sql, new MapSqlParameterSource(paramMap), rse);
 	}
 
@@ -123,90 +127,105 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rch);
 	}
 
-	public void query(String sql, Map paramMap, RowCallbackHandler rch) throws DataAccessException {
+	public void query(String sql, Map<String, Object> paramMap, RowCallbackHandler rch)
+			throws DataAccessException {
+
 		query(sql, new MapSqlParameterSource(paramMap), rch);
 	}
 
-	public List query(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
+	public <T> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 	}
 
-	public List query(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
+	public <T> List<T> query(String sql, Map<String, Object> paramMap, RowMapper<T> rowMapper)
+			throws DataAccessException {
+
 		return query(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
-	public Object queryForObject(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
+	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
-		List results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
+		List<T> results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
-	public Object queryForObject(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
+	public <T> T queryForObject(String sql, Map<String, Object> paramMap, RowMapper<T>rowMapper)
+			throws DataAccessException {
+
 		return queryForObject(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
-	public Object queryForObject(String sql, SqlParameterSource paramSource, Class requiredType)
+	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
-		return queryForObject(sql, paramSource, new SingleColumnRowMapper(requiredType));
+		return queryForObject(sql, paramSource, new SingleColumnRowMapper<T>(requiredType));
 	}
 
-	public Object queryForObject(String sql, Map paramMap, Class requiredType) throws DataAccessException {
-		return queryForObject(sql, paramMap, new SingleColumnRowMapper(requiredType));
+	public <T> T queryForObject(String sql, Map<String, Object> paramMap, Class<T> requiredType)
+			throws DataAccessException {
+
+		return queryForObject(sql, paramMap, new SingleColumnRowMapper<T>(requiredType));
 	}
 
-	public Map queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		return (Map) queryForObject(sql, paramSource, new ColumnMapRowMapper());
+	public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
 	}
 
-	public Map queryForMap(String sql, Map paramMap) throws DataAccessException {
-		return (Map) queryForObject(sql, paramMap, new ColumnMapRowMapper());
+	public Map<String, Object> queryForMap(String sql, Map<String, Object> paramMap) throws DataAccessException {
+		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
 	}
 
 	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = (Number) queryForObject(sql, paramSource, Number.class);
+		Number number = queryForObject(sql, paramSource, Number.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
-	public long queryForLong(String sql, Map paramMap) throws DataAccessException {
+	public long queryForLong(String sql, Map<String, Object> paramMap) throws DataAccessException {
 		return queryForLong(sql, new MapSqlParameterSource(paramMap));
 	}
 
 	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = (Number) queryForObject(sql, paramSource, Number.class);
+		Number number = queryForObject(sql, paramSource, Number.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public int queryForInt(String sql, Map paramMap) throws DataAccessException {
+	public int queryForInt(String sql, Map<String, Object> paramMap) throws DataAccessException {
 		return queryForInt(sql, new MapSqlParameterSource(paramMap));
 	}
 
-	public List queryForList(String sql, SqlParameterSource paramSource, Class elementType)
+	public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
-		return query(sql, paramSource, new SingleColumnRowMapper(elementType));
+
+		return query(sql, paramSource, new SingleColumnRowMapper<T>(elementType));
 	}
 
-	public List queryForList(String sql, Map paramMap, Class elementType) throws DataAccessException {
+	public <T> List<T> queryForList(String sql, Map<String, Object> paramMap, Class<T> elementType)
+			throws DataAccessException {
+
 		return queryForList(sql, new MapSqlParameterSource(paramMap), elementType);
 	}
 
-	public List queryForList(String sql, SqlParameterSource paramSource) throws DataAccessException {
+	public List<Map<String, Object>> queryForList(String sql, SqlParameterSource paramSource)
+			throws DataAccessException {
+
 		return query(sql, paramSource, new ColumnMapRowMapper());
 	}
 
-	public List queryForList(String sql, Map paramMap) throws DataAccessException {
+	public List<Map<String, Object>> queryForList(String sql, Map<String, Object> paramMap)
+			throws DataAccessException {
+
 		return queryForList(sql, new MapSqlParameterSource(paramMap));
 	}
 
 	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		return (SqlRowSet) getJdbcOperations().query(
+		return getJdbcOperations().query(
 				getPreparedStatementCreator(sql, paramSource), new SqlRowSetResultSetExtractor());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Map<String, Object> paramMap) throws DataAccessException {
 		return queryForRowSet(sql, new MapSqlParameterSource(paramMap));
 	}
 
@@ -214,7 +233,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().update(getPreparedStatementCreator(sql, paramSource));
 	}
 
-	public int update(String sql, Map paramMap) throws DataAccessException {
+	public int update(String sql, Map<String, Object> paramMap) throws DataAccessException {
 		return update(sql, new MapSqlParameterSource(paramMap));
 	}
 
@@ -266,7 +285,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 */
 	protected ParsedSql getParsedSql(String sql) {
 		synchronized (this.parsedSqlCache) {
-			ParsedSql parsedSql = (ParsedSql) this.parsedSqlCache.get(sql);
+			ParsedSql parsedSql = this.parsedSqlCache.get(sql);
 			if (parsedSql == null) {
 				parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 				this.parsedSqlCache.put(sql, parsedSql);

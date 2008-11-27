@@ -18,12 +18,12 @@ package org.springframework.web.servlet.view.document;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -55,9 +55,9 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <p>As an example, you can try this snippet:
  *
- * <pre>
+ * <pre class="code">
  * protected void buildExcelDocument(
- *     Map model, HSSFWorkbook workbook,
+ *     Map&lt;String, Object&gt; model, HSSFWorkbook workbook,
  *     HttpServletRequest request, HttpServletResponse response) {
  *
  *   // Go to the first sheet.
@@ -131,7 +131,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	 */
 	@Override
 	protected final void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		HSSFWorkbook workbook;
 		if (this.url != null) {
@@ -185,7 +185,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
 	protected abstract void buildExcelDocument(
-			Map model, HSSFWorkbook workbook, HttpServletRequest request, HttpServletResponse response)
+			Map<String, Object> model, HSSFWorkbook workbook, HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 
 
@@ -217,7 +217,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	 */
 	protected void setText(HSSFCell cell, String text) {
 		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
-		cell.setCellValue(text);
+		cell.setCellValue(new HSSFRichTextString(text));
 	}
 
 }

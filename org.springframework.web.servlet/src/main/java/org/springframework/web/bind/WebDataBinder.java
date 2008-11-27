@@ -17,7 +17,6 @@
 package org.springframework.web.bind;
 
 import java.lang.reflect.Array;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -165,8 +164,7 @@ public class WebDataBinder extends DataBinder {
 		if (getFieldMarkerPrefix() != null) {
 			String fieldMarkerPrefix = getFieldMarkerPrefix();
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
-			for (int i = 0; i < pvArray.length; i++) {
-				PropertyValue pv = pvArray[i];
+			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldMarkerPrefix)) {
 					String field = pv.getName().substring(fieldMarkerPrefix.length());
 					if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
@@ -214,11 +212,10 @@ public class WebDataBinder extends DataBinder {
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see #setBindEmptyMultipartFiles
 	 */
-	protected void bindMultipartFiles(Map multipartFiles, MutablePropertyValues mpvs) {
-		for (Iterator it = multipartFiles.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String key = (String) entry.getKey();
-			MultipartFile value = (MultipartFile) entry.getValue();
+	protected void bindMultipartFiles(Map<String, MultipartFile> multipartFiles, MutablePropertyValues mpvs) {
+		for (Map.Entry<String, MultipartFile> entry : multipartFiles.entrySet()) {
+			String key = entry.getKey();
+			MultipartFile value = entry.getValue();
 			if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
 				mpvs.addPropertyValue(key, value);
 			}

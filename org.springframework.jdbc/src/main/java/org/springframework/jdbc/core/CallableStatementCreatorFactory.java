@@ -43,7 +43,7 @@ public class CallableStatementCreatorFactory {
 	private final String callString;
 
 	/** List of SqlParameter objects. May not be <code>null</code>. */
-	private final List declaredParameters;
+	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
@@ -58,7 +58,7 @@ public class CallableStatementCreatorFactory {
 	 */
 	public CallableStatementCreatorFactory(String callString) {
 		this.callString = callString;
-		this.declaredParameters = new LinkedList();
+		this.declaredParameters = new LinkedList<SqlParameter>();
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class CallableStatementCreatorFactory {
 	 * @param callString the SQL call string
 	 * @param declaredParameters list of {@link SqlParameter} objects
 	 */
-	public CallableStatementCreatorFactory(String callString, List declaredParameters) {
+	public CallableStatementCreatorFactory(String callString, List<SqlParameter> declaredParameters) {
 		this.callString = callString;
 		this.declaredParameters = declaredParameters;
 	}
@@ -112,8 +112,8 @@ public class CallableStatementCreatorFactory {
 	 * Return a new CallableStatementCreator instance given this parameters.
 	 * @param params list of parameters (may be <code>null</code>)
 	 */
-	public CallableStatementCreator newCallableStatementCreator(Map params) {
-		return new CallableStatementCreatorImpl(params != null ? params : new HashMap());
+	public CallableStatementCreator newCallableStatementCreator(Map<String, ?> params) {
+		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<String, Object>());
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class CallableStatementCreatorFactory {
 
 		private ParameterMapper inParameterMapper;
 
-		private Map inParameters;
+		private Map<String, ?> inParameters;
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
@@ -146,7 +146,7 @@ public class CallableStatementCreatorFactory {
 		 * Create a new CallableStatementCreatorImpl.
 		 * @param inParams list of SqlParameter objects
 		 */
-		public CallableStatementCreatorImpl(Map inParams) {
+		public CallableStatementCreatorImpl(Map<String, ?> inParams) {
 			this.inParameters = inParams;
 		}
 
@@ -178,8 +178,7 @@ public class CallableStatementCreatorFactory {
 			}
 
 			int sqlColIndx = 1;
-			for (int i = 0; i < declaredParameters.size(); i++) {
-				SqlParameter declaredParam = (SqlParameter) declaredParameters.get(i);
+			for (SqlParameter declaredParam : declaredParameters) {
 				if (!declaredParam.isResultsParameter()) {
 					// So, it's a call parameter - part of the call string.
 					// Get the value - it may still be null.
@@ -193,7 +192,7 @@ public class CallableStatementCreatorFactory {
 							}
 							else {
 								if (declaredParam.getScale() != null) {
-									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType(), declaredParam.getScale().intValue());
+									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType(), declaredParam.getScale());
 								}
 								else {
 									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType());
@@ -231,9 +230,10 @@ public class CallableStatementCreatorFactory {
 
 		@Override
 		public String toString() {
-			StringBuffer buf = new StringBuffer("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql=[");
-			buf.append(callString).append("]; parameters=").append(this.inParameters);
-			return buf.toString();
+			StringBuilder sb = new StringBuilder();
+			sb.append("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql=[");
+			sb.append(callString).append("]; parameters=").append(this.inParameters);
+			return sb.toString();
 		}
 	}
 

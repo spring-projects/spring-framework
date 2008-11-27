@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 package org.springframework.web.portlet.handler;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -48,9 +47,9 @@ import org.springframework.util.CollectionUtils;
  * @author John A. Lewis
  * @since 2.0
  */
-public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
+public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping<PortletMode> {
 
-	private final Map portletModeMap = new HashMap();
+	private final Map<String, Object> portletModeMap = new HashMap<String, Object>();
 
 
 	/**
@@ -58,7 +57,7 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * @param mappings properties with PortletMode names as keys and bean names as values
 	 */
 	public void setMappings(Properties mappings) {
-		this.portletModeMap.putAll(mappings);
+		CollectionUtils.mergePropertiesIntoMap(mappings, this.portletModeMap);
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * Convenient for population with bean references.
 	 * @param portletModeMap map with PortletMode names as keys and beans or bean names as values
 	 */
-	public void setPortletModeMap(Map portletModeMap) {
+	public void setPortletModeMap(Map<String, ?> portletModeMap) {
 		this.portletModeMap.putAll(portletModeMap);
 	}
 
@@ -79,27 +78,17 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
-		registerHandlers(this.portletModeMap);
+		registerHandlersByMode(this.portletModeMap);
 	}
 
 	/**
 	 * Register all handlers specified in the Portlet mode map for the corresponding modes.
 	 * @param portletModeMap Map with mode names as keys and handler beans or bean names as values
-	 * @throws BeansException if the handler couldn't be registered
 	 */
-	@Override
-	protected void registerHandlers(Map portletModeMap) throws BeansException {
-		if (CollectionUtils.isEmpty(portletModeMap)) {
-			logger.warn("Neither 'portletModeMap' nor 'mappings' set on PortletModeHandlerMapping");
-		}
-		else {
-			for (Iterator it = portletModeMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String modeKey = (String) entry.getKey();
-				PortletMode mode = new PortletMode(modeKey);
-				Object handler = entry.getValue();
-				registerHandler(mode, handler);
-			}
+	protected void registerHandlersByMode(Map<String, Object> portletModeMap) {
+		Assert.notNull(portletModeMap, "'portletModeMap' must not be null");
+		for (Map.Entry<String, Object> entry : portletModeMap.entrySet()) {
+			registerHandler(new PortletMode(entry.getKey()), entry.getValue());
 		}
 	}
 
@@ -108,7 +97,7 @@ public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 	 * Uses the current PortletMode as lookup key.
 	 */
 	@Override
-	protected Object getLookupKey(PortletRequest request) throws Exception {
+	protected PortletMode getLookupKey(PortletRequest request) throws Exception {
 		return request.getPortletMode();
 	}
 

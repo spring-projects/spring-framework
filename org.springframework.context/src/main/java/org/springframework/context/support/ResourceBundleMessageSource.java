@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map cachedResourceBundles = new HashMap();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
+			new HashMap<String, Map<Locale, ResourceBundle>>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -79,7 +80,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map cachedBundleMessageFormats = new HashMap();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
+			new HashMap<ResourceBundle, Map<String, Map<Locale, MessageFormat>>>();
 
 
 	/**
@@ -200,9 +202,9 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
 		synchronized (this.cachedResourceBundles) {
-			Map localeMap = (Map) this.cachedResourceBundles.get(basename);
+			Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
 			if (localeMap != null) {
-				ResourceBundle bundle = (ResourceBundle) localeMap.get(locale);
+				ResourceBundle bundle = localeMap.get(locale);
 				if (bundle != null) {
 					return bundle;
 				}
@@ -210,7 +212,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 			try {
 				ResourceBundle bundle = doGetBundle(basename, locale);
 				if (localeMap == null) {
-					localeMap = new HashMap();
+					localeMap = new HashMap<Locale, ResourceBundle>();
 					this.cachedResourceBundles.put(basename, localeMap);
 				}
 				localeMap.put(locale, bundle);
@@ -254,12 +256,12 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 			throws MissingResourceException {
 
 		synchronized (this.cachedBundleMessageFormats) {
-			Map codeMap = (Map) this.cachedBundleMessageFormats.get(bundle);
-			Map localeMap = null;
+			Map<String, Map<Locale, MessageFormat>> codeMap = this.cachedBundleMessageFormats.get(bundle);
+			Map<Locale, MessageFormat> localeMap = null;
 			if (codeMap != null) {
-				localeMap = (Map) codeMap.get(code);
+				localeMap = codeMap.get(code);
 				if (localeMap != null) {
-					MessageFormat result = (MessageFormat) localeMap.get(locale);
+					MessageFormat result = localeMap.get(locale);
 					if (result != null) {
 						return result;
 					}
@@ -269,11 +271,11 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 			String msg = getStringOrNull(bundle, code);
 			if (msg != null) {
 				if (codeMap == null) {
-					codeMap = new HashMap();
+					codeMap = new HashMap<String, Map<Locale, MessageFormat>>();
 					this.cachedBundleMessageFormats.put(bundle, codeMap);
 				}
 				if (localeMap == null) {
-					localeMap = new HashMap();
+					localeMap = new HashMap<Locale, MessageFormat>();
 					codeMap.put(code, localeMap);
 				}
 				MessageFormat result = createMessageFormat(msg, locale);

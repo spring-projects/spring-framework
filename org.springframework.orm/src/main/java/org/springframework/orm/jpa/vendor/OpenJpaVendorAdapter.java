@@ -16,9 +16,8 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
@@ -59,26 +58,25 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
-	public Map getJpaPropertyMap() {
-		Properties jpaProperties = new Properties();
+	public Map<String, Object> getJpaPropertyMap() {
+		Map<String, Object> jpaProperties = new HashMap<String, Object>();
 
 		if (getDatabasePlatform() != null) {
-			jpaProperties.setProperty("openjpa.jdbc.DBDictionary", getDatabasePlatform());
+			jpaProperties.put("openjpa.jdbc.DBDictionary", getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
 			String databaseDictonary = determineDatabaseDictionary(getDatabase());
 			if (databaseDictonary != null) {
-				jpaProperties.setProperty("openjpa.jdbc.DBDictionary", databaseDictonary);
+				jpaProperties.put("openjpa.jdbc.DBDictionary", databaseDictonary);
 			}
 		}
 
 		if (isGenerateDdl()) {
-			jpaProperties.setProperty("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
+			jpaProperties.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
 		}
-
 		if (isShowSql()) {
 			// Taken from the OpenJPA 0.9.6 docs ("Standard OpenJPA Log Configuration + All SQL Statements")
-			jpaProperties.setProperty("openjpa.Log", "DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE");
+			jpaProperties.put("openjpa.Log", "DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE");
 		}
 
 		return jpaProperties;

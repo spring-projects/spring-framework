@@ -276,17 +276,11 @@ public abstract class PortletUtils {
 	 * @param request current portlet request
 	 * @param attributes the attributes Map
 	 */
-	public static void exposeRequestAttributes(PortletRequest request, Map attributes) {
+	public static void exposeRequestAttributes(PortletRequest request, Map<String, ?> attributes) {
 		Assert.notNull(request, "Request must not be null");
-		Assert.notNull(attributes, "attributes Map must not be null");
-		Iterator it = attributes.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			if (!(entry.getKey() instanceof String)) {
-				throw new IllegalArgumentException(
-						"Invalid key [" + entry.getKey() + "] in attributes Map - only Strings allowed as attribute keys");
-			}
-			request.setAttribute((String) entry.getKey(), entry.getValue());
+		Assert.notNull(attributes, "Attributes Map must not be null");
+		for (Map.Entry<String, ?> entry : attributes.entrySet()) {
+			request.setAttribute(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -345,10 +339,10 @@ public abstract class PortletUtils {
 	 * @see javax.portlet.PortletRequest#getParameterValues
 	 * @see javax.portlet.PortletRequest#getParameterMap
 	 */
-	public static Map getParametersStartingWith(PortletRequest request, String prefix) {
+	public static Map<String, Object> getParametersStartingWith(PortletRequest request, String prefix) {
 		Assert.notNull(request, "Request must not be null");
 		Enumeration paramNames = request.getParameterNames();
-		Map params = new TreeMap();
+		Map<String, Object> params = new TreeMap<String, Object>();
 		if (prefix == null) {
 			prefix = "";
 		}

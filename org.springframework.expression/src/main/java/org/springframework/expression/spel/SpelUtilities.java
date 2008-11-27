@@ -44,7 +44,7 @@ public class SpelUtilities {
 	 */
 	private static void printAST(PrintStream out, SpelNode t, String indent) {
 		if (t != null) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			String s = (t.getType() == -1 ? "EOF" : t.getClass().getSimpleName());
 			sb.append(indent).append(s);
 			sb.append("  value=").append(t.getText());

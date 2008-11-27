@@ -972,8 +972,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			throws Exception {
 
 		ModelAndView exMv = null;
-		for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-			HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
+		for (Iterator<HandlerExceptionResolver> it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+			HandlerExceptionResolver resolver = it.next();
 			exMv = resolver.resolveException(request, response, handler, ex);
 		}
 		if (exMv != null) {

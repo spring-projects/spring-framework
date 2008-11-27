@@ -45,7 +45,7 @@ import java.sql.SQLException;
  * @see ResultSetExtractor
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
-public interface RowMapper {
+public interface RowMapper<T> {
 
 	/** 
 	 * Implementations must implement this method to map each row of data
@@ -57,7 +57,7 @@ public interface RowMapper {
 	 * @throws SQLException if a SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
-	Object mapRow(ResultSet rs, int rowNum) throws SQLException; 
+	T mapRow(ResultSet rs, int rowNum) throws SQLException; 
 
 }
  

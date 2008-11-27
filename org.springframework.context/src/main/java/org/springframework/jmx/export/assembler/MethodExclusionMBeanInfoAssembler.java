@@ -57,9 +57,9 @@ import org.springframework.util.StringUtils;
  */
 public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
-	private Set ignoredMethods;
+	private Set<String> ignoredMethods;
 
-	private Map ignoredMethodMappings;
+	private Map<String, Set<String>> ignoredMethodMappings;
 
 
 	/**
@@ -69,7 +69,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * @see #setIgnoredMethodMappings(java.util.Properties)
 	 */
 	public void setIgnoredMethods(String[] ignoredMethodNames) {
-		this.ignoredMethods = new HashSet(Arrays.asList(ignoredMethodNames));
+		this.ignoredMethods = new HashSet<String>(Arrays.asList(ignoredMethodNames));
 	}
 
 	/**
@@ -80,11 +80,11 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * Spring will check these mappings first.
 	 */
 	public void setIgnoredMethodMappings(Properties mappings) {
-		this.ignoredMethodMappings = new HashMap();
+		this.ignoredMethodMappings = new HashMap<String, Set<String>>();
 		for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			this.ignoredMethodMappings.put(beanKey, new HashSet(Arrays.asList(methodNames)));
+			this.ignoredMethodMappings.put(beanKey, new HashSet<String>(Arrays.asList(methodNames)));
 		}
 	}
 
@@ -113,7 +113,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 */
 	protected boolean isNotIgnored(Method method, String beanKey) {
 		if (this.ignoredMethodMappings != null) {
-			Set methodNames = (Set) this.ignoredMethodMappings.get(beanKey);
+			Set<String> methodNames = this.ignoredMethodMappings.get(beanKey);
 			if (methodNames != null) {
 				return !methodNames.contains(method.getName());
 			}

@@ -17,10 +17,7 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRExporter;
@@ -57,13 +54,12 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * for a pre-defined output format.
 	 */
 	@Override
-	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
+	protected void renderReport(JasperPrint populatedReport, Map<String, Object> model, HttpServletResponse response)
 			throws Exception {
 
 		JRExporter exporter = createExporter();
 
-		// Set exporter parameters - overriding with values from the Model.
-		Map mergedExporterParameters = mergeExporterParameters(model);
+		Map mergedExporterParameters = getConvertedExporterParameters();
 		if (!CollectionUtils.isEmpty(mergedExporterParameters)) {
 			exporter.setParameters(mergedExporterParameters);
 		}
@@ -74,28 +70,6 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		else {
 			renderReportUsingOutputStream(exporter, populatedReport, response);
 		}
-	}
-
-	/**
-	 * Merges the configured JRExporterParameters with any specified in the supplied model data.
-	 * JRExporterParameters in the model override those specified in the configuration.
-	 * @see #setExporterParameters(java.util.Map)
-	 */
-	protected Map mergeExporterParameters(Map model) {
-		Map mergedParameters = new HashMap();
-		Map convertedExporterParameters = getConvertedExporterParameters();
-		if (!CollectionUtils.isEmpty(convertedExporterParameters)) {
-			mergedParameters.putAll(convertedExporterParameters);
-		}
-		for (Iterator it = model.keySet().iterator(); it.hasNext();) {
-			Object key = it.next();
-			if (key instanceof JRExporterParameter) {
-				Object value = model.get(key);
-				Object convertedValue = convertParameterValue((JRExporterParameter) key, value);
-				mergedParameters.put(key, convertedValue);
-			}
-		}
-		return mergedParameters;
 	}
 
 	/**
@@ -113,7 +87,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
 		if (encoding != null) {
 			// Only apply encoding if content type is specified but does not contain charset clause already.
-			if (contentType != null && contentType.toLowerCase().indexOf(WebUtils.CONTENT_TYPE_CHARSET_PREFIX) == -1) {
+			if (contentType != null && !contentType.toLowerCase().contains(WebUtils.CONTENT_TYPE_CHARSET_PREFIX)) {
 				contentType = contentType + WebUtils.CONTENT_TYPE_CHARSET_PREFIX + encoding;
 			}
 		}

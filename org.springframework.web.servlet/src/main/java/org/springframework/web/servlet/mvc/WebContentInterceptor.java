@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +49,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-	private Map cacheMappings = new HashMap();
+	private Map<String, Integer> cacheMappings = new HashMap<String, Integer>();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -111,8 +110,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 */
 	public void setCacheMappings(Properties cacheMappings) {
 		this.cacheMappings.clear();
-		for (Iterator it = cacheMappings.keySet().iterator(); it.hasNext();) {
-			String path = (String) it.next();
+		Enumeration propNames = cacheMappings.propertyNames();
+		while (propNames.hasMoreElements()) {
+			String path = (String) propNames.nextElement();
 			this.cacheMappings.put(path, Integer.valueOf(cacheMappings.getProperty(path)));
 		}
 	}
@@ -143,7 +143,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Applying " + cacheSeconds + " cache seconds to [" + lookupPath + "]");
 			}
-			checkAndPrepare(request, response, cacheSeconds.intValue(), handler instanceof LastModified);
+			checkAndPrepare(request, response, cacheSeconds, handler instanceof LastModified);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -166,13 +166,12 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 */
 	protected Integer lookupCacheSeconds(String urlPath) {
 		// direct match?
-		Integer cacheSeconds = (Integer) this.cacheMappings.get(urlPath);
+		Integer cacheSeconds = this.cacheMappings.get(urlPath);
 		if (cacheSeconds == null) {
 			// pattern match?
-			for (Iterator it = this.cacheMappings.keySet().iterator(); it.hasNext();) {
-				String registeredPath = (String) it.next();
+			for (String registeredPath : this.cacheMappings.keySet()) {
 				if (this.pathMatcher.match(registeredPath, urlPath)) {
-					cacheSeconds = (Integer) this.cacheMappings.get(registeredPath);
+					cacheSeconds = this.cacheMappings.get(registeredPath);
 				}
 			}
 		}

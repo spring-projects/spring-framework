@@ -432,7 +432,7 @@ public abstract class JdbcUtils {
 	 * @return the name using "camel case"
 	 */
 	public static String convertUnderscoreNameToPropertyName(String name) {
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		boolean nextIsUpper = false;
 		if (name != null && name.length() > 0) {
 			if (name.length() > 1 && name.substring(1,2).equals("_")) {

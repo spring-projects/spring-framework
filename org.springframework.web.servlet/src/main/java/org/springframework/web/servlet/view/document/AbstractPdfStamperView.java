@@ -41,9 +41,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  */
 public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
 
-  public AbstractPdfStamperView(){
-    setContentType("application/pdf");
-  }
+	public AbstractPdfStamperView(){
+		setContentType("application/pdf");
+	}
 
 
 	@Override
@@ -51,21 +51,21 @@ public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
 		return true;
 	}
 
-   @Override
-   protected final void renderMergedOutputModel(
-			 Map model, HttpServletRequest request, HttpServletResponse response) throws Exception{
+	@Override
+	protected final void renderMergedOutputModel(
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// IE workaround: write into byte array first.
 		ByteArrayOutputStream baos = createTemporaryOutputStream();
 
-    PdfReader reader = readPdfResource();
-    PdfStamper stamper = new PdfStamper(reader, baos);
-    mergePdfDocument(model, stamper, request, response);
-    stamper.close();
+		PdfReader reader = readPdfResource();
+		PdfStamper stamper = new PdfStamper(reader, baos);
+		mergePdfDocument(model, stamper, request, response);
+		stamper.close();
 
 		// Flush to HTTP response.
 		writeToResponse(response, baos);
-  }
+	}
 
 	/**
 	 * Read the raw PDF resource into an iText PdfReader.
@@ -79,34 +79,33 @@ public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
 		return new PdfReader(getApplicationContext().getResource(getUrl()).getInputStream());
 	}
 
-  /**
+	/**
 	 * Subclasses must implement this method to merge the PDF form
 	 * with the given model data.
-   * <p>This is where you are able to set values on the AcroForm.
-   * An example of what can be done at this level is:
+	 * <p>This is where you are able to set values on the AcroForm.
+	 * An example of what can be done at this level is:
 	 * <pre class="code">
-   * // get the form from the document
-   * AcroFields form = stamper.getAcroFields();
-   *
-   * // set some values on the form
-   * form.setField("field1", "value1");
-   * form.setField("field2", "Vvlue2");
+	 * // get the form from the document
+	 * AcroFields form = stamper.getAcroFields();
 	 *
-   * // set the disposition and filename
-   * response.setHeader("Content-disposition", "attachment; FILENAME=someName.pdf");</pre>
+	 * // set some values on the form
+	 * form.setField("field1", "value1");
+	 * form.setField("field2", "Vvlue2");
+	 *
+	 * // set the disposition and filename
+	 * response.setHeader("Content-disposition", "attachment; FILENAME=someName.pdf");</pre>
 	 * <p>Note that the passed-in HTTP response is just supposed to be used
 	 * for setting cookies or other HTTP headers. The built PDF document itself
 	 * will automatically get written to the response after this method returns.
 	 * @param model the model Map
-   * @param stamper the PdfStamper instance that will contain the AcroFields.
+	 * @param stamper the PdfStamper instance that will contain the AcroFields.
 	 * You may also customize this PdfStamper instance according to your needs,
 	 * e.g. setting the "formFlattening" property.
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 * @throws Exception any exception that occured during document building
-   */
-  protected abstract void mergePdfDocument(
-			Map model, PdfStamper stamper, HttpServletRequest request, HttpServletResponse response)
-			throws Exception;
+     */
+	protected abstract void mergePdfDocument(Map<String, Object> model, PdfStamper stamper,
+			HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

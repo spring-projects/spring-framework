@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.ToolboxManager;
 import org.apache.velocity.tools.view.context.ChainedContext;
 import org.apache.velocity.tools.view.servlet.ServletToolboxManager;
-import org.apache.velocity.tools.view.tools.ViewTool;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -56,7 +55,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>This is a separate class mainly to avoid a required dependency on
  * the view package of Velocity Tools in {@link VelocityView} itself.
- * As of Spring 2.0, this class requires Velocity Tools 1.2 or higher.
+ * As of Spring 3.0, this class requires Velocity Tools 1.3 or higher.
  *
  * @author Juergen Hoeller
  * @since 1.1.3
@@ -64,7 +63,6 @@ import org.springframework.util.ReflectionUtils;
  * @see #initTool
  * @see org.apache.velocity.tools.view.context.ViewContext
  * @see org.apache.velocity.tools.view.context.ChainedContext
- * @see org.apache.velocity.tools.view.tools.ViewTool
  * @see org.apache.velocity.tools.view.tools.LinkTool
  */
 public class VelocityToolboxView extends VelocityView {
@@ -102,7 +100,7 @@ public class VelocityToolboxView extends VelocityView {
 	 */
 	@Override
 	protected Context createVelocityContext(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// Create a ChainedContext instance.
 		ChainedContext velocityContext = new ChainedContext(
@@ -123,26 +121,14 @@ public class VelocityToolboxView extends VelocityView {
 	 * Overridden to check for the ViewContext interface which is part of the
 	 * view package of Velocity Tools. This requires a special Velocity context,
 	 * like ChainedContext as set up by {@link #createVelocityContext} in this class.
-	 * @see org.apache.velocity.tools.view.tools.ViewTool#init(Object)
 	 * @see org.apache.velocity.tools.view.tools.LinkTool#init(Object)
 	 */
 	@Override
 	protected void initTool(Object tool, Context velocityContext) throws Exception {
-		// Initialize ViewTool instances with the Velocity context.
-		// Despite having an "init(Object)" method, all known ViewTool
-		// implementations expect a ViewContext implementation as argument.
-		// ChainedContext implements the ViewContext interface.
-		if (tool instanceof ViewTool) {
-			// Velocity Tools 1.2: an actual ViewTool implementation.
-			((ViewTool) tool).init(velocityContext);
-		}
-		else {
-			// Velocity Tools 1.3: a class-level "init(Object)" method.
-			Method initMethod =
-					ClassUtils.getMethodIfAvailable(tool.getClass(), "init", new Class[] {Object.class});
-			if (initMethod != null) {
-				ReflectionUtils.invokeMethod(initMethod, tool, new Object[] {velocityContext});
-			}
+		// Velocity Tools 1.3: a class-level "init(Object)" method.
+		Method initMethod = ClassUtils.getMethodIfAvailable(tool.getClass(), "init", Object.class);
+		if (initMethod != null) {
+			ReflectionUtils.invokeMethod(initMethod, tool, new Object[] {velocityContext});
 		}
 	}
 

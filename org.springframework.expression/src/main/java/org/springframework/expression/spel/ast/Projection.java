@@ -86,7 +86,7 @@ public class Projection extends SpelNode {
 
 	@Override
 	public String toStringAST() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		return sb.append("!{").append(getChild(0).toStringAST()).append("}").toString();
 	}
 

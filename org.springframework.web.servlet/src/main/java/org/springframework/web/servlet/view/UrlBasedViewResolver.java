@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Ordered;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.servlet.View;
 
@@ -115,7 +116,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	private int order = Integer.MAX_VALUE;
 
 	/** Map of static attributes, keyed by attribute name (String) */
-	private final Map	staticAttributes = new HashMap();
+	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
 
 
 	/**
@@ -271,7 +272,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see AbstractView#setAttributes
 	 */
 	public void setAttributes(Properties props) {
-		setAttributesMap(props);
+		CollectionUtils.mergePropertiesIntoMap(props, this.staticAttributes);
 	}
 
 	/**
@@ -281,7 +282,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @param attributes Map with name Strings as keys and attribute objects as values
 	 * @see AbstractView#setAttributesMap
 	 */
-	public void setAttributesMap(Map attributes) {
+	public void setAttributesMap(Map<String, ?> attributes) {
 		if (attributes != null) {
 			this.staticAttributes.putAll(attributes);
 		}
@@ -294,7 +295,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * "attributesMap[myKey]". This is particularly useful for
 	 * adding or overriding entries in child view definitions.
 	 */
-	public Map getAttributesMap() {
+	public Map<String, Object> getAttributesMap() {
 		return this.staticAttributes;
 	}
 

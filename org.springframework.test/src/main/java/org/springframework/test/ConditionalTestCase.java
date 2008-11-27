@@ -32,7 +32,10 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @since 2.0
  * @see #isDisabledInThisEnvironment
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class ConditionalTestCase extends TestCase {
 
 	private static int disabledTestCount;
@@ -78,7 +81,6 @@ public abstract class ConditionalTestCase extends TestCase {
 
 	/**
 	 * Should this test run?
-	 *
 	 * @param testMethodName name of the test method
 	 * @return whether the test should execute in the current environment
 	 */
@@ -88,7 +90,6 @@ public abstract class ConditionalTestCase extends TestCase {
 
 	/**
 	 * Record a disabled test.
-	 *
 	 * @return the current disabled test count
 	 */
 	protected int recordDisabled() {

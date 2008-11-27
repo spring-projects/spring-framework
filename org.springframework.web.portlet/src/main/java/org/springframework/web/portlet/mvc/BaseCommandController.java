@@ -138,7 +138,9 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * @author Juergen Hoeller
  * @author John A. Lewis
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class BaseCommandController extends AbstractController {
 
 	/**

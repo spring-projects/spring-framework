@@ -46,7 +46,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	private final Object target;
 
-	private final Map fieldMap = new HashMap();
+	private final Map<String, Field> fieldMap = new HashMap<String, Field>();
 
 	private final TypeConverterDelegate typeConverterDelegate;
 
@@ -79,7 +79,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	@Override
 	public Class getPropertyType(String propertyName) throws BeansException {
-		Field field = (Field) this.fieldMap.get(propertyName);
+		Field field = this.fieldMap.get(propertyName);
 		if (field != null) {
 			return field.getType();
 		}
@@ -88,7 +88,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	@Override
 	public Object getPropertyValue(String propertyName) throws BeansException {
-		Field field = (Field) this.fieldMap.get(propertyName);
+		Field field = this.fieldMap.get(propertyName);
 		if (field == null) {
 			throw new NotReadablePropertyException(
 					this.target.getClass(), propertyName, "Field '" + propertyName + "' does not exist");
@@ -104,7 +104,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	@Override
 	public void setPropertyValue(String propertyName, Object newValue) throws BeansException {
-		Field field = (Field) this.fieldMap.get(propertyName);
+		Field field = this.fieldMap.get(propertyName);
 		if (field == null) {
 			throw new NotWritablePropertyException(
 					this.target.getClass(), propertyName, "Field '" + propertyName + "' does not exist");

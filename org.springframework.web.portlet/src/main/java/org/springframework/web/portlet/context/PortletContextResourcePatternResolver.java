@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,12 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see javax.portlet.PortletContext#getResourcePaths
 	 */
 	@Override
-	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
+	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
 		if (rootDirResource instanceof PortletContextResource) {
 			PortletContextResource pcResource = (PortletContextResource) rootDirResource;
 			PortletContext pc = pcResource.getPortletContext();
 			String fullPattern = pcResource.getPath() + subPattern;
-			Set result = new HashSet();
+			Set<Resource> result = new HashSet<Resource>();
 			doRetrieveMatchingPortletContextResources(pc, fullPattern, pcResource.getPath(), result);
 			return result;
 		}
@@ -98,11 +98,11 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see javax.portlet.PortletContext#getResourcePaths
 	 */
 	protected void doRetrieveMatchingPortletContextResources(
-			PortletContext portletContext, String fullPattern, String dir, Set result) throws IOException {
+			PortletContext portletContext, String fullPattern, String dir, Set<Resource> result) throws IOException {
 
 		Set candidates = portletContext.getResourcePaths(dir);
 		if (candidates != null) {
-			boolean dirDepthNotFixed = (fullPattern.indexOf("**") != -1);
+			boolean dirDepthNotFixed = fullPattern.contains("**");
 			for (Iterator it = candidates.iterator(); it.hasNext();) {
 				String currPath = (String) it.next();
 				if (currPath.endsWith("/") &&

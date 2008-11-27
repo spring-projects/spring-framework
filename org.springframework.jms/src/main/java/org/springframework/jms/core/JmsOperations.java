@@ -52,7 +52,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem
 	 */
-	Object execute(SessionCallback action) throws JmsException;
+	<T> T execute(SessionCallback<T> action) throws JmsException;
 
 	/**
 	 * Send messages to the default JMS destination (or one specified
@@ -62,7 +62,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object execute(ProducerCallback action) throws JmsException;
+	<T> T execute(ProducerCallback<T> action) throws JmsException;
 
 	/**
 	 * Send messages to a JMS destination. The callback gives access to the JMS Session
@@ -72,7 +72,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object execute(Destination destination, ProducerCallback action) throws JmsException;
+	<T> T execute(Destination destination, ProducerCallback<T> action) throws JmsException;
 
 	/**
 	 * Send messages to a JMS destination. The callback gives access to the JMS Session
@@ -83,7 +83,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object execute(String destinationName, ProducerCallback action) throws JmsException;
+	<T> T execute(String destinationName, ProducerCallback<T> action) throws JmsException;
 
 
 	//-------------------------------------------------------------------------
@@ -363,7 +363,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object browse(BrowserCallback action) throws JmsException;
+	<T> T browse(BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse messages in a JMS queue. The callback gives access to the JMS Session
@@ -373,7 +373,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object browse(Queue queue, BrowserCallback action) throws JmsException;
+	<T> T browse(Queue queue, BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse messages in a JMS queue. The callback gives access to the JMS Session
@@ -384,7 +384,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object browse(String queueName, BrowserCallback action) throws JmsException;
+	<T> T browse(String queueName, BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
@@ -395,7 +395,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object browseSelected(String messageSelector, BrowserCallback action) throws JmsException;
+	<T> T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
@@ -407,7 +407,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object browseSelected(Queue queue, String messageSelector, BrowserCallback action) throws JmsException;
+	<T> T browseSelected(Queue queue, String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
@@ -420,6 +420,6 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	Object browseSelected(String queueName, String messageSelector, BrowserCallback action) throws JmsException;
+	<T> T browseSelected(String queueName, String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 }

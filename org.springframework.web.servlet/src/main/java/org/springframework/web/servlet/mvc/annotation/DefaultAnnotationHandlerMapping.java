@@ -24,10 +24,7 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
@@ -108,11 +105,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	protected String[] determineUrlsForHandler(String beanName) {
 		ApplicationContext context = getApplicationContext();
 		Class<?> handlerType = context.getType(beanName);
-		ListableBeanFactory bf = (context instanceof ConfigurableApplicationContext ?
-				((ConfigurableApplicationContext) context).getBeanFactory() : context);
-		GenericBeanFactoryAccessor bfa = new GenericBeanFactoryAccessor(bf);
-		RequestMapping mapping = bfa.findAnnotationOnBean(beanName, RequestMapping.class);
-
+		RequestMapping mapping = context.findAnnotationOnBean(beanName, RequestMapping.class);
 		if (mapping != null) {
 			// @RequestMapping found at type level
 			this.cachedMappings.put(handlerType, mapping);

@@ -465,9 +465,10 @@ public abstract class WebUtils {
 	 * @param request current HTTP request
 	 * @param attributes the attributes Map
 	 */
-	public static void exposeRequestAttributes(ServletRequest request, Map<String, Object> attributes) {
+	public static void exposeRequestAttributes(ServletRequest request, Map<String, ?> attributes) {
 		Assert.notNull(request, "Request must not be null");
-		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+		Assert.notNull(attributes, "Attributes Map must not be null");
+		for (Map.Entry<String, ?> entry : attributes.entrySet()) {
 			request.setAttribute(entry.getKey(), entry.getValue());
 		}
 	}

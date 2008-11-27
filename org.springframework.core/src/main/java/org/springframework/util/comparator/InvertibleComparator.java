@@ -28,9 +28,9 @@ import java.util.Comparator;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-public class InvertibleComparator implements Comparator, Serializable {
+public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 
-	private final Comparator comparator;
+	private final Comparator<T> comparator;
 
 	private boolean ascending = true;
 
@@ -40,7 +40,7 @@ public class InvertibleComparator implements Comparator, Serializable {
 	 * For the actual comparison, the specified Comparator will be used.
 	 * @param comparator the comparator to decorate
 	 */
-	public InvertibleComparator(Comparator comparator) {
+	public InvertibleComparator(Comparator<T> comparator) {
 		this.comparator = comparator;
 	}
 
@@ -50,7 +50,7 @@ public class InvertibleComparator implements Comparator, Serializable {
 	 * @param comparator the comparator to decorate
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
-	public InvertibleComparator(Comparator comparator, boolean ascending) {
+	public InvertibleComparator(Comparator<T> comparator, boolean ascending) {
 		this.comparator = comparator;
 		setAscending(ascending);
 	}
@@ -67,7 +67,7 @@ public class InvertibleComparator implements Comparator, Serializable {
 	 * Return the sort order: ascending (true) or descending (false).
 	 */
 	public boolean isAscending() {
-		return ascending;
+		return this.ascending;
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class InvertibleComparator implements Comparator, Serializable {
 	}
 
 
-	public int compare(Object o1, Object o2) {
+	public int compare(T o1, T o2) {
 		int result = this.comparator.compare(o1, o2);
 		if (result != 0) {
 			// Invert the order if it is a reverse sort.

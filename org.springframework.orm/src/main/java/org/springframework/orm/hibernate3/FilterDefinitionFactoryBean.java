@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.hibernate.engine.FilterDefinition;
+import org.hibernate.type.Type;
 import org.hibernate.type.TypeFactory;
 
 import org.springframework.beans.factory.BeanNameAware;
@@ -44,10 +43,10 @@ import org.springframework.beans.factory.InitializingBean;
  *       &lt;bean class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean"&gt;
  *         &lt;property name="filterName" value="myFilter"/&gt;
  *         &lt;property name="parameterTypes"&gt;
- *           &lt;props&gt;
- *             &lt;prop key="myParam"&gt;string&lt;/prop&gt;
- *             &lt;prop key="myOtherParam"&gt;long&lt;/prop&gt;
- *           &lt;/props&gt;
+ *           &lt;map&gt;
+ *             &lt;entry key="myParam" value="string"/&gt;
+ *             &lt;entry key="myOtherParam" value="long"/&gt;
+ *           &lt;/map&gt;
  *         &lt;/property&gt;
  *       &lt;/bean&gt;
  *     &lt;/list&gt;
@@ -63,11 +62,11 @@ import org.springframework.beans.factory.InitializingBean;
  * @see org.hibernate.engine.FilterDefinition
  * @see LocalSessionFactoryBean#setFilterDefinitions
  */
-public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, InitializingBean {
+public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition>, BeanNameAware, InitializingBean {
 
 	private String filterName;
 
-	private Map parameterTypeMap = new HashMap();
+	private Map<String, Type> parameterTypeMap = new HashMap<String, Type>();
 
 	private String defaultFilterCondition;
 
@@ -86,17 +85,15 @@ public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, 
 	 * with parameter names as keys and type names as values.
 	 * @see org.hibernate.type.TypeFactory#heuristicType(String)
 	 */
-	public void setParameterTypes(Properties parameterTypes) {
+	public void setParameterTypes(Map<String, String> parameterTypes) {
 		if (parameterTypes != null) {
-			this.parameterTypeMap = new HashMap(parameterTypes.size());
-			for (Enumeration names = parameterTypes.propertyNames(); names.hasMoreElements();) {
-				String paramName = (String) names.nextElement();
-				String typeName = parameterTypes.getProperty(paramName);
-				this.parameterTypeMap.put(paramName, TypeFactory.heuristicType(typeName));
+			this.parameterTypeMap = new HashMap<String, Type>(parameterTypes.size());
+			for (Map.Entry<String, String> entry : parameterTypes.entrySet()) {
+				this.parameterTypeMap.put(entry.getKey(), TypeFactory.heuristicType(entry.getValue()));
 			}
 		}
 		else {
-			this.parameterTypeMap = new HashMap();
+			this.parameterTypeMap = new HashMap<String, Type>();
 		}
 	}
 
@@ -124,11 +121,11 @@ public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, 
 	}
 
 
-	public Object getObject() {
+	public FilterDefinition getObject() {
 		return this.filterDefinition;
 	}
 
-	public Class getObjectType() {
+	public Class<FilterDefinition> getObjectType() {
 		return FilterDefinition.class;
 	}
 

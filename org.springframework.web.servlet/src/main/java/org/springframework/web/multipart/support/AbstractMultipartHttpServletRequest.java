@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public abstract class AbstractMultipartHttpServletRequest extends HttpServletRequestWrapper
     implements MultipartHttpServletRequest {
 
-	private Map multipartFiles;
+	private Map<String, MultipartFile> multipartFiles;
 
 
 	/**
@@ -48,15 +48,15 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	}
 
 
-	public Iterator getFileNames() {
+	public Iterator<String> getFileNames() {
 		return getMultipartFiles().keySet().iterator();
 	}
 
 	public MultipartFile getFile(String name) {
-		return (MultipartFile) getMultipartFiles().get(name);
+		return getMultipartFiles().get(name);
 	}
 
-	public Map getFileMap() {
+	public Map<String, MultipartFile> getFileMap() {
 		return getMultipartFiles();
 	}
 
@@ -65,7 +65,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	 * Set a Map with parameter names as keys and MultipartFile objects as values.
 	 * To be invoked by subclasses on initialization.
 	 */
-	protected final void setMultipartFiles(Map multipartFiles) {
+	protected final void setMultipartFiles(Map<String, MultipartFile> multipartFiles) {
 		this.multipartFiles = Collections.unmodifiableMap(multipartFiles);
 	}
 
@@ -74,7 +74,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
-	protected Map getMultipartFiles() {
+	protected Map<String, MultipartFile> getMultipartFiles() {
 		if (this.multipartFiles == null) {
 			initializeMultipart();
 		}

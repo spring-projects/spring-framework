@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.test;
-
-import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 /**
  * Simple method object encapsulation of the 'test-for-Exception' scenario (for JUnit).
@@ -77,10 +74,9 @@ import junit.framework.AssertionFailedError;
  *    }
  * }</pre>
  *
+ * Intended for use with JUnit 4 and TestNG (as of Spring 3.0).
  * You might want to compare this class with the
  * {@link junit.extensions.ExceptionTestCase} class.
- *
- * <p>Note: This class requires JDK 1.4 or higher.
  *
  * @author Rick Evans
  * @author Juergen Hoeller
@@ -193,7 +189,7 @@ public abstract class AssertThrows {
 	 * @see #getFailureMessage()
 	 */
 	protected void doFail() {
-		Assert.fail(createMessageForNoExceptionThrown());
+		throw new AssertionError(createMessageForNoExceptionThrown());
 	}
 
 	/**
@@ -203,7 +199,7 @@ public abstract class AssertThrows {
 	 * @see #getFailureMessage()
 	 */
 	protected String createMessageForNoExceptionThrown() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("Should have thrown a [").append(this.getExpectedException()).append("]");
 		if (getFailureMessage() != null) {
 			sb.append(": ").append(getFailureMessage());
@@ -223,8 +219,8 @@ public abstract class AssertThrows {
 	 */
 	protected void checkExceptionExpectations(Exception actualException) {
 		if (!getExpectedException().isAssignableFrom(actualException.getClass())) {
-			AssertionFailedError error =
-					new AssertionFailedError(createMessageForWrongThrownExceptionType(actualException));
+			AssertionError error =
+					new AssertionError(createMessageForWrongThrownExceptionType(actualException));
 			error.initCause(actualException);
 			throw error;
 		}
@@ -237,7 +233,7 @@ public abstract class AssertThrows {
 	 * @return the message for the given exception
 	 */
 	protected String createMessageForWrongThrownExceptionType(Exception actualException) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("Was expecting a [").append(getExpectedException().getName());
 		sb.append("] to be thrown, but instead a [").append(actualException.getClass().getName());
 		sb.append("] was thrown.");

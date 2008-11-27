@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,14 +298,13 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
-		List mimeMessages = new ArrayList(simpleMessages.length);
-		for (int i = 0; i < simpleMessages.length; i++) {
-			SimpleMailMessage simpleMessage = simpleMessages[i];
+		List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(simpleMessages.length);
+		for (SimpleMailMessage simpleMessage : simpleMessages) {
 			MimeMailMessage message = new MimeMailMessage(createMimeMessage());
 			simpleMessage.copyTo(message);
 			mimeMessages.add(message.getMimeMessage());
 		}
-		doSend((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+		doSend(mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 	}
 
 
@@ -348,13 +347,13 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException {
 		try {
-			List mimeMessages = new ArrayList(mimeMessagePreparators.length);
-			for (int i = 0; i < mimeMessagePreparators.length; i++) {
+			List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(mimeMessagePreparators.length);
+			for (MimeMessagePreparator preparator : mimeMessagePreparators) {
 				MimeMessage mimeMessage = createMimeMessage();
-				mimeMessagePreparators[i].prepare(mimeMessage);
+				preparator.prepare(mimeMessage);
 				mimeMessages.add(mimeMessage);
 			}
-			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+			send(mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
 		}
 		catch (MailException ex) {
 			throw ex;
@@ -383,7 +382,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * in case of failure when sending a message
 	 */
 	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
-		Map failedMessages = new LinkedHashMap();
+		Map<Object, Exception> failedMessages = new LinkedHashMap<Object, Exception>();
 		try {
 			Transport transport = getTransport(getSession());
 			transport.connect(getHost(), getPort(), getUsername(), getPassword());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.util.Assert;
 
@@ -36,7 +35,7 @@ import org.springframework.util.Assert;
 public abstract class AttributeAccessorSupport implements AttributeAccessor, Serializable {
 
 	/** Map with String keys and Object values */
-	private final Map attributes = new LinkedHashMap();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 
 	public void setAttribute(String name, Object value) {
@@ -65,8 +64,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 	public String[] attributeNames() {
-		Set attributeNames = this.attributes.keySet();
-		return (String[]) attributeNames.toArray(new String[attributeNames.size()]);
+		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
 	}
 
 
@@ -77,8 +75,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	protected void copyAttributesFrom(AttributeAccessor source) {
 		Assert.notNull(source, "Source must not be null");
 		String[] attributeNames = source.attributeNames();
-		for (int i = 0; i < attributeNames.length; i++) {
-			String attributeName = attributeNames[i];
+		for (String attributeName : attributeNames) {
 			setAttribute(attributeName, source.getAttribute(attributeName));
 		}
 	}

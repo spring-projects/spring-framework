@@ -277,7 +277,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	protected static final Log logger = LogFactory.getLog(SingletonBeanFactoryLocator.class);
 
 	/** The keyed BeanFactory instances */
-	private static Map instances = new HashMap();
+	private static final Map<String, BeanFactoryLocator> instances = new HashMap<String, BeanFactoryLocator>();
 
 
 	/**
@@ -324,7 +324,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				logger.trace("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
 						instances.hashCode() + ", instances=" + instances);
 			}
-			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(resourceLocation);
+			BeanFactoryLocator bfl = instances.get(resourceLocation);
 			if (bfl == null) {
 				bfl = new SingletonBeanFactoryLocator(resourceLocation);
 				instances.put(resourceLocation, bfl);
@@ -335,9 +335,9 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 
 	// We map BeanFactoryGroup objects by String keys, and by the definition object.
-	private final Map bfgInstancesByKey = new HashMap();
+	private final Map<String, BeanFactoryGroup> bfgInstancesByKey = new HashMap<String, BeanFactoryGroup>();
 
-	private final Map bfgInstancesByObj = new HashMap();
+	private final Map<BeanFactory, BeanFactoryGroup> bfgInstancesByObj = new HashMap<BeanFactory, BeanFactoryGroup>();
 
 	private final String resourceLocation;
 
@@ -354,7 +354,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		synchronized (this.bfgInstancesByKey) {
-			BeanFactoryGroup bfg = (BeanFactoryGroup) this.bfgInstancesByKey.get(this.resourceLocation);
+			BeanFactoryGroup bfg = this.bfgInstancesByKey.get(this.resourceLocation);
 
 			if (bfg != null) {
 				bfg.refCount++;
@@ -394,11 +394,10 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			try {
 				BeanFactory beanFactory = null;
 				if (factoryKey != null) {
-					beanFactory = (BeanFactory) bfg.definition.getBean(factoryKey, BeanFactory.class);
+					beanFactory = bfg.definition.getBean(factoryKey, BeanFactory.class);
 				}
 				else if (bfg.definition instanceof ListableBeanFactory) {
-					beanFactory = (BeanFactory)
-							BeanFactoryUtils.beanOfType((ListableBeanFactory) bfg.definition, BeanFactory.class);
+					beanFactory = BeanFactoryUtils.beanOfType((ListableBeanFactory) bfg.definition, BeanFactory.class);
 				}
 				else {
 					throw new IllegalStateException(
@@ -518,7 +517,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				BeanFactory savedRef = this.groupContextRef;
 				if (savedRef != null) {
 					this.groupContextRef = null;
-					BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByObj.get(savedRef);
+					BeanFactoryGroup bfg = bfgInstancesByObj.get(savedRef);
 					if (bfg != null) {
 						bfg.refCount--;
 						if (bfg.refCount == 0) {

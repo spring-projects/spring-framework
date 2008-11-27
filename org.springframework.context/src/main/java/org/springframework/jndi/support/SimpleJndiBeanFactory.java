@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,13 +60,13 @@ import org.springframework.jndi.TypeMismatchNamingException;
 public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFactory {
 
 	/** JNDI names of resources that are known to be shareable, i.e. can be cached */
-	private final Set shareableResources = new HashSet();
+	private final Set<String> shareableResources = new HashSet<String>();
 
 	/** Cache of shareable singleton objects: bean name --> bean instance */
-	private final Map singletonObjects = new HashMap();
+	private final Map<String, Object> singletonObjects = new HashMap<String, Object>();
 
 	/** Cache of the types of nonshareable resources: bean name --> bean type */
-	private final Map resourceTypes = new HashMap();
+	private final Map<String, Class> resourceTypes = new HashMap<String, Class>();
 
 
 	public SimpleJndiBeanFactory() {
@@ -96,10 +96,10 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 
 	public Object getBean(String name) throws BeansException {
-		return getBean(name, (Class) null);
+		return getBean(name, Object.class);
 	}
 
-	public Object getBean(String name, Class requiredType) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		try {
 			if (isSingleton(name)) {
 				return doGetSingleton(name, requiredType);
@@ -170,7 +170,8 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 
-	private Object doGetSingleton(String name, Class requiredType) throws NamingException {
+	@SuppressWarnings("unchecked")
+	private <T> T doGetSingleton(String name, Class<T> requiredType) throws NamingException {
 		synchronized (this.singletonObjects) {
 			if (this.singletonObjects.containsKey(name)) {
 				Object jndiObject = this.singletonObjects.get(name);
@@ -178,9 +179,9 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 					throw new TypeMismatchNamingException(
 							convertJndiName(name), requiredType, (jndiObject != null ? jndiObject.getClass() : null));
 				}
-				return jndiObject;
+				return (T) jndiObject;
 			}
-			Object jndiObject = lookup(name, requiredType);
+			T jndiObject = lookup(name, requiredType);
 			this.singletonObjects.put(name, jndiObject);
 			return jndiObject;
 		}
@@ -194,7 +195,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		else {
 			synchronized (this.resourceTypes) {
 				if (this.resourceTypes.containsKey(name)) {
-					return (Class) this.resourceTypes.get(name);
+					return this.resourceTypes.get(name);
 				}
 				else {
 					Object jndiObject = lookup(name, null);

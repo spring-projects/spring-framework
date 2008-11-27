@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2087 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	/** 
 	 * Hold weak references to keys as we don't want to interfere with garbage collection..
 	 */
-	private Map delegateMap = new WeakHashMap();
+	private final Map<Object, Object> delegateMap = new WeakHashMap<Object, Object>();
 
 	private Class defaultImplType;
 
@@ -115,7 +115,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	}
 
 	private Object getIntroductionDelegateFor(Object targetObject) {
-		synchronized(this.delegateMap) {
+		synchronized (this.delegateMap) {
 			if (this.delegateMap.containsKey(targetObject)) {
 				return this.delegateMap.get(targetObject);
 			}

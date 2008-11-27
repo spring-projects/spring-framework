@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.portlet.ActionRequest;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -39,22 +38,24 @@ import org.springframework.web.portlet.util.ActionRequestWrapper;
  */
 public class DefaultMultipartActionRequest extends ActionRequestWrapper implements MultipartActionRequest {
 
-	private Map multipartFiles;
+	private Map<String, MultipartFile> multipartFiles;
 
-	private Map multipartParameters;
+	private Map<String, String[]> multipartParameters;
 
 
 	/**
 	 * Wrap the given Portlet ActionRequest in a MultipartActionRequest.
 	 * @param request the request to wrap
-	 * @param multipartFiles a map of the multipart files
-	 * @param multipartParameters a map of the parameters to expose,
+	 * @param mpFiles a map of the multipart files
+	 * @param mpParams a map of the parameters to expose,
 	 * with Strings as keys and String arrays as values
 	 */
-	public DefaultMultipartActionRequest(ActionRequest request, Map multipartFiles, Map multipartParameters) {
+	public DefaultMultipartActionRequest(
+			ActionRequest request, Map<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
+
 		super(request);
-		setMultipartFiles(multipartFiles);
-		setMultipartParameters(multipartParameters);
+		setMultipartFiles(mpFiles);
+		setMultipartParameters(mpParams);
 	}
 
 	/**
@@ -66,25 +67,25 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 
-	public Iterator getFileNames() {
+	public Iterator<String> getFileNames() {
 		return getMultipartFiles().keySet().iterator();
 	}
 
 	public MultipartFile getFile(String name) {
-		return (MultipartFile) getMultipartFiles().get(name);
+		return getMultipartFiles().get(name);
 	}
 
-	public Map getFileMap() {
+	public Map<String, MultipartFile> getFileMap() {
 		return getMultipartFiles();
 	}
 
 
 	@Override
-	public Enumeration getParameterNames() {
-		Set paramNames = new HashSet();
+	public Enumeration<String> getParameterNames() {
+		Set<String> paramNames = new HashSet<String>();
 		Enumeration paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
-			paramNames.add(paramEnum.nextElement());
+			paramNames.add((String) paramEnum.nextElement());
 		}
 		paramNames.addAll(getMultipartParameters().keySet());
 		return Collections.enumeration(paramNames);
@@ -92,7 +93,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 
 	@Override
 	public String getParameter(String name) {
-		String[] values = (String[]) getMultipartParameters().get(name);
+		String[] values = getMultipartParameters().get(name);
 		if (values != null) {
 			return (values.length > 0 ? values[0] : null);
 		}
@@ -101,7 +102,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 
 	@Override
 	public String[] getParameterValues(String name) {
-		String[] values = (String[]) getMultipartParameters().get(name);
+		String[] values = getMultipartParameters().get(name);
 		if (values != null) {
 			return values;
 		}
@@ -109,8 +110,9 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 	@Override
-	public Map getParameterMap() {
-		Map paramMap = new HashMap();
+	@SuppressWarnings("unchecked")
+	public Map<String, String[]> getParameterMap() {
+		Map<String, String[]> paramMap = new HashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());
 		paramMap.putAll(getMultipartParameters());
 		return paramMap;
@@ -121,7 +123,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	 * Set a Map with parameter names as keys and MultipartFile objects as values.
 	 * To be invoked by subclasses on initialization.
 	 */
-	protected final void setMultipartFiles(Map multipartFiles) {
+	protected final void setMultipartFiles(Map<String, MultipartFile> multipartFiles) {
 		this.multipartFiles = Collections.unmodifiableMap(multipartFiles);
 	}
 
@@ -130,7 +132,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
-	protected Map getMultipartFiles() {
+	protected Map<String, MultipartFile> getMultipartFiles() {
 		if (this.multipartFiles == null) {
 			initializeMultipart();
 		}
@@ -141,7 +143,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	 * Set a Map with parameter names as keys and String array objects as values.
 	 * To be invoked by subclasses on initialization.
 	 */
-	protected final void setMultipartParameters(Map multipartParameters) {
+	protected final void setMultipartParameters(Map<String, String[]> multipartParameters) {
 		this.multipartParameters = multipartParameters;
 	}
 
@@ -150,7 +152,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
-	protected Map getMultipartParameters() {
+	protected Map<String, String[]> getMultipartParameters() {
 		if (this.multipartParameters == null) {
 			initializeMultipart();
 		}

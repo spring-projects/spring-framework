@@ -47,7 +47,9 @@ import org.springframework.web.servlet.ModelAndView;
  * @see #setCommandClass
  * @see #setCommandName
  * @see #setValidator
+ * @deprecated as of Spring 3.0, in favor of annotated controllers
  */
+@Deprecated
 public abstract class AbstractCommandController extends BaseCommandController {
 
 	/**

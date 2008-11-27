@@ -42,16 +42,6 @@ import org.springframework.util.Assert;
  */
 public class BindException extends Exception implements BindingResult {
 
-	/**
-	 * Prefix for the name of the BindException instance in a model,
-	 * followed by the object name.
-	 * @deprecated in favor of <code>BindingResult.MODEL_KEY_PREFIX</code>
-	 * @see BindingResult#MODEL_KEY_PREFIX
-	 */
-	@Deprecated
-	public static final String ERROR_KEY_PREFIX = BindException.class.getName() + ".";
-
-
 	private final BindingResult bindingResult;
 
 
@@ -208,7 +198,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getTarget();
 	}
 
-	public Map getModel() {
+	public Map<String, Object> getModel() {
 		return this.bindingResult.getModel();
 	}
 

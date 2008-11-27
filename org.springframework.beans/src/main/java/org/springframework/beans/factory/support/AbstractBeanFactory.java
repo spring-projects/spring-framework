@@ -167,15 +167,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	//---------------------------------------------------------------------
 
 	public Object getBean(String name) throws BeansException {
-		return getBean(name, null, null);
+		return doGetBean(name, null, null, false);
 	}
 		
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-		return getBean(name, requiredType, null);
+		return doGetBean(name, requiredType, null, false);
 	}
 
 	public Object getBean(String name, Object[] args) throws BeansException {
-		return getBean(name, null, args);
+		return doGetBean(name, null, args, false);
 	}
 
 	/**
@@ -202,6 +202,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
+	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(
 			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
 			throws BeansException {

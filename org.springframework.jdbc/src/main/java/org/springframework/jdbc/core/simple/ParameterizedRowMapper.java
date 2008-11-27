@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,18 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.jdbc.core.RowMapper;
 
 /**
  * Extension of the {@link org.springframework.jdbc.core.RowMapper} interface,
- * adding type parameterization. Uses Java 5 covariant return types to override
- * the return type of the {@link #mapRow} method to be the type parameter
- * <code>T</code>.
+ * adding type parameterization. As of Spring 3.0, this is equivalent to
+ * using the RowMapper interface directly.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.jdbc.core.simple.SimpleJdbcOperations
  */
-public interface ParameterizedRowMapper<T> extends RowMapper {
-
-	/**
-	 * Implementations should return the object representation of
-	 * the current row in the supplied {@link ResultSet}.
-	 * @see org.springframework.jdbc.core.RowMapper#mapRow
-	 */
-	T mapRow(ResultSet rs, int rowNum) throws SQLException;
+public interface ParameterizedRowMapper<T> extends RowMapper<T> {
 
 }

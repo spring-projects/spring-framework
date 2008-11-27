@@ -45,7 +45,10 @@ import org.springframework.util.StringUtils;
  * @since 1.1.1
  * @see #setDataSource(javax.sql.DataSource)
  * @see #getJdbcTemplate()
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class AbstractTransactionalDataSourceSpringContextTests
     extends AbstractTransactionalSpringContextTests {
 

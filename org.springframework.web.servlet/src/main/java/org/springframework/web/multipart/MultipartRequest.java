@@ -37,7 +37,7 @@ public interface MultipartRequest {
 	 * original file names.
 	 * @return the names of the files
 	 */
-	Iterator getFileNames();
+	Iterator<String> getFileNames();
 
 	/**
 	 * Return the contents plus description of an uploaded file in this request,
@@ -53,6 +53,6 @@ public interface MultipartRequest {
 	 * {@link org.springframework.web.multipart.MultipartFile} objects as values
 	 * @see MultipartFile
 	 */
-	Map getFileMap();
+	Map<String, MultipartFile> getFileMap();
 
 }

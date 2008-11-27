@@ -87,10 +87,10 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @throws NamingException if the JNDI lookup failed
 	 * @see #setResourceRef
 	 */
-	protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+	protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 		Assert.notNull(jndiName, "'jndiName' must not be null");
 		String convertedName = convertJndiName(jndiName);
-		Object jndiObject = null;
+		T jndiObject = null;
 		try {
 			jndiObject = getJndiTemplate().lookup(convertedName, requiredType);
 		}

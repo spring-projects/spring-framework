@@ -32,7 +32,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see SetFactoryBean
  * @see MapFactoryBean
  */
-public class ListFactoryBean extends AbstractFactoryBean {
+public class ListFactoryBean extends AbstractFactoryBean<List> {
 
 	private List sourceList;
 
@@ -64,13 +64,13 @@ public class ListFactoryBean extends AbstractFactoryBean {
 
 
 	@Override
-	public Class getObjectType() {
+	public Class<List> getObjectType() {
 		return List.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object createInstance() {
+	protected List createInstance() {
 		if (this.sourceList == null) {
 			throw new IllegalArgumentException("'sourceList' is required");
 		}

@@ -66,11 +66,11 @@ public class ControllerBeanNameHandlerMapping extends AbstractControllerUrlHandl
 
 	@Override
 	protected String[] buildUrlsForHandler(String beanName, Class beanClass) {
-		List urls = new ArrayList();
+		List<String> urls = new ArrayList<String>();
 		urls.add(generatePathMapping(beanName));
 		String[] aliases = getApplicationContext().getAliases(beanName);
-		for (int i = 0; i < aliases.length; i++) {
-			urls.add(generatePathMapping(aliases[i]));
+		for (String alias : aliases) {
+			urls.add(generatePathMapping(alias));
 		}
 		return StringUtils.toStringArray(urls);
 	}
@@ -80,7 +80,7 @@ public class ControllerBeanNameHandlerMapping extends AbstractControllerUrlHandl
 	 */
 	protected String generatePathMapping(String beanName) {
 		String name = (beanName.startsWith("/") ? beanName : "/" + beanName);
-		StringBuffer path = new StringBuffer();
+		StringBuilder path = new StringBuilder();
 		if (!name.startsWith(this.urlPrefix)) {
 			path.append(this.urlPrefix);
 		}

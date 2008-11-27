@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.BeansException;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
@@ -55,7 +55,7 @@ import org.springframework.beans.BeansException;
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
-	private final Map urlMap = new HashMap();
+	private final Map<String, Object> urlMap = new HashMap<String, Object>();
 
 
 	/**
@@ -67,7 +67,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * @see #setUrlMap
 	 */
 	public void setMappings(Properties mappings) {
-		this.urlMap.putAll(mappings);
+		CollectionUtils.mergePropertiesIntoMap(mappings, this.urlMap);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * @param urlMap map with URLs as keys and beans as values
 	 * @see #setMappings
 	 */
-	public void setUrlMap(Map urlMap) {
+	public void setUrlMap(Map<String, Object> urlMap) {
 		this.urlMap.putAll(urlMap);
 	}
 
@@ -110,15 +110,14 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * @throws BeansException if a handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandlers(Map urlMap) throws BeansException {
+	protected void registerHandlers(Map<String, Object> urlMap) throws BeansException {
 		if (urlMap.isEmpty()) {
 			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
 		}
 		else {
-			Iterator it = urlMap.keySet().iterator();
-			while (it.hasNext()) {
-				String url = (String) it.next();
-				Object handler = urlMap.get(url);
+			for (Map.Entry<String, Object> entry : urlMap.entrySet()) {
+				String url = entry.getKey();
+				Object handler = entry.getValue();
 				// Prepend with slash if not already present.
 				if (!url.startsWith("/")) {
 					url = "/" + url;

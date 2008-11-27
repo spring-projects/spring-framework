@@ -136,9 +136,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(getTargetClass());
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Object[] argumentsToUse = null;
-
-			for (int i = 0; i < candidates.length; i++) {
-				Method candidate = candidates[i];
+			for (Method candidate : candidates) {
 				if (candidate.getName().equals(targetMethod)) {
 					// Check if the inspected method has the correct number of parameters.
 					Class[] paramTypes = candidate.getParameterTypes();
@@ -166,13 +164,11 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 					}
 				}
 			}
-
 			if (matchingMethod != null) {
 				setArguments(argumentsToUse);
 				return matchingMethod;
 			}
 		}
-
 		return null;
 	}
 
