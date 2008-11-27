@@ -32,8 +32,9 @@
 		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0" conf="optional, feed->compile"/>
 		<dependency org="com.lowagie.text" name="com.springsource.com.lowagie.text" rev="2.0.8" conf="optional, itext->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12" conf="optional, freemarker->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.4.0" conf="provided->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.0.0" conf="provided->compile"/>
+		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="provided->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.1.0" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2" conf="provided->compile"/>
 		<dependency org="net.sourceforge.jexcelapi" name="com.springsource.jxl" rev="2.6.6" conf="optional, jexcelapi->compile"/>
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5" conf="optional, jasper-reports->compile"/>
@@ -51,10 +52,10 @@
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="compile->compile"/>
 		<!-- test dependencies -->
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
-		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="test->compile" />
-		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="test->compile" />
+		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="test->compile"/>
+		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
         <dependency org="org.jaxen" name="com.springsource.org.jaxen" rev="1.1.1" conf="test->compile"/>

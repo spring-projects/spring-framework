@@ -42,7 +42,7 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.1.ga" conf="optional, hibernate-jpa->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.0.0" conf="provided, jdo->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided, jpa->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.4.0" conf="provided, web->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided, web->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="optional, aop->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="compile->compile"/>
@@ -53,7 +53,7 @@
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional, web->compile"/>
 		<!-- test dependencies -->
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.4.0" conf="test->runtime" />
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
 	</dependencies>
 
