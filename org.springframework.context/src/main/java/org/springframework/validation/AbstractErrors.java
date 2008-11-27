@@ -19,7 +19,6 @@ package org.springframework.validation;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.EmptyStackException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -38,7 +37,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	private String nestedPath = "";
 
-	private final Stack nestedPathStack = new Stack();
+	private final Stack<String> nestedPathStack = new Stack<String>();
 
 
 	public void setNestedPath(String nestedPath) {
@@ -57,7 +56,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	public void popNestedPath() throws IllegalArgumentException {
 		try {
-			String formerNestedPath = (String) this.nestedPathStack.pop();
+			String formerNestedPath = this.nestedPathStack.pop();
 			doSetNestedPath(formerNestedPath);
 		}
 		catch (EmptyStackException ex) {
@@ -131,8 +130,8 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		return getAllErrors().size();
 	}
 
-	public List getAllErrors() {
-		List result = new LinkedList();
+	public List<ObjectError> getAllErrors() {
+		List<ObjectError> result = new LinkedList<ObjectError>();
 		result.addAll(getGlobalErrors());
 		result.addAll(getFieldErrors());
 		return Collections.unmodifiableList(result);
@@ -172,13 +171,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		return getFieldErrors(field).size();
 	}
 
-	public List getFieldErrors(String field) {
-		List fieldErrors = getFieldErrors();
-		List result = new LinkedList();
+	public List<FieldError> getFieldErrors(String field) {
+		List<FieldError> fieldErrors = getFieldErrors();
+		List<FieldError> result = new LinkedList<FieldError>();
 		String fixedField = fixedField(field);
-		for (Iterator it = fieldErrors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (isMatchingFieldError(fixedField, (FieldError) error)) {
+		for (FieldError error : fieldErrors) {
+			if (isMatchingFieldError(fixedField, error)) {
 				result.add(error);
 			}
 		}
@@ -198,6 +196,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		}
 		return null;
 	}
+
 	/**
 	 * Check whether the given FieldError matches the given field.
 	 * @param field the field that we are looking up FieldErrors for
@@ -214,9 +213,8 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getName());
 		sb.append(": ").append(getErrorCount()).append(" errors");
-		Iterator it = getAllErrors().iterator();
-		while (it.hasNext()) {
-			sb.append('\n').append(it.next());
+		for (ObjectError error : getAllErrors()) {
+			sb.append('\n').append(error);
 		}
 		return sb.toString();
 	}

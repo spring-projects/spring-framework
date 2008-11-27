@@ -170,12 +170,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 		if (ResourcePatternUtils.isUrl(location)) {
 			try {
-				Set actualResources = new LinkedHashSet(4);
+				Set<Resource> actualResources = new LinkedHashSet<Resource> (4);
 				int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
 				}
-				Resource[] actResArray = (Resource[]) actualResources.toArray(new Resource[actualResources.size()]);
+				Resource[] actResArray = actualResources.toArray(new Resource[actualResources.size()]);
 				getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
 			}
 			catch (BeanDefinitionStoreException ex) {

@@ -65,7 +65,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/** Set of supported HTTP methods */
-	private Set	supportedMethods;
+	private Set<String>	supportedMethods;
 
 	private boolean requireSession = false;
 
@@ -97,7 +97,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public WebContentGenerator(boolean restrictDefaultSupportedMethods) {
 		if (restrictDefaultSupportedMethods) {
-			this.supportedMethods = new HashSet(4);
+			this.supportedMethods = new HashSet<String>(4);
 			this.supportedMethods.add(METHOD_GET);
 			this.supportedMethods.add(METHOD_HEAD);
 			this.supportedMethods.add(METHOD_POST);
@@ -111,7 +111,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public final void setSupportedMethods(String[] methods) {
 		if (methods != null) {
-			this.supportedMethods = new HashSet(Arrays.asList(methods));
+			this.supportedMethods = new HashSet<String>(Arrays.asList(methods));
 		}
 		else {
 			this.supportedMethods = null;

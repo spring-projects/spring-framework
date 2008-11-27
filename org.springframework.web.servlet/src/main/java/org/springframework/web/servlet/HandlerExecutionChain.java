@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.util.CollectionUtils;
@@ -35,7 +36,7 @@ public class HandlerExecutionChain {
 
 	private HandlerInterceptor[] interceptors;
 
-	private List interceptorList;
+	private List<HandlerInterceptor> interceptorList;
 
 
 	/**
@@ -56,7 +57,7 @@ public class HandlerExecutionChain {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
-			this.interceptorList = new ArrayList();
+			this.interceptorList = new ArrayList<HandlerInterceptor>();
 			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
 			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
 		}
@@ -83,20 +84,16 @@ public class HandlerExecutionChain {
 	public void addInterceptors(HandlerInterceptor[] interceptors) {
 		if (interceptors != null) {
 			initInterceptorList();
-			for (int i = 0; i < interceptors.length; i++) {
-				this.interceptorList.add(interceptors[i]);
-			}
+			this.interceptorList.addAll(Arrays.asList(interceptors));
 		}
 	}
 
 	private void initInterceptorList() {
 		if (this.interceptorList == null) {
-			this.interceptorList = new ArrayList();
+			this.interceptorList = new ArrayList<HandlerInterceptor>();
 		}
 		if (this.interceptors != null) {
-			for (int i = 0; i < this.interceptors.length; i++) {
-				this.interceptorList.add(this.interceptors[i]);
-			}
+			this.interceptorList.addAll(Arrays.asList(this.interceptors));
 			this.interceptors = null;
 		}
 	}
@@ -107,17 +104,18 @@ public class HandlerExecutionChain {
 	 */
 	public HandlerInterceptor[] getInterceptors() {
 		if (this.interceptors == null && this.interceptorList != null) {
-			this.interceptors = (HandlerInterceptor[])
-					this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
+			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
 		}
 		return this.interceptors;
 	}
+
 
 	/**
 	 * Delegates to the handler's <code>toString()</code>.
 	 */
 	@Override
 	public String toString() {
-		return String.valueOf(handler);
+		return String.valueOf(this.handler);
 	}
+
 }

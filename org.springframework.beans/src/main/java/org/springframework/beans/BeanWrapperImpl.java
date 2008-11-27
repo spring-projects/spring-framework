@@ -481,7 +481,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
 		PropertyTokenHolder tokens = new PropertyTokenHolder();
 		String actualName = null;
-		List keys = new ArrayList(2);
+		List<String> keys = new ArrayList<String>(2);
 		int searchIndex = 0;
 		while (searchIndex != -1) {
 			int keyStart = propertyName.indexOf(PROPERTY_KEY_PREFIX, searchIndex);

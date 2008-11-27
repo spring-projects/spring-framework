@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -118,8 +118,6 @@ import org.springframework.util.StringUtils;
  */
 public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-	private static final String ANNOTATION_CLASS_NAME = "java.lang.annotation.Annotation";
-
 	private static final String THIS_JOIN_POINT = "thisJoinPoint";
 	private static final String THIS_JOIN_POINT_STATIC_PART = "thisJoinPointStaticPart";
 
@@ -133,10 +131,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_REFERENCE_PCUT_BINDING = 7;
 	private static final int STEP_FINISHED = 8;
 
-	private static final Set singleValuedAnnotationPcds = new HashSet();
-	private static final Set nonReferencePointcutTokens = new HashSet();
-
-	private static Class annotationClass;
+	private static final Set<String> singleValuedAnnotationPcds = new HashSet<String>();
+	private static final Set<String> nonReferencePointcutTokens = new HashSet<String>();
 
 
 	static {
@@ -157,15 +153,6 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		nonReferencePointcutTokens.add("and");
 		nonReferencePointcutTokens.add("or");
 		nonReferencePointcutTokens.add("not");
-
-		try {
-			annotationClass = ClassUtils.forName(ANNOTATION_CLASS_NAME,
-					AspectJAdviceParameterNameDiscoverer.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Running on < JDK 1.5, this is OK...
-			annotationClass = null;
-		}
 	}
 
 
@@ -191,8 +178,6 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private String[] parameterNameBindings;
 
 	private int numberOfRemainingUnboundArguments;
-
-	private int algorithmicStep = STEP_JOIN_POINT_BINDING;
 
 
 	/**
@@ -241,7 +226,6 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		this.argumentTypes = method.getParameterTypes();
 		this.numberOfRemainingUnboundArguments = this.argumentTypes.length;
 		this.parameterNameBindings = new String[this.numberOfRemainingUnboundArguments];
-		this.algorithmicStep = STEP_JOIN_POINT_BINDING;
 
 		int minimumNumberUnboundArgs = 0;
 		if (this.returningName != null) {
@@ -256,8 +240,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 
 		try {
-			while ((this.numberOfRemainingUnboundArguments > 0) && (this.algorithmicStep < STEP_FINISHED)) {
-				switch (this.algorithmicStep++) {
+			int algorithmicStep = STEP_JOIN_POINT_BINDING;
+			while ((this.numberOfRemainingUnboundArguments > 0) && algorithmicStep < STEP_FINISHED) {
+				switch (algorithmicStep++) {
 					case STEP_JOIN_POINT_BINDING:
 						if (!maybeBindThisJoinPoint()) {
 							maybeBindThisJoinPointStaticPart();
@@ -282,7 +267,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 						maybeBindReferencePointcutParameter();
 						break;
 					default:
-						throw new IllegalStateException("Unknown algorithmic step: " + (this.algorithmicStep - 1));
+						throw new IllegalStateException("Unknown algorithmic step: " + (algorithmicStep - 1));
 				}
 			}
 		}
@@ -429,7 +414,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * <p>Some more support from AspectJ in doing this exercise would be nice... :)
 	 */
 	private void maybeBindAnnotationsFromPointcutExpression() {
-		List varNames = new ArrayList();
+		List<String> varNames = new ArrayList<String>();
 		String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 		for (int i = 0; i < tokens.length; i++) {
 			String toMatch = tokens[i];
@@ -458,7 +443,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	/**
 	 * Match the given list of extracted variable names to argument slots.
 	 */
-	private void bindAnnotationsFromVarNames(List varNames) {
+	private void bindAnnotationsFromVarNames(List<String> varNames) {
 		if (!varNames.isEmpty()) {
 			// we have work to do...
 			int numAnnotationSlots = countNumberOfUnboundAnnotationArguments();
@@ -470,7 +455,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			else if (numAnnotationSlots == 1) {
 				if (varNames.size() == 1) {
 					// it's a match
-					findAndBind(annotationClass, (String) varNames.get(0));
+					findAndBind(Annotation.class, varNames.get(0));
 				}
 				else {
 					// multiple candidate vars, but only one slot
@@ -495,8 +480,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
 				Character.isLowerCase(candidateToken.charAt(0))) {
 			char[] tokenChars = candidateToken.toCharArray();
-			for (int i = 0; i < tokenChars.length; i++) {
-				if (!Character.isJavaIdentifierPart(tokenChars[i])) {
+			for (char tokenChar : tokenChars) {
+				if (!Character.isJavaIdentifierPart(tokenChar)) {
 					return null;
 				}
 			}
@@ -511,11 +496,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Given an args pointcut body (could be <code>args</code> or <code>at_args</code>),
 	 * add any candidate variable names to the given list.
 	 */
-	private void maybeExtractVariableNamesFromArgs(String argsSpec, List varNames) {
+	private void maybeExtractVariableNamesFromArgs(String argsSpec, List<String> varNames) {
 		if (argsSpec == null) {
 			return;
 		}
-
 		String[] tokens = StringUtils.tokenizeToStringArray(argsSpec, ",");
 		for (int i = 0; i < tokens.length; i++) {
 			tokens[i] = StringUtils.trimWhitespace(tokens[i]);
@@ -536,7 +520,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 					+ " unbound args at this(),target(),args() binding stage, with no way to determine between them");
 		}
 
-		List varNames = new ArrayList();
+		List<String> varNames = new ArrayList<String>();
 		String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i].equals("this") ||
@@ -553,12 +537,11 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			else if (tokens[i].equals("args") || tokens[i].startsWith("args(")) {
 				PointcutBody body = getPointcutBody(tokens, i);
 				i += body.numTokensConsumed;
-				List candidateVarNames = new ArrayList();
+				List<String> candidateVarNames = new ArrayList<String>();
 				maybeExtractVariableNamesFromArgs(body.text, candidateVarNames);
 				// we may have found some var names that were bound in previous primitive args binding step,
 				// filter them out...
-				for (Iterator iter = candidateVarNames.iterator(); iter.hasNext();) {
-					String varName = (String) iter.next();
+				for (String varName : candidateVarNames) {
 					if (!alreadyBound(varName)) {
 						varNames.add(varName);
 					}
@@ -574,7 +557,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		else if (varNames.size() == 1) {
 			for (int j = 0; j < this.parameterNameBindings.length; j++) {
 				if (isUnbound(j)) {
-					bindParameterName(j, (String) varNames.get(0));
+					bindParameterName(j, varNames.get(0));
 					break;
 				}
 			}
@@ -588,7 +571,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 					+ " unbound args at reference pointcut binding stage, with no way to determine between them");
 		}
 
-		List varNames = new ArrayList();
+		List<String> varNames = new ArrayList<String>();
 		String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 		for (int i = 0; i < tokens.length; i++) {
 			String toMatch = tokens[i];
@@ -634,7 +617,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		else if (varNames.size() == 1) {
 			for (int j = 0; j < this.parameterNameBindings.length; j++) {
 				if (isUnbound(j)) {
-					bindParameterName(j, (String) varNames.get(0));
+					bindParameterName(j, varNames.get(0));
 					break;
 				}
 			}
@@ -700,7 +683,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 		if (numUnboundPrimitives == 1) {
 			// Look for arg variable and bind it if we find exactly one...
-			List varNames = new ArrayList();
+			List<String> varNames = new ArrayList<String>();
 			String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 			for (int i = 0; i < tokens.length; i++) {
 				if (tokens[i].equals("args") || tokens[i].startsWith("args(")) {
@@ -751,14 +734,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 	private int countNumberOfUnboundAnnotationArguments() {
-		if (annotationClass == null) {
-			// We're running on a JDK < 1.5
-			return 0;
-		}
-
 		int count = 0;
 		for (int i = 0; i < this.argumentTypes.length; i++) {
-			if (isUnbound(i) && isSubtypeOf(annotationClass, i)) {
+			if (isUnbound(i) && isSubtypeOf(Annotation.class, i)) {
 				count++;
 			}
 		}

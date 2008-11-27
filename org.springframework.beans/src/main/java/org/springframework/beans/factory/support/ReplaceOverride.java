@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,10 @@ import org.springframework.util.ObjectUtils;
  * @since 1.1
  */
 public class ReplaceOverride extends MethodOverride {
-	
+
 	private final String methodReplacerBeanName;
-	
-	/** 
-	 * List of String. Identifying signatures.
-	 */
-	private List typeIdentifiers = new LinkedList();
+
+	private List<String> typeIdentifiers = new LinkedList<String>();
 
 
 	/**
@@ -90,8 +87,8 @@ public class ReplaceOverride extends MethodOverride {
 			return false;
 		}
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
-			String identifier = (String) this.typeIdentifiers.get(i);
-			if (method.getParameterTypes()[i].getName().indexOf(identifier) == -1) {
+			String identifier = this.typeIdentifiers.get(i);
+			if (!method.getParameterTypes()[i].getName().contains(identifier)) {
 				// This parameter cannot match.
 				return false;
 			}

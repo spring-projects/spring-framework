@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-20078the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,7 @@ public class StopWatch {
 
 	private boolean keepTaskList = true;
 
-	/** List of TaskInfo objects */
-	private final List taskList = new LinkedList();
+	private final List<TaskInfo> taskList = new LinkedList<TaskInfo>();
 
 	/** Start time of the current task */
 	private long startTimeMillis;
@@ -187,7 +186,7 @@ public class StopWatch {
 		if (!this.keepTaskList) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
-		return (TaskInfo[]) this.taskList.toArray(new TaskInfo[this.taskList.size()]);
+		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
 	}
 
 
@@ -209,7 +208,6 @@ public class StopWatch {
 			sb.append("No task info kept");
 		}
 		else {
-			TaskInfo[] tasks = getTaskInfo();
 			sb.append("-----------------------------------------\n");
 			sb.append("ms     %     Task name\n");
 			sb.append("-----------------------------------------\n");
@@ -219,10 +217,10 @@ public class StopWatch {
 			NumberFormat pf = NumberFormat.getPercentInstance();
 			pf.setMinimumIntegerDigits(3);
 			pf.setGroupingUsed(false);
-			for (int i = 0; i < tasks.length; i++) {
-				sb.append(nf.format(tasks[i].getTimeMillis()) + "  ");
-				sb.append(pf.format(tasks[i].getTimeSeconds() / getTotalTimeSeconds()) + "  ");
-				sb.append(tasks[i].getTaskName() + "\n");
+			for (TaskInfo task : getTaskInfo()) {
+				sb.append(nf.format(task.getTimeMillis())).append("  ");
+				sb.append(pf.format(task.getTimeSeconds() / getTotalTimeSeconds())).append("  ");
+				sb.append(task.getTaskName()).append("\n");
 			}
 		}
 		return sb.toString();
@@ -236,11 +234,10 @@ public class StopWatch {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(shortSummary());
 		if (this.keepTaskList) {
-			TaskInfo[] tasks = getTaskInfo();
-			for (int i = 0; i < tasks.length; i++) {
-				sb.append("; [" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeMillis());
-				long percent = Math.round((100.0 * tasks[i].getTimeSeconds()) / getTotalTimeSeconds());
-				sb.append(" = " + percent + "%");
+			for (TaskInfo task : getTaskInfo()) {
+				sb.append("; [").append(task.getTaskName()).append("] took ").append(task.getTimeMillis());
+				long percent = Math.round((100.0 * task.getTimeSeconds()) / getTotalTimeSeconds());
+				sb.append(" = ").append(percent).append("%");
 			}
 		}
 		else {

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
@@ -94,17 +93,15 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection input = (value instanceof Collection ? (Collection) value : Arrays.asList((Object[]) value));
-			List merged = new ArrayList();
-			for (Iterator it = input.iterator(); it.hasNext();) {
-				Object element = it.next();
+			List<Resource> merged = new ArrayList<Resource>();
+			for (Object element : input) {
 				if (element instanceof String) {
 					// A location pattern: resolve it into a Resource array.
 					// Might point to a single resource or to multiple resources.
 					String pattern = resolvePath((String) element).trim();
 					try {
 						Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-						for (int i = 0; i < resources.length; i++) {
-							Resource resource = resources[i];
+						for (Resource resource : resources) {
 							if (!merged.contains(resource)) {
 								merged.add(resource);
 							}
@@ -117,8 +114,9 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 				}
 				else if (element instanceof Resource) {
 					// A Resource object: add it to the result.
-					if (!merged.contains(element)) {
-						merged.add(element);
+					Resource resource = (Resource) element;
+					if (!merged.contains(resource)) {
+						merged.add(resource);
 					}
 				}
 				else {

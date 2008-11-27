@@ -394,8 +394,8 @@ public class SingleConnectionFactory
 	 */
 	protected Session createSession(Connection con, Integer mode) throws JMSException {
 		// Determine JMS API arguments...
-		boolean transacted = (mode.intValue() == Session.SESSION_TRANSACTED);
-		int ackMode = (transacted ? Session.AUTO_ACKNOWLEDGE : mode.intValue());
+		boolean transacted = (mode == Session.SESSION_TRANSACTED);
+		int ackMode = (transacted ? Session.AUTO_ACKNOWLEDGE : mode);
 		// Now actually call the appropriate JMS factory method...
 		if (Boolean.FALSE.equals(this.pubSubMode) && con instanceof QueueConnection) {
 			return ((QueueConnection) con).createQueueSession(transacted, ackMode);
@@ -444,7 +444,7 @@ public class SingleConnectionFactory
 	 * @return the wrapped Connection
 	 */
 	protected Connection getSharedConnectionProxy(Connection target) {
-		List classes = new ArrayList(3);
+		List<Class> classes = new ArrayList<Class>(3);
 		classes.add(Connection.class);
 		if (target instanceof QueueConnection) {
 			classes.add(QueueConnection.class);
@@ -454,7 +454,7 @@ public class SingleConnectionFactory
 		}
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
-				(Class[]) classes.toArray(new Class[classes.size()]),
+				classes.toArray(new Class[classes.size()]),
 				new SharedConnectionInvocationHandler(target));
 	}
 
@@ -477,7 +477,7 @@ public class SingleConnectionFactory
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("toString")) {
 				return "Shared JMS Connection: " + this.target;
@@ -527,9 +527,9 @@ public class SingleConnectionFactory
 			}
 			else if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") ||
 					method.getName().equals("createTopicSession")) {
-				boolean transacted = ((Boolean) args[0]).booleanValue();
+				boolean transacted = (Boolean) args[0];
 				Integer ackMode = (Integer) args[1];
-				Integer mode = (transacted ? new Integer(Session.SESSION_TRANSACTED) : ackMode);
+				Integer mode = (transacted ? Session.SESSION_TRANSACTED : ackMode);
 				Session session = getSession(this.target, mode);
 				if (session != null) {
 					if (!method.getReturnType().isInstance(session)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,9 @@ import org.springframework.util.Assert;
  */
 public class ProxyCreatorSupport extends AdvisedSupport {
 
-	/** The AopProxyFactory to use */
 	private AopProxyFactory aopProxyFactory;
 
-	/** List of AdvisedSupportListener */
-	private List listeners = new LinkedList();
+	private List<AdvisedSupportListener> listeners = new LinkedList<AdvisedSupportListener>();
 
 	/** Set to true when the first AOP proxy has been created */
 	private boolean active = false;
@@ -112,8 +110,8 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 */
 	private void activate() {
 		this.active = true;
-		for (int i = 0; i < this.listeners.size(); i++) {
-			((AdvisedSupportListener) this.listeners.get(i)).activated(this);
+		for (AdvisedSupportListener listener : this.listeners) {
+			listener.activated(this);
 		}
 	}
 
@@ -126,8 +124,8 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		super.adviceChanged();
 		synchronized (this) {
 			if (this.active) {
-				for (int i = 0; i < this.listeners.size(); i++) {
-					((AdvisedSupportListener) this.listeners.get(i)).adviceChanged(this);
+				for (AdvisedSupportListener listener : this.listeners) {
+					listener.adviceChanged(this);
 				}
 			}
 		}

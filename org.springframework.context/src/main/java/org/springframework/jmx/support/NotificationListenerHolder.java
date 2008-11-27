@@ -16,10 +16,9 @@
 
 package org.springframework.jmx.support;
 
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
@@ -46,7 +45,7 @@ public class NotificationListenerHolder {
 
 	private Object handback;
 
-	protected Set mappedObjectNames;
+	protected Set<Object> mappedObjectNames;
 
 
 	/**
@@ -122,15 +121,8 @@ public class NotificationListenerHolder {
 	 * @see #setMappedObjectName
 	 */
 	public void setMappedObjectNames(Object[] mappedObjectNames) {
-		if (mappedObjectNames != null) {
-			this.mappedObjectNames = new LinkedHashSet(mappedObjectNames.length);
-			for (int i = 0; i < mappedObjectNames.length; i++) {
-				this.mappedObjectNames.add(mappedObjectNames[i]);
-			}
-		}
-		else {
-			this.mappedObjectNames = null;
-		}
+		this.mappedObjectNames = (mappedObjectNames != null ?
+				new LinkedHashSet<Object>(Arrays.asList(mappedObjectNames)) : null);
 	}
 
 	/**
@@ -145,8 +137,8 @@ public class NotificationListenerHolder {
 		}
 		ObjectName[] resolved = new ObjectName[this.mappedObjectNames.size()];
 		int i = 0;
-		for (Iterator it = this.mappedObjectNames.iterator(); it.hasNext();) {
-			resolved[i] = ObjectNameManager.getInstance(it.next());
+		for (Object objectName : this.mappedObjectNames) {
+			resolved[i] = ObjectNameManager.getInstance(objectName);
 			i++;
 		}
 		return resolved;

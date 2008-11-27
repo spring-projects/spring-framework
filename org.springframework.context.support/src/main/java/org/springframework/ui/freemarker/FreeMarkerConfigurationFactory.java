@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,15 +80,15 @@ public class FreeMarkerConfigurationFactory {
 
 	private Properties freemarkerSettings;
 
-	private Map freemarkerVariables;
+	private Map<String, Object> freemarkerVariables;
 
 	private String defaultEncoding;
 
-	private final List templateLoaders = new ArrayList();
+	private final List<TemplateLoader> templateLoaders = new ArrayList<TemplateLoader>();
 
-	private List preTemplateLoaders;
+	private List<TemplateLoader> preTemplateLoaders;
 
-	private List postTemplateLoaders;
+	private List<TemplateLoader> postTemplateLoaders;
 
 	private String[] templateLoaderPaths;
 
@@ -121,7 +121,7 @@ public class FreeMarkerConfigurationFactory {
 	 * to FreeMarker's <code>Configuration.setAllSharedVariables()</code> method.
 	 * @see freemarker.template.Configuration#setAllSharedVariables
 	 */
-	public void setFreemarkerVariables(Map variables) {
+	public void setFreemarkerVariables(Map<String, Object> variables) {
 		this.freemarkerVariables = variables;
 	}
 
@@ -300,8 +300,8 @@ public class FreeMarkerConfigurationFactory {
 
 		// Register default template loaders.
 		if (this.templateLoaderPaths != null) {
-			for (int i = 0; i < this.templateLoaderPaths.length; i++) {
-				this.templateLoaders.add(getTemplateLoaderForPath(this.templateLoaderPaths[i]));
+			for (String path : this.templateLoaderPaths) {
+				this.templateLoaders.add(getTemplateLoaderForPath(path));
 			}
 		}
 		postProcessTemplateLoaders(this.templateLoaders);
@@ -393,16 +393,16 @@ public class FreeMarkerConfigurationFactory {
 	 * @param templateLoaders the final List of TemplateLoader instances
 	 * @return the aggregate TemplateLoader
 	 */
-	protected TemplateLoader getAggregateTemplateLoader(List templateLoaders) {
+	protected TemplateLoader getAggregateTemplateLoader(List<TemplateLoader> templateLoaders) {
 		int loaderCount = templateLoaders.size();
 		switch (loaderCount) {
 			case 0:
 				logger.info("No FreeMarker TemplateLoaders specified");
 				return null;
 			case 1:
-				return (TemplateLoader) templateLoaders.get(0);
+				return templateLoaders.get(0);
 			default:
-				TemplateLoader[] loaders = (TemplateLoader[]) templateLoaders.toArray(new TemplateLoader[loaderCount]);
+				TemplateLoader[] loaders = templateLoaders.toArray(new TemplateLoader[loaderCount]);
 				return new MultiTemplateLoader(loaders);
 		}
 	}

@@ -61,68 +61,37 @@ import org.springframework.util.xml.DomUtils;
 class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String ASPECT = "aspect";
-
 	private static final String EXPRESSION = "expression";
-
 	private static final String ID = "id";
-
 	private static final String POINTCUT = "pointcut";
-
 	private static final String ADVICE_BEAN_NAME = "adviceBeanName";
-
 	private static final String ADVISOR = "advisor";
-
 	private static final String ADVICE_REF = "advice-ref";
-
 	private static final String POINTCUT_REF = "pointcut-ref";
-
 	private static final String REF = "ref";
-
 	private static final String BEFORE = "before";
-
 	private static final String DECLARE_PARENTS = "declare-parents";
-
 	private static final String TYPE_PATTERN = "types-matching";
-
 	private static final String DEFAULT_IMPL = "default-impl";
-	
 	private static final String DELEGATE_REF = "delegate-ref";
-
 	private static final String IMPLEMENT_INTERFACE = "implement-interface";
-
 	private static final String AFTER = "after";
-
 	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
-
 	private static final String AFTER_THROWING_ELEMENT = "after-throwing";
-
 	private static final String AROUND = "around";
-
 	private static final String RETURNING = "returning";
-
 	private static final String RETURNING_PROPERTY = "returningName";
-
 	private static final String THROWING = "throwing";
-
 	private static final String THROWING_PROPERTY = "throwingName";
-
 	private static final String ARG_NAMES = "arg-names";
-
 	private static final String ARG_NAMES_PROPERTY = "argumentNames";
-
 	private static final String ASPECT_NAME_PROPERTY = "aspectName";
-
 	private static final String DECLARATION_ORDER_PROPERTY = "declarationOrder";
-
 	private static final String ORDER_PROPERTY = "order";
-
 	private static final int METHOD_INDEX = 0;
-
 	private static final int POINTCUT_INDEX = 1;
-
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 
-	
 	private ParseState parseState = new ParseState();
 	
 
@@ -232,12 +201,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		try {
 			this.parseState.push(new AspectEntry(aspectId, aspectName));
-			List beanDefinitions = new ArrayList();
-			List beanReferences = new ArrayList();
+			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>();
+			List<BeanReference> beanReferences = new ArrayList<BeanReference>();
 
-			List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
+			List<Element> declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
 			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
-				Element declareParentsElement = (Element) declareParents.get(i);
+				Element declareParentsElement = declareParents.get(i);
 				beanDefinitions.add(parseDeclareParents(declareParentsElement, parserContext));
 			}
 
@@ -268,9 +237,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 					aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
 			parserContext.pushContainingComponent(aspectComponentDefinition);
 
-			List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
-			for (int i = 0; i < pointcuts.size(); i++) {
-				Element pointcutElement = (Element) pointcuts.get(i);
+			List<Element> pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
+			for (Element pointcutElement : pointcuts) {
 				parsePointcut(pointcutElement, parserContext);
 			}
 
@@ -282,10 +250,11 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private AspectComponentDefinition createAspectComponentDefinition(
-			Element aspectElement, String aspectId, List beanDefs, List beanRefs, ParserContext parserContext) {
+			Element aspectElement, String aspectId, List<BeanDefinition> beanDefs,
+			List<BeanReference> beanRefs, ParserContext parserContext) {
 
-		BeanDefinition[] beanDefArray = (BeanDefinition[]) beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
-		BeanReference[] beanRefArray = (BeanReference[]) beanRefs.toArray(new BeanReference[beanRefs.size()]);
+		BeanDefinition[] beanDefArray = beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
+		BeanReference[] beanRefArray = beanRefs.toArray(new BeanReference[beanRefs.size()]);
 		Object source = parserContext.extractSource(aspectElement);
 		return new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source);
 	}
@@ -345,7 +314,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private AbstractBeanDefinition parseAdvice(
 			String aspectName, int order, Element aspectElement, Element adviceElement, ParserContext parserContext,
-			List beanDefinitions, List beanReferences) {
+			List<BeanDefinition> beanDefinitions, List<BeanReference> beanReferences) {
 
 		try {
 			this.parseState.push(new AdviceEntry(adviceElement.getLocalName()));
@@ -394,15 +363,14 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private AbstractBeanDefinition createAdviceDefinition(
 			Element adviceElement, ParserContext parserContext, String aspectName, int order,
-			RootBeanDefinition methodDef, RootBeanDefinition aspectFactoryDef, List beanDefinitions, List beanReferences) {
+			RootBeanDefinition methodDef, RootBeanDefinition aspectFactoryDef,
+			List<BeanDefinition> beanDefinitions, List<BeanReference> beanReferences) {
 
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
 		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
-		adviceDefinition.getPropertyValues().addPropertyValue(
-				ASPECT_NAME_PROPERTY, aspectName);
-		adviceDefinition.getPropertyValues().addPropertyValue(
-				DECLARATION_ORDER_PROPERTY, new Integer(order));
+		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
+		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY, order);
 
 		if (adviceElement.hasAttribute(RETURNING)) {
 			adviceDefinition.getPropertyValues().addPropertyValue(
@@ -423,7 +391,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		Object pointcut = parsePointcutProperty(adviceElement, parserContext);
 		if (pointcut instanceof BeanDefinition) {
 			cav.addIndexedArgumentValue(POINTCUT_INDEX, pointcut);
-			beanDefinitions.add(pointcut);
+			beanDefinitions.add((BeanDefinition) pointcut);
 		}
 		else if (pointcut instanceof String) {
 			RuntimeBeanReference pointcutRef = new RuntimeBeanReference((String) pointcut);

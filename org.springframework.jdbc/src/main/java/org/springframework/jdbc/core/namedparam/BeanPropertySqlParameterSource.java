@@ -75,14 +75,14 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	 */
 	public String[] getReadablePropertyNames() {
 		if (this.propertyNames == null) {
-			List names = new ArrayList();
+			List<String> names = new ArrayList<String>();
 			PropertyDescriptor[] props = this.beanWrapper.getPropertyDescriptors();
-			for (int i = 0; i < props.length; i++) {
-				if (this.beanWrapper.isReadableProperty(props[i].getName())) {
-					names.add(props[i].getName());
+			for (PropertyDescriptor pd : props) {
+				if (this.beanWrapper.isReadableProperty(pd.getName())) {
+					names.add(pd.getName());
 				}
 			}
-			this.propertyNames = (String[]) names.toArray(new String[names.size()]);
+			this.propertyNames = names.toArray(new String[names.size()]);
 		}
 		return this.propertyNames;
 	}

@@ -295,7 +295,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
 	private List resolveManagedList(Object argName, List<?> ml) {
-		List resolved = new ArrayList(ml.size());
+		List<Object> resolved = new ArrayList<Object>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
 			    resolveValueIfNecessary(
@@ -309,7 +309,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
 	private Set resolveManagedSet(Object argName, Set<?> ms) {
-		Set resolved = new LinkedHashSet(ms.size());
+		Set<Object> resolved = new LinkedHashSet<Object>(ms.size());
 		int i = 0;
 		for (Object m : ms) {
 			resolved.add(resolveValueIfNecessary(
@@ -323,7 +323,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
 	private Map resolveManagedMap(Object argName, Map<?, ?> mm) {
-		Map resolved = new LinkedHashMap(mm.size());
+		Map<Object, Object> resolved = new LinkedHashMap<Object, Object>(mm.size());
 		for (Map.Entry entry : mm.entrySet()) {
 			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
 			Object resolvedValue = resolveValueIfNecessary(

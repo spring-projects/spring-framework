@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.bind;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.validation.Errors;
@@ -117,7 +116,7 @@ public class EscapedErrors implements Errors {
 		return this.source.getErrorCount();
 	}
 
-	public List getAllErrors() {
+	public List<ObjectError> getAllErrors() {
 		return escapeObjectErrors(this.source.getAllErrors());
 	}
 
@@ -129,7 +128,7 @@ public class EscapedErrors implements Errors {
 		return this.source.getGlobalErrorCount();
 	}
 
-	public List getGlobalErrors() {
+	public List<ObjectError> getGlobalErrors() {
 		return escapeObjectErrors(this.source.getGlobalErrors());
 	}
 
@@ -145,7 +144,7 @@ public class EscapedErrors implements Errors {
 		return this.source.getFieldErrorCount();
 	}
 
-	public List getFieldErrors() {
+	public List<FieldError> getFieldErrors() {
 		return this.source.getFieldErrors();
 	}
 
@@ -161,12 +160,12 @@ public class EscapedErrors implements Errors {
 		return this.source.getFieldErrorCount(field);
 	}
 
-	public List getFieldErrors(String field) {
+	public List<FieldError> getFieldErrors(String field) {
 		return escapeObjectErrors(this.source.getFieldErrors(field));
 	}
 
 	public FieldError getFieldError(String field) {
-		return (FieldError) escapeObjectError(this.source.getFieldError(field));
+		return escapeObjectError(this.source.getFieldError(field));
 	}
 
 	public Object getFieldValue(String field) {
@@ -178,7 +177,8 @@ public class EscapedErrors implements Errors {
 		return this.source.getFieldType(field);
 	}
 
-	private ObjectError escapeObjectError(ObjectError source) {
+	@SuppressWarnings("unchecked")
+	private <T extends ObjectError> T escapeObjectError(T source) {
 		if (source == null) {
 			return null;
 		}
@@ -188,20 +188,21 @@ public class EscapedErrors implements Errors {
 			if (value instanceof String) {
 				value = HtmlUtils.htmlEscape((String) value);
 			}
-			return new FieldError(
+			return (T) new FieldError(
 					fieldError.getObjectName(), fieldError.getField(), value,
 					fieldError.isBindingFailure(), fieldError.getCodes(),
 					fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
 		}
-		return new ObjectError(
-				source.getObjectName(), source.getCodes(), source.getArguments(),
-				HtmlUtils.htmlEscape(source.getDefaultMessage()));
+		else {
+			return (T) new ObjectError(
+					source.getObjectName(), source.getCodes(), source.getArguments(),
+					HtmlUtils.htmlEscape(source.getDefaultMessage()));
+		}
 	}
 
-	private List escapeObjectErrors(List source) {
-		List escaped = new ArrayList(source.size());
-		for (Iterator it = source.iterator(); it.hasNext();) {
-			ObjectError objectError = (ObjectError)it.next();
+	private <T extends ObjectError> List<T> escapeObjectErrors(List<T> source) {
+		List<T> escaped = new ArrayList<T>(source.size());
+		for (T objectError : source) {
 			escaped.add(escapeObjectError(objectError));
 		}
 		return escaped;

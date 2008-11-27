@@ -37,9 +37,9 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 	private final WebApplicationContext webApplicationContext;
 
-	private final Set exposedContextBeanNames;
+	private final Set<String> exposedContextBeanNames;
 
-	private Set explicitAttributes;
+	private Set<String> explicitAttributes;
 
 
 	/**
@@ -60,7 +60,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 	 * Set are eligible for exposure as attributes)
 	 */
 	public ContextExposingHttpServletRequest(
-			HttpServletRequest originalRequest, WebApplicationContext context, Set exposedContextBeanNames) {
+			HttpServletRequest originalRequest, WebApplicationContext context, Set<String> exposedContextBeanNames) {
 
 		super(originalRequest);
 		Assert.notNull(context, "WebApplicationContext must not be null");
@@ -93,7 +93,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 	public void setAttribute(String name, Object value) {
 		super.setAttribute(name, value);
 		if (this.explicitAttributes == null) {
-			this.explicitAttributes = new HashSet(8);
+			this.explicitAttributes = new HashSet<String>(8);
 		}
 		this.explicitAttributes.add(name);
 	}

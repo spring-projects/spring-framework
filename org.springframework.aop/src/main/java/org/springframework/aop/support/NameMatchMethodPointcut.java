@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Arrays;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -36,7 +37,7 @@ import org.springframework.util.PatternMatchUtils;
  */
 public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-	private List mappedNames = new LinkedList();
+	private List<String> mappedNames = new LinkedList<String>();
 
 
 	/**
@@ -45,7 +46,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * @see #setMappedNames
 	 */
 	public void setMappedName(String mappedName) {
-		setMappedNames(new String[] { mappedName });
+		setMappedNames(new String[] {mappedName});
 	}
 
 	/**
@@ -54,11 +55,9 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * the pointcut matches.
 	 */
 	public void setMappedNames(String[] mappedNames) {
-		this.mappedNames = new LinkedList();
+		this.mappedNames = new LinkedList<String>();
 		if (mappedNames != null) {
-			for (int i = 0; i < mappedNames.length; i++) {
-				this.mappedNames.add(mappedNames[i]);
-			}
+			this.mappedNames.addAll(Arrays.asList(mappedNames));
 		}
 	}
 
@@ -72,16 +71,13 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * @return this pointcut to allow for multiple additions in one line
 	 */
 	public NameMatchMethodPointcut addMethodName(String name) {
-		// TODO in a future release, consider a way of letting proxies
-		// cause advice changed events.
 		this.mappedNames.add(name);
 		return this;
 	}
 
 
 	public boolean matches(Method method, Class targetClass) {
-		for (int i = 0; i < this.mappedNames.size(); i++) {
-			String mappedName = (String) this.mappedNames.get(i);
+		for (String mappedName : this.mappedNames) {
 			if (mappedName.equals(method.getName()) || isMatch(method.getName(), mappedName)) {
 				return true;
 			}
@@ -105,11 +101,8 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		return (other instanceof NameMatchMethodPointcut &&
-				ObjectUtils.nullSafeEquals(this.mappedNames, ((NameMatchMethodPointcut) other).mappedNames));
+		return (this == other || (other instanceof NameMatchMethodPointcut &&
+				ObjectUtils.nullSafeEquals(this.mappedNames, ((NameMatchMethodPointcut) other).mappedNames)));
 	}
 
 	@Override

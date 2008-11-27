@@ -143,8 +143,8 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		if (codes == null) {
 			codes = new String[0];
 		}
-		for (int i = 0; i < codes.length; i++) {
-			String msg = getMessageInternal(codes[i], resolvable.getArguments(), locale);
+		for (String code : codes) {
+			String msg = getMessageInternal(code, resolvable.getArguments(), locale);
 			if (msg != null) {
 				return msg;
 			}
@@ -291,13 +291,13 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		if (args == null) {
 			return new Object[0];
 		}
-		List resolvedArgs = new ArrayList(args.length);
-		for (int i = 0; i < args.length; i++) {
-			if (args[i] instanceof MessageSourceResolvable) {
-				resolvedArgs.add(getMessage((MessageSourceResolvable) args[i], locale));
+		List<Object> resolvedArgs = new ArrayList<Object>(args.length);
+		for (Object arg : args) {
+			if (arg instanceof MessageSourceResolvable) {
+				resolvedArgs.add(getMessage((MessageSourceResolvable) arg, locale));
 			}
 			else {
-				resolvedArgs.add(args[i]);
+				resolvedArgs.add(arg);
 			}
 		}
 		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);

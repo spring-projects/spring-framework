@@ -238,7 +238,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per file basis.
 	 */
-	private final Set usedNames = new HashSet();
+	private final Set<String> usedNames = new HashSet<String>();
 
 
 	/**
@@ -366,7 +366,7 @@ public class BeanDefinitionParserDelegate {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
-		List aliases = new ArrayList();
+		List<String> aliases = new ArrayList<String>();
 		if (StringUtils.hasLength(nameAttr)) {
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));

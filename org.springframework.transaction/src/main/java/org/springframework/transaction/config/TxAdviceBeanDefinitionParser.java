@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,13 +94,11 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	}
 
 	private RootBeanDefinition parseAttributeSource(Element attrEle, ParserContext parserContext) {
-		List methods = DomUtils.getChildElementsByTagName(attrEle, "method");
+		List<Element> methods = DomUtils.getChildElementsByTagName(attrEle, "method");
 		ManagedMap transactionAttributeMap = new ManagedMap(methods.size());
 		transactionAttributeMap.setSource(parserContext.extractSource(attrEle));
 
-		for (int i = 0; i < methods.size(); i++) {
-			Element methodEle = (Element) methods.get(i);
-
+		for (Element methodEle : methods) {
 			String name = methodEle.getAttribute("name");
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(methodEle));
@@ -125,10 +123,10 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 				}
 			}
 			if (StringUtils.hasText(readOnly)) {
-				attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY)).booleanValue());
+				attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY)));
 			}
 
-			List rollbackRules = new LinkedList();
+			List<RollbackRuleAttribute> rollbackRules = new LinkedList<RollbackRuleAttribute>();
 			if (methodEle.hasAttribute(ROLLBACK_FOR)) {
 				String rollbackForValue = methodEle.getAttribute(ROLLBACK_FOR);
 				addRollbackRuleAttributesTo(rollbackRules,rollbackForValue);
@@ -148,17 +146,17 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		return attributeSourceDefinition;
 	}
 
-	private void addRollbackRuleAttributesTo(List rollbackRules, String rollbackForValue) {
+	private void addRollbackRuleAttributesTo(List<RollbackRuleAttribute> rollbackRules, String rollbackForValue) {
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(rollbackForValue);
-		for (int i = 0; i < exceptionTypeNames.length; i++) {
-			rollbackRules.add(new RollbackRuleAttribute(StringUtils.trimWhitespace(exceptionTypeNames[i])));
+		for (String typeName : exceptionTypeNames) {
+			rollbackRules.add(new RollbackRuleAttribute(StringUtils.trimWhitespace(typeName)));
 		}
 	}
 
-	private void addNoRollbackRuleAttributesTo(List rollbackRules, String noRollbackForValue) {
+	private void addNoRollbackRuleAttributesTo(List<RollbackRuleAttribute> rollbackRules, String noRollbackForValue) {
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(noRollbackForValue);
-		for (int i = 0; i < exceptionTypeNames.length; i++) {
-			rollbackRules.add(new NoRollbackRuleAttribute(StringUtils.trimWhitespace(exceptionTypeNames[i])));
+		for (String typeName : exceptionTypeNames) {
+			rollbackRules.add(new NoRollbackRuleAttribute(StringUtils.trimWhitespace(typeName)));
 		}
 	}
 
