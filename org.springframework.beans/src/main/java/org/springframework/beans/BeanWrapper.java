@@ -31,9 +31,6 @@ import java.beans.PropertyDescriptor;
  *
  * <p>This interface supports <b>nested properties</b> enabling the setting
  * of properties on subproperties to an unlimited depth.
- * A <code>BeanWrapper</code> instance can be used repeatedly, with its
- * {@link #setWrappedInstance(Object) target object} (the wrapped JavaBean
- * instance) changing as required.
  *
  * <p>A BeanWrapper's default for the "extractOldValueForEditor" setting
  * is "false", to avoid side effects caused by getter method invocations.

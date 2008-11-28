@@ -30,7 +30,6 @@ import org.springframework.context.ApplicationEvent;
  * @author Juergen Hoeller
  * @since January 17, 2001
  * @see ServletRequestHandledEvent
- * @see PerformanceMonitorListener
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.context.ApplicationContext#publishEvent
  */

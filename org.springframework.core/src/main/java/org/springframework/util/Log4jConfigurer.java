@@ -42,7 +42,6 @@ import org.apache.log4j.xml.DOMConfigurator;
  * @since 13.03.2003
  * @see org.springframework.web.util.Log4jWebConfigurer
  * @see org.springframework.web.util.Log4jConfigListener
- * @see org.springframework.web.util.Log4jConfigServlet
  */
 public abstract class Log4jConfigurer {
 

@@ -37,7 +37,6 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @see #setSuffix
  * @see #setRequestContextAttribute
  * @see #setExposeSpringMacroHelpers
- * @see #setVelocityFormatterAttribute
  * @see #setDateToolAttribute
  * @see #setNumberToolAttribute
  * @see VelocityView

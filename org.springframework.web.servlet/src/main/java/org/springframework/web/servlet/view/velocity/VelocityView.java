@@ -122,7 +122,6 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see VelocityToolboxView
 	 * @see #createVelocityContext
 	 * @see #initTool
-	 * @see #setVelocityFormatterAttribute
 	 * @see #setDateToolAttribute
 	 * @see #setNumberToolAttribute
 	 */

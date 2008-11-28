@@ -75,7 +75,7 @@ public class LoadTimeWeaverAwareProcessor implements BeanPostProcessor, BeanFact
 	 * <p>The <code>LoadTimeWeaver</code> will be auto-retrieved from
 	 * the given {@link BeanFactory}, expecting a bean named
 	 * {@link ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME "loadTimeWeaver"}.
-	 * @param loadTimeWeaver the specific <code>LoadTimeWeaver</code> that is to be used
+	 * @param beanFactory the BeanFactory to retrieve the LoadTimeWeaver from
 	 */
 	public LoadTimeWeaverAwareProcessor(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;

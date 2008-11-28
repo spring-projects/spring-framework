@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression;
 
 import org.springframework.expression.spel.standard.StandardTypeLocator;
@@ -21,17 +22,16 @@ import org.springframework.expression.spel.standard.StandardTypeLocator;
  * Implementors of this interface are expected to be able to locate types. They may use custom classloaders or the
  * and deal with common package prefixes (java.lang, etc) however they wish. See
  * {@link StandardTypeLocator} for an example implementation.
- * 
+ *
  * @author Andy Clement
  */
 public interface TypeLocator {
 
 	/**
 	 * Find a type by name. The name may or may not be fully qualified (eg. String or java.lang.String)
-	 * 
-	 * @param type the type to be located
+	 * @param typename the type to be located
 	 * @return the class object representing that type
-	 * @throw ExpressionException if there is a problem finding it
+	 * @throws EvaluationException if there is a problem finding it
 	 */
 	Class<?> findType(String typename) throws EvaluationException;
 

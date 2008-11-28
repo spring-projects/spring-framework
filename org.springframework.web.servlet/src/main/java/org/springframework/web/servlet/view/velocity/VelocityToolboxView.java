@@ -63,7 +63,6 @@ import org.springframework.util.ReflectionUtils;
  * @see #initTool
  * @see org.apache.velocity.tools.view.context.ViewContext
  * @see org.apache.velocity.tools.view.context.ChainedContext
- * @see org.apache.velocity.tools.view.tools.LinkTool
  */
 public class VelocityToolboxView extends VelocityView {
 
@@ -121,7 +120,6 @@ public class VelocityToolboxView extends VelocityView {
 	 * Overridden to check for the ViewContext interface which is part of the
 	 * view package of Velocity Tools. This requires a special Velocity context,
 	 * like ChainedContext as set up by {@link #createVelocityContext} in this class.
-	 * @see org.apache.velocity.tools.view.tools.LinkTool#init(Object)
 	 */
 	@Override
 	protected void initTool(Object tool, Context velocityContext) throws Exception {
