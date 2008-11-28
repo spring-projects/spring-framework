@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,24 +101,6 @@ public interface SqlMapClientOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
 	void queryWithRowHandler(String statementName, Object parameterObject, RowHandler rowHandler)
-			throws DataAccessException;
-
-	/**
-	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForPaginatedList(String, int)
-	 * @deprecated as of iBATIS 2.3.0
-	 * @throws org.springframework.dao.DataAccessException in case of errors
-	 */
-	@Deprecated
-	PaginatedList queryForPaginatedList(String statementName, int pageSize)
-			throws DataAccessException;
-
-	/**
-	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForPaginatedList(String, Object, int)
-	 * @deprecated as of iBATIS 2.3.0
-	 * @throws org.springframework.dao.DataAccessException in case of errors
-	 */
-	@Deprecated
-	PaginatedList queryForPaginatedList(String statementName, Object parameterObject, int pageSize)
 			throws DataAccessException;
 
 	/**

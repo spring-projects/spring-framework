@@ -223,11 +223,11 @@ public class TransactionAwareConnectionFactoryProxy
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (Session.class.equals(method.getReturnType())) {
 				Session session = ConnectionFactoryUtils.getTransactionalSession(
@@ -295,11 +295,11 @@ public class TransactionAwareConnectionFactoryProxy
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("commit")) {
 				throw new TransactionInProgressException("Commit call not allowed within a managed transaction");

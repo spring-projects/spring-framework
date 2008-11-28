@@ -118,7 +118,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @see java.sql.Connection#setAutoCommit
 	 */
 	public void setDefaultAutoCommit(boolean defaultAutoCommit) {
-		this.defaultAutoCommit = new Boolean(defaultAutoCommit);
+		this.defaultAutoCommit = defaultAutoCommit;
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @see java.sql.Connection#setTransactionIsolation
 	 */
 	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
-		this.defaultTransactionIsolation = new Integer(defaultTransactionIsolation);
+		this.defaultTransactionIsolation = defaultTransactionIsolation;
 	}
 
 	/**
@@ -187,10 +187,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 */
 	protected synchronized void checkDefaultConnectionProperties(Connection con) throws SQLException {
 		if (this.defaultAutoCommit == null) {
-			this.defaultAutoCommit = new Boolean(con.getAutoCommit());
+			this.defaultAutoCommit = con.getAutoCommit();
 		}
 		if (this.defaultTransactionIsolation == null) {
-			this.defaultTransactionIsolation = new Integer(con.getTransactionIsolation());
+			this.defaultTransactionIsolation = con.getTransactionIsolation();
 		}
 	}
 
@@ -281,13 +281,13 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 			if (method.getName().equals("equals")) {
 				// We must avoid fetching a target Connection for "equals".
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// We must avoid fetching a target Connection for "hashCode",
 				// and we must return the same hash code even when the target
 				// Connection has been fetched: use hashCode of Connection proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying connection.
@@ -346,7 +346,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					return null;
 				}
 				else if (method.getName().equals("isClosed")) {
-					return (this.closed ? Boolean.TRUE : Boolean.FALSE);
+					return (this.closed);
 				}
 				else if (method.getName().equals("close")) {
 					// Ignore: no target connection yet.
@@ -397,15 +397,15 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				checkDefaultConnectionProperties(this.target);
 
 				// Apply kept transaction settings, if any.
-				if (this.readOnly.booleanValue()) {
-					this.target.setReadOnly(this.readOnly.booleanValue());
+				if (this.readOnly) {
+					this.target.setReadOnly(this.readOnly);
 				}
 				if (this.transactionIsolation != null &&
 						!this.transactionIsolation.equals(defaultTransactionIsolation())) {
-					this.target.setTransactionIsolation(this.transactionIsolation.intValue());
+					this.target.setTransactionIsolation(this.transactionIsolation);
 				}
-				if (this.autoCommit != null && this.autoCommit.booleanValue() != this.target.getAutoCommit()) {
-					this.target.setAutoCommit(this.autoCommit.booleanValue());
+				if (this.autoCommit != null && this.autoCommit != this.target.getAutoCommit()) {
+					this.target.setAutoCommit(this.autoCommit);
 				}
 			}
 

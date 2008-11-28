@@ -89,7 +89,7 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 
 		int[] concurrency = parseConcurrency(containerEle, parserContext);
 		if (concurrency != null) {
-			configDef.getPropertyValues().addPropertyValue("maxConcurrency", new Integer(concurrency[1]));
+			configDef.getPropertyValues().addPropertyValue("maxConcurrency", concurrency[1]);
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);

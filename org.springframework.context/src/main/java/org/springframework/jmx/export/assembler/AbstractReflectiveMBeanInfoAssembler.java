@@ -98,7 +98,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * accessors or mutators for attributes.
 	 * @see #FIELD_VISIBILITY
 	 */
-	protected static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
+	protected static final int ATTRIBUTE_OPERATION_VISIBILITY = 4;
 
 	/**
 	 * Constant identifier for the class field in a JMX {@link Descriptor}.

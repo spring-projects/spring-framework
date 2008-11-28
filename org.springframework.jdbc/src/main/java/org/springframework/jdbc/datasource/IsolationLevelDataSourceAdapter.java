@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,10 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()
 	 */
 	public void setIsolationLevel(int isolationLevel) {
-		if (!constants.getValues(DefaultTransactionDefinition.PREFIX_ISOLATION).contains(new Integer(isolationLevel))) {
+		if (!constants.getValues(DefaultTransactionDefinition.PREFIX_ISOLATION).contains(isolationLevel)) {
 			throw new IllegalArgumentException("Only values of isolation constants allowed");
 		}
-		this.isolationLevel =
-				(isolationLevel != TransactionDefinition.ISOLATION_DEFAULT ? new Integer(isolationLevel) : null);
+		this.isolationLevel = (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT ? isolationLevel : null);
 	}
 
 	/**
@@ -128,11 +127,11 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 		Connection con = super.doGetConnection(username, password);
 		Boolean readOnlyToUse = getCurrentReadOnlyFlag();
 		if (readOnlyToUse != null) {
-			con.setReadOnly(readOnlyToUse.booleanValue());
+			con.setReadOnly(readOnlyToUse);
 		}
 		Integer isolationLevelToUse = getCurrentIsolationLevel();
 		if (isolationLevelToUse != null) {
-			con.setTransactionIsolation(isolationLevelToUse.intValue());
+			con.setTransactionIsolation(isolationLevelToUse);
 		}
 		return con;
 	}

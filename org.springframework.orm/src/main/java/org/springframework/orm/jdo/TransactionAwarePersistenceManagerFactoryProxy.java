@@ -148,18 +148,18 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of PersistenceManagerFactory proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("getPersistenceManager")) {
 				PersistenceManagerFactory target = getTargetPersistenceManagerFactory();
 				PersistenceManager pm =
 						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
 				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
-				return (PersistenceManager) Proxy.newProxyInstance(
+				return Proxy.newProxyInstance(
 						pm.getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
 			}
 
@@ -194,11 +194,11 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of PersistenceManager proxy.
-				return new Integer(System.identityHashCode(proxy));
+				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.

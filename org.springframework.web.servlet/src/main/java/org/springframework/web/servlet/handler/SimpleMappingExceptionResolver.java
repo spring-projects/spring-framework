@@ -169,7 +169,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @see javax.servlet.http.HttpServletResponse#SC_NOT_FOUND
 	 */
 	public void setDefaultStatusCode(int defaultStatusCode) {
-		this.defaultStatusCode = new Integer(defaultStatusCode);
+		this.defaultStatusCode = defaultStatusCode;
 	}
 
 	/**
@@ -218,8 +218,8 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 				return true;
 			}
 			if (this.mappedHandlerClasses != null) {
-				for (int i = 0; i < this.mappedHandlerClasses.length; i++) {
-					if (this.mappedHandlerClasses[i].isInstance(handler)) {
+				for (Class handlerClass : this.mappedHandlerClasses) {
+					if (handlerClass.isInstance(handler)) {
 						return true;
 					}
 				}
@@ -259,7 +259,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 			// Only apply it if we're processing a top-level request.
 			Integer statusCode = determineStatusCode(request, viewName);
 			if (statusCode != null) {
-				applyStatusCodeIfPossible(request, response, statusCode.intValue());
+				applyStatusCodeIfPossible(request, response, statusCode);
 			}
 			return getModelAndView(viewName, ex, request);
 		}
@@ -362,7 +362,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
-		if (exceptionClass.getName().indexOf(exceptionMapping) != -1) {
+		if (exceptionClass.getName().contains(exceptionMapping)) {
 			// Found it!
 			return depth;
 		}
@@ -407,7 +407,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 				logger.debug("Applying HTTP status code " + statusCode);
 			}
 			response.setStatus(statusCode);
-			request.setAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE, new Integer(statusCode));
+			request.setAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE, statusCode);
 		}
 	}
 

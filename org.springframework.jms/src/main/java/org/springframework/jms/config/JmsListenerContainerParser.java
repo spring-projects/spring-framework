@@ -114,7 +114,7 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
-			if (acknowledgeMode.intValue() == Session.SESSION_TRANSACTED) {
+			if (acknowledgeMode == Session.SESSION_TRANSACTED) {
 				containerDef.getPropertyValues().addPropertyValue("sessionTransacted", Boolean.TRUE);
 			}
 			else {
@@ -137,11 +137,11 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		int[] concurrency = parseConcurrency(containerEle, parserContext);
 		if (concurrency != null) {
 			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency[0]));
-				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", new Integer(concurrency[1]));
+				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", concurrency[0]);
+				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", concurrency[1]);
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency[1]));
+				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", concurrency[1]);
 			}
 		}
 

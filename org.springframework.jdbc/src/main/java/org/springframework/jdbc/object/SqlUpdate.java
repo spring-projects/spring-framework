@@ -163,7 +163,7 @@ public class SqlUpdate extends SqlOperation {
 	 * @param params array of parameters objects
 	 * @return the number of rows affected by the update
 	 */
-	public int update(Object[] params) throws DataAccessException {
+	public int update(Object... params) throws DataAccessException {
 		validateParameters(params);
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params));
 		checkRowsAffected(rowsAffected);
@@ -195,28 +195,28 @@ public class SqlUpdate extends SqlOperation {
 	 * Convenient method to execute an update given one int arg.
 	 */
 	public int update(int p1) throws DataAccessException {
-		return update(new Object[] {new Integer(p1)});
+		return update(new Object[] {p1});
 	}
 
 	/**
 	 * Convenient method to execute an update given two int args.
 	 */
 	public int update(int p1, int p2) throws DataAccessException {
-		return update(new Object[] {new Integer(p1), new Integer(p2)});
+		return update(new Object[] {p1, p2});
 	}
 
 	/**
 	 * Convenient method to execute an update given one long arg.
 	 */
 	public int update(long p1) throws DataAccessException {
-		return update(new Object[] {new Long(p1)});
+		return update(new Object[] {p1});
 	}
 
 	/**
 	 * Convenient method to execute an update given two long args.
 	 */
 	public int update(long p1, long p2) throws DataAccessException {
-		return update(new Object[] {new Long(p1), new Long(p2)});
+		return update(new Object[] {p1, p2});
 	}
 
 	/**

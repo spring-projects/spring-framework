@@ -127,7 +127,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
-		if (!constants.getValues(PREFIX_PROPAGATION).contains(new Integer(propagationBehavior))) {
+		if (!constants.getValues(PREFIX_PROPAGATION).contains(propagationBehavior)) {
 			throw new IllegalArgumentException("Only values of propagation constants allowed");
 		}
 		this.propagationBehavior = propagationBehavior;
@@ -161,7 +161,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {
-		if (!constants.getValues(PREFIX_ISOLATION).contains(new Integer(isolationLevel))) {
+		if (!constants.getValues(PREFIX_ISOLATION).contains(isolationLevel)) {
 			throw new IllegalArgumentException("Only values of isolation constants allowed");
 		}
 		this.isolationLevel = isolationLevel;

@@ -142,32 +142,32 @@ public abstract class JdbcUtils {
 			value = rs.getString(index);
 		}
 		else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
-			value = Boolean.valueOf(rs.getBoolean(index));
+			value = rs.getBoolean(index);
 			wasNullCheck = true;
 		}
 		else if (byte.class.equals(requiredType) || Byte.class.equals(requiredType)) {
-			value = new Byte(rs.getByte(index));
+			value = rs.getByte(index);
 			wasNullCheck = true;
 		}
 		else if (short.class.equals(requiredType) || Short.class.equals(requiredType)) {
-			value = new Short(rs.getShort(index));
+			value = rs.getShort(index);
 			wasNullCheck = true;
 		}
 		else if (int.class.equals(requiredType) || Integer.class.equals(requiredType)) {
-			value = new Integer(rs.getInt(index));
+			value = rs.getInt(index);
 			wasNullCheck = true;
 		}
 		else if (long.class.equals(requiredType) || Long.class.equals(requiredType)) {
-			value = new Long(rs.getLong(index));
+			value = rs.getLong(index);
 			wasNullCheck = true;
 		}
 		else if (float.class.equals(requiredType) || Float.class.equals(requiredType)) {
-			value = new Float(rs.getFloat(index));
+			value = rs.getFloat(index);
 			wasNullCheck = true;
 		}
 		else if (double.class.equals(requiredType) || Double.class.equals(requiredType) ||
 				Number.class.equals(requiredType)) {
-			value = new Double(rs.getDouble(index));
+			value = rs.getDouble(index);
 			wasNullCheck = true;
 		}
 		else if (byte[].class.equals(requiredType)) {

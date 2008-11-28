@@ -305,7 +305,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Return a list of the declared {@link SqlParameter} objects.
 	 */
-	protected List getDeclaredParameters() {
+	protected List<SqlParameter> getDeclaredParameters() {
 		return this.declaredParameters;
 	}
 
@@ -398,7 +398,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @param parameters parameter Map supplied. May be <code>null</code>.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
-	protected void validateNamedParameters(Map<String, Object> parameters) throws InvalidDataAccessApiUsageException {
+	protected void validateNamedParameters(Map<String, ?> parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
 		Map paramsToUse = (parameters != null ? parameters : Collections.emptyMap());
 		int declaredInParameters = 0;

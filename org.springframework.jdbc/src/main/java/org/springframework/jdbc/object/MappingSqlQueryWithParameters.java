@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -48,7 +47,7 @@ import org.springframework.jdbc.core.RowMapper;
  * @see org.springframework.jdbc.object.MappingSqlQuery
  * @see org.springframework.jdbc.object.SqlQuery
  */
-public abstract class MappingSqlQueryWithParameters extends SqlQuery {
+public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 
 	/**
 	 * Constructor to allow use as a JavaBean
@@ -71,7 +70,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * implementation of the mapRow() method.
 	 */
 	@Override
-	protected RowMapper newRowMapper(Object[] parameters, Map context) {
+	protected RowMapper<T> newRowMapper(Object[] parameters, Map context) {
 		return new RowMapperImpl(parameters, context);
 	}
 
@@ -90,7 +89,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract Object mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context)
+	protected abstract T mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context)
 			throws SQLException;
 
 
@@ -98,7 +97,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * Implementation of RowMapper that calls the enclosing
 	 * class's <code>mapRow</code> method for each row.
 	 */
-	protected class RowMapperImpl implements RowMapper {
+	protected class RowMapperImpl implements RowMapper<T> {
 
 		private final Object[] params;
 
@@ -112,7 +111,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 			this.context = context;
 		}
 
-		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return MappingSqlQueryWithParameters.this.mapRow(rs, rowNum, this.params, this.context);
 		}
 	}

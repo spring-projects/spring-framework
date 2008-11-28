@@ -170,7 +170,7 @@ public abstract class DataSourceUtils {
 				logger.debug("Changing isolation level of JDBC Connection [" + con + "] to " +
 						definition.getIsolationLevel());
 			}
-			previousIsolationLevel = new Integer(con.getTransactionIsolation());
+			previousIsolationLevel = con.getTransactionIsolation();
 			con.setTransactionIsolation(definition.getIsolationLevel());
 		}
 

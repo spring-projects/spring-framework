@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,8 +220,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			parserContext.getReaderContext().error("Invalid listener container 'destination-type': " +
 					"only \"queue\", \"topic\" and \"durableTopic\" supported.", ele);
 		}
-		configDef.getPropertyValues().addPropertyValue("pubSubDomain", Boolean.valueOf(pubSubDomain));
-		configDef.getPropertyValues().addPropertyValue("subscriptionDurable", Boolean.valueOf(subscriptionDurable));
+		configDef.getPropertyValues().addPropertyValue("pubSubDomain", pubSubDomain);
+		configDef.getPropertyValues().addPropertyValue("subscriptionDurable", subscriptionDurable);
 
 		if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
 			String clientId = ele.getAttribute(CLIENT_ID_ATTRIBUTE);
@@ -250,7 +250,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error("Invalid listener container 'acknowledge' setting [" +
 						acknowledge + "]: only \"auto\", \"client\", \"dups-ok\" and \"transacted\" supported.", ele);
 			}
-			return new Integer(acknowledgeMode);
+			return acknowledgeMode;
 		}
 		else {
 			return null;
@@ -258,7 +258,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	}
 
 	protected boolean indicatesPubSubConfig(BeanDefinition configDef) {
-		return ((Boolean) configDef.getPropertyValues().getPropertyValue("pubSubDomain").getValue()).booleanValue();
+		return (Boolean) configDef.getPropertyValues().getPropertyValue("pubSubDomain").getValue();
 	}
 
 	protected int[] parseConcurrency(Element ele, ParserContext parserContext) {

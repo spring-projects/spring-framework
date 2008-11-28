@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,12 +99,12 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		try {
 			Class transactionUtilityClass = getClass().getClassLoader().loadClass(TRANSACTION_UTILITY_CLASS_NAME);
-			Method getInstanceMethod = transactionUtilityClass.getMethod("getInstance", new Class[0]);
-			Object transactionUtility = getInstanceMethod.invoke(null, new Object[0]);
+			Method getInstanceMethod = transactionUtilityClass.getMethod("getInstance");
+			Object transactionUtility = getInstanceMethod.invoke(null);
 			logger.debug("Retrieving JTA UserTransaction from OC4J TransactionUtility");
 			Method getUserTransactionMethod =
-					transactionUtility.getClass().getMethod("getOC4JUserTransaction", new Class[0]);
-			return (UserTransaction) getUserTransactionMethod.invoke(transactionUtility, new Object[0]);
+					transactionUtility.getClass().getMethod("getOC4JUserTransaction");
+			return (UserTransaction) getUserTransactionMethod.invoke(transactionUtility);
 		}
 		catch (ClassNotFoundException ex) {
 			logger.debug("Could not find OC4J 10.1.3.2 TransactionUtility: " + ex);
@@ -144,9 +144,9 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 		// Cache reflective Method references for later use.
 		if (transactionManagerClass.isInstance(getUserTransaction())) {
 			this.beginWithNameMethod = ClassUtils.getMethodIfAvailable(
-					transactionManagerClass, "begin", new Class[] {String.class});
+					transactionManagerClass, "begin", String.class);
 			this.setTransactionIsolationMethod = ClassUtils.getMethodIfAvailable(
-					transactionClass, "setTransactionIsolation", new Class[] {int.class});
+					transactionClass, "setTransactionIsolation", int.class);
 			logger.info("Support for OC4J transaction names and isolation levels available");
 		}
 		else {
@@ -169,7 +169,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 			otm.begin(definition.getName());
 			*/
 			try {
-				this.beginWithNameMethod.invoke(txObject.getUserTransaction(), new Object[] {definition.getName()});
+				this.beginWithNameMethod.invoke(txObject.getUserTransaction(), definition.getName());
 			}
 			catch (InvocationTargetException ex) {
 				throw new TransactionSystemException(
@@ -195,8 +195,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 					oracle.j2ee.transaction.OC4JTransaction otx = (oracle.j2ee.transaction.OC4JTransaction) tx;
 					otx.setTransactionIsolation(definition.getIsolationLevel());
 					*/
-					Integer isolationLevel = new Integer(definition.getIsolationLevel());
-					this.setTransactionIsolationMethod.invoke(tx, new Object[] {isolationLevel});
+					this.setTransactionIsolationMethod.invoke(tx, definition.getIsolationLevel());
 				}
 				catch (InvocationTargetException ex) {
 					throw new TransactionSystemException(
@@ -222,7 +221,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 				ut.setTransactionTimeout(timeout);
 			}
 			try {
-				this.beginWithNameMethod.invoke(ut, new Object[] {name});
+				this.beginWithNameMethod.invoke(ut, name);
 			}
 			catch (InvocationTargetException ex) {
 				if (ex.getTargetException() instanceof NotSupportedException) {

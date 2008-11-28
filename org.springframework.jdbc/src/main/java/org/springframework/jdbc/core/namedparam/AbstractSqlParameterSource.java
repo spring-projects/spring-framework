@@ -30,9 +30,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 
-	private final Map sqlTypes = new HashMap();
+	private final Map<String, Integer> sqlTypes = new HashMap<String, Integer>();
 
-	private final Map typeNames = new HashMap();
+	private final Map<String, String> typeNames = new HashMap<String, String>();
 
 
 	/**
@@ -42,7 +42,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 */
 	public void registerSqlType(String paramName, int sqlType) {
 		Assert.notNull(paramName, "Parameter name must not be null");
-		this.sqlTypes.put(paramName, new Integer(sqlType));
+		this.sqlTypes.put(paramName, sqlType);
 	}
 
 	/**
@@ -63,9 +63,9 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 */
 	public int getSqlType(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
-		Integer sqlType = (Integer) this.sqlTypes.get(paramName);
+		Integer sqlType = this.sqlTypes.get(paramName);
 		if (sqlType != null) {
-			return sqlType.intValue();
+			return sqlType;
 		}
 		return TYPE_UNKNOWN;
 	}
@@ -78,7 +78,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 */
 	public String getTypeName(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
-		return (String) this.typeNames.get(paramName);
+		return this.typeNames.get(paramName);
 	}
 
 }

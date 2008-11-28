@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,10 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @since 1.0.2
  * @see org.springframework.jdbc.support.lob.LobCreator
  */
-public abstract class AbstractLobCreatingPreparedStatementCallback implements PreparedStatementCallback {
+public abstract class AbstractLobCreatingPreparedStatementCallback implements PreparedStatementCallback<Integer> {
 
 	private final LobHandler lobHandler;
+
 
 	/**
 	 * Create a new AbstractLobCreatingPreparedStatementCallback for the
@@ -64,11 +65,12 @@ public abstract class AbstractLobCreatingPreparedStatementCallback implements Pr
 		this.lobHandler = lobHandler;
 	}
 
-	public final Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+
+	public final Integer doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
 		try {
 			setValues(ps, lobCreator);
-			return new Integer(ps.executeUpdate());
+			return ps.executeUpdate();
 		}
 		finally {
 			lobCreator.close();

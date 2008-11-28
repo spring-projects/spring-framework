@@ -72,8 +72,8 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 			// do not modify the EntityManager: just mark the request accordingly
 			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-			int newCount = (count != null) ? count.intValue() + 1 : 1;
-			request.setAttribute(getParticipateAttributeName(), new Integer(newCount), WebRequest.SCOPE_REQUEST);
+			int newCount = (count != null ? count + 1 : 1);
+			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		}
 		else {
 			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewInterceptor");
@@ -95,8 +95,8 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		if (count != null) {
 			// Do not modify the EntityManager: just clear the marker.
-			if (count.intValue() > 1) {
-				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1), WebRequest.SCOPE_REQUEST);
+			if (count > 1) {
+				request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
 			}
 			else {
 				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);

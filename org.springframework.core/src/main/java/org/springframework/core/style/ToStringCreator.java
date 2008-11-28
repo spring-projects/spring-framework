@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,16 @@ public class ToStringCreator {
 	}
 
 	/**
+	 * Append a long field value.
+	 * @param fieldName the name of the field, usually the member variable name
+	 * @param value the field value
+	 * @return this, to support call-chaining
+	 */
+	public ToStringCreator append(String fieldName, long value) {
+		return append(fieldName, new Long(value));
+	}
+
+	/**
 	 * Append a float field value.
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
@@ -126,23 +136,13 @@ public class ToStringCreator {
 	}
 
 	/**
-	 * Append a long field value.
-	 * @param fieldName the name of the field, usually the member variable name
-	 * @param value the field value
-	 * @return this, to support call-chaining
-	 */
-	public ToStringCreator append(String fieldName, long value) {
-		return append(fieldName, new Long(value));
-	}
-
-	/**
 	 * Append a boolean field value.
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, boolean value) {
-		return append(fieldName, value ? Boolean.TRUE : Boolean.FALSE);
+		return append(fieldName, Boolean.valueOf(value));
 	}
 
 	/**

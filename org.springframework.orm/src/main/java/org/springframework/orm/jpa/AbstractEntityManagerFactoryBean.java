@@ -415,7 +415,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			try {
 				if (method.getName().equals("equals")) {
 					// Only consider equal when proxies are identical.
-					return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+					return (proxy == args[0]);
 				}
 				else if (method.getName().equals("hashCode")) {
 					// Use hashCode of EntityManagerFactory proxy.

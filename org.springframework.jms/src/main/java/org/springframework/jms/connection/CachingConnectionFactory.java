@@ -281,7 +281,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			String methodName = method.getName();
 			if (methodName.equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (methodName.equals("hashCode")) {
 				// Use hashCode of Session proxy.
