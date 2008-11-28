@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate3.annotation;
 
 import java.io.IOException;
-
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -78,7 +77,7 @@ import org.springframework.util.ClassUtils;
  */
 public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implements ResourceLoaderAware {
 
-	private static final String RESOURCE_PATTERN = "**/*.class";
+	private static final String RESOURCE_PATTERN = "/**/*.class";
 
 
 	private Class[] annotatedClasses;
@@ -164,13 +163,13 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	protected void postProcessMappings(Configuration config) throws HibernateException {
 		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
 		if (this.annotatedClasses != null) {
-			for (int i = 0; i < this.annotatedClasses.length; i++) {
-				annConfig.addAnnotatedClass(this.annotatedClasses[i]);
+			for (Class annotatedClass : this.annotatedClasses) {
+				annConfig.addAnnotatedClass(annotatedClass);
 			}
 		}
 		if (this.annotatedPackages != null) {
-			for (int i = 0; i < this.annotatedPackages.length; i++) {
-				annConfig.addPackage(this.annotatedPackages[i]);
+			for (String annotatedPackage : this.annotatedPackages) {
+				annConfig.addPackage(annotatedPackage);
 			}
 		}
 		scanPackages(annConfig);
