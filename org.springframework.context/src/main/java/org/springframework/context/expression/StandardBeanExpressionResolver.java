@@ -25,8 +25,9 @@ import org.springframework.expression.spel.standard.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
 /**
- * Standard implementation of the {@link BeanExpressionResolver} interface,
- * parsing and evaluating Spring EL using Spring's expression module.
+ * Standard implementation of the
+ * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
+ * interface, parsing and evaluating Spring EL using Spring's expression module.
  *
  * @author Juergen Hoeller
  * @since 3.0

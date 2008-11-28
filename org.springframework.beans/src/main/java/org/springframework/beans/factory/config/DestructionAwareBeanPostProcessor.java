@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
- * Subinterface of BeanPostProcessor that adds a before-destruction callback.
+ * Subinterface of {@link BeanPostProcessor} that adds a before-destruction callback.
  *
  * <p>The typical usage will be to invoke custom destruction callbacks on
  * specific bean types, matching corresponding initialization callbacks.
  *
  * @author Juergen Hoeller
  * @since 1.0.1
- * @see org.springframework.web.struts.ActionServletAwareProcessor
  */
 public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 

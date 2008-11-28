@@ -297,7 +297,7 @@ public abstract class CommonsFileUploadSupport {
 		/**
 		 * Create a new MultipartParsingResult.
 		 * @param mpFiles Map of field name to MultipartFile instance
-		 * @param multipartParameters Map of field name to form field String value
+		 * @param mpParams Map of field name to form field String value
 		 */
 		public MultipartParsingResult(Map<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
 			this.multipartFiles = mpFiles;

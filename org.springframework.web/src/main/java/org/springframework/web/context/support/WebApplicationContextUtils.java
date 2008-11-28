@@ -48,8 +48,6 @@ import org.springframework.web.context.request.SessionScope;
  * @see org.springframework.web.context.ContextLoader
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see org.springframework.web.struts.ActionSupport
- * @see org.springframework.web.struts.DelegatingActionProxy
  * @see org.springframework.web.jsf.FacesContextUtils
  * @see org.springframework.web.jsf.DelegatingVariableResolver
  */

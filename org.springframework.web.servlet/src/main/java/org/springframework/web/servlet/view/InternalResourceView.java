@@ -250,7 +250,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @throws Exception if there's a fatal error while we're adding attributes
 	 * @see #renderMergedOutputModel
 	 * @see JstlView#exposeHelpers
-	 * @see org.springframework.web.servlet.view.tiles.TilesJstlView#exposeHelpers
 	 */
 	protected void exposeHelpers(HttpServletRequest request) throws Exception {
 	}
@@ -266,7 +265,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @return the request dispatcher path to use
 	 * @throws Exception if preparations failed
 	 * @see #getUrl()
-	 * @see org.springframework.web.servlet.view.tiles.TilesView#prepareForRendering
 	 */
 	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {

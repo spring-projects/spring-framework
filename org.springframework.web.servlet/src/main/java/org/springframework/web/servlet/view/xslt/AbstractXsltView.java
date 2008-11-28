@@ -411,7 +411,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param model the model Map
 	 * @param request current HTTP request
 	 * @return a Map of parameters to apply to the transformation process
-	 * @see #getParameters()
 	 * @see javax.xml.transform.Transformer#setParameter
 	 */
 	protected Map getParameters(Map<String, Object> model, HttpServletRequest request) {
