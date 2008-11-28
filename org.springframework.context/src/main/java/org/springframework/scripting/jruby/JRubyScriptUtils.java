@@ -162,7 +162,7 @@ public abstract class JRubyScriptUtils {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
-				return (isProxyForSameRubyObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
+				return (isProxyForSameRubyObject(args[0]));
 			}
 			else if (ReflectionUtils.isHashCodeMethod(method)) {
 				return this.rubyObject.hashCode();

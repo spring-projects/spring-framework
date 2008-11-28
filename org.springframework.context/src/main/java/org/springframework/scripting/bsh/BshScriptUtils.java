@@ -175,10 +175,10 @@ public abstract class BshScriptUtils {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
-				return (isProxyForSameBshObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
+				return (isProxyForSameBshObject(args[0]));
 			}
 			else if (ReflectionUtils.isHashCodeMethod(method)) {
-				return new Integer(this.xt.hashCode());
+				return this.xt.hashCode();
 			}
 			else if (ReflectionUtils.isToStringMethod(method)) {
 				return "BeanShell object [" + this.xt + "]";

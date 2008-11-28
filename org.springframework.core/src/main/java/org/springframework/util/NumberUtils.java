@@ -63,24 +63,24 @@ public abstract class NumberUtils {
 			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
-			return new Byte(number.byteValue());
+			return number.byteValue();
 		}
 		else if (targetClass.equals(Short.class)) {
 			long value = number.longValue();
 			if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
-			return new Short(number.shortValue());
+			return number.shortValue();
 		}
 		else if (targetClass.equals(Integer.class)) {
 			long value = number.longValue();
 			if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
-			return new Integer(number.intValue());
+			return number.intValue();
 		}
 		else if (targetClass.equals(Long.class)) {
-			return new Long(number.longValue());
+			return number.longValue();
 		}
 		else if (targetClass.equals(BigInteger.class)) {
 			if (number instanceof BigDecimal) {
@@ -93,10 +93,10 @@ public abstract class NumberUtils {
 			}
 		}
 		else if (targetClass.equals(Float.class)) {
-			return new Float(number.floatValue());
+			return number.floatValue();
 		}
 		else if (targetClass.equals(Double.class)) {
-			return new Double(number.doubleValue());
+			return number.doubleValue();
 		}
 		else if (targetClass.equals(BigDecimal.class)) {
 			// always use BigDecimal(String) here to avoid unpredictability of BigDecimal(double)

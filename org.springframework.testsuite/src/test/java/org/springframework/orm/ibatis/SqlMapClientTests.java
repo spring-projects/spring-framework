@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.ibatis.common.util.PaginatedArrayList;
-import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.client.SqlMapExecutor;
 import com.ibatis.sqlmap.client.SqlMapSession;
@@ -263,26 +261,6 @@ public class SqlMapClientTests extends TestCase {
 		template.executorControl.setVoidCallable(1);
 		template.executorControl.replay();
 		template.queryWithRowHandler("myStatement", "myParameter", rowHandler);
-		template.executorControl.verify();
-	}
-
-	public void testQueryForPaginatedList() throws SQLException {
-		PaginatedList result = new PaginatedArrayList(10);
-		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForPaginatedList("myStatement", null, 10);
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
-		assertEquals(result, template.queryForPaginatedList("myStatement", 10));
-		template.executorControl.verify();
-	}
-
-	public void testQueryForPaginatedListWithParameter() throws SQLException {
-		PaginatedList result = new PaginatedArrayList(10);
-		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForPaginatedList("myStatement", "myParameter", 10);
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
-		assertEquals(result, template.queryForPaginatedList("myStatement", "myParameter", 10));
 		template.executorControl.verify();
 	}
 

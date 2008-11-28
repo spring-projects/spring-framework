@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,8 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		try {
 			logger.debug("Retrieving JTA UserTransaction from WebLogic TransactionHelper/TxHelper");
 			Method getUserTransactionMethod =
-					this.transactionHelperClass.getMethod("getUserTransaction", new Class[0]);
-			return (UserTransaction) getUserTransactionMethod.invoke(this.transactionHelper, new Object[0]);
+					this.transactionHelperClass.getMethod("getUserTransaction");
+			return (UserTransaction) getUserTransactionMethod.invoke(this.transactionHelper);
 		}
 		catch (InvocationTargetException ex) {
 			throw new TransactionSystemException(
@@ -135,9 +135,8 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		loadWebLogicTransactionHelperClass();
 		try {
 			logger.debug("Retrieving JTA TransactionManager from WebLogic TransactionHelper/TxHelper");
-			Method getTransactionManagerMethod =
-					this.transactionHelperClass.getMethod("getTransactionManager", new Class[0]);
-			return (TransactionManager) getTransactionManagerMethod.invoke(this.transactionHelper, new Object[0]);
+			Method getTransactionManagerMethod = this.transactionHelperClass.getMethod("getTransactionManager");
+			return (TransactionManager) getTransactionManagerMethod.invoke(this.transactionHelper);
 		}
 		catch (InvocationTargetException ex) {
 			throw new TransactionSystemException(
@@ -158,7 +157,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 							getClass().getClassLoader().loadClass(TRANSACTION_HELPER_CLASS_NAME);
 					Method getTransactionHelperMethod =
 							this.transactionHelperClass.getMethod("getTransactionHelper", new Class[0]);
-					this.transactionHelper = getTransactionHelperMethod.invoke(null, new Object[0]);
+					this.transactionHelper = getTransactionHelperMethod.invoke(null);
 					logger.debug("WebLogic 8.1+ TransactionHelper found");
 				}
 				catch (ClassNotFoundException ex) {
@@ -246,16 +245,14 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
 					wut.begin(definition.getName(), timeout);
 					*/
-					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(),
-							new Object[] {definition.getName(), new Integer(timeout)});
+					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(), definition.getName(), timeout);
 				}
 				else {
 					/*
 					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
 					wut.begin(definition.getName());
 					*/
-					this.beginWithNameMethod.invoke(txObject.getUserTransaction(),
-							new Object[] {definition.getName()});
+					this.beginWithNameMethod.invoke(txObject.getUserTransaction(), definition.getName());
 				}
 			}
 			catch (InvocationTargetException ex) {
@@ -279,12 +276,12 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				try {
 					Transaction tx = getTransactionManager().getTransaction();
-					Integer isolationLevel = new Integer(definition.getIsolationLevel());
+					Integer isolationLevel = definition.getIsolationLevel();
 					/*
 					weblogic.transaction.Transaction wtx = (weblogic.transaction.Transaction) tx;
 					wtx.setProperty(ISOLATION_LEVEL_KEY, isolationLevel);
 					*/
-					this.setPropertyMethod.invoke(tx, new Object[] {ISOLATION_LEVEL_KEY, isolationLevel});
+					this.setPropertyMethod.invoke(tx, ISOLATION_LEVEL_KEY, isolationLevel);
 				}
 				catch (InvocationTargetException ex) {
 					throw new TransactionSystemException(
@@ -323,7 +320,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			wtm.forceResume(suspendedTransaction);
 			*/
 			try {
-				this.forceResumeMethod.invoke(getTransactionManager(), new Object[] {suspendedTransaction});
+				this.forceResumeMethod.invoke(getTransactionManager(), suspendedTransaction);
 			}
 			catch (InvocationTargetException ex2) {
 				throw new TransactionSystemException(
@@ -342,10 +339,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		if (this.weblogicUserTransactionAvailable && name != null) {
 			try {
 				if (timeout >= 0) {
-					this.beginWithNameAndTimeoutMethod.invoke(getUserTransaction(), new Object[] {name, new Integer(timeout)});
+					this.beginWithNameAndTimeoutMethod.invoke(getUserTransaction(), name, timeout);
 				}
 				else {
-					this.beginWithNameMethod.invoke(getUserTransaction(), new Object[] {name});
+					this.beginWithNameMethod.invoke(getUserTransaction(), name);
 				}
 			}
 			catch (InvocationTargetException ex) {

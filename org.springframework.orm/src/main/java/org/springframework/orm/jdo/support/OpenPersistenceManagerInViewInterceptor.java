@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ public class OpenPersistenceManagerInViewInterceptor implements WebRequestInterc
 			// Do not modify the PersistenceManager: just mark the request accordingly.
 			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-			int newCount = (count != null) ? count.intValue() + 1 : 1;
-			request.setAttribute(getParticipateAttributeName(), new Integer(newCount), WebRequest.SCOPE_REQUEST);
+			int newCount = (count != null ? count + 1 : 1);
+			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		}
 		else {
 			logger.debug("Opening JDO PersistenceManager in OpenPersistenceManagerInViewInterceptor");
@@ -114,8 +114,8 @@ public class OpenPersistenceManagerInViewInterceptor implements WebRequestInterc
 		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		if (count != null) {
 			// Do not modify the PersistenceManager: just clear the marker.
-			if (count.intValue() > 1) {
-				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1), WebRequest.SCOPE_REQUEST);
+			if (count > 1) {
+				request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
 			}
 			else {
 				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);

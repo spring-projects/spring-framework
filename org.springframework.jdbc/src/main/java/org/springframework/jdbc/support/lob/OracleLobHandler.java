@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,9 +96,9 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	private Class clobClass;
 
-	private final Map durationSessionConstants = new HashMap(2);
+	private final Map<Class, Integer> durationSessionConstants = new HashMap<Class, Integer>(2);
 
-	private final Map modeReadWriteConstants = new HashMap(2);
+	private final Map<Class, Integer> modeReadWriteConstants = new HashMap<Class, Integer>(2);
 
 
 	/**
@@ -128,7 +128,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * @see oracle.sql.CLOB#createTemporary
 	 */
 	public void setCache(boolean cache) {
-		this.cache = new Boolean(cache);
+		this.cache = cache;
 	}
 
 
@@ -149,16 +149,16 @@ public class OracleLobHandler extends AbstractLobHandler {
 				// Initialize oracle.sql.BLOB class
 				this.blobClass = con.getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
 				this.durationSessionConstants.put(
-						this.blobClass, new Integer(this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
+						this.blobClass, this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
 				this.modeReadWriteConstants.put(
-						this.blobClass, new Integer(this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+						this.blobClass, this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
 
 				// Initialize oracle.sql.CLOB class
 				this.clobClass = con.getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
 				this.durationSessionConstants.put(
-						this.clobClass, new Integer(this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
+						this.clobClass, this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
 				this.modeReadWriteConstants.put(
-						this.clobClass, new Integer(this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+						this.clobClass, this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
 			}
 			catch (Exception ex) {
 				throw new InvalidDataAccessApiUsageException(
@@ -219,8 +219,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 			if (content != null) {
 				Blob blob = (Blob) createLob(ps, false, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
-						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", new Class[0]);
-						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
+						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream");
+						OutputStream out = (OutputStream) methodToInvoke.invoke(lob);
 						FileCopyUtils.copy(content, out);
 					}
 				});
@@ -389,11 +389,10 @@ public class OracleLobHandler extends AbstractLobHandler {
 			return blob;
 			*/
 			Method createTemporary = lobClass.getMethod(
-					"createTemporary", new Class[] {Connection.class, boolean.class, int.class});
-			Object lob = createTemporary.invoke(
-					null, new Object[] {con, cache, durationSessionConstants.get(lobClass)});
-			Method open = lobClass.getMethod("open", new Class[] {int.class});
-			open.invoke(lob, new Object[] {modeReadWriteConstants.get(lobClass)});
+					"createTemporary", Connection.class, boolean.class, int.class);
+			Object lob = createTemporary.invoke(null, con, cache, durationSessionConstants.get(lobClass));
+			Method open = lobClass.getMethod("open", int.class);
+			open.invoke(lob, modeReadWriteConstants.get(lobClass));
 			return lob;
 		}
 
@@ -408,8 +407,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 					blob.freeTemporary();
 					*/
 					Object lob = it.next();
-					Method freeTemporary = lob.getClass().getMethod("freeTemporary", new Class[0]);
-					freeTemporary.invoke(lob, new Object[0]);
+					Method freeTemporary = lob.getClass().getMethod("freeTemporary");
+					freeTemporary.invoke(lob);
 					it.remove();
 				}
 			}

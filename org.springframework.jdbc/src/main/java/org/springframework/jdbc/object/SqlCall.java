@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlReturnResultSet;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -130,7 +128,7 @@ public abstract class SqlCall extends RdbmsOperation {
 			this.callString = getSql();
 		}
 		else {
-			List parameters = getDeclaredParameters();
+			List<SqlParameter> parameters = getDeclaredParameters();
 			int parameterCount = 0;
 			if (isFunction()) {
 				this.callString = "{? = call " + getSql() + "(";
@@ -139,8 +137,7 @@ public abstract class SqlCall extends RdbmsOperation {
 			else {
 				this.callString = "{call " + getSql() + "(";
 			}
-			for (int i = 0; i < parameters.size(); i++) {
-				SqlParameter parameter = (SqlParameter) parameters.get(i);
+			for (SqlParameter parameter : parameters) {
 				if (!(parameter.isResultsParameter())) {
 					if (parameterCount > 0) {
 						this.callString += ", ";
@@ -184,7 +181,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * with this parameters.
 	 * @param inParams parameters. May be <code>null</code>.
 	 */
-	protected CallableStatementCreator newCallableStatementCreator(Map inParams) {
+	protected CallableStatementCreator newCallableStatementCreator(Map<String, ?> inParams) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
 	}
 

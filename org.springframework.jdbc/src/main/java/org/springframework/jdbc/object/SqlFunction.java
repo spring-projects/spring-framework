@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,13 +18,10 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
-import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * SQL "function" wrapper for a query that returns a single row of results. 
@@ -50,9 +47,9 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Jean-Pierre Pawlak
  * @see org.springframework.jdbc.object.StoredProcedure
  */
-public class SqlFunction extends MappingSqlQuery {
+public class SqlFunction<T> extends MappingSqlQuery<T> {
 
-	private final SingleColumnRowMapper rowMapper = new SingleColumnRowMapper();
+	private final SingleColumnRowMapper<T> rowMapper = new SingleColumnRowMapper<T>();
 
 
 	/**
@@ -104,7 +101,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * @see #setResultType(Class)
 	 * @see java.sql.Types
 	 */
-	public SqlFunction(DataSource ds, String sql, int[] types, Class resultType) {
+	public SqlFunction(DataSource ds, String sql, int[] types, Class<T> resultType) {
 		setRowsExpected(1);
 		setDataSource(ds);
 		setSql(sql);
@@ -118,7 +115,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * <p>If not specified, the result value will be exposed as
 	 * returned by the JDBC driver.
 	 */
-	public void setResultType(Class resultType) {
+	public void setResultType(Class<T> resultType) {
 		this.rowMapper.setRequiredType(resultType);
 	}
 
@@ -129,7 +126,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * of rows returned, this is treated as an error.
 	 */
 	@Override
-	protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+	protected T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		return this.rowMapper.mapRow(rs, rowNum);
 	}
 
@@ -139,7 +136,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * @return the value of the function
 	 */
 	public int run() {
-		return run(null);
+		return run(new Object[0]);
 	}
 
 	/**
@@ -148,7 +145,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * @return the value of the function
 	 */
 	public int run(int parameter) {
-		return run(new Object[] {new Integer(parameter)});
+		return run(new Object[] {parameter});
 	}
 
 	/**
@@ -158,7 +155,7 @@ public class SqlFunction extends MappingSqlQuery {
 	 * object wrapper types for primitives.
 	 * @return the value of the function
 	 */
-	public int run(Object[] parameters) {
+	public int run(Object... parameters) {
 		Object obj = super.findObject(parameters);
 		if (!(obj instanceof Number)) {
 			throw new TypeMismatchDataAccessException("Couldn't convert result object [" + obj + "] to int");

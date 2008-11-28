@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class PortletRequestUtils {
 		if (request.getParameter(name) == null) {
 			return null;
 		}
-		return new Integer(getRequiredIntParameter(request, name));
+		return getRequiredIntParameter(request, name);
 	}
 
 	/**
@@ -138,7 +138,7 @@ public abstract class PortletRequestUtils {
 		if (request.getParameter(name) == null) {
 			return null;
 		}
-		return new Long(getRequiredLongParameter(request, name));
+		return getRequiredLongParameter(request, name);
 	}
 
 	/**
@@ -216,7 +216,7 @@ public abstract class PortletRequestUtils {
 		if (request.getParameter(name) == null) {
 			return null;
 		}
-		return new Float(getRequiredFloatParameter(request, name));
+		return getRequiredFloatParameter(request, name);
 	}
 
 	/**
@@ -294,7 +294,7 @@ public abstract class PortletRequestUtils {
 		if (request.getParameter(name) == null) {
 			return null;
 		}
-		return new Double(getRequiredDoubleParameter(request, name));
+		return getRequiredDoubleParameter(request, name);
 	}
 
 	/**
@@ -374,7 +374,7 @@ public abstract class PortletRequestUtils {
 		if (request.getParameter(name) == null) {
 			return null;
 		}
-		return (getRequiredBooleanParameter(request, name) ? Boolean.TRUE : Boolean.FALSE);
+		return (getRequiredBooleanParameter(request, name));
 	}
 
 	/**
@@ -518,9 +518,9 @@ public abstract class PortletRequestUtils {
 	}
 
 
-	private abstract static class ParameterParser {
+	private abstract static class ParameterParser<T> {
 
-		protected final Object parse(String name, String parameter) throws PortletRequestBindingException {
+		protected final T parse(String name, String parameter) throws PortletRequestBindingException {
 			validateRequiredParameter(name, parameter);
 			try {
 				return doParse(parameter);
@@ -542,11 +542,11 @@ public abstract class PortletRequestUtils {
 
 		protected abstract String getType();
 
-		protected abstract Object doParse(String parameter) throws NumberFormatException;
+		protected abstract T doParse(String parameter) throws NumberFormatException;
 	}
 
 
-	private static class IntParser extends ParameterParser {
+	private static class IntParser extends ParameterParser<Integer> {
 
 		@Override
 		protected String getType() {
@@ -554,12 +554,12 @@ public abstract class PortletRequestUtils {
 		}
 
 		@Override
-		protected Object doParse(String s) throws NumberFormatException {
+		protected Integer doParse(String s) throws NumberFormatException {
 			return Integer.valueOf(s);
 		}
 
 		public int parseInt(String name, String parameter) throws PortletRequestBindingException {
-			return ((Number) parse(name, parameter)).intValue();
+			return parse(name, parameter);
 		}
 
 		public int[] parseInts(String name, String[] values) throws PortletRequestBindingException {
@@ -573,7 +573,7 @@ public abstract class PortletRequestUtils {
 	}
 
 
-	private static class LongParser extends ParameterParser {
+	private static class LongParser extends ParameterParser<Long> {
 
 		@Override
 		protected String getType() {
@@ -581,12 +581,12 @@ public abstract class PortletRequestUtils {
 		}
 
 		@Override
-		protected Object doParse(String parameter) throws NumberFormatException {
+		protected Long doParse(String parameter) throws NumberFormatException {
 			return Long.valueOf(parameter);
 		}
 
 		public long parseLong(String name, String parameter) throws PortletRequestBindingException {
-			return ((Number) parse(name, parameter)).longValue();
+			return parse(name, parameter);
 		}
 
 		public long[] parseLongs(String name, String[] values) throws PortletRequestBindingException {
@@ -600,7 +600,7 @@ public abstract class PortletRequestUtils {
 	}
 
 
-	private static class FloatParser extends ParameterParser {
+	private static class FloatParser extends ParameterParser<Float> {
 
 		@Override
 		protected String getType() {
@@ -608,12 +608,12 @@ public abstract class PortletRequestUtils {
 		}
 
 		@Override
-		protected Object doParse(String parameter) throws NumberFormatException {
+		protected Float doParse(String parameter) throws NumberFormatException {
 			return Float.valueOf(parameter);
 		}
 
 		public float parseFloat(String name, String parameter) throws PortletRequestBindingException {
-			return ((Number) parse(name, parameter)).floatValue();
+			return parse(name, parameter);
 		}
 
 		public float[] parseFloats(String name, String[] values) throws PortletRequestBindingException {
@@ -627,7 +627,7 @@ public abstract class PortletRequestUtils {
 	}
 
 
-	private static class DoubleParser extends ParameterParser {
+	private static class DoubleParser extends ParameterParser<Double> {
 
 		@Override
 		protected String getType() {
@@ -635,12 +635,12 @@ public abstract class PortletRequestUtils {
 		}
 
 		@Override
-		protected Object doParse(String parameter) throws NumberFormatException {
+		protected Double doParse(String parameter) throws NumberFormatException {
 			return Double.valueOf(parameter);
 		}
 
 		public double parseDouble(String name, String parameter) throws PortletRequestBindingException {
-			return ((Number) parse(name, parameter)).doubleValue();
+			return parse(name, parameter);
 		}
 
 		public double[] parseDoubles(String name, String[] values) throws PortletRequestBindingException {
@@ -654,7 +654,7 @@ public abstract class PortletRequestUtils {
 	}
 
 
-	private static class BooleanParser extends ParameterParser {
+	private static class BooleanParser extends ParameterParser<Boolean> {
 
 		@Override
 		protected String getType() {
@@ -662,13 +662,13 @@ public abstract class PortletRequestUtils {
 		}
 
 		@Override
-		protected Object doParse(String parameter) throws NumberFormatException {
+		protected Boolean doParse(String parameter) throws NumberFormatException {
 			return (parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("on") ||
-					parameter.equalsIgnoreCase("yes") || parameter.equals("1") ? Boolean.TRUE : Boolean.FALSE);
+					parameter.equalsIgnoreCase("yes") || parameter.equals("1"));
 		}
 
 		public boolean parseBoolean(String name, String parameter) throws PortletRequestBindingException {
-			return ((Boolean) parse(name, parameter)).booleanValue();
+			return parse(name, parameter);
 		}
 
 		public boolean[] parseBooleans(String name, String[] values) throws PortletRequestBindingException {
@@ -682,7 +682,7 @@ public abstract class PortletRequestUtils {
 	}
 
 
-	private static class StringParser extends ParameterParser {
+	private static class StringParser extends ParameterParser<String> {
 
 		@Override
 		protected String getType() {
@@ -690,7 +690,7 @@ public abstract class PortletRequestUtils {
 		}
 
 		@Override
-		protected Object doParse(String parameter) throws NumberFormatException {
+		protected String doParse(String parameter) throws NumberFormatException {
 			return parameter;
 		}
 
@@ -701,8 +701,8 @@ public abstract class PortletRequestUtils {
 
 		public String[] validateRequiredStrings(String name, String[] values) throws PortletRequestBindingException {
 			validateRequiredParameter(name, values);
-			for (int i = 0; i < values.length; i++) {
-				validateRequiredParameter(name, values[i]);
+			for (String value : values) {
+				validateRequiredParameter(name, value);
 			}
 			return values;
 		}

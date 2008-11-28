@@ -44,9 +44,9 @@ abstract class TagIdGenerator {
 	public static String nextId(String name, PageContext pageContext) {
 		String attributeName = PAGE_CONTEXT_ATTRIBUTE_PREFIX + name;
 		Integer currentCount = (Integer) pageContext.getAttribute(attributeName);
-		currentCount = (currentCount != null ? new Integer(currentCount.intValue() + 1) : new Integer(1));
+		currentCount = (currentCount != null ? currentCount + 1 : 1);
 		pageContext.setAttribute(attributeName, currentCount);
-		return (name + currentCount.intValue());
+		return (name + currentCount);
 	}
 
 }

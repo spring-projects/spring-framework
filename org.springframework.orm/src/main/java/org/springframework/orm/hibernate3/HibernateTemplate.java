@@ -1279,7 +1279,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Session proxy.

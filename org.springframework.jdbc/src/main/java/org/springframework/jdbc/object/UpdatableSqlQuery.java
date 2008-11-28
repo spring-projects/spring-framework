@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import org.springframework.jdbc.core.RowMapper;
  * @author Thomas Risberg
  * @see org.springframework.jdbc.object.SqlQuery
  */
-public abstract class UpdatableSqlQuery extends SqlQuery {
+public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 
 	/**
 	 * Constructor to allow use as a JavaBean
@@ -54,12 +54,13 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 		setUpdatableResults(true);
 	}
 
+
 	/**
 	 * Implementation of the superclass template method. This invokes the subclass's
 	 * implementation of the <code>updateRow()</code> method.
 	 */
 	@Override
-	protected RowMapper newRowMapper(Object[] parameters, Map context) {
+	protected RowMapper<T> newRowMapper(Object[] parameters, Map context) {
 		return new RowMapperImpl(context);
 	}
 
@@ -78,14 +79,14 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract Object updateRow(ResultSet rs, int rowNum, Map context) throws SQLException;
+	protected abstract T updateRow(ResultSet rs, int rowNum, Map context) throws SQLException;
 
 
 	/**
 	 * Implementation of RowMapper that calls the enclosing
 	 * class's <code>updateRow()</code> method for each row.
 	 */
-	protected class RowMapperImpl implements RowMapper {
+	protected class RowMapperImpl implements RowMapper<T> {
 
 		private final Map context;
 
@@ -93,8 +94,8 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 			this.context = context;
 		}
 
-		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Object result = updateRow(rs, rowNum, this.context);
+		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+			T result = updateRow(rs, rowNum, this.context);
 			rs.updateRow();
 			return result;
 		}

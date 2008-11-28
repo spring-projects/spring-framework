@@ -227,7 +227,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #AUTODETECT_NONE
 	 */
 	public void setAutodetectMode(int autodetectMode) {
-		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(new Integer(autodetectMode))) {
+		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(autodetectMode)) {
 			throw new IllegalArgumentException("Only values of autodetect constants allowed");
 		}
 		this.autodetectMode = autodetectMode;

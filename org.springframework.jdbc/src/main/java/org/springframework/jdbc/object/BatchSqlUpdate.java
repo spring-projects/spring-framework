@@ -158,7 +158,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * @see #flush
 	 */
 	@Override
-	public int update(Object[] params) throws DataAccessException {
+	public int update(Object... params) throws DataAccessException {
 		validateParameters(params);
 		this.parameterQueue.add(params.clone());
 
