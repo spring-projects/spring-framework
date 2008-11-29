@@ -24,6 +24,7 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.testng/com.springsource.org.testng/5.8.0/com.springsource.org.testng-5.8.0.jar" sourcepath="/IVY_CACHE/org.testng/com.springsource.org.testng/5.8.0/com.springsource.org.testng-sources-5.8.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.taglibs/com.springsource.org.apache.taglibs.standard/1.1.2/com.springsource.org.apache.taglibs.standard-1.1.2.jar" sourcepath="/IVY_CACHE/org.apache.taglibs/com.springsource.org.apache.taglibs.standard/1.1.2/com.springsource.org.apache.taglibs.standard-sources-1.1.2.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2/com.springsource.org.aspectj.weaver-1.6.2.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-2.1.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-sources-2.1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

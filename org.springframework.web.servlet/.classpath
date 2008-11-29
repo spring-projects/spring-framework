@@ -37,5 +37,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.jdom/com.springsource.org.jdom/1.0.0/com.springsource.org.jdom-1.0.0.jar" sourcepath="/IVY_CACHE/org.jdom/com.springsource.org.jdom/1.0.0/com.springsource.org.jdom-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.activation/com.springsource.javax.activation/1.1.0/com.springsource.javax.activation-1.1.0.jar" sourcepath="/IVY_CACHE/javax.activation/com.springsource.javax.activation/1.1.0/com.springsource.javax.activation-sources-1.1.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-2.1.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-sources-2.1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
