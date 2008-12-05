@@ -46,6 +46,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -156,36 +157,47 @@ public class HandlerMethodInvoker {
 			methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
-			boolean paramRequired = false;
-			String paramDefaultValue = null;
+			String headerName = null;
+			boolean required = false;
+			String defaultValue = null;
 			String pathVarName = null;
 			String attrName = null;
+			int found = 0;
 			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
 			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
-					paramRequired = requestParam.required();
-					paramDefaultValue = requestParam.defaultValue();
-					break;
+					required = requestParam.required();
+					defaultValue = requestParam.defaultValue();
+					found++;
+				}
+				else if (RequestHeader.class.isInstance(paramAnn)) {
+					RequestHeader requestHeader = (RequestHeader) paramAnn;
+					headerName = requestHeader.value();
+					required = requestHeader.required();
+					defaultValue = requestHeader.defaultValue();
+					found++;
 				}
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
 					ModelAttribute attr = (ModelAttribute) paramAnn;
 					attrName = attr.value();
+					found++;
 				}
 				else if (PathVariable.class.isInstance(paramAnn)) {
 					PathVariable pathVar = (PathVariable) paramAnn;
 					pathVarName = pathVar.value();
+					found++;
 				}
 			}
-			if ((paramName != null && attrName != null) || (paramName != null && pathVarName != null) ||
-					(pathVarName != null && attrName != null)) {
-				throw new IllegalStateException("@RequestParam, @PathVariable and @ModelAttribute are exclusive " +
-						"choices - do not specify both on the same parameter: " + handlerMethod);
+
+			if (found > 1) {
+				throw new IllegalStateException("Handler parameter annotations are exclusive choices - " +
+						"do not specify more than one such annotation on the same parameter: " + handlerMethod);
 			}
 
-			if (paramName == null && attrName == null && pathVarName == null) {
+			if (found == 0) {
 				Object argValue = resolveCommonArgument(methodParam, webRequest);
 				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					args[i] = argValue;
@@ -212,8 +224,10 @@ public class HandlerMethodInvoker {
 			}
 
 			if (paramName != null) {
-				args[i] = resolveRequestParam(paramName, paramRequired, paramDefaultValue, methodParam, webRequest,
-						handler);
+				args[i] = resolveRequestParam(paramName, required, defaultValue, methodParam, webRequest, handler);
+			}
+			else if (headerName != null) {
+				args[i] = resolveRequestHeader(headerName, required, defaultValue, methodParam, webRequest, handler);
 			}
 			else if (attrName != null) {
 				WebDataBinder binder = resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
@@ -333,18 +347,13 @@ public class HandlerMethodInvoker {
 		return initBinderArgs;
 	}
 
-	private Object resolveRequestParam(String paramName, boolean paramRequired, String paramDefaultValue,
+	private Object resolveRequestParam(String paramName, boolean required, String defaultValue,
 			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
 			throws Exception {
 
 		Class paramType = methodParam.getParameterType();
 		if (paramName.length() == 0) {
-			paramName = methodParam.getParameterName();
-			if (paramName == null) {
-				throw new IllegalStateException(
-						"No parameter specified for @RequestParam argument of type [" + paramType.getName() +
-								"], and no parameter name information found in class file either.");
-			}
+			paramName = getRequiredParameterName(methodParam);
 		}
 		Object paramValue = null;
 		if (webRequest.getNativeRequest() instanceof MultipartRequest) {
@@ -357,21 +366,62 @@ public class HandlerMethodInvoker {
 			}
 		}
 		if (paramValue == null) {
-			if (StringUtils.hasText(paramDefaultValue)) {
-				paramValue = paramDefaultValue;
+			if (StringUtils.hasText(defaultValue)) {
+				paramValue = defaultValue;
 			}
-			else if (paramRequired) {
+			else if (required) {
 				raiseMissingParameterException(paramName, paramType);
 			}
-			if (paramValue == null && paramType.isPrimitive()) {
-				throw new IllegalStateException("Optional " + paramType + " parameter '" + paramName +
-						"' is not present but cannot be translated into a null value due to being declared as a " +
-						"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
-			}
+			checkValue(paramName, paramValue, paramType);
 		}
 		WebDataBinder binder = createBinder(webRequest, null, paramName);
 		initBinder(handlerForInitBinderCall, paramName, binder, webRequest);
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
+	}
+
+	private Object resolveRequestHeader(String headerName, boolean required, String defaultValue,
+			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
+			throws Exception {
+
+		Class paramType = methodParam.getParameterType();
+		if (headerName.length() == 0) {
+			headerName = getRequiredParameterName(methodParam);
+		}
+		Object headerValue = null;
+		String[] headerValues = webRequest.getHeaderValues(headerName);
+		if (headerValues != null) {
+			headerValue = (headerValues.length == 1 ? headerValues[0] : headerValues);
+		}
+		if (headerValue == null) {
+			if (StringUtils.hasText(defaultValue)) {
+				headerValue = defaultValue;
+			}
+			else if (required) {
+				raiseMissingHeaderException(headerName, paramType);
+			}
+			checkValue(headerName, headerValue, paramType);
+		}
+		WebDataBinder binder = createBinder(webRequest, null, headerName);
+		initBinder(handlerForInitBinderCall, headerName, binder, webRequest);
+		return binder.convertIfNecessary(headerValue, paramType, methodParam);
+	}
+
+	private String getRequiredParameterName(MethodParameter methodParam) {
+		String name = methodParam.getParameterName();
+		if (name == null) {
+			throw new IllegalStateException("No parameter name specified for argument of type [" +
+					methodParam.getParameterType().getName() +
+					"], and no parameter name information found in class file either.");
+		}
+		return name;
+	}
+
+	private void checkValue(String name, Object value, Class paramType) {
+		if (value == null && paramType.isPrimitive()) {
+			throw new IllegalStateException("Optional " + paramType + " parameter '" + name +
+					"' is not present but cannot be translated into a null value due to being declared as a " +
+					"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
+		}
 	}
 
 	private WebDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
@@ -469,6 +519,10 @@ public class HandlerMethodInvoker {
 
 	protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
 		throw new IllegalStateException("Missing parameter '" + paramName + "' of type [" + paramType.getName() + "]");
+	}
+
+	protected void raiseMissingHeaderException(String headerName, Class paramType) throws Exception {
+		throw new IllegalStateException("Missing header '" + headerName + "' of type [" + paramType.getName() + "]");
 	}
 
 	protected void raiseSessionRequiredException(String message) throws Exception {

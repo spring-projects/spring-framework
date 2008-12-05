@@ -51,6 +51,14 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 
+	public String getHeader(String headerName) {
+		return getExternalContext().getRequestHeaderMap().get(headerName);
+	}
+
+	public String[] getHeaderValues(String headerName) {
+		return getExternalContext().getRequestHeaderValuesMap().get(headerName);
+	}
+
 	public String getParameter(String paramName) {
 		return getExternalContext().getRequestParameterMap().get(paramName);
 	}

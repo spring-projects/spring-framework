@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -77,6 +78,16 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getResponse();
 	}
 
+
+	public String getHeader(String headerName) {
+		return getRequest().getHeader(headerName);
+	}
+
+	@SuppressWarnings("unchecked")
+	public String[] getHeaderValues(String headerName) {
+		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
+		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
+	}
 
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
