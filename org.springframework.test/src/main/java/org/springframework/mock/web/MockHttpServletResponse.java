@@ -307,7 +307,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
 	 */
-	public List getHeaders(String name) {
+	public List<Object> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValues() : Collections.emptyList());
 	}
