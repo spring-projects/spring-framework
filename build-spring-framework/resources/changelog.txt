@@ -1,6 +1,24 @@
-SPRING FRAMEWORK
-=========================
+SPRING FRAMEWORK CHANGELOG
+==========================
 http://www.springframework.org
 
-Changes in version 3.0.0.M1 ()
--------------------------------------
+Changes in version 3.0.0.M1 (2008-12-05)
+----------------------------------------
+
+* Java 5 code style update of entire codebase (generics, varargs, etc)
+* updated to JUnit 4.5 and JRuby 1.1
+* removed WebLogic 8.1 support
+* removed native TopLink API support
+* removed Commons Attributes support
+* removed Jakarta JSTL support for JSP 1.2
+* removed Struts 1.x Action delegation support
+* removed ContextLoaderServlet and Log4jConfigServlet
+* introduced Spring EL parser in org.springframework.expression package
+* introduced #{...} expression support in bean definitions
+* introduced @Value annotation for embedded expression support
+* introduced @PathVariable annotation for MVC handler methods
+* introduced AbstractAtomFeedView and AbstractRssFeedView
+* introduced shallow ETag support
+* introduced default value support for @RequestParam
+* introduced @RequestHeader annotation for MVC handler methods
+* introduced "spring:url" and "spring:param" JSP tags
