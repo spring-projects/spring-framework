@@ -678,9 +678,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return (header != null ? header.getValue().toString() : null);
 	}
 
-	public Enumeration<Object> getHeaders(String name) {
+	public Enumeration<String> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return Collections.enumeration(header != null ? header.getValues() : Collections.emptyList());
+		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
 	}
 
 	public Enumeration<String> getHeaderNames() {
