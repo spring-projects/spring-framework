@@ -523,6 +523,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/org.springframework.aop/aop.iml" filepath="$PROJECT_DIR$/org.springframework.aop/aop.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.beans/beans.iml" filepath="$PROJECT_DIR$/org.springframework.beans/beans.iml" />
+      <module fileurl="file://$PROJECT_DIR$/build-spring-framework/build.iml" filepath="$PROJECT_DIR$/build-spring-framework/build.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.context/context.iml" filepath="$PROJECT_DIR$/org.springframework.context/context.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.context.support/context-support.iml" filepath="$PROJECT_DIR$/org.springframework.context.support/context-support.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.core/core.iml" filepath="$PROJECT_DIR$/org.springframework.core/core.iml" />
