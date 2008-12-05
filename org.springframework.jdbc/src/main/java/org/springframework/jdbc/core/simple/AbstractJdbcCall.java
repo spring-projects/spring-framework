@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -50,7 +49,7 @@ public abstract class AbstractJdbcCall {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Lower-level class used to execute SQL */
-	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
+	private final JdbcTemplate jdbcTemplate;
 
 	/** List of SqlParameter objects */
 	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
@@ -338,7 +337,7 @@ public abstract class AbstractJdbcCall {
 	 */
 	protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
-		Map params = matchInParameterValuesWithCallParameters(parameterSource);
+		Map<String, Object> params = matchInParameterValuesWithCallParameters(parameterSource);
 		return executeCallInternal(params);
 	}
 
@@ -347,16 +346,16 @@ public abstract class AbstractJdbcCall {
 	 * @param args Map of parameter name and values
 	 * @return Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(Map<String, Object> args) {
+	protected Map<String, Object> doExecute(Map<String, ?> args) {
 		checkCompiled();
-		Map params = matchInParameterValuesWithCallParameters(args);
+		Map<String, ?> params = matchInParameterValuesWithCallParameters(args);
 		return executeCallInternal(params);
 	}
 
 	/**
 	 * Method to perform the actual call processing
 	 */
-	private Map<String, Object> executeCallInternal(Map params) {
+	private Map<String, Object> executeCallInternal(Map<String, ?> params) {
 		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(params);
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getCallString() + " with: " + params);
@@ -392,7 +391,7 @@ public abstract class AbstractJdbcCall {
 	 * @param args the parameter values provided in a Map
 	 * @return Map with parameter names and values
 	 */
-	protected Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> args) {
+	protected Map<String, ?> matchInParameterValuesWithCallParameters(Map<String, ?> args) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);
 	}
 

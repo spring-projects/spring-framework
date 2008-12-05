@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.object;
 
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -240,7 +239,7 @@ public class SqlUpdate extends SqlOperation {
 	 * matching named parameters specified in the SQL statement
 	 * @return the number of rows affected by the update
 	 */
-	public int updateByNamedParam(Map paramMap) throws DataAccessException {
+	public int updateByNamedParam(Map<String, ?> paramMap) throws DataAccessException {
 		validateNamedParameters(paramMap);
 		ParsedSql parsedSql = getParsedSql();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
@@ -259,7 +258,7 @@ public class SqlUpdate extends SqlOperation {
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
 	 * @return the number of rows affected by the update
 	 */
-	public int updateByNamedParam(Map paramMap, KeyHolder generatedKeyHolder) throws DataAccessException {
+	public int updateByNamedParam(Map<String, ?> paramMap, KeyHolder generatedKeyHolder) throws DataAccessException {
 		validateNamedParameters(paramMap);
 		ParsedSql parsedSql = getParsedSql();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);

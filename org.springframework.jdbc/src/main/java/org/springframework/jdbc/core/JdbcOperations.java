@@ -613,7 +613,7 @@ public interface JdbcOperations {
 	 * @see #queryForMap(String)
 	 * @see ColumnMapRowMapper
 	 */
-	Map<String, Object> queryForMap(String sql, Object[] args) throws DataAccessException;
+	Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -649,7 +649,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForLong(String)
 	 */
-	long queryForLong(String sql, Object[] args) throws DataAccessException;
+	long queryForLong(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -685,7 +685,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForInt(String)
 	 */
-	int queryForInt(String sql, Object[] args) throws DataAccessException;
+	int queryForInt(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -759,7 +759,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String)
 	 */
-	List<Map<String, Object>> queryForList(String sql, Object[] args) throws DataAccessException;
+	List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -805,7 +805,7 @@ public interface JdbcOperations {
 	 * @see SqlRowSetResultSetExtractor
 	 * @see javax.sql.rowset.CachedRowSet
 	 */
-	SqlRowSet queryForRowSet(String sql, Object[] args) throws DataAccessException;
+	SqlRowSet queryForRowSet(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Issue a single SQL update operation (such as an insert, update or delete statement)
@@ -871,7 +871,7 @@ public interface JdbcOperations {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int update(String sql, Object[] args) throws DataAccessException;
+	int update(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Issue multiple update statements on a single PreparedStatement,

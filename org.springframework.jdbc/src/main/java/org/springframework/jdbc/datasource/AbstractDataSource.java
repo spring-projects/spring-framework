@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.datasource;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -77,16 +76,17 @@ public abstract class AbstractDataSource implements DataSource {
 	// Implementation of JDBC 4.0's Wrapper interface
 	//---------------------------------------------------------------------
 
-	public Object unwrap(Class iface) throws SQLException {
+	@SuppressWarnings("unchecked")
+	public <T> T  unwrap(Class<T> iface) throws SQLException {
 		Assert.notNull(iface, "Interface argument must not be null");
 		if (!DataSource.class.equals(iface)) {
 			throw new SQLException("DataSource of type [" + getClass().getName() +
 					"] can only be unwrapped as [javax.sql.DataSource], not as [" + iface.getName());
 		}
-		return this;
+		return (T) this;
 	}
 
-	public boolean isWrapperFor(Class iface) throws SQLException {
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return DataSource.class.equals(iface);
 	}
 
