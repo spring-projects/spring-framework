@@ -63,6 +63,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -142,7 +143,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("null", response.getContentAsString());
+		assertEquals("null-null", response.getContentAsString());
 	}
 
 	@Test
@@ -161,7 +162,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("foo", response.getContentAsString());
+		assertEquals("foo-bar", response.getContentAsString());
 	}
 
 	@Test
@@ -281,9 +282,10 @@ public class ServletAnnotationControllerTests {
 		request = new MockHttpServletRequest("GET", "/myPath2.do");
 		request.addParameter("param1", "value1");
 		request.addParameter("param2", "2");
+		request.addHeader("header1", "10");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-value1-2", response.getContentAsString());
+		assertEquals("test-value1-2-10", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/myPath3.do");
 		request.addParameter("param1", "value1");
@@ -812,6 +814,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	/** @noinspection UnusedDeclaration*/
 	private static class BaseController {
 
@@ -820,6 +823,7 @@ public class ServletAnnotationControllerTests {
 			response.getWriter().write("test");
 		}
 	}
+
 
 	@Controller
 	private static class MyAdaptedController {
@@ -830,10 +834,9 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1")String p1,
-							 @RequestParam("param2")int p2,
-							 HttpServletResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + p2);
+		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2,
+				@RequestHeader("header1") long h1, HttpServletResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1);
 		}
 
 		@RequestMapping("/myPath3")
@@ -847,6 +850,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	@RequestMapping("/*.do")
 	private static class MyAdaptedController2 {
@@ -857,9 +861,9 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1")String p1, int param2, HttpServletResponse response)
-				throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2);
+		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response,
+				@RequestHeader("header1") String h1) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + h1);
 		}
 
 		@RequestMapping("/myPath3")
@@ -873,22 +877,25 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	private static class MyAdaptedControllerBase<T> {
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1")T p1, int param2, HttpServletResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2);
+		public void myHandle(@RequestParam("param1") T p1, int param2, @RequestHeader Integer header1,
+				HttpServletResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1);
 		}
 
 		@InitBinder
-		public void initBinder(@RequestParam("param1")T p1, int param2) {
+		public void initBinder(@RequestParam("param1") T p1, int param2) {
 		}
 
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1")T p1, int param2) {
+		public void modelAttribute(@RequestParam("param1") T p1, int param2) {
 		}
 	}
+
 
 	@RequestMapping("/*.do")
 	private static class MyAdaptedController3 extends MyAdaptedControllerBase<String> {
@@ -899,9 +906,9 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@Override
-		public void myHandle(@RequestParam("param1")String p1, int param2, HttpServletResponse response)
-				throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2);
+		public void myHandle(@RequestParam("param1") String p1, int param2, @RequestHeader Integer header1,
+				HttpServletResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1);
 		}
 
 		@RequestMapping("/myPath3")
@@ -916,14 +923,15 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@InitBinder
-		public void initBinder(@RequestParam("param1")String p1, int param2) {
+		public void initBinder(@RequestParam("param1") String p1, int param2) {
 		}
 
 		@Override
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1")String p1, int param2) {
+		public void modelAttribute(@RequestParam("param1") String p1, int param2) {
 		}
 	}
+
 
 	@Controller
 	@RequestMapping(method = RequestMethod.GET)
@@ -940,6 +948,7 @@ public class ServletAnnotationControllerTests {
 		public void nonEmptyParameterListHandler(HttpServletResponse response) {
 		}
 	}
+
 
 	@Controller
 	public static class MyFormController {
@@ -961,6 +970,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	public static class MyModelFormController {
 
@@ -981,14 +991,14 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	private static class MyCommandProvidingFormController<T, TB, TB2> extends MyFormController {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam T defaultName,
-										Map<String, Object> model,
-										@RequestParam Date date) {
+		private TestBean createTestBean(@RequestParam T defaultName, Map<String, Object> model,
+				@RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
 			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
 		}
@@ -1020,17 +1030,20 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	private static class MySpecialArg {
 
 		public MySpecialArg(String value) {
 		}
 	}
 
+
 	@Controller
 	private static class MyTypedCommandProvidingFormController
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
 
 	}
+
 
 	@Controller
 	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
@@ -1045,13 +1058,14 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	private static class MySpecificBinderInitializingCommandProvidingFormController
 			extends MyCommandProvidingFormController {
 
 		@SuppressWarnings("unused")
 		@InitBinder({"myCommand", "date"})
-		private void initBinder(WebDataBinder binder, String date, @RequestParam("date")String[] date2) {
+		private void initBinder(WebDataBinder binder, String date, @RequestParam("date") String[] date2) {
 			assertEquals("2007-10-02", date);
 			assertEquals(1, date2.length);
 			assertEquals("2007-10-02", date2[0]);
@@ -1060,6 +1074,7 @@ public class ServletAnnotationControllerTests {
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 		}
 	}
+
 
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
@@ -1071,6 +1086,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	private static class MySpecialArgumentResolver implements WebArgumentResolver {
 
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
@@ -1080,6 +1096,7 @@ public class ServletAnnotationControllerTests {
 			return UNRESOLVED;
 		}
 	}
+
 
 	@Controller
 	@RequestMapping("/myPath.do")
@@ -1126,11 +1143,13 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	@RequestMapping(value = "/*.do", method = RequestMethod.POST, params = "myParam=myValue")
 	private static class MyPostMethodNameDispatchingController extends MethodNameDispatchingController {
 
 	}
+
 
 	@Controller
 	@RequestMapping("/myApp/*")
@@ -1157,6 +1176,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	private static class MyNullCommandController {
 
@@ -1171,11 +1191,8 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/myPath")
-		public void handle(@ModelAttribute TestBean testBean,
-						   Errors errors,
-						   @ModelAttribute TestPrincipal modelPrinc,
-						   OtherPrincipal requestPrinc,
-						   Writer writer) throws IOException {
+		public void handle(@ModelAttribute TestBean testBean, Errors errors, @ModelAttribute TestPrincipal modelPrinc,
+				OtherPrincipal requestPrinc, Writer writer) throws IOException {
 			assertNull(testBean);
 			assertNotNull(modelPrinc);
 			assertNotNull(requestPrinc);
@@ -1185,6 +1202,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	private static class TestPrincipal implements Principal {
 
 		public String getName() {
@@ -1192,12 +1210,14 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	private static class OtherPrincipal implements Principal {
 
 		public String getName() {
 			return "other";
 		}
 	}
+
 
 	private static class TestViewResolver implements ViewResolver {
 
@@ -1242,6 +1262,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	public static class ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
@@ -1249,43 +1270,50 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	@RequestMapping("/child/test")
 	public static class ChildController extends ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
-		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId")String id) {
+		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId") String id) {
 		}
 	}
+
 
 	@Controller
 	public static class RequiredParamController {
 
 		@RequestMapping("/myPath.do")
-		public void myHandle(@RequestParam(value = "id", required = true)String id) {
-
+		public void myHandle(@RequestParam(value = "id", required = true) String id,
+				@RequestHeader(value = "header", required = true) String header) {
 		}
 	}
+
 
 	@Controller
 	public static class OptionalParamController {
 
 		@RequestMapping("/myPath.do")
-		public void myHandle(@RequestParam(value = "id", required = false)String id, HttpServletResponse response)
+		public void myHandle(@RequestParam(required = false) String id,
+				@RequestHeader(value = "header", required = false) String header, HttpServletResponse response)
 				throws IOException {
-			response.getWriter().write(String.valueOf(id));
+			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header));
 		}
 	}
+
 
 	@Controller
 	public static class DefaultValueParamController {
 
 		@RequestMapping("/myPath.do")
-		public void myHandle(@RequestParam(value = "id", defaultValue = "foo")String id, HttpServletResponse response)
+		public void myHandle(@RequestParam(value = "id", defaultValue = "foo") String id,
+				@RequestHeader(defaultValue = "bar") String header, HttpServletResponse response)
 				throws IOException {
-			response.getWriter().write(String.valueOf(id));
+			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header));
 		}
 	}
+
 
 	@Controller
 	public static class MethodNotAllowedController {
@@ -1317,6 +1345,5 @@ public class ServletAnnotationControllerTests {
 		public void get() {
 		}
 	}
-
 
 }

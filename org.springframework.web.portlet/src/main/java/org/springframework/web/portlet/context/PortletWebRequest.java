@@ -23,6 +23,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -72,6 +73,16 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return getResponse();
 	}
 
+
+	public String getHeader(String headerName) {
+		return getRequest().getProperty(headerName);
+	}
+
+	@SuppressWarnings("unchecked")
+	public String[] getHeaderValues(String headerName) {
+		String[] headerValues = StringUtils.toStringArray(getRequest().getProperties(headerName));
+		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
+	}
 
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
