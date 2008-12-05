@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.datasource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -109,11 +108,12 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	// Implementation of JDBC 4.0's Wrapper interface
 	//---------------------------------------------------------------------
 
-	public Object unwrap(Class iface) throws SQLException {
+	@SuppressWarnings("unchecked")
+	public <T> T  unwrap(Class<T> iface) throws SQLException {
 		return getTargetDataSource().unwrap(iface);
 	}
 
-	public boolean isWrapperFor(Class iface) throws SQLException {
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return getTargetDataSource().isWrapperFor(iface);
 	}
 

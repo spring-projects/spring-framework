@@ -484,7 +484,7 @@ public class CallMetaDataContext {
 	 * @param inParameters the input values
 	 * @return a Map containing the matched parameter names with the value taken from the input
 	 */
-	public Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters) {
+	public Map<String, ?> matchInParameterValuesWithCallParameters(Map<String, ?> inParameters) {
 		if (!this.metaDataProvider.isProcedureColumnMetaDataUsed()) {
 			return inParameters;
 		}

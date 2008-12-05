@@ -731,7 +731,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
-	public Map<String, Object> queryForMap(String sql, Object[] args) throws DataAccessException {
+	public Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getColumnMapRowMapper());
 	}
 
@@ -740,7 +740,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return (number != null ? number.longValue() : 0);
 	}
 
-	public long queryForLong(String sql, Object[] args) throws DataAccessException {
+	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		Number number = queryForObject(sql, args, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
@@ -750,7 +750,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public int queryForInt(String sql, Object[] args) throws DataAccessException {
+	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		Number number = queryForObject(sql, args, Integer.class);
 		return (number != null ? number.intValue() : 0);
 	}
@@ -767,7 +767,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
-	public List<Map<String, Object>> queryForList(String sql, Object[] args) throws DataAccessException {
+	public List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException {
 		return query(sql, args, getColumnMapRowMapper());
 	}
 
@@ -775,7 +775,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, new SqlRowSetResultSetExtractor());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, Object[] args) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Object... args) throws DataAccessException {
 		return query(sql, args, new SqlRowSetResultSetExtractor());
 	}
 
@@ -846,7 +846,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
 	}
 
-	public int update(String sql, Object[] args) throws DataAccessException {
+	public int update(String sql, Object... args) throws DataAccessException {
 		return update(sql, new ArgPreparedStatementSetter(args));
 	}
 

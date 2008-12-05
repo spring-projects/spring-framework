@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.object;
 
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -114,7 +113,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map execute(Map inParams) throws DataAccessException {
+	public Map<String, Object> execute(Map<String, ?> inParams) throws DataAccessException {
 		validateParameters(inParams.values().toArray());
 		return getJdbcTemplate().call(newCallableStatementCreator(inParams), getDeclaredParameters());
 	}
@@ -135,7 +134,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map execute(ParameterMapper inParamMapper) throws DataAccessException {
+	public Map<String, Object> execute(ParameterMapper inParamMapper) throws DataAccessException {
 		checkCompiled();
 		return getJdbcTemplate().call(newCallableStatementCreator(inParamMapper), getDeclaredParameters());
 	}
