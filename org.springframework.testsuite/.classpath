@@ -71,5 +71,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-2.0.8.jar" sourcepath="/IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-sources-2.0.8.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-1.0.0.jar" sourcepath="/IVY_CACHE/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-sources-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-3.2.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-sources-3.2.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-2.7.6.jar" sourcepath="/IVY_CACHE/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-sources-2.7.6.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
