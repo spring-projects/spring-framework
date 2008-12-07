@@ -11,9 +11,9 @@
 		<property name="basenamePrefix"><value>org/springframework/web/context/WEB-INF/test-</value></property>
 	</bean>
 
-	<bean id="aca" class="org.springframework.context.ACATest"/>
+	<bean id="aca" class="org.springframework.context.ACATester"/>
 
-	<bean id="aca-prototype" class="org.springframework.context.ACATest" scope="prototype"/>
+	<bean id="aca-prototype" class="org.springframework.context.ACATester" scope="prototype"/>
 
 	<bean id="rod" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
