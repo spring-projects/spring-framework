@@ -559,6 +559,17 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-2.7.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-sources-2.7.6.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
   <component name="copyright">
     <Base>
