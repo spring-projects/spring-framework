@@ -16,12 +16,16 @@
 
 package org.springframework.orm.jpa.support;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import junit.framework.TestCase;
 import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -30,8 +34,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class SharedEntityManagerFactoryTests extends TestCase {
+public class SharedEntityManagerFactoryTests {
 	
+    @Test
 	public void testValidUsage() {
 		Object o = new Object();
 

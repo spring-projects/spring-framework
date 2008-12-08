@@ -68,7 +68,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		//Thread.sleep(2000);
 		assertEquals("Any previous tx must have been rolled back", 0, countRowsInTable("person"));
 		//insertPerson("foo");
-		executeSqlScript("/sql/insertPerson.sql", false);
+		executeSqlScript("/org/springframework/orm/jpa/insertPerson.sql", false);
 	}
 
 	//@NotTransactional

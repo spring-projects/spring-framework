@@ -312,7 +312,7 @@ public final class PortletUtilsTests extends TestCase {
 	}
 
 	public void testExposeRequestAttributesWithAttributesMapContainingBadKeyType() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
+		new AssertThrows(ClassCastException.class) {
 			public void test() throws Exception {
 				MockPortletRequest request = new MockPortletRequest();
 				Map attributes = new HashMap();

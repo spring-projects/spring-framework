@@ -118,7 +118,7 @@ public class CustomScopeConfigurerTests extends TestCase {
 	public void testWhereScopeMapHasNonStringTypedScopeNameInKeySet() throws Exception {
 		new ConfigurableListableBeanFactoryMockTemplate() {
 			protected void doTest(final ConfigurableListableBeanFactory factory) {
-				new AssertThrows(IllegalArgumentException.class) {
+				new AssertThrows(ClassCastException.class) {
 					public void test() throws Exception {
 						Map scopes = new HashMap();
 						scopes.put(this, new NoOpScope()); // <-- not a valid value (the key)...

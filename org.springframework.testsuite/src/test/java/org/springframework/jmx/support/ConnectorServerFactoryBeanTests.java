@@ -28,11 +28,13 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Ignore;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 /**
  * @author Rob Harrop
  */
+@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
 public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";

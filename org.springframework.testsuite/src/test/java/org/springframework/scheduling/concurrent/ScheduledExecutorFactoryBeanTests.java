@@ -16,22 +16,28 @@
 
 package org.springframework.scheduling.concurrent;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.core.task.NoOpRunnable;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public class ScheduledExecutorFactoryBeanTests extends TestCase {
+public class ScheduledExecutorFactoryBeanTests {
 
+    @Test
 	public void testThrowsExceptionIfPoolSizeIsLessThanZero() throws Exception {
 		try {
 			ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
@@ -46,6 +52,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testShutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -67,6 +74,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockScheduledExecutorService.verify();
 	}
 
+    @Test
 	public void testShutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -89,6 +97,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockScheduledExecutorService.verify();
 	}
 
+    @Test
 	public void testOneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -107,6 +116,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockRunnable.verify();
 	}
 
+    @Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -129,6 +139,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockRunnable.verify();
 	}
 
+    @Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -152,6 +163,8 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockRunnable.verify();
 	}
 
+    @Ignore
+    @Test
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -180,6 +193,8 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		}
 	}
 
+    @Ignore
+    @Test
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -209,6 +224,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testSettingThreadFactoryToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -224,6 +240,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		factory.destroy();
 	}
 
+    @Test
 	public void testSettingRejectedExecutionHandlerToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -239,6 +256,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		factory.destroy();
 	}
 
+    @Test
 	public void testObjectTypeReportsCorrectType() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 		assertEquals(ScheduledExecutorService.class, factory.getObjectType());

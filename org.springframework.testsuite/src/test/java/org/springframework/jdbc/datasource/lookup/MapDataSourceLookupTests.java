@@ -80,7 +80,7 @@ public final class MapDataSourceLookupTests extends TestCase {
 	}
 
 	public void testGetDataSourceWhereSuppliedMapHasNonDataSourceTypeUnderSpecifiedKey() throws Exception {
-		new AssertThrows(DataSourceLookupFailureException.class) {
+		new AssertThrows(ClassCastException.class) {
 			public void test() throws Exception {
 				Map dataSources = new HashMap();
 				dataSources.put(DATA_SOURCE_NAME, new Object());
