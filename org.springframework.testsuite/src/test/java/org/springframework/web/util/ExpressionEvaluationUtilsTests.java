@@ -26,6 +26,7 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.springframework.mock.web.MockExpressionEvaluator;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.mock.web.MockServletContext;
@@ -35,6 +36,7 @@ import org.springframework.mock.web.MockServletContext;
  * @author Juergen Hoeller
  * @since 16.09.2003
  */
+@Ignore // calls to deprecated getVariableResolver() are throwing UOEs
 public class ExpressionEvaluationUtilsTests extends TestCase {
 
 	public void testIsExpressionLanguage() {

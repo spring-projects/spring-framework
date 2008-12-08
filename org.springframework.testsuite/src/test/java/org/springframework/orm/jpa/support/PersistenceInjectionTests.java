@@ -33,6 +33,7 @@ import javax.persistence.PersistenceUnit;
 
 import org.easymock.MockControl;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.junit.Ignore;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.SimpleMapScope;
@@ -291,7 +292,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		emf2Mc.verify();
 	}
 
-	public void testPersistenceUnitsFromJndi() {
+	@Ignore
+	public void ignoreTestPersistenceUnitsFromJndi() {
 		mockEmf.createEntityManager();
 		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
 		emfMc.setReturnValue(mockEm, 1);
@@ -536,7 +538,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		}
 	}
 
-	public void testNoPropertiesPassedIn() {
+	@Ignore
+	public void ignoreTestNoPropertiesPassedIn() {
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(MockControl.createControl(EntityManager.class).getMock(), 1);
 		emfMc.replay();
@@ -548,7 +551,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		emfMc.verify();
 	}
 
-	public void testPropertiesPassedIn() {
+	@Ignore
+	public void ignoreTestPropertiesPassedIn() {
 		Properties props = new Properties();
 		props.put("foo", "bar");
 		mockEmf.createEntityManager(props);

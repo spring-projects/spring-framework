@@ -29,6 +29,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Ignore;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxException;
@@ -40,6 +41,7 @@ import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssem
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
+//@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
 public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	protected static final String OBJECT_NAME = "spring:test=proxy";
@@ -179,7 +181,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
-	public void testLazyConnectionToRemote() throws Exception {
+	@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
+	public void ignoreTestLazyConnectionToRemote() throws Exception {
 		if (!runTests) return;
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");

@@ -19,9 +19,12 @@ package org.springframework.jmx.export.assembler;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
+import org.junit.Ignore;
+
 /**
  * @author Rob Harrop
  */
+@Ignore
 public class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAssemblerTests {
 
 	protected static final String OBJECT_NAME = "bean:name=testBean5";

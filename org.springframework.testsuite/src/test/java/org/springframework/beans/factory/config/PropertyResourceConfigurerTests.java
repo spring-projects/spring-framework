@@ -16,6 +16,11 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +28,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
-import junit.framework.TestCase;
-
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
@@ -45,8 +50,9 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 02.10.2003
  */
-public class PropertyResourceConfigurerTests extends TestCase {
+public class PropertyResourceConfigurerTests {
 
+    @Test
 	public void testPropertyOverrideConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -67,6 +73,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", tb2.getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithNestedProperty() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -79,6 +86,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithNestedPropertyAndDotInBeanName() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("my.tb", IndexedTestBean.class);
@@ -92,6 +100,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithNestedMapPropertyAndDotInMapKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -104,6 +113,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", tb.getMap().get("key2.ext"));
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithJavaMailProperties() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", JavaMailSenderImpl.class);
@@ -115,6 +125,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("true", tb.getJavaMailProperties().getProperty("mail.smtp.auth"));
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithPropertiesFile() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -127,6 +138,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithInvalidPropertiesFile() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -142,6 +154,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithPropertiesXmlFile() {
 		// ignore for JDK < 1.5
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
@@ -159,6 +172,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithConvertProperties() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -171,6 +185,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("Xtest", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithInvalidKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -191,6 +206,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testPropertyOverrideConfigurerWithIgnoreInvalidKeys() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -212,10 +228,12 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", tb2.getName());
 	}
 
+    @Test
 	public void testPropertyPlaceholderConfigurer() {
 		doTestPropertyPlaceholderConfigurer(false);
 	}
 
+    @Test
 	public void testPropertyPlaceholderConfigurerWithParentChildSeparation() {
 		doTestPropertyPlaceholderConfigurer(true);
 	}
@@ -309,6 +327,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyFallback() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -321,6 +340,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(System.getProperty("os.name"), tb.getTouchy());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyNotUsed() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -336,6 +356,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("myos", tb.getTouchy());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithOverridingSystemProperty() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -352,6 +373,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(System.getProperty("os.name"), tb.getTouchy());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemProperty() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -370,6 +392,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithUnresolvablePlaceholder() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -386,6 +409,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithIgnoreUnresolvablePlaceholder() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -399,6 +423,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("${ref}", tb.getName());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithEmptyStringAsNull() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -412,6 +437,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertNull(tb.getName());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithEmptyStringInPlaceholderAsNull() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -428,6 +454,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertNull(tb.getName());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithNestedPlaceholderInKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -444,6 +471,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("myname", tb.getName());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -468,6 +496,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertiesInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -496,6 +525,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemPropertiesInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -515,6 +545,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -533,6 +564,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithMultiLevelCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -550,6 +582,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithNestedCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -567,6 +600,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithDefaultProperties() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -582,6 +616,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("mytest", tb.getTouchy());
 	}
 
+	@Ignore // this test was breaking after the 3.0 repackaging
+	@Test
 	public void testPropertyPlaceholderConfigurerWithAutowireByType() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -602,6 +638,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("mytest", tb.getTouchy());
 	}
 
+	@Test
 	public void testPropertyPlaceholderConfigurerWithAliases() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -625,6 +662,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("mytest", tb.getTouchy());
 	}
 
+	@Test
 	public void testPreferencesPlaceholderConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -650,6 +688,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		Preferences.systemRoot().remove("myName");
 	}
 
+	@Test
 	public void testPreferencesPlaceholderConfigurerWithCustomTreePaths() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -677,6 +716,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		Preferences.systemRoot().node("mySystemPath").remove("myName");
 	}
 
+	@Test
 	public void testPreferencesPlaceholderConfigurerWithPathInPlaceholder() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();

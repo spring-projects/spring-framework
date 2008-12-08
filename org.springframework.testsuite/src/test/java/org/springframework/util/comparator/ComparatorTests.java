@@ -41,7 +41,7 @@ public class ComparatorTests extends TestCase {
 		try {
 			c.compare(o1, o2);
 		}
-		catch (IllegalArgumentException e) {
+		catch (ClassCastException e) {
 			return;
 		}
 		fail("Comparator should have thrown a cce");

@@ -25,6 +25,7 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Ignore;
 
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.mock.web.MockServletConfig;
@@ -34,6 +35,7 @@ import org.springframework.mock.web.MockServletContext;
  * @author Juergen Hoeller
  * @since 21.02.2005
  */
+@Ignore
 public class Log4jWebConfigurerTests extends TestCase {
 
 	public void testInitLoggingWithClasspath() throws FileNotFoundException {

@@ -62,11 +62,36 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 
 	@Parameters
 	public static Collection<Object[]> contextConfigurationLocationsData() {
+		@ContextConfiguration
+		class ClasspathDefaultLocationsTest {
+		}
+	
+		@ContextConfiguration(locations = { "context1.xml", "context2.xml" })
+		class ImplicitClasspathLocationsTest {
+		}
+	
+		@ContextConfiguration(locations = { "classpath:context.xml" })
+		class ExplicitClasspathLocationsTest {
+		}
+	
+		@ContextConfiguration(locations = { "file:/testing/directory/context.xml" })
+		class ExplicitFileLocationsTest {
+		}
+	
+		@ContextConfiguration(locations = { "http://example.com/context.xml" })
+		class ExplicitUrlLocationsTest {
+		}
+	
+		@ContextConfiguration(locations = { "context1.xml", "classpath:context2.xml", "/context3.xml",
+			"file:/testing/directory/context.xml", "http://example.com/context.xml" })
+		class ExplicitMixedPathTypesLocationsTest {
+		}
+
 		return Arrays.asList(new Object[][] {
 
 			{
 				ClasspathDefaultLocationsTest.class,
-				new String[] { "classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathDefaultLocationsTest-context.xml" } },
+				new String[] { "classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$1ClasspathDefaultLocationsTest-context.xml" } },
 
 			{
 				ImplicitClasspathLocationsTest.class,
@@ -108,30 +133,5 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 				processedLocations);
 	}
 
-
-	@ContextConfiguration
-	private static class ClasspathDefaultLocationsTest {
-	}
-
-	@ContextConfiguration(locations = { "context1.xml", "context2.xml" })
-	private static class ImplicitClasspathLocationsTest {
-	}
-
-	@ContextConfiguration(locations = { "classpath:context.xml" })
-	private static class ExplicitClasspathLocationsTest {
-	}
-
-	@ContextConfiguration(locations = { "file:/testing/directory/context.xml" })
-	private static class ExplicitFileLocationsTest {
-	}
-
-	@ContextConfiguration(locations = { "http://example.com/context.xml" })
-	private static class ExplicitUrlLocationsTest {
-	}
-
-	@ContextConfiguration(locations = { "context1.xml", "classpath:context2.xml", "/context3.xml",
-		"file:/testing/directory/context.xml", "http://example.com/context.xml" })
-	private static class ExplicitMixedPathTypesLocationsTest {
-	}
 
 }

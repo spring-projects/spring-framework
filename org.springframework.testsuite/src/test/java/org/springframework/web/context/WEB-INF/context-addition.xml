@@ -3,9 +3,9 @@
 
 <beans>
 
-	<bean id="aca" class="org.springframework.context.ACATest"/>
+	<bean id="aca" class="org.springframework.context.ACATester"/>
 
-	<bean id="aca-prototype" class="org.springframework.context.ACATest" scope="prototype"/>
+	<bean id="aca-prototype" class="org.springframework.context.ACATester" scope="prototype"/>
 
 	<bean id="testListener" class="org.springframework.context.TestListener"/>
 

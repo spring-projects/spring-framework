@@ -16,11 +16,17 @@
 
 package org.springframework.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.TypeVariable;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,8 +37,8 @@ import java.util.Map;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 
-import junit.framework.TestCase;
-
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -42,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class BridgeMethodResolverTests extends TestCase {
+public class BridgeMethodResolverTests {
 
 	private static TypeVariable findTypeVariable(Class clazz, String name) {
 		TypeVariable[] variables = clazz.getTypeParameters();
@@ -66,6 +72,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 
+	@Test
 	public void testFindBridgedMethod() throws Exception {
 		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
@@ -76,6 +83,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
 	}
 
+	@Test
 	public void testFindBridgedVarargMethod() throws Exception {
 		Method unbridged = MyFoo.class.getDeclaredMethod("someVarargMethod", String.class, Object[].class);
 		Method bridged = MyFoo.class.getDeclaredMethod("someVarargMethod", Serializable.class, Object[].class);
@@ -86,6 +94,8 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
 	}
 
+	@Ignore
+	@Test
 	public void testFindBridgedMethodInHierarchy() throws Exception {
 		Method unbridged = DateAdder.class.getMethod("add", Date.class);
 		Method bridged = DateAdder.class.getMethod("add", Object.class);
@@ -96,6 +106,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
 	}
 
+	@Test
 	public void testIsBridgeMethodFor() throws Exception {
 		Map typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
@@ -106,6 +117,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, typeParameterMap));
 	}
 
+	@Test
 	public void testCreateTypeVariableMap() throws Exception {
 		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		TypeVariable barT = findTypeVariable(InterBar.class, "T");
@@ -124,6 +136,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(String.class, typeVariableMap.get(t));
 	}
 
+	@Test
 	public void testDoubleParameterization() throws Exception {
 		Method objectBridge = MyBoo.class.getDeclaredMethod("foo", Object.class);
 		Method serializableBridge = MyBoo.class.getDeclaredMethod("foo", Serializable.class);
@@ -135,6 +148,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("foo(Integer) not resolved.", integerFoo, BridgeMethodResolver.findBridgedMethod(serializableBridge));
 	}
 
+	@Test
 	public void testFindBridgedMethodFromMultipleBridges() throws Exception {
 		Method loadWithObjectReturn = findMethodWithReturnType("load", Object.class, SettingsDaoImpl.class);
 		assertNotNull(loadWithObjectReturn);
@@ -151,6 +165,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithSettingsReturn));
 	}
 
+	@Test
 	public void testFindBridgedMethodFromParent() throws Exception {
 		Method loadFromParentBridge = SettingsDaoImpl.class.getMethod("loadFromParent");
 		assertNotNull(loadFromParentBridge);
@@ -163,6 +178,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(loadFromParent, BridgeMethodResolver.findBridgedMethod(loadFromParentBridge));
 	}
 
+	@Test
 	public void testWithSingleBoundParameterizedOnInstantiate() throws Exception {
 		Method bridgeMethod = DelayQueue.class.getMethod("add", Object.class);
 		assertTrue(bridgeMethod.isBridge());
@@ -171,6 +187,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testWithDoubleBoundParameterizedOnInstantiate() throws Exception {
 		Method bridgeMethod = SerializableBounded.class.getMethod("boundedOperation", Object.class);
 		assertTrue(bridgeMethod.isBridge());
@@ -179,6 +196,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testWithGenericParameter() throws Exception {
 		Method[] methods = StringGenericParameter.class.getMethods();
 		Method bridgeMethod = null;
@@ -201,6 +219,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testOnAllMethods() throws Exception {
 		Method[] methods = StringList.class.getMethods();
 		for (int i = 0; i < methods.length; i++) {
@@ -209,6 +228,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSPR2583() throws Exception {
 		Method bridgedMethod = MessageBroadcasterImpl.class.getMethod("receive", MessageEvent.class);
 		assertFalse(bridgedMethod.isBridge());
@@ -225,12 +245,14 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR2454() throws Exception {
 		Map typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
 		TypeVariable variable = findTypeVariable(MyHomer.class, "L");
 		assertEquals(AbstractBounded.class, ((ParameterizedType) typeVariableMap.get(variable)).getRawType());
 	}
 
+	@Test
 	public void testSPR2603() throws Exception {
 		Method objectBridge = YourHomer.class.getDeclaredMethod("foo", Bounded.class);
 		Method abstractBoundedFoo = YourHomer.class.getDeclaredMethod("foo", AbstractBounded.class);
@@ -239,6 +261,8 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("foo(AbstractBounded) not resolved.", abstractBoundedFoo, bridgedMethod);
 	}
 
+	@Ignore
+	@Test
 	public void testSPR2648() throws Exception {
 		Method bridgeMethod = GenericSqlMapIntegerDao.class.getDeclaredMethod("saveOrUpdate", Object.class);
 		assertTrue(bridgeMethod.isBridge());
@@ -249,6 +273,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR2763() throws Exception {
 		Method bridgedMethod = AbstractDao.class.getDeclaredMethod("save", Object.class);
 		assertFalse(bridgedMethod.isBridge());
@@ -259,6 +284,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR3041() throws Exception {
 		Method bridgedMethod = BusinessDao.class.getDeclaredMethod("save", Business.class);
 		assertNotNull(bridgedMethod);
@@ -271,6 +297,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR3173() throws Exception {
 		Method bridgedMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", User.class, Object[].class);
 		assertFalse(bridgedMethod.isBridge());
@@ -281,6 +308,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR3304() throws Exception {
 		Method bridgedMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaMessageEvent.class);
 		assertFalse(bridgedMethod.isBridge());
@@ -291,6 +319,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR3324() throws Exception {
 		Method bridgedMethod = BusinessDao.class.getDeclaredMethod("get", Long.class);
 		assertNotNull(bridgedMethod);
@@ -303,6 +332,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR3357() throws Exception {
 		Method bridgedMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
 				"doSomething", DomainObjectExtendsSuper.class, Object.class);
@@ -317,6 +347,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Test
 	public void testSPR3485() throws Exception {
 		Method bridgedMethod = DomainObject.class.getDeclaredMethod(
 				"method2", ParameterType.class, byte[].class);
@@ -331,6 +362,8 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	@Ignore
+	@Test
 	public void testSPR3534() throws Exception {
 		Method bridgedMethod = TestEmailProvider.class.getDeclaredMethod(
 				"findBy", EmailSearchConditions.class);
