@@ -20,6 +20,7 @@
 		<pathelement location="../org.springframework.web.portlet"/>
 		<pathelement location="../org.springframework.test"/>
 		<pathelement location="../org.springframework.spring-library"/>
+		<pathelement location="../org.springframework.testsuite"/>
 	</path>
 
 	<property file="${basedir}/../build.properties"/>

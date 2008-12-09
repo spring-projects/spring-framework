@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -43,14 +44,14 @@ public class TestExecutionListenersTests {
 
 	@Test
 	public void verifyNumDefaultListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTest.class);
+		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTestCase.class);
 		assertEquals("Verifying the number of registered TestExecutionListeners for DefaultListenersExampleTest.", 3,
 				testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumNonInheritedDefaultListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(NonInheritedDefaultListenersExampleTest.class);
+		TestContextManager testContextManager = new TestContextManager(NonInheritedDefaultListenersExampleTestCase.class);
 		assertEquals(
 				"Verifying the number of registered TestExecutionListeners for NonInheritedDefaultListenersExampleTest.",
 				1, testContextManager.getTestExecutionListeners().size());
@@ -58,17 +59,17 @@ public class TestExecutionListenersTests {
 
 	@Test
 	public void verifyNumInheritedDefaultListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(InheritedDefaultListenersExampleTest.class);
+		TestContextManager testContextManager = new TestContextManager(InheritedDefaultListenersExampleTestCase.class);
 		assertEquals(
 				"Verifying the number of registered TestExecutionListeners for InheritedDefaultListenersExampleTest.",
 				1, testContextManager.getTestExecutionListeners().size());
 
-		testContextManager = new TestContextManager(SubInheritedDefaultListenersExampleTest.class);
+		testContextManager = new TestContextManager(SubInheritedDefaultListenersExampleTestCase.class);
 		assertEquals(
 				"Verifying the number of registered TestExecutionListeners for SubInheritedDefaultListenersExampleTest.",
 				1, testContextManager.getTestExecutionListeners().size());
 
-		testContextManager = new TestContextManager(SubSubInheritedDefaultListenersExampleTest.class);
+		testContextManager = new TestContextManager(SubSubInheritedDefaultListenersExampleTestCase.class);
 		assertEquals(
 				"Verifying the number of registered TestExecutionListeners for SubSubInheritedDefaultListenersExampleTest.",
 				2, testContextManager.getTestExecutionListeners().size());
@@ -76,55 +77,58 @@ public class TestExecutionListenersTests {
 
 	@Test
 	public void verifyNumListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(ExampleTest.class);
+		TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
 		assertEquals("Verifying the number of registered TestExecutionListeners for ExampleTest.", 3,
 				testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumNonInheritedListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(NonInheritedListenersExampleTest.class);
+		TestContextManager testContextManager = new TestContextManager(NonInheritedListenersExampleTestCase.class);
 		assertEquals("Verifying the number of registered TestExecutionListeners for NonInheritedListenersExampleTest.",
 				1, testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
 	public void verifyNumInheritedListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(InheritedListenersExampleTest.class);
+		TestContextManager testContextManager = new TestContextManager(InheritedListenersExampleTestCase.class);
 		assertEquals("Verifying the number of registered TestExecutionListeners for InheritedListenersExampleTest.", 4,
 				testContextManager.getTestExecutionListeners().size());
 	}
 
 
-	static class DefaultListenersExampleTest {
+	static class DefaultListenersExampleTestCase {
 	}
 
 	@TestExecutionListeners( { QuuxTestExecutionListener.class })
-	static class InheritedDefaultListenersExampleTest extends DefaultListenersExampleTest {
+	static class InheritedDefaultListenersExampleTestCase extends DefaultListenersExampleTestCase {
+	    public void testDoSomething() {
+	        fail("whaa?");
+	    }
 	}
 
-	static class SubInheritedDefaultListenersExampleTest extends InheritedDefaultListenersExampleTest {
+	static class SubInheritedDefaultListenersExampleTestCase extends InheritedDefaultListenersExampleTestCase {
 	}
 
 	@TestExecutionListeners( { EnigmaTestExecutionListener.class })
-	static class SubSubInheritedDefaultListenersExampleTest extends SubInheritedDefaultListenersExampleTest {
+	static class SubSubInheritedDefaultListenersExampleTestCase extends SubInheritedDefaultListenersExampleTestCase {
 	}
 
 	@TestExecutionListeners(value = { QuuxTestExecutionListener.class }, inheritListeners = false)
-	static class NonInheritedDefaultListenersExampleTest extends InheritedDefaultListenersExampleTest {
+	static class NonInheritedDefaultListenersExampleTestCase extends InheritedDefaultListenersExampleTestCase {
 	}
 
 	@TestExecutionListeners( { FooTestExecutionListener.class, BarTestExecutionListener.class,
 		BazTestExecutionListener.class })
-	static class ExampleTest {
+	static class ExampleTestCase {
 	}
 
 	@TestExecutionListeners( { QuuxTestExecutionListener.class })
-	static class InheritedListenersExampleTest extends ExampleTest {
+	static class InheritedListenersExampleTestCase extends ExampleTestCase {
 	}
 
 	@TestExecutionListeners(value = { QuuxTestExecutionListener.class }, inheritListeners = false)
-	static class NonInheritedListenersExampleTest extends InheritedListenersExampleTest {
+	static class NonInheritedListenersExampleTestCase extends InheritedListenersExampleTestCase {
 	}
 
 	static class FooTestExecutionListener extends AbstractTestExecutionListener {

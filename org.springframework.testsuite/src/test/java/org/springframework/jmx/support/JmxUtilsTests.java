@@ -80,13 +80,13 @@ public class JmxUtilsTests extends TestCase {
 	}
 
 	public void testGetAttributeNameWithStrictCasing() {
-		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
+		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTestBean.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, true);
 		assertEquals("Incorrect casing on attribute name", "Name", attributeName);
 	}
 
 	public void testGetAttributeNameWithoutStrictCasing() {
-		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
+		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTestBean.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, false);
 		assertEquals("Incorrect casing on attribute name", "name", attributeName);
 	}
@@ -121,17 +121,17 @@ public class JmxUtilsTests extends TestCase {
 
 	public void testIsMBean() {
 		// Correctly returns true for a class
-		assertTrue(JmxUtils.isMBean(JmxClassTest.class));
+		assertTrue(JmxUtils.isMBean(JmxClass.class));
 
 		// Correctly returns false since JmxUtils won't navigate to the extended interface
-		assertFalse(JmxUtils.isMBean(SpecializedJmxInterfaceTest.class));
+		assertFalse(JmxUtils.isMBean(SpecializedJmxInterface.class));
 
 		// Incorrectly returns true since it doesn't detect that this is an interface
-		assertFalse(JmxUtils.isMBean(JmxInterfaceTest.class));
+		assertFalse(JmxUtils.isMBean(JmxInterface.class));
 	}
 
 
-	public static class AttributeTest {
+	public static class AttributeTestBean {
 
 		private String name;
 
@@ -216,27 +216,27 @@ public class JmxUtilsTests extends TestCase {
 	}
 
 
-	private static interface JmxInterfaceTestMBean {
+	private static interface JmxInterfaceMBean {
 
 	}
 
 
-	private static interface JmxInterfaceTest extends JmxInterfaceTestMBean {
+	private static interface JmxInterface extends JmxInterfaceMBean {
 
 	}
 
 
-	private static interface SpecializedJmxInterfaceTest extends JmxInterfaceTest {
+	private static interface SpecializedJmxInterface extends JmxInterface {
 
 	}
 
 
-	private static interface JmxClassTestMBean {
+	private static interface JmxClassMBean {
 
 	}
 
 
-	private static class JmxClassTest implements JmxClassTestMBean {
+	private static class JmxClass implements JmxClassMBean {
 
 	}
 
