@@ -26,6 +26,7 @@ import static org.testng.Assert.assertTrue;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.junit.Ignore;
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -51,8 +52,9 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 2.5
  */
+@Ignore // renamed to Tests_ to avoid being picked up by junit. Spring Build support for TestNG is pending.
 @ContextConfiguration
-public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests
+public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTransactionalTestNGSpringContextTests
         implements BeanNameAware, InitializingBean {
 
     // ------------------------------------------------------------------------|

@@ -21,6 +21,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 
+import org.junit.Ignore;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,8 +48,9 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 2.5
  */
+@Ignore // renamed to Tests_ to avoid being picked up by junit. Spring Build support for TestNG is pending.
 @ContextConfiguration
-public class DirtiesContextTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
+public class DirtiesContextTransactionalTestNGSpringContextTests_ extends AbstractTransactionalTestNGSpringContextTests {
 
 	private ApplicationContext dirtiedApplicationContext;
 

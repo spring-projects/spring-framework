@@ -111,15 +111,15 @@ public class TestContextManagerTests {
 	@Before
 	public void setUpTestContextManager() throws Throwable {
 
-		final Method testMethod = ExampleTest.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
-		this.testContextManager = new TestContextManager(ExampleTest.class);
+		final Method testMethod = ExampleTestCase.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
+		this.testContextManager = new TestContextManager(ExampleTestCase.class);
 		this.testContextManager.registerTestExecutionListeners(new NamedTestExecutionListener(FIRST),
 				new NamedTestExecutionListener(SECOND), new NamedTestExecutionListener(THIRD));
 
 		assertEquals("Verifying the number of registered TestExecutionListeners.", 6,
 				this.testContextManager.getTestExecutionListeners().size());
 
-		this.testContextManager.beforeTestMethod(new ExampleTest(), testMethod);
+		this.testContextManager.beforeTestMethod(new ExampleTestCase(), testMethod);
 	}
 
 	/**
@@ -135,14 +135,14 @@ public class TestContextManagerTests {
 
 	@After
 	public void tearDownTestContextManager() throws Throwable {
-		final Method testMethod = ExampleTest.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
-		this.testContextManager.afterTestMethod(new ExampleTest(), testMethod, null);
+		final Method testMethod = ExampleTestCase.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
+		this.testContextManager.afterTestMethod(new ExampleTestCase(), testMethod, null);
 		this.testContextManager = null;
 	}
 
 
 	@ContextConfiguration
-	private static class ExampleTest {
+	private static class ExampleTestCase {
 
 		public void exampleTestMethod() {
 			assertTrue(true);
