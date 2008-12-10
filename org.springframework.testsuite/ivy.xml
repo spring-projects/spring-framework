@@ -67,6 +67,7 @@
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.2.6.ga" conf="test->compile"/>
