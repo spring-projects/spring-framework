@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.aop.aspectj.autoproxy;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
@@ -41,16 +41,18 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.StopWatch;
 
 /**
- * Tests for AspectJ auto-proxying. Includes mixing with Spring AOP Advisors
+ * Integration tests for AspectJ auto-proxying. Includes mixing with Spring AOP Advisors
  * to demonstrate that existing autoproxying contract is honoured.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class AspectJAutoProxyCreatorTests extends TestCase {
+public class AspectJAutoProxyCreatorTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+	@Test
 	public void testAspectsAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
@@ -61,6 +63,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(68, ((ITestBean) factoryBean.getTargetObject()).getAge());
 	}
 
+	@Test
 	public void testMultipleAspectsWithParameterApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
@@ -69,6 +72,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(20, tb.getAge());
 	}
 
+	@Test
 	public void testAspectsAreAppliedInDefinedOrder() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsWithOrdering.xml");
@@ -76,6 +80,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(71, tb.getAge());
 	}
 
+	@Test
 	public void testAspectsAndAdvisorAreApplied() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
@@ -83,6 +88,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		testAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
 	}
 
+	@Test
 	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -103,6 +109,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
+	@Test
 	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -123,6 +130,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
 	}
 
+	@Test
 	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -142,6 +150,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue("Singleton creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
+	@Test
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
@@ -178,6 +187,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals("Must be able to hold state in aspect", 1, mrv.invocations);
 	}
 
+	@Test
 	public void testPerThisAspect() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/perthis.xml");
@@ -198,6 +208,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(2, adrian1.getAge());
 	}
 
+	@Test
 	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/pertarget.xml");
@@ -234,10 +245,12 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(3, adrian1.getAge());
 	}
 
+	@Test
 	public void testTwoAdviceAspectSingleton() {
 		doTestTwoAdviceAspectWith("twoAdviceAspect.xml");
 	}
 
+	@Test
 	public void testTwoAdviceAspectPrototype() {
 		doTestTwoAdviceAspectWith("twoAdviceAspectPrototype.xml");
 	}
@@ -254,6 +267,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		testPrototype(adrian2, aspectSingleton ? 2 : 0);
 	}
 
+	@Test
 	public void testAdviceUsingJoinPoint() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/usesJoinPointAspect.xml");
@@ -266,6 +280,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0);
 	}
 
+	@Test
 	public void testIncludeMechanism() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/usesInclude.xml");
@@ -287,6 +302,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(start++, adrian1.getAge());
 	}
 
+	@Test
 	public void testForceProxyTargetClass() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsWithCGLIB.xml");
@@ -295,6 +311,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue("should be proxying classes", pc.isProxyTargetClass());
 	}
 
+	@Test
 	public void testWithAbstractFactoryBeanAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsWithAbstractBean.xml");
@@ -304,6 +321,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(68, adrian.getAge());
 	}
 
+	@Test
 	public void testRetryAspect() throws Exception {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/retryAspect.xml");
