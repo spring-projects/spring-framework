@@ -16,6 +16,8 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.*;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
@@ -39,8 +41,9 @@ import org.springframework.transaction.annotation.Transactional;
  * Java5-specific AspectJExpressionPointcutTests.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class TigerAspectJExpressionPointcutTests extends TestCase {
+public class TigerAspectJExpressionPointcutTests {
 
 	// TODO factor into static in AspectJExpressionPointcut
 	private Method getAge;
@@ -48,6 +51,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 	private Map<String,Method> methodsOnHasGeneric = new HashMap<String,Method>();
 
 
+	@Before
 	public void setUp() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge", (Class[]) null);
 		// Assumes no overloading
@@ -69,6 +73,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testMatchGenericArgument() {
 		String expression = "execution(* set*(java.util.List<org.springframework.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
@@ -87,6 +92,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertFalse(ajexp.matches(getAge, TestBean.class));
 	}
 	
+	@Test
 	public void testMatchVarargs() throws SecurityException, NoSuchMethodException {
 		String expression = "execution(int *.*(String, Object...))";
 		AspectJExpressionPointcut jdbcVarArgs = new AspectJExpressionPointcut();
@@ -109,16 +115,19 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertFalse(jdbcVarArgs.matches(getAge, TestBean.class));
 	}
 	
+	@Test
 	public void testMatchAnnotationOnClassWithAtWithin() throws SecurityException, NoSuchMethodException {
 		String expression = "@within(org.springframework.transaction.annotation.Transactional)";
 		testMatchAnnotationOnClass(expression);
 	}
 	
+	@Test
 	public void testMatchAnnotationOnClassWithoutBinding() throws SecurityException, NoSuchMethodException {
 		String expression = "within(@org.springframework.transaction.annotation.Transactional *)";
 		testMatchAnnotationOnClass(expression);
 	}
 	
+	@Test
 	public void testMatchAnnotationOnClassWithSubpackageWildcard() throws SecurityException, NoSuchMethodException {
 		String expression = "within(@(org.springframework..*) *)";
 		AspectJExpressionPointcut springAnnotatedPc = testMatchAnnotationOnClass(expression);
@@ -133,6 +142,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 				SpringAnnotated.class));
 	}
 	
+	@Test
 	public void testMatchAnnotationOnClassWithExactPackageWildcard() throws SecurityException, NoSuchMethodException {
 		String expression = "within(@(org.springframework.transaction.annotation.*) *)";
 		testMatchAnnotationOnClass(expression);
@@ -150,6 +160,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		return ajexp;
 	}
 	
+	@Test
 	public void testAnnotationOnMethodWithFQN() throws SecurityException, NoSuchMethodException {
 		String expression = "@annotation(org.springframework.transaction.annotation.Transactional)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
@@ -163,6 +174,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertFalse(ajexp.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("setName", String.class), TestBean3.class));
 	}
 	
+	@Test
 	public void testAnnotationOnMethodWithWildcard() throws SecurityException, NoSuchMethodException {
 		String expression = "execution(@(org.springframework..*) * *(..))";
 		AspectJExpressionPointcut anySpringMethodAnnotation = new AspectJExpressionPointcut();
@@ -176,6 +188,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertFalse(anySpringMethodAnnotation.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("setName", String.class), TestBean3.class));
 	}
 
+	@Test
 	public void testAnnotationOnMethodArgumentsWithFQN() throws SecurityException, NoSuchMethodException {
 		String expression = "@args(*, org.springframework.aop.aspectj.TigerAspectJExpressionPointcutTests.EmptySpringAnnotation))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
@@ -204,6 +217,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		);
 	}
 	
+	@Test
 	public void testAnnotationOnMethodArgumentsWithWildcards() throws SecurityException, NoSuchMethodException {
 		String expression = "execution(* *(*, @(org.springframework..*) *))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
