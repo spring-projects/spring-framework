@@ -16,27 +16,26 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue;
 import org.springframework.aop.aspectj.autoproxy.PerThisAspect;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class AspectProxyFactoryTests extends TestCase {
+public class AspectProxyFactoryTests {
 
-	public void testWithNonAspect() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
-				proxyFactory.addAspect(TestBean.class);
-			}
-		}.runTest();
+    @Test(expected=IllegalArgumentException.class)
+	public void testWithNonAspect() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(TestBean.class);
 	}
 
+    @Test
 	public void testWithSimpleAspect() throws Exception {
 		TestBean bean = new TestBean();
 		bean.setAge(2);
@@ -46,6 +45,7 @@ public class AspectProxyFactoryTests extends TestCase {
 		assertEquals("Multiplication did not occur", bean.getAge() * 2, proxy.getAge());
 	}
 
+    @Test
 	public void testWithPerThisAspect() throws Exception {
 		TestBean bean1 = new TestBean();
 		TestBean bean2 = new TestBean();
@@ -65,15 +65,13 @@ public class AspectProxyFactoryTests extends TestCase {
 		assertEquals(2, proxy1.getAge());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithInstanceWithNonAspect() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				AspectJProxyFactory pf = new AspectJProxyFactory();
-				pf.addAspect(new TestBean());
-			}
-		}.runTest();
+		AspectJProxyFactory pf = new AspectJProxyFactory();
+		pf.addAspect(new TestBean());
 	}
 
+	@Test
 	public void testWithInstance() throws Exception {
 		MultiplyReturnValue aspect = new MultiplyReturnValue();
 		int multiple = 3;
@@ -90,13 +88,10 @@ public class AspectProxyFactoryTests extends TestCase {
 		assertEquals(target.getAge() * multiple, proxy.getAge());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithNonSingletonAspectInstance() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				AspectJProxyFactory pf = new AspectJProxyFactory();
-				pf.addAspect(new PerThisAspect());
-			}
-		}.runTest();
+		AspectJProxyFactory pf = new AspectJProxyFactory();
+		pf.addAspect(new PerThisAspect());
 	}
 
 

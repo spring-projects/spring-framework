@@ -16,8 +16,9 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 import org.aspectj.lang.reflect.PerClauseKind;
+import org.junit.Test;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
@@ -25,23 +26,18 @@ import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryT
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerThisAspect;
 
 /**
- * 
  * @since 2.0
  * @author Rod Johnson
- *
+ * @author Chris Beams
  */
-public class AspectMetadataTests extends TestCase {
+public class AspectMetadataTests {
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testNotAnAspect() {
-		try {
-			new AspectMetadata(String.class,"someBean");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		new AspectMetadata(String.class,"someBean");
 	}
 	
+    @Test
 	public void testSingletonAspect() {
 		AspectMetadata am = new AspectMetadata(ExceptionAspect.class,"someBean");
 		assertFalse(am.isPerThisOrPerTarget());
@@ -49,6 +45,7 @@ public class AspectMetadataTests extends TestCase {
 		assertEquals(PerClauseKind.SINGLETON, am.getAjType().getPerClause().getKind());
 	}
 	
+    @Test
 	public void testPerTargetAspect() {
 		AspectMetadata am = new AspectMetadata(PerTargetAspect.class,"someBean");
 		assertTrue(am.isPerThisOrPerTarget());
@@ -56,6 +53,7 @@ public class AspectMetadataTests extends TestCase {
 		assertEquals(PerClauseKind.PERTARGET, am.getAjType().getPerClause().getKind());
 	}
 	
+    @Test
 	public void testPerThisAspect() {
 		AspectMetadata am = new AspectMetadata(PerThisAspect.class,"someBean");
 		assertTrue(am.isPerThisOrPerTarget());
