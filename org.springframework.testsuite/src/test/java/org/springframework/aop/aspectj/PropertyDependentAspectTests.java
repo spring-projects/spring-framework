@@ -16,8 +16,9 @@
 
 package org.springframework.aop.aspectj;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -28,21 +29,26 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class PropertyDependentAspectTests extends TestCase {
+public class PropertyDependentAspectTests {
 
+    @Test
 	public void testPropertyDependentAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
 		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-before-aspect-test.xml");
 	}
 
+    @Test
 	public void testPropertyDependentAspectWithPropertyDeclaredAfterAdvice() throws Exception {
 		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-after-aspect-test.xml");
 	}
 
+    @Test
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
 		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-before-aspect-test.xml");
 	}
 
+    @Test
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredAfterAdvice() throws Exception {
 		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-after-aspect-test.xml");
 	}

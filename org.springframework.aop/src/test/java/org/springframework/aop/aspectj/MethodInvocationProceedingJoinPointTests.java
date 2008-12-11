@@ -16,15 +16,17 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import junit.framework.TestCase;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.JoinPoint.StaticPart;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
+import org.junit.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.AopContext;
@@ -36,10 +38,12 @@ import org.springframework.beans.TestBean;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 2.0
  */
-public class MethodInvocationProceedingJoinPointTests extends TestCase {
+public class MethodInvocationProceedingJoinPointTests {
 	
+    @Test
 	public void testingBindingWithJoinPoint() {
 		try {
 			AbstractAspectJAdvice.currentJoinPoint();
@@ -50,6 +54,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		}
 	}
 	
+    @Test
 	public void testingBindingWithProceedingJoinPoint() {
 		try {
 			AbstractAspectJAdvice.currentJoinPoint();
@@ -60,6 +65,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		}
 	}
 	
+    @Test
 	public void testCanGetMethodSignatureFromJoinPoint() {
 		final Object raw = new TestBean();
 		// Will be set by advice during a method call
@@ -128,6 +134,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		assertEquals("Advice reentrantly set age", newAge, itb.getAge());
 	}
 	
+    @Test
 	public void testCanGetSourceLocationFromJoinPoint() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
@@ -159,6 +166,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		itb.getAge();
 	}
 	
+    @Test
 	public void testCanGetStaticPartFromJoinPoint() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);

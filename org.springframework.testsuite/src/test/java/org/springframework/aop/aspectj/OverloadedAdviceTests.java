@@ -16,18 +16,21 @@
 
 package org.springframework.aop.aspectj;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Tests for overloaded advice.
+ * Integration tests for overloaded advice.
  *
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class OverloadedAdviceTests extends TestCase {
+public class OverloadedAdviceTests {
 
+    @Test
 	public void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/overloaded-advice-tests.xml");
@@ -40,6 +43,7 @@ public class OverloadedAdviceTests extends TestCase {
 		}
 	}
 	
+    @Test
 	public void testExceptionOnConfigParsingWithAmbiguousAdviceMethod() {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/ambiguous-advice-tests.xml");
