@@ -16,7 +16,9 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -27,8 +29,9 @@ import java.io.IOException;
  * @author Rob Harrop
  * @since 2.0
  */
-public class AtAspectJAfterThrowingTests extends TestCase {
+public class AtAspectJAfterThrowingTests {
 
+    @Test
 	public void testAccessThrowable() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("afterThrowingAdviceTests.xml", getClass());
 
