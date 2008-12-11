@@ -16,46 +16,48 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import static org.junit.Assert.*;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
-
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.junit.Test;
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.test.AssertThrows;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ArgumentBindingTests extends TestCase {
+public class ArgumentBindingTests {
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testBindingInPointcutUsedByAdvice() {
 		TestBean tb = new TestBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(NamedPointcutWithArgs.class);
-		final ITestBean proxiedTestBean = (ITestBean) proxyFactory.getProxy();
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				proxiedTestBean.setName("Supercalifragalisticexpialidocious");
-			}
-		}.runTest();
+		
+		ITestBean proxiedTestBean = (ITestBean) proxyFactory.getProxy();
+		proxiedTestBean.setName("Supercalifragalisticexpialidocious"); // should throw
 	}
 
+    @Test(expected=IllegalStateException.class)
 	public void testAnnotationArgumentNameBinding() {
 		TransactionalBean tb = new TransactionalBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
-		final ITransactionalBean proxiedTestBean = (ITransactionalBean) proxyFactory.getProxy();
-		new AssertThrows(IllegalStateException.class) {
-			public void test() throws Exception {
-				proxiedTestBean.doInTransaction();
-			}
-		}.runTest();
+		
+		ITransactionalBean proxiedTestBean = (ITransactionalBean) proxyFactory.getProxy();
+		proxiedTestBean.doInTransaction(); // should throw
 	}
 
+    @Test
 	public void testParameterNameDiscoverWithReferencePointcut() throws Exception {
 		AspectJAdviceParameterNameDiscoverer discoverer =
 				new AspectJAdviceParameterNameDiscoverer("somepc(formal) && set(* *)");
@@ -83,6 +85,27 @@ public class ArgumentBindingTests extends TestCase {
 		@Transactional
 		public void doInTransaction() {
 		}
+	}
+
+}
+
+/**
+ * Represents Spring's Transactional annotation without actually introducing the dependency
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@interface Transactional {
+}
+
+/**
+ * @author Juergen Hoeller
+ */
+@Aspect
+class PointcutWithAnnotationArgument {
+
+	@Around(value = "execution(* org.springframework..*.*(..)) && @annotation(transaction)")
+	public Object around(ProceedingJoinPoint pjp, Transactional transaction) throws Throwable {
+		System.out.println("Invoked with transaction " + transaction);
+		throw new IllegalStateException();
 	}
 
 }
