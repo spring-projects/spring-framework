@@ -16,8 +16,9 @@
 
 package org.springframework.aop.aspectj.autoproxy.benchmark;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -25,12 +26,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StopWatch;
 
 /**
- * Tests for AspectJ auto proxying. Includes mixing with Spring AOP 
+ * Integration tests for AspectJ auto proxying. Includes mixing with Spring AOP 
  * Advisors to demonstrate that existing autoproxying contract is honoured.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class BenchmarkTests extends TestCase {
+public class BenchmarkTests {
 
 	private static final String ASPECTJ_CONTEXT = "/org/springframework/aop/aspectj/autoproxy/benchmark/aspectj.xml";
 
@@ -43,34 +45,42 @@ public class BenchmarkTests extends TestCase {
 		return 10;
 	}
 	
+	@Test
 	public void testRepeatedAroundAdviceInvocationsWithAspectJ() {
 		testRepeatedAroundAdviceInvocations(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 	
+	@Test
 	public void testRepeatedAroundAdviceInvocationsWithSpringAop() {
 		testRepeatedAroundAdviceInvocations(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 	
+	@Test
 	public void testRepeatedBeforeAdviceInvocationsWithAspectJ() {
 		testBeforeAdviceWithoutJoinPoint(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 	
+	@Test
 	public void testRepeatedBeforeAdviceInvocationsWithSpringAop() {
 		testBeforeAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 	
+	@Test
 	public void testRepeatedAfterReturningAdviceInvocationsWithAspectJ() {
 		testAfterReturningAdviceWithoutJoinPoint(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 	
+	@Test
 	public void testRepeatedAfterReturningAdviceInvocationsWithSpringAop() {
 		testAfterReturningAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
+	@Test
 	public void testRepeatedMixWithAspectJ() {
 		testMix(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 	
+	@Test
 	public void testRepeatedMixWithSpringAop() {
 		testMix(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
