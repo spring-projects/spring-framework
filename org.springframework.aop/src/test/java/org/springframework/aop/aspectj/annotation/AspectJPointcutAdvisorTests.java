@@ -16,8 +16,9 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
@@ -26,11 +27,13 @@ import org.springframework.beans.TestBean;
 
 /**
  * @author Rod Johnson 
+ * @author Chris Beams
  */
-public class AspectJPointcutAdvisorTests extends TestCase {
+public class AspectJPointcutAdvisorTests {
 	
 	private AspectJAdvisorFactory af = new ReflectiveAspectJAdvisorFactory();
 
+	@Test
 	public void testSingleton() throws SecurityException, NoSuchMethodException {
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
@@ -42,6 +45,7 @@ public class AspectJPointcutAdvisorTests extends TestCase {
 		assertFalse(ajpa.isPerInstance());
 	}
 	
+	@Test
 	public void testPerTarget() throws SecurityException, NoSuchMethodException {
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
@@ -62,23 +66,18 @@ public class AspectJPointcutAdvisorTests extends TestCase {
 				TestBean.class));
 	}
 	
-	
+	@Test(expected=AopConfigException.class)
 	public void testPerCflowTarget() {
 		testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowAspect.class);
 	}
 	
+	@Test(expected=AopConfigException.class)
 	public void testPerCflowBelowTarget() {
 		testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowBelowAspect.class);
 	}
 	
-	private void testIllegalInstantiationModel(Class c) {
-		try {
-			new AspectMetadata(c,"someBean");
-			fail();
-		}
-		catch (AopConfigException ex) {
-			// OK
-		}
+	private void testIllegalInstantiationModel(Class<?> c) throws AopConfigException {
+		new AspectMetadata(c,"someBean");
 	}
 
 }
