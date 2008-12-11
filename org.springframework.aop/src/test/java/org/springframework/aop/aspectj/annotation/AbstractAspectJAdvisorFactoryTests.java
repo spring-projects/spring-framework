@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.aop.aspectj.annotation;
 
+import static org.junit.Assert.*;
+
+import java.io.FileNotFoundException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.servlet.ServletException;
-
-import junit.framework.TestCase;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -34,6 +33,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
+import org.junit.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
@@ -55,7 +55,7 @@ import org.springframework.core.annotation.Order;
  *
  * @author Rod Johnson
  */
-public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
+public abstract class AbstractAspectJAdvisorFactoryTests {
 	
 	/**
 	 * To be overridden by concrete test subclasses.
@@ -64,6 +64,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	protected abstract AspectJAdvisorFactory getFixture();
 	
 
+	@Test
 	public void testRejectsPerCflowAspect() {
 		try {
 			getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerCflowAspect(),"someBean"));
@@ -74,6 +75,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 	
+	@Test
 	public void testRejectsPerCflowBelowAspect() {
 		try {
 			getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerCflowBelowAspect(),"someBean"));
@@ -84,6 +86,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
@@ -114,6 +117,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
 
+	@Test
 	public void testMultiplePerTargetAspects() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
@@ -141,6 +145,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
 
+	@Test
 	public void testMultiplePerTargetAspectsWithOrderAnnotation() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
@@ -166,6 +171,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
 
+	@Test
 	public void testPerThisAspect() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
@@ -200,6 +206,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
 	
+	@Test
 	public void testPerTypeWithinAspect() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
@@ -243,18 +250,22 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(2, aif.getInstantiationCount());
 	}
 
+	@Test
 	public void testNamedPointcutAspectWithFQN() {
 		testNamedPointcuts(new NamedPointcutAspectWithFQN());
 	}
 
+	@Test
 	public void testNamedPointcutAspectWithoutFQN() {
 		testNamedPointcuts(new NamedPointcutAspectWithoutFQN());
 	}
 
+	@Test
 	public void testNamedPointcutFromAspectLibrary() {
 		testNamedPointcuts(new NamedPointcutAspectFromLibrary());
 	}
 
+	@Test
 	public void testNamedPointcutFromAspectLibraryWithBinding() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
@@ -276,6 +287,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(realAge, target.getAge());
 	}
 
+	@Test
 	public void testBindingWithSingleArg() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
@@ -286,6 +298,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(20,target.getAge());
 	}
 
+	@Test
 	public void testBindingWithMultipleArgsDifferentlyOrdered() {
 		ManyValuedArgs target = new ManyValuedArgs();
 		ManyValuedArgs mva = (ManyValuedArgs) createProxy(target, 
@@ -304,6 +317,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	/**
 	 * In this case the introduction will be made.
 	 */
+	@Test
 	public void testIntroductionOnTargetNotImplementingInterface() {
 		NotLockable notLockableTarget = new NotLockable();
 		assertFalse(notLockableTarget instanceof Lockable);
@@ -336,6 +350,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertTrue(lockable2.locked());
 	}
 	
+	@Test
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
 		assertTrue(AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(
@@ -345,7 +360,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(2, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class).size());
 	}
 	
-	@SuppressWarnings("unchecked")
+	@Test
 	public void testIntroductionOnTargetImplementingInterface() {
 		CannotBeUnlocked target = new CannotBeUnlocked();
 		Lockable proxy = (Lockable) createProxy(target,
@@ -371,6 +386,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	}
 	
 	@SuppressWarnings("unchecked")
+	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
 		LinkedList target = new LinkedList();
 		List proxy = (List) createProxy(target,
@@ -423,6 +439,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		itb.setName("Tony");
 	}
 
+	@Test
 	public void testAspectMethodThrowsExceptionLegalOnSignature() {
 		TestBean target = new TestBean();
 		UnsupportedOperationException expectedException = new UnsupportedOperationException();
@@ -442,6 +459,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	
 	// TODO document this behaviour.
 	// Is it different AspectJ behaviour, at least for checked exceptions?
+	@Test
 	public void testAspectMethodThrowsExceptionIllegalOnSignature() {
 		TestBean target = new TestBean();
 		RemoteException expectedException = new RemoteException();
@@ -459,7 +477,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 	
-	protected Object createProxy(Object target, List advisors, Class ... interfaces) {
+	protected Object createProxy(Object target, List<Advisor> advisors, Class<?>... interfaces) {
 		ProxyFactory pf = new ProxyFactory(target);
 		if (interfaces.length > 1 || interfaces[0].isInterface()) {
 			pf.setInterfaces(interfaces);
@@ -479,6 +497,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		return pf.getProxy();
 	}
 
+	@Test
 	public void testTwoAdvicesOnOneAspect() {
 		TestBean target = new TestBean();
 
@@ -495,6 +514,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(1, itb.getAge());
 	}
 
+	@Test
 	public void testAfterAdviceTypes() throws Exception {
 		Echo target = new Echo();
 
@@ -508,10 +528,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(1, afterReturningAspect.successCount);
 		assertEquals(0, afterReturningAspect.failureCount);
 		try {
-			echo.echo(new ServletException());
+			echo.echo(new FileNotFoundException());
 			fail();
 		}
-		catch (ServletException ex) {
+		catch (FileNotFoundException ex) {
 			// Ok
 		}
 		catch (Exception ex) {
@@ -522,6 +542,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(afterReturningAspect.failureCount + afterReturningAspect.successCount, afterReturningAspect.afterCount);
 	}
 
+	@Test
 	public void testFailureWithoutExplicitDeclarePrecedence() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
@@ -536,6 +557,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 	
+	@Test
 	public void testDeclarePrecedenceNotSupported() {
 		TestBean target = new TestBean();
 		try {
@@ -703,7 +725,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	@Aspect
 	public static class NamedPointcutAspectWithFQN {
 
-		@SuppressWarnings("unused")
 		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 		@Pointcut("execution(* getAge())")
