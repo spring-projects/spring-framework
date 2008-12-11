@@ -15,12 +15,17 @@
  */
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
-import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.config.AopConfigUtils;
@@ -38,6 +43,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.util.StopWatch;
 
 /**
@@ -223,7 +229,7 @@ public class AspectJAutoProxyCreatorTests {
 		assertEquals("Setter does not initiate advice", explicitlySetAge, adrian1.getAge());
 		// Fire aspect
 
-		AspectMetadata am = new AspectMetadata(AbstractAspectJAdvisorFactoryTests.PerTargetAspect.class, "someBean");
+		AspectMetadata am = new AspectMetadata(PerTargetAspect.class, "someBean");
 		assertTrue(am.getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 
 		adrian1.getSpouse();
@@ -335,3 +341,31 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 }
+
+
+@Aspect("pertarget(execution(* *.getSpouse()))")
+class PerTargetAspect implements Ordered {
+
+	public int count;
+
+	private int order = Ordered.LOWEST_PRECEDENCE;
+
+	@Around("execution(int *.getAge())")
+	public int returnCountAsAge() {
+		return count++;
+	}
+
+	@Before("execution(void *.set*(int))")
+	public void countSetter() {
+		++count;
+	}
+
+	public int getOrder() {
+		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+}
+

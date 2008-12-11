@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj.annotation;
+package org.springframework.aop.aspectj;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 
-import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscovererTests;
 
 /**
  * Additional parameter name discover tests that need Java 5.
