@@ -29,16 +29,15 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
@@ -1463,20 +1462,20 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testThrowsAdvisorIsInvoked() throws Throwable {
 		// Reacts to ServletException and RemoteException
-		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
+		MyThrowsHandler th = new MyThrowsHandler();
 		Advisor matchesEchoInvocations = new StaticMethodMatcherPointcutAdvisor(th) {
 			public boolean matches(Method m, Class targetClass) {
 				return m.getName().startsWith("echo");
 			}
 		};
 
-		ThrowsAdviceInterceptorTests.Echo target = new ThrowsAdviceInterceptorTests.Echo();
+		Echo target = new Echo();
 		target.setA(16);
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addAdvice(new NopInterceptor());
 		pf.addAdvisor(matchesEchoInvocations);
 		assertEquals("Advisor was added", matchesEchoInvocations, pf.getAdvisors()[1]);
-		ThrowsAdviceInterceptorTests.IEcho proxied = (ThrowsAdviceInterceptorTests.IEcho) createProxy(pf);
+		IEcho proxied = (IEcho) createProxy(pf);
 		assertEquals(0, th.getCalls());
 		assertEquals(target.getA(), proxied.getA());
 		assertEquals(0, th.getCalls());
@@ -1503,14 +1502,14 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testAddThrowsAdviceWithoutAdvisor() throws Throwable {
 		// Reacts to ServletException and RemoteException
-		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
+		MyThrowsHandler th = new MyThrowsHandler();
 
-		ThrowsAdviceInterceptorTests.Echo target = new ThrowsAdviceInterceptorTests.Echo();
+		Echo target = new Echo();
 		target.setA(16);
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addAdvice(new NopInterceptor());
 		pf.addAdvice(th);
-		ThrowsAdviceInterceptorTests.IEcho proxied = (ThrowsAdviceInterceptorTests.IEcho) createProxy(pf);
+		IEcho proxied = (IEcho) createProxy(pf);
 		assertEquals(0, th.getCalls());
 		assertEquals(target.getA(), proxied.getA());
 		assertEquals(0, th.getCalls());
@@ -1535,7 +1534,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 		assertEquals(1, th.getCalls("remoteException"));
 	}
-
 
 	private static class CheckMethodInvocationIsSameInAndOutInterceptor implements MethodInterceptor {
 
