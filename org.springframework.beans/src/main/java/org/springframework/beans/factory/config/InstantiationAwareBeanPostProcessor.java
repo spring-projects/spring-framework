@@ -66,7 +66,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#hasBeanClass
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
 	 */
-	Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException;
+	Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException;
 
 	/**
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,

@@ -44,7 +44,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * @return the type of the bean, or <code>null</code> if not predictable
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
-	Class predictBeanType(Class beanClass, String beanName) throws BeansException;
+	Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException;
 
 	/**
 	 * Determine the candidate constructors to use for the given bean.
@@ -53,7 +53,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * @return the candidate constructors, or <code>null</code> if none specified
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
-	Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException;
+	Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException;
 
 	/**
 	 * Obtain a reference for early access to the specified bean,
