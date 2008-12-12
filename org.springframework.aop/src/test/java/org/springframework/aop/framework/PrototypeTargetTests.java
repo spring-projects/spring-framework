@@ -16,9 +16,11 @@
 
 package org.springframework.aop.framework;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
 
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -27,8 +29,9 @@ import org.springframework.core.io.ClassPathResource;
  * @author Juergen Hoeller
  * @since 03.09.2004
  */
-public class PrototypeTargetTests extends TestCase {
+public class PrototypeTargetTests {
 
+	@Test
 	public void testPrototypeProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("prototypeTarget.xml", getClass()));
@@ -41,6 +44,7 @@ public class PrototypeTargetTests extends TestCase {
 		assertEquals(10, interceptor.invocationCount);
 	}
 
+	@Test
 	public void testSingletonProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("prototypeTarget.xml", getClass()));
@@ -55,13 +59,11 @@ public class PrototypeTargetTests extends TestCase {
 
 
 	public static interface TestBean {
-
 		public void doSomething();
 	}
 
 
 	public static class TestBeanImpl implements TestBean {
-
 		private static int constructionCount = 0;
 
 		public TestBeanImpl() {
@@ -74,7 +76,6 @@ public class PrototypeTargetTests extends TestCase {
 
 
 	public static class TestInterceptor implements MethodInterceptor {
-
 		private int invocationCount = 0;
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {

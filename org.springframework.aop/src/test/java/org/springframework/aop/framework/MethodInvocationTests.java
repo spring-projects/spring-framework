@@ -16,63 +16,30 @@
 
 package org.springframework.aop.framework;
 
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 
 /**
- * TODO: could refactor to be generic.
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 14.03.2003
  */
-public class MethodInvocationTests extends TestCase {
+public class MethodInvocationTests {
 	
-	/*
-	public static MethodInvocation testInvocation(Object o, String methodName, Class[] args, Interceptor[] interceptors) throws Exception {
-		Method m = o.getClass().getMethod(methodName, args);
-		MethodInvocationImpl invocation = new MethodInvocationImpl(null, null, m.getDeclaringClass(), 
-	m, null, interceptors, // list
-	new Attrib4jAttributeRegistry());
-	return invocation;
-	}*/
-
-	/*
-	public void testNullInterceptor() throws Exception {
-		Method m = Object.class.getMethod("hashCode", null);
-		Object proxy = new Object();
-		try {
-				MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, null // could customize here
-	);
-			fail("Shouldn't be able to create methodInvocationImpl with null interceptors");
-		} catch (AopConfigException ex) {
-		}
-	}
-
-	public void testEmptyInterceptorList() throws Exception {
-		Method m = Object.class.getMethod("hashCode", null);
-		Object proxy = new Object();
-		try {
-				MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, new LinkedList() // list
-	);
-			fail("Shouldn't be able to create methodInvocationImpl with no interceptors");
-		} catch (AopConfigException ex) {
-		}
-	}
-	*/
-
+	@Test
 	public void testValidInvocation() throws Throwable {
 		Method m = Object.class.getMethod("hashCode", (Class[]) null);
 		Object proxy = new Object();
 		final Object returnValue = new Object();
-		List is = new LinkedList();
+		List<Object> is = new LinkedList<Object>();
 		is.add(new MethodInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return returnValue;
@@ -86,16 +53,16 @@ public class MethodInvocationTests extends TestCase {
 	}
 	
 	/**
-	 * ToString on target can cause failure.
+	 * toString on target can cause failure.
 	 */
+	@Test
 	public void testToStringDoesntHitTarget() throws Throwable {
 		Object target = new TestBean() {
 			public String toString() {
 				throw new UnsupportedOperationException("toString");
 			}
 		};
-		final Object returnValue = new Object();
-		List is = new LinkedList();
+		List<Object> is = new LinkedList<Object>();
 
 		Method m = Object.class.getMethod("hashCode", (Class[]) null);
 		Object proxy = new Object();
