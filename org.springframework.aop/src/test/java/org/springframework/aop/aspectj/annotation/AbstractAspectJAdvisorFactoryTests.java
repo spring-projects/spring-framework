@@ -49,6 +49,9 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
+import example.aspects.PerTargetAspect;
+import example.aspects.TwoAdviceAspect;
+
 /**
  * Abstract tests for AspectJAdvisorFactory.
  * See subclasses for tests of concrete factories.
@@ -594,33 +597,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 
 	@Aspect("pertarget(execution(* *.getSpouse()))")
-	public static class PerTargetAspect implements Ordered {
-
-		public int count;
-
-		private int order = Ordered.LOWEST_PRECEDENCE;
-
-		@Around("execution(int *.getAge())")
-		public int returnCountAsAge() {
-			return count++;
-		}
-
-		@Before("execution(void *.set*(int))")
-		public void countSetter() {
-			++count;
-		}
-
-		public int getOrder() {
-			return this.order;
-		}
-
-		public void setOrder(int order) {
-			this.order = order;
-		}
-	}
-
-
-	@Aspect("pertarget(execution(* *.getSpouse()))")
 	@Order(10)
 	public static class PerTargetAspectWithOrderAnnotation10 {
 
@@ -643,28 +619,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	public static class PerTargetAspectWithOrderAnnotation5 {
 
 		public int count;
-
-		@Around("execution(int *.getAge())")
-		public int returnCountAsAge() {
-			return count++;
-		}
-
-		@Before("execution(void *.set*(int))")
-		public void countSetter() {
-			++count;
-		}
-	}
-
-
-	@Aspect("perthis(execution(* *.getSpouse()))")
-	public static class PerThisAspect {
-
-		public int count;
-
-		/**
-		 * Just to check that this doesn't cause problems with introduction processing
-		 */
-		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 		@Around("execution(int *.getAge())")
 		public int returnCountAsAge() {
@@ -829,22 +783,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		@Before("execution(* getAge())")
 		public void throwException() throws Exception {
 			throw ex;
-		}
-	}
-
-
-	@Aspect
-	public static class TwoAdviceAspect {
-		private int totalCalls;
-
-		@Around("execution(* getAge())")
-		public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
-			return totalCalls;
-		}
-
-		@Before("execution(* setAge(int)) && args(newAge)")
-		public void countSet(int newAge) throws Exception {
-			++totalCalls;
 		}
 	}
 

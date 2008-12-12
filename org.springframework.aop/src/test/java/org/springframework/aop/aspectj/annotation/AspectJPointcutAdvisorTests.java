@@ -25,6 +25,8 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.beans.TestBean;
 
+import example.aspects.PerTargetAspect;
+
 /**
  * @author Rod Johnson 
  * @author Chris Beams
@@ -51,7 +53,7 @@ public class AspectJPointcutAdvisorTests {
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
 		
 		InstantiationModelAwarePointcutAdvisorImpl ajpa = new InstantiationModelAwarePointcutAdvisorImpl(af, ajexp, 
-				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAspectJAdvisorFactoryTests.PerTargetAspect(),"someBean"), null, 1, "someBean");
+				new SingletonMetadataAwareAspectInstanceFactory(new PerTargetAspect(),"someBean"), null, 1, "someBean");
 		assertNotSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
 		assertTrue(ajpa.getAspectMetadata().getPerClausePointcut() instanceof AspectJExpressionPointcut);
 		assertTrue(ajpa.isPerInstance());

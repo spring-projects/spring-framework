@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj.autoproxy;
+package example.aspects;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
