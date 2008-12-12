@@ -930,7 +930,7 @@ public abstract class AbstractAopProxyTests {
 		pf2.addAdvisor(new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor()));
 		ITestBean proxy2 = (ITestBean) createProxy(pf2);
 
-		HashMap h = new HashMap();
+		HashMap<ITestBean, Object> h = new HashMap<ITestBean, Object>();
 		Object value1 = "foo";
 		Object value2 = "bar";
 		assertNull(h.get(proxy1));
@@ -1070,7 +1070,7 @@ public abstract class AbstractAopProxyTests {
 		pc.setTarget(tb);
 		ITestBean it = (ITestBean) createProxy(pc);
 		assertEquals(dp.count, 0);
-		int age = it.getAge();
+		it.getAge();
 		assertEquals(dp.count, 1);
 		it.setAge(11);
 		assertEquals(it.getAge(), 11);
@@ -1088,7 +1088,7 @@ public abstract class AbstractAopProxyTests {
 		pc.setTargetSource(mockTargetSource);
 		ITestBean it = (ITestBean) createProxy(pc);
 		assertEquals(dp.count, 0);
-		int age = it.getAge();
+		it.getAge();
 		// Statically vetoed
 		assertEquals(0, dp.count);
 		it.setAge(11);
@@ -1109,7 +1109,7 @@ public abstract class AbstractAopProxyTests {
 		pc.setTarget(tb);
 		ITestBean it = (ITestBean) createProxy(pc);
 		assertEquals(di.getCount(), 0);
-		int age = it.getAge();
+		it.getAge();
 		assertEquals(di.getCount(), 1);
 		it.setAge(11);
 		assertEquals(it.getAge(), 11);
@@ -1137,8 +1137,9 @@ public abstract class AbstractAopProxyTests {
 				return mi.proceed();
 			}
 		};
+		@SuppressWarnings("serial")
 		StaticMethodMatcherPointcutAdvisor advisor = new StaticMethodMatcherPointcutAdvisor(twoBirthdayInterceptor) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return "haveBirthday".equals(m.getName());
 			}
 		};
@@ -1178,7 +1179,7 @@ public abstract class AbstractAopProxyTests {
 		};
 
 		class NameSaver implements MethodInterceptor {
-			private List names = new LinkedList();
+			private List<Object> names = new LinkedList<Object>();
 
 			public Object invoke(MethodInvocation mi) throws Throwable {
 				names.add(mi.getArguments()[0]);
@@ -1206,19 +1207,20 @@ public abstract class AbstractAopProxyTests {
 		assertEquals(name1, saver.names.get(1));
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void testOverloadedMethodsWithDifferentAdvice() throws Throwable {
 		Overloads target = new Overloads();
 		ProxyFactory pc = new ProxyFactory(target);
 		NopInterceptor overLoadVoids = new NopInterceptor();
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadVoids) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getName().equals("overload") && m.getParameterTypes().length == 0;
 			}
 		});
 		NopInterceptor overLoadInts = new NopInterceptor();
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadInts) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getName().equals("overload") && m.getParameterTypes().length == 1 &&
 					m.getParameterTypes()[0].equals(int.class);
 			}
@@ -1248,7 +1250,7 @@ public abstract class AbstractAopProxyTests {
 		Advised config = (Advised) proxy;
 		// This class just checks proxy is bound before getTarget() call
 		config.setTargetSource(new TargetSource() {
-			public Class getTargetClass() {
+			public Class<?> getTargetClass() {
 				return TestBean.class;
 			}
 
@@ -1302,8 +1304,9 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testBeforeAdvisorIsInvoked() {
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
+		@SuppressWarnings("serial")
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cba) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getParameterTypes().length == 0;
 			}
 		};
@@ -1329,15 +1332,15 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testUserAttributes() throws Throwable {
 		class MapAwareMethodInterceptor implements MethodInterceptor {
-			private final Map expectedValues;
-			private final Map valuesToAdd;
-			public MapAwareMethodInterceptor(Map expectedValues, Map valuesToAdd) {
+			private final Map<String, String> expectedValues;
+			private final Map<String, String> valuesToAdd;
+			public MapAwareMethodInterceptor(Map<String, String> expectedValues, Map<String, String> valuesToAdd) {
 				this.expectedValues = expectedValues;
 				this.valuesToAdd = valuesToAdd;
 			}
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) invocation;
-				for (Iterator it = rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ){
+				for (Iterator<String> it = rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ){
 					Object key = it.next();
 					assertEquals(expectedValues.get(key), rmi.getUserAttributes().get(key));
 				}
@@ -1346,17 +1349,17 @@ public abstract class AbstractAopProxyTests {
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
-		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap(), new HashMap());
-		Map firstValuesToAdd = new HashMap();
+		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<String, String>(), new HashMap<String, String>());
+		Map<String, String> firstValuesToAdd = new HashMap<String, String>();
 		firstValuesToAdd.put("test", "");
-		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap(), firstValuesToAdd);
-		MapAwareMethodInterceptor mami3 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap());
-		MapAwareMethodInterceptor mami4 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap());
-		Map secondValuesToAdd = new HashMap();
+		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap<String, String>(), firstValuesToAdd);
+		MapAwareMethodInterceptor mami3 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap<String, String>());
+		MapAwareMethodInterceptor mami4 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap<String, String>());
+		Map<String, String> secondValuesToAdd = new HashMap<String, String>();
 		secondValuesToAdd.put("foo", "bar");
 		secondValuesToAdd.put("cat", "dog");
 		MapAwareMethodInterceptor mami5 = new MapAwareMethodInterceptor(firstValuesToAdd, secondValuesToAdd);
-		Map finalExpected = new HashMap(firstValuesToAdd);
+		Map<String, String> finalExpected = new HashMap<String, String>(firstValuesToAdd);
 		finalExpected.putAll(secondValuesToAdd);
 		MapAwareMethodInterceptor mami6 = new MapAwareMethodInterceptor(finalExpected, secondValuesToAdd);
 		
@@ -1380,8 +1383,9 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testMultiAdvice() throws Throwable {
 		CountingMultiAdvice cca = new CountingMultiAdvice();
+		@SuppressWarnings("serial")
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cca) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getParameterTypes().length == 0 || "exceptional".equals(m.getName());
 			}
 		};
@@ -1417,6 +1421,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testBeforeAdviceThrowsException() {
 		final RuntimeException rex = new RuntimeException();
+		@SuppressWarnings("serial")
 		CountingBeforeAdvice ba = new CountingBeforeAdvice() {
 			public void before(Method m, Object[] args, Object target) throws Throwable {
 				super.before(m, args, target);
@@ -1466,8 +1471,9 @@ public abstract class AbstractAopProxyTests {
 			}
 		}
 		SummingAfterAdvice aa = new SummingAfterAdvice();
+	    @SuppressWarnings("serial")
 		Advisor matchesInt = new StaticMethodMatcherPointcutAdvisor(aa) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getReturnType() == int.class;
 			}
 		};
@@ -1522,8 +1528,9 @@ public abstract class AbstractAopProxyTests {
 	public void testThrowsAdvisorIsInvoked() throws Throwable {
 		// Reacts to ServletException and RemoteException
 		MyThrowsHandler th = new MyThrowsHandler();
+		@SuppressWarnings("serial")
 		Advisor matchesEchoInvocations = new StaticMethodMatcherPointcutAdvisor(th) {
-			public boolean matches(Method m, Class targetClass) {
+			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getName().startsWith("echo");
 			}
 		};
@@ -1651,6 +1658,7 @@ public abstract class AbstractAopProxyTests {
 	/**
 	 * Fires on setter methods that take a string. Replaces null arg with "".
 	 */
+	@SuppressWarnings("serial")
 	protected static class StringSetterNullReplacementAdvice extends DefaultPointcutAdvisor {
 
 		private static MethodInterceptor cleaner = new MethodInterceptor() {
@@ -1664,10 +1672,10 @@ public abstract class AbstractAopProxyTests {
 		public StringSetterNullReplacementAdvice() {
 			super(cleaner);
 			setPointcut(new DynamicMethodMatcherPointcut() {
-				public boolean matches(Method m, Class targetClass, Object[] args) {
+				public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 					return args[0] == null;
 				}
-				public boolean matches(Method m, Class targetClass) {
+				public boolean matches(Method m, Class<?> targetClass) {
 					return m.getName().startsWith("set") &&
 						m.getParameterTypes().length == 1 &&
 						m.getParameterTypes()[0].equals(String.class);
@@ -1677,6 +1685,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	protected static class TestDynamicPointcutAdvice extends DefaultPointcutAdvisor {
 
 		public int count;
@@ -1684,7 +1693,7 @@ public abstract class AbstractAopProxyTests {
 		public TestDynamicPointcutAdvice(MethodInterceptor mi, final String pattern) {
 			super(mi);
 			setPointcut(new DynamicMethodMatcherPointcut() {
-				public boolean matches(Method m, Class targetClass, Object[] args) {
+				public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 					boolean run = m.getName().indexOf(pattern) != -1;
 					if (run) ++count;
 					return run;
@@ -1694,6 +1703,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	protected static class TestDynamicPointcutForSettersOnly extends DefaultPointcutAdvisor {
 
 		public int count;
@@ -1701,12 +1711,12 @@ public abstract class AbstractAopProxyTests {
 		public TestDynamicPointcutForSettersOnly(MethodInterceptor mi, final String pattern) {
 			super(mi);
 			setPointcut(new DynamicMethodMatcherPointcut() {
-				public boolean matches(Method m, Class targetClass, Object[] args) {
+				public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 					boolean run = m.getName().indexOf(pattern) != -1;
 					if (run) ++count;
 					return run;
 				}
-				public boolean matches(Method m, Class clazz) {
+				public boolean matches(Method m, Class<?> clazz) {
 					return m.getName().startsWith("set");
 				}
 			});
@@ -1714,6 +1724,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAdvisor {
 
 		private String pattern;
@@ -1723,7 +1734,7 @@ public abstract class AbstractAopProxyTests {
 			super(mi);
 			this.pattern = pattern;
 		}
-		public boolean matches(Method m, Class targetClass) {
+		public boolean matches(Method m, Class<?> targetClass) {
 			boolean run = m.getName().indexOf(pattern) != -1;
 			if (run) ++count;
 			return run;
@@ -1750,7 +1761,7 @@ public abstract class AbstractAopProxyTests {
 
 	private static class DummyIntroductionAdviceImpl implements DynamicIntroductionAdvice {
 
-		public boolean implementsInterface(Class intf) {
+		public boolean implementsInterface(Class<?> intf) {
 			return true;
 		}
 	}
