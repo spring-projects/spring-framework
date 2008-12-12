@@ -16,12 +16,15 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
@@ -41,8 +44,9 @@ import org.springframework.transaction.CallCountingTransactionManager;
  * Tests for auto proxy creation by advisor recognition.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class AdvisorAutoProxyCreatorTests extends TestCase {
+public class AdvisorAutoProxyCreatorTests {
 
 	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
 
@@ -55,6 +59,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		return new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreator.xml");
 	}
 
+	@Test
 	public void testDefaultExclusionPrefix() throws Exception {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
 		assertEquals(ADVISOR_APC_BEAN_NAME + DefaultAdvisorAutoProxyCreator.SEPARATOR, aapc.getAdvisorBeanNamePrefix());
@@ -64,18 +69,21 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	/**
 	 * If no pointcuts match (no attrs) there should be proxying.
 	 */
+	@Test
 	public void testNoProxy() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Object o = bf.getBean("noSetters");
 		assertFalse(AopUtils.isAopProxy(o));
 	}
 
+	@Test
 	public void testTxIsProxied() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertTrue(AopUtils.isAopProxy(test));
 	}
 
+	@Test
 	public void testRegexpApplied() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
@@ -90,6 +98,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	 * appear in the chain before "specific" interceptors,
 	 * which are sourced from matching advisors
 	 */
+	@Test
 	public void testCommonInterceptorAndAdvisor() throws Exception {
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreatorWithCommonInterceptors.xml");
 		ITestBean test1 = (ITestBean) bf.getBean("test1");
@@ -119,6 +128,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	 * We have custom TargetSourceCreators but there's no match, and
 	 * hence no proxying, for this bean
 	 */
+	@Test
 	public void testCustomTargetSourceNoMatch() throws Exception {
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
 		ITestBean test = (ITestBean) bf.getBean("test");
@@ -127,6 +137,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals("Kerry", test.getSpouse().getName());
 	}
 
+	@Test
 	public void testCustomPrototypeTargetSource() throws Exception {
 		CountingTestBean.count = 0;
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
@@ -141,6 +152,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		CountingTestBean.count = 0;
 	}
 
+	@Test
 	public void testLazyInitTargetSource() throws Exception {
 		CountingTestBean.count = 0;
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
@@ -155,6 +167,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		CountingTestBean.count = 0;
 	}
 
+	@Test
 	public void testQuickTargetSourceCreator() throws Exception {
 		ClassPathXmlApplicationContext bf =
 				new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/quickTargetSource.xml");
@@ -200,6 +213,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	}
 	
 	/*
+	@Test
 	public void testIntroductionIsProxied() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Object modifiable = bf.getBean("modifiable1");
@@ -209,6 +223,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	}
 	*/
 
+	@Test
 	public void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
@@ -230,6 +245,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	/**
 	 * Should not roll back on servlet exception.
 	 */
+	@Test
 	public void testRollbackRulesOnMethodCauseRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
@@ -255,6 +271,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals("Transaction counts match", 1, txMan.rollbacks);
 	}
 
+	@Test
 	public void testRollbackRulesOnMethodPreventRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
@@ -272,6 +289,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals("Transaction counts match", 1, txMan.commits);
 	}
 
+	@Test
 	public void testProgrammaticRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 
@@ -289,6 +307,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals(1, txMan.rollbacks);
 	}
 
+	@Test
 	public void testWithOptimizedProxy() throws Exception {
 		BeanFactory beanFactory = new ClassPathXmlApplicationContext("org/springframework/aop/framework/autoproxy/optimizedAutoProxyCreator.xml");
 
@@ -311,6 +330,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	 * The Modifiable behaviour of each instance of TestBean should be distinct.
 	 */
 	/*
+	@Test
 	public void testIntroductionViaPrototype() throws Exception {
 		BeanFactory bf = getBeanFactory();
 

@@ -16,30 +16,27 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Juergen Hoeller
  * @author Dave Syer
+ * @author Chris Beams
  */
-public class BeanNameAutoProxyCreatorInitTests extends TestCase {
+public class BeanNameAutoProxyCreatorInitTests {
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testIgnoreAdvisorThatIsCurrentlyCreation() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("beanNameAutoProxyCreatorInitTests.xml", getClass());
 		TestBean bean = (TestBean) ctx.getBean("bean");
 		bean.setName("foo");
 		assertEquals("foo", bean.getName());
-		try {
-			bean.setName(null);
-			fail("Expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		bean.setName(null); // should throw
 	}
 
 }

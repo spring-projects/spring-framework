@@ -16,8 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -26,10 +25,13 @@ import org.springframework.util.StopWatch;
 /**
  * Benchmarks for introductions.
  * 
+ * NOTE: No assertions!
+ * 
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 2.0
  */
-public class IntroductionBenchmarkTests extends TestCase {
+public class IntroductionBenchmarkTests {
 	
 	private static final int EXPECTED_COMPARE = 13;
 	
@@ -37,12 +39,8 @@ public class IntroductionBenchmarkTests extends TestCase {
 	private static final int INVOCATIONS = 100000;
 
 	
-	public void testBenchmarks() {
-		timeManyInvocations();
-	}
-
+	@SuppressWarnings("serial")
 	public static class SimpleCounterIntroduction extends DelegatingIntroductionInterceptor implements Counter {
-		
 		public int getCount() {
 			return EXPECTED_COMPARE;
 		}
@@ -52,7 +50,8 @@ public class IntroductionBenchmarkTests extends TestCase {
 		int getCount();
 	}
 	
-	protected long timeManyInvocations() {
+	@Test
+	public void timeManyInvocations() {
 		StopWatch sw = new StopWatch();
 		
 		TestBean target = new TestBean();
@@ -82,6 +81,5 @@ public class IntroductionBenchmarkTests extends TestCase {
         sw.stop();
         
         System.out.println(sw.prettyPrint());
-        return sw.getLastTaskTimeMillis();
     }
 }

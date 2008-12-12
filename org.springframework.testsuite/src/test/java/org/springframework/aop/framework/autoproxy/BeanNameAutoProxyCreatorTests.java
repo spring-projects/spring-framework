@@ -16,10 +16,12 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
@@ -35,35 +37,41 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Chris Beams
  */
-public class BeanNameAutoProxyCreatorTests extends TestCase {
+public class BeanNameAutoProxyCreatorTests {
 
 	private BeanFactory beanFactory;
 
-	protected void setUp() throws IOException {
+	@Before
+	public void setUp() throws IOException {
 		// Note that we need an ApplicationContext, not just a BeanFactory,
 		// for post-processing and hence auto-proxying to work.
 		this.beanFactory = new ClassPathXmlApplicationContext("beanNameAutoProxyCreatorTests.xml", getClass());
 	}
 
+	@Test
 	public void testNoProxy() {
 		TestBean tb = (TestBean) beanFactory.getBean("noproxy");
 		assertFalse(AopUtils.isAopProxy(tb));
 		assertEquals("noproxy", tb.getName());
 	}
 
+	@Test
 	public void testJdkProxyWithExactNameMatch() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("onlyJdk");
 		jdkAssertions(tb, 1);
 		assertEquals("onlyJdk", tb.getName());
 	}
 
+	@Test
 	public void testJdkProxyWithDoubleProxying() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("doubleJdk");
 		jdkAssertions(tb, 2);
 		assertEquals("doubleJdk", tb.getName());
 	}
 
+	@Test
 	public void testJdkIntroduction() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("introductionUsingJdk");
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("introductionNopInterceptor");
@@ -102,6 +110,7 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testJdkIntroductionAppliesToCreatedObjectsNotFactoryBean() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("factory-introductionUsingJdk");
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("introductionNopInterceptor");
@@ -139,18 +148,21 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testJdkProxyWithWildcardMatch() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("jdk1");
 		jdkAssertions(tb, 1);
 		assertEquals("jdk1", tb.getName());
 	}
 
+	@Test
 	public void testCglibProxyWithWildcardMatch() {
 		TestBean tb = (TestBean) beanFactory.getBean("cglib1");
 		cglibAssertions(tb);
 		assertEquals("cglib1", tb.getName());
 	}
 
+	@Test
 	public void testWithFrozenProxy() {
 		ITestBean testBean = (ITestBean) beanFactory.getBean("frozenBean");
 		assertTrue(((Advised)testBean).isFrozen());
