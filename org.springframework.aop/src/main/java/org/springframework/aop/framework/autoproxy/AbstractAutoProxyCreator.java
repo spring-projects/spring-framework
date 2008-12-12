@@ -144,7 +144,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private final Set<Object> nonAdvisedBeans = Collections.synchronizedSet(new HashSet<Object>());
 
-	private final Map<Object, Class> proxyTypes = new ConcurrentHashMap<Object, Class>();
+	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>();
 
 
 	/**
@@ -253,12 +253,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 
-	public Class predictBeanType(Class beanClass, String beanName) {
+    public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
 	}
 
-	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
@@ -268,7 +268,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
-	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!this.targetSourcedBeans.contains(cacheKey)) {
@@ -332,7 +332,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @param beanName the bean name
 	 * @return the cache key for the given class and name
 	 */
-	protected Object getCacheKey(Class beanClass, String beanName) {
+	protected Object getCacheKey(Class<?> beanClass, String beanName) {
 		return beanClass.getName() + "_" + beanName;
 	}
 
@@ -379,7 +379,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see org.aopalliance.intercept.MethodInterceptor
 	 * @see #shouldSkip
 	 */
-	protected boolean isInfrastructureClass(Class beanClass) {
+	protected boolean isInfrastructureClass(Class<?> beanClass) {
 		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
 				Advice.class.isAssignableFrom(beanClass) ||
 				AopInfrastructureBean.class.isAssignableFrom(beanClass);
@@ -398,7 +398,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @param beanName the name of the bean
 	 * @return whether to skip the given bean
 	 */
-	protected boolean shouldSkip(Class beanClass, String beanName) {
+	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
 		return false;
 	}
 
@@ -412,7 +412,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @return a TargetSource for this bean
 	 * @see #setCustomTargetSourceCreators
 	 */
-	protected TargetSource getCustomTargetSource(Class beanClass, String beanName) {
+	protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
 		// We can't create fancy target sources for directly registered singletons.
 		if (this.customTargetSourceCreators != null &&
 				this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
@@ -445,7 +445,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #buildAdvisors
 	 */
 	protected Object createProxy(
-			Class beanClass, String beanName, Object[] specificInterceptors, TargetSource targetSource) {
+			Class<?> beanClass, String beanName, Object[] specificInterceptors, TargetSource targetSource) {
 
 		ProxyFactory proxyFactory = new ProxyFactory();
 		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
@@ -454,8 +454,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (!shouldProxyTargetClass(beanClass, beanName)) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
-			Class[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
-			for (Class targetInterface : targetInterfaces) {
+			Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
+			for (Class<?> targetInterface : targetInterfaces) {
 				proxyFactory.addInterface(targetInterface);
 			}
 		}
@@ -487,7 +487,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @return whether the given bean should be proxied with its target class
 	 * @see AutoProxyUtils#shouldProxyTargetClass
 	 */
-	protected boolean shouldProxyTargetClass(Class beanClass, String beanName) {
+	protected boolean shouldProxyTargetClass(Class<?> beanClass, String beanName) {
 		return (isProxyTargetClass() ||
 				(this.beanFactory instanceof ConfigurableListableBeanFactory &&
 						AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName)));
@@ -591,6 +591,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
 	protected abstract Object[] getAdvicesAndAdvisorsForBean(
-			Class beanClass, String beanName, TargetSource customTargetSource) throws BeansException;
+			Class<?> beanClass, String beanName, TargetSource customTargetSource) throws BeansException;
 
 }
