@@ -68,6 +68,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 13.03.2003
  */
 public abstract class AbstractAopProxyTests {
@@ -800,7 +801,8 @@ public abstract class AbstractAopProxyTests {
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 
-		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
+		@SuppressWarnings("serial")
+        class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
 			 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
 			 */
