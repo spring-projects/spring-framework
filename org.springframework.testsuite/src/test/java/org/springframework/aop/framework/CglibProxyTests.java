@@ -16,11 +16,13 @@
 
 package org.springframework.aop.framework;
 
+import static org.junit.Assert.*;
+
 import java.io.Serializable;
-import java.lang.reflect.Modifier;
 
 import net.sf.cglib.core.CodeGenerationException;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.junit.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
@@ -60,6 +62,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		return true;
 	}
 
+	@Test
 	public void testNullConfig() {
 		try {
 			AopProxy aop = new Cglib2AopProxy(null);
@@ -70,6 +73,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		}
 	}
 
+	@Test
 	public void testNoTarget() {
 		AdvisedSupport pc = new AdvisedSupport(new Class[]{ITestBean.class});
 		pc.addAdvice(new NopInterceptor());
@@ -83,6 +87,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		}
 	}
 
+	@Test
 	public void testProtectedMethodInvocation() {
 		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
 		mockTargetSource.setTarget(bean);
@@ -96,6 +101,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertTrue(AopUtils.isCglibProxy(proxy));
 	}
 
+	@Test
 	public void testProxyCanBeClassNotInterface() throws Exception {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
@@ -113,6 +119,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertEquals(32, tb.getAge());
 	}
 
+	@Test
 	public void testCglibProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
 		class YouCantSeeThis {
 			void hidden() {
@@ -134,6 +141,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		}
 	}
 
+	@Test
 	public void testMethodInvocationDuringConstructor() {
 		CglibTestBean bean = new CglibTestBean();
 		bean.setName("Rob Harrop");
@@ -149,6 +157,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 				"Rob Harrop", proxy.getName());
 	}
 
+	@Test
 	public void testUnadvisedProxyCreationWithCallDuringConstructor() throws Exception {
 		CglibTestBean target = new CglibTestBean();
 		target.setName("Rob Harrop");
@@ -166,6 +175,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 	}
 
+	@Test
 	public void testMultipleProxies() {
 		TestBean target = new TestBean();
 		target.setAge(20);
@@ -206,6 +216,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		return (ITestBean) pf.getProxy();
 	}
 	
+	@Test
 	public void testMultipleProxiesForIntroductionAdvisor() {
 		TestBean target = new TestBean();
 		target.setAge(20);
@@ -229,6 +240,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		return (ITestBean) pf.getProxy();
 	}
 
+	@Test
 	public void testWithNoArgConstructor() {
 		NoArgCtorTestBean target = new NoArgCtorTestBean("b", 1);
 		target.reset();
@@ -246,6 +258,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertNotNull("Proxy should be null", proxy);
 	}
 
+	@Test
 	public void testProxyAProxy() {
 		ITestBean target = new TestBean();
 
@@ -266,6 +279,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		ITestBean proxy2 = (ITestBean) cglib.getProxy();
 	}
 
+	@Test
 	public void testProxyAProxyWithAdditionalInterface() {
 		ITestBean target = new TestBean();
 		mockTargetSource.setTarget(target);
@@ -288,6 +302,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertTrue(proxy2 instanceof Serializable);
 	}
 
+	@Test
 	public void testExceptionHandling() {
 		ExceptionThrower bean = new ExceptionThrower();
 		mockTargetSource.setTarget(bean);
@@ -310,12 +325,14 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertTrue("Finally was not invoked", proxy.isFinallyInvoked());
 	}
 
+	@Test
 	public void testWithDependencyChecking() {
 		ApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/aop/framework/withDependencyChecking.xml");
 		ctx.getBean("testBean");
 	}
 
+	@Test
 	public void testAddAdviceAtRuntime() {
 		TestBean bean = new TestBean();
 
@@ -342,6 +359,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertEquals(1, cba.getCalls());
 	}
 
+	@Test
 	public void testProxyProtectedMethod() throws Exception {
 		CountingBeforeAdvice advice = new CountingBeforeAdvice();
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
