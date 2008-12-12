@@ -16,15 +16,15 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Juergen Hoeller
  */
-public class PrototypeProxyTests extends TestCase {
+public class PrototypeProxyTests {
 
+    @Test
 	public void testInjectionBeforeWrappingCheckDoesNotKickInForPrototypeProxy() {
 		new ClassPathXmlApplicationContext("prototypeProxy.xml", getClass());
 	}

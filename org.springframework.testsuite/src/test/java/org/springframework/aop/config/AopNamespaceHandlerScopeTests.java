@@ -16,8 +16,10 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -33,10 +35,11 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AopNamespaceHandlerScopeTests extends TestCase {
+public class AopNamespaceHandlerScopeTests {
 
 	private ApplicationContext context;
 
+	@Before
 	public void setUp() {
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
 		wac.setConfigLocations(new String[] {"classpath:org/springframework/aop/config/aopNamespaceHandlerScopeTests.xml"});
@@ -44,6 +47,7 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		this.context = wac;
 	}
 
+	@Test
 	public void testRequestScoping() throws Exception {
 		MockHttpServletRequest oldRequest = new MockHttpServletRequest();
 		MockHttpServletRequest newRequest = new MockHttpServletRequest();
@@ -71,6 +75,7 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		assertTrue("Should have advisors", ((Advised) scoped).getAdvisors().length > 0);
 	}
 
+	@Test
 	public void testSessionScoping() throws Exception {
 		MockHttpSession oldSession = new MockHttpSession();
 		MockHttpSession newSession = new MockHttpSession();

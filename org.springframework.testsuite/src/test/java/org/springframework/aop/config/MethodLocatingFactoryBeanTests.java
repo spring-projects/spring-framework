@@ -16,10 +16,12 @@
 
 package org.springframework.aop.config;
 
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.junit.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.mock.easymock.AbstractScalarMockTemplate;
@@ -28,21 +30,24 @@ import org.springframework.test.AssertThrows;
 /**
  * @author Rick Evans
  */
-public final class MethodLocatingFactoryBeanTests extends TestCase {
+public final class MethodLocatingFactoryBeanTests {
 
 	private static final String BEAN_NAME = "string";
 
 
+	@Test
 	public void testIsSingleton() throws Exception {
 		MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
 		assertTrue(factory.isSingleton());
 	}
 
+	@Test
 	public void testGetObjectType() throws Exception {
 		MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
 		assertEquals(Method.class, factory.getObjectType());
 	}
 
+	@Test
 	public void testWithNullTargetBeanName() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
@@ -57,6 +62,7 @@ public final class MethodLocatingFactoryBeanTests extends TestCase {
 		}.test();
 	}
 
+	@Test
 	public void testWithEmptyTargetBeanName() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
@@ -72,6 +78,7 @@ public final class MethodLocatingFactoryBeanTests extends TestCase {
 		}.test();
 	}
 
+	@Test
 	public void testWithNullTargetMethodName() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
@@ -86,6 +93,7 @@ public final class MethodLocatingFactoryBeanTests extends TestCase {
 		}.test();
 	}
 
+	@Test
 	public void testWithEmptyTargetMethodName() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
@@ -101,6 +109,7 @@ public final class MethodLocatingFactoryBeanTests extends TestCase {
 		}.test();
 	}
 
+	@Test
 	public void testWhenTargetBeanClassCannotBeResolved() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {
@@ -120,6 +129,7 @@ public final class MethodLocatingFactoryBeanTests extends TestCase {
 		}.test();
 	}
 
+	@Test
 	public void testSunnyDayPath() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {
@@ -140,6 +150,7 @@ public final class MethodLocatingFactoryBeanTests extends TestCase {
 		}.test();
 	}
 
+	@Test
 	public void testWhereMethodCannotBeResolved() throws Exception {
 		new BeanFactoryScalarMockTemplate() {
 			protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {

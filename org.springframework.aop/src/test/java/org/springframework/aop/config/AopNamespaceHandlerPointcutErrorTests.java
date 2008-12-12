@@ -16,8 +16,9 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -26,8 +27,9 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Mark Fisher
  */
-public class AopNamespaceHandlerPointcutErrorTests extends TestCase {
+public class AopNamespaceHandlerPointcutErrorTests {
 
+    @Test
 	public void testDuplicatePointcutConfig() {
 		try {
 			new XmlBeanFactory(new ClassPathResource(
@@ -39,6 +41,7 @@ public class AopNamespaceHandlerPointcutErrorTests extends TestCase {
 		}
 	}
 	
+    @Test
 	public void testMissingPointcutConfig() {
 		try {
 			new XmlBeanFactory(new ClassPathResource(

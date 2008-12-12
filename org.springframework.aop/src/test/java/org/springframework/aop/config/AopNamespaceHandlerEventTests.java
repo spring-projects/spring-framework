@@ -16,11 +16,13 @@
 
 package org.springframework.aop.config;
 
+import static org.junit.Assert.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -35,7 +37,7 @@ import org.springframework.core.io.ClassPathResource;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AopNamespaceHandlerEventTests extends TestCase {
+public class AopNamespaceHandlerEventTests {
 
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
@@ -44,11 +46,13 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setEventListener(this.eventListener);
 	}
 
+	@Test
 	public void testPointcutEvents() throws Exception {
 		loadBeansFrom("aopNamespaceHandlerPointcutEventTests.xml");
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
@@ -72,6 +76,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertEquals("Incorrect number of BeanDefinitions", 1, pcd.getBeanDefinitions().length);
 	}
 
+	@Test
 	public void testAdvisorEventsWithPointcutRef() throws Exception {
 		loadBeansFrom("aopNamespaceHandlerAdvisorWithPointcutRefEventTests.xml");
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
@@ -100,6 +105,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertEquals("countingAdvice", adviceDef.getBeanName());
 	}
 
+	@Test
 	public void testAdvisorEventsWithDirectPointcut() throws Exception {
 		loadBeansFrom("aopNamespaceHandlerAdvisorWithDirectPointcutEventTests.xml");
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
@@ -128,6 +134,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertEquals("countingAdvice", adviceDef.getBeanName());
 	}
 
+	@Test
 	public void testAspectEvent() throws Exception {
 		loadBeansFrom("aopNamespaceHandlerAspectEventTests.xml");
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
@@ -154,7 +161,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		BeanReference[] beanReferences = acd.getBeanReferences();
 		assertEquals(6, beanReferences.length);
 
-		Set expectedReferences = new HashSet();
+		Set<String> expectedReferences = new HashSet<String>();
 		expectedReferences.add("pc");
 		expectedReferences.add("countingAdvice");
 		for (int i = 0; i < beanReferences.length; i++) {

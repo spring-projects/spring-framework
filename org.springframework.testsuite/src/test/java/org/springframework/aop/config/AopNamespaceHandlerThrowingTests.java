@@ -16,8 +16,9 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +28,7 @@ import org.xml.sax.SAXParseException;
 /**
  * @author Adrian Colyer
  */
-public class AopNamespaceHandlerThrowingTests extends TestCase {
+public class AopNamespaceHandlerThrowingTests {
 
 	private ApplicationContext context;
 
@@ -39,10 +40,12 @@ public class AopNamespaceHandlerThrowingTests extends TestCase {
 		return "org/springframework/aop/config/aopNamespaceHandlerThrowingErrorTests.xml";
 	}
 
+	@Test
 	public void testThrowingOnThrowingAdvice() {
 		this.context = new ClassPathXmlApplicationContext(getOKConfigLocation());
 	}
 	
+	@Test
 	public void testParseThrowingOnOtherAdviceType() {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
