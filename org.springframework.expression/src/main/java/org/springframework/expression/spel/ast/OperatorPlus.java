@@ -27,18 +27,18 @@ public class OperatorPlus extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
-		SpelNode leftOp = getLeftOperand();
-		SpelNode rightOp = getRightOperand();
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+		SpelNodeImpl leftOp = getLeftOperand();
+		SpelNodeImpl rightOp = getRightOperand();
 		if (rightOp == null) { // If only one operand, then this is unary plus
-			Object operandOne = leftOp.getValue(state);
+			Object operandOne = leftOp.getValueInternal(state);
 			if (operandOne instanceof Number) {
 				return new Integer(((Number) operandOne).intValue());
 			}
 			return state.operate(Operation.ADD, operandOne, null);
 		} else {
-			Object operandOne = leftOp.getValue(state);
-			Object operandTwo = rightOp.getValue(state);
+			Object operandOne = leftOp.getValueInternal(state);
+			Object operandTwo = rightOp.getValueInternal(state);
 			if (operandOne instanceof Number && operandTwo instanceof Number) {
 				Number op1 = (Number) operandOne;
 				Number op2 = (Number) operandTwo;

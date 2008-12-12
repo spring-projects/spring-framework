@@ -25,7 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * 
  */
-public class Dot extends SpelNode {
+public class Dot extends SpelNodeImpl {
 	// TODO Keep Dot for the positional information or remove it?
 
 	public Dot(Token payload) {
@@ -38,7 +38,7 @@ public class Dot extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws SpelException {
+	public Object getValueInternal(ExpressionState state) throws SpelException {
 		// This makes Dot a do-nothing operation, but this is not free in terms of computation
 		return state.getActiveContextObject();
 	}

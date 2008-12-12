@@ -15,21 +15,12 @@
  */
 package org.springframework.expression.spel;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.DefaultNonTemplateParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
-import org.springframework.expression.spel.ast.SpelNode;
-import org.springframework.expression.spel.generated.SpringExpressionsLexer;
-import org.springframework.expression.spel.generated.SpringExpressionsParser.expr_return;
-import org.springframework.expression.spel.internal.InternalELException;
-import org.springframework.expression.spel.internal.SpelTreeAdaptor;
-import org.springframework.expression.spel.internal.SpringExpressionsLexerExtender;
-import org.springframework.expression.spel.internal.SpringExpressionsParserExtender;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 
 /**
  * Instances of this parser class can process Spring Expression Language format expressions. The result of parsing an
@@ -40,17 +31,11 @@ import org.springframework.expression.spel.internal.SpringExpressionsParserExten
  */
 public class SpelExpressionParser extends TemplateAwareExpressionParser {
 
-	private final SpringExpressionsLexer lexer;
-	private final SpringExpressionsParserExtender parser;
+	private final SpelInternalParser expressionParser;
 
-	/**
-	 * Should be constructed through the SpelParserFactory
-	 */
 	public SpelExpressionParser() {
-		lexer = new SpringExpressionsLexerExtender();
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		parser = new SpringExpressionsParserExtender(tokens);
-		parser.setTreeAdaptor(new SpelTreeAdaptor());
+		// Use an Antlr based expression parser
+		expressionParser = new SpelAntlrExpressionParser();
 	}
 
 	/**
@@ -63,22 +48,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	 */
 	@Override
 	protected Expression doParseExpression(String expressionString, ParserContext context) throws ParseException {
-		try {
-			lexer.setCharStream(new ANTLRStringStream(expressionString));
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			parser.setTokenStream(tokens);
-			expr_return exprReturn = parser.expr();
-			SpelExpression newExpression = new SpelExpression(expressionString, (SpelNode) exprReturn.getTree());
-			return newExpression;
-		} catch (RecognitionException re) {
-			ParseException exception = new ParseException(expressionString, "Recognition error at position: "
-					+ re.charPositionInLine + ": " + re.getMessage(), re);
-			throw exception;
-		} catch (InternalELException e) {
-			SpelException wrappedException = e.getCause();
-			throw new ParseException(expressionString, "Parsing problem: " + wrappedException.getMessage(),
-					wrappedException);
-		}
+		return expressionParser.doParseExpression(expressionString,context);
 	}
 
 	/**
@@ -87,5 +57,9 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	@Override
 	public SpelExpression parseExpression(String expressionString) throws ParseException {
 		return (SpelExpression) super.parseExpression(expressionString, DefaultNonTemplateParserContext.INSTANCE);
+	}
+
+	public interface SpelInternalParser {
+		Expression doParseExpression(String expressionString, ParserContext context) throws ParseException;
 	}
 }

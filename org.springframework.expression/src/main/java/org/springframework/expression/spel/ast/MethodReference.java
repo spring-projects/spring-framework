@@ -28,7 +28,7 @@ import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.internal.Utils;
 
-public class MethodReference extends SpelNode {
+public class MethodReference extends SpelNodeImpl {
 
 	private final String name;
 	private MethodExecutor fastInvocationAccessor;
@@ -39,11 +39,11 @@ public class MethodReference extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Object currentContext = state.getActiveContextObject();
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = getChild(i).getValue(state);
+			arguments[i] = getChild(i).getValueInternal(state);
 		}
 		if (currentContext == null) {
 			throw new SpelException(getCharPositionInLine(), SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,

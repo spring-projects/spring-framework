@@ -36,7 +36,7 @@ import org.springframework.expression.spel.internal.KeyValuePair;
  * 
  * @author Andy Clement
  */
-public class Selection extends SpelNode {
+public class Selection extends SpelNodeImpl {
 
 	public final static int ALL = 0; // ?{}
 	public final static int FIRST = 1; // ^{}
@@ -50,9 +50,9 @@ public class Selection extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Object operand = state.getActiveContextObject();
-		SpelNode selectionCriteria = getChild(0);
+		SpelNodeImpl selectionCriteria = getChild(0);
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
@@ -60,7 +60,7 @@ public class Selection extends SpelNode {
 				try {
 					Object kvpair = new KeyValuePair(k, mapdata.get(k));
 					state.pushActiveContextObject(kvpair);
-					Object o = selectionCriteria.getValue(state);
+					Object o = selectionCriteria.getValueInternal(state);
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST)
@@ -91,7 +91,7 @@ public class Selection extends SpelNode {
 				try {
 					state.pushActiveContextObject(element);
 					state.enterScope("index", idx);
-					Object o = selectionCriteria.getValue(state);
+					Object o = selectionCriteria.getValueInternal(state);
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST)

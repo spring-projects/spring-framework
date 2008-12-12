@@ -15,6 +15,7 @@
  */
 package org.springframework.expression.spel;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -27,7 +28,6 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeUtils;
-import org.springframework.expression.spel.internal.VariableScope;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
@@ -197,6 +197,44 @@ public class ExpressionState {
 
 	public EvaluationContext getEvaluationContext() {
 		return relatedContext;
+	}
+
+	/**
+	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
+	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
+	 * the function is executing.  When the function returns the scope is exited.
+	 * 
+	 * @author Andy Clement
+	 *
+	 */
+	static class VariableScope {
+
+		private final Map<String, Object> vars = new HashMap<String, Object>();
+
+		public VariableScope() { }
+
+		public VariableScope(Map<String, Object> arguments) {
+			if (arguments!=null) {
+				vars.putAll(arguments);
+			}
+		}
+		
+		public VariableScope(String name,Object value) {
+			vars.put(name,value);
+		}
+
+		public Object lookupVariable(String name) {
+			return vars.get(name);
+		}
+
+		public void setVariable(String name, Object value) {
+			vars.put(name,value);
+		}
+
+		public boolean definesVariable(String name) {
+			return vars.containsKey(name);
+		}
+
 	}
 
 }

@@ -27,14 +27,14 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * 
  */
-public class Placeholder extends SpelNode {
+public class Placeholder extends SpelNodeImpl {
 
 	public Placeholder(Token payload) {
 		super(payload);
 	}
 
 	@Override
-	public String getValue(ExpressionState state) throws SpelException {
+	public String getValueInternal(ExpressionState state) throws SpelException {
 		throw new SpelException(getCharPositionInLine(), SpelMessages.PLACEHOLDER_SHOULD_NEVER_BE_EVALUATED);
 	}
 

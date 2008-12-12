@@ -18,9 +18,9 @@ package org.springframework.expression.spel.ast;
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Implements the minus operator. If there is only one operand it is a unary minus.
@@ -47,11 +47,11 @@ public class OperatorMinus extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
-		SpelNode leftOp = getLeftOperand();
-		SpelNode rightOp = getRightOperand();
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+		SpelNodeImpl leftOp = getLeftOperand();
+		SpelNodeImpl rightOp = getRightOperand();
 		if (rightOp == null) {// If only one operand, then this is unary minus
-			Object left = leftOp.getValue(state);
+			Object left = leftOp.getValueInternal(state);
 			if (left instanceof Number) {
 				Number n = (Number) left;
 				if (left instanceof Double) {
@@ -70,8 +70,8 @@ public class OperatorMinus extends Operator {
 			}
 			throw new SpelException(SpelMessages.CANNOT_NEGATE_TYPE, left.getClass().getName());
 		} else {
-			Object left = leftOp.getValue(state);
-			Object right = rightOp.getValue(state);
+			Object left = leftOp.getValueInternal(state);
+			Object right = rightOp.getValueInternal(state);
 			if (left instanceof Number && right instanceof Number) {
 				Number op1 = (Number) left;
 				Number op2 = (Number) right;

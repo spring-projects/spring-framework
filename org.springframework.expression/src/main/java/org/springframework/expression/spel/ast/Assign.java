@@ -28,15 +28,15 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * 
  */
-public class Assign extends SpelNode {
+public class Assign extends SpelNodeImpl {
 
 	public Assign(Token payload) {
 		super(payload);
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
-		Object newValue = getChild(1).getValue(state);
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+		Object newValue = getChild(1).getValueInternal(state);
 		getChild(0).setValue(state, newValue);
 		return newValue;
 	}

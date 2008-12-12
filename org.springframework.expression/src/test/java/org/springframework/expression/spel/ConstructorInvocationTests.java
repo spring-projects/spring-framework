@@ -24,6 +24,8 @@ import org.springframework.expression.spel.standard.StandardEvaluationContext;
  */
 public class ConstructorInvocationTests extends ExpressionTestCase {
 
+	// Some tests commented out as language support has been removed for now
+	
 	// public void testPrimitiveTypeArrayConstructors() {
 	// evaluate("new int[]{1,2,3,4}.count()", 4, Integer.class);
 	// evaluate("new boolean[]{true,false,true}.count()", 3, Integer.class);
@@ -45,11 +47,6 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	// evaluate("new float[]{1f,2f,3f,4f}[0]", (float) 1, Float.class);
 	// evaluate("new byte[]{1,2,3,4}[0]", (byte) 1, Byte.class);
 	// }
-
-	public void testTypeConstructors() {
-		evaluate("new String('hello world')", "hello world", String.class);
-		// evaluate("new String(new char[]{'h','e','l','l','o'})", "hello", String.class);
-	}
 
 	// public void testErrorCases() {
 	// evaluateAndCheckError("new char[7]{'a','c','d','e'}", SpelMessages.INITIALIZER_LENGTH_INCORRECT);
@@ -75,6 +72,11 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	// new String[3][4].getClass());
 	// }
 
+	public void testTypeConstructors() {
+		evaluate("new String('hello world')", "hello world", String.class);
+		// evaluate("new String(new char[]{'h','e','l','l','o'})", "hello", String.class);
+	}
+	
 	/*
 	 * These tests are attempting to call constructors where we need to widen or convert the argument in order to
 	 * satisfy a suitable constructor.

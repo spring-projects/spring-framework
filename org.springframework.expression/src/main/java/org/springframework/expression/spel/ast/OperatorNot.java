@@ -20,16 +20,16 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
 
-public class OperatorNot extends SpelNode { // Not is a unary operator so do not extend BinaryOperator
+public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do not extend BinaryOperator
 
 	public OperatorNot(Token payload) {
 		super(payload);
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			boolean value = state.toBoolean(getChild(0).getValue(state));
+			boolean value = state.toBoolean(getChild(0).getValueInternal(state));
 			return !value;
 		} catch (SpelException see) {
 			see.setPosition(getChild(0).getCharPositionInLine());

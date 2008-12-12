@@ -39,7 +39,7 @@ import org.springframework.expression.spel.reflection.ReflectionUtils;
  * 
  * @author Andy Clement
  */
-public class FunctionReference extends SpelNode {
+public class FunctionReference extends SpelNodeImpl {
 
 	private final String name;
 
@@ -49,7 +49,7 @@ public class FunctionReference extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Object o = state.lookupVariable(name);
 		if (o == null) {
 			throw new SpelException(SpelMessages.FUNCTION_NOT_DEFINED, name);
@@ -139,7 +139,7 @@ public class FunctionReference extends SpelNode {
 		// Compute arguments to the function
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = getChild(i).getValue(state);
+			arguments[i] = getChild(i).getValueInternal(state);
 		}
 		return arguments;
 	}

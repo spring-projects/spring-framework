@@ -18,6 +18,8 @@ package org.springframework.expression.spel;
 /**
  * Tests the evaluation of real expressions in a real context.
  * 
+ * Node: Some tests commented out as language support has been removed
+ * 
  * @author Andy Clement
  */
 public class EvaluationTests extends ExpressionTestCase {

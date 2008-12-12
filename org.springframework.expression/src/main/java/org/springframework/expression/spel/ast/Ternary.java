@@ -25,7 +25,7 @@ import org.springframework.expression.spel.SpelException;
  * 
  * @author Andy Clement
  */
-public class Ternary extends SpelNode {
+public class Ternary extends SpelNodeImpl {
 
 	public Ternary(Token payload) {
 		super(payload);
@@ -39,13 +39,13 @@ public class Ternary extends SpelNode {
 	 * executing the chosen alternative
 	 */
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Boolean b = (Boolean) getChild(0).getValue(state, Boolean.class);
 		try {
 			if (b) {
-				return getChild(1).getValue(state);
+				return getChild(1).getValueInternal(state);
 			} else {
-				return getChild(2).getValue(state);
+				return getChild(2).getValueInternal(state);
 			}
 		} catch (SpelException ex) {
 			ex.setPosition(getChild(0).getCharPositionInLine());

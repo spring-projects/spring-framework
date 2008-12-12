@@ -37,12 +37,12 @@ public class OperatorAnd extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
 
 		try {
-			leftValue = state.toBoolean(getLeftOperand().getValue(state));
+			leftValue = state.toBoolean(getLeftOperand().getValueInternal(state));
 		} catch (SpelException ee) {
 			ee.setPosition(getLeftOperand().getCharPositionInLine());
 			throw ee;
@@ -53,7 +53,7 @@ public class OperatorAnd extends Operator {
 		}
 
 		try {
-			rightValue = state.toBoolean(getRightOperand().getValue(state));
+			rightValue = state.toBoolean(getRightOperand().getValueInternal(state));
 		} catch (SpelException ee) {
 			ee.setPosition(getRightOperand().getCharPositionInLine());
 			throw ee;

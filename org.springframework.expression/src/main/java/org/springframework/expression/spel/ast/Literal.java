@@ -19,7 +19,7 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.internal.InternalELException;
+import org.springframework.expression.spel.WrappedELException;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).
@@ -27,7 +27,7 @@ import org.springframework.expression.spel.internal.InternalELException;
  * @author Andy Clement
  * 
  */
-public abstract class Literal extends SpelNode {
+public abstract class Literal extends SpelNodeImpl {
 
 	public Literal(Token payload) {
 		super(payload);
@@ -36,7 +36,7 @@ public abstract class Literal extends SpelNode {
 	public abstract Object getLiteralValue();
 
 	@Override
-	public final Object getValue(ExpressionState state) throws SpelException {
+	public final Object getValueInternal(ExpressionState state) throws SpelException {
 		return getLiteralValue();
 	}
 
@@ -84,7 +84,7 @@ public abstract class Literal extends SpelNode {
 				long value = Long.parseLong(numberString, radix);
 				return new LongLiteral(numberToken, value);
 			} catch (NumberFormatException nfe) {
-				throw new InternalELException(new SpelException(numberToken.getCharPositionInLine(), nfe,
+				throw new WrappedELException(new SpelException(numberToken.getCharPositionInLine(), nfe,
 						SpelMessages.NOT_A_LONG, numberToken.getText()));
 			}
 		} else {
@@ -92,7 +92,7 @@ public abstract class Literal extends SpelNode {
 				int value = Integer.parseInt(numberString, radix);
 				return new IntLiteral(numberToken, value);
 			} catch (NumberFormatException nfe) {
-				throw new InternalELException(new SpelException(numberToken.getCharPositionInLine(), nfe,
+				throw new WrappedELException(new SpelException(numberToken.getCharPositionInLine(), nfe,
 						SpelMessages.NOT_AN_INTEGER, numberToken.getText()));
 			}
 		}

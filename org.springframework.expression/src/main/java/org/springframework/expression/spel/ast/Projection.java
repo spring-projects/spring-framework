@@ -35,14 +35,14 @@ import org.springframework.expression.spel.internal.KeyValuePair;
  * @author Andy Clement
  * 
  */
-public class Projection extends SpelNode {
+public class Projection extends SpelNodeImpl {
 
 	public Projection(Token payload) {
 		super(payload);
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Object operand = state.getActiveContextObject();
 
 		// When the input is a map, we push a special context object on the stack
@@ -56,7 +56,7 @@ public class Projection extends SpelNode {
 			for (Object k : mapdata.keySet()) {
 				try {
 					state.pushActiveContextObject(new KeyValuePair(k, mapdata.get(k)));
-					result.add(getChild(0).getValue(state));
+					result.add(getChild(0).getValueInternal(state));
 				} finally {
 					state.popActiveContextObject();
 				}
@@ -71,7 +71,7 @@ public class Projection extends SpelNode {
 				try {
 					state.pushActiveContextObject(element);
 					state.enterScope("index", idx);
-					result.add(getChild(0).getValue(state));
+					result.add(getChild(0).getValueInternal(state));
 				} finally {
 					state.exitScope();
 					state.popActiveContextObject();
