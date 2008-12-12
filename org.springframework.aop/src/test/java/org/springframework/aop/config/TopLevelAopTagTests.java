@@ -16,7 +16,9 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -26,8 +28,9 @@ import org.springframework.core.io.ClassPathResource;
  * 
  * @author Rob Harrop
  */
-public final class TopLevelAopTagTests extends TestCase {
+public final class TopLevelAopTagTests {
 
+    @Test
 	public void testParse() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);

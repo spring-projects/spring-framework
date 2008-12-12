@@ -16,10 +16,10 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -28,7 +28,7 @@ import org.xml.sax.SAXParseException;
 /**
  * @author Adrian Colyer
  */
-public class AopNamespaceAdviceTypeTests extends TestCase {
+public class AopNamespaceAdviceTypeTests {
 
 	private ApplicationContext context;
 
@@ -40,10 +40,12 @@ public class AopNamespaceAdviceTypeTests extends TestCase {
 		return "org/springframework/aop/config/aopNamespaceHandlerAdviceTypeErrorTests.xml";
 	}
 
+	@Test
 	public void testParsingOfAdviceTypes() {
 		this.context = new ClassPathXmlApplicationContext(getOKConfigLocation());
 	}
 	
+	@Test
 	public void testParsingOfAdviceTypesWithError() {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());

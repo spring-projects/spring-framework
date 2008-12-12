@@ -16,8 +16,9 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +27,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * @author Adrian Colyer
  */
-public class AopNamespaceHandlerArgNamesTests extends TestCase {
+public class AopNamespaceHandlerArgNamesTests {
 
 	private ApplicationContext context;
 
@@ -38,10 +39,12 @@ public class AopNamespaceHandlerArgNamesTests extends TestCase {
 		return "org/springframework/aop/config/aopNamespaceHandlerArgNamesErrorTests.xml";
 	}
 
+	@Test
 	public void testArgNamesOK() {
 		this.context = new ClassPathXmlApplicationContext(getOKConfigLocation());
 	}
 	
+	@Test
 	public void testArgNamesError() {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());

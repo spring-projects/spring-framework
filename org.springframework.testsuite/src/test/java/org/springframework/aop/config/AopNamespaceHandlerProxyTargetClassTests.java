@@ -16,6 +16,9 @@
 
 package org.springframework.aop.config;
 
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 
@@ -24,6 +27,7 @@ import org.springframework.beans.ITestBean;
  */
 public class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
 
+    @Test
 	public void testIsClassProxy() {
 		ITestBean bean = getTestBean();
 		assertTrue("Should be a CGLIB proxy", AopUtils.isCglibProxy(bean));

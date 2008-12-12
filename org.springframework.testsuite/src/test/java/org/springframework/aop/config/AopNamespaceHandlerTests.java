@@ -16,7 +16,10 @@
 
 package org.springframework.aop.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.CountingBeforeAdvice;
@@ -28,10 +31,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * @author Rob Harrop
  */
-public class AopNamespaceHandlerTests extends TestCase {
+public class AopNamespaceHandlerTests {
 
 	private ApplicationContext context;
 
+	@Before
 	public void setUp() {
 		this.context = new ClassPathXmlApplicationContext(getConfigLocation());
 	}
@@ -40,6 +44,7 @@ public class AopNamespaceHandlerTests extends TestCase {
 		return "org/springframework/aop/config/aopNamespaceHandlerTests.xml";
 	}
 
+	@Test
 	public void testIsProxy() throws Exception {
 		ITestBean bean = getTestBean();
 
@@ -52,6 +57,7 @@ public class AopNamespaceHandlerTests extends TestCase {
 		assertTrue("Advisors should not be empty", advisors.length > 0);
 	}
 
+	@Test
 	public void testAdviceInvokedCorrectly() throws Exception {
 		CountingBeforeAdvice getAgeCounter = (CountingBeforeAdvice) this.context.getBean("getAgeCounter");
 		CountingBeforeAdvice getNameCounter = (CountingBeforeAdvice) this.context.getBean("getNameCounter");
@@ -72,6 +78,7 @@ public class AopNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect getName count on getAge counter", 0, getAgeCounter.getCalls("getName"));
 	}
 
+	@Test
 	public void testAspectApplied() throws Exception {
 		ITestBean testBean = getTestBean();
 
