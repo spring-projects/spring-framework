@@ -50,11 +50,11 @@ public class OperatorMatches extends Operator {
 	 * @throws EvaluationException if there is a problem evaluating the expression (e.g. the regex is invalid)
 	 */
 	@Override
-	public Boolean getValue(ExpressionState state) throws EvaluationException {
-		SpelNode leftOp = getLeftOperand();
-		SpelNode rightOp = getRightOperand();
+	public Boolean getValueInternal(ExpressionState state) throws EvaluationException {
+		SpelNodeImpl leftOp = getLeftOperand();
+		SpelNodeImpl rightOp = getRightOperand();
 		Object left = leftOp.getValue(state, String.class);
-		Object right = getRightOperand().getValue(state);
+		Object right = getRightOperand().getValueInternal(state);
 		try {
 			if (!(left instanceof String)) {
 				throw new SpelException(leftOp.getCharPositionInLine(),

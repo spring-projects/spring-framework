@@ -19,7 +19,7 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
 
-public class Identifier extends SpelNode {
+public class Identifier extends SpelNodeImpl {
 
 	private final String id;
 
@@ -34,7 +34,7 @@ public class Identifier extends SpelNode {
 	}
 
 	@Override
-	public String getValue(ExpressionState state) throws SpelException {
+	public String getValueInternal(ExpressionState state) throws SpelException {
 		return id;
 	}
 

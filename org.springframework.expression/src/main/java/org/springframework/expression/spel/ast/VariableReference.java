@@ -26,7 +26,7 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * 
  */
-public class VariableReference extends SpelNode {
+public class VariableReference extends SpelNodeImpl {
 
 	// Well known variables:
 	private final static String THIS = "this"; // currently active context object
@@ -40,7 +40,7 @@ public class VariableReference extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws SpelException {
+	public Object getValueInternal(ExpressionState state) throws SpelException {
 		if (name.equals(THIS))
 			return state.getActiveContextObject();
 		if (name.equals(ROOT))

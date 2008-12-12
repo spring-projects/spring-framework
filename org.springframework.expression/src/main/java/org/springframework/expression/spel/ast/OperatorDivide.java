@@ -37,9 +37,9 @@ public class OperatorDivide extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
-		Object operandOne = getLeftOperand().getValue(state);
-		Object operandTwo = getRightOperand().getValue(state);
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+		Object operandOne = getLeftOperand().getValueInternal(state);
+		Object operandTwo = getRightOperand().getValueInternal(state);
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;

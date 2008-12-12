@@ -19,8 +19,6 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.common.ExpressionUtils;
-import org.springframework.expression.spel.ast.SpelNode;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
 
 /**
  * A SpelExpressions represents a parsed (valid) expression that is ready to be evaluated in a specified context. An
@@ -31,6 +29,7 @@ import org.springframework.expression.spel.standard.StandardEvaluationContext;
  * 
  */
 public class SpelExpression implements Expression {
+	
 	private final String expression;
 	public final SpelNode ast;
 
@@ -40,7 +39,7 @@ public class SpelExpression implements Expression {
 	 * @param expression
 	 * @param ast
 	 */
-	SpelExpression(String expression, SpelNode ast) {
+	public SpelExpression(String expression, SpelNode ast) {
 		this.expression = expression;
 		this.ast = ast;
 	}
@@ -56,8 +55,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Object getValue() throws EvaluationException {
-		EvaluationContext eContext = new StandardEvaluationContext();
-		return ast.getValue(new ExpressionState(eContext));
+		return ast.getValue(null);
 	}
 
 	/**
@@ -70,18 +68,17 @@ public class SpelExpression implements Expression {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getValue(EvaluationContext context, Class<?> expectedResultType) throws EvaluationException {
+	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Object result = ast.getValue(new ExpressionState(context));
 
 		if (result != null && expectedResultType != null) {
 			Class<?> resultType = result.getClass();
-			if (expectedResultType.isAssignableFrom(resultType)) {
-				return result;
+			if (!expectedResultType.isAssignableFrom(resultType)) {
+				// Attempt conversion to the requested type, may throw an exception
+				result = context.getTypeUtils().getTypeConverter().convertValue(result, expectedResultType);
 			}
-			// Attempt conversion to the requested type, may throw an exception
-			return context.getTypeUtils().getTypeConverter().convertValue(result, expectedResultType);
 		}
-		return result;
+		return (T)result;
 	}
 
 	/**
@@ -145,9 +142,10 @@ public class SpelExpression implements Expression {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getValue(Class<?> expectedResultType) throws EvaluationException {
+	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		Object result = getValue();
-		return ExpressionUtils.convert(null, result, expectedResultType);
+		// TODO propagate generic-ness into convert
+		return (T)ExpressionUtils.convert(null, result, expectedResultType);
 	}
 
 }

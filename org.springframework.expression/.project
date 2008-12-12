@@ -12,8 +12,14 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>structure101.java.eclipse.plugin.JDMEclipseBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>structure101.java.eclipse.plugin.JDMEclipseNature</nature>
 	</natures>
 </projectDescription>

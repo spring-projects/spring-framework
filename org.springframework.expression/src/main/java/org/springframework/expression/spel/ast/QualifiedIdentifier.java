@@ -27,7 +27,7 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * 
  */
-public class QualifiedIdentifier extends SpelNode {
+public class QualifiedIdentifier extends SpelNodeImpl {
 
 	private String value;
 
@@ -37,14 +37,14 @@ public class QualifiedIdentifier extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		// Cache the concatenation of child identifiers
 		if (value == null) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < getChildCount(); i++) {
 				if (i > 0)
 					sb.append(".");
-				sb.append(getChild(i).getValue(state));
+				sb.append(getChild(i).getValueInternal(state));
 			}
 			value = sb.toString();
 		}

@@ -47,9 +47,9 @@ public class OperatorInstanceof extends Operator {
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override
-	public Boolean getValue(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValue(state);
-		Object right = getRightOperand().getValue(state);
+	public Boolean getValueInternal(ExpressionState state) throws EvaluationException {
+		Object left = getLeftOperand().getValueInternal(state);
+		Object right = getRightOperand().getValueInternal(state);
 		if (left == null) {
 			return false; // null is not an instanceof anything
 		}

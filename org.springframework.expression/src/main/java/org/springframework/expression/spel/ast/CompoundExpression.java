@@ -26,7 +26,7 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * 
  */
-public class CompoundExpression extends SpelNode {
+public class CompoundExpression extends SpelNodeImpl {
 
 	public CompoundExpression(Token payload) {
 		super(payload);
@@ -40,17 +40,17 @@ public class CompoundExpression extends SpelNode {
 	 * @return the final value from the last piece of the compound expression
 	 */
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Object result = null;
-		SpelNode nextNode = null;
+		SpelNodeImpl nextNode = null;
 		try {
 			nextNode = getChild(0);
-			result = nextNode.getValue(state);
+			result = nextNode.getValueInternal(state);
 			for (int i = 1; i < getChildCount(); i++) {
 				try {
 					state.pushActiveContextObject(result);
 					nextNode = getChild(i);
-					result = nextNode.getValue(state);
+					result = nextNode.getValueInternal(state);
 				} finally {
 					state.popActiveContextObject();
 				}
@@ -69,11 +69,11 @@ public class CompoundExpression extends SpelNode {
 			getChild(0).setValue(state, value);
 			return;
 		}
-		Object ctx = getChild(0).getValue(state);
+		Object ctx = getChild(0).getValueInternal(state);
 		for (int i = 1; i < getChildCount() - 1; i++) {
 			try {
 				state.pushActiveContextObject(ctx);
-				ctx = getChild(i).getValue(state);
+				ctx = getChild(i).getValueInternal(state);
 			} finally {
 				state.popActiveContextObject();
 			}
@@ -91,11 +91,11 @@ public class CompoundExpression extends SpelNode {
 		if (getChildCount() == 1) {
 			return getChild(0).isWritable(state);
 		}
-		Object ctx = getChild(0).getValue(state);
+		Object ctx = getChild(0).getValueInternal(state);
 		for (int i = 1; i < getChildCount() - 1; i++) {
 			try {
 				state.pushActiveContextObject(ctx);
-				ctx = getChild(i).getValue(state);
+				ctx = getChild(i).getValueInternal(state);
 			} finally {
 				state.popActiveContextObject();
 			}

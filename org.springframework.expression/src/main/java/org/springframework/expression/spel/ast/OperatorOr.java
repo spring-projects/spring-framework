@@ -37,11 +37,11 @@ public class OperatorOr extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
 		try {
-			leftValue = state.toBoolean(getLeftOperand().getValue(state));
+			leftValue = state.toBoolean(getLeftOperand().getValueInternal(state));
 		} catch (SpelException see) {
 			see.setPosition(getLeftOperand().getCharPositionInLine());
 			throw see;
@@ -51,7 +51,7 @@ public class OperatorOr extends Operator {
 			return true; // no need to evaluate right operand
 
 		try {
-			rightValue = state.toBoolean(getRightOperand().getValue(state));
+			rightValue = state.toBoolean(getRightOperand().getValueInternal(state));
 		} catch (SpelException see) {
 			see.setPosition(getRightOperand().getCharPositionInLine());
 			throw see;

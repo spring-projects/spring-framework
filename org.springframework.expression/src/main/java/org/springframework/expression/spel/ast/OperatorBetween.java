@@ -51,9 +51,9 @@ public class OperatorBetween extends Operator {
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override
-	public Boolean getValue(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValue(state);
-		Object right = getRightOperand().getValue(state);
+	public Boolean getValueInternal(ExpressionState state) throws EvaluationException {
+		Object left = getLeftOperand().getValueInternal(state);
+		Object right = getRightOperand().getValueInternal(state);
 		if (!(right instanceof List) || ((List<?>) right).size() != 2) {
 			throw new SpelException(getRightOperand().getCharPositionInLine(),
 					SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);

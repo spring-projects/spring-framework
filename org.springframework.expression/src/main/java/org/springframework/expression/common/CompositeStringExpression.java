@@ -62,14 +62,14 @@ public class CompositeStringExpression implements Expression {
 		throw new EvaluationException(expressionString, "Cannot call setValue() on a composite expression");
 	}
 
-	public Object getValue(EvaluationContext context, Class<?> expectedResultType) throws EvaluationException {
+	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue(context);
-		return ExpressionUtils.convert(context, value, expectedResultType);
+		return (T)ExpressionUtils.convert(context, value, expectedResultType);
 	}
 
-	public Object getValue(Class<?> expectedResultType) throws EvaluationException {
+	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
-		return ExpressionUtils.convert(null, value, expectedResultType);
+		return (T)ExpressionUtils.convert(null, value, expectedResultType);
 	}
 
 	public boolean isWritable(EvaluationContext context) throws EvaluationException {

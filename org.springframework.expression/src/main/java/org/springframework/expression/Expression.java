@@ -41,7 +41,7 @@ public interface Expression {
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	public Object getValue(Class<?> desiredResultType) throws EvaluationException;
+	public <T> T getValue(Class<T> desiredResultType) throws EvaluationException;
 
 	/**
 	 * Evaluate this expression in the provided context and return the result of evaluation.
@@ -62,7 +62,7 @@ public interface Expression {
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	public Object getValue(EvaluationContext context, Class<?> desiredResultType) throws EvaluationException;
+	public <T> T getValue(EvaluationContext context, Class<T> desiredResultType) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.

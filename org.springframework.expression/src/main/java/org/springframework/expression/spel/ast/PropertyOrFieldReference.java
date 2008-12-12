@@ -35,7 +35,7 @@ import org.springframework.expression.spel.internal.Utils;
  * 
  * @author Andy Clement
  */
-public class PropertyOrFieldReference extends SpelNode {
+public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	public static boolean useCaching = true;
 
@@ -49,7 +49,7 @@ public class PropertyOrFieldReference extends SpelNode {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws SpelException {
+	public Object getValueInternal(ExpressionState state) throws SpelException {
 		return readProperty(state, name);
 	}
 

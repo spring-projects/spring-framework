@@ -32,16 +32,16 @@ import org.springframework.expression.spel.SpelMessages;
  * 
  * @author Andy Clement
  */
-public class Indexer extends SpelNode {
+public class Indexer extends SpelNodeImpl {
 
 	public Indexer(Token payload) {
 		super(payload);
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		Object ctx = state.getActiveContextObject();
-		Object index = getChild(0).getValue(state);
+		Object index = getChild(0).getValueInternal(state);
 
 		// Indexing into a Map
 		if (ctx instanceof Map) {

@@ -25,7 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
  * 
  * @author Andy Clement
  */
-public abstract class Operator extends SpelNode {
+public abstract class Operator extends SpelNodeImpl {
 
 	public Operator(Token payload) {
 		super(payload);
@@ -39,11 +39,11 @@ public abstract class Operator extends SpelNode {
 		return false;
 	}
 
-	public SpelNode getLeftOperand() {
+	public SpelNodeImpl getLeftOperand() {
 		return getChild(0);
 	}
 
-	public SpelNode getRightOperand() {
+	public SpelNodeImpl getRightOperand() {
 		return getChild(1);
 	}
 

@@ -17,8 +17,6 @@ package org.springframework.expression.spel;
 
 import java.io.PrintStream;
 
-import org.springframework.expression.spel.ast.SpelNode;
-
 /**
  * Utilities for working with Spring Expressions.
  * 
@@ -45,10 +43,9 @@ public class SpelUtilities {
 	private static void printAST(PrintStream out, SpelNode t, String indent) {
 		if (t != null) {
 			StringBuilder sb = new StringBuilder();
-			String s = (t.getType() == -1 ? "EOF" : t.getClass().getSimpleName());
-			sb.append(indent).append(s);
-			sb.append("  value=").append(t.getText());
-			sb.append(t.getChildCount() < 2 ? "" : "  children=#" + t.getChildCount());
+			sb.append(indent).append(t.getClass().getSimpleName());
+			sb.append("  value:").append(t.toStringAST());
+			sb.append(t.getChildCount() < 2 ? "" : "  #children:" + t.getChildCount());
 			out.println(sb.toString());
 			for (int i = 0; i < t.getChildCount(); i++) {
 				printAST(out, t.getChild(i), indent + "  ");

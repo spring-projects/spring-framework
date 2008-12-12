@@ -36,9 +36,9 @@ public class OperatorInequality extends Operator {
 	}
 
 	@Override
-	public Object getValue(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValue(state);
-		Object right = getRightOperand().getValue(state);
+	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+		Object left = getLeftOperand().getValueInternal(state);
+		Object right = getRightOperand().getValueInternal(state);
 		if (left instanceof Number && right instanceof Number) {
 			Number op1 = (Number) left;
 			Number op2 = (Number) right;
