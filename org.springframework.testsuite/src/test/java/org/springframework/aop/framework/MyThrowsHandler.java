@@ -9,7 +9,8 @@ import java.rmi.RemoteException;
 
 import org.springframework.aop.ThrowsAdvice;
 
-@SuppressWarnings("serial") class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
+@SuppressWarnings("serial")
+public class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
 	// Full method signature
 	public void afterThrowing(Method m, Object[] args, Object target, IOException ex) {
 		count("ioException");

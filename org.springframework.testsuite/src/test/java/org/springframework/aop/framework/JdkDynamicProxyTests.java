@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import static org.junit.Assert.*;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
