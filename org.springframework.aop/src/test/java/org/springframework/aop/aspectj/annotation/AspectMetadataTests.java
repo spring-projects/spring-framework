@@ -22,8 +22,8 @@ import org.junit.Test;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
-import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
-import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerThisAspect;
+
+import example.aspects.PerTargetAspect;
 
 /**
  * @since 2.0
