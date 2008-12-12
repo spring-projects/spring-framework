@@ -16,23 +16,26 @@
 
 package org.springframework.aop.aspectj;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.CountingTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.test.AssertThrows;
 
 /**
  * Unit tests for the {@link TypePatternClassFilter} class.
  *
  * @author Rod Johnson
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class TypePatternClassFilterTests extends TestCase {
+public final class TypePatternClassFilterTests {
 
+    @Test
 	public void testInvalidPattern() {
 		try {
 			new TypePatternClassFilter("-");
@@ -42,6 +45,7 @@ public final class TypePatternClassFilterTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testValidPatternMatching() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.*");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
@@ -52,6 +56,7 @@ public final class TypePatternClassFilterTests extends TestCase {
 		assertFalse("Must be excluded: in wrong package", tpcf.matches(DefaultListableBeanFactory.class));
 	}
 
+    @Test
 	public void testSubclassMatching() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.ITestBean+");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
@@ -61,6 +66,7 @@ public final class TypePatternClassFilterTests extends TestCase {
 		assertFalse("Must be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
 	}
 	
+    @Test
 	public void testAndOrNotReplacement() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("java.lang.Object or java.lang.String");
 		assertFalse("matches Number",tpcf.matches(Number.class));
@@ -74,20 +80,14 @@ public final class TypePatternClassFilterTests extends TestCase {
 		assertTrue("matches Double",tpcf.matches(Double.class));	
 	}
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testSetTypePatternWithNullArgument() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new TypePatternClassFilter(null);
-			}
-		}.runTest();
+        new TypePatternClassFilter(null);
 	}
 
+    @Test(expected=IllegalStateException.class)
 	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
-		new AssertThrows(IllegalStateException.class) {
-			public void test() throws Exception {
-				new TypePatternClassFilter().matches(String.class);
-			}
-		}.runTest();
+		new TypePatternClassFilter().matches(String.class);
 	}
 
 }
