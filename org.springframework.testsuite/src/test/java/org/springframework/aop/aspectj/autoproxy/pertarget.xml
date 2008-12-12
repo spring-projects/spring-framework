@@ -5,7 +5,7 @@
 
 	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
 
-	<bean class="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests$PerTargetAspect"
+	<bean class="example.aspects.PerTargetAspect"
 			scope="prototype">
 		<property name="order" value="5"/>
 	</bean>
