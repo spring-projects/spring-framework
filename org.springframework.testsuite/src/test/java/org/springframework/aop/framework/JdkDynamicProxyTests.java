@@ -16,11 +16,14 @@
 
 package org.springframework.aop.framework;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.MockControl;
 
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
@@ -31,6 +34,7 @@ import org.springframework.beans.TestBean;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 13.03.2003
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
@@ -48,7 +52,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	
 	public void testNullConfig() {
 		try {
-			JdkDynamicAopProxy aop = new JdkDynamicAopProxy(null);
+			new JdkDynamicAopProxy(null);
 			fail("Shouldn't allow null interceptors");
 		} 
 		catch (IllegalArgumentException ex) {
@@ -71,27 +75,18 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	public void testInterceptorIsInvokedWithNoTarget() throws Throwable {
 		// Test return value
 		int age = 25;
-		MockControl miControl = MockControl.createControl(MethodInterceptor.class);
-		MethodInterceptor mi = (MethodInterceptor) miControl.getMock();
+		MethodInterceptor mi = createMock(MethodInterceptor.class);
 
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
 		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
 
-		// Really would like to permit null arg:can't get exact mi
-		mi.invoke(null);
-		//mi.invoke(new MethodInvocationImpl(aop, null, ITestBean.class,
-		//	ITestBean.class.getMethod("getAge", null),
-		//	null, l, r));
-		//miControl.
-		//miControl.setReturnValue(new Integer(age));
-		// Have disabled strong argument checking
-		miControl.setDefaultReturnValue(new Integer(age));
-		miControl.replay();
+		expect(mi.invoke(null)).andReturn(age);
+		replay(mi);
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("correct return value", tb.getAge() == age);
-		miControl.verify();
+		verify(mi);
 	}
 	
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {

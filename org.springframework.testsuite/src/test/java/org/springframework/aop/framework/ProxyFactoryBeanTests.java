@@ -16,18 +16,18 @@
 
 package org.springframework.aop.framework;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.servlet.ServletException;
-
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
@@ -425,16 +425,16 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(0, th.getCalls());
 		
 		// Handler knows how to handle this exception
-		expected = new ServletException();
+		expected = new FileNotFoundException();
 		try {
 			echo.echoException(1, expected);
 			fail();
 		}
-		catch (ServletException ex) {
+		catch (IOException ex) {
 			assertEquals(expected, ex);
 		}
 		// One match
-		assertEquals(1, th.getCalls("servletException"));
+		assertEquals(1, th.getCalls("ioException"));
 	}
 
 	// These two fail the whole bean factory

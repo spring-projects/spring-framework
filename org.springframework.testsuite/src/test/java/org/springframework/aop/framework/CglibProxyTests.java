@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 import java.io.Serializable;
@@ -43,6 +44,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 
@@ -65,7 +67,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	@Test
 	public void testNullConfig() {
 		try {
-			AopProxy aop = new Cglib2AopProxy(null);
+			new Cglib2AopProxy(null);
 			fail("Shouldn't allow null interceptors");
 		}
 		catch (IllegalArgumentException ex) {
@@ -276,7 +278,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		as.addAdvice(new NopInterceptor());
 		cglib = new Cglib2AopProxy(as);
 
-		ITestBean proxy2 = (ITestBean) cglib.getProxy();
+		assertThat(cglib.getProxy(), instanceOf(ITestBean.class));
 	}
 
 	@Test
