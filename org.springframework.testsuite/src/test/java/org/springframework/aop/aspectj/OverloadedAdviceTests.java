@@ -30,7 +30,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class OverloadedAdviceTests {
 
-    @Test
+	@Test
 	public void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/overloaded-advice-tests.xml");
@@ -42,8 +42,8 @@ public class OverloadedAdviceTests {
 					cause.getMessage().indexOf("invalidAbsoluteTypeName") != -1);
 		}
 	}
-	
-    @Test
+
+	@Test
 	public void testExceptionOnConfigParsingWithAmbiguousAdviceMethod() {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/ambiguous-advice-tests.xml");

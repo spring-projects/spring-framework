@@ -35,8 +35,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  */
 public class SharedEntityManagerFactoryTests {
-	
-    @Test
+
+	@Test
 	public void testValidUsage() {
 		Object o = new Object();
 

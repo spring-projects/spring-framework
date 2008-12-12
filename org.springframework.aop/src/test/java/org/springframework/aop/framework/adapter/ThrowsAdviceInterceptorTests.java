@@ -41,7 +41,7 @@ import org.springframework.aop.framework.MethodCounter;
  */
 public class ThrowsAdviceInterceptorTests {
 
-    @Test
+	@Test
 	public void testNoHandlerMethods() {
 		Object o = new Object();
 		try {
@@ -52,8 +52,8 @@ public class ThrowsAdviceInterceptorTests {
 			// Ok
 		}
 	}
-	
-    @Test
+
+	@Test
 	public void testNotInvoked() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
@@ -65,8 +65,8 @@ public class ThrowsAdviceInterceptorTests {
 		assertEquals(0, th.getCalls());
 		verify(mi);
 	}
-	
-    @Test
+
+	@Test
 	public void testNoHandlerMethodForThrowable() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
@@ -85,8 +85,8 @@ public class ThrowsAdviceInterceptorTests {
 		assertEquals(0, th.getCalls());
 		verify(mi);
 	}
-	
-    @Test
+
+	@Test
 	public void testCorrectHandlerUsed() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
@@ -108,8 +108,8 @@ public class ThrowsAdviceInterceptorTests {
 		assertEquals(1, th.getCalls("ioException"));
 		verify(mi);
 	}
-	
-    @Test
+
+	@Test
 	public void testCorrectHandlerUsedForSubclass() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
@@ -129,11 +129,11 @@ public class ThrowsAdviceInterceptorTests {
 		assertEquals(1, th.getCalls("remoteException"));
 		verify(mi);
 	}
-	
-    @Test
+
+	@Test
 	public void testHandlerMethodThrowsException() throws Throwable {
 		final Throwable t = new Throwable();
-		
+
 		@SuppressWarnings("serial")
 		MyThrowsHandler th = new MyThrowsHandler() {
 			public void afterThrowing(RemoteException ex) throws Throwable {
@@ -141,7 +141,7 @@ public class ThrowsAdviceInterceptorTests {
 				throw t;
 			}
 		};
-		
+
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		TransactionRolledbackException ex = new TransactionRolledbackException();
@@ -159,9 +159,9 @@ public class ThrowsAdviceInterceptorTests {
 		assertEquals(1, th.getCalls("remoteException"));
 		verify(mi);
 	}
-	
+
 	@SuppressWarnings("serial")
-    private static class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
+	private static class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
 		// Full method signature
 		public void afterThrowing(Method m, Object[] args, Object target, IOException ex) {
 			count("ioException");
@@ -169,11 +169,11 @@ public class ThrowsAdviceInterceptorTests {
 		public void afterThrowing(RemoteException ex) throws Throwable {
 			count("remoteException");
 		}
-		
+
 		/** Not valid, wrong number of arguments */
 		public void afterThrowing(Method m, Exception ex) throws Throwable {
 			throw new UnsupportedOperationException("Shouldn't be called");
 		}
 	}
-	
+
 }

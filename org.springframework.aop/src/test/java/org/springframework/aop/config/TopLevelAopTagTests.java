@@ -30,7 +30,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public final class TopLevelAopTagTests {
 
-    @Test
+	@Test
 	public void testParse() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);

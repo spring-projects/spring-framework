@@ -55,239 +55,239 @@ import org.testng.annotations.Test;
 @Ignore // renamed to Tests_ to avoid being picked up by junit. Spring Build support for TestNG is pending.
 @ContextConfiguration
 public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTransactionalTestNGSpringContextTests
-        implements BeanNameAware, InitializingBean {
+		implements BeanNameAware, InitializingBean {
 
-    // ------------------------------------------------------------------------|
-    // --- CONSTANTS ----------------------------------------------------------|
-    // ------------------------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+	// --- CONSTANTS ----------------------------------------------------------|
+	// ------------------------------------------------------------------------|
 
-    private static final String BOB = "bob";
-    private static final String JANE = "jane";
-    private static final String SUE = "sue";
-    private static final String YODA = "yoda";
+	private static final String BOB = "bob";
+	private static final String JANE = "jane";
+	private static final String SUE = "sue";
+	private static final String YODA = "yoda";
 
-    // ------------------------------------------------------------------------|
-    // --- STATIC VARIABLES ---------------------------------------------------|
-    // ------------------------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+	// --- STATIC VARIABLES ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
 
-    private static int numSetUpCalls = 0;
-    private static int numSetUpCallsInTransaction = 0;
-    private static int numTearDownCalls = 0;
-    private static int numTearDownCallsInTransaction = 0;
+	private static int numSetUpCalls = 0;
+	private static int numSetUpCallsInTransaction = 0;
+	private static int numTearDownCalls = 0;
+	private static int numTearDownCallsInTransaction = 0;
 
-    // ------------------------------------------------------------------------|
-    // --- INSTANCE VARIABLES -------------------------------------------------|
-    // ------------------------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+	// --- INSTANCE VARIABLES -------------------------------------------------|
+	// ------------------------------------------------------------------------|
 
-    private boolean beanInitialized = false;
+	private boolean beanInitialized = false;
 
-    private String beanName = "replace me with [" + getClass().getName() + "]";
+	private String beanName = "replace me with [" + getClass().getName() + "]";
 
-    private Employee employee;
+	private Employee employee;
 
-    @Autowired
-    private Pet pet;
+	@Autowired
+	private Pet pet;
 
-    @Autowired(required = false)
-    protected Long nonrequiredLong;
+	@Autowired(required = false)
+	protected Long nonrequiredLong;
 
-    @Resource()
-    protected String foo;
+	@Resource()
+	protected String foo;
 
-    protected String bar;
-
-
-    // ------------------------------------------------------------------------|
-    // --- STATIC METHODS -----------------------------------------------------|
-    // ------------------------------------------------------------------------|
-
-    private static int clearPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
-        return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
-    }
-
-    private static void createPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
-        try {
-            simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
-        }
-        catch (BadSqlGrammarException bsge) {
-            /* ignore */
-        }
-    }
-
-    private static int countRowsInPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
-        return SimpleJdbcTestUtils.countRowsInTable(simpleJdbcTemplate, "person");
-    }
-
-    private static int addPerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
-        return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
-    }
-
-    private static int deletePerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
-        return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
-    }
-
-    // ------------------------------------------------------------------------|
-    // --- INSTANCE METHODS ---------------------------------------------------|
-    // ------------------------------------------------------------------------|
-
-    public void afterPropertiesSet() throws Exception {
-        this.beanInitialized = true;
-    }
-
-    public void setBeanName(String beanName) {
-        this.beanName = beanName;
-    }
-
-    @Autowired
-    protected void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
-
-    @Resource
-    protected void setBar(String bar) {
-        this.bar = bar;
-    }
-
-    // ------------------------------------------------------------------------|
-
-    private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
-        assertEquals(countRowsInPersonTable(this.simpleJdbcTemplate), expectedNumRows,
-                "Verifying the number of rows in the person table (" + testState + ").");
-    }
-
-    private void assertAddPerson(final String name) {
-        assertEquals(addPerson(this.simpleJdbcTemplate, name), 1, "Adding '" + name + "'");
-    }
-
-    // ------------------------------------------------------------------------|
-
-    @BeforeClass
-    public void beforeClass() {
-        numSetUpCalls = 0;
-        numSetUpCallsInTransaction = 0;
-        numTearDownCalls = 0;
-        numTearDownCallsInTransaction = 0;
-    }
-
-    @AfterClass
-    public void afterClass() {
-        assertEquals(numSetUpCalls, 8, "Verifying number of calls to setUp().");
-        assertEquals(numSetUpCallsInTransaction, 1, "Verifying number of calls to setUp() within a transaction.");
-        assertEquals(numTearDownCalls, 8, "Verifying number of calls to tearDown().");
-        assertEquals(numTearDownCallsInTransaction, 1, "Verifying number of calls to tearDown() within a transaction.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyApplicationContextSet() {
-        assertInTransaction(false);
-        assertNotNull(super.applicationContext,
-                "The application context should have been set due to ApplicationContextAware semantics.");
-        Employee employeeBean = (Employee) super.applicationContext.getBean("employee");
-        assertEquals(employeeBean.getName(), "John Smith", "Verifying employee's name.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyBeanInitialized() {
-        assertInTransaction(false);
-        assertTrue(this.beanInitialized,
-                "This test instance should have been initialized due to InitializingBean semantics.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyBeanNameSet() {
-        assertInTransaction(false);
-        assertEquals(this.beanName, getClass().getName(),
-                "The bean name of this test instance should have been set due to BeanNameAware semantics.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyAnnotationAutowiredFields() {
-        assertInTransaction(false);
-        assertNull(this.nonrequiredLong, "The nonrequiredLong field should NOT have been autowired.");
-        assertNotNull(this.pet, "The pet field should have been autowired.");
-        assertEquals(this.pet.getName(), "Fido", "Verifying pet's name.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyAnnotationAutowiredMethods() {
-        assertInTransaction(false);
-        assertNotNull(this.employee, "The setEmployee() method should have been autowired.");
-        assertEquals(this.employee.getName(), "John Smith", "Verifying employee's name.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyResourceAnnotationInjectedFields() {
-        assertInTransaction(false);
-        assertEquals(this.foo, "Foo", "The foo field should have been injected via @Resource.");
-    }
-
-    @Test
-    @NotTransactional
-    public void verifyResourceAnnotationInjectedMethods() {
-        assertInTransaction(false);
-        assertEquals(this.bar, "Bar", "The setBar() method should have been injected via @Resource.");
-    }
-
-    // ------------------------------------------------------------------------|
-
-    @BeforeTransaction
-    public void beforeTransaction() {
-        assertNumRowsInPersonTable(1, "before a transactional test method");
-        assertAddPerson(YODA);
-    }
-
-    @BeforeMethod
-    public void setUp() throws Exception {
-        numSetUpCalls++;
-        if (inTransaction()) {
-            numSetUpCallsInTransaction++;
-        }
-        assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
-    }
-
-    @Test
-    public void modifyTestDataWithinTransaction() {
-        assertInTransaction(true);
-        assertAddPerson(JANE);
-        assertAddPerson(SUE);
-        assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
-    }
-
-    @AfterMethod
-    public void tearDown() throws Exception {
-        numTearDownCalls++;
-        if (inTransaction()) {
-            numTearDownCallsInTransaction++;
-        }
-        assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
-    }
-
-    @AfterTransaction
-    public void afterTransaction() {
-        assertEquals(deletePerson(this.simpleJdbcTemplate, YODA), 1, "Deleting yoda");
-        assertNumRowsInPersonTable(1, "after a transactional test method");
-    }
+	protected String bar;
 
 
-    // ------------------------------------------------------------------------|
-    // --- TYPES --------------------------------------------------------------|
-    // ------------------------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+	// --- STATIC METHODS -----------------------------------------------------|
+	// ------------------------------------------------------------------------|
 
-    public static class DatabaseSetup {
+	private static int clearPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
+		return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
+	}
 
-        @Autowired
-        void setDataSource(DataSource dataSource) {
-            SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-            createPersonTable(simpleJdbcTemplate);
-            clearPersonTable(simpleJdbcTemplate);
-            addPerson(simpleJdbcTemplate, BOB);
-        }
-    }
+	private static void createPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
+		try {
+			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
+		}
+		catch (BadSqlGrammarException bsge) {
+			/* ignore */
+		}
+	}
+
+	private static int countRowsInPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
+		return SimpleJdbcTestUtils.countRowsInTable(simpleJdbcTemplate, "person");
+	}
+
+	private static int addPerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
+		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+	}
+
+	private static int deletePerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
+		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+	}
+
+	// ------------------------------------------------------------------------|
+	// --- INSTANCE METHODS ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	public void afterPropertiesSet() throws Exception {
+		this.beanInitialized = true;
+	}
+
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	@Autowired
+	protected void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+
+	@Resource
+	protected void setBar(String bar) {
+		this.bar = bar;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
+		assertEquals(countRowsInPersonTable(this.simpleJdbcTemplate), expectedNumRows,
+				"Verifying the number of rows in the person table (" + testState + ").");
+	}
+
+	private void assertAddPerson(final String name) {
+		assertEquals(addPerson(this.simpleJdbcTemplate, name), 1, "Adding '" + name + "'");
+	}
+
+	// ------------------------------------------------------------------------|
+
+	@BeforeClass
+	public void beforeClass() {
+		numSetUpCalls = 0;
+		numSetUpCallsInTransaction = 0;
+		numTearDownCalls = 0;
+		numTearDownCallsInTransaction = 0;
+	}
+
+	@AfterClass
+	public void afterClass() {
+		assertEquals(numSetUpCalls, 8, "Verifying number of calls to setUp().");
+		assertEquals(numSetUpCallsInTransaction, 1, "Verifying number of calls to setUp() within a transaction.");
+		assertEquals(numTearDownCalls, 8, "Verifying number of calls to tearDown().");
+		assertEquals(numTearDownCallsInTransaction, 1, "Verifying number of calls to tearDown() within a transaction.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyApplicationContextSet() {
+		assertInTransaction(false);
+		assertNotNull(super.applicationContext,
+				"The application context should have been set due to ApplicationContextAware semantics.");
+		Employee employeeBean = (Employee) super.applicationContext.getBean("employee");
+		assertEquals(employeeBean.getName(), "John Smith", "Verifying employee's name.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyBeanInitialized() {
+		assertInTransaction(false);
+		assertTrue(this.beanInitialized,
+				"This test instance should have been initialized due to InitializingBean semantics.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyBeanNameSet() {
+		assertInTransaction(false);
+		assertEquals(this.beanName, getClass().getName(),
+				"The bean name of this test instance should have been set due to BeanNameAware semantics.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyAnnotationAutowiredFields() {
+		assertInTransaction(false);
+		assertNull(this.nonrequiredLong, "The nonrequiredLong field should NOT have been autowired.");
+		assertNotNull(this.pet, "The pet field should have been autowired.");
+		assertEquals(this.pet.getName(), "Fido", "Verifying pet's name.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyAnnotationAutowiredMethods() {
+		assertInTransaction(false);
+		assertNotNull(this.employee, "The setEmployee() method should have been autowired.");
+		assertEquals(this.employee.getName(), "John Smith", "Verifying employee's name.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyResourceAnnotationInjectedFields() {
+		assertInTransaction(false);
+		assertEquals(this.foo, "Foo", "The foo field should have been injected via @Resource.");
+	}
+
+	@Test
+	@NotTransactional
+	public void verifyResourceAnnotationInjectedMethods() {
+		assertInTransaction(false);
+		assertEquals(this.bar, "Bar", "The setBar() method should have been injected via @Resource.");
+	}
+
+	// ------------------------------------------------------------------------|
+
+	@BeforeTransaction
+	public void beforeTransaction() {
+		assertNumRowsInPersonTable(1, "before a transactional test method");
+		assertAddPerson(YODA);
+	}
+
+	@BeforeMethod
+	public void setUp() throws Exception {
+		numSetUpCalls++;
+		if (inTransaction()) {
+			numSetUpCallsInTransaction++;
+		}
+		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
+	}
+
+	@Test
+	public void modifyTestDataWithinTransaction() {
+		assertInTransaction(true);
+		assertAddPerson(JANE);
+		assertAddPerson(SUE);
+		assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
+	}
+
+	@AfterMethod
+	public void tearDown() throws Exception {
+		numTearDownCalls++;
+		if (inTransaction()) {
+			numTearDownCallsInTransaction++;
+		}
+		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
+	}
+
+	@AfterTransaction
+	public void afterTransaction() {
+		assertEquals(deletePerson(this.simpleJdbcTemplate, YODA), 1, "Deleting yoda");
+		assertNumRowsInPersonTable(1, "after a transactional test method");
+	}
+
+
+	// ------------------------------------------------------------------------|
+	// --- TYPES --------------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	public static class DatabaseSetup {
+
+		@Autowired
+		void setDataSource(DataSource dataSource) {
+			SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+			createPersonTable(simpleJdbcTemplate);
+			clearPersonTable(simpleJdbcTemplate);
+			addPerson(simpleJdbcTemplate, BOB);
+		}
+	}
 
 }

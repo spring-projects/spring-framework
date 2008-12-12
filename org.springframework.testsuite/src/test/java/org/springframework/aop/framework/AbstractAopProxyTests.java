@@ -802,7 +802,7 @@ public abstract class AbstractAopProxyTests {
 		ProxyFactory pc = new ProxyFactory(target);
 
 		@SuppressWarnings("serial")
-        class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
+		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
 			 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
 			 */
@@ -1266,11 +1266,11 @@ public abstract class AbstractAopProxyTests {
 			public void releaseTarget(Object target) throws Exception {				
 			}			
 		});
-		
+
 		// Just test anything: it will fail if context wasn't found
 		assertEquals(0, proxy.getAge());
 	}
-	
+
 	@Test
 	public void testEquals() {
 		IOther a = new AllInstancesAreEqual();
@@ -1328,7 +1328,7 @@ public abstract class AbstractAopProxyTests {
 		assertEquals(1, cba.getCalls());
 		assertEquals(26, proxied.getAge());
 	}
-	
+
 	@Test
 	public void testUserAttributes() throws Throwable {
 		class MapAwareMethodInterceptor implements MethodInterceptor {
@@ -1362,7 +1362,7 @@ public abstract class AbstractAopProxyTests {
 		Map<String, String> finalExpected = new HashMap<String, String>(firstValuesToAdd);
 		finalExpected.putAll(secondValuesToAdd);
 		MapAwareMethodInterceptor mami6 = new MapAwareMethodInterceptor(finalExpected, secondValuesToAdd);
-		
+
 		pc.addAdvice(mami1);
 		pc.addAdvice(mami2);
 		pc.addAdvice(mami3);
@@ -1471,7 +1471,7 @@ public abstract class AbstractAopProxyTests {
 			}
 		}
 		SummingAfterAdvice aa = new SummingAfterAdvice();
-	    @SuppressWarnings("serial")
+		@SuppressWarnings("serial")
 		Advisor matchesInt = new StaticMethodMatcherPointcutAdvisor(aa) {
 			public boolean matches(Method m, Class<?> targetClass) {
 				return m.getReturnType() == int.class;

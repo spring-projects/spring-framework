@@ -1096,8 +1096,8 @@ public class BridgeMethodResolverTests {
 
 	public class BusinessDao extends BusinessGenericDao<Business<?>, Long> {
 
-    public void save(Business<?> business) {
-    }
+	public void save(Business<?> business) {
+	}
 
 		public Business<?> get(Long id) {
 			return null;

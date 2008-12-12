@@ -41,8 +41,8 @@ import org.springframework.transaction.TransactionDefinition;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public final class TransactionAttributeSourceTests {
-  
-    @Test
+
+	@Test
 	public void testMatchAlwaysTransactionAttributeSource() throws Exception {
 		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
 		TransactionAttribute ta = tas.getTransactionAttribute(
@@ -57,8 +57,8 @@ public final class TransactionAttributeSourceTests {
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
 	}
 
-    @Ignore
-    @Test
+	@Ignore
+	@Test
 	public void testMethodMapTransactionAttributeSource() throws NoSuchMethodException {
 		MethodMapTransactionAttributeSource tas = new MethodMapTransactionAttributeSource();
 		Map methodMap = new HashMap();
@@ -76,8 +76,8 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
 	}
 
-    @Ignore
-    @Test
+	@Ignore
+	@Test
 	public void testMethodMapTransactionAttributeSourceWithLazyInit() throws NoSuchMethodException {
 		MethodMapTransactionAttributeSource tas = new MethodMapTransactionAttributeSource();
 		Map methodMap = new HashMap();
@@ -94,8 +94,8 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
 	}
 
-    @Ignore
-    @Test
+	@Ignore
+	@Test
 	public void testNameMatchTransactionAttributeSource() throws NoSuchMethodException {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Map methodMap = new HashMap();
@@ -111,7 +111,7 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
 	}
 
-    @Test
+	@Test
 	public void testNameMatchTransactionAttributeSourceWithStarAtStartOfMethodName() throws NoSuchMethodException {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
@@ -123,7 +123,7 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, ta.getPropagationBehavior());
 	}
 
-    @Test
+	@Test
 	public void testNameMatchTransactionAttributeSourceWithStarAtEndOfMethodName() throws NoSuchMethodException {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
@@ -135,7 +135,7 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, ta.getPropagationBehavior());
 	}
 
-    @Test
+	@Test
 	public void testNameMatchTransactionAttributeSourceMostSpecificMethodNameIsDefinitelyMatched() throws NoSuchMethodException {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
@@ -148,7 +148,7 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_MANDATORY, ta.getPropagationBehavior());
 	}
 
-    @Test
+	@Test
 	public void testNameMatchTransactionAttributeSourceWithEmptyMethodName() throws NoSuchMethodException {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();

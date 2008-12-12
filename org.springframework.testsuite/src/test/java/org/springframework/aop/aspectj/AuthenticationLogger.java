@@ -27,11 +27,11 @@ public class AuthenticationLogger {
 	public void logAuthenticationAttempt(String username) {
 		System.out.println("User [" + username + "] attempting to authenticate");
 	}
-	
+
 }
 
 class SecurityManager {
-    public boolean authenticate(String username, String password) {
-    	return false;
-    }
+	public boolean authenticate(String username, String password) {
+		return false;
+	}
 }

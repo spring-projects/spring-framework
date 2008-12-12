@@ -35,7 +35,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  */
 public final class TypePatternClassFilterTests {
 
-    @Test
+	@Test
 	public void testInvalidPattern() {
 		try {
 			new TypePatternClassFilter("-");
@@ -45,7 +45,7 @@ public final class TypePatternClassFilterTests {
 		}
 	}
 
-    @Test
+	@Test
 	public void testValidPatternMatching() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.*");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
@@ -56,7 +56,7 @@ public final class TypePatternClassFilterTests {
 		assertFalse("Must be excluded: in wrong package", tpcf.matches(DefaultListableBeanFactory.class));
 	}
 
-    @Test
+	@Test
 	public void testSubclassMatching() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.ITestBean+");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
@@ -66,7 +66,7 @@ public final class TypePatternClassFilterTests {
 		assertFalse("Must be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
 	}
 	
-    @Test
+	@Test
 	public void testAndOrNotReplacement() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("java.lang.Object or java.lang.String");
 		assertFalse("matches Number",tpcf.matches(Number.class));
@@ -80,12 +80,12 @@ public final class TypePatternClassFilterTests {
 		assertTrue("matches Double",tpcf.matches(Double.class));	
 	}
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetTypePatternWithNullArgument() throws Exception {
-        new TypePatternClassFilter(null);
+	    new TypePatternClassFilter(null);
 	}
 
-    @Test(expected=IllegalStateException.class)
+	@Test(expected=IllegalStateException.class)
 	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
 		new TypePatternClassFilter().matches(String.class);
 	}

@@ -37,7 +37,7 @@ import org.springframework.core.task.NoOpRunnable;
  */
 public class ScheduledExecutorFactoryBeanTests {
 
-    @Test
+	@Test
 	public void testThrowsExceptionIfPoolSizeIsLessThanZero() throws Exception {
 		try {
 			ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
@@ -52,7 +52,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		}
 	}
 
-    @Test
+	@Test
 	public void testShutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -74,7 +74,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockScheduledExecutorService.verify();
 	}
 
-    @Test
+	@Test
 	public void testShutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -97,7 +97,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockScheduledExecutorService.verify();
 	}
 
-    @Test
+	@Test
 	public void testOneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -116,7 +116,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockRunnable.verify();
 	}
 
-    @Test
+	@Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -139,7 +139,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockRunnable.verify();
 	}
 
-    @Test
+	@Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -163,8 +163,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockRunnable.verify();
 	}
 
-    @Ignore
-    @Test
+	@Ignore
+	@Test
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -193,8 +193,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		}
 	}
 
-    @Ignore
-    @Test
+	@Ignore
+	@Test
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
@@ -224,7 +224,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		}
 	}
 
-    @Test
+	@Test
 	public void testSettingThreadFactoryToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -240,7 +240,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		factory.destroy();
 	}
 
-    @Test
+	@Test
 	public void testSettingRejectedExecutionHandlerToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -256,7 +256,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		factory.destroy();
 	}
 
-    @Test
+	@Test
 	public void testObjectTypeReportsCorrectType() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 		assertEquals(ScheduledExecutorService.class, factory.getObjectType());

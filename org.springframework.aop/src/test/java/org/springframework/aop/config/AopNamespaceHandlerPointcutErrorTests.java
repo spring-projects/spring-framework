@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class AopNamespaceHandlerPointcutErrorTests {
 
-    @Test
+	@Test
 	public void testDuplicatePointcutConfig() {
 		try {
 			new XmlBeanFactory(new ClassPathResource(
@@ -40,8 +40,8 @@ public class AopNamespaceHandlerPointcutErrorTests {
 			assertTrue(ex.contains(BeanDefinitionParsingException.class));
 		}
 	}
-	
-    @Test
+
+	@Test
 	public void testMissingPointcutConfig() {
 		try {
 			new XmlBeanFactory(new ClassPathResource(

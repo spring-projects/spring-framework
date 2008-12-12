@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 public class AtAspectJAfterThrowingTests {
 
-    @Test
+	@Test
 	public void testAccessThrowable() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("afterThrowingAdviceTests.xml", getClass());
 

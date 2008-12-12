@@ -35,42 +35,42 @@ import java.util.Arrays;
  */
 public final class SimpleMessageConverter102Tests extends TestCase {
 
-    public void testByteArrayConversion102() throws JMSException {
-        MockControl sessionControl = MockControl.createControl(Session.class);
-        Session session = (Session) sessionControl.getMock();
-        MockControl messageControl = MockControl.createControl(BytesMessage.class);
-        BytesMessage message = (BytesMessage) messageControl.getMock();
+	public void testByteArrayConversion102() throws JMSException {
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl messageControl = MockControl.createControl(BytesMessage.class);
+		BytesMessage message = (BytesMessage) messageControl.getMock();
 
-        byte[] content = new byte[5000];
+		byte[] content = new byte[5000];
 
-        session.createBytesMessage();
-        sessionControl.setReturnValue(message, 1);
-        message.writeBytes(content);
-        messageControl.setVoidCallable(1);
-        message.readBytes(new byte[SimpleMessageConverter102.BUFFER_SIZE]);
-        messageControl.setMatcher(new ArgumentsMatcher() {
-            public boolean matches(Object[] arg0, Object[] arg1) {
-                byte[] one = (byte[]) arg0[0];
-                byte[] two = (byte[]) arg1[0];
-                return Arrays.equals(one, two);
-            }
+		session.createBytesMessage();
+		sessionControl.setReturnValue(message, 1);
+		message.writeBytes(content);
+		messageControl.setVoidCallable(1);
+		message.readBytes(new byte[SimpleMessageConverter102.BUFFER_SIZE]);
+		messageControl.setMatcher(new ArgumentsMatcher() {
+			public boolean matches(Object[] arg0, Object[] arg1) {
+				byte[] one = (byte[]) arg0[0];
+				byte[] two = (byte[]) arg1[0];
+				return Arrays.equals(one, two);
+			}
 
-            public String toString(Object[] arg0) {
-                return "bla";
-            }
-        });
-        messageControl.setReturnValue(SimpleMessageConverter102.BUFFER_SIZE, 1);
-        message.readBytes(new byte[SimpleMessageConverter102.BUFFER_SIZE]);
-        messageControl.setReturnValue(5000 - SimpleMessageConverter102.BUFFER_SIZE, 1);
-        sessionControl.replay();
-        messageControl.replay();
+			public String toString(Object[] arg0) {
+				return "bla";
+			}
+		});
+		messageControl.setReturnValue(SimpleMessageConverter102.BUFFER_SIZE, 1);
+		message.readBytes(new byte[SimpleMessageConverter102.BUFFER_SIZE]);
+		messageControl.setReturnValue(5000 - SimpleMessageConverter102.BUFFER_SIZE, 1);
+		sessionControl.replay();
+		messageControl.replay();
 
-        SimpleMessageConverter102 converter = new SimpleMessageConverter102();
-        Message msg = converter.toMessage(content, session);
-        assertEquals(content.length, ((byte[]) converter.fromMessage(msg)).length);
+		SimpleMessageConverter102 converter = new SimpleMessageConverter102();
+		Message msg = converter.toMessage(content, session);
+		assertEquals(content.length, ((byte[]) converter.fromMessage(msg)).length);
 
-        sessionControl.verify();
-        messageControl.verify();
-    }
+		sessionControl.verify();
+		messageControl.verify();
+	}
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
  package org.springframework.aop.framework;
 
 /**
@@ -22,7 +22,7 @@
  * @author Rod Johnson
  */
 public class DefaultLockable implements Lockable {
-	
+
 	private boolean locked;
 
 	public void lock() {
