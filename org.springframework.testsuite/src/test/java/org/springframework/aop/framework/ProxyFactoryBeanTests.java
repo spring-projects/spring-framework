@@ -31,7 +31,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
@@ -404,11 +403,11 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testCanAddThrowsAdviceWithoutAdvisor() throws Throwable {
 		BeanFactory f = new XmlBeanFactory(new ClassPathResource("throwsAdvice.xml", getClass()));
-		ThrowsAdviceInterceptorTests.MyThrowsHandler th = (ThrowsAdviceInterceptorTests.MyThrowsHandler) f.getBean("throwsAdvice");
+		MyThrowsHandler th = (MyThrowsHandler) f.getBean("throwsAdvice");
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) f.getBean("countingBeforeAdvice");
 		assertEquals(0, cba.getCalls());
 		assertEquals(0, th.getCalls());
-		ThrowsAdviceInterceptorTests.IEcho echo = (ThrowsAdviceInterceptorTests.IEcho) f.getBean("throwsAdvised");
+		IEcho echo = (IEcho) f.getBean("throwsAdvised");
 		int i = 12;
 		echo.setA(i);
 		assertEquals(i, echo.getA());
