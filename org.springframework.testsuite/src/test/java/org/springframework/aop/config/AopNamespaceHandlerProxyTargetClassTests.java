@@ -27,7 +27,7 @@ import org.springframework.beans.ITestBean;
  */
 public class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
 
-    @Test
+	@Test
 	public void testIsClassProxy() {
 		ITestBean bean = getTestBean();
 		assertTrue("Should be a CGLIB proxy", AopUtils.isCglibProxy(bean));

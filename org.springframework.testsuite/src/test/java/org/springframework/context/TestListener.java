@@ -23,19 +23,19 @@ package org.springframework.context;
  * @since January 21, 2001
  */
 public class TestListener implements ApplicationListener {
-	
+
 	private int eventCount;
-	
+
 	public int getEventCount() {
 		return eventCount;
 	}
-	
+
 	public void zeroCounter() {
 		eventCount = 0;
 	}
-	
+
 	public void onApplicationEvent(ApplicationEvent e) {
 		++eventCount;
 	}
-    
+
 }

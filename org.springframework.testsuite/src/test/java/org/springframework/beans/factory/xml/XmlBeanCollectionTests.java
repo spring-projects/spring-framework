@@ -276,7 +276,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("props");
 		assertTrue(hasMap.getProps().size() == 2);
-        assertTrue(hasMap.getProps().get("foo").equals("bar"));
+		assertTrue(hasMap.getProps().get("foo").equals("bar"));
 		assertTrue(hasMap.getProps().get("2").equals("TWO"));
 	}
 

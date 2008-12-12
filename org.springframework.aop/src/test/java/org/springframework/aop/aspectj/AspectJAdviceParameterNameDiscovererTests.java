@@ -238,19 +238,19 @@ public class AspectJAdviceParameterNameDiscovererTests {
 	}
 
 	@Test
-    public void testReferenceBinding() {
-        assertParameterNames(getMethod("onePrimitive"),"somepc(foo)",new String[] {"foo"});
-    }
+	public void testReferenceBinding() {
+		assertParameterNames(getMethod("onePrimitive"),"somepc(foo)",new String[] {"foo"});
+	}
 
 	@Test
-    public void testReferenceBindingWithAlternateTokenizations() {
-        assertParameterNames(getMethod("onePrimitive"),"call(bar *) && somepc(foo)",new String[] {"foo"});
-        assertParameterNames(getMethod("onePrimitive"),"somepc ( foo )",new String[] {"foo"});
-        assertParameterNames(getMethod("onePrimitive"),"somepc( foo)",new String[] {"foo"});  
-    }
+	public void testReferenceBindingWithAlternateTokenizations() {
+		assertParameterNames(getMethod("onePrimitive"),"call(bar *) && somepc(foo)",new String[] {"foo"});
+		assertParameterNames(getMethod("onePrimitive"),"somepc ( foo )",new String[] {"foo"});
+		assertParameterNames(getMethod("onePrimitive"),"somepc( foo)",new String[] {"foo"});  
+	}
 
 
-    protected Method getMethod(String name) {
+	protected Method getMethod(String name) {
 		// assumes no overloading of test methods...
 		Method[] candidates = this.getClass().getMethods();
 		for (int i = 0; i < candidates.length; i++) {

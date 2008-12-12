@@ -23,6 +23,7 @@ package org.springframework.beans.factory;
  * @author Rick Evans
  */
 class PackageLevelVisibleBean {
-    
-    public static final String CONSTANT = "Wuby";
+
+	public static final String CONSTANT = "Wuby";
+
 }

@@ -32,12 +32,12 @@ import example.aspects.PerTargetAspect;
  */
 public class AspectMetadataTests {
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testNotAnAspect() {
 		new AspectMetadata(String.class,"someBean");
 	}
 	
-    @Test
+	@Test
 	public void testSingletonAspect() {
 		AspectMetadata am = new AspectMetadata(ExceptionAspect.class,"someBean");
 		assertFalse(am.isPerThisOrPerTarget());
@@ -45,7 +45,7 @@ public class AspectMetadataTests {
 		assertEquals(PerClauseKind.SINGLETON, am.getAjType().getPerClause().getKind());
 	}
 	
-    @Test
+	@Test
 	public void testPerTargetAspect() {
 		AspectMetadata am = new AspectMetadata(PerTargetAspect.class,"someBean");
 		assertTrue(am.isPerThisOrPerTarget());
@@ -53,7 +53,7 @@ public class AspectMetadataTests {
 		assertEquals(PerClauseKind.PERTARGET, am.getAjType().getPerClause().getKind());
 	}
 	
-    @Test
+	@Test
 	public void testPerThisAspect() {
 		AspectMetadata am = new AspectMetadata(PerThisAspect.class,"someBean");
 		assertTrue(am.isPerThisOrPerTarget());

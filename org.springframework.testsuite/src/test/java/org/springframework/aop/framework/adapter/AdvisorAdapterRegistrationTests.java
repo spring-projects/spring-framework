@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,24 +33,24 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class AdvisorAdapterRegistrationTests {
 
-    @Test
-    public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withoutBPPContext.xml");
-        ITestBean tb = (ITestBean) ctx.getBean("testBean");
+	@Test
+	public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withoutBPPContext.xml");
+		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
-        try {
+		try {
 			tb.getName();
 			fail("Should throw UnknownAdviceTypeException");
 		}
 		catch (UnknownAdviceTypeException ex) {
-            // expected
+			// expected
 			assertEquals(0, getAdviceImpl(tb).getInvocationCounter());
 		}
 	}
 
-    @Test
+	@Test
 	public void testAdvisorAdapterRegistrationManagerPresentInContext() {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withBPPContext.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withBPPContext.xml");
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
 		try {

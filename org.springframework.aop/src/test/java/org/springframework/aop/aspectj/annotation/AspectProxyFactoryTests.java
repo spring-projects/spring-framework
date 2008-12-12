@@ -30,13 +30,13 @@ import example.aspects.PerThisAspect;
  */
 public class AspectProxyFactoryTests {
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithNonAspect() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(TestBean.class);
 	}
 
-    @Test
+	@Test
 	public void testWithSimpleAspect() throws Exception {
 		TestBean bean = new TestBean();
 		bean.setAge(2);
@@ -46,7 +46,7 @@ public class AspectProxyFactoryTests {
 		assertEquals("Multiplication did not occur", bean.getAge() * 2, proxy.getAge());
 	}
 
-    @Test
+	@Test
 	public void testWithPerThisAspect() throws Exception {
 		TestBean bean1 = new TestBean();
 		TestBean bean2 = new TestBean();

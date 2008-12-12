@@ -48,11 +48,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 02.10.2003
  */
 public class PropertyResourceConfigurerTests {
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -73,7 +74,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", tb2.getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithNestedProperty() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -86,7 +87,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithNestedPropertyAndDotInBeanName() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("my.tb", IndexedTestBean.class);
@@ -100,7 +101,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithNestedMapPropertyAndDotInMapKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -113,7 +114,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", tb.getMap().get("key2.ext"));
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithJavaMailProperties() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", JavaMailSenderImpl.class);
@@ -125,7 +126,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("true", tb.getJavaMailProperties().getProperty("mail.smtp.auth"));
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithPropertiesFile() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -138,7 +139,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithInvalidPropertiesFile() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -154,7 +155,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithPropertiesXmlFile() {
 		// ignore for JDK < 1.5
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
@@ -172,7 +173,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithConvertProperties() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
@@ -185,7 +186,7 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("Xtest", ((TestBean) tb.getList().get(1)).getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithInvalidKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -206,7 +207,7 @@ public class PropertyResourceConfigurerTests {
 		}
 	}
 
-    @Test
+	@Test
 	public void testPropertyOverrideConfigurerWithIgnoreInvalidKeys() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -228,12 +229,12 @@ public class PropertyResourceConfigurerTests {
 		assertEquals("test", tb2.getName());
 	}
 
-    @Test
+	@Test
 	public void testPropertyPlaceholderConfigurer() {
 		doTestPropertyPlaceholderConfigurer(false);
 	}
 
-    @Test
+	@Test
 	public void testPropertyPlaceholderConfigurerWithParentChildSeparation() {
 		doTestPropertyPlaceholderConfigurer(true);
 	}

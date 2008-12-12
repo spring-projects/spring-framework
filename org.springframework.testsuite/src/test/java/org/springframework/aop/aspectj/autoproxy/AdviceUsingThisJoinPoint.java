@@ -24,18 +24,18 @@ import org.aspectj.lang.annotation.Pointcut;
 @Aspect
 public class AdviceUsingThisJoinPoint {
 
-  private String lastEntry = "";	
+	private String lastEntry = "";
 
-  public String getLastMethodEntered() {
-	  return this.lastEntry;
-  }
-  
-  @Pointcut("execution(* *(..))")
-  public void methodExecution() {}
-			  
-  @Before("methodExecution()")
-  public void entryTrace(JoinPoint jp) {
-	  this.lastEntry = jp.toString();
-  }
+	public String getLastMethodEntered() {
+		return this.lastEntry;
+	}
+
+	@Pointcut("execution(* *(..))")
+	public void methodExecution() {}
+
+	@Before("methodExecution()")
+	public void entryTrace(JoinPoint jp) {
+		this.lastEntry = jp.toString();
+	}
 
 }

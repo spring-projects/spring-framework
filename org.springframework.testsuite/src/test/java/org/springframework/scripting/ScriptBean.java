@@ -22,7 +22,7 @@ package org.springframework.scripting;
  * @author Rick Evans
  */
 public interface ScriptBean {
-    
+
 	String getName();
 
 	void setName(String name);
@@ -30,5 +30,5 @@ public interface ScriptBean {
 	int getAge();
 
 	void setAge(int age);
-    
+
 }

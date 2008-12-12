@@ -24,7 +24,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class PrototypeProxyTests {
 
-    @Test
+	@Test
 	public void testInjectionBeforeWrappingCheckDoesNotKickInForPrototypeProxy() {
 		new ClassPathXmlApplicationContext("prototypeProxy.xml", getClass());
 	}

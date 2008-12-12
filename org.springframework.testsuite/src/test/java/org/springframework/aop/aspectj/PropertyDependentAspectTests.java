@@ -33,22 +33,22 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class PropertyDependentAspectTests {
 
-    @Test
+	@Test
 	public void testPropertyDependentAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
 		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-before-aspect-test.xml");
 	}
 
-    @Test
+	@Test
 	public void testPropertyDependentAspectWithPropertyDeclaredAfterAdvice() throws Exception {
 		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-after-aspect-test.xml");
 	}
 
-    @Test
+	@Test
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
 		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-before-aspect-test.xml");
 	}
 
-    @Test
+	@Test
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredAfterAdvice() throws Exception {
 		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-after-aspect-test.xml");
 	}

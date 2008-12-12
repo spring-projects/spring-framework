@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  */
 public class BeanNamePointcutMatchingTests {
 
-    @Test
+	@Test
 	public void testMatchingPointcuts() {
 		assertMatch("someName", "bean(someName)");
 
@@ -64,7 +64,7 @@ public class BeanNamePointcutMatchingTests {
 		assertMatch("someName", "bean(someName) && !bean(someOtherName)");
 	}
 
-    @Test
+	@Test
 	public void testNonMatchingPointcuts() {
 		assertMisMatch("someName", "bean(someNamex)");
 		assertMisMatch("someName", "bean(someX*Name)");
@@ -86,8 +86,8 @@ public class BeanNamePointcutMatchingTests {
 				matches(beanName, pcExpression));
 	}
 
-    private static boolean matches(final String beanName, String pcExpression) {
-        @SuppressWarnings("serial")
+	private static boolean matches(final String beanName, String pcExpression) {
+		@SuppressWarnings("serial")
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut() {
 			protected String getCurrentProxiedBeanName() {
 				return beanName;

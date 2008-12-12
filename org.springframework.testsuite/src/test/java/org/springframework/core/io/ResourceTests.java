@@ -40,7 +40,7 @@ import org.springframework.web.context.support.ServletContextResource;
  */
 public class ResourceTests {
 
-    @Test
+	@Test
 	public void testByteArrayResource() throws IOException {
 		Resource resource = new ByteArrayResource("testString".getBytes());
 		assertTrue(resource.exists());
@@ -49,8 +49,8 @@ public class ResourceTests {
 		assertEquals("testString", content);
 		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
 	}
-	
-    @Test
+
+	@Test
 	public void testByteArrayResourceWithDescription() throws IOException {
 		Resource resource = new ByteArrayResource("testString".getBytes(), "my description");
 		assertTrue(resource.exists());
@@ -61,7 +61,7 @@ public class ResourceTests {
 		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
 	}
 
-    @Test
+	@Test
 	public void testInputStreamResource() throws IOException {
 		InputStream is = new ByteArrayInputStream("testString".getBytes());
 		Resource resource = new InputStreamResource(is);
@@ -72,7 +72,7 @@ public class ResourceTests {
 		assertEquals(resource, new InputStreamResource(is));
 	}
 
-    @Test
+	@Test
 	public void testInputStreamResourceWithDescription() throws IOException {
 		InputStream is = new ByteArrayInputStream("testString".getBytes());
 		Resource resource = new InputStreamResource(is, "my description");
@@ -84,7 +84,7 @@ public class ResourceTests {
 		assertEquals(resource, new InputStreamResource(is));
 	}
 
-    @Test
+	@Test
 	public void testClassPathResource() throws IOException {
 		Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class");
 		doTestResource(resource);
@@ -100,7 +100,7 @@ public class ResourceTests {
 		assertEquals(1, resources.size());
 	}
 
-    @Test
+	@Test
 	public void testClassPathResourceWithClassLoader() throws IOException {
 		Resource resource =
 				new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
@@ -109,15 +109,15 @@ public class ResourceTests {
 				new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader()));
 	}
 
-    @Test
+	@Test
 	public void testClassPathResourceWithClass() throws IOException {
 		Resource resource = new ClassPathResource("Resource.class", getClass());
 		doTestResource(resource);
 		assertEquals(resource, new ClassPathResource("Resource.class", getClass()));
 	}
 
-    @Ignore // passes under eclipse, fails under ant
-    @Test
+	@Ignore // passes under eclipse, fails under ant
+	@Test
 	public void testFileSystemResource() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
 		doTestResource(resource);
@@ -126,7 +126,7 @@ public class ResourceTests {
 		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
 	}
 
-    @Test
+	@Test
 	public void testUrlResource() throws IOException {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
@@ -135,7 +135,7 @@ public class ResourceTests {
 		assertEquals(resource2, new UrlResource("file:core/../core/io/./Resource.class"));
 	}
 
-    @Test
+	@Test
 	public void testServletContextResource() throws IOException {
 		MockServletContext sc = new MockServletContext();
 		Resource resource = new ServletContextResource(sc, "org/springframework/core/io/Resource.class");

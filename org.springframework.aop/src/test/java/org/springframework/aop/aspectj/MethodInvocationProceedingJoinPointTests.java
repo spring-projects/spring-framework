@@ -42,8 +42,8 @@ import org.springframework.beans.TestBean;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPointTests {
-	
-    @Test
+
+	@Test
 	public void testingBindingWithJoinPoint() {
 		try {
 			AbstractAspectJAdvice.currentJoinPoint();
@@ -53,8 +53,8 @@ public class MethodInvocationProceedingJoinPointTests {
 			// expected
 		}
 	}
-	
-    @Test
+
+	@Test
 	public void testingBindingWithProceedingJoinPoint() {
 		try {
 			AbstractAspectJAdvice.currentJoinPoint();
@@ -64,8 +64,8 @@ public class MethodInvocationProceedingJoinPointTests {
 			// expected
 		}
 	}
-	
-    @Test
+
+	@Test
 	public void testCanGetMethodSignatureFromJoinPoint() {
 		final Object raw = new TestBean();
 		// Will be set by advice during a method call
@@ -133,8 +133,8 @@ public class MethodInvocationProceedingJoinPointTests {
 		// Any call will do
 		assertEquals("Advice reentrantly set age", newAge, itb.getAge());
 	}
-	
-    @Test
+
+	@Test
 	public void testCanGetSourceLocationFromJoinPoint() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
@@ -165,8 +165,8 @@ public class MethodInvocationProceedingJoinPointTests {
 		// Any call will do
 		itb.getAge();
 	}
-	
-    @Test
+
+	@Test
 	public void testCanGetStaticPartFromJoinPoint() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
