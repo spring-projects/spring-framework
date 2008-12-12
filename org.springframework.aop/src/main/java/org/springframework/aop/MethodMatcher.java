@@ -57,7 +57,7 @@ public interface MethodMatcher {
 	 * the candidate class must be taken to be the method's declaring class)
 	 * @return whether or not this method matches statically
 	 */
-	boolean matches(Method method, Class targetClass);
+	boolean matches(Method method, Class<?> targetClass);
 
 	/**
 	 * Is this MethodMatcher dynamic, that is, must a final call be made on the
@@ -86,7 +86,7 @@ public interface MethodMatcher {
 	 * @return whether there's a runtime match
 	 * @see MethodMatcher#matches(Method, Class)
 	 */
-	boolean matches(Method method, Class targetClass, Object[] args);
+	boolean matches(Method method, Class<?> targetClass, Object[] args);
 
 
 	/**

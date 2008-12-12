@@ -34,7 +34,7 @@ public abstract class DynamicMethodMatcher implements MethodMatcher {
 	 * Can override to add preconditions for dynamic matching. This implementation
 	 * always returns true.
 	 */
-	public boolean matches(Method method, Class targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return true;
 	}
 
