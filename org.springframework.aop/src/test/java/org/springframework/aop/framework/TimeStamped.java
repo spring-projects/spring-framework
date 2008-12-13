@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.interceptor;
-
-import junit.framework.TestCase;
-
-import org.springframework.beans.ITestBean;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+package org.springframework.aop.framework;
 
 /**
- * Non-XML tests are in AbstractAopProxyTests
+ * This interface can be implemented by cacheable objects or cache entries,
+ * to enable the freshness of objects to be checked.
+ *
  * @author Rod Johnson
  */
-public class ExposeInvocationInterceptorTests extends TestCase {
-
-	public void testXmlConfig() {
-		ClassPathXmlApplicationContext xac = new ClassPathXmlApplicationContext("org/springframework/aop/interceptor/exposeInvocation.xml");
-		ITestBean tb = (ITestBean) xac.getBean("proxy");
-		String name= "tony";
-		tb.setName(name);
-		// Fires context checks
-		assertEquals(name, tb.getName());
-	}
+public interface TimeStamped {
+	
+	/**
+	 * Return the timestamp for this object.
+	 * @return long the timestamp for this object,
+	 * as returned by System.currentTimeMillis()
+	 */
+	long getTimeStamp();
 
 }
