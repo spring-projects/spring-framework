@@ -16,16 +16,20 @@
 
 package org.springframework.aop.target.dynamic;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
-public class RefreshableTargetSourceTests extends TestCase {
+public class RefreshableTargetSourceTests {
 
 	/**
 	 * Test what happens when checking for refresh but not refreshing object.
 	 */
+	@Test
 	public void testRefreshCheckWithNonRefresh() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource();
 		ts.setRefreshCheckDelay(0);
@@ -41,6 +45,7 @@ public class RefreshableTargetSourceTests extends TestCase {
 	/**
 	 * Test what happens when checking for refresh and refresh occurs.
 	 */
+	@Test
 	public void testRefreshCheckWithRefresh() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(0);
@@ -56,6 +61,7 @@ public class RefreshableTargetSourceTests extends TestCase {
 	/**
 	 * Test what happens when no refresh occurs.
 	 */
+	@Test
 	public void testWithNoRefreshCheck() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(-1);
@@ -67,6 +73,7 @@ public class RefreshableTargetSourceTests extends TestCase {
 		assertSame("Objects should be the same - refresh check delay not elapsed", a, b);
 	}
 
+	@Test
 	public void testRefreshOverTime() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(100);

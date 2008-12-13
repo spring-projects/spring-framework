@@ -16,11 +16,14 @@
 
 package org.springframework.aop.target;
 
+import static org.junit.Assert.*;
+
 import java.util.NoSuchElementException;
 
-import junit.framework.TestCase;
 import org.apache.commons.pool.impl.GenericObjectPool;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.Person;
@@ -37,8 +40,9 @@ import org.springframework.util.SerializationTestUtils;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Chris Beams
  */
-public class CommonsPoolTargetSourceTests extends TestCase {
+public class CommonsPoolTargetSourceTests {
 
 	/**
 	 * Initial count value set in bean factory XML
@@ -47,14 +51,16 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 
 	private XmlBeanFactory beanFactory;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.beanFactory = new XmlBeanFactory(new ClassPathResource("commonsPoolTests.xml", getClass()));
 	}
 
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
-	protected void tearDown() {
+	@After
+	public void tearDown() {
 		// Will call pool.close()
 		this.beanFactory.destroySingletons();
 	}
@@ -72,14 +78,17 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		//assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
 	}
 
+	@Test
 	public void testFunctionality() {
 		testFunctionality("pooled");
 	}
 
+	@Test
 	public void testFunctionalityWithNoInterceptors() {
 		testFunctionality("pooledNoInterceptors");
 	}
 
+	@Test
 	public void testConfigMixin() {
 		SideEffectBean pooled = (SideEffectBean) beanFactory.getBean("pooledWithMixin");
 		assertEquals(INITIAL_COUNT, pooled.getCount());
@@ -94,6 +103,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		assertEquals(25, conf.getMaxSize());
 	}
 
+	@Test
 	public void testTargetSourceSerializableWithoutConfigMixin() throws Exception {
 		CommonsPoolTargetSource cpts = (CommonsPoolTargetSource) beanFactory.getBean("personPoolTargetSource");
 
@@ -102,6 +112,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 	}
 
 
+	@Test
 	public void testProxySerializableWithoutConfigMixin() throws Exception {
 		Person pooled = (Person) beanFactory.getBean("pooledPerson");
 
@@ -115,6 +126,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		assertEquals(25, serialized.getAge());
 	}
 
+	@Test
 	public void testHitMaxSize() throws Exception {
 		int maxSize = 10;
 
@@ -150,6 +162,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testHitMaxSizeLoadedFromContext() throws Exception {
 		Advised person = (Advised) beanFactory.getBean("maxSizePooledPerson");
 		CommonsPoolTargetSource targetSource = (CommonsPoolTargetSource) person.getTargetSource();
@@ -182,6 +195,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetWhenExhaustedAction() {
 		CommonsPoolTargetSource targetSource = new CommonsPoolTargetSource();
 		targetSource.setWhenExhaustedActionName("WHEN_EXHAUSTED_BLOCK");

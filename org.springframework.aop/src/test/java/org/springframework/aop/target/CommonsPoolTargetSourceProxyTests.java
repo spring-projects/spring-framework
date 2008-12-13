@@ -16,20 +16,23 @@
 
 package org.springframework.aop.target;
 
-import junit.framework.TestCase;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.ITestBean;
-import org.springframework.core.io.ClassPathResource;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 2.0
  */
-public class CommonsPoolTargetSourceProxyTests extends TestCase {
+public class CommonsPoolTargetSourceProxyTests {
 
+	@Test
 	public void testProxy() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);

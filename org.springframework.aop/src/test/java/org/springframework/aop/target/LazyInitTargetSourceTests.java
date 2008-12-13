@@ -16,10 +16,11 @@
 
 package org.springframework.aop.target;
 
+import static org.junit.Assert.*;
+
 import java.util.Set;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -27,10 +28,12 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 07.01.2005
  */
-public class LazyInitTargetSourceTests extends TestCase {
+public class LazyInitTargetSourceTests {
 
+	@Test
 	public void testLazyInitSingletonTargetSource() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("lazyInitSingletonTests.xml", getClass()));
 		bf.preInstantiateSingletons();
@@ -41,6 +44,7 @@ public class LazyInitTargetSourceTests extends TestCase {
 		assertTrue(bf.containsSingleton("target"));
 	}
 
+	@Test
 	public void testCustomLazyInitSingletonTargetSource() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("customLazyInitTarget.xml", getClass()));
 		bf.preInstantiateSingletons();
@@ -51,16 +55,17 @@ public class LazyInitTargetSourceTests extends TestCase {
 		assertTrue(bf.containsSingleton("target"));
 	}
 
+	@Test
 	public void testLazyInitFactoryBeanTargetSource() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("lazyInitFactoryBean.xml", getClass()));
 		bf.preInstantiateSingletons();
 
-		Set set1 = (Set) bf.getBean("proxy1");
+		Set<?> set1 = (Set<?>) bf.getBean("proxy1");
 		assertFalse(bf.containsSingleton("target1"));
 		assertTrue(set1.contains("10"));
 		assertTrue(bf.containsSingleton("target1"));
 
-		Set set2 = (Set) bf.getBean("proxy2");
+		Set<?> set2 = (Set<?>) bf.getBean("proxy2");
 		assertFalse(bf.containsSingleton("target2"));
 		assertTrue(set2.contains("20"));
 		assertTrue(bf.containsSingleton("target2"));

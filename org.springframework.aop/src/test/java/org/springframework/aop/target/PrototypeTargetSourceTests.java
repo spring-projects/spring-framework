@@ -16,8 +16,10 @@
 
 package org.springframework.aop.target;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -25,15 +27,17 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class PrototypeTargetSourceTests extends TestCase {
+public class PrototypeTargetSourceTests {
 	
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 	
 	private BeanFactory beanFactory;
 	
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.beanFactory = new XmlBeanFactory(new ClassPathResource("prototypeTests.xml", getClass()));
 	}
 
@@ -42,6 +46,7 @@ public class PrototypeTargetSourceTests extends TestCase {
 	 * in no change to visible state, as a new instance is used.
 	 * With the singleton, there will be change.
 	 */
+	@Test
 	public void testPrototypeAndSingletonBehaveDifferently() {
 		SideEffectBean singleton = (SideEffectBean) beanFactory.getBean("singleton");
 		assertEquals(INITIAL_COUNT, singleton.getCount() );

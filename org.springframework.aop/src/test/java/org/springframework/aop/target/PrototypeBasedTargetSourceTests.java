@@ -16,8 +16,9 @@
 
 package org.springframework.aop.target;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.SerializablePerson;
@@ -31,9 +32,11 @@ import org.springframework.util.SerializationTestUtils;
  * and not subclasses.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class PrototypeBasedTargetSourceTests extends TestCase {
+public class PrototypeBasedTargetSourceTests {
 
+	@Test
 	public void testSerializability() throws Exception {
 		MutablePropertyValues tsPvs = new MutablePropertyValues();
 		tsPvs.addPropertyValue("targetBeanName", "person");

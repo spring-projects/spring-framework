@@ -16,8 +16,11 @@
 
 package org.springframework.aop.target;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.SerializableNopInterceptor;
@@ -31,22 +34,25 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class HotSwappableTargetSourceTests extends TestCase {
+public class HotSwappableTargetSourceTests {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
 	private XmlBeanFactory beanFactory;
 	
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.beanFactory = new XmlBeanFactory(new ClassPathResource("hotSwapTests.xml", getClass()));
 	}
 	
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
-	protected void tearDown() {
+	@After
+	public void tearDown() {
 		// Will call pool.close()
 		this.beanFactory.destroySingletons();
 	}
@@ -55,8 +61,8 @@ public class HotSwappableTargetSourceTests extends TestCase {
 	 * Check it works like a normal invoker
 	 *
 	 */
+	@Test
 	public void testBasicFunctionality() {
-		SideEffectBean target1 = (SideEffectBean) beanFactory.getBean("target1");
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
 		assertEquals(INITIAL_COUNT, proxied.getCount() );
 		proxied.doWork();
@@ -67,12 +73,12 @@ public class HotSwappableTargetSourceTests extends TestCase {
 		assertEquals(INITIAL_COUNT + 2, proxied.getCount() );
 	}
 	
+	@Test
 	public void testValidSwaps() {
 		SideEffectBean target1 = (SideEffectBean) beanFactory.getBean("target1");
 		SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 		
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-	//	assertEquals(target1, ((Advised) proxied).getTarget());
 		assertEquals(target1.getCount(), proxied.getCount() );
 		proxied.doWork();
 		assertEquals(INITIAL_COUNT + 1, proxied.getCount() );
@@ -117,6 +123,7 @@ public class HotSwappableTargetSourceTests extends TestCase {
 		return aopex;
 	}
 	
+	@Test
 	public void testRejectsSwapToNull() {
 		IllegalArgumentException ex = testRejectsSwapToInvalidValue(null);
 		assertTrue(ex.getMessage().indexOf("null") != -1);
@@ -126,6 +133,7 @@ public class HotSwappableTargetSourceTests extends TestCase {
 	// how to decide what's valid?
 	
 	
+	@Test
 	public void testSerialization() throws Exception {
 		SerializablePerson sp1 = new SerializablePerson();
 		sp1.setName("Tony");
