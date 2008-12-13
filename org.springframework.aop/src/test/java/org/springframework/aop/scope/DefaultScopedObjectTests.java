@@ -16,54 +16,49 @@
 
 package org.springframework.aop.scope;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
+
+import org.junit.Test;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.test.AssertThrows;
 
 /**
  * Unit tests for the {@link DefaultScopedObject} class.
  *
  * @author Rick Evans
  */
-public final class DefaultScopedObjectTests extends TestCase {
+public final class DefaultScopedObjectTests {
 
 	private static final String GOOD_BEAN_NAME = "foo";
 
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullBeanFactory() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new DefaultScopedObject(null, GOOD_BEAN_NAME);
-			}
-		}.runTest();
+		new DefaultScopedObject(null, GOOD_BEAN_NAME);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullTargetBeanName() throws Exception {
 		testBadTargetBeanName(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithEmptyTargetBeanName() throws Exception {
 		testBadTargetBeanName("");
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithJustWhitespacedTargetBeanName() throws Exception {
 		testBadTargetBeanName("   ");
 	}
 
 
 	private static void testBadTargetBeanName(final String badTargetBeanName) {
-		MockControl mock = MockControl.createControl(ConfigurableBeanFactory.class);
-		final ConfigurableBeanFactory factory = (ConfigurableBeanFactory) mock.getMock();
-		mock.replay();
+		ConfigurableBeanFactory factory = createMock(ConfigurableBeanFactory.class);
+		replay(factory);
 
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new DefaultScopedObject(factory, badTargetBeanName);
-			}
-		}.runTest();
+		new DefaultScopedObject(factory, badTargetBeanName);
 
-		mock.verify();
+		verify(factory);
 	}
 
 }

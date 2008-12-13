@@ -16,12 +16,13 @@
 
 package org.springframework.aop.scope;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -34,16 +35,19 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ScopedProxyTests extends TestCase {
+public class ScopedProxyTests {
 
 	/* SPR-2108 */
+	@Test
 	public void testProxyAssignable() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedMap.xml", getClass()));
 		Object baseMap = bf.getBean("singletonMap");
 		assertTrue(baseMap instanceof Map);
 	}
 
+	@Test
 	public void testSimpleProxy() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedMap.xml", getClass()));
 		Object simpleMap = bf.getBean("simpleMap");
@@ -51,6 +55,7 @@ public class ScopedProxyTests extends TestCase {
 		assertTrue(simpleMap instanceof HashMap);
 	}
 
+	@Test
 	public void testScopedOverride() throws Exception {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("scopedOverride.xml", getClass()));
@@ -66,6 +71,7 @@ public class ScopedProxyTests extends TestCase {
 		assertEquals(TestBean.class, scope.getMap().get("scopedTarget.testBean").getClass());
 	}
 
+	@Test
 	public void testJdkScopedProxy() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedTestBean.xml", getClass()));
 		SimpleMapScope scope = new SimpleMapScope();
@@ -82,6 +88,7 @@ public class ScopedProxyTests extends TestCase {
 		assertEquals(TestBean.class, scope.getMap().get("testBeanTarget").getClass());
 	}
 
+	@Test
 	public void testCglibScopedProxy() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedList.xml", getClass()));
 		SimpleMapScope scope = new SimpleMapScope();

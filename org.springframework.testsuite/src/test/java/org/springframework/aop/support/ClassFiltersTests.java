@@ -17,8 +17,9 @@
 
 package org.springframework.aop.support;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.ClassFilter;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -26,8 +27,9 @@ import org.springframework.core.NestedRuntimeException;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class ClassFiltersTests extends TestCase {
+public class ClassFiltersTests {
 	
 	private ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
 	
@@ -35,6 +37,7 @@ public class ClassFiltersTests extends TestCase {
 	
 	private ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
 
+	@Test
 	public void testUnion() {
 		assertTrue(exceptionFilter.matches(RuntimeException.class));
 		assertFalse(exceptionFilter.matches(TestBean.class));
@@ -45,6 +48,7 @@ public class ClassFiltersTests extends TestCase {
 		assertTrue(union.matches(TestBean.class));
 	}
 	
+	@Test
 	public void testIntersection() {
 		assertTrue(exceptionFilter.matches(RuntimeException.class));
 		assertTrue(hasRootCauseFilter.matches(NestedRuntimeException.class));

@@ -16,8 +16,9 @@
 
 package org.springframework.aop.support;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.NopInterceptor;
@@ -25,15 +26,12 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
- * 
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class ControlFlowPointcutTests extends TestCase {
+public class ControlFlowPointcutTests {
 	
-	public ControlFlowPointcutTests(String s) {
-		super(s);
-	}
-	
+	@Test
 	public void testMatches() {
 		TestBean target = new TestBean();
 		target.setAge(27);
@@ -64,6 +62,7 @@ public class ControlFlowPointcutTests extends TestCase {
 	 * to the cflow pointcut, meaning that it's not so prohibitively
 	 * expensive.
 	 */
+	@Test
 	public void testSelectiveApplication() {
 		TestBean target = new TestBean();
 		target.setAge(27);
@@ -90,6 +89,7 @@ public class ControlFlowPointcutTests extends TestCase {
 		assertEquals(1, cflow.getEvaluations());
 	}
 
+	@Test
 	public void testEqualsAndHashCode() throws Exception {
 		assertEquals(new ControlFlowPointcut(One.class), new ControlFlowPointcut(One.class));
 		assertEquals(new ControlFlowPointcut(One.class, "getAge"), new ControlFlowPointcut(One.class, "getAge"));
