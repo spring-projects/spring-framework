@@ -16,10 +16,11 @@
 
 package org.springframework.aop.support;
 
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -31,12 +32,14 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class AopUtilsTests extends TestCase {
+public class AopUtilsTests {
 
+	@Test
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
-			public boolean matches(Method method, Class clazzy) {
+			public boolean matches(Method method, Class<?> clazzy) {
 				return false;
 			}
 		}
@@ -45,14 +48,16 @@ public class AopUtilsTests extends TestCase {
 		assertFalse(AopUtils.canApply(no, Object.class));
 	}
 
+	@Test
 	public void testPointcutAlwaysApplies() {
 		assertTrue(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), Object.class));
 		assertTrue(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), TestBean.class));
 	}
 
+	@Test
 	public void testPointcutAppliesToOneMethodOnObject() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
-			public boolean matches(Method method, Class clazz) {
+			public boolean matches(Method method, Class<?> clazz) {
 				return method.getName().equals("hashCode");
 			}
 		}
@@ -68,6 +73,7 @@ public class AopUtilsTests extends TestCase {
 	 * of AOP classes, they return the same instance, not a new instance
 	 * that's subverted the singleton construction limitation.
 	 */
+	@Test
 	public void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
 		assertSame(MethodMatcher.TRUE, SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE));
 		assertSame(ClassFilter.TRUE, SerializationTestUtils.serializeAndDeserialize(ClassFilter.TRUE));

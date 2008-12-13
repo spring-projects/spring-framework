@@ -16,16 +16,19 @@
 
 package org.springframework.aop.scope;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertSame;
 
+import org.junit.Test;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class ScopedProxyAutowireTests extends TestCase {
+public class ScopedProxyAutowireTests {
 
+	@Test
 	public void testScopedProxyInheritsAutowireCandidateFalse() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedAutowireFalse.xml", getClass()));
 		TestBean autowired = (TestBean) bf.getBean("autowired");
@@ -33,6 +36,7 @@ public class ScopedProxyAutowireTests extends TestCase {
 		assertSame(unscoped, autowired.getChild());
 	}
 
+	@Test
 	public void testScopedProxyReplacesAutowireCandidateTrue() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedAutowireTrue.xml", getClass()));
 		TestBean autowired = (TestBean) bf.getBean("autowired");
@@ -41,7 +45,7 @@ public class ScopedProxyAutowireTests extends TestCase {
 	}
 
 
-	public static class TestBean {
+	static class TestBean {
 
 		private TestBean child;
 
