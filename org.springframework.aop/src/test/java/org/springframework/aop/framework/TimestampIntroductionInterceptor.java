@@ -16,16 +16,26 @@
 
 package org.springframework.aop.framework;
 
-import junit.framework.TestCase;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.beans.ITestBean;
+public class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
+	implements TimeStamped {
 
+	private long ts;
 
-public class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
-	protected void assertions(MethodInvocation invocation) {
-		TestCase.assertTrue(invocation.getThis() == this);
-		TestCase.assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
-				ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
+	public TimestampIntroductionInterceptor() {
 	}
+
+	public TimestampIntroductionInterceptor(long ts) {
+		this.ts = ts;
+	}
+	
+	public void setTime(long ts) {
+		this.ts = ts;
+	}
+
+	public long getTimeStamp() {
+		return ts;
+	}
+
 }

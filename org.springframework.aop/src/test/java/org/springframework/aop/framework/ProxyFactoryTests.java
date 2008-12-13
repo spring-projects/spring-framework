@@ -16,8 +16,13 @@
 
 package org.springframework.aop.framework;
 
-import junit.framework.TestCase;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.*;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
@@ -27,17 +32,18 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
  * Also tests AdvisedSupport and ProxyCreatorSupport superclasses.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 14.05.2003
  */
-public class ProxyFactoryTests extends TestCase {
+public class ProxyFactoryTests {
 
+	@Test
 	public void testIndexOfMethods() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
@@ -53,6 +59,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(-1, advised.indexOf(new DefaultPointcutAdvisor(null)));
 	}
 	
+	@Test
 	public void testRemoveAdvisorByReference() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
@@ -72,6 +79,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertFalse(pf.removeAdvisor(new DefaultPointcutAdvisor(null)));
 	}
 	
+	@Test
 	public void testRemoveAdvisorByIndex() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
@@ -119,6 +127,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(4, nop2.getCount());
 	}
 
+	@Test
 	public void testReplaceAdvisor() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
@@ -147,6 +156,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertFalse(pf.replaceAdvisor(new DefaultPointcutAdvisor(null), advisor1));
 	}
 
+	@Test
 	public void testAddRepeatedInterface() {
 		TimeStamped tst = new TimeStamped() {
 			public long getTimeStamp() {
@@ -158,22 +168,23 @@ public class ProxyFactoryTests extends TestCase {
 		// This call should be ignored without error
 		pf.addInterface(TimeStamped.class);
 		// All cool
-		TimeStamped ts = (TimeStamped) pf.getProxy();
+		assertThat(pf.getProxy(), instanceOf(TimeStamped.class));
 	}
 
+	@Test
 	public void testGetsAllInterfaces() throws Exception {
 		// Extend to get new interface
-		class TestBeanSubclass extends TestBean implements Comparable {
+		class TestBeanSubclass extends TestBean implements Comparable<Object> {
 			public int compareTo(Object arg0) {
 				throw new UnsupportedOperationException("compareTo");
 			}
 		}
 		TestBeanSubclass raw = new TestBeanSubclass();
 		ProxyFactory factory = new ProxyFactory(raw);
-		assertEquals("Found correct number of interfaces", 5, factory.getProxiedInterfaces().length);
 		//System.out.println("Proxied interfaces are " + StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), ","));
+		assertEquals("Found correct number of interfaces", 3, factory.getProxiedInterfaces().length);
 		ITestBean tb = (ITestBean) factory.getProxy();
-		assertTrue("Picked up secondary interface", tb instanceof IOther);
+		assertThat("Picked up secondary interface", tb, instanceOf(IOther.class));
 				
 		raw.setAge(25);
 		assertTrue(tb.getAge() == raw.getAge());
@@ -181,11 +192,11 @@ public class ProxyFactoryTests extends TestCase {
 		long t = 555555L;
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(t);
 		
-		Class[] oldProxiedInterfaces = factory.getProxiedInterfaces();
+		Class<?>[] oldProxiedInterfaces = factory.getProxiedInterfaces();
 		
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 		
-		Class[] newProxiedInterfaces = factory.getProxiedInterfaces();
+		Class<?>[] newProxiedInterfaces = factory.getProxiedInterfaces();
 		assertEquals("Advisor proxies one more interface after introduction", oldProxiedInterfaces.length + 1, newProxiedInterfaces.length);
 
 		TimeStamped ts = (TimeStamped) factory.getProxy();
@@ -194,16 +205,23 @@ public class ProxyFactoryTests extends TestCase {
 		 ((IOther) ts).absquatulate();
 	}
 	
+	@Test
 	public void testInterceptorInclusionMethods() {
+		class MyInterceptor implements MethodInterceptor {
+			public Object invoke(MethodInvocation invocation) throws Throwable {
+				throw new UnsupportedOperationException();
+			}
+		}
+		
 		NopInterceptor di = new NopInterceptor();
 		NopInterceptor diUnused = new NopInterceptor();
 		ProxyFactory factory = new ProxyFactory(new TestBean());
 		factory.addAdvice(0, di);
-		ITestBean tb = (ITestBean) factory.getProxy();
+		assertThat(factory.getProxy(), instanceOf(ITestBean.class));
 		assertTrue(factory.adviceIncluded(di));
 		assertTrue(!factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 1);
-		assertTrue(factory.countAdvicesOfType(TransactionInterceptor.class) == 0);
+		assertTrue(factory.countAdvicesOfType(MyInterceptor.class) == 0);
 	
 		factory.addAdvice(0, diUnused);
 		assertTrue(factory.adviceIncluded(diUnused));
@@ -213,6 +231,7 @@ public class ProxyFactoryTests extends TestCase {
 	/**
 	 * Should see effect immediately on behavior.
 	 */
+	@Test
 	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
 		ProxyFactory config = new ProxyFactory(new TestBean());
 
@@ -264,6 +283,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertTrue(debugInterceptor.getCount() == 1);
 	}
 
+	@Test
 	public void testProxyTargetClassWithInterfaceAsTarget() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(ITestBean.class);
@@ -273,6 +293,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertTrue(proxy instanceof ITestBean);
 	}
 
+	@Test
 	public void testProxyTargetClassWithConcreteClassAsTarget() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(TestBean.class);
