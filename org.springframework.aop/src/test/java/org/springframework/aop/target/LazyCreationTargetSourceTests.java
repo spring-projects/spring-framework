@@ -16,23 +16,26 @@
 
 package org.springframework.aop.target;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class LazyCreationTargetSourceTests extends TestCase {
+public class LazyCreationTargetSourceTests {
 
+	@Test
 	public void testCreateLazy() {
 		TargetSource targetSource = new AbstractLazyCreationTargetSource() {
 			protected Object createObject() {
 				return new InitCountingBean();
 			}
-			public Class getTargetClass() {
+			public Class<?> getTargetClass() {
 				return InitCountingBean.class;
 			}
 		};

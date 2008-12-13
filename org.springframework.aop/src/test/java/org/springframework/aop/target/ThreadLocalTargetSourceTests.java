@@ -16,8 +16,10 @@
 
 package org.springframework.aop.target;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -25,15 +27,17 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class ThreadLocalTargetSourceTests extends TestCase {
+public class ThreadLocalTargetSourceTests {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
 	private XmlBeanFactory beanFactory;
 	
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.beanFactory = new XmlBeanFactory(new ClassPathResource("threadLocalTests.xml", getClass()));
 	}
 	
@@ -49,6 +53,7 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 	 * managing objects of different types without them interfering
 	 * with one another.
 	 */
+	@Test
 	public void testUseDifferentManagedInstancesInSameThread() {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertEquals(INITIAL_COUNT, apartment.getCount() );
@@ -60,6 +65,7 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 		assertEquals("Kerry", test.getSpouse().getName());
 	}
 
+	@Test
 	public void testReuseInSameThread() {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertEquals(INITIAL_COUNT, apartment.getCount() );
@@ -73,6 +79,7 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 	/**
 	 * Relies on introduction.
 	 */
+	@Test
 	public void testCanGetStatsViaMixin() {
 		ThreadLocalTargetSourceStats stats = (ThreadLocalTargetSourceStats) beanFactory.getBean("apartment");
 		// +1 because creating target for stats call counts
@@ -90,6 +97,7 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 		assertEquals(1, stats.getObjectCount());
 	}
 	
+	@Test
 	public void testNewThreadHasOwnInstance() throws InterruptedException {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertEquals(INITIAL_COUNT, apartment.getCount() );
@@ -128,11 +136,12 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 	/**
 	 * Test for SPR-1442. Destroyed target should re-associated with thread and not throw NPE
 	 */
+	@Test
 	public void testReuseDestroyedTarget() {
 		ThreadLocalTargetSource source = (ThreadLocalTargetSource)this.beanFactory.getBean("threadLocalTs");
 
 		// try first time
-		Object o = source.getTarget();
+		source.getTarget();
 		source.destroy();
 
 		// try second time
