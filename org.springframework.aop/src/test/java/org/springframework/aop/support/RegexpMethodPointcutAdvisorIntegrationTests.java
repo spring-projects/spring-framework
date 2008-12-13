@@ -16,8 +16,9 @@
 
 package org.springframework.aop.support;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SerializableNopInterceptor;
@@ -25,16 +26,19 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class RegexpMethodPointcutAdvisorIntegrationTests extends TestCase {
+public class RegexpMethodPointcutAdvisorIntegrationTests {
 
+	@Test
 	public void testSinglePattern() throws Throwable {
-		BeanFactory bf = new ClassPathXmlApplicationContext("org/springframework/aop/support/regexpSetterTests.xml"); 
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("regexpSetterTests.xml", getClass())); 
 		ITestBean advised = (ITestBean) bf.getBean("settersAdvised");
 		// Interceptor behind regexp advisor
 		NopInterceptor nop = (NopInterceptor) bf.getBean("nopInterceptor");
@@ -50,8 +54,9 @@ public class RegexpMethodPointcutAdvisorIntegrationTests extends TestCase {
 		assertEquals(1, nop.getCount());
 	}
 	
+	@Test
 	public void testMultiplePatterns() throws Throwable {
-		BeanFactory bf = new ClassPathXmlApplicationContext("org/springframework/aop/support/regexpSetterTests.xml"); 
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("regexpSetterTests.xml", getClass())); 
 		// This is a CGLIB proxy, so we can proxy it to the target class
 		TestBean advised = (TestBean) bf.getBean("settersAndAbsquatulateAdvised");
 		// Interceptor behind regexp advisor
@@ -72,8 +77,9 @@ public class RegexpMethodPointcutAdvisorIntegrationTests extends TestCase {
 		assertEquals(2, nop.getCount());
 	}
 	
+	@Test
 	public void testSerialization() throws Throwable {
-		BeanFactory bf = new ClassPathXmlApplicationContext("org/springframework/aop/support/regexpSetterTests.xml"); 
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("regexpSetterTests.xml", getClass())); 
 		// This is a CGLIB proxy, so we can proxy it to the target class
 		Person p = (Person) bf.getBean("serializableSettersAdvised");
 		// Interceptor behind regexp advisor

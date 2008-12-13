@@ -16,10 +16,11 @@
 
 package org.springframework.aop.support;
 
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -27,9 +28,10 @@ import org.springframework.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 /**
- * $Id: MethodMatchersTests.java,v 1.7 2005/03/25 09:28:18 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class MethodMatchersTests extends TestCase {
+public class MethodMatchersTests {
 
 	private final Method EXCEPTION_GETMESSAGE;
 
@@ -46,16 +48,19 @@ public class MethodMatchersTests extends TestCase {
 		IOTHER_ABSQUATULATE = IOther.class.getMethod("absquatulate", (Class[]) null);
 	}
 
+	@Test
 	public void testDefaultMatchesAll() throws Exception {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertTrue(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class));
 		assertTrue(defaultMm.matches(ITESTBEAN_SETAGE, TestBean.class));
 	}
 	
+	@Test
 	public void testMethodMatcherTrueSerializable() throws Exception {
 		assertSame(SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE), MethodMatcher.TRUE);
 	}
 
+	@Test
 	public void testSingle() throws Exception {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertTrue(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class));
@@ -67,6 +72,7 @@ public class MethodMatchersTests extends TestCase {
 	}
 
 	
+	@Test
 	public void testDynamicAndStaticMethodMatcherIntersection() throws Exception {
 		MethodMatcher mm1 = MethodMatcher.TRUE;
 		MethodMatcher mm2 = new TestDynamicMethodMatcherWhichMatches();
@@ -81,6 +87,7 @@ public class MethodMatchersTests extends TestCase {
 		assertFalse("3 - not Matched setAge method", intersection.matches(ITESTBEAN_SETAGE, TestBean.class, new Object[] { new Integer(5) }));
 	}
 	
+	@Test
 	public void testStaticMethodMatcherUnion() throws Exception {
 		MethodMatcher getterMatcher = new StartsWithMatcher("get");
 		MethodMatcher setterMatcher = new StartsWithMatcher("set");
