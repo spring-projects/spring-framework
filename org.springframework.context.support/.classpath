@@ -26,5 +26,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.beanutils/1.7.0/com.springsource.org.apache.commons.beanutils-1.7.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.beanutils/1.7.0/com.springsource.org.apache.commons.beanutils-sources-1.7.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-2.0.8.jar" sourcepath="/IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-sources-2.0.8.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.digester/1.8.0/com.springsource.org.apache.commons.digester-1.8.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.digester/1.8.0/com.springsource.org.apache.commons.digester-sources-1.8.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
