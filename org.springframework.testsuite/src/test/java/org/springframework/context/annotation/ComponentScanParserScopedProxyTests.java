@@ -23,6 +23,9 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import example.scannable.FooService;
+import example.scannable.ScopedProxyTestBean;
+
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller

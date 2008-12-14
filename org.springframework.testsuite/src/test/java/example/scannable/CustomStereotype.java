@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package example.scannable;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.springframework.stereotype.Component;
 
 /**
  * @author Juergen Hoeller
  */
-@CustomStereotype
-public class DefaultNamedComponent {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Component
+public @interface CustomStereotype {
+
+	String value() default "thoreau";
 
 }

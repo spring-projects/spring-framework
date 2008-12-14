@@ -18,6 +18,9 @@ package org.springframework.context.annotation;
 
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
+import example.scannable.FooService;
+import example.scannable.ServiceInvocationCounter;
+
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller

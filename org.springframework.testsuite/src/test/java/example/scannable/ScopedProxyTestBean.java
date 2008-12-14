@@ -14,38 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package example.scannable;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-public class AutowiredQualifierFooService implements FooService {
-
-	@Autowired
-	@Qualifier("testing")
-	private FooDao fooDao;
-
-	private boolean initCalled = false;
-
-	@PostConstruct
-	private void init() {
-		if (this.initCalled) {
-			throw new IllegalStateException("Init already called");
-		}
-		this.initCalled = true;
-	}
+@Scope("myScope")
+public class ScopedProxyTestBean implements FooService {
 
 	public String foo(int id) {
-		return this.fooDao.findFoo(id);
+		return "bar";
 	}
 
 	public boolean isInitCalled() {
-		return this.initCalled;
+		return false;
 	}
 
 }

@@ -16,12 +16,13 @@
 
 package org.springframework.context.annotation;
 
+import static org.junit.Assert.*;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
@@ -35,13 +36,15 @@ import org.springframework.util.ClassUtils;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
+public class ClassPathScanningCandidateComponentProviderTests {
 
 	private static final String TEST_BASE_PACKAGE =
 			ClassPathScanningCandidateComponentProviderTests.class.getPackage().getName();
 
 
+	@Test
 	public void testWithDefaults() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
@@ -53,12 +56,14 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 	}
 
+	@Test
 	public void testWithBogusBasePackage() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents("bogus");
 		assertEquals(0, candidates.size());
 	}
 
+	@Test
 	public void testWithPackageExcludeFilter() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		provider.addExcludeFilter(new RegexPatternTypeFilter(Pattern.compile(TEST_BASE_PACKAGE + ".*")));
@@ -66,12 +71,14 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertEquals(0, candidates.size());
 	}
 
+	@Test
 	public void testWithNoFilters() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertEquals(0, candidates.size());
 	}
 
+	@Test
 	public void testWithComponentAnnotationOnly() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
@@ -88,6 +95,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Test
 	public void testWithAspectAnnotationOnly() throws Exception {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(
@@ -97,6 +105,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 	}
 
+	@Test
 	public void testWithInterfaceType() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AssignableTypeFilter(FooDao.class));
@@ -105,6 +114,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertTrue(containsBeanClass(candidates, StubFooDao.class));
 	}
 
+	@Test
 	public void testWithClassType() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AssignableTypeFilter(MessageBean.class));
@@ -113,6 +123,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertTrue(containsBeanClass(candidates, MessageBean.class));
 	}
 
+	@Test
 	public void testWithMultipleMatchingFilters() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
@@ -124,6 +135,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertTrue(containsBeanClass(candidates, FooServiceImpl.class));
 	}
 
+	@Test
 	public void testExcludeTakesPrecedence() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));

@@ -7,8 +7,8 @@
 				http://www.springframework.org/schema/context
 				http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-	<bean id="fooService" class="org.springframework.context.annotation.AutowiredQualifierFooService"/>
+	<bean id="fooService" class="example.scannable.AutowiredQualifierFooService"/>
 
-	<context:component-scan base-package="org.springframework.context.annotation"/>
+	<context:component-scan base-package="example.scannable"/>
 
 </beans>

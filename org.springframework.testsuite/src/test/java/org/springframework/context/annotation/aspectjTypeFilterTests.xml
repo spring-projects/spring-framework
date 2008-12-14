@@ -5,10 +5,10 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-	<context:component-scan base-package="org.springframework.context.annotation" use-default-filters="false" annotation-config="false">
-        <context:include-filter type="aspectj" expression="org.springframework.context.annotation.Stub*"/>
-        <context:include-filter type="aspectj" expression="org.springframework.context.annotation.FooService+"/>
-        <context:exclude-filter type="aspectj" expression="org.springframework..Scoped*Test*" />
+	<context:component-scan base-package="example.scannable" use-default-filters="false" annotation-config="false">
+        <context:include-filter type="aspectj" expression="example.scannable.Stub*"/>
+        <context:include-filter type="aspectj" expression="example.scannable.FooService+"/>
+        <context:exclude-filter type="aspectj" expression="example..Scoped*Test*" />
     </context:component-scan>
 
 </beans>
