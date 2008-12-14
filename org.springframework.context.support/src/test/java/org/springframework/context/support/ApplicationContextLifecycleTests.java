@@ -16,13 +16,17 @@
 
 package org.springframework.context.support;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class ApplicationContextLifecycleTests extends TestCase {
+public class ApplicationContextLifecycleTests {
 
+	@Test
 	public void testBeansStart() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
@@ -37,6 +41,7 @@ public class ApplicationContextLifecycleTests extends TestCase {
 		assertTrue(error, bean4.isRunning());
 	}
 
+	@Test
 	public void testBeansStop() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
@@ -57,6 +62,7 @@ public class ApplicationContextLifecycleTests extends TestCase {
 		assertFalse(stopError, bean4.isRunning());
 	}
 
+	@Test
 	public void testStartOrder() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
@@ -75,6 +81,7 @@ public class ApplicationContextLifecycleTests extends TestCase {
 		assertTrue(orderError, bean4.getStartOrder() > bean2.getStartOrder());
 	}
 
+	@Test
 	public void testStopOrder() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
