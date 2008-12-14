@@ -33,6 +33,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
+import example.scannable.FooDao;
+import example.scannable.FooService;
+import example.scannable.FooServiceImpl;
+import example.scannable.MessageBean;
+import example.scannable.NamedComponent;
+import example.scannable.NamedStubDao;
+import example.scannable.ServiceInvocationCounter;
+import example.scannable.StubFooDao;
+
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -40,15 +49,15 @@ import org.springframework.util.ClassUtils;
  */
 public class ClassPathScanningCandidateComponentProviderTests {
 
-	private static final String TEST_BASE_PACKAGE =
-			ClassPathScanningCandidateComponentProviderTests.class.getPackage().getName();
+	private static final String TEST_BASE_PACKAGE = "example.scannable";
+			//ClassPathScanningCandidateComponentProviderTests.class.getPackage().getName();
 
 
 	@Test
 	public void testWithDefaults() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(9, candidates.size());
+		assertEquals(6, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, FooServiceImpl.class));
 		assertTrue(containsBeanClass(candidates, StubFooDao.class));
@@ -86,7 +95,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addExcludeFilter(new AnnotationTypeFilter(Service.class));
 		provider.addExcludeFilter(new AnnotationTypeFilter(Controller.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(6, candidates.size());
+		assertEquals(3, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 		assertFalse(containsBeanClass(candidates, FooServiceImpl.class));
@@ -129,7 +138,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(9, candidates.size());
+		assertEquals(6, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 		assertTrue(containsBeanClass(candidates, FooServiceImpl.class));
@@ -142,7 +151,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		provider.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(8, candidates.size());
+		assertEquals(5, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 		assertFalse(containsBeanClass(candidates, FooServiceImpl.class));
