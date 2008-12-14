@@ -26,6 +26,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import example.scannable.DefaultNamedComponent;
+
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
