@@ -11,9 +11,9 @@
 	
 	<aop:aspectj-autoproxy/>
 	
-	<bean class="example.scannable.FooServiceImpl"/>
+	<bean id="fooServiceImpl" class="example.scannable.FooServiceImpl"/>
 	
-	<bean class="example.scannable.ServiceInvocationCounter"/>
+	<bean id="serviceInvocationCounter" class="example.scannable.ServiceInvocationCounter"/>
 	
 	<bean class="example.scannable.StubFooDao"/>
 		

@@ -16,7 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import example.scannable.FooService;
 import example.scannable.ServiceInvocationCounter;
@@ -24,21 +27,15 @@ import example.scannable.ServiceInvocationCounter;
 /**
  * @author Mark Fisher
  */
-public class SimpleConfigTests extends AbstractDependencyInjectionSpringContextTests {
-
-	private FooService fooService;
+public class SimpleConfigTests {
 	
-	private ServiceInvocationCounter serviceInvocationCounter;
-	
-	public void setFooService(FooService fooService) {
-		this.fooService = fooService;
-	}
-
-	public void setServiceInvocationCounter(ServiceInvocationCounter serviceInvocationCounter) {
-		this.serviceInvocationCounter = serviceInvocationCounter;
-	}
-
+	@Test
 	public void testFooService() throws Exception {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigLocations(), getClass());
+		
+		FooService fooService = (FooService) ctx.getBean("fooServiceImpl");
+		ServiceInvocationCounter serviceInvocationCounter = (ServiceInvocationCounter) ctx.getBean("serviceInvocationCounter");
+
 		String value = fooService.foo(1);
 		assertEquals("bar", value);
 		
@@ -47,10 +44,10 @@ public class SimpleConfigTests extends AbstractDependencyInjectionSpringContextT
 		fooService.foo(1);
 		assertEquals(2, serviceInvocationCounter.getCount());
 	}
-	
-	@Override
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/context/annotation/simpleConfigTests.xml"};
+
+	public String[] getConfigLocations() {
+		return new String[] {"simpleConfigTests.xml"};
 	}
+	
 
 }
