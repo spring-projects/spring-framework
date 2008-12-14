@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.context;
+package org.springframework.context.support;
+
+import org.springframework.aop.ThrowsAdvice;
 
 /**
- * Listener that maintains a global count of events.
+ * Advice object that implements <i>multiple</i> Advice interfaces.
  *
- * @author Rod Johnson
- * @since January 21, 2001
+ * @author Chris Beams
  */
-public class TestListener implements ApplicationListener {
+public class NoOpAdvice implements ThrowsAdvice {
 
-	private int eventCount;
-
-	public int getEventCount() {
-		return eventCount;
-	}
-
-	public void zeroCounter() {
-		eventCount = 0;
-	}
-
-	public void onApplicationEvent(ApplicationEvent e) {
-		++eventCount;
+	public void afterThrowing(Exception ex) throws Throwable {
+	    // no-op
 	}
 
 }
