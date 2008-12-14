@@ -16,13 +16,14 @@
 
 package org.springframework.context.annotation;
 
+import static org.junit.Assert.*;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.INestedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.NestedTestBean;
@@ -39,9 +40,11 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class CommonAnnotationBeanPostProcessorTests extends TestCase {
+public class CommonAnnotationBeanPostProcessorTests {
 
+	@Test
 	public void testPostConstructAndPreDestroy() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
@@ -53,6 +56,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroyCalled);
 	}
 
+	@Test
 	public void testPostConstructAndPreDestroyWithManualConfiguration() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		InitDestroyAnnotationBeanPostProcessor bpp = new InitDestroyAnnotationBeanPostProcessor();
@@ -67,6 +71,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroyCalled);
 	}
 
+	@Test
 	public void testSerialization() throws Exception {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		CommonAnnotationBeanPostProcessor bpp2 = (CommonAnnotationBeanPostProcessor)
@@ -77,6 +82,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroyCalled);
 	}
 
+	@Test
 	public void testSerializationWithManualConfiguration() throws Exception {
 		InitDestroyAnnotationBeanPostProcessor bpp = new InitDestroyAnnotationBeanPostProcessor();
 		bpp.setInitAnnotationType(PostConstruct.class);
@@ -89,6 +95,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroyCalled);
 	}
 
+	@Test
 	public void testResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -110,6 +117,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	@Test
 	public void testResourceInjectionWithTwoProcessors() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -134,6 +142,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	@Test
 	public void testResourceInjectionFromJndi() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -158,6 +167,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	@Test
 	public void testExtendedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -198,6 +208,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	@Test
 	public void testExtendedResourceInjectionWithOverriding() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -246,6 +257,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	@Test
 	public void testExtendedEjbInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
