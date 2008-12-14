@@ -16,26 +16,31 @@
 
 package org.springframework.context.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
+public class ComponentScanParserBeanDefinitionDefaultsTests {
 
 	private static final String TEST_BEAN_NAME = "componentScanParserBeanDefinitionDefaultsTests.DefaultsTestBean";
 
 	private static final String LOCATION_PREFIX = "org/springframework/context/annotation/";
 
 
+	@Before
 	public void setUp() {
 		DefaultsTestBean.INIT_COUNT = 0;
 	}
 
+	@Test
 	public void testDefaultLazyInit() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -46,6 +51,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertEquals("bean should have been instantiated", 1, DefaultsTestBean.INIT_COUNT);
 	}
 
+	@Test
 	public void testLazyInitTrue() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -58,6 +64,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertEquals("bean should have been instantiated", 1, DefaultsTestBean.INIT_COUNT);
 	}
 
+	@Test
 	public void testLazyInitFalse() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -68,6 +75,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertEquals("bean should have been instantiated", 1, DefaultsTestBean.INIT_COUNT);
 	}
 
+	@Test
 	public void testDefaultAutowire() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -79,6 +87,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertNull("no dependencies should have been autowired", bean.getPropertyDependency2());
 	}
 
+	@Test
 	public void testAutowireNo() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -90,6 +99,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertNull("no dependencies should have been autowired", bean.getPropertyDependency2());
 	}
 
+	@Test
 	public void testAutowireConstructor() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -102,6 +112,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertNull("property dependencies should not have been autowired", bean.getPropertyDependency2());
 	}
 
+	@Test
 	public void testAutowireByType() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -115,6 +126,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAutowireByName() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -127,6 +139,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertEquals("pd2", bean.getPropertyDependency2().getName());
 	}
 
+	@Test
 	public void testDefaultDependencyCheck() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -138,6 +151,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertNull("property dependencies should not have been autowired", bean.getPropertyDependency2());
 	}
 
+	@Test
 	public void testDependencyCheckAll() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -151,6 +165,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDependencyCheckObjectsWithAutowireByName() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -162,6 +177,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertNotNull("property dependencies should have been autowired", bean.getPropertyDependency2());
 	}
 
+	@Test
 	public void testDefaultInitAndDestroyMethodsNotDefined() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -173,6 +189,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertFalse("bean should not have been destroyed", bean.isDestroyed());
 	}
 
+	@Test
 	public void testDefaultInitAndDestroyMethodsDefined() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -184,6 +201,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests extends TestCase {
 		assertTrue("bean should have been destroyed", bean.isDestroyed());
 	}
 
+	@Test
 	public void testDefaultNonExistingInitAndDestroyMethodsDefined() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);

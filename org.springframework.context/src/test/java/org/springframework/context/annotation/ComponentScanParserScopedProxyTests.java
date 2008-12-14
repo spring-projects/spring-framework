@@ -16,8 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.SimpleMapScope;
@@ -30,8 +31,9 @@ import example.scannable.ScopedProxyTestBean;
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
-public class ComponentScanParserScopedProxyTests extends TestCase {
+public class ComponentScanParserScopedProxyTests {
 
+	@Test
 	public void testDefaultScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyDefaultTests.xml");
@@ -41,6 +43,7 @@ public class ComponentScanParserScopedProxyTests extends TestCase {
 		assertFalse(AopUtils.isAopProxy(bean));
 	}
 
+	@Test
 	public void testNoScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyNoTests.xml");
@@ -50,6 +53,7 @@ public class ComponentScanParserScopedProxyTests extends TestCase {
 		assertFalse(AopUtils.isAopProxy(bean));
 	}
 
+	@Test
 	public void testInterfacesScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
@@ -60,6 +64,7 @@ public class ComponentScanParserScopedProxyTests extends TestCase {
 		assertTrue(AopUtils.isJdkDynamicProxy(bean));
 	}
 
+	@Test
 	public void testTargetClassScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
@@ -69,6 +74,7 @@ public class ComponentScanParserScopedProxyTests extends TestCase {
 		assertTrue(AopUtils.isCglibProxy(bean));
 	}
 
+	@Test
 	public void testInvalidConfigScopedProxy() {
 		try {
 			new ClassPathXmlApplicationContext(
