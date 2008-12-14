@@ -16,23 +16,27 @@
 
 package org.springframework.context.annotation;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * @author Mark Fisher
  */
-public class ComponentScanParserWithUserDefinedStrategiesTests extends AbstractDependencyInjectionSpringContextTests {
+public class ComponentScanParserWithUserDefinedStrategiesTests {
 
+	@Test
 	public void testCustomBeanNameGenerator() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customNameGeneratorTests.xml");
 		assertTrue(context.containsBean("testing.fooServiceImpl"));
 	}
 
+	@Test
 	public void testCustomScopeMetadataResolver() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customScopeResolverTests.xml");
@@ -41,6 +45,7 @@ public class ComponentScanParserWithUserDefinedStrategiesTests extends AbstractD
 		assertFalse(bd.isSingleton());
 	}
 
+	@Test
 	public void testInvalidConstructorBeanNameGenerator() {
 		try {
 			new ClassPathXmlApplicationContext(
@@ -52,6 +57,7 @@ public class ComponentScanParserWithUserDefinedStrategiesTests extends AbstractD
 		}
 	}
 
+	@Test
 	public void testInvalidClassNameScopeMetadataResolver() {
 		try {
 			new ClassPathXmlApplicationContext(

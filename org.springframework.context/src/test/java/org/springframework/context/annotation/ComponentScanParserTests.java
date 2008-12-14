@@ -16,13 +16,14 @@
 
 package org.springframework.context.annotation;
 
+import static org.junit.Assert.*;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -35,9 +36,11 @@ import example.scannable.AutowiredQualifierFooService;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ComponentScanParserTests extends TestCase {
+public class ComponentScanParserTests {
 
+	@Test
 	public void testAspectJTypeFilter() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/aspectjTypeFilterTests.xml");
@@ -46,18 +49,21 @@ public class ComponentScanParserTests extends TestCase {
 		assertFalse(context.containsBean("scopedProxyTestBean"));
 	}
 
+	@Test
 	public void testNonMatchingResourcePattern() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/nonMatchingResourcePatternTests.xml");
 		assertFalse(context.containsBean("fooServiceImpl"));
 	}
 
+	@Test
 	public void testMatchingResourcePattern() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/matchingResourcePatternTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
 	}
 
+	@Test
 	public void testComponentScanWithAutowiredQualifier() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/componentScanWithAutowiredQualifierTests.xml");
@@ -66,6 +72,7 @@ public class ComponentScanParserTests extends TestCase {
 		assertEquals("bar", fooService.foo(123));
 	}
 
+	@Test
 	public void testCustomAnnotationUsedForBothComponentScanAndQualifier() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customAnnotationUsedForBothComponentScanAndQualifierTests.xml");
@@ -73,6 +80,7 @@ public class ComponentScanParserTests extends TestCase {
 		assertNotNull(testBean.getDependency());
 	}
 
+	@Test
 	public void testCustomTypeFilter() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customTypeFilterTests.xml");
