@@ -19,7 +19,7 @@ package org.springframework.context;
 import java.util.Map;
 
 /**
- * A stub {@link org.springframework.context.ApplicationListener}.
+ * A stub {@link ApplicationListener}.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
