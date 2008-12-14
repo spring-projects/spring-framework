@@ -16,74 +16,76 @@
 
 package org.springframework.context.event;
 
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.TestListener;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class EventPublicationInterceptorTests extends TestCase {
+public class EventPublicationInterceptorTests {
+	
+	private ApplicationEventPublisher publisher;
 
+
+	@Before
+	public void setUp() {
+		publisher = createMock(ApplicationEventPublisher.class);
+		replay(publisher);
+	}
+	
+	@After
+	public void tearDown() {
+		verify(publisher);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithNoApplicationEventClassSupplied() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-				ApplicationContext ctx = new StaticApplicationContext();
-				interceptor.setApplicationEventPublisher(ctx);
-				interceptor.afterPropertiesSet();
-			}
-		}.runTest();
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.afterPropertiesSet();
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithNonApplicationEventClassSupplied() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-				ApplicationContext ctx = new StaticApplicationContext();
-				interceptor.setApplicationEventPublisher(ctx);
-				interceptor.setApplicationEventClass(getClass());
-				interceptor.afterPropertiesSet();
-			}
-		}.runTest();
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventClass(getClass());
+		interceptor.afterPropertiesSet();
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-				ApplicationContext ctx = new StaticApplicationContext();
-				interceptor.setApplicationEventPublisher(ctx);
-				interceptor.setApplicationEventClass(ApplicationEvent.class);
-				interceptor.afterPropertiesSet();
-			}
-		}.runTest();
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventClass(ApplicationEvent.class);
+		interceptor.afterPropertiesSet();
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-				ApplicationContext ctx = new StaticApplicationContext();
-				interceptor.setApplicationEventPublisher(ctx);
-				interceptor.setApplicationEventClass(TestEventWithNoValidOneArgObjectCtor.class);
-				interceptor.afterPropertiesSet();
-			}
-		}.runTest();
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventClass(TestEventWithNoValidOneArgObjectCtor.class);
+		interceptor.afterPropertiesSet();
 	}
 
+	@Test
 	public void testExpectedBehavior() throws Exception {
 		TestBean target = new TestBean();
 		final TestListener listener = new TestListener();
