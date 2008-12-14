@@ -9,7 +9,7 @@
                             resource-pattern="**/thispackagedoesnotexist/*.class"
                             use-default-filters="false"
                             annotation-config="false">
-        <context:include-filter type="aspectj" expression="org.springframework.context.annotation.FooService+"/>
+        <context:include-filter type="aspectj" expression="example.scannable.FooService+"/>
     </context:component-scan>
 
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation3;
+package example.scannable;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 
-import example.scannable.FooDao;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Mark Fisher
  */
-@Repository
-@Qualifier("testing")
-public class StubFooDao implements FooDao {
+@Component
+@Aspect
+public class ServiceInvocationCounter {
 
-	public String findFoo(int id) {
-		return "bar";
+	private int useCount;
+
+	@Pointcut("execution(* example.scannable.FooService+.*(..))")
+	public void serviceExecution() {}
+
+	@Before("serviceExecution()")
+	public void countUse() {
+		this.useCount++;
+	}
+	
+	public int getCount() {
+		return this.useCount;
 	}
 
 }

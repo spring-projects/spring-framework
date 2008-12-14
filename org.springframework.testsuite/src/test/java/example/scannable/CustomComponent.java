@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package example.scannable;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Mark Fisher
- * @author Juergen Hoeller
  */
-@Scope("myScope")
-public class ScopedProxyTestBean implements FooService {
-
-	public String foo(int id) {
-		return "bar";
-	}
-
-	public boolean isInitCalled() {
-		return false;
-	}
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface CustomComponent {
 
 }

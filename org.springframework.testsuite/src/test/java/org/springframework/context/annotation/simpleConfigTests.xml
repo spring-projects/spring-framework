@@ -11,10 +11,10 @@
 	
 	<aop:aspectj-autoproxy/>
 	
-	<bean class="org.springframework.context.annotation.FooServiceImpl"/>
+	<bean class="example.scannable.FooServiceImpl"/>
 	
-	<bean class="org.springframework.context.annotation.ServiceInvocationCounter"/>
+	<bean class="example.scannable.ServiceInvocationCounter"/>
 	
-	<bean class="org.springframework.context.annotation.StubFooDao"/>
+	<bean class="example.scannable.StubFooDao"/>
 		
 </beans>

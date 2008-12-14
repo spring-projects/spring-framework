@@ -30,6 +30,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
+import example.scannable.AutowiredQualifierFooService;
+
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller

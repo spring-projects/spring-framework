@@ -1,27 +1,31 @@
 package org.springframework.context.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.test.AssertThrows;
 
 /**
  * Unit tests for the {@link AnnotationScopeMetadataResolver} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class AnnotationScopeMetadataResolverTests extends TestCase {
+public final class AnnotationScopeMetadataResolverTests {
 
 	private AnnotationScopeMetadataResolver scopeMetadataResolver;
 
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 	}
 
 
+	@Test
 	public void testThatResolveScopeMetadataDoesNotApplyScopedProxyModeToASingleton() {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithSingletonScope.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
@@ -31,6 +35,7 @@ public final class AnnotationScopeMetadataResolverTests extends TestCase {
 	}
 
 
+	@Test
 	public void testThatResolveScopeMetadataDoesApplyScopedProxyModeToAPrototype() {
 		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(ScopedProxyMode.INTERFACES);
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithPrototypeScope.class);
@@ -40,20 +45,14 @@ public final class AnnotationScopeMetadataResolverTests extends TestCase {
 		assertEquals(ScopedProxyMode.INTERFACES, scopeMetadata.getScopedProxyMode());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullScopedProxyMode() {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new AnnotationScopeMetadataResolver(null);
-			}
-		}.runTest();
+		new AnnotationScopeMetadataResolver(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetScopeAnnotationTypeWithNullType() {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				scopeMetadataResolver.setScopeAnnotationType(null);
-			}
-		}.runTest();
+		scopeMetadataResolver.setScopeAnnotationType(null);
 	}
 
 

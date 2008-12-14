@@ -16,12 +16,13 @@
 
 package org.springframework.context.annotation;
 
+import static org.junit.Assert.*;
+
 import javax.annotation.Resource;
 
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +35,14 @@ import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.5
  */
-public class AnnotationProcessorPerformanceTests extends TestCase {
+public class AnnotationProcessorPerformanceTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+	@Test
 	public void testPrototypeCreationWithResourcePropertiesIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -65,6 +68,7 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
+	@Test
 	public void testPrototypeCreationWithOverriddenResourcePropertiesIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -91,6 +95,7 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
+	@Test
 	public void testPrototypeCreationWithAutowiredPropertiesIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -116,6 +121,7 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
+	@Test
 	public void testPrototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
