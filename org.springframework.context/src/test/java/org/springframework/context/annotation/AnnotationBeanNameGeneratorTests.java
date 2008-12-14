@@ -16,9 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -29,16 +30,17 @@ import org.springframework.util.StringUtils;
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class AnnotationBeanNameGeneratorTests extends TestCase {
+public class AnnotationBeanNameGeneratorTests {
 
 	private AnnotationBeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 
+	@Test
 	public void testGenerateBeanNameWithNamedComponent() {
-		MockControl control = MockControl.createControl(BeanDefinitionRegistry.class);
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
-		control.replay();
+		BeanDefinitionRegistry registry = createMock(BeanDefinitionRegistry.class);
+		replay(registry);
 
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithName.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -46,13 +48,13 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
 		assertEquals("walden", beanName);
 
-		control.verify();
+		verify(registry);
 	}
 
+	@Test
 	public void testGenerateBeanNameWithDefaultNamedComponent() {
-		MockControl control = MockControl.createControl(BeanDefinitionRegistry.class);
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
-		control.replay();
+		BeanDefinitionRegistry registry = createMock(BeanDefinitionRegistry.class);
+		replay(registry);
 
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(DefaultNamedComponent.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -60,13 +62,13 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
 		assertEquals("thoreau", beanName);
 
-		control.verify();
+		verify(registry);
 	}
 
+	@Test
 	public void testGenerateBeanNameWithNamedComponentWhereTheNameIsBlank() {
-		MockControl control = MockControl.createControl(BeanDefinitionRegistry.class);
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
-		control.replay();
+		BeanDefinitionRegistry registry = createMock(BeanDefinitionRegistry.class);
+		replay(registry);
 
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithBlankName.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -77,13 +79,13 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 
 		assertEquals(expectedGeneratedBeanName, beanName);
 
-		control.verify();
+		verify(registry);
 	}
 
+	@Test
 	public void testGenerateBeanNameWithAnonymousComponentYieldsGeneratedBeanName() {
-		MockControl control = MockControl.createControl(BeanDefinitionRegistry.class);
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
-		control.replay();
+		BeanDefinitionRegistry registry = createMock(BeanDefinitionRegistry.class);
+		replay(registry);
 
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnonymousComponent.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
@@ -94,7 +96,7 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 
 		assertEquals(expectedGeneratedBeanName, beanName);
 
-		control.verify();
+		verify(registry);
 	}
 
 
