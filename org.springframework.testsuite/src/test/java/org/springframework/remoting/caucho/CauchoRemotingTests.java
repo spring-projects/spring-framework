@@ -40,7 +40,7 @@ public class CauchoRemotingTests extends TestCase {
 			// expected
 		}
 		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhost/testbean");
+		factory.setServiceUrl("http://localhosta/testbean");
 		factory.afterPropertiesSet();
 
 		assertTrue("Correct singleton value", factory.isSingleton());
@@ -66,7 +66,7 @@ public class CauchoRemotingTests extends TestCase {
 			// expected
 		}
 		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhost/testbean");
+		factory.setServiceUrl("http://localhosta/testbean");
 		factory.setUsername("test");
 		factory.setPassword("bean");
 		factory.setOverloadEnabled(true);
@@ -89,7 +89,7 @@ public class CauchoRemotingTests extends TestCase {
 		TestHessianProxyFactory proxyFactory = new TestHessianProxyFactory();
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhost/testbean");
+		factory.setServiceUrl("http://localhosta/testbean");
 		factory.setProxyFactory(proxyFactory);
 		factory.setUsername("test");
 		factory.setPassword("bean");
