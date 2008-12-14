@@ -20,8 +20,9 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocatorTests;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -33,9 +34,8 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 	public void testBaseBeanFactoryDefs() {
 		// Just test the base BeanFactory/AppContext defs we are going to work
 		// with in other tests.
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				new String[] {"/org/springframework/beans/factory/access/beans1.xml",
-				              "/org/springframework/beans/factory/access/beans2.xml"});
+		new XmlBeanFactory(new ClassPathResource("/org/springframework/beans/factory/access/beans1.xml"));
+		new XmlBeanFactory(new ClassPathResource("/org/springframework/beans/factory/access/beans2.xml"));
 	}
 
 	public void testBasicFunctionality() {
