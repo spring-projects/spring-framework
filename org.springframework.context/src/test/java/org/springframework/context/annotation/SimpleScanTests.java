@@ -16,7 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import example.scannable.FooService;
 import example.scannable.ServiceInvocationCounter;
@@ -24,30 +27,21 @@ import example.scannable.ServiceInvocationCounter;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class SimpleScanTests extends AbstractDependencyInjectionSpringContextTests {
+public class SimpleScanTests {
 
-	private FooService fooService;
-
-	private ServiceInvocationCounter serviceInvocationCounter;
-
-
-	public void setFooService(FooService fooService) {
-		this.fooService = fooService;
-	}
-
-	public void setServiceInvocationCounter(ServiceInvocationCounter serviceInvocationCounter) {
-		this.serviceInvocationCounter = serviceInvocationCounter;
-	}
-
-
-	@Override
 	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/context/annotation/simpleScanTests.xml"};
+		return new String[] {"simpleScanTests.xml"};
 	}
 
-
+	@Test
 	public void testFooService() throws Exception {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigLocations(), getClass());
+		
+		FooService fooService = (FooService) ctx.getBean("fooServiceImpl");
+		ServiceInvocationCounter serviceInvocationCounter = (ServiceInvocationCounter) ctx.getBean("serviceInvocationCounter");
+		
 		assertEquals(0, serviceInvocationCounter.getCount());
 
 		assertTrue(fooService.isInitCalled());
