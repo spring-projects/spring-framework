@@ -16,8 +16,11 @@
 
 package org.springframework.context.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -34,8 +37,9 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
+public class ClassPathBeanDefinitionScannerScopeTests {
 
 	private static final String DEFAULT_NAME = "default";
 
@@ -50,6 +54,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 	private ServletRequestAttributes newRequestAttributesWithSession;
 
 
+	@Before
 	public void setUp() {
 		this.oldRequestAttributes = new ServletRequestAttributes(new MockHttpServletRequest());
 		this.newRequestAttributes = new ServletRequestAttributes(new MockHttpServletRequest());
@@ -63,11 +68,13 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		this.newRequestAttributesWithSession = new ServletRequestAttributes(newRequestWithSession);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		RequestContextHolder.setRequestAttributes(null);
 	}
 
 
+	@Test
 	public void testSingletonScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.NO);
@@ -88,6 +95,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(MODIFIED_NAME, bean2.getName());
 	}
 
+	@Test
 	public void testSingletonScopeIgnoresProxyInterfaces() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.INTERFACES);
@@ -108,6 +116,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(MODIFIED_NAME, bean2.getName());
 	}
 
+	@Test
 	public void testSingletonScopeIgnoresProxyTargetClass() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.TARGET_CLASS);
@@ -128,6 +137,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(MODIFIED_NAME, bean2.getName());
 	}
 
+	@Test
 	public void testRequestScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.NO);
@@ -148,6 +158,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(DEFAULT_NAME, bean2.getName());
 	}
 
+	@Test
 	public void testRequestScopeWithProxiedInterfaces() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.INTERFACES);
@@ -168,6 +179,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(MODIFIED_NAME, bean.getName());
 	}
 
+	@Test
 	public void testRequestScopeWithProxiedTargetClass() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.TARGET_CLASS);
@@ -188,6 +200,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(MODIFIED_NAME, bean.getName());
 	}
 
+	@Test
 	public void testSessionScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		ApplicationContext context = createContext(ScopedProxyMode.NO);
@@ -208,6 +221,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(DEFAULT_NAME, bean2.getName());
 	}
 
+	@Test
 	public void testSessionScopeWithProxiedInterfaces() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		ApplicationContext context = createContext(ScopedProxyMode.INTERFACES);
@@ -234,6 +248,7 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertEquals(MODIFIED_NAME, bean.getName());
 	}
 
+	@Test
 	public void testSessionScopeWithProxiedTargetClass() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		ApplicationContext context = createContext(ScopedProxyMode.TARGET_CLASS);
