@@ -35,6 +35,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 17.11.2004
  */
 public class PathMatchingResourcePatternResolverTests {
@@ -49,10 +50,11 @@ public class PathMatchingResourcePatternResolverTests {
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_AOPALLIANCE =
-			new String[] {"Advice.class", "AspectException.class", "ConstructorInterceptor.class",
-										"ConstructorInvocation.class", "Interceptor.class", "Invocation.class",
-										"Joinpoint.class", "MethodInterceptor.class", "MethodInvocation.class"};
+	private static final String[] CLASSES_IN_COMMONSLOGGING =
+			new String[] {"Log.class", "LogConfigurationException.class", "LogFactory.class",
+										"LogFactory$1.class", "LogFactory$2.class", "LogFactory$3.class",
+										"LogFactory$4.class", "LogFactory$5.class", "LogFactory$6.class",
+										"LogSource.class"};
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -101,14 +103,14 @@ public class PathMatchingResourcePatternResolverTests {
 
 	@Test
 	public void testClasspathWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath:org/aopalliance/**/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_AOPALLIANCE);
+		Resource[] resources = resolver.getResources("classpath:org/apache/commons/logging/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
 	}
 
 	@Test
 	public void testClasspathStartWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/aopalliance/**/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_AOPALLIANCE);
+		Resource[] resources = resolver.getResources("classpath*:org/apache/commons/logging/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
 	}
 
 	private void assertProtocolAndFilename(Resource resource, String urlProtocol, String fileName) throws IOException {
