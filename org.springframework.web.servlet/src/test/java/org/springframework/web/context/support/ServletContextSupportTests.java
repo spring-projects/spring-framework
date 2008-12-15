@@ -16,6 +16,8 @@
 
 package org.springframework.web.context.support;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
@@ -44,10 +45,12 @@ import org.springframework.mock.web.MockServletContext;
  * Tests for various ServletContext-related support classes.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 22.12.2004
  */
-public class ServletContextSupportTests extends TestCase {
+public class ServletContextSupportTests {
 
+	@Test
 	public void testServletContextFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 
@@ -61,6 +64,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(sc, value);
 	}
 
+	@Test
 	public void testServletContextAttributeFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute("myAttr", "myValue");
@@ -76,6 +80,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals("myValue", value);
 	}
 
+	@Test
 	public void testServletContextAttributeFactoryBeanWithAttributeNotFound() {
 		MockServletContext sc = new MockServletContext();
 
@@ -96,6 +101,7 @@ public class ServletContextSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testServletContextParameterFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("myParam", "myValue");
@@ -111,6 +117,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals("myValue", value);
 	}
 
+	@Test
 	public void testServletContextParameterFactoryBeanWithAttributeNotFound() {
 		MockServletContext sc = new MockServletContext();
 
@@ -131,9 +138,10 @@ public class ServletContextSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testServletContextAttributeExporter() {
 		TestBean tb = new TestBean();
-		Map attributes = new HashMap();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("attr1", "value1");
 		attributes.put("attr2", tb);
 
@@ -146,6 +154,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertSame(tb, sc.getAttribute("attr2"));
 	}
 
+	@Test
 	public void testServletContextPropertyPlaceholderConfigurer() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -175,6 +184,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(tb2, tb1.getSpouse());
 	}
 
+	@Test
 	public void testServletContextPropertyPlaceholderConfigurerWithLocalOverriding() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -204,6 +214,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(tb2, tb1.getSpouse());
 	}
 
+	@Test
 	public void testServletContextPropertyPlaceholderConfigurerWithContextOverride() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -234,6 +245,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(tb2, tb1.getSpouse());
 	}
 
+	@Test
 	public void testServletContextPropertyPlaceholderConfigurerWithContextOverrideAndAttributes() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -266,6 +278,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(tb2, tb1.getSpouse());
 	}
 
+	@Test
 	public void testServletContextPropertyPlaceholderConfigurerWithAttributes() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -284,17 +297,17 @@ public class ServletContextSupportTests extends TestCase {
 		cas.addGenericArgumentValue("${var}name${age}");
 
 		pvs = new MutablePropertyValues();
-		List friends = new ManagedList();
+		List<Object> friends = new ManagedList<Object>();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
 		pvs.addPropertyValue("friends", friends);
 
-		Set someSet = new ManagedSet();
+		Set<Object> someSet = new ManagedSet<Object>();
 		someSet.add("na${age}me");
 		someSet.add(new RuntimeBeanReference("${ref}"));
 		pvs.addPropertyValue("someSet", someSet);
 
-		Map someMap = new ManagedMap();
+		Map<String, Object> someMap = new ManagedMap<String, Object>();
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
 		someMap.put("key2", "${age}name");
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
@@ -341,6 +354,7 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
 	}
 
+	@Test
 	public void testServletContextResourceLoader() {
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context");
 		ServletContextResourceLoader rl = new ServletContextResourceLoader(sc);
@@ -350,13 +364,14 @@ public class ServletContextSupportTests extends TestCase {
 		assertTrue(rl.getResource("/../context/WEB-INF/web.xml").exists());
 	}
 
+	@Test
 	public void testServletContextResourcePatternResolver() throws IOException {
-		final Set paths = new HashSet();
+		final Set<String> paths = new HashSet<String>();
 		paths.add("/WEB-INF/context1.xml");
 		paths.add("/WEB-INF/context2.xml");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
-			public Set getResourcePaths(String path) {
+			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return paths;
 				}
@@ -366,7 +381,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
-		Set foundPaths = new HashSet();
+		Set<String> foundPaths = new HashSet<String>();
 		for (int i = 0; i < found.length; i++) {
 			foundPaths.add(((ServletContextResource) found[i]).getPath());
 		}
@@ -375,13 +390,14 @@ public class ServletContextSupportTests extends TestCase {
 		assertTrue(foundPaths.contains("/WEB-INF/context2.xml"));
 	}
 
+	@Test
 	public void testServletContextResourcePatternResolverWithPatternPath() throws IOException {
-		final Set dirs = new HashSet();
+		final Set<String> dirs = new HashSet<String>();
 		dirs.add("/WEB-INF/mydir1/");
 		dirs.add("/WEB-INF/mydir2/");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
-			public Set getResourcePaths(String path) {
+			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return dirs;
 				}
@@ -397,7 +413,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*/*.xml");
-		Set foundPaths = new HashSet();
+		Set<String> foundPaths = new HashSet<String>();
 		for (int i = 0; i < found.length; i++) {
 			foundPaths.add(((ServletContextResource) found[i]).getPath());
 		}
@@ -406,17 +422,18 @@ public class ServletContextSupportTests extends TestCase {
 		assertTrue(foundPaths.contains("/WEB-INF/mydir2/context2.xml"));
 	}
 
+	@Test
 	public void testServletContextResourcePatternResolverWithUnboundedPatternPath() throws IOException {
-		final Set dirs = new HashSet();
+		final Set<String> dirs = new HashSet<String>();
 		dirs.add("/WEB-INF/mydir1/");
 		dirs.add("/WEB-INF/mydir2/");
 
-		final Set paths = new HashSet();
+		final Set<String> paths = new HashSet<String>();
 		paths.add("/WEB-INF/mydir2/context2.xml");
 		paths.add("/WEB-INF/mydir2/mydir3/");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
-			public Set getResourcePaths(String path) {
+			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return dirs;
 				}
@@ -435,7 +452,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/**/*.xml");
-		Set foundPaths = new HashSet();
+		Set<String> foundPaths = new HashSet<String>();
 		for (int i = 0; i < found.length; i++) {
 			foundPaths.add(((ServletContextResource) found[i]).getPath());
 		}
@@ -445,14 +462,15 @@ public class ServletContextSupportTests extends TestCase {
 		assertTrue(foundPaths.contains("/WEB-INF/mydir2/mydir3/context3.xml"));
 	}
 
+	@Test
 	public void testServletContextResourcePatternResolverWithAbsolutePaths() throws IOException {
-		final Set paths = new HashSet();
+		final Set<String> paths = new HashSet<String>();
 		paths.add("C:/webroot/WEB-INF/context1.xml");
 		paths.add("C:/webroot/WEB-INF/context2.xml");
 		paths.add("C:/webroot/someOtherDirThatDoesntContainPath");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
-			public Set getResourcePaths(String path) {
+			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return paths;
 				}
@@ -462,7 +480,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
-		Set foundPaths = new HashSet();
+		Set<String> foundPaths = new HashSet<String>();
 		for (int i = 0; i < found.length; i++) {
 			foundPaths.add(((ServletContextResource) found[i]).getPath());
 		}

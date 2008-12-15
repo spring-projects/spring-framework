@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context;
+package org.springframework.context;
 
-import javax.servlet.ServletConfig;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * @author Juergen Hoeller
  */
-public class ServletConfigAwareBean implements ServletConfigAware {
+public class BeanThatBroadcasts implements ApplicationContextAware {
 
-	private ServletConfig servletConfig;
+	public ApplicationContext applicationContext;
 
-	public void setServletConfig(ServletConfig servletConfig) {
-		this.servletConfig = servletConfig;
+	public int receivedCount;
+
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+		if (applicationContext.getDisplayName().indexOf("listener") != -1) {
+			applicationContext.getBean("listener");
+		}
 	}
 
-	public ServletConfig getServletConfig() {
-		return servletConfig;
-	}
 }

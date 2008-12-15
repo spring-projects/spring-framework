@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -31,8 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
@@ -55,10 +56,12 @@ import org.springframework.web.servlet.theme.FixedThemeResolver;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 18.06.2003
  */
-public class ViewResolverTests extends TestCase {
+public class ViewResolverTests {
 
+	@Test
 	public void testBeanNameViewResolver() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -81,6 +84,7 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("Correct URL", "/example2.jsp", ((JstlView) view).getUrl());
 	}
 
+	@Test
 	public void testUrlBasedViewResolverWithNullViewClass() {
 		UrlBasedViewResolver resolver = new UrlBasedViewResolver();
 		try {
@@ -92,22 +96,26 @@ public class ViewResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testUrlBasedViewResolverWithoutPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
 		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithoutPrefixes(vr);
 	}
 
+	@Test
 	public void testUrlBasedViewResolverWithPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
 		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithPrefixes(vr);
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithoutPrefixes() throws Exception {
 		doTestUrlBasedViewResolverWithoutPrefixes(new InternalResourceViewResolver());
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithPrefixes() throws Exception {
 		doTestUrlBasedViewResolverWithPrefixes(new InternalResourceViewResolver());
 	}
@@ -176,6 +184,7 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithAttributes() throws Exception {
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -219,6 +228,7 @@ public class ViewResolverTests extends TestCase {
 		assertEquals(new Integer(2), request.getAttribute("key2"));
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithContextBeans() throws Exception {
 		MockServletContext sc = new MockServletContext();
 		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -256,6 +266,7 @@ public class ViewResolverTests extends TestCase {
 		view.render(new HashMap(), request, response);
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithSpecificContextBeans() throws Exception {
 		MockServletContext sc = new MockServletContext();
 		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -293,6 +304,7 @@ public class ViewResolverTests extends TestCase {
 		view.render(new HashMap(), request, response);
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithJstl() throws Exception {
 		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
 
@@ -330,6 +342,7 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
 	}
 
+	@Test
 	public void testInternalResourceViewResolverWithJstlAndContextParam() throws Exception {
 		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
 
@@ -369,6 +382,7 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("message2", lc.getResourceBundle().getString("code2"));
 	}
 
+	@Test
 	public void testXmlViewResolver() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("testBean", TestBean.class);
@@ -413,6 +427,7 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct test2 attribute", "testvalue2".equals(request.getAttribute("test2")));
 	}
 
+	@Test
 	public void testXmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			protected Resource getResourceByPath(String path) {
@@ -432,6 +447,7 @@ public class ViewResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			protected Resource getResourceByPath(String path) {
@@ -458,6 +474,7 @@ public class ViewResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCacheRemoval() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());

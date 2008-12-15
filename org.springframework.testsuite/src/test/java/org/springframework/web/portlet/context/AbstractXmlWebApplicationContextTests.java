@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context;
+package org.springframework.web.portlet.context;
 
 import java.util.Locale;
 
@@ -32,13 +32,19 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
+ * Should ideally be eliminated.  Copied when splitting .testsuite up into individual bundles.
+ * 
+ * @see org.springframework.web.context.XmlWebApplicationContextTests
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class XmlWebApplicationContextTests extends AbstractApplicationContextTests {
+public abstract class AbstractXmlWebApplicationContextTests extends AbstractApplicationContextTests {
 
 	private ConfigurableWebApplicationContext root;
 

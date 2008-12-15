@@ -3,7 +3,7 @@
 
 <beans>
 
-	<import resource="classpath:/org/springframework/web/context/WEB-INF/test-servlet.xml"/>
+	<import resource="classpath:/org/springframework/web/portlet/context/WEB-INF/test-servlet.xml"/>
 	
 	<bean id="portletContextAwareBean" class="org.springframework.web.portlet.context.PortletContextAwareBean"/>
 	
