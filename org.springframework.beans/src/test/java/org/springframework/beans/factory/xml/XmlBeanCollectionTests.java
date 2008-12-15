@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,9 +30,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
-import org.hibernate.FlushMode;
-
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -44,10 +44,12 @@ import org.springframework.core.io.ClassPathResource;
  * Tests for collections in XML bean definitions.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 19.12.2004
  */
-public class XmlBeanCollectionTests extends TestCase {
+public class XmlBeanCollectionTests {
 
+	@Test
 	public void testCollectionFactoryDefaults() throws Exception {
 		ListFactoryBean listFactory = new ListFactoryBean();
 		listFactory.setSourceList(new LinkedList());
@@ -65,6 +67,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(mapFactory.getObject() instanceof LinkedHashMap);
 	}
 
+	@Test
 	public void testRefSubelement() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
@@ -73,24 +76,28 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(jen.getSpouse() == dave);
 	}
 
+	@Test
 	public void testPropertyWithLiteralValueSubelement() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean verbose = (TestBean) xbf.getBean("verbose");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
+	@Test
 	public void testPropertyWithIdRefLocalAttrSubelement() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean verbose = (TestBean) xbf.getBean("verbose2");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
+	@Test
 	public void testPropertyWithIdRefBeanAttrSubelement() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean verbose = (TestBean) xbf.getBean("verbose3");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
+	@Test
 	public void testRefSubelementsBuildCollection() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean jen = (TestBean) xbf.getBean("jenny");
@@ -108,6 +115,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		// Should be ordered
 	}
 
+	@Test
 	public void testRefSubelementsBuildCollectionWithPrototypes() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 
@@ -132,6 +140,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue("Dave not same instance", friends2[1] != friends[1]);
 	}
 
+	@Test
 	public void testRefSubelementsBuildCollectionFromSingleElement() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean loner = (TestBean) xbf.getBean("loner");
@@ -140,6 +149,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(loner.getFriends().contains(dave));
 	}
 
+	@Test
 	public void testBuildCollectionFromMixtureOfReferencesAndValues() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		MixedCollectionBean jumble = (MixedCollectionBean) xbf.getBean("jumble");
@@ -152,6 +162,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(l.get(3).equals("rod"));
 	}
 
+	@Test
 	public void testInvalidBeanNameReference() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		try {
@@ -164,12 +175,14 @@ public class XmlBeanCollectionTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEmptyMap() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyMap");
 		assertTrue(hasMap.getMap().size() == 0);
 	}
 
+	@Test
 	public void testMapWithLiteralsOnly() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("literalMap");
@@ -179,6 +192,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(hasMap.getMap().get("fa") == null);
 	}
 
+	@Test
 	public void testMapWithLiteralsAndReferences() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMap");
@@ -189,6 +203,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(hasMap.getMap().get(new Integer(5)).equals("david"));
 	}
 
+	@Test
 	public void testMapWithLiteralsAndPrototypeReferences() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 
@@ -206,6 +221,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue("Not same instance", hasMap2.getMap().get("jenny") != hasMap.getMap().get("jenny"));
 	}
 
+	@Test
 	public void testMapWithLiteralsReferencesAndList() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMapWithList");
@@ -245,12 +261,14 @@ public class XmlBeanCollectionTests extends TestCase {
 				m.get("jenny").equals(jenny));
 	}
 
+	@Test
 	public void testEmptySet() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptySet");
 		assertTrue(hasMap.getSet().size() == 0);
 	}
 
+	@Test
 	public void testPopulatedSet() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("set");
@@ -265,6 +283,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals(null, it.next());
 	}
 
+	@Test
 	public void testEmptyProps() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyProps");
@@ -272,6 +291,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals(hasMap.getProps().getClass(), Properties.class);
 	}
 
+	@Test
 	public void testPopulatedProps() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("props");
@@ -280,6 +300,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(hasMap.getProps().get("2").equals("TWO"));
 	}
 
+	@Test
 	public void testObjectArray() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("objectArray");
@@ -288,6 +309,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(hasMap.getObjectArray()[1].equals(xbf.getBean("jenny")));
 	}
 
+	@Test
 	public void testClassArray() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("classArray");
@@ -296,6 +318,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(hasMap.getClassArray()[1].equals(Exception.class));
 	}
 
+	@Test
 	public void testIntegerArray() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("integerArray");
@@ -305,6 +328,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(hasMap.getIntegerArray()[2].intValue() == 2);
 	}
 
+	@Test
 	public void testProps() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 
@@ -319,6 +343,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("TWO", hasMap2.getProps().getProperty("2"));
 	}
 
+	@Test
 	public void testListFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		List list = (List) xbf.getBean("listFactory");
@@ -328,6 +353,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("jenny", list.get(1));
 	}
 
+	@Test
 	public void testPrototypeListFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		List list = (List) xbf.getBean("pListFactory");
@@ -337,6 +363,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("jenny", list.get(1));
 	}
 
+	@Test
 	public void testSetFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Set set = (Set) xbf.getBean("setFactory");
@@ -346,6 +373,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(set.contains("jenny"));
 	}
 
+	@Test
 	public void testPrototypeSetFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Set set = (Set) xbf.getBean("pSetFactory");
@@ -355,6 +383,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(set.contains("jenny"));
 	}
 
+	@Test
 	public void testMapFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Map map = (Map) xbf.getBean("mapFactory");
@@ -364,6 +393,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("jenny", map.get("jen"));
 	}
 
+	@Test
 	public void testPrototypeMapFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Map map = (Map) xbf.getBean("pMapFactory");
@@ -373,6 +403,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("jenny", map.get("jen"));
 	}
 
+	@Test
 	public void testChoiceBetweenSetAndMap() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		MapAndSet sam = (MapAndSet) xbf.getBean("setAndMap");
@@ -384,14 +415,14 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("val3", map.get("key3"));
 	}
 
+	@Test
 	public void testEnumSetFactory() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Set set = (Set) xbf.getBean("enumSetFactory");
 		assertTrue(set.size() == 2);
-		assertTrue(set.contains(FlushMode.NEVER));
-		assertTrue(set.contains(FlushMode.COMMIT));
+		assertTrue(set.contains("ONE"));
+		assertTrue(set.contains("TWO"));
 	}
-
 
 	public static class MapAndSet {
 

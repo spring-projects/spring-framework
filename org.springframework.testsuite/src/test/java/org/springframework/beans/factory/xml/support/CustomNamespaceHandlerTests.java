@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.xml.support;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
-import org.xml.sax.InputSource;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -39,17 +40,20 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.xml.sax.InputSource;
 
 /**
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class CustomNamespaceHandlerTests extends TestCase {
+public final class CustomNamespaceHandlerTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		String location = "org/springframework/beans/factory/xml/support/customNamespace.properties";
 		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), location);
 		this.beanFactory = new DefaultListableBeanFactory();
@@ -61,16 +65,19 @@ public final class CustomNamespaceHandlerTests extends TestCase {
 	}
 
 
+	@Test
 	public void testSimpleParser() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assetTestBean(bean);
 	}
 
+	@Test
 	public void testSimpleDecorator() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("customisedTestBean");
 		assetTestBean(bean);
 	}
 
+	@Test
 	public void testProxyingDecorator() throws Exception {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("debuggingTestBean");
 		assetTestBean(bean);
@@ -80,6 +87,7 @@ public final class CustomNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect advice class.", DebugInterceptor.class, advisors[0].getAdvice().getClass());
 	}
 
+	@Test
 	public void testChainedDecorators() throws Exception {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("chainedTestBean");
 		assetTestBean(bean);
@@ -90,6 +98,7 @@ public final class CustomNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect advice class.", NopInterceptor.class, advisors[1].getAdvice().getClass());
 	}
 
+	@Test
 	public void testDecorationViaAttribute() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getBeanDefinition("decorateWithAttribute");
 		assertEquals("foo", beanDefinition.getAttribute("objectName"));
@@ -98,8 +107,9 @@ public final class CustomNamespaceHandlerTests extends TestCase {
 	/**
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
 	 */
+	@Test
 	public void testCustomElementNestedWithinUtilList() throws Exception {
-		List things = (List) this.beanFactory.getBean("list.of.things");
+		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
@@ -107,8 +117,9 @@ public final class CustomNamespaceHandlerTests extends TestCase {
 	/**
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
 	 */
+	@Test
 	public void testCustomElementNestedWithinUtilSet() throws Exception {
-		Set things = (Set) this.beanFactory.getBean("set.of.things");
+		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
@@ -116,8 +127,9 @@ public final class CustomNamespaceHandlerTests extends TestCase {
 	/**
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
 	 */
+	@Test
 	public void testCustomElementNestedWithinUtilMap() throws Exception {
-		Map things = (Map) this.beanFactory.getBean("map.of.things");
+		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
