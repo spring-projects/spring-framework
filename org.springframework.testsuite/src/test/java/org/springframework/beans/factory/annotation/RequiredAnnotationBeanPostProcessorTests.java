@@ -24,6 +24,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 2.0
  */
 public class RequiredAnnotationBeanPostProcessorTests extends TestCase {

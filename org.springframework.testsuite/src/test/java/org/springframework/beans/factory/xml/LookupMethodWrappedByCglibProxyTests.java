@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
@@ -28,16 +30,19 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class LookupMethodWrappedByCglibProxyTests extends TestCase {
+public class LookupMethodWrappedByCglibProxyTests {
 
 	private ApplicationContext applicationContext;
 
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		this.applicationContext = new ClassPathXmlApplicationContext("overloadOverrides.xml", getClass());
 		resetInterceptor();
 	}
 
+	@Test
 	public void testAutoProxiedLookup() {
 		OverloadLookup olup = (OverloadLookup) applicationContext.getBean("autoProxiedOverload");
 		ITestBean jenny = olup.newTestBean();
@@ -46,6 +51,7 @@ public class LookupMethodWrappedByCglibProxyTests extends TestCase {
 		assertInterceptorCount(2);
 	}
 
+	@Test
 	public void testRegularlyProxiedLookup() {
 		OverloadLookup olup = (OverloadLookup) applicationContext.getBean("regularlyProxiedOverload");
 		ITestBean jenny = olup.newTestBean();

@@ -352,7 +352,7 @@
 		</property>
 	</bean>
 
-	<bean id="setAndMap" class="org.springframework.beans.factory.xml.XmlBeanCollectionTests$MapAndSet">
+	<bean id="setAndMap" class="org.springframework.beans.factory.xml.MapAndSet">
 		<constructor-arg>
 			<map>
 				<description>My Map</description>

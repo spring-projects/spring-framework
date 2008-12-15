@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
@@ -28,13 +29,15 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class CustomAutowireConfigurerTests extends TestCase {
+public class CustomAutowireConfigurerTests {
 
 	private static final String CONFIG_LOCATION =
 			"classpath:org/springframework/beans/factory/annotation/customAutowireConfigurer.xml";
 
 
+	@Test
 	public void testCustomResolver() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);

@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.junit.Assert.*;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,13 +34,15 @@ import org.springframework.context.support.StaticApplicationContext;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class QualifierAnnotationTests extends TestCase {
+public class QualifierAnnotationTests {
 
 	private static final String CONFIG_LOCATION =
 			"classpath:org/springframework/beans/factory/xml/qualifierAnnotationTests.xml";
 
 
+	@Test
 	public void testNonQualifiedFieldFails() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -54,6 +57,7 @@ public class QualifierAnnotationTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testQualifiedByValue() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -65,6 +69,7 @@ public class QualifierAnnotationTests extends TestCase {
 		assertEquals("Larry", person.getName());
 	}
 
+	@Test
 	public void testQualifiedByBeanName() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -76,6 +81,7 @@ public class QualifierAnnotationTests extends TestCase {
 		assertEquals("LarryBean", person.getName());
 	}
 
+	@Test
 	public void testQualifiedByAlias() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -87,6 +93,7 @@ public class QualifierAnnotationTests extends TestCase {
 		assertEquals("LarryBean", person.getName());		
 	}
 
+	@Test
 	public void testQualifiedByAnnotation() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -98,6 +105,7 @@ public class QualifierAnnotationTests extends TestCase {
 		assertEquals("LarrySpecial", person.getName());
 	}
 
+	@Test
 	public void testQualifiedByCustomValue() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -109,6 +117,7 @@ public class QualifierAnnotationTests extends TestCase {
 		assertEquals("Curly", person.getName());
 	}
 
+	@Test
 	public void testQualifiedByAnnotationValue() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -120,6 +129,7 @@ public class QualifierAnnotationTests extends TestCase {
 		assertEquals("LarrySpecial", person.getName());
 	}
 
+	@Test
 	public void testQualifiedByAttributesFailsWithoutCustomQualifierRegistered() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
@@ -134,6 +144,7 @@ public class QualifierAnnotationTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testQualifiedByAttributesWithCustomQualifierRegistered() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);

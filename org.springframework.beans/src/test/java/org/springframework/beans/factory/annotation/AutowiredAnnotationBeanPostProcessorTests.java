@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.annotation;
 
+import static org.junit.Assert.*;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,8 +25,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.NestedTestBean;
@@ -41,9 +42,11 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Chris Beams
  */
-public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
+public class AutowiredAnnotationBeanPostProcessorTests {
 
+	@Test
 	public void testIncompleteBeanDefinition() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -58,6 +61,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -78,6 +82,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean2());
 	}
 
+	@Test
 	public void testExtendedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerResolvableDependency(BeanFactory.class, bf);
@@ -109,6 +114,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(bf, bean.getBeanFactory());
 	}
 
+	@Test
 	public void testExtendedResourceInjectionWithOverriding() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerResolvableDependency(BeanFactory.class, bf);
@@ -134,6 +140,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testExtendedResourceInjectionWithAtRequired() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerResolvableDependency(BeanFactory.class, bf);
@@ -158,6 +165,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(bf, bean.getBeanFactory());
 	}
 
+	@Test
 	public void testOptionalResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -188,6 +196,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testOptionalCollectionResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -225,6 +234,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testOptionalCollectionResourceInjectionWithSingleElement() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -257,6 +267,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testOptionalResourceInjectionWithIncompleteDependencies() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -275,6 +286,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testOptionalResourceInjectionWithNoDependencies() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -291,6 +303,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testConstructorResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerResolvableDependency(BeanFactory.class, bf);
@@ -322,6 +335,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(bf, bean.getBeanFactory());
 	}
 
+	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidates() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -344,6 +358,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAsCollection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -367,6 +382,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAndFallback() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -382,6 +398,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAndDefaultFallback() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -395,6 +412,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testConstructorInjectionWithMap() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -423,6 +441,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.getTestBeanMap().values().contains(tb2));
 	}
 
+	@Test
 	public void testFieldInjectionWithMap() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -451,6 +470,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.getTestBeanMap().values().contains(tb2));
 	}
 
+	@Test
 	public void testMethodInjectionWithMap() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -475,6 +495,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean());
 	}
 
+	@Test
 	public void testMethodInjectionWithMapAndMultipleMatches() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -485,7 +506,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
 
 		try {
-			MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
+			bf.getBean("annotatedBean");
 			fail("should have failed, more than one bean of type");
 		}
 		catch (BeanCreationException e) {
@@ -494,6 +515,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -514,6 +536,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testMethodInjectionWithMapAndNoMatches() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -527,6 +550,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -545,6 +569,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -566,6 +591,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenMultipleDependenciesFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -591,6 +617,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -609,6 +636,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -630,6 +658,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -655,6 +684,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -675,6 +705,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -693,6 +724,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalFieldResourceInjectionWhenMultipleDependenciesFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -718,6 +750,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -738,6 +771,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -756,6 +790,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	@Test
 	public void testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -788,6 +823,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4040"
 	 * target="_blank">SPR-4040</a>.
 	 */
+	@Test
 	public void testBeanAutowiredWithFactoryBean() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -1246,21 +1282,21 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 	private static class FactoryBeanDependentBean {
 
 		@Autowired
-		private FactoryBean factoryBean;
+		private FactoryBean<?> factoryBean;
 
-		public final FactoryBean getFactoryBean() {
+		public final FactoryBean<?> getFactoryBean() {
 			return this.factoryBean;
 		}
 	}
 
 
-	public static class StringFactoryBean implements FactoryBean {
+	public static class StringFactoryBean implements FactoryBean<String> {
 
-		public Object getObject() throws Exception {
+		public String getObject() throws Exception {
 			return "";
 		}
 
-		public Class getObjectType() {
+		public Class<String> getObjectType() {
 			return String.class;
 		}
 
