@@ -17,7 +17,8 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+
+import org.junit.Test;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
@@ -25,40 +26,30 @@ import org.xml.sax.InputSource;
  * Unit tests for the {@link DelegatingEntityResolver} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class DelegatingEntityResolverTests extends TestCase {
+public final class DelegatingEntityResolverTests {
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWhereDtdEntityResolverIsNull() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new DelegatingEntityResolver(null, new NoOpEntityResolver());
-			}
-		}.runTest();
+		new DelegatingEntityResolver(null, new NoOpEntityResolver());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWhereSchemaEntityResolverIsNull() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new DelegatingEntityResolver(new NoOpEntityResolver(), null);
-			}
-		}.runTest();
+		new DelegatingEntityResolver(new NoOpEntityResolver(), null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWhereEntityResolversAreBothNull() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new DelegatingEntityResolver(null, null);
-			}
-		}.runTest();
+		new DelegatingEntityResolver(null, null);
 	}
 
 
 	private static final class NoOpEntityResolver implements EntityResolver {
-
 		public InputSource resolveEntity(String publicId, String systemId) {
 			return null;
 		}
-
 	}
 
 }

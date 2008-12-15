@@ -16,14 +16,14 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
-import javax.mail.Session;
-
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -32,9 +32,11 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class FactoryMethodTests extends TestCase {
+public class FactoryMethodTests {
 
+	@Test
 	public void testFactoryMethodsSingletonOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -68,6 +70,7 @@ public class FactoryMethodTests extends TestCase {
 		assertTrue(tb.wasDestroyed());
 	}
 
+	@Test
 	public void testFactoryMethodsWithNullInstance() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -85,6 +88,7 @@ public class FactoryMethodTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFactoryMethodsWithNullValue() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -101,6 +105,7 @@ public class FactoryMethodTests extends TestCase {
 		assertEquals("Juergen", fm.getTestBean().getName());
 	}
 
+	@Test
 	public void testFactoryMethodsWithAutowire() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -112,6 +117,7 @@ public class FactoryMethodTests extends TestCase {
 		assertEquals("Juergen", fm.getTestBean().getName());
 	}
 
+	@Test
 	public void testProtectedFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -121,6 +127,7 @@ public class FactoryMethodTests extends TestCase {
 		assertEquals(1, tb.getAge());
 	}
 
+	@Test
 	public void testPrivateFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -130,6 +137,7 @@ public class FactoryMethodTests extends TestCase {
 		assertEquals(1, tb.getAge());
 	}
 
+	@Test
 	public void testFactoryMethodsPrototypeOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -173,6 +181,7 @@ public class FactoryMethodTests extends TestCase {
 	/**
 	 * Tests where the static factory method is on a different class.
 	 */
+	@Test
 	public void testFactoryMethodsOnExternalClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -198,6 +207,7 @@ public class FactoryMethodTests extends TestCase {
 		assertTrue(Arrays.asList(names).contains("externalFactoryMethodWithArgs"));
 	}
 
+	@Test
 	public void testInstanceFactoryMethodWithoutArgs() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -215,6 +225,7 @@ public class FactoryMethodTests extends TestCase {
 		assertEquals(1, InstanceFactory.count);
 	}
 
+	@Test
 	public void testFactoryMethodNoMatchingStaticMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -228,6 +239,7 @@ public class FactoryMethodTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -263,6 +275,7 @@ public class FactoryMethodTests extends TestCase {
 		assertEquals("arg1", fm4.getTestBean().getName());
 	}
 
+	@Test
 	public void testCannotSpecifyFactoryMethodArgumentsOnSingleton() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -276,6 +289,7 @@ public class FactoryMethodTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCannotSpecifyFactoryMethodArgumentsOnSingletonAfterCreation() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -290,6 +304,7 @@ public class FactoryMethodTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFactoryMethodWithDifferentReturnType() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -308,18 +323,40 @@ public class FactoryMethodTests extends TestCase {
 		assertTrue(!Arrays.asList(names).contains("listInstance"));
 		names = xbf.getBeanNamesForType(List.class);
 		assertTrue(Arrays.asList(names).contains("listInstance"));
-		List list = (List) xbf.getBean("listInstance");
+		List<?> list = (List<?>) xbf.getBean("listInstance");
 		assertEquals(Collections.EMPTY_LIST, list);
 	}
 
+	@Test
 	public void testFactoryMethodForJavaMailSession() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
-		Session session = (Session) xbf.getBean("javaMailSession");
+		MailSession session = (MailSession) xbf.getBean("javaMailSession");
 		assertEquals("someuser", session.getProperty("mail.smtp.user"));
 		assertEquals("somepw", session.getProperty("mail.smtp.password"));
 	}
+	
+}
 
+class MailSession {
+	private Properties props;
+
+    private MailSession() {
+	}
+	
+	public void setProperties(Properties props) {
+        this.props = props;
+	}
+	
+    public static MailSession getDefaultInstance(Properties props) {
+    	MailSession session = new MailSession();
+    	session.setProperties(props);
+    	return session;
+    }
+    
+    public Object getProperty(String key) {
+        return props.get(key);
+    }
 }
