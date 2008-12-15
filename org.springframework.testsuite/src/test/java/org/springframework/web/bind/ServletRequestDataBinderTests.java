@@ -16,20 +16,28 @@
 
 package org.springframework.web.bind;
 
+import static org.junit.Assert.*;
+
 import java.beans.PropertyEditorSupport;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.beans.AbstractPropertyValuesTests;
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
+public class ServletRequestDataBinderTests {
 
+	@Test
 	public void testBindingWithNestedObjectCreation() throws Exception {
 		TestBean tb = new TestBean();
 
@@ -49,6 +57,7 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertEquals("test", tb.getSpouse().getName());
 	}
 
+	@Test
 	public void testFieldPrefixCausesFieldReset() throws Exception {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
@@ -64,6 +73,7 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertFalse(target.isPostProcessed());
 	}
 
+	@Test
 	public void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() throws Exception {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
@@ -80,6 +90,7 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertFalse(target.isPostProcessed());
 	}
 
+	@Test
 	public void testWithCommaSeparatedStringArray() throws Exception {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
@@ -97,6 +108,7 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertEquals("Expected only 1 item to be bound", 1, target.getStringArray().length);
 	}
 
+	@Test
 	public void testBindingWithNestedObjectCreationAndWrongOrder() throws Exception {
 		TestBean tb = new TestBean();
 
@@ -116,6 +128,7 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertEquals("test", tb.getSpouse().getName());
 	}
 
+	@Test
 	public void testNoPrefix() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("forname", "Tony");
@@ -126,6 +139,7 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		doTestTony(pvs);
 	}
 
+	@Test
 	public void testPrefix() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("test_forname", "Tony");
@@ -140,12 +154,14 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		doTestTony(pvs);
 	}
 
+	@Test
 	public void testNoParameters() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 		assertTrue("Found no parameters", pvs.getPropertyValues().length == 0);
 	}
 
+	@Test
 	public void testMultipleValuesForParameter() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		String[] original = new String[] {"Tony", "Rod"};
@@ -156,6 +172,31 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertTrue("Found array value", pvs.getPropertyValue("forname").getValue() instanceof String[]);
 		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
 		assertEquals("Correct values", Arrays.asList(values), Arrays.asList(original));
+	}
+
+	/**
+	 * Must contain: forname=Tony surname=Blair age=50
+	 */
+	protected void doTestTony(PropertyValues pvs) throws Exception {
+		assertTrue("Contains 3", pvs.getPropertyValues().length == 3);
+		assertTrue("Contains forname", pvs.contains("forname"));
+		assertTrue("Contains surname", pvs.contains("surname"));
+		assertTrue("Contains age", pvs.contains("age"));
+		assertTrue("Doesn't contain tory", !pvs.contains("tory"));
+
+		PropertyValue[] ps = pvs.getPropertyValues();
+		Map<String, String> m = new HashMap<String, String>();
+		m.put("forname", "Tony");
+		m.put("surname", "Blair");
+		m.put("age", "50");
+		for (int i = 0; i < ps.length; i++) {
+			Object val = m.get(ps[i].getName());
+			assertTrue("Can't have unexpected value", val != null);
+			assertTrue("Val i string", val instanceof String);
+			assertTrue("val matches expected", val.equals(ps[i].getValue()));
+			m.remove(ps[i].getName());
+		}
+		assertTrue("Map size is 0", m.size() == 0);
 	}
 
 }

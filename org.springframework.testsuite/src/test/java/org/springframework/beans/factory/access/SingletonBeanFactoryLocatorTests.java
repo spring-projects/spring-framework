@@ -16,24 +16,19 @@
 
 package org.springframework.beans.factory.access;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.ClassUtils;
 
 /**
  * @author Colin Sampaleanu
+ * @author Chris Beams
  */
-public class SingletonBeanFactoryLocatorTests extends TestCase {
+public class SingletonBeanFactoryLocatorTests {
 
-	public void testBaseBeanFactoryDefs() {
-		// Just test the base BeanFactory/AppContext defs we are going to work with
-		// in other tests.
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"/org/springframework/beans/factory/access/beans*.xml");
-	}
-
+	@Test
 	public void testBasicFunctionality() {
 		SingletonBeanFactoryLocator facLoc = new SingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
@@ -74,6 +69,7 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 	 * 2nd and subsequent calls will actuall get back same locator instance. This is not
 	 * an issue really, since the contained beanfactories will still be loaded and released.
 	 */
+	@Test
 	public void testGetInstance() {
 		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
