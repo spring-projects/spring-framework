@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.xml.support;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.UtilNamespaceHandler;
-import org.springframework.test.AssertThrows;
 
 /**
  * Unit and integration tests for the {@link DefaultNamespaceHandlerResolver} class.
@@ -29,8 +29,9 @@ import org.springframework.test.AssertThrows;
  * @author Rob Harrop
  * @author Rick Evans
  */
-public class DefaultNamespaceHandlerResolverTests extends TestCase {
+public class DefaultNamespaceHandlerResolverTests {
 
+	@Test
 	public void testResolvedMappedHandler() {
 		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(getClass().getClassLoader());
 		NamespaceHandler handler = resolver.resolve("http://www.springframework.org/schema/util");
@@ -38,6 +39,7 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 		assertEquals("Incorrect handler loaded", UtilNamespaceHandler.class, handler.getClass());
 	}
 
+	@Test
 	public void testResolvedMappedHandlerWithNoArgCtor() {
 		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver();
 		NamespaceHandler handler = resolver.resolve("http://www.springframework.org/schema/util");
@@ -45,6 +47,7 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 		assertEquals("Incorrect handler loaded", UtilNamespaceHandler.class, handler.getClass());
 	}
 
+	@Test
 	public void testNonExistentHandlerClass() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
@@ -56,6 +59,7 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testResolveInvalidHandler() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/invalid.properties";
 		try {
@@ -66,19 +70,18 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCtorWithNullClassLoaderArgument() throws Exception {
 		// simply must not bail...
 		new DefaultNamespaceHandlerResolver(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new DefaultNamespaceHandlerResolver(null, null);
-			}
-		}.runTest();
+		new DefaultNamespaceHandlerResolver(null, null);
 	}
 
+	@Test
 	public void testCtorWithNonExistentMappingLocationArgument() throws Exception {
 		// simply must not bail; we don't want non-existent resources to result in an Exception
 		new DefaultNamespaceHandlerResolver(null, "738trbc bobabloobop871");
