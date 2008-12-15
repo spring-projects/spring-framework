@@ -6,7 +6,7 @@
 	<!--
 		Just included for the count: not to mean anything in particular
 	-->
-	<bean id="something" class="org.springframework.aop.support.DefaultPointcutAdvisor"/>
+	<bean id="something" class="org.springframework.beans.GenericIntegerBean"/>
 
 	<bean id="indexedBean" class="org.springframework.beans.IndexedTestBean"/>
 
