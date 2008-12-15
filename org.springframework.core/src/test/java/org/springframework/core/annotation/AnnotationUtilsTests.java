@@ -16,26 +16,26 @@
 
 package org.springframework.core.annotation;
 
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
-import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationInherited;
+import static org.junit.Assert.*;
+import static org.springframework.core.annotation.AnnotationUtils.*;
 
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.core.Ordered;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Chris Beams
  */
-public class AnnotationUtilsTests extends TestCase {
+public class AnnotationUtilsTests {
 
+	@Test
 	public void testFindMethodAnnotationOnLeaf() throws SecurityException, NoSuchMethodException {
 
 		final Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
@@ -44,6 +44,7 @@ public class AnnotationUtilsTests extends TestCase {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
+	@Test
 	public void testFindMethodAnnotationOnRoot() throws SecurityException, NoSuchMethodException {
 
 		final Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
@@ -52,6 +53,7 @@ public class AnnotationUtilsTests extends TestCase {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
+	@Test
 	public void testFindMethodAnnotationOnRootButOverridden() throws SecurityException, NoSuchMethodException {
 
 		final Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
@@ -60,12 +62,14 @@ public class AnnotationUtilsTests extends TestCase {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
+	@Test
 	public void testFindMethodAnnotationNotAnnotated() throws SecurityException, NoSuchMethodException {
 
 		final Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
 		assertNull(findAnnotation(m, Order.class));
 	}
 
+	@Test
 	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
 
 		final Method m = SimpleFoo.class.getMethod("something", Object.class);
@@ -87,6 +91,7 @@ public class AnnotationUtilsTests extends TestCase {
 	// assertNotNull(o);
 	// }
 
+	@Test
 	public void testFindAnnotationDeclaringClass() throws Exception {
 
 		// no class-level annotation
@@ -113,6 +118,7 @@ public class AnnotationUtilsTests extends TestCase {
 				SubNonInheritedAnnotationClass.class));
 	}
 
+	@Test
 	public void testIsAnnotationDeclaredLocally() throws Exception {
 
 		// no class-level annotation
@@ -132,6 +138,7 @@ public class AnnotationUtilsTests extends TestCase {
 		assertFalse(isAnnotationDeclaredLocally(Order.class, SubNonInheritedAnnotationClass.class));
 	}
 
+	@Test
 	public void testIsAnnotationInherited() throws Exception {
 
 		// no class-level annotation
@@ -154,6 +161,7 @@ public class AnnotationUtilsTests extends TestCase {
 		assertFalse(isAnnotationInherited(Order.class, SubNonInheritedAnnotationClass.class));
 	}
 
+	@Test
 	public void testGetValueFromAnnotation() throws Exception {
 
 		final Method method = SimpleFoo.class.getMethod("something", Object.class);
@@ -163,6 +171,7 @@ public class AnnotationUtilsTests extends TestCase {
 		assertEquals(1, AnnotationUtils.getValue(order));
 	}
 
+	@Test
 	public void testGetDefaultValueFromAnnotation() throws Exception {
 
 		final Method method = SimpleFoo.class.getMethod("something", Object.class);
@@ -172,6 +181,7 @@ public class AnnotationUtilsTests extends TestCase {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order));
 	}
 
+	@Test
 	public void testGetDefaultValueFromAnnotationType() throws Exception {
 
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class, AnnotationUtils.VALUE));
@@ -276,4 +286,10 @@ public class AnnotationUtilsTests extends TestCase {
 	public static class SubNonInheritedAnnotationClass extends NonInheritedAnnotationClass {
 	}
 
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@interface Transactional {
+	
 }

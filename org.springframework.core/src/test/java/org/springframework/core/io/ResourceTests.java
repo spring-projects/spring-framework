@@ -16,10 +16,7 @@
 
 package org.springframework.core.io;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -30,9 +27,7 @@ import java.util.HashSet;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * @author Juergen Hoeller
@@ -94,7 +89,7 @@ public class ResourceTests {
 		assertEquals(resource, resource3);
 
 		// Check whether equal/hashCode works in a HashSet.
-		HashSet resources = new HashSet();
+		HashSet<Resource> resources = new HashSet<Resource>();
 		resources.add(resource);
 		resources.add(resource2);
 		assertEquals(1, resources.size());
@@ -133,14 +128,6 @@ public class ResourceTests {
 		assertEquals(new UrlResource(getClass().getResource("Resource.class")), resource);
 		Resource resource2 = new UrlResource("file:core/io/Resource.class");
 		assertEquals(resource2, new UrlResource("file:core/../core/io/./Resource.class"));
-	}
-
-	@Test
-	public void testServletContextResource() throws IOException {
-		MockServletContext sc = new MockServletContext();
-		Resource resource = new ServletContextResource(sc, "org/springframework/core/io/Resource.class");
-		doTestResource(resource);
-		assertEquals(resource, new ServletContextResource(sc, "org/springframework/core/../core/io/./Resource.class"));
 	}
 
 	private void doTestResource(Resource resource) throws IOException {
@@ -184,14 +171,6 @@ public class ResourceTests {
 		Resource resource = new UrlResource("file:dir/");
 		Resource relative = resource.createRelative("subdir");
 		assertEquals(new UrlResource("file:dir/subdir"), relative);
-	}
-
-	@Test
-	public void testServletContextResourceWithRelativePath() throws IOException {
-		MockServletContext sc = new MockServletContext();
-		Resource resource = new ServletContextResource(sc, "dir/");
-		Resource relative = resource.createRelative("subdir");
-		assertEquals(new ServletContextResource(sc, "dir/subdir"), relative);
 	}
 
 	/*
