@@ -16,81 +16,77 @@
 
 package org.springframework.beans.propertyeditors;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
+
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link CustomCollectionEditor} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class CustomCollectionEditorTests extends TestCase {
+public final class CustomCollectionEditorTests {
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullCollectionType() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new CustomCollectionEditor(null);
-			}
-		}.runTest();
+		new CustomCollectionEditor(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNonCollectionType() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new CustomCollectionEditor(String.class);
-			}
-		}.runTest();
+		new CustomCollectionEditor(String.class);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
-				editor.setValue("1");
-			}
-		}.runTest();
+		CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
+		editor.setValue("1");
 	}
 
+	@Test
 	public void testSunnyDaySetValue() throws Exception {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue(new int[] {0, 1, 2});
 		Object value = editor.getValue();
 		assertNotNull(value);
 		assertTrue(value instanceof ArrayList);
-		List list = (List) value;
+		List<?> list = (List<?>) value;
 		assertEquals("There must be 3 elements in the converted collection", 3, list.size());
 		assertEquals(new Integer(0), list.get(0));
 		assertEquals(new Integer(1), list.get(1));
 		assertEquals(new Integer(2), list.get(2));
 	}
 
+	@Test
 	public void testWhenTargetTypeIsExactlyTheCollectionInterfaceUsesFallbackCollectionType() throws Exception {
 		CustomCollectionEditor editor = new CustomCollectionEditor(Collection.class);
 		editor.setValue("0, 1, 2");
-		Collection value = (Collection) editor.getValue();
+		Collection<?> value = (Collection<?>) editor.getValue();
 		assertNotNull(value);
 		assertEquals("There must be 1 element in the converted collection", 1, value.size());
 		assertEquals("0, 1, 2", value.iterator().next());
 	}
 
+	@Test
 	public void testSunnyDaySetAsTextYieldsSingleValue() throws Exception {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue("0, 1, 2");
 		Object value = editor.getValue();
 		assertNotNull(value);
 		assertTrue(value instanceof ArrayList);
-		List list = (List) value;
+		List<?> list = (List<?>) value;
 		assertEquals("There must be 1 element in the converted collection", 1, list.size());
 		assertEquals("0, 1, 2", list.get(0));
 	}
 
 
-	private static final class CollectionTypeWithNoNoArgCtor extends ArrayList {
-
+	@SuppressWarnings("serial")
+	private static final class CollectionTypeWithNoNoArgCtor extends ArrayList<Object> {
 		public CollectionTypeWithNoNoArgCtor(String anArg) {
 		}
 	}
