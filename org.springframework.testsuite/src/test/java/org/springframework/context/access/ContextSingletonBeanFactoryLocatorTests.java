@@ -45,11 +45,9 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 
 	@Test
 	public void testBasicFunctionality() {
-		// Just use definition file from the SingletonBeanFactoryLocator test,
-		// since it is completely valid.
 		ContextSingletonBeanFactoryLocator facLoc = new ContextSingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(
-				SingletonBeanFactoryLocatorTests.class, "ref1.xml"));
+				getClass(), "context.xml"));
 		
 		basicFunctionalityTest(facLoc);
 
@@ -75,18 +73,18 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.
 		BeanFactoryLocator facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(
-				SingletonBeanFactoryLocatorTests.class, "ref1.xml"));
+				getClass(), "context.xml"));
 		getInstanceTest1(facLoc);
 		
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(
-				SingletonBeanFactoryLocatorTests.class, "ref1.xml"));
+				getClass(), "context.xml"));
 		getInstanceTest2(facLoc);
 
 		// This will actually get another locator instance, as the key is the resource name.
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				"classpath:" + ClassUtils.addResourcePathToPackagePath(
-				SingletonBeanFactoryLocatorTests.class, "ref1.xml"));
+				getClass(), "context.xml"));
 		getInstanceTest3(facLoc);
 	}
 
