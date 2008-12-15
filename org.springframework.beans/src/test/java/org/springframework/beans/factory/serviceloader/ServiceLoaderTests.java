@@ -16,22 +16,25 @@
 
 package org.springframework.beans.factory.serviceloader;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 import java.util.ServiceLoader;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ServiceLoaderTests extends TestCase {
+public class ServiceLoaderTests {
 
+	@Test
 	public void testServiceLoaderFactoryBean() {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
 				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
@@ -42,10 +45,11 @@ public class ServiceLoaderTests extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
 		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
-		ServiceLoader serviceLoader = (ServiceLoader) bf.getBean("service");
+		ServiceLoader<?> serviceLoader = (ServiceLoader<?>) bf.getBean("service");
 		assertTrue(serviceLoader.iterator().next() instanceof DocumentBuilderFactory);
 	}
 
+	@Test
 	public void testServiceFactoryBean() {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
 				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
@@ -59,6 +63,7 @@ public class ServiceLoaderTests extends TestCase {
 		assertTrue(bf.getBean("service") instanceof DocumentBuilderFactory);
 	}
 
+	@Test
 	public void testServiceListFactoryBean() {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
 				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
@@ -69,7 +74,7 @@ public class ServiceLoaderTests extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);
 		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
-		List serviceList = (List) bf.getBean("service");
+		List<?> serviceList = (List<?>) bf.getBean("service");
 		assertTrue(serviceList.get(0) instanceof DocumentBuilderFactory);
 	}
 

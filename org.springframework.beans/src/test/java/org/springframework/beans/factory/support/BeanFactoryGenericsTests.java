@@ -16,9 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
+import static org.junit.Assert.*;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.GenericBean;
 import org.springframework.beans.GenericIntegerBean;
 import org.springframework.beans.GenericSetOfIntegerBean;
@@ -41,42 +43,46 @@ import org.springframework.core.io.UrlResource;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 20.01.2006
  */
-public class BeanFactoryGenericsTests extends TestCase {
+public class BeanFactoryGenericsTests {
 
+	@Test
 	public void testGenericSetProperty() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
 		rbd.getPropertyValues().addPropertyValue("integerSet", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
 	}
 
+	@Test
 	public void testGenericListProperty() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		List input = new ArrayList();
+		List<String> input = new ArrayList<String>();
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
 		rbd.getPropertyValues().addPropertyValue("resourceList", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
 	}
 
+	@Test
 	public void testGenericListPropertyWithAutowiring() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
@@ -90,35 +96,38 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
 	}
 
+	@Test
 	public void testGenericListPropertyWithOptionalAutowiring() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertNull(gb.getResourceList());
 	}
 
+	@Test
 	public void testGenericMapProperty() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getPropertyValues().addPropertyValue("shortMap", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 	}
 
+	@Test
 	public void testGenericListOfArraysProperty() throws MalformedURLException {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
-		GenericBean<?> gb = (GenericBean) bf.getBean("listOfArrays");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("listOfArrays");
 
 		assertEquals(1, gb.getListOfArrays().size());
 		String[] array = gb.getListOfArrays().get(0);
@@ -128,22 +137,24 @@ public class BeanFactoryGenericsTests extends TestCase {
 	}
 
 
+	@Test
 	public void testGenericSetConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
 	}
 
+	@Test
 	public void testGenericSetConstructorWithAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerSingleton("integer1", new Integer(4));
@@ -151,37 +162,39 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
 	}
 
+	@Test
 	public void testGenericSetConstructorWithOptionalAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertNull(gb.getIntegerSet());
 	}
 
+	@Test
 	public void testGenericSetListConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
-		List input2 = new ArrayList();
+		List<String> input2 = new ArrayList<String>();
 		input2.add("http://localhost:8080");
 		input2.add("http://localhost:9090");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
@@ -189,6 +202,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
 	}
 
+	@Test
 	public void testGenericSetListConstructorWithAutowiring() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerSingleton("integer1", new Integer(4));
@@ -198,7 +212,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
@@ -206,6 +220,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
 	}
 
+	@Test
 	public void testGenericSetListConstructorWithOptionalAutowiring() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
@@ -213,27 +228,28 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertNull(gb.getIntegerSet());
 		assertNull(gb.getResourceList());
 	}
 
+	@Test
 	public void testGenericSetMapConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
-		Map input2 = new HashMap();
+		Map<String, String> input2 = new HashMap<String, String>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
@@ -241,39 +257,41 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 	}
 
+	@Test
 	public void testGenericMapResourceConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
 	}
 
+	@Test
 	public void testGenericMapMapConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("1", "0");
 		input.put("2", "3");
-		Map input2 = new HashMap();
+		Map<String, String> input2 = new HashMap<String, String>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertNotSame(gb.getPlainMap(), gb.getShortMap());
 		assertEquals(2, gb.getPlainMap().size());
@@ -284,18 +302,19 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 	}
 
+	@Test
 	public void testGenericMapMapConstructorWithSameRefAndConversion() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("1", "0");
 		input.put("2", "3");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertNotSame(gb.getPlainMap(), gb.getShortMap());
 		assertEquals(2, gb.getPlainMap().size());
@@ -306,18 +325,19 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(3), gb.getShortMap().get(new Short("2")));
 	}
 
+	@Test
 	public void testGenericMapMapConstructorWithSameRefAndNoConversion() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
+		Map<Short, Integer> input = new HashMap<Short, Integer>();
 		input.put(new Short((short) 1), new Integer(0));
 		input.put(new Short((short) 2), new Integer(3));
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertSame(gb.getPlainMap(), gb.getShortMap());
 		assertEquals(2, gb.getShortMap().size());
@@ -325,22 +345,24 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(3), gb.getShortMap().get(new Short("2")));
 	}
 
+	@Test
 	public void testGenericMapWithKeyTypeConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals("5", gb.getLongMap().get(new Long("4")));
 		assertEquals("7", gb.getLongMap().get(new Long("6")));
 	}
 
+	@Test
 	public void testGenericMapWithCollectionValueConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
@@ -350,57 +372,59 @@ public class BeanFactoryGenericsTests extends TestCase {
 		});
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map input = new HashMap();
-		HashSet value1 = new HashSet();
+		Map<String, AbstractCollection<?>> input = new HashMap<String, AbstractCollection<?>>();
+		HashSet<Integer> value1 = new HashSet<Integer>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
-		ArrayList value2 = new ArrayList();
+		ArrayList<Boolean> value2 = new ArrayList<Boolean>();
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
 		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
 	}
 
 
+	@Test
 	public void testGenericSetFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
 	}
 
+	@Test
 	public void testGenericSetListFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
-		List input2 = new ArrayList();
+		List<String> input2 = new ArrayList<String>();
 		input2.add("http://localhost:8080");
 		input2.add("http://localhost:9090");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
@@ -408,22 +432,23 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
 	}
 
+	@Test
 	public void testGenericSetMapFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Set input = new HashSet();
+		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
-		Map input2 = new HashMap();
+		Map<String, String> input2 = new HashMap<String, String>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
@@ -431,41 +456,43 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 	}
 
+	@Test
 	public void testGenericMapResourceFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
 	}
 
+	@Test
 	public void testGenericMapMapFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("1", "0");
 		input.put("2", "3");
-		Map input2 = new HashMap();
+		Map<String, String> input2 = new HashMap<String, String>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals("0", gb.getPlainMap().get("1"));
 		assertEquals("3", gb.getPlainMap().get("2"));
@@ -473,23 +500,25 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 	}
 
+	@Test
 	public void testGenericMapWithKeyTypeFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map input = new HashMap();
+		Map<String, String> input = new HashMap<String, String>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertEquals("5", gb.getLongMap().get(new Long("4")));
 		assertEquals("7", gb.getLongMap().get(new Long("6")));
 	}
 
+	@Test
 	public void testGenericMapWithCollectionValueFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
@@ -500,45 +529,49 @@ public class BeanFactoryGenericsTests extends TestCase {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map input = new HashMap();
-		HashSet value1 = new HashSet();
+		Map<String, AbstractCollection<?>> input = new HashMap<String, AbstractCollection<?>>();
+		HashSet<Integer> value1 = new HashSet<Integer>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
-		ArrayList value2 = new ArrayList();
+		ArrayList<Boolean> value2 = new ArrayList<Boolean>();
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
 		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
 		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
 	}
 
+	@Test
 	public void testGenericListBean() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
-		List list = (List) bf.getBean("list");
+		List<?> list = (List<?>) bf.getBean("list");
 		assertEquals(1, list.size());
 		assertEquals(new URL("http://localhost:8080"), list.get(0));
 	}
 
+	@Test
 	public void testGenericSetBean() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
-		Set set = (Set) bf.getBean("set");
+		Set<?> set = (Set<?>) bf.getBean("set");
 		assertEquals(1, set.size());
 		assertEquals(new URL("http://localhost:8080"), set.iterator().next());
 	}
 
+	@Test
 	public void testGenericMapBean() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
-		Map map = (Map) bf.getBean("map");
+		Map<?, ?> map = (Map<?, ?>) bf.getBean("map");
 		assertEquals(1, map.size());
 		assertEquals(new Integer(10), map.keySet().iterator().next());
 		assertEquals(new URL("http://localhost:8080"), map.values().iterator().next());
 	}
 
+	@Test
 	public void testGenericallyTypedIntegerBean() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
@@ -547,6 +580,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(30), gb.getGenericListProperty().get(1));
 	}
 
+	@Test
 	public void testGenericallyTypedSetOfIntegerBean() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
@@ -555,6 +589,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
 	}
 
+	@Test
 	public void testSetBean() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		UrlSet us = (UrlSet) bf.getBean("setBean");
@@ -563,14 +598,17 @@ public class BeanFactoryGenericsTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class NamedUrlList extends LinkedList<URL> {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class NamedUrlSet extends HashSet<URL> {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class NamedUrlMap extends HashMap<Integer, URL> {
 	}
 
@@ -585,6 +623,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class UrlSet extends HashSet<URL> {
 
 		public UrlSet() {
