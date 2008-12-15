@@ -16,53 +16,40 @@
 
 package org.springframework.beans.factory.parsing;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
-import org.easymock.AbstractMatcher;
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
 
+import org.apache.commons.logging.Log;
+import org.junit.Test;
 import org.springframework.core.io.DescriptiveResource;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public final class FailFastProblemReporterTests extends TestCase {
+public final class FailFastProblemReporterTests {
 
+	@Test(expected=BeanDefinitionParsingException.class)
 	public void testError() throws Exception {
-		new AssertThrows(BeanDefinitionParsingException.class) {
-			public void test() throws Exception {
-				FailFastProblemReporter reporter = new FailFastProblemReporter();
-				reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),
-						null, new IllegalArgumentException()));
-			}
-		}.runTest();
+		FailFastProblemReporter reporter = new FailFastProblemReporter();
+		reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),
+				null, new IllegalArgumentException()));
 	}
 
+	@Test
 	public void testWarn() throws Exception {
-		IllegalArgumentException rootCause = new IllegalArgumentException();
 		Problem problem = new Problem("VGER", new Location(new DescriptiveResource("here")),
 				null, new IllegalArgumentException());
 
-		MockControl mockLog = MockControl.createControl(Log.class);
-		Log log = (Log) mockLog.getMock();
-		log.warn(null, rootCause);
-		mockLog.setMatcher(new AbstractMatcher() {
-			public boolean matches(Object[] expected, Object[] actual) {
-				Assert.assertEquals(2, actual.length);
-				Assert.assertTrue(actual[1] instanceof IllegalArgumentException);
-				return true;
-			}
-		});
-		mockLog.replay();
+		Log log = createMock(Log.class);
+		log.warn(anyObject(), isA(IllegalArgumentException.class));
+		replay(log);
 
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
 		reporter.setLogger(log);
 		reporter.warning(problem);
 
-		mockLog.verify();
+		verify(log);
 	}
 
 }

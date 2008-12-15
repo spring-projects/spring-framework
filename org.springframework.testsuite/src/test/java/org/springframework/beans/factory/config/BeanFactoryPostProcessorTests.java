@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -27,10 +28,12 @@ import org.springframework.context.support.StaticApplicationContext;
 /**
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 02.10.2003
  */
-public class BeanFactoryPostProcessorTests extends TestCase {
+public class BeanFactoryPostProcessorTests {
 
+	@Test
 	public void testRegisteredBeanFactoryPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -42,6 +45,7 @@ public class BeanFactoryPostProcessorTests extends TestCase {
 		assertTrue(bfpp.wasCalled);
 	}
 	
+	@Test
 	public void testDefinedBeanFactoryPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -52,6 +56,7 @@ public class BeanFactoryPostProcessorTests extends TestCase {
 		assertTrue(bfpp.wasCalled);
 	}
 
+	@Test
 	public void testMultipleDefinedBeanFactoryPostProcessors() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -68,6 +73,7 @@ public class BeanFactoryPostProcessorTests extends TestCase {
 		assertTrue(bfpp.wasCalled);
 	}
 
+	@Test
 	public void testBeanFactoryPostProcessorNotExecutedByBeanFactory() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class));

@@ -16,22 +16,19 @@
 
 package org.springframework.beans.factory.parsing;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link ConstructorArgumentEntry} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class ConstructorArgumentEntryTests extends TestCase {
+public final class ConstructorArgumentEntryTests {
 
-	public void testCtorBailsOnNegativeCtorIndexArgument() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new ConstructorArgumentEntry(-1);
-			}
-		}.runTest();
+	@Test(expected=IllegalArgumentException.class)
+	public void testCtorBailsOnNegativeCtorIndexArgument() {
+		new ConstructorArgumentEntry(-1);
 	}
 
 }
