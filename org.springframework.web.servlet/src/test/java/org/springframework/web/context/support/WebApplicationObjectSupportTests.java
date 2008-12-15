@@ -16,10 +16,11 @@
 
 package org.springframework.web.context.support;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockServletContext;
@@ -27,10 +28,12 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 28.08.2003
  */
-public class WebApplicationObjectSupportTests extends TestCase {
+public class WebApplicationObjectSupportTests {
 
+	@Test
 	public void testWebApplicationObjectSupport() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -43,6 +46,7 @@ public class WebApplicationObjectSupportTests extends TestCase {
 		assertEquals(wao.getTempDir(), tempDir);
 	}
 
+	@Test
 	public void testWebApplicationObjectSupportWithWrongContext() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));

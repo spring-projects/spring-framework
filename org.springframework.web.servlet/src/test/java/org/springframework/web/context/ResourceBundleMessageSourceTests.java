@@ -19,7 +19,6 @@ package org.springframework.web.context;
 import java.util.Date;
 import java.util.Locale;
 
-import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;

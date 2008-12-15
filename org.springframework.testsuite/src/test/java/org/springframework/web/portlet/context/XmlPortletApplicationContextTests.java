@@ -30,14 +30,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
-import org.springframework.web.context.XmlWebApplicationContextTests;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class XmlPortletApplicationContextTests extends XmlWebApplicationContextTests {
+public class XmlPortletApplicationContextTests extends AbstractXmlWebApplicationContextTests {
 
 	private ConfigurablePortletApplicationContext root;
 	
@@ -46,7 +46,7 @@ public class XmlPortletApplicationContextTests extends XmlWebApplicationContextT
 		PortletContext portletContext = new MockPortletContext();
 		PortletConfig portletConfig = new MockPortletConfig(portletContext);
 		root.setPortletConfig(portletConfig);
-		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
+		root.setConfigLocations(new String[] {"/org/springframework/web/portlet/context/WEB-INF/applicationContext.xml"});
 		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
 			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {

@@ -16,6 +16,8 @@
 
 package org.springframework.web.context.support;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 
 import javax.servlet.Servlet;
@@ -23,8 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
@@ -34,10 +35,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.0
  */
-public class HttpRequestHandlerTests extends TestCase {
+public class HttpRequestHandlerTests {
 
+	@Test
 	public void testHttpRequestHandlerServletPassThrough() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		final MockHttpServletRequest request = new MockHttpServletRequest();
