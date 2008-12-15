@@ -16,22 +16,25 @@
 
 package org.springframework.beans.propertyeditors;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import static org.junit.Assert.*;
 
 import java.util.ResourceBundle;
+
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link ResourceBundleEditor} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class ResourceBundleEditorTests extends TestCase {
+public final class ResourceBundleEditorTests {
 
 	private static final String BASE_NAME = ResourceBundleEditorTests.class.getName();
 	private static final String MESSAGE_KEY = "punk";
 
 
+	@Test
 	public void testSetAsTextWithJustBaseName() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME);
@@ -43,6 +46,7 @@ public final class ResourceBundleEditorTests extends TestCase {
 		assertEquals(MESSAGE_KEY, string);
 	}
 
+	@Test
 	public void testSetAsTextWithBaseNameThatEndsInDefaultSeparator() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "_");
@@ -54,6 +58,7 @@ public final class ResourceBundleEditorTests extends TestCase {
 		assertEquals(MESSAGE_KEY, string);
 	}
 
+	@Test
 	public void testSetAsTextWithBaseNameAndLanguageCode() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "Lang" + "_en");
@@ -65,6 +70,7 @@ public final class ResourceBundleEditorTests extends TestCase {
 		assertEquals("yob", string);
 	}
 
+	@Test
 	public void testSetAsTextWithBaseNameLanguageAndCountryCode() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountry" + "_en_GB");
@@ -76,6 +82,7 @@ public final class ResourceBundleEditorTests extends TestCase {
 		assertEquals("chav", string);
 	}
 
+	@Test
 	public void testSetAsTextWithTheKitchenSink() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountryDialect" + "_en_GB_GLASGOW");
@@ -87,40 +94,28 @@ public final class ResourceBundleEditorTests extends TestCase {
 		assertEquals("ned", string);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetAsTextWithNull() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				ResourceBundleEditor editor = new ResourceBundleEditor();
-				editor.setAsText(null);
-			}
-		}.runTest();
+		ResourceBundleEditor editor = new ResourceBundleEditor();
+		editor.setAsText(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetAsTextWithEmptyString() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				ResourceBundleEditor editor = new ResourceBundleEditor();
-				editor.setAsText("");
-			}
-		}.runTest();
+		ResourceBundleEditor editor = new ResourceBundleEditor();
+		editor.setAsText("");
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetAsTextWithWhiteSpaceString() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				ResourceBundleEditor editor = new ResourceBundleEditor();
-				editor.setAsText("   ");
-			}
-		}.runTest();
+		ResourceBundleEditor editor = new ResourceBundleEditor();
+		editor.setAsText("   ");
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetAsTextWithJustSeparatorString() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				ResourceBundleEditor editor = new ResourceBundleEditor();
-				editor.setAsText("_");
-			}
-		}.runTest();
+		ResourceBundleEditor editor = new ResourceBundleEditor();
+		editor.setAsText("_");
 	}
 
 }

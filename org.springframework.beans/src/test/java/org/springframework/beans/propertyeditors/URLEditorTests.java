@@ -16,19 +16,21 @@
 
 package org.springframework.beans.propertyeditors;
 
+import static org.junit.Assert.*;
+
 import java.beans.PropertyEditor;
 import java.net.URL;
 
-import junit.framework.TestCase;
-
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 import org.springframework.util.ClassUtils;
 
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class URLEditorTests extends TestCase {
+public final class URLEditorTests {
 
+	@Test
 	public void testStandardURI() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("mailto:juergen.hoeller@interface21.com");
@@ -38,6 +40,7 @@ public final class URLEditorTests extends TestCase {
 		assertEquals(url.toExternalForm(), urlEditor.getAsText());
 	}
 
+	@Test
 	public void testStandardURL() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("http://www.springframework.org");
@@ -47,6 +50,7 @@ public final class URLEditorTests extends TestCase {
 		assertEquals(url.toExternalForm(), urlEditor.getAsText());
 	}
 
+	@Test
 	public void testClasspathURL() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
@@ -58,15 +62,13 @@ public final class URLEditorTests extends TestCase {
 		assertTrue(!url.getProtocol().startsWith("classpath"));
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWithNonExistentResource() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				PropertyEditor urlEditor = new URLEditor();
-				urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
-			}
-		}.runTest();
+		PropertyEditor urlEditor = new URLEditor();
+		urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
 	}
 
+	@Test
 	public void testSetAsTextWithNull() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText(null);
@@ -74,17 +76,15 @@ public final class URLEditorTests extends TestCase {
 		assertEquals("", urlEditor.getAsText());
 	}
 
+	@Test
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		assertEquals("", urlEditor.getAsText());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullResourceEditor() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new URLEditor(null);
-			}
-		}.runTest();
+		new URLEditor(null);
 	}
 
 }

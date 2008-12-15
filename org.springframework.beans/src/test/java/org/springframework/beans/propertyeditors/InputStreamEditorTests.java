@@ -16,27 +16,27 @@
 
 package org.springframework.beans.propertyeditors;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
-import org.springframework.util.ClassUtils;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
+
+import org.junit.Test;
+import org.springframework.util.ClassUtils;
 
 /**
  * Unit tests for the {@link InputStreamEditor} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class InputStreamEditorTests extends TestCase {
+public final class InputStreamEditorTests {
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullResourceEditor() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new InputStreamEditor(null);
-			}
-		}.runTest();
+		new InputStreamEditor(null);
 	}
 
+	@Test
 	public void testSunnyDay() throws Exception {
 		InputStream stream = null;
 		try {
@@ -55,16 +55,14 @@ public final class InputStreamEditorTests extends TestCase {
 		}
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testWhenResourceDoesNotExist() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				String resource = "classpath:bingo!";
-				InputStreamEditor editor = new InputStreamEditor();
-				editor.setAsText(resource);
-			}
-		}.runTest();
+		String resource = "classpath:bingo!";
+		InputStreamEditor editor = new InputStreamEditor();
+		editor.setAsText(resource);
 	}
 
+	@Test
 	public void testGetAsTextReturnsNullByDefault() throws Exception {
 		assertNull(new InputStreamEditor().getAsText());
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" + ClassUtils.getShortName(getClass()) + ".class";
