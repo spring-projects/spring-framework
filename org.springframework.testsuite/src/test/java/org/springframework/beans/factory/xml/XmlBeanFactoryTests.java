@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,11 +30,8 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import org.apache.commons.logging.LogFactory;
-import org.xml.sax.InputSource;
-
+import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -65,6 +65,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -72,19 +73,20 @@ import org.springframework.util.StopWatch;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Rick Evans
+ * @author Chris Beams
  */
-public class XmlBeanFactoryTests extends TestCase {
+public class XmlBeanFactoryTests {
 
 	/*
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2368
 	 */
-	public void testCollectionsReferredToAsRefLocals() throws Exception {
+	public @Test void testCollectionsReferredToAsRefLocals() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(
 				new ClassPathResource("local-collections-using-XSD.xml", getClass()));
 		factory.preInstantiateSingletons();
 	}
 
-	public void testRefToSeparatePrototypeInstances() throws Exception {
+	public @Test void testRefToSeparatePrototypeInstances() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -102,7 +104,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("They object equal direct ref", emmasJenks.equals(xbf.getBean("jenks")));
 	}
 
-	public void testRefToSingleton() throws Exception {
+	public @Test void testRefToSingleton() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -118,7 +120,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("1 jen instance", davesJen == jen);
 	}
 
-	public void testInnerBeans() throws IOException {
+	public @Test void testInnerBeans() throws IOException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
@@ -181,7 +183,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inner5.wasDestroyed());
 	}
 
-	public void testInnerBeansWithoutDestroy() {
+	public @Test void testInnerBeansWithoutDestroy() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -214,7 +216,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("innerBean", inner5.getBeanName());
 	}
 
-	public void testFailsOnInnerBean() {
+	public @Test void testFailsOnInnerBean() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -241,7 +243,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
+	public @Test void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		assertEquals(TestBean.class, child.getType("inheritsFromParentFactory"));
@@ -254,7 +256,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits2 == inherits);
 	}
 
-	public void testInheritanceWithDifferentClass() throws Exception {
+	public @Test void testInheritanceWithDifferentClass() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		assertEquals(DerivedTestBean.class, child.getType("inheritsWithClass"));
@@ -266,7 +268,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits.wasInitialized());
 	}
 
-	public void testInheritanceWithClass() throws Exception {
+	public @Test void testInheritanceWithClass() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		assertEquals(DerivedTestBean.class, child.getType("inheritsWithClass"));
@@ -278,7 +280,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits.wasInitialized());
 	}
 
-	public void testPrototypeInheritanceFromParentFactoryPrototype() throws Exception {
+	public @Test void testPrototypeInheritanceFromParentFactoryPrototype() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		assertEquals(TestBean.class, child.getType("prototypeInheritsFromParentFactoryPrototype"));
@@ -295,7 +297,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits.getAge() == 2);
 	}
 
-	public void testPrototypeInheritanceFromParentFactorySingleton() throws Exception {
+	public @Test void testPrototypeInheritanceFromParentFactorySingleton() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
@@ -311,7 +313,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits.getAge() == 1);
 	}
 
-	public void testAutowireModeNotInherited() {
+	public @Test void testAutowireModeNotInherited() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
@@ -325,13 +327,13 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertNull("autowiring not propagated along child relationships", derivedDavid.getSpouse());
 	}
 
-	public void testAbstractParentBeans() {
+	public @Test void testAbstractParentBeans() {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		parent.preInstantiateSingletons();
 		assertTrue(parent.isSingleton("inheritedTestBeanWithoutClass"));
 
 		// abstract beans should not match
-		Map tbs = parent.getBeansOfType(TestBean.class);
+		Map<?, ?> tbs = parent.getBeansOfType(TestBean.class);
 		assertEquals(2, tbs.size());
 		assertTrue(tbs.containsKey("inheritedTestBeanPrototype"));
 		assertTrue(tbs.containsKey("inheritedTestBeanSingleton"));
@@ -349,7 +351,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(parent.getBean("inheritedTestBeanPrototype") instanceof TestBean);
 	}
 
-	public void testDependenciesMaterializeThis() throws Exception {
+	public @Test void testDependenciesMaterializeThis() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("dependenciesMaterializeThis.xml", getClass()));
 
 		assertEquals(2, xbf.getBeansOfType(DummyBo.class, true, false).size());
@@ -366,7 +368,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(bos.dao == bop.dao);
 	}
 
-	public void testChildOverridesParentBean() throws Exception {
+	public @Test void testChildOverridesParentBean() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("inheritedTestBean");
@@ -382,7 +384,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 * Check that a prototype can't inherit from a bogus parent.
 	 * If a singleton does this the factory will fail to load.
 	 */
-	public void testBogusParentageFromParentFactory() throws Exception {
+	public @Test void testBogusParentageFromParentFactory() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		try {
@@ -401,7 +403,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 * It's possible for a subclass singleton not to return independent
 	 * instances even if derived from a prototype
 	 */
-	public void testSingletonInheritsFromParentFactoryPrototype() throws Exception {
+	public @Test void testSingletonInheritsFromParentFactoryPrototype() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("singletonInheritsFromParentFactoryPrototype");
@@ -413,7 +415,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits2 == inherits);
 	}
 
-	public void testSingletonFromParent() {
+	public @Test void testSingletonFromParent() {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		TestBean beanFromParent = (TestBean) parent.getBean("inheritedTestBeanSingleton");
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
@@ -421,14 +423,14 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("singleton from parent and child is the same", beanFromParent == beanFromChild);
 	}
 
-	public void testNestedPropertyValue() {
+	public @Test void testNestedPropertyValue() {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		IndexedTestBean bean = (IndexedTestBean) child.getBean("indexedTestBean");
 		assertEquals("name applied correctly", "myname", bean.getArray()[0].getName());
 	}
 
-	public void testCircularReferences() {
+	public @Test void testCircularReferences() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -445,17 +447,17 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("Correct circular reference", complexEgo.getSpouse().getSpouse() == complexEgo);
 	}
 
-	public void testCircularReferenceWithFactoryBeanFirst() {
+	public @Test void testCircularReferenceWithFactoryBeanFirst() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
-		TestBean egoBridge = (TestBean) xbf.getBean("egoBridge");
+		xbf.getBean("egoBridge");
 		TestBean complexEgo = (TestBean) xbf.getBean("complexEgo");
 		assertTrue("Correct circular reference", complexEgo.getSpouse().getSpouse() == complexEgo);
 	}
 
-	public void testCircularReferenceWithTwoFactoryBeans() {
+	public @Test void testCircularReferenceWithTwoFactoryBeans() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -466,7 +468,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("Correct circular reference", ego3.getSpouse().getSpouse() == ego3);
 	}
 
-	public void testCircularReferencesWithNotAllowed() {
+	public @Test void testCircularReferencesWithNotAllowed() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		xbf.setAllowCircularReferences(false);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -481,7 +483,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testCircularReferencesWithWrapping() {
+	public @Test void testCircularReferencesWithWrapping() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -496,7 +498,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testCircularReferencesWithWrappingAndRawInjectionAllowed() {
+	public @Test void testCircularReferencesWithWrappingAndRawInjectionAllowed() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		xbf.setAllowRawInjectionDespiteWrapping(true);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -516,19 +518,19 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(!AopUtils.isAopProxy(david.getSpouse()));
 	}
 
-	public void testFactoryReferenceCircle() {
+	public @Test void testFactoryReferenceCircle() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("factoryCircle.xml", getClass()));
 		TestBean tb = (TestBean) xbf.getBean("singletonFactory");
 		DummyFactory db = (DummyFactory) xbf.getBean("&singletonFactory");
 		assertTrue(tb == db.getOtherTestBean());
 	}
 
-	public void testFactoryReferenceWithDoublePrefix() {
+	public @Test void testFactoryReferenceWithDoublePrefix() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("factoryCircle.xml", getClass()));
-		DummyFactory db = (DummyFactory) xbf.getBean("&&singletonFactory");
+		assertThat(xbf.getBean("&&singletonFactory"), instanceOf(DummyFactory.class));
 	}
 
-	public void testComplexFactoryReferenceCircle() {
+	public @Test void testComplexFactoryReferenceCircle() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("complexFactoryCircle.xml", getClass()));
 		xbf.getBean("proxy1");
 		// check that unused instances from autowiring got removed
@@ -538,7 +540,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(7, xbf.getSingletonCount());
 	}
 
-	public void testNoSuchFactoryBeanMethod() {
+	public @Test void testNoSuchFactoryBeanMethod() {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("no-such-factory-method.xml", getClass()));
 			assertNotNull(xbf.getBean("defaultTestBean"));
@@ -549,7 +551,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testInitMethodIsInvoked() throws Exception {
+	public @Test void testInitMethodIsInvoked() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		DoubleInitializer in = (DoubleInitializer) xbf.getBean("init-method1");
 		// Initializer should have doubled value
@@ -559,7 +561,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	/**
 	 * Test that if a custom initializer throws an exception, it's handled correctly
 	 */
-	public void testInitMethodThrowsException() {
+	public @Test void testInitMethodThrowsException() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		try {
 			xbf.getBean("init-method2");
@@ -572,7 +574,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testNoSuchInitMethod() throws Exception {
+	public @Test void testNoSuchInitMethod() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		try {
 			xbf.getBean("init-method3");
@@ -589,7 +591,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	/**
 	 * Check that InitializingBean method is called first.
 	 */
-	public void testInitializingBeanAndInitMethod() throws Exception {
+	public @Test void testInitializingBeanAndInitMethod() throws Exception {
 		InitAndIB.constructed = false;
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		assertFalse(InitAndIB.constructed);
@@ -608,7 +610,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	/**
 	 * Check that InitializingBean method is not called twice.
 	 */
-	public void testInitializingBeanAndSameInitMethod() throws Exception {
+	public @Test void testInitializingBeanAndSameInitMethod() throws Exception {
 		InitAndIB.constructed = false;
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		assertFalse(InitAndIB.constructed);
@@ -624,7 +626,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(iib.destroyed && !iib.customDestroyed);
 	}
 
-	public void testDefaultLazyInit() throws Exception {
+	public @Test void testDefaultLazyInit() throws Exception {
 		InitAndIB.constructed = false;
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("default-lazy-init.xml", getClass()));
 		assertFalse(InitAndIB.constructed);
@@ -638,7 +640,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testNoSuchXmlFile() throws Exception {
+	public @Test void testNoSuchXmlFile() throws Exception {
 		try {
 			new XmlBeanFactory(new ClassPathResource("missing.xml", getClass()));
 			fail("Must not create factory from missing XML");
@@ -647,7 +649,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testInvalidXmlFile() throws Exception {
+	public @Test void testInvalidXmlFile() throws Exception {
 		try {
 			new XmlBeanFactory(new ClassPathResource("invalid.xml", getClass()));
 			fail("Must not create factory from invalid XML");
@@ -656,7 +658,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testUnsatisfiedObjectDependencyCheck() throws Exception {
+	public @Test void testUnsatisfiedObjectDependencyCheck() throws Exception {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedObjectDependencyCheck.xml", getClass()));
 			xbf.getBean("a", DependenciesBean.class);
@@ -666,7 +668,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testUnsatisfiedSimpleDependencyCheck() throws Exception {
+	public @Test void testUnsatisfiedSimpleDependencyCheck() throws Exception {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedSimpleDependencyCheck.xml", getClass()));
 			xbf.getBean("a", DependenciesBean.class);
@@ -676,20 +678,20 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testSatisfiedObjectDependencyCheck() throws Exception {
+	public @Test void testSatisfiedObjectDependencyCheck() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedObjectDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertNotNull(a.getSpouse());
 		assertEquals(xbf, a.getBeanFactory());
 	}
 
-	public void testSatisfiedSimpleDependencyCheck() throws Exception {
+	public @Test void testSatisfiedSimpleDependencyCheck() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedSimpleDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertEquals(a.getAge(), 33);
 	}
 
-	public void testUnsatisfiedAllDependencyCheck() throws Exception {
+	public @Test void testUnsatisfiedAllDependencyCheck() throws Exception {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedAllDependencyCheckMissingObjects.xml", getClass()));
 			xbf.getBean("a", DependenciesBean.class);
@@ -699,7 +701,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testSatisfiedAllDependencyCheck() throws Exception {
+	public @Test void testSatisfiedAllDependencyCheck() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedAllDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertEquals(a.getAge(), 33);
@@ -707,14 +709,14 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertNotNull(a.getSpouse());
 	}
 
-	public void testAutowire() throws Exception {
+	public @Test void testAutowire() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("autowire.xml", getClass()));
 		TestBean spouse = new TestBean("kerry", 0);
 		xbf.registerSingleton("spouse", spouse);
 		doTestAutowire(xbf);
 	}
 
-	public void testAutowireWithParent() throws Exception {
+	public @Test void testAutowireWithParent() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("autowire.xml", getClass()));
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -771,7 +773,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(appCtx.containsBean("jenny"));
 	}
 
-	public void testAutowireWithDefault() throws Exception {
+	public @Test void testAutowireWithDefault() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("default-autowire.xml", getClass()));
 
 		DependenciesBean rod1 = (DependenciesBean) xbf.getBean("rod1");
@@ -792,7 +794,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testAutowireByConstructor() throws Exception {
+	public @Test void testAutowireByConstructor() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		ConstructorDependenciesBean rod1 = (ConstructorDependenciesBean) xbf.getBean("rod1");
 		TestBean kerry = (TestBean) xbf.getBean("kerry2");
@@ -828,7 +830,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(null, rod.getName());
 	}
 
-	public void testAutowireByConstructorWithSimpleValues() throws Exception {
+	public @Test void testAutowireByConstructorWithSimpleValues() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 
 		ConstructorDependenciesBean rod5 = (ConstructorDependenciesBean) xbf.getBean("rod5");
@@ -856,7 +858,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(rod6.destroyed);
 	}
 
-	public void testRelatedCausesFromConstructorResolution() {
+	public @Test void testRelatedCausesFromConstructorResolution() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 
 		try {
@@ -869,7 +871,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testConstructorArgResolution() {
+	public @Test void testConstructorArgResolution() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
@@ -911,13 +913,13 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(29, rod16.getAge());
 	}
 
-	public void testConstructorArgWithSingleMatch() {
+	public @Test void testConstructorArgWithSingleMatch() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		File file = (File) xbf.getBean("file");
 		assertEquals(File.separator + "test", file.getPath());
 	}
 
-	public void testThrowsExceptionOnTooManyArguments() throws Exception {
+	public @Test void testThrowsExceptionOnTooManyArguments() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
 			xbf.getBean("rod7", ConstructorDependenciesBean.class);
@@ -927,7 +929,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testThrowsExceptionOnAmbiguousResolution() throws Exception {
+	public @Test void testThrowsExceptionOnAmbiguousResolution() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
 			xbf.getBean("rod8", ConstructorDependenciesBean.class);
@@ -937,43 +939,43 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testDependsOn() {
+	public @Test void testDependsOn() {
 		doTestDependencies("dependencies-dependsOn.xml", 1);
 	}
 
-	public void testDependsOnInInnerBean() {
+	public @Test void testDependsOnInInnerBean() {
 		doTestDependencies("dependencies-dependsOn-inner.xml", 4);
 	}
 
-	public void testDependenciesThroughConstructorArguments() {
+	public @Test void testDependenciesThroughConstructorArguments() {
 		doTestDependencies("dependencies-carg.xml", 1);
 	}
 
-	public void testDependenciesThroughConstructorArgumentAutowiring() {
+	public @Test void testDependenciesThroughConstructorArgumentAutowiring() {
 		doTestDependencies("dependencies-carg-autowire.xml", 1);
 	}
 
-	public void testDependenciesThroughConstructorArgumentsInInnerBean() {
+	public @Test void testDependenciesThroughConstructorArgumentsInInnerBean() {
 		doTestDependencies("dependencies-carg-inner.xml", 1);
 	}
 
-	public void testDependenciesThroughProperties() {
+	public @Test void testDependenciesThroughProperties() {
 		doTestDependencies("dependencies-prop.xml", 1);
 	}
 
-	public void testDependenciesThroughPropertiesWithInTheMiddle() {
+	public @Test void testDependenciesThroughPropertiesWithInTheMiddle() {
 		doTestDependencies("dependencies-prop-inTheMiddle.xml", 1);
 	}
 
-	public void testDependenciesThroughPropertyAutowiringByName() {
+	public @Test void testDependenciesThroughPropertyAutowiringByName() {
 		doTestDependencies("dependencies-prop-autowireByName.xml", 1);
 	}
 
-	public void testDependenciesThroughPropertyAutowiringByType() {
+	public @Test void testDependenciesThroughPropertyAutowiringByType() {
 		doTestDependencies("dependencies-prop-autowireByType.xml", 1);
 	}
 
-	public void testDependenciesThroughPropertiesInInnerBean() {
+	public @Test void testDependenciesThroughPropertiesInInnerBean() {
 		doTestDependencies("dependencies-prop-inner.xml", 1);
 	}
 
@@ -1003,7 +1005,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 * bean def is being parsed, 'cos everything on a bean def is now lazy, but
 	 * must rather only be picked up when the bean is instantiated.
 	 */
-	public void testClassNotFoundWithDefaultBeanClassLoader() {
+	public @Test void testClassNotFoundWithDefaultBeanClassLoader() {
 		BeanFactory factory = new XmlBeanFactory(new ClassPathResource("classNotFound.xml", getClass()));
 		// cool, no errors, so the rubbish class name in the bean def was not resolved
 		try {
@@ -1017,7 +1019,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testClassNotFoundWithNoBeanClassLoader() {
+	public @Test void testClassNotFoundWithNoBeanClassLoader() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setBeanClassLoader(null);
@@ -1025,7 +1027,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("WhatALotOfRubbish", bf.getBeanDefinition("classNotFound").getBeanClassName());
 	}
 
-	public void testResourceAndInputStream() throws IOException {
+	public @Test void testResourceAndInputStream() throws IOException {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("resource.xml", getClass()));
 		// comes from "resourceImport.xml"
 		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
@@ -1047,7 +1049,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("test", writer.toString());
 	}
 
-	public void testClassPathResourceWithImport() {
+	public @Test void testClassPathResourceWithImport() {
 		XmlBeanFactory xbf = new XmlBeanFactory(
 				new ClassPathResource("org/springframework/beans/factory/xml/resource.xml"));
 		// comes from "resourceImport.xml"
@@ -1056,7 +1058,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
-	public void testUrlResourceWithImport() {
+	public @Test void testUrlResourceWithImport() {
 		URL url = getClass().getResource("resource.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(new UrlResource(url));
 		// comes from "resourceImport.xml"
@@ -1065,7 +1067,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
-	public void testFileSystemResourceWithImport() {
+	public @Test void testFileSystemResourceWithImport() {
 		String file = getClass().getResource("resource.xml").getFile();
 		XmlBeanFactory xbf = new XmlBeanFactory(new FileSystemResource(file));
 		// comes from "resourceImport.xml"
@@ -1074,10 +1076,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
-	public void testRecursiveImport() {
+	public @Test void testRecursiveImport() {
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(
-					new ClassPathResource("org/springframework/beans/factory/xml/recursiveImport.xml"));
+			new XmlBeanFactory(new ClassPathResource("org/springframework/beans/factory/xml/recursiveImport.xml"));
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -1087,7 +1088,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 
-	public void testLookupOverrideMethodsWithSetterInjection() {
+	public @Test void testLookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
@@ -1152,7 +1153,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertSame(dave1, dave2);
 	}
 
-	public void testReplaceMethodOverrideWithSetterInjection() {
+	public @Test void testReplaceMethodOverrideWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
@@ -1199,7 +1200,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(s2, dos.lastArg);
 	}
 
-	public void testLookupOverrideOneMethodWithConstructorInjection() {
+	public @Test void testLookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("constructorOverrides.xml", getClass()));
@@ -1222,7 +1223,7 @@ public class XmlBeanFactoryTests extends TestCase {
 				fm1.getTestBean(), fm2.getTestBean());
 	}
 
-	public void testRejectsOverrideOfBogusMethodName() {
+	public @Test void testRejectsOverrideOfBogusMethodName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		try {
@@ -1239,12 +1240,12 @@ public class XmlBeanFactoryTests extends TestCase {
 	/**
 	 * Assert the presence of this bug until we resolve it.
 	 */
-	public void testSerializabilityOfMethodReplacer() throws Exception {
+	public @Test void testSerializabilityOfMethodReplacer() throws Exception {
 		try {
 			BUGtestSerializableMethodReplacerAndSuperclass();
 			fail();
 		}
-		catch (AssertionFailedError ex) {
+		catch (AssertionError ex) {
 			System.err.println("****** SPR-356: Objects with MethodReplace overrides are not serializable");
 		}
 	}
@@ -1262,7 +1263,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("Method replace still works after serialization and deserialization", backwards, s.replaceMe(forwards));
 	}
 
-	public void testInnerBeanInheritsScopeFromConcreteChildDefinition() {
+	public @Test void testInnerBeanInheritsScopeFromConcreteChildDefinition() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
@@ -1271,7 +1272,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(jenny.getFriends().iterator().next() instanceof TestBean);
 	}
 
-	public void testConstructorArgWithSingleSimpleTypeMatch() {
+	public @Test void testConstructorArgWithSingleSimpleTypeMatch() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 
 		SingleSimpleTypeConstructorBean bean = (SingleSimpleTypeConstructorBean) xbf.getBean("beanWithBoolean");
@@ -1281,7 +1282,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(bean2.isSingleBoolean());
 	}
 
-	public void testConstructorArgWithDoubleSimpleTypeMatch() {
+	public @Test void testConstructorArgWithDoubleSimpleTypeMatch() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 
 		SingleSimpleTypeConstructorBean bean = (SingleSimpleTypeConstructorBean) xbf.getBean("beanWithBooleanAndString");
@@ -1293,21 +1294,21 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("A String", bean2.getTestString());
 	}
 
-	public void testDoubleBooleanAutowire() {
+	public @Test void testDoubleBooleanAutowire() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		DoubleBooleanConstructorBean bean = (DoubleBooleanConstructorBean) xbf.getBean("beanWithDoubleBoolean");
 		assertEquals(Boolean.TRUE, bean.boolean1);
 		assertEquals(Boolean.FALSE, bean.boolean2);
 	}
 
-	public void testDoubleBooleanAutowireWithIndex() {
+	public @Test void testDoubleBooleanAutowireWithIndex() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		DoubleBooleanConstructorBean bean = (DoubleBooleanConstructorBean) xbf.getBean("beanWithDoubleBooleanAndIndex");
 		assertEquals(Boolean.FALSE, bean.boolean1);
 		assertEquals(Boolean.TRUE, bean.boolean2);
 	}
 
-	public void testWithDuplicateName() throws Exception {
+	public @Test void testWithDuplicateName() throws Exception {
 		try {
 			new XmlBeanFactory(new ClassPathResource("testWithDuplicateNames.xml", getClass()));
 			fail("Duplicate name not detected");
@@ -1317,7 +1318,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testWithDuplicateNameInAlias() throws Exception {
+	public @Test void testWithDuplicateNameInAlias() throws Exception {
 		try {
 			new XmlBeanFactory(new ClassPathResource("testWithDuplicateNameInAlias.xml", getClass()));
 			fail("Duplicate name not detected");

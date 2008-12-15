@@ -130,7 +130,8 @@
 		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
 	</bean>
 
-	<bean name="javaMailSession" class="javax.mail.Session" factory-method="getDefaultInstance">
+	<bean name="javaMailSession" class="org.springframework.beans.factory.xml.MailSession"
+		  factory-method="getDefaultInstance">
 		<constructor-arg>
 			<props>
 				<prop key="mail.smtp.auth">true</prop>
