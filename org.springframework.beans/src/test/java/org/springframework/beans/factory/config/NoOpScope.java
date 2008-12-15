@@ -23,7 +23,7 @@ import org.springframework.beans.factory.ObjectFactory;
  */
 public class NoOpScope implements Scope {
 
-	public Object get(String name, ObjectFactory objectFactory) {
+	public Object get(String name, ObjectFactory<?> objectFactory) {
 		throw new UnsupportedOperationException();
 	}
 

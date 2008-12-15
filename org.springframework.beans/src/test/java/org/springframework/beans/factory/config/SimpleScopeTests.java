@@ -16,35 +16,39 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.*;
+
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * Simple test to illustrate and verify scope usage.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class SimpleScopeTests extends TestCase {
+public class SimpleScopeTests {
 
-	private GenericApplicationContext applicationContext;
+	private DefaultListableBeanFactory beanFactory;
 	
-	protected void setUp() {
-		applicationContext = new GenericApplicationContext();
+	@Before
+	public void setUp() {
+		beanFactory = new DefaultListableBeanFactory();
 		Scope scope = new NoOpScope() {
 			private int index;
-			private List objects = new LinkedList(); {
+			private List<TestBean> objects = new LinkedList<TestBean>(); {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
 			}
-			public Object get(String name, ObjectFactory objectFactory) {
+			public Object get(String name, ObjectFactory<?> objectFactory) {
 				if (index >= objects.size()) {
 					index = 0;
 				}
@@ -52,24 +56,23 @@ public class SimpleScopeTests extends TestCase {
 			}
 		};
 
-		applicationContext.getBeanFactory().registerScope("myScope", scope);
+		beanFactory.registerScope("myScope", scope);
 
-		String[] scopeNames = applicationContext.getBeanFactory().getRegisteredScopeNames();
+		String[] scopeNames = beanFactory.getRegisteredScopeNames();
 		assertEquals(1, scopeNames.length);
 		assertEquals("myScope", scopeNames[0]);
-		assertSame(scope, applicationContext.getBeanFactory().getRegisteredScope("myScope"));
+		assertSame(scope, beanFactory.getRegisteredScope("myScope"));
 
-		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(applicationContext);
+		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(beanFactory);
 		xbdr.loadBeanDefinitions("org/springframework/beans/factory/config/simpleScope.xml");
-		
-		applicationContext.refresh();
 	}
 	
+	@Test
 	public void testCanGetScopedObject() {
-		TestBean tb1 = (TestBean) applicationContext.getBean("usesScope");
-		TestBean tb2 = (TestBean) applicationContext.getBean("usesScope");
+		TestBean tb1 = (TestBean) beanFactory.getBean("usesScope");
+		TestBean tb2 = (TestBean) beanFactory.getBean("usesScope");
 		assertNotSame(tb1, tb2);
-		TestBean tb3 = (TestBean) applicationContext.getBean("usesScope");
+		TestBean tb3 = (TestBean) beanFactory.getBean("usesScope");
 		assertSame(tb3, tb1);
 	}
 

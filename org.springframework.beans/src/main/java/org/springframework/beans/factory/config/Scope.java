@@ -69,7 +69,7 @@ public interface Scope {
 	 * object if it is not present in the underlying storage mechanism
 	 * @return the desired object (never <code>null</code>)
 	 */
-	Object get(String name, ObjectFactory objectFactory);
+	Object get(String name, ObjectFactory<?> objectFactory);
 
 	/**
 	 * Remove the object with the given <code>name</code> from the underlying scope.
