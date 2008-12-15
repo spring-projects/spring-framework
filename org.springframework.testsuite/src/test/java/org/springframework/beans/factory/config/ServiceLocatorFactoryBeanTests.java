@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -32,9 +33,11 @@ import org.springframework.test.AssertThrows;
 /**
  * @author Colin Sampaleanu
  * @author Rick Evans
+ * @author Chris Beams
  */
-public class ServiceLocatorFactoryBeanTests extends TestCase {
+public class ServiceLocatorFactoryBeanTests {
 
+	@Test
 	public void testNoArgGetter() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
@@ -48,6 +51,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		assertNotNull(testService);
 	}
 
+	@Test
 	public void testErrorOnTooManyOrTooFew() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
@@ -84,6 +88,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testErrorOnTooManyOrTooFewWithCustomServiceLocatorException() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
@@ -126,6 +131,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testStringArgGetter() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
@@ -136,6 +142,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 
 		// test string-arg getter with null id
 		final TestServiceLocator2 factory = (TestServiceLocator2) ctx.getBean("factory");
+		@SuppressWarnings("unused")
 		TestService testBean = factory.getTestService(null);
 		// now test with explicit id
 		testBean = factory.getTestService("testService");
@@ -147,6 +154,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testCombinedLocatorInterface() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerPrototype("testService", TestService.class, new MutablePropertyValues());
@@ -171,6 +179,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		assertTrue(factory.toString().indexOf("TestServiceLocator3") != -1);
 	}
 
+	@Test
 	public void testServiceMappings() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerPrototype("testService1", TestService.class, new MutablePropertyValues());
@@ -198,6 +207,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		assertTrue(testBean4 instanceof ExtendedTestService);
 	}
 
+	@Test
 	public void testNoServiceLocatorInterfaceSupplied() throws Exception {
 		new AssertThrows(IllegalArgumentException.class, "No serviceLocator interface supplied") {
 			public void test() throws Exception {
@@ -206,6 +216,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testWhenServiceLocatorInterfaceIsNotAnInterfaceType() throws Exception {
 		new AssertThrows(IllegalArgumentException.class, "Bad (non-interface-type) serviceLocator interface supplied") {
 			public void test() throws Exception {
@@ -216,6 +227,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testWhenServiceLocatorExceptionClassToExceptionTypeWithOnlyNoArgCtor() throws Exception {
 		new AssertThrows(IllegalArgumentException.class, "Bad (invalid-Exception-type) serviceLocatorException class supplied") {
 			public void test() throws Exception {
@@ -225,6 +237,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testWhenServiceLocatorExceptionClassIsNotAnExceptionSubclass() throws Exception {
 		new AssertThrows(IllegalArgumentException.class, "Bad (non-Exception-type) serviceLocatorException class supplied") {
 			public void test() throws Exception {
@@ -234,6 +247,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testWhenServiceLocatorMethodCalledWithTooManyParameters() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		factory.setServiceLocatorInterface(ServiceLocatorInterfaceWithExtraNonCompliantMethod.class);
@@ -246,19 +260,19 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
 	public void testRequiresListableBeanFactoryAndChokesOnAnythingElse() throws Exception {
-		MockControl mockBeanFactory = MockControl.createControl(BeanFactory.class);
-		final BeanFactory beanFactory = (BeanFactory) mockBeanFactory.getMock();
-		mockBeanFactory.replay();
+		final BeanFactory beanFactory = createMock(BeanFactory.class);
+		replay(beanFactory);
 
-		new AssertThrows(FatalBeanException.class) {
-			public void test() throws Exception {
-				ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
-				factory.setBeanFactory(beanFactory);
-			}
-		}.runTest();
+		try {
+			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
+			factory.setBeanFactory(beanFactory);
+		} catch (FatalBeanException ex) {
+			// expected
+		}
 
-		mockBeanFactory.verify();
+		verify(beanFactory);
 	}
 
 
@@ -315,6 +329,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomServiceLocatorException1 extends NestedRuntimeException {
 
 		public CustomServiceLocatorException1(String message, Throwable cause) {
@@ -323,6 +338,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomServiceLocatorException2 extends NestedCheckedException {
 
 		public CustomServiceLocatorException2(Throwable cause) {
@@ -331,6 +347,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomServiceLocatorException3 extends NestedCheckedException {
 
 		public CustomServiceLocatorException3(String message) {
@@ -339,6 +356,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ExceptionClassWithOnlyZeroArgCtor extends Exception {
 
 	}
