@@ -16,28 +16,36 @@
 
 package org.springframework.beans.factory;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.Assert;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class FactoryBeanTests extends TestCase {
+public class FactoryBeanTests {
 
+	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("factoryBeanReturnsNull.xml", getClass()));
 		Object result = factory.getBean("factoryBean");
 		assertNull(result);
 	}
 
+	@Test
 	public void testFactoryBeansWithAutowiring() throws Exception {
-		ClassPathXmlApplicationContext factory =
-				new ClassPathXmlApplicationContext("factoryBeansWithAutowiring.xml", getClass());
+		XmlBeanFactory factory =
+				new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml", getClass()));
+		
+		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
+		ppc.postProcessBeanFactory(factory);
+		
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Beta beta = (Beta) factory.getBean("beta");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
@@ -48,9 +56,14 @@ public class FactoryBeanTests extends TestCase {
 		assertEquals("yourName", beta.getName());
 	}
 
+	@Test
 	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
-		ClassPathXmlApplicationContext factory =
-				new ClassPathXmlApplicationContext("factoryBeansWithAutowiring.xml", getClass());
+		XmlBeanFactory factory =
+				new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml", getClass()));
+		
+		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
+		ppc.postProcessBeanFactory(factory);
+		
 		Beta beta = (Beta) factory.getBean("beta");
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
@@ -59,13 +72,13 @@ public class FactoryBeanTests extends TestCase {
 	}
 
 
-	public static class NullReturningFactoryBean implements FactoryBean {
+	public static class NullReturningFactoryBean implements FactoryBean<Object> {
 
 		public Object getObject() {
 			return null;
 		}
 
-		public Class getObjectType() {
+		public Class<?> getObjectType() {
 			return null;
 		}
 
@@ -125,7 +138,7 @@ public class FactoryBeanTests extends TestCase {
 	}
 
 
-	public static class BetaFactoryBean implements FactoryBean {
+	public static class BetaFactoryBean implements FactoryBean<Object> {
 
 		private Beta beta;
 
@@ -137,7 +150,7 @@ public class FactoryBeanTests extends TestCase {
 			return this.beta;
 		}
 
-		public Class getObjectType() {
+		public Class<?> getObjectType() {
 			return null;
 		}
 

@@ -16,12 +16,16 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import net.sf.cglib.proxy.NoOp;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
@@ -30,20 +34,21 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.HandlerAdapter;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 04.07.2003
  */
-public class BeanFactoryUtilsTests extends TestCase {
+public class BeanFactoryUtilsTests {
 
 	private ConfigurableListableBeanFactory listableBeanFactory;
 
 	private ConfigurableListableBeanFactory dependentBeansBF;
 
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		// Interesting hierarchical factory to test counts.
 		// Slow to read so we cache it.
 		XmlBeanFactory grandParent = new XmlBeanFactory(new ClassPathResource("root.xml", getClass()));
@@ -54,6 +59,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		this.listableBeanFactory = child;
 	}
 
+	@Test
 	public void testHierarchicalCountBeansWithNonHierarchicalFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("t1", new TestBean());
@@ -64,6 +70,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 	/**
 	 * Check that override doesn't count as two separate beans.
 	 */
+	@Test
 	public void testHierarchicalCountBeansWithOverride() throws Exception {
 		// Leaf count
 		assertTrue(this.listableBeanFactory.getBeanDefinitionCount() == 1);
@@ -73,14 +80,16 @@ public class BeanFactoryUtilsTests extends TestCase {
 			BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
 	}
 
+	@Test
 	public void testHierarchicalNamesWithNoMatch() throws Exception {
-		List names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
-			HandlerAdapter.class));
+		List<String> names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
+			NoOp.class));
 		assertEquals(0, names.size());
 	}
 
+	@Test
 	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
-		List names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
+		List<String> names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
 			IndexedTestBean.class));
 		assertEquals(1, names.size());
 		assertTrue(names.contains("indexedBean"));
@@ -88,8 +97,9 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertTrue(listableBeanFactory.getBeanNamesForType(IndexedTestBean.class).length == 0);
 	}
 
+	@Test
 	public void testGetBeanNamesForTypeWithOverride() throws Exception {
-		List names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
+		List<String> names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
 			ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
 		assertEquals(4, names.size());
@@ -99,13 +109,15 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertTrue(names.contains("testFactory2"));
 	}
 
+	@Test
 	public void testNoBeansOfType() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("foo", new Object());
-		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
+		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
 		assertTrue(beans.isEmpty());
 	}
 
+	@Test
 	public void testFindsBeansOfTypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean t1 = new TestBean();
@@ -118,7 +130,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		lbf.addBean("t3", t3);
 		lbf.addBean("t4", t4);
 
-		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
+		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
 		assertEquals(2, beans.size());
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
@@ -147,6 +159,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(t4, beans.get("&t4"));
 	}
 
+	@Test
 	public void testFindsBeansOfTypeWithDefaultFactory() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
@@ -161,7 +174,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		this.listableBeanFactory.registerSingleton("t3", t3);
 		this.listableBeanFactory.registerSingleton("t4", t4);
 
-		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true,
+		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true,
 			false);
 		assertEquals(6, beans.size());
 		assertEquals(test3, beans.get("test3"));
@@ -212,11 +225,12 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(t4, beans.get("&t4"));
 	}
 
+	@Test
 	public void testHierarchicalResolutionWithOverride() throws Exception {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
-		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true,
+		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true,
 			false);
 		assertEquals(2, beans.size());
 		assertEquals(test3, beans.get("test3"));
@@ -250,21 +264,25 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
 	}
 
+	@Test
 	public void testADependencies() {
 		String[] deps = this.dependentBeansBF.getDependentBeans("a");
 		assertTrue(ObjectUtils.isEmpty(deps));
 	}
 
+	@Test
 	public void testBDependencies() {
 		String[] deps = this.dependentBeansBF.getDependentBeans("b");
 		assertTrue(Arrays.equals(new String[] { "c" }, deps));
 	}
 
+	@Test
 	public void testCDependencies() {
 		String[] deps = this.dependentBeansBF.getDependentBeans("c");
 		assertTrue(Arrays.equals(new String[] { "int", "long" }, deps));
 	}
 
+	@Test
 	public void testIntDependencies() {
 		String[] deps = this.dependentBeansBF.getDependentBeans("int");
 		assertTrue(Arrays.equals(new String[] { "buffer" }, deps));

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.annotation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.wiring.BeanWiringInfo;
 
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
-public class AnnotationBeanWiringInfoResolverTests extends TestCase {
+public class AnnotationBeanWiringInfoResolverTests {
 
+	@Test
 	public void testResolveWiringInfo() throws Exception {
 		try {
 			new AnnotationBeanWiringInfoResolver().resolveWiringInfo(null);
@@ -34,18 +40,21 @@ public class AnnotationBeanWiringInfoResolverTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testResolveWiringInfoWithAnInstanceOfANonAnnotatedClass() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo("java.lang.String is not @Configurable");
 		assertNull("Must be returning null for a non-@Configurable class instance", info);
 	}
 
+	@Test
 	public void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClass() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo(new Soap());
 		assertNotNull("Must *not* be returning null for a non-@Configurable class instance", info);
 	}
 
+	@Test
 	public void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClassWithAutowiringTurnedOffExplicitly() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo(new WirelessSoap());
@@ -54,6 +63,7 @@ public class AnnotationBeanWiringInfoResolverTests extends TestCase {
 		assertEquals(WirelessSoap.class.getName(), info.getBeanName());
 	}
 
+	@Test
 	public void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClassWithAutowiringTurnedOffExplicitlyAndCustomBeanName() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo(new NamedWirelessSoap());
