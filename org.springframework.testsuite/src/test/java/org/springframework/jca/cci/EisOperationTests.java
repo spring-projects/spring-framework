@@ -16,6 +16,9 @@
 
 package org.springframework.jca.cci;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertSame;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -24,168 +27,119 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.jca.cci.core.RecordCreator;
 import org.springframework.jca.cci.object.MappingRecordOperation;
 import org.springframework.jca.cci.object.SimpleRecordOperation;
 
 /**
- * @author Thierry TEMPLIER
+ * @author Thierry Templier
+ * @author Chris Beams
  */
-public class EisOperationTests extends TestCase {
+public class EisOperationTests {
 
+	@Test
 	public void testSimpleRecordOperation() throws ResourceException {
-		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
-		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
-		MockControl connectionControl = MockControl.createControl(Connection.class);
-		Connection connection = (Connection) connectionControl.getMock();
-		MockControl interactionControl = MockControl.createControl(Interaction.class);
-		Interaction interaction = (Interaction) interactionControl.getMock();
+		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
+		Connection connection = createMock(Connection.class);
+		Interaction interaction = createMock(Interaction.class);
 
-		MockControl inputRecordControl = MockControl.createControl(Record.class);
-		Record inputRecord = (Record) inputRecordControl.getMock();
-		MockControl outputRecordControl = MockControl.createControl(Record.class);
-		Record outputRecord = (Record) outputRecordControl.getMock();
+		Record inputRecord = createMock(Record.class);
+		Record outputRecord = createMock(Record.class);
 
-		MockControl interactionSpecControl = MockControl.createControl(InteractionSpec.class);
-		InteractionSpec interactionSpec = (InteractionSpec) interactionSpecControl.getMock();
+		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
 		SimpleRecordOperation query = new SimpleRecordOperation(connectionFactory, interactionSpec);
 
-		connectionFactory.getConnection();
-		connectionFactoryControl.setReturnValue(connection);
+		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		connection.createInteraction();
-		connectionControl.setReturnValue(interaction);
+		expect(connection.createInteraction()).andReturn(interaction);
 
-		interaction.execute(interactionSpec, inputRecord);
-		interactionControl.setReturnValue(outputRecord, 1);
+		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(outputRecord);
 
 		interaction.close();
-		interactionControl.setVoidCallable(1);
 
 		connection.close();
-		connectionControl.setVoidCallable(1);
 
-		connectionFactoryControl.replay();
-		connectionControl.replay();
-		interactionControl.replay();
+		replay(connectionFactory, connection, interaction);
 
 		query.execute(inputRecord);
 
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		interactionControl.verify();
+		verify(connectionFactory, connection, interaction);
 	}
 
+	@Test
 	public void testSimpleRecordOperationWithExplicitOutputRecord() throws ResourceException {
-		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
-		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
-		MockControl connectionControl = MockControl.createControl(Connection.class);
-		Connection connection = (Connection) connectionControl.getMock();
-		MockControl interactionControl = MockControl.createControl(Interaction.class);
-		Interaction interaction = (Interaction) interactionControl.getMock();
+		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
+		Connection connection = createMock(Connection.class);
+		Interaction interaction = createMock(Interaction.class);
 
-		MockControl inputRecordControl = MockControl.createControl(Record.class);
-		Record inputRecord = (Record) inputRecordControl.getMock();
-		MockControl outputRecordControl = MockControl.createControl(Record.class);
-		Record outputRecord = (Record) outputRecordControl.getMock();
+		Record inputRecord = createMock(Record.class);
+		Record outputRecord = createMock(Record.class);
 
-		MockControl interactionSpecControl = MockControl.createControl(InteractionSpec.class);
-		InteractionSpec interactionSpec = (InteractionSpec) interactionSpecControl.getMock();
+		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
 		SimpleRecordOperation operation = new SimpleRecordOperation(connectionFactory, interactionSpec);
+		
+		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		connectionFactory.getConnection();
-		connectionFactoryControl.setReturnValue(connection, 1);
+		expect(connection.createInteraction()).andReturn(interaction);
 
-		connection.createInteraction();
-		connectionControl.setReturnValue(interaction, 1);
-
-		interaction.execute(interactionSpec, inputRecord, outputRecord);
-		interactionControl.setReturnValue(true, 1);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
 
 		interaction.close();
-		interactionControl.setVoidCallable(1);
 
 		connection.close();
-		connectionControl.setVoidCallable(1);
 
-		connectionFactoryControl.replay();
-		connectionControl.replay();
-		interactionControl.replay();
+		replay(connectionFactory, connection, interaction);
 
 		operation.execute(inputRecord, outputRecord);
 
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		interactionControl.verify();
+		verify(connectionFactory, connection, interaction);
 	}
 
+	@Test
 	public void testSimpleRecordOperationWithInputOutputRecord() throws ResourceException {
-		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
-		final ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
-		MockControl connectionControl = MockControl.createControl(Connection.class);
-		Connection connection = (Connection) connectionControl.getMock();
-		MockControl interactionControl = MockControl.createControl(Interaction.class);
-		Interaction interaction = (Interaction) interactionControl.getMock();
+		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
+		Connection connection = createMock(Connection.class);
+		Interaction interaction = createMock(Interaction.class);
 
-		MockControl inputOutputRecordControl = MockControl.createControl(Record.class);
-		Record inputOutputRecord = (Record) inputOutputRecordControl.getMock();
+		Record inputOutputRecord = createMock(Record.class);
 
-		MockControl interactionSpecControl = MockControl.createControl(InteractionSpec.class);
-		InteractionSpec interactionSpec = (InteractionSpec) interactionSpecControl.getMock();
+		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
 		SimpleRecordOperation query = new SimpleRecordOperation(connectionFactory, interactionSpec);
 
-		connectionFactory.getConnection();
-		connectionFactoryControl.setReturnValue(connection);
+		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		connection.createInteraction();
-		connectionControl.setReturnValue(interaction);
+		expect(connection.createInteraction()).andReturn(interaction);
 
-		interaction.execute(interactionSpec, inputOutputRecord, inputOutputRecord);
-		interactionControl.setReturnValue(true, 1);
+		expect(interaction.execute(interactionSpec, inputOutputRecord, inputOutputRecord)).andReturn(true);
 
 		interaction.close();
-		interactionControl.setVoidCallable(1);
 
 		connection.close();
-		connectionControl.setVoidCallable(1);
 
-		connectionFactoryControl.replay();
-		connectionControl.replay();
-		interactionControl.replay();
+		replay(connectionFactory, connection, interaction);
 
 		query.execute(inputOutputRecord, inputOutputRecord);
 
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		interactionControl.verify();
+		verify(connectionFactory, connection, interaction);
 	}
 
+	@Test
 	public void testMappingRecordOperation() throws ResourceException {
-		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
-		final ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
-		MockControl recordFactoryControl = MockControl.createStrictControl(RecordFactory.class);
-		RecordFactory recordFactory = (RecordFactory) recordFactoryControl.getMock();
-		MockControl connectionControl = MockControl.createControl(Connection.class);
-		Connection connection = (Connection) connectionControl.getMock();
-		MockControl interactionControl = MockControl.createControl(Interaction.class);
-		Interaction interaction = (Interaction) interactionControl.getMock();
+		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
+		Connection connection = createMock(Connection.class);
+		Interaction interaction = createMock(Interaction.class);
+		RecordFactory recordFactory = createMock(RecordFactory.class);
 
-		MockControl inputRecordControl = MockControl.createControl(Record.class);
-		Record inputRecord = (Record) inputRecordControl.getMock();
-		MockControl outputRecordControl = MockControl.createControl(Record.class);
-		Record outputRecord = (Record) outputRecordControl.getMock();
+		Record inputRecord = createMock(Record.class);
+		Record outputRecord = createMock(Record.class);
 
-		MockControl interactionSpecControl = MockControl.createControl(InteractionSpec.class);
-		InteractionSpec interactionSpec = (InteractionSpec) interactionSpecControl.getMock();
+		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
-		MockControl callDetectorControl = MockControl.createControl(QueryCallDetector.class);
-		QueryCallDetector callDetector = (QueryCallDetector) callDetectorControl.getMock();
+		QueryCallDetector callDetector = createMock(QueryCallDetector.class);
 
 		MappingRecordOperationImpl query = new MappingRecordOperationImpl(connectionFactory, interactionSpec);
 		query.setCallDetector(callDetector);
@@ -193,65 +147,44 @@ public class EisOperationTests extends TestCase {
 		Object inObj = new Object();
 		Object outObj = new Object();
 
-		connectionFactory.getRecordFactory();
-		connectionFactoryControl.setReturnValue(recordFactory, 1);
+		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
 
-		callDetector.callCreateInputRecord(recordFactory, inObj);
-		callDetectorControl.setReturnValue(inputRecord, 1);
+		expect(callDetector.callCreateInputRecord(recordFactory, inObj)).andReturn(inputRecord);
 
-		connectionFactory.getConnection();
-		connectionFactoryControl.setReturnValue(connection, 1);
+		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		connection.createInteraction();
-		connectionControl.setReturnValue(interaction, 1);
+		expect(connection.createInteraction()).andReturn(interaction);
 
-		interaction.execute(interactionSpec, inputRecord);
-		interactionControl.setReturnValue(outputRecord, 1);
+		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(outputRecord);
 
-		callDetector.callExtractOutputData(outputRecord);
-		callDetectorControl.setReturnValue(outObj, 1);
+		expect(callDetector.callExtractOutputData(outputRecord)).andReturn(outObj);
 
 		interaction.close();
-		interactionControl.setVoidCallable(1);
 
 		connection.close();
-		connectionControl.setVoidCallable(1);
 
-		connectionFactoryControl.replay();
-		connectionControl.replay();
-		interactionControl.replay();
-		callDetectorControl.replay();
+		replay(connectionFactory, connection, interaction, callDetector);
 
 		assertSame(outObj, query.execute(inObj));
 
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		interactionControl.verify();
-		callDetectorControl.verify();
+		verify(connectionFactory, connection, interaction, callDetector);
 	}
 
+	@Test
 	public void testMappingRecordOperationWithOutputRecordCreator() throws ResourceException {
-		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
-		final ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
-		MockControl recordFactoryControl = MockControl.createStrictControl(RecordFactory.class);
-		RecordFactory recordFactory = (RecordFactory) recordFactoryControl.getMock();
-		MockControl connectionControl = MockControl.createControl(Connection.class);
-		Connection connection = (Connection) connectionControl.getMock();
-		MockControl interactionControl = MockControl.createControl(Interaction.class);
-		Interaction interaction = (Interaction) interactionControl.getMock();
+		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
+		Connection connection = createMock(Connection.class);
+		Interaction interaction = createMock(Interaction.class);
+		RecordFactory recordFactory = createMock(RecordFactory.class);
 
-		MockControl inputRecordControl = MockControl.createControl(Record.class);
-		Record inputRecord = (Record) inputRecordControl.getMock();
-		MockControl outputRecordControl = MockControl.createControl(Record.class);
-		Record outputRecord = (Record) outputRecordControl.getMock();
-		MockControl outputCreatorControl = MockControl.createControl(RecordCreator.class);
-		RecordCreator outputCreator = (RecordCreator) outputCreatorControl.getMock();
+		Record inputRecord = createMock(Record.class);
+		Record outputRecord = createMock(Record.class);
 
-		MockControl interactionSpecControl = MockControl.createControl(InteractionSpec.class);
-		InteractionSpec interactionSpec = (InteractionSpec) interactionSpecControl.getMock();
+		RecordCreator outputCreator = createMock(RecordCreator.class);
 
-		MockControl callDetectorControl = MockControl.createControl(QueryCallDetector.class);
-		QueryCallDetector callDetector = (QueryCallDetector) callDetectorControl.getMock();
+		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
+
+		QueryCallDetector callDetector = createMock(QueryCallDetector.class);
 
 		MappingRecordOperationImpl query = new MappingRecordOperationImpl(connectionFactory, interactionSpec);
 		query.setOutputRecordCreator(outputCreator);
@@ -260,49 +193,31 @@ public class EisOperationTests extends TestCase {
 		Object inObj = new Object();
 		Object outObj = new Object();
 
-		connectionFactory.getRecordFactory();
-		connectionFactoryControl.setReturnValue(recordFactory, 1);
+		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
 
-		callDetector.callCreateInputRecord(recordFactory, inObj);
-		callDetectorControl.setReturnValue(inputRecord, 1);
+		expect(callDetector.callCreateInputRecord(recordFactory, inObj)).andReturn(inputRecord);
 
-		connectionFactory.getConnection();
-		connectionFactoryControl.setReturnValue(connection, 1);
+		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		connection.createInteraction();
-		connectionControl.setReturnValue(interaction, 1);
+		expect(connection.createInteraction()).andReturn(interaction);
 
-		connectionFactory.getRecordFactory();
-		connectionFactoryControl.setReturnValue(recordFactory, 1);
+		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
 
-		outputCreator.createRecord(recordFactory);
-		outputCreatorControl.setReturnValue(outputRecord, 1);
+		expect(outputCreator.createRecord(recordFactory)).andReturn(outputRecord);
 
-		interaction.execute(interactionSpec, inputRecord, outputRecord);
-		interactionControl.setReturnValue(true, 1);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
 
-		callDetector.callExtractOutputData(outputRecord);
-		callDetectorControl.setReturnValue(outObj, 1);
+		expect(callDetector.callExtractOutputData(outputRecord)).andReturn(outObj);
 
 		interaction.close();
-		interactionControl.setVoidCallable(1);
 
 		connection.close();
-		connectionControl.setVoidCallable(1);
 
-		connectionFactoryControl.replay();
-		connectionControl.replay();
-		interactionControl.replay();
-		outputCreatorControl.replay();
-		callDetectorControl.replay();
+		replay(connectionFactory, connection, interaction, outputCreator, callDetector);
 
 		assertSame(outObj, query.execute(inObj));
 
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		interactionControl.verify();
-		outputCreatorControl.verify();
-		callDetectorControl.verify();
+		verify(connectionFactory, connection, interaction, outputCreator, callDetector);
 	}
 
 
