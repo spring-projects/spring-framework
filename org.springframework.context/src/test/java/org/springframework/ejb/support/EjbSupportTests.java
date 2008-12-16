@@ -16,6 +16,8 @@
 
 package org.springframework.ejb.support;
 
+import static org.easymock.EasyMock.*;
+
 import java.rmi.RemoteException;
 
 import javax.ejb.CreateException;
@@ -26,7 +28,6 @@ import javax.jms.Message;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
@@ -40,14 +41,14 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 21.05.2003
  */
 public class EjbSupportTests extends TestCase {
 
 	public void testSfsb() throws CreateException {
-		MockControl mc = MockControl.createControl(SessionContext.class);
-		SessionContext sc = (SessionContext) mc.getMock();
-		mc.replay();
+		SessionContext sc = createMock(SessionContext.class);
+		replay(sc);
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
@@ -65,6 +66,7 @@ public class EjbSupportTests extends TestCase {
 		};
 		
 		// Basically the test is what needed to be implemented here!
+		@SuppressWarnings("serial")
 		class MySfsb extends AbstractStatefulSessionBean {
 			public void ejbCreate() throws CreateException {
 				loadBeanFactory();
@@ -92,13 +94,13 @@ public class EjbSupportTests extends TestCase {
 	public void testHelpfulNamingLookupMessage() throws NamingException, CreateException {
 		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		
-		MockControl mc = MockControl.createControl(SessionContext.class);
-		SessionContext sc = (SessionContext) mc.getMock();
-		mc.replay();
+		SessionContext sc = createMock(SessionContext.class);
+		replay(sc);
 	
 		// Leave with default XmlBeanFactoryLoader
 	
 		// Basically the test is what needed to be implemented here!
+		@SuppressWarnings("serial")
 		AbstractStatelessSessionBean slsb = new AbstractStatelessSessionBean() {
 			public void onEjbCreate() {
 			}
@@ -116,9 +118,8 @@ public class EjbSupportTests extends TestCase {
 	}
 	
 	public void testSlsb() throws Exception {
-		MockControl mc = MockControl.createControl(SessionContext.class);
-		SessionContext sc = (SessionContext) mc.getMock();
-		mc.replay();
+		SessionContext sc = createMock(SessionContext.class);
+		replay(sc);
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
@@ -134,6 +135,7 @@ public class EjbSupportTests extends TestCase {
 			}
 		};
 	
+		@SuppressWarnings("serial")
 		AbstractStatelessSessionBean slsb = new AbstractStatelessSessionBean() {
 			protected void onEjbCreate() throws CreateException {
 				assertTrue(getBeanFactory() == bf);
@@ -161,9 +163,8 @@ public class EjbSupportTests extends TestCase {
 	}
 
 	public void testJmsMdb() throws Exception {
-		MockControl mc = MockControl.createControl(MessageDrivenContext.class);
-		MessageDrivenContext sc = (MessageDrivenContext) mc.getMock();
-		mc.replay();
+		MessageDrivenContext sc = createMock(MessageDrivenContext.class);
+		replay(sc);
 	
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
@@ -179,6 +180,7 @@ public class EjbSupportTests extends TestCase {
 			}
 		};
 
+		@SuppressWarnings("serial")
 		AbstractJmsMessageDrivenBean mdb = new AbstractJmsMessageDrivenBean() {
 			protected void onEjbCreate() {
 				assertTrue(getBeanFactory() == bf);
@@ -195,15 +197,15 @@ public class EjbSupportTests extends TestCase {
 	}
 	
 	public void testCannotLoadBeanFactory() throws Exception {
-		MockControl mc = MockControl.createControl(SessionContext.class);
-		SessionContext sc = (SessionContext) mc.getMock();
-		mc.replay();
+		SessionContext sc = createMock(SessionContext.class);
+		replay(sc);
 	
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
 			public BeanFactoryReference useBeanFactory(String factoryKey) throws FatalBeanException {
 				throw new BootstrapException("", null);
 		}};
 
+		@SuppressWarnings("serial")
 		AbstractStatelessSessionBean slsb = new AbstractStatelessSessionBean() {
 			protected void onEjbCreate() throws CreateException {
 			}

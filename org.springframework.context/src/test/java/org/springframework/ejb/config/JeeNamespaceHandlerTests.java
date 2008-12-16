@@ -16,8 +16,10 @@
 
 package org.springframework.ejb.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -32,12 +34,14 @@ import org.springframework.jndi.JndiObjectFactoryBean;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class JeeNamespaceHandlerTests extends TestCase {
+public class JeeNamespaceHandlerTests {
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(
 				new ClassPathResource("jeeNamespaceHandlerTests.xml", getClass()));
@@ -46,6 +50,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		this.beanFactory.getBeanNamesForType(ITestBean.class);
 	}
 
+	@Test
 	public void testSimpleDefinition() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simple");
 		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
@@ -53,6 +58,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 	}
 
+	@Test
 	public void testComplexDefinition() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complex");
 		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
@@ -66,18 +72,21 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "defaultObject", "myValue");
 	}
 
+	@Test
 	public void testWithEnvironment() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
 		assertPropertyValue(beanDefinition, "defaultObject", new RuntimeBeanReference("myBean"));
 	}
 
+	@Test
 	public void testWithReferencedEnvironment() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withReferencedEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", new RuntimeBeanReference("myEnvironment"));
 		assertFalse(beanDefinition.getPropertyValues().contains("environmentRef"));
 	}
 
+	@Test
 	public void testSimpleLocalSlsb() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
 		assertEquals(LocalStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
@@ -85,6 +94,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
 	}
 
+	@Test
 	public void testSimpleRemoteSlsb() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
 		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
@@ -92,6 +102,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
 	}
 
+	@Test
 	public void testComplexLocalSlsb() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
 		assertEquals(LocalStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
@@ -103,6 +114,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
 	}
 
+	@Test
 	public void testComplexRemoteSlsb() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
 		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());

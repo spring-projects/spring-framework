@@ -16,8 +16,10 @@
 
 package org.springframework.ejb.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -28,8 +30,9 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Torsten Juergeleit
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class JeeNamespaceHandlerEventTests extends TestCase {
+public class JeeNamespaceHandlerEventTests {
 
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
@@ -38,22 +41,26 @@ public class JeeNamespaceHandlerEventTests extends TestCase {
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
+	@Before
 	public void setUp() throws Exception {
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setEventListener(this.eventListener);
 		this.reader.loadBeanDefinitions(new ClassPathResource("jeeNamespaceHandlerTests.xml", getClass()));
 	}
 
+	@Test
 	public void testJndiLookupComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("simple");
 		assertTrue(component instanceof BeanComponentDefinition);
 	}
 
+	@Test
 	public void testLocalSlsbComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("simpleLocalEjb");
 		assertTrue(component instanceof BeanComponentDefinition);
 	}
 
+	@Test
 	public void testRemoteSlsbComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("simpleRemoteEjb");
 		assertTrue(component instanceof BeanComponentDefinition);
