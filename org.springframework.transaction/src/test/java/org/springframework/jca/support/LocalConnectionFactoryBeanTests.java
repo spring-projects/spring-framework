@@ -16,77 +16,73 @@
 
 package org.springframework.jca.support;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.springframework.test.AssertThrows;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ManagedConnectionFactory;
+
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link LocalConnectionFactoryBean} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class LocalConnectionFactoryBeanTests extends TestCase {
+public final class LocalConnectionFactoryBeanTests {
 
+	@Test(expected=IllegalArgumentException.class)
     public void testManagedConnectionFactoryIsRequired() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                new LocalConnectionFactoryBean().afterPropertiesSet();
-            }
-        }.runTest();
+        new LocalConnectionFactoryBean().afterPropertiesSet();
     }
 
+	@Test
     public void testIsSingleton() throws Exception {
         LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
         assertTrue(factory.isSingleton());
     }
 
+	@Test
     public void testGetObjectTypeIsNullIfConnectionFactoryHasNotBeenConfigured() throws Exception {
         LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
         assertNull(factory.getObjectType());
     }
 
+	@Test
     public void testCreatesVanillaConnectionFactoryIfNoConnectionManagerHasBeenConfigured() throws Exception {
         
         final Object CONNECTION_FACTORY = new Object();
         
-        MockControl mockManagedConnectionFactory = MockControl.createControl(ManagedConnectionFactory.class);
-        ManagedConnectionFactory managedConnectionFactory = (ManagedConnectionFactory) mockManagedConnectionFactory.getMock();
+        ManagedConnectionFactory managedConnectionFactory = createMock(ManagedConnectionFactory.class);
 
-        managedConnectionFactory.createConnectionFactory();
-        mockManagedConnectionFactory.setReturnValue(CONNECTION_FACTORY);
-        mockManagedConnectionFactory.replay();
+        expect(managedConnectionFactory.createConnectionFactory()).andReturn(CONNECTION_FACTORY);
+        replay(managedConnectionFactory);
 
         LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
         factory.setManagedConnectionFactory(managedConnectionFactory);
         factory.afterPropertiesSet();
         assertEquals(CONNECTION_FACTORY, factory.getObject());
 
-        mockManagedConnectionFactory.verify();
+        verify(managedConnectionFactory);
     }
 
+	@Test
     public void testCreatesManagedConnectionFactoryIfAConnectionManagerHasBeenConfigured() throws Exception {
-        MockControl mockManagedConnectionFactory = MockControl.createControl(ManagedConnectionFactory.class);
-        ManagedConnectionFactory managedConnectionFactory = (ManagedConnectionFactory) mockManagedConnectionFactory.getMock();
+        ManagedConnectionFactory managedConnectionFactory = createMock(ManagedConnectionFactory.class);
 
-        MockControl mockConnectionManager = MockControl.createControl(ConnectionManager.class);
-        ConnectionManager connectionManager = (ConnectionManager) mockConnectionManager.getMock();
+        ConnectionManager connectionManager = createMock(ConnectionManager.class);
 
-        managedConnectionFactory.createConnectionFactory(connectionManager);
-        mockManagedConnectionFactory.setReturnValue(null);
+        expect(managedConnectionFactory.createConnectionFactory(connectionManager)).andReturn(null);
 
-        mockConnectionManager.replay();
-        mockManagedConnectionFactory.replay();
+        replay(connectionManager, managedConnectionFactory);
 
         LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
         factory.setManagedConnectionFactory(managedConnectionFactory);
         factory.setConnectionManager(connectionManager);
         factory.afterPropertiesSet();
 
-        mockManagedConnectionFactory.verify();
-        mockConnectionManager.verify();
+        verify(connectionManager, managedConnectionFactory);
     }
 
 }
