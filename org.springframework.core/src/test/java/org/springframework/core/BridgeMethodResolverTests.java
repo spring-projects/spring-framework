@@ -39,21 +39,18 @@ import java.util.concurrent.Delayed;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
 public class BridgeMethodResolverTests {
 
-	private static TypeVariable findTypeVariable(Class clazz, String name) {
-		TypeVariable[] variables = clazz.getTypeParameters();
+	private static TypeVariable<?> findTypeVariable(Class<?> clazz, String name) {
+		TypeVariable<?>[] variables = clazz.getTypeParameters();
 		for (int i = 0; i < variables.length; i++) {
-			TypeVariable variable = variables[i];
+			TypeVariable<?> variable = variables[i];
 			if (variable.getName().equals(name)) {
 				return variable;
 			}
@@ -61,7 +58,7 @@ public class BridgeMethodResolverTests {
 		return null;
 	}
 
-	private static Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
+	private static Method findMethodWithReturnType(String name, Class<?> returnType, Class<SettingsDaoImpl> targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
 			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
@@ -108,7 +105,7 @@ public class BridgeMethodResolverTests {
 
 	@Test
 	public void testIsBridgeMethodFor() throws Exception {
-		Map typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
+		Map<TypeVariable, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
@@ -120,17 +117,17 @@ public class BridgeMethodResolverTests {
 	@Test
 	public void testCreateTypeVariableMap() throws Exception {
 		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
-		TypeVariable barT = findTypeVariable(InterBar.class, "T");
+		TypeVariable<?> barT = findTypeVariable(InterBar.class, "T");
 		assertEquals(String.class, typeVariableMap.get(barT));
 
 		typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyFoo.class);
-		TypeVariable fooT = findTypeVariable(Foo.class, "T");
+		TypeVariable<?> fooT = findTypeVariable(Foo.class, "T");
 		assertEquals(String.class, typeVariableMap.get(fooT));
 
 		typeVariableMap = GenericTypeResolver.getTypeVariableMap(ExtendsEnclosing.ExtendsEnclosed.ExtendsReallyDeepNow.class);
-		TypeVariable r = findTypeVariable(Enclosing.Enclosed.ReallyDeepNow.class, "R");
-		TypeVariable s = findTypeVariable(Enclosing.Enclosed.class, "S");
-		TypeVariable t = findTypeVariable(Enclosing.class, "T");
+		TypeVariable<?> r = findTypeVariable(Enclosing.Enclosed.ReallyDeepNow.class, "R");
+		TypeVariable<?> s = findTypeVariable(Enclosing.Enclosed.class, "S");
+		TypeVariable<?> t = findTypeVariable(Enclosing.class, "T");
 		assertEquals(Long.class, typeVariableMap.get(r));
 		assertEquals(Integer.class, typeVariableMap.get(s));
 		assertEquals(String.class, typeVariableMap.get(t));
@@ -238,7 +235,7 @@ public class BridgeMethodResolverTests {
 		Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
 		assertFalse(otherMethod.isBridge());
 
-		Map typeVariableMap = GenericTypeResolver.getTypeVariableMap(MessageBroadcasterImpl.class);
+		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MessageBroadcasterImpl.class);
 		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, typeVariableMap));
 		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, typeVariableMap));
 
@@ -247,8 +244,8 @@ public class BridgeMethodResolverTests {
 
 	@Test
 	public void testSPR2454() throws Exception {
-		Map typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
-		TypeVariable variable = findTypeVariable(MyHomer.class, "L");
+		Map<?, ?> typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
+		TypeVariable<?> variable = findTypeVariable(MyHomer.class, "L");
 		assertEquals(AbstractBounded.class, ((ParameterizedType) typeVariableMap.get(variable)).getRawType());
 	}
 
@@ -402,10 +399,10 @@ public class BridgeMethodResolverTests {
 
 	public static abstract class Bar<T> {
 
-		void someMethod(Map m, Object otherArg) {
+		void someMethod(Map<?, ?> m, Object otherArg) {
 		}
 
-		void someMethod(T theArg, Map m) {
+		void someMethod(T theArg, Map<?, ?> m) {
 		}
 
 		abstract void someMethod(T theArg, Object otherArg);
@@ -535,7 +532,7 @@ public class BridgeMethodResolverTests {
 			this.otherObject = otherObject;
 		}
 
-		@Transactional(readOnly = true)
+		//@Transactional(readOnly = true)
 		public S loadFromParent() {
 			return otherObject;
 		}
@@ -548,7 +545,7 @@ public class BridgeMethodResolverTests {
 			super(object, "From Parent");
 		}
 
-		@Transactional(readOnly = true)
+		//@Transactional(readOnly = true)
 		public ConcreteSettings load() {
 			return super.object;
 		}
@@ -757,7 +754,7 @@ public class BridgeMethodResolverTests {
 
 		public void unsubscribe();
 
-		public void setChannel(Channel channel);
+		public void setChannel(Channel<?> channel);
 	}
 
 
@@ -767,7 +764,7 @@ public class BridgeMethodResolverTests {
 
 
 	public abstract class GenericEventBroadcasterImpl<T extends Event> extends GenericBroadcasterImpl
-					implements EventBroadcaster, BeanNameAware {
+					implements EventBroadcaster {
 
 		private Class<T>[] subscribingEvents;
 
@@ -889,7 +886,7 @@ public class BridgeMethodResolverTests {
 
 
 	public class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
-					implements RepositoryRegistry, InitializingBean {
+					implements RepositoryRegistry {
 
 		protected void injectInto(R rep) {
 		}
@@ -924,7 +921,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public class GenericHibernateRepository<T, ID extends Serializable> extends HibernateDaoSupport
+	public class GenericHibernateRepository<T, ID extends Serializable> 
 					implements ConvenientGenericRepository<T, ID> {
 
 		/**
@@ -1049,10 +1046,10 @@ public class BridgeMethodResolverTests {
 
 	public interface UserDao {
 
-		@Transactional
+		//@Transactional
 		void save(User user);
 
-		@Transactional
+		//@Transactional
 		void save(Permission perm);
 	}
 
@@ -1208,7 +1205,8 @@ public class BridgeMethodResolverTests {
 	// SPR-3485 classes
 	//-------------------
 
-	private static class ParameterType implements Serializable {
+	@SuppressWarnings("serial")
+    private static class ParameterType implements Serializable {
 
 	}
 
@@ -1251,7 +1249,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public interface IExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions>
+	public interface IExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<?>>
 			extends SearchProvider<S, T> {
 	}
 
