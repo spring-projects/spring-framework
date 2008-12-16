@@ -16,50 +16,48 @@
 
 package org.springframework.instrument.classloading.oc4j;
 
-import junit.framework.TestCase;
-import org.easymock.AbstractMatcher;
-import org.easymock.MockControl;
-import org.springframework.test.AssertThrows;
+import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.junit.Assert.assertNotNull;
 
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
+
+import org.easymock.AbstractMatcher;
+import org.easymock.MockControl;
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link OC4JClassPreprocessorAdapter} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class OC4JClassPreprocessorAdapterTests extends TestCase {
+public final class OC4JClassPreprocessorAdapterTests {
 
-	public void testClassNameIsUnMangledPriorToTransformation() throws Exception {
+	@Test
+	public void testClassNameIsUnMangledPriorToTransformation() throws IllegalClassFormatException {
 		final byte[] classBytes = "CAFEBABE".getBytes();
 		final ClassLoader classLoader = getClass().getClassLoader();
 
-		MockControl mockTransformer = MockControl.createControl(ClassFileTransformer.class);
-		ClassFileTransformer transformer = (ClassFileTransformer) mockTransformer.getMock();
+		ClassFileTransformer transformer = createMock(ClassFileTransformer.class);
 
-		transformer.transform(classLoader, "com/foo/Bar", null, null, classBytes);
-		mockTransformer.setMatcher(new AbstractMatcher() {
-			public boolean matches(Object[] expected, Object[] actual) {
-				return expected[1].equals(actual[1]);
-			}
-		});
-		mockTransformer.setReturnValue(classBytes);
-
-		mockTransformer.replay();
+		expect(
+				transformer.transform(eq(classLoader), eq("com/foo/Bar"), (Class<?>)isNull(), (ProtectionDomain)isNull(), isA(byte[].class))
+			).andReturn(classBytes);
+		replay(transformer);
 
 		OC4JClassPreprocessorAdapter processor = new OC4JClassPreprocessorAdapter(transformer);
 		byte[] bytes = processor.processClass("com.foo.Bar", classBytes, 0, 0, null, classLoader);
 		assertNotNull(bytes);
 
-		mockTransformer.verify();
+		verify(transformer);
 	}
 
-	public void testCtorWithNullClassFileTransformer() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new OC4JClassPreprocessorAdapter(null);
-			}
-		}.runTest();
+	@Test(expected=IllegalArgumentException.class)
+	public void testCtorWithNullClassFileTransformer() {
+		new OC4JClassPreprocessorAdapter(null);
 	}
 
 }

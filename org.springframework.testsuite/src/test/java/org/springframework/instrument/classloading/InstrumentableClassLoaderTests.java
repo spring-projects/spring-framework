@@ -16,16 +16,19 @@
 
 package org.springframework.instrument.classloading;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertSame;
 
+import org.junit.Test;
 import org.springframework.util.ClassUtils;
 
 /**
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class InstrumentableClassLoaderTests extends TestCase {
+public class InstrumentableClassLoaderTests {
 
+	@Test
 	public void testDefaultLoadTimeWeaver() {
 		ClassLoader loader = new SimpleInstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
 		ReflectiveLoadTimeWeaver handler = new ReflectiveLoadTimeWeaver(loader);

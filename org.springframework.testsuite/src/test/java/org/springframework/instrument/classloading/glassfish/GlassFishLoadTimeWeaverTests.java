@@ -16,6 +16,8 @@
 
 package org.springframework.instrument.classloading.glassfish;
 
+import static org.junit.Assert.*;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -26,16 +28,20 @@ import java.util.List;
 
 import javax.persistence.spi.ClassTransformer;
 
-import com.sun.enterprise.loader.InstrumentableClassLoader;
-import junit.framework.TestCase;
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 
-public class GlassFishLoadTimeWeaverTests extends TestCase {
+import com.sun.enterprise.loader.InstrumentableClassLoader;
 
-	private MockControl loaderCtrl;
+// converting away from old-style EasyMock APIs was problematic with this class
+@SuppressWarnings("deprecation")
+public class GlassFishLoadTimeWeaverTests {
+
+	private MockControl<InstrumentableClassLoader> loaderCtrl;
 	private InstrumentableClassLoader loader;
 	private LoadTimeWeaver ltw;
 
@@ -60,9 +66,10 @@ public class GlassFishLoadTimeWeaverTests extends TestCase {
 		}
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		loaderCtrl = MockControl.createControl(InstrumentableClassLoader.class);
-		loader = (InstrumentableClassLoader) loaderCtrl.getMock();
+		loader = loaderCtrl.getMock();
 		loaderCtrl.replay();
 
 		ltw = new GlassFishLoadTimeWeaver() {
@@ -73,11 +80,13 @@ public class GlassFishLoadTimeWeaverTests extends TestCase {
 		};
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		loaderCtrl.verify();
 		ltw = null;
 	}
 
+	@Test
 	public void testGlassFishLoadTimeWeaver() {
 		try {
 			ltw = new GlassFishLoadTimeWeaver();
@@ -89,6 +98,7 @@ public class GlassFishLoadTimeWeaverTests extends TestCase {
 
 	}
 
+	@Test
 	public void testGlassFishLoadTimeWeaverClassLoader() {
 		try {
 			ltw = new GlassFishLoadTimeWeaver(null);
@@ -115,8 +125,9 @@ public class GlassFishLoadTimeWeaverTests extends TestCase {
 		assertSame(cl4, ltw.getInstrumentableClassLoader());
 	}
 
+	@Test
 	public void testAddTransformer() {
-		ClassFileTransformer transformer = (ClassFileTransformer) MockControl.createNiceControl(
+		ClassFileTransformer transformer = MockControl.createNiceControl(
 				ClassFileTransformer.class).getMock();
 		loaderCtrl.reset();
 		loader.addTransformer(new ClassTransformerAdapter(transformer));
@@ -141,6 +152,7 @@ public class GlassFishLoadTimeWeaverTests extends TestCase {
 		ltw.addTransformer(transformer);
 	}
 
+	@Test
 	public void testGetThrowawayClassLoader() {
 		loaderCtrl.reset();
 		ClassLoader cl = new URLClassLoader(new URL[0]);
