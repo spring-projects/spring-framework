@@ -16,24 +16,26 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import static org.junit.Assert.*;
+
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class JndiDataSourceLookupTests extends TestCase {
+public final class JndiDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "Love is like a stove, burns you when it's hot";
 
-
+	@Test
 	public void testSunnyDay() throws Exception {
 		final DataSource expectedDataSource = new StubDataSource();
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
+			@SuppressWarnings("unchecked")
 			protected Object lookup(String jndiName, Class requiredType) {
 				assertEquals(DATA_SOURCE_NAME, jndiName);
 				return expectedDataSource;
@@ -44,18 +46,16 @@ public final class JndiDataSourceLookupTests extends TestCase {
 		assertSame(expectedDataSource, dataSource);
 	}
 
+	@Test(expected=DataSourceLookupFailureException.class)
 	public void testNoDataSourceAtJndiLocation() throws Exception {
-		new AssertThrows(DataSourceLookupFailureException.class) {
-			public void test() throws Exception {
-				JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
-					protected Object lookup(String jndiName, Class requiredType) throws NamingException {
-						assertEquals(DATA_SOURCE_NAME, jndiName);
-						throw new NamingException();
-					}
-				};
-				lookup.getDataSource(DATA_SOURCE_NAME);
+		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
+			@SuppressWarnings("unchecked")
+			protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+				assertEquals(DATA_SOURCE_NAME, jndiName);
+				throw new NamingException();
 			}
-		}.runTest();
+		};
+		lookup.getDataSource(DATA_SOURCE_NAME);
 	}
 
 }

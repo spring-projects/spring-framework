@@ -37,7 +37,7 @@ public abstract class AbstractJdbcTests extends TestCase {
 	protected DataSource mockDataSource;
 	protected MockControl ctrlConnection;
 	protected Connection mockConnection;
-
+	
 	/**
 	 * Set to true if the user wants verification, indicated
 	 * by a call to replay(). We need to make this optional,
