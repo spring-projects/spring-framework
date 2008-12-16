@@ -34,6 +34,8 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
+ * Integration tests for handling {@link Qualifier} annotations.
+ * 
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
