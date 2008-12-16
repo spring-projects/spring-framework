@@ -26,7 +26,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
 import org.easymock.MockControl;
 import org.apache.commons.logging.LogFactory;
 
@@ -122,18 +121,18 @@ public abstract class AbstractRowMapperTests extends TestCase {
 
 	protected void verifyPerson(Person bean) {
 		verify();
-		Assert.assertEquals("Bubba", bean.getName());
-		Assert.assertEquals(22L, bean.getAge());
-		Assert.assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		Assert.assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+		assertEquals("Bubba", bean.getName());
+		assertEquals(22L, bean.getAge());
+		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
 	protected void verifyConcretePerson(ConcretePerson bean) {
 		verify();
-		Assert.assertEquals("Bubba", bean.getName());
-		Assert.assertEquals(22L, bean.getAge());
-		Assert.assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		Assert.assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+		assertEquals("Bubba", bean.getName());
+		assertEquals(22L, bean.getAge());
+		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
 	private void verify() {

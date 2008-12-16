@@ -16,69 +16,67 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class BeanFactoryDataSourceLookupTests extends TestCase {
+public class BeanFactoryDataSourceLookupTests {
 
 	private static final String DATASOURCE_BEAN_NAME = "dataSource";
 
 
-	public void testLookupSunnyDay() throws Exception {
-		MockControl mockBeanFactory = MockControl.createControl(BeanFactory.class);
-		BeanFactory beanFactory = (BeanFactory) mockBeanFactory.getMock();
-
-		beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class);
+	@Test
+	public void testLookupSunnyDay() {
+		BeanFactory beanFactory = createMock(BeanFactory.class);
+		
 		StubDataSource expectedDataSource = new StubDataSource();
-		mockBeanFactory.setReturnValue(expectedDataSource);
+		expect(beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class)).andReturn(expectedDataSource);
 
-		mockBeanFactory.replay();
+		replay(beanFactory);
 
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 		lookup.setBeanFactory(beanFactory);
 		DataSource dataSource = lookup.getDataSource(DATASOURCE_BEAN_NAME);
-		assertNotNull("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is", dataSource);
+		assertNotNull("A DataSourceLookup implementation must *never* return null from " +
+				"getDataSource(): this one obviously (and incorrectly) is", dataSource);
 		assertSame(expectedDataSource, dataSource);
 
-		mockBeanFactory.verify();
+		verify(beanFactory);
 	}
 
+	@Test
 	public void testLookupWhereBeanFactoryYieldsNonDataSourceType() throws Exception {
-		MockControl mockBeanFactory = MockControl.createControl(BeanFactory.class);
-		final BeanFactory beanFactory = (BeanFactory) mockBeanFactory.getMock();
+		final BeanFactory beanFactory = createMock(BeanFactory.class);
 
-		beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class);
-		mockBeanFactory.setThrowable(new BeanNotOfRequiredTypeException(DATASOURCE_BEAN_NAME, DataSource.class, String.class));
+		expect(
+				beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class)
+			).andThrow(new BeanNotOfRequiredTypeException(DATASOURCE_BEAN_NAME, DataSource.class, String.class));
 
-		mockBeanFactory.replay();
+		replay(beanFactory);
 
-		new AssertThrows(DataSourceLookupFailureException.class) {
-			public void test() throws Exception {
+		try {
 				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup(beanFactory);
 				lookup.getDataSource(DATASOURCE_BEAN_NAME);
-			}
-		}.runTest();
+				fail("should have thrown DataSourceLookupFailureException");
+		} catch (DataSourceLookupFailureException ex) { /* expected */ }
 
-		mockBeanFactory.verify();
+		verify(beanFactory);
 	}
 
+	@Test(expected=IllegalStateException.class)
 	public void testLookupWhereBeanFactoryHasNotBeenSupplied() throws Exception {
-		new AssertThrows(IllegalStateException.class) {
-			public void test() throws Exception {
-				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
-				lookup.getDataSource(DATASOURCE_BEAN_NAME);
-			}
-		}.runTest();
+		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
+		lookup.getDataSource(DATASOURCE_BEAN_NAME);
 	}
 
 }

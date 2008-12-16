@@ -40,11 +40,11 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
 public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 
@@ -91,19 +91,17 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 
 
 	public void testNullDataSourceProvidedToCtor() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new NamedParameterJdbcTemplate((DataSource) null);
-			}
-		}.runTest();
+		try {
+			new NamedParameterJdbcTemplate((DataSource) null);
+			fail("should have thrown IllegalArgumentException");
+		} catch (IllegalArgumentException ex) { /* expected */ }
 	}
 
 	public void testNullJdbcTemplateProvidedToCtor() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new NamedParameterJdbcTemplate((JdbcOperations) null);
-			}
-		}.runTest();
+		try {
+			new NamedParameterJdbcTemplate((JdbcOperations) null);
+			fail("should have thrown IllegalArgumentException");
+		} catch (IllegalArgumentException ex) { /* expected */ }
 	}
 
 	public void testExecute() throws SQLException {

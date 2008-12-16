@@ -21,6 +21,7 @@ import org.springframework.dao.DataAccessException;
 /**
  * @author Thomas Risberg
  */
+@SuppressWarnings("serial")
 public class CustomErrorCodeException extends DataAccessException {
 
 	public CustomErrorCodeException(String msg) {
