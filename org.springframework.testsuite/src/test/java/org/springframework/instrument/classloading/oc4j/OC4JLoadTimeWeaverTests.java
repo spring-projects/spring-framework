@@ -16,30 +16,24 @@
 
 package org.springframework.instrument.classloading.oc4j;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link OC4JLoadTimeWeaver} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class OC4JLoadTimeWeaverTests extends TestCase {
+public final class OC4JLoadTimeWeaverTests {
 
-	public void testCtorWithNullClassLoader() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new OC4JLoadTimeWeaver(null);
-			}
-		}.runTest();
+	@Test(expected=IllegalArgumentException.class)
+	public void testCtorWithNullClassLoader() {
+		new OC4JLoadTimeWeaver(null);
 	}
 
-	public void testAddTransformerWithNullTransformer() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
+	@Test(expected=IllegalArgumentException.class)
+	public void testAddTransformerWithNullTransformer() {
 				new OC4JLoadTimeWeaver().addTransformer(null);
-			}
-		}.runTest();
 	}
 
 }
