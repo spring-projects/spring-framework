@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.config;
+package org.springframework.context.support;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 
 /**
+ * Tests the interaction between {@link ApplicationContext} implementations and
+ * any registered {@link BeanFactoryPostProcessor} implementations.  Specifically
+ * {@link StaticApplicationContext} is used for the tests, but what's represented
+ * here is any {@link AbstractApplicationContext} implementation.
+ * 
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Chris Beams
