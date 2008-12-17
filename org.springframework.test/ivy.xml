@@ -41,6 +41,7 @@
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.portlet" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration" conf="optional->compile"/>
+		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 	</dependencies>
 
 </ivy-module>
