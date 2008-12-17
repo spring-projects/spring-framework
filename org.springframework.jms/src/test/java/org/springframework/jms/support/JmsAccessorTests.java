@@ -16,27 +16,27 @@
 
 package org.springframework.jms.support;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import static org.junit.Assert.*;
 
 import javax.jms.Session;
+
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link JmsAccessor} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class JmsAccessorTests extends TestCase {
+public final class JmsAccessorTests {
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				JmsAccessor accessor = new StubJmsAccessor();
-				accessor.afterPropertiesSet();
-			}
-		}.runTest();
-	}
+		JmsAccessor accessor = new StubJmsAccessor();
+		accessor.afterPropertiesSet();
+    }
 
+    @Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertFalse("The [sessionTransacted] property of JmsAccessor must default to " +
@@ -45,6 +45,7 @@ public final class JmsAccessorTests extends TestCase {
 				accessor.isSessionTransacted());
 	}
 
+    @Test
 	public void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertEquals("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
@@ -54,12 +55,9 @@ public final class JmsAccessorTests extends TestCase {
 				accessor.getSessionAcknowledgeMode());
 	}
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
-			}
-		}.runTest();
+		new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
 	}
 
 

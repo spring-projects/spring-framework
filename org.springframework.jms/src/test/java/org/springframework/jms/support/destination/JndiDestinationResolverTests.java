@@ -16,26 +16,28 @@
 
 package org.springframework.jms.support.destination;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
-import org.springframework.test.AssertThrows;
-import org.springframework.jms.StubTopic;
+import static org.junit.Assert.*;
 
 import javax.jms.Destination;
 import javax.jms.Session;
 import javax.naming.NamingException;
 
+import org.easymock.MockControl;
+import org.junit.Test;
+import org.springframework.jms.StubTopic;
+
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
-public class JndiDestinationResolverTests extends TestCase {
+public class JndiDestinationResolverTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
 	private static final Destination DESTINATION = new StubTopic();
 
 
+	@Test
 	public void testHitsCacheSecondTimeThrough() throws Exception {
 
 		MockControl mockSession = MockControl.createControl(Session.class);
@@ -50,6 +52,7 @@ public class JndiDestinationResolverTests extends TestCase {
 		mockSession.verify();
 	}
 
+	@Test
 	public void testDoesNotUseCacheIfCachingIsTurnedOff() throws Exception {
 
 		MockControl mockSession = MockControl.createControl(Session.class);
@@ -72,6 +75,7 @@ public class JndiDestinationResolverTests extends TestCase {
 		mockSession.verify();
 	}
 
+	@Test
 	public void testDelegatesToFallbackIfNotResolvedInJndi() throws Exception {
 		MockControl mockSession = MockControl.createControl(Session.class);
 		Session session = (Session) mockSession.getMock();
@@ -99,6 +103,7 @@ public class JndiDestinationResolverTests extends TestCase {
 		mockDestinationResolver.verify();
 	}
 
+	@Test
 	public void testDoesNotDelegateToFallbackIfNotResolvedInJndi() throws Exception {
 		MockControl mockSession = MockControl.createControl(Session.class);
 		final Session session = (Session) mockSession.getMock();
@@ -115,11 +120,10 @@ public class JndiDestinationResolverTests extends TestCase {
 		};
 		resolver.setDynamicDestinationResolver(dynamicResolver);
 
-		new AssertThrows(DestinationResolutionException.class) {
-			public void test() throws Exception {
-				resolver.resolveDestinationName(session, DESTINATION_NAME, true);
-			}
-		}.runTest();
+		try {
+			resolver.resolveDestinationName(session, DESTINATION_NAME, true);
+			fail("expected DestinationResolutionException");
+		} catch (DestinationResolutionException ex) { /* expected */ }
 
 		mockSession.verify();
 		mockDestinationResolver.verify();
