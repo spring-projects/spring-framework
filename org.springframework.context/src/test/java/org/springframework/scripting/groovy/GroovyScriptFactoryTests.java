@@ -16,6 +16,8 @@
 
 package org.springframework.scripting.groovy;
 
+import static org.junit.Assert.*;
+
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map;
@@ -24,6 +26,7 @@ import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
@@ -42,7 +45,6 @@ import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rob Harrop
@@ -50,9 +52,11 @@ import org.springframework.test.AssertThrows;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class GroovyScriptFactoryTests extends TestCase {
+public class GroovyScriptFactoryTests {
 
+    @Test
 	public void testStaticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 
@@ -81,6 +85,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
+    @Test
 	public void testStaticPrototypeScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -99,6 +104,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
+    @Test
 	public void testStaticScriptWithInstance() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance"));
@@ -112,6 +118,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
+    @Test
 	public void testStaticScriptWithInlineDefinedInstance() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstanceInline"));
@@ -125,6 +132,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
+    @Test
 	public void testNonStaticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
@@ -142,6 +150,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
+    @Test
 	public void testNonStaticPrototypeScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyRefreshableContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -165,6 +174,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
+    @Test
 	public void testScriptCompilationException() throws Exception {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml");
@@ -175,6 +185,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource script = (ScriptSource) mock.getMock();
@@ -195,6 +206,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		mock.verify();
 	}
 
+    @Test
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource script = (ScriptSource) mock.getMock();
@@ -215,6 +227,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		mock.verify();
 	}
 
+    @Test
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_CorrectClassFirst() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesCorrectOneFirst.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
@@ -225,6 +238,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		GroovyObject goo = (GroovyObject) messenger;
 	}
 
+    @Test
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
 		try {
 			ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
@@ -236,6 +250,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
 			new GroovyScriptFactory(null);
@@ -245,6 +260,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
 			new GroovyScriptFactory("");
@@ -254,6 +270,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
 			new GroovyScriptFactory("\n   ");
@@ -263,6 +280,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testWithInlineScriptWithLeadingWhitespace() throws Exception {
 		try {
 			new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass());
@@ -273,6 +291,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource scriptSource = (ScriptSource) mock.getMock();
@@ -288,6 +307,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		mock.verify();
 	}
 
+    @Test
 	public void testGetScriptedObjectDoesChokeOnNullScriptSourceBeingPassedIn() throws Exception {
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
 		try {
@@ -298,6 +318,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testResourceScriptFromTag() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
@@ -313,6 +334,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals(-200, countingAspect.getCalls());
 	}
 
+    @Test
 	public void testPrototypeScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -328,6 +350,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
+    @Test
 	public void testInlineScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
@@ -335,6 +358,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertFalse(calculator instanceof Refreshable);
 	}
 
+    @Test
 	public void testRefreshableFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("refreshableMessenger"));
@@ -351,6 +375,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
+    @Test
 	public void testAnonymousScriptDetected() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map beans = ctx.getBeansOfType(Messenger.class);
@@ -361,6 +386,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	 * Tests the SPR-2098 bug whereby no more than 1 property element could be
 	 * passed to a scripted bean :(
 	 */
+    @Test
 	public void testCanPassInMoreThanOneProperty() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-multiple-properties.xml", getClass());
 		TestBean tb = (TestBean) ctx.getBean("testBean");
@@ -385,28 +411,30 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+    @Test
 	public void testMetaClassWithBeans() {
 		testMetaClass("org/springframework/scripting/groovy/calculators.xml");
 	}
 	
+    @Test
 	public void testMetaClassWithXsd() {
 		testMetaClass("org/springframework/scripting/groovy/calculators-with-xsd.xml");
 	}
 	
 	private void testMetaClass(final String xmlFile) {
 		// expect the exception we threw in the custom metaclass to show it got invoked
-		AssertThrows at = new AssertThrows(IllegalStateException.class) {
-			public void test() throws Exception {
-				ApplicationContext ctx =
-						new ClassPathXmlApplicationContext(xmlFile);
-				Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
-				calc.add(1, 2);
-			}
-		};
-		at.runTest();
-		assertEquals("Gotcha", at.getActualException().getMessage());
+	    try {
+			ApplicationContext ctx =
+					new ClassPathXmlApplicationContext(xmlFile);
+			Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
+			calc.add(1, 2);
+			fail("expected IllegalStateException");
+		} catch (IllegalStateException ex) {
+		    assertEquals("Gotcha", ex.getMessage());
+		}
 	}
 
+	@Test
 	public void testFactoryBean() {
 		ApplicationContext context = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		Object factory = context.getBean("&factory");
@@ -416,6 +444,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("test", result);
 	}
 
+	@Test
 	public void testRefreshableFactoryBean() {
 		ApplicationContext context = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		Object factory = context.getBean("&refreshableFactory");
