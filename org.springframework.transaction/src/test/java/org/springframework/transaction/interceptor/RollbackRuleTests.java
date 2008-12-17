@@ -16,24 +16,27 @@
 
 package org.springframework.transaction.interceptor;
 
-import javax.servlet.ServletException;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.mail.MailSendException;
 
 /**
  * Unit tests for the {@link RollbackRuleAttribute} class.
  *
  * @author Rod Johnson
  * @author Rick Evans
+ * @author Chris Beams
  * @since 09.04.2003
  */
 public class RollbackRuleTests extends TestCase {
 
 	public void testFoundImmediatelyWithString() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute("java.lang.Exception");
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		assertTrue(rr.getDepth(new Exception()) == 0);
 	}
 	
@@ -43,20 +46,20 @@ public class RollbackRuleTests extends TestCase {
 	}
 	
 	public void testNotFound() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute("javax.servlet.ServletException");
-		assertTrue(rr.getDepth(new MailSendException("")) == -1);
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
+		assertTrue(rr.getDepth(new MyRuntimeException("")) == -1);
 	}
 	
 	public void testAncestry() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute("java.lang.Exception");
-		// Exception -> Runtime -> NestedRuntime -> MailException -> MailSendException
-		assertTrue(rr.getDepth(new MailSendException("")) == 4);
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
+		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException
+		assertThat(rr.getDepth(new MyRuntimeException("")), equalTo(3));
 	}
 
 	public void testAlwaysTrueForThrowable() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute("java.lang.Throwable");
-		assertTrue(rr.getDepth(new MailSendException("")) > 0);
-		assertTrue(rr.getDepth(new ServletException()) > 0);
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Throwable.class.getName());
+		assertTrue(rr.getDepth(new MyRuntimeException("")) > 0);
+		assertTrue(rr.getDepth(new IOException()) > 0);
 		assertTrue(rr.getDepth(new FatalBeanException(null,null)) > 0);
 		assertTrue(rr.getDepth(new RuntimeException()) > 0);
 	}
