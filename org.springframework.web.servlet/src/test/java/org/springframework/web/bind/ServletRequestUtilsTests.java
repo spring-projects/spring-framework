@@ -16,17 +16,20 @@
 
 package org.springframework.web.bind;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 06.08.2003
  */
-public class ServletRequestUtilsTests extends TestCase {
+public class ServletRequestUtilsTests {
 
+	@Test
 	public void testIntParameter() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "5");
@@ -65,6 +68,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testIntParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param", new String[] {"1", "2", "3"});
@@ -89,6 +93,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLongParameter() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "5");
@@ -127,6 +132,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLongParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter("param", new String[] {"1", "2", "3"});
@@ -167,6 +173,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFloatParameter() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "5.5");
@@ -205,6 +212,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFloatParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
@@ -229,6 +237,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDoubleParameter() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "5.5");
@@ -267,6 +276,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDoubleParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
@@ -291,6 +301,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBooleanParameter() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "true");
@@ -324,6 +335,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertFalse(ServletRequestUtils.getRequiredBooleanParameter(request, "paramEmpty"));
 	}
 
+	@Test
 	public void testBooleanParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param", new String[] {"true", "yes", "off", "1", "bogus"});
@@ -347,6 +359,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testStringParameter() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "str");
@@ -371,6 +384,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertEquals("", ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));
 	}
 
+	@Test
 	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
@@ -383,6 +397,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
+	@Test
 	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
@@ -395,6 +410,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
+	@Test
 	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
@@ -407,6 +423,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
+	@Test
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
@@ -419,6 +436,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
+	@Test
 	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
@@ -431,6 +449,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
+	@Test
 	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
