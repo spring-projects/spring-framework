@@ -16,16 +16,12 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.servlet.ServletException;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,6 +33,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Chris Beams
  * @since 15.10.2003
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
@@ -52,17 +49,18 @@ public final class TransactionAttributeSourceTests {
 
 		tas.setTransactionAttribute(new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_SUPPORTS));
 		ta = tas.getTransactionAttribute(
-				ServletException.class.getMethod("getMessage", (Class[]) null), ServletException.class);
+				IOException.class.getMethod("getMessage", (Class[]) null), IOException.class);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
 	}
 
-	@Ignore
+	@SuppressWarnings("unchecked")
+	@Ignore // no longer works now that setMethodMap has been parameterized
 	@Test
 	public void testMethodMapTransactionAttributeSource() throws NoSuchMethodException {
 		MethodMapTransactionAttributeSource tas = new MethodMapTransactionAttributeSource();
 		Map methodMap = new HashMap();
-		methodMap.put(Object.class.getName() + ".hashCode", "PROPAGATION_REQUIRED");
+		methodMap.put(Object.class.getName() + ".hashCode", TransactionDefinition.PROPAGATION_REQUIRED);
 		methodMap.put(Object.class.getName() + ".toString",
 				new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_SUPPORTS));
 		tas.setMethodMap(methodMap);
@@ -76,7 +74,8 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
 	}
 
-	@Ignore
+	@SuppressWarnings("unchecked")
+	@Ignore // no longer works now that setMethodMap has been parameterized
 	@Test
 	public void testMethodMapTransactionAttributeSourceWithLazyInit() throws NoSuchMethodException {
 		MethodMapTransactionAttributeSource tas = new MethodMapTransactionAttributeSource();
@@ -94,7 +93,8 @@ public final class TransactionAttributeSourceTests {
 		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
 	}
 
-	@Ignore
+	@SuppressWarnings("unchecked")
+	@Ignore // no longer works now that setMethodMap has been parameterized
 	@Test
 	public void testNameMatchTransactionAttributeSource() throws NoSuchMethodException {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
