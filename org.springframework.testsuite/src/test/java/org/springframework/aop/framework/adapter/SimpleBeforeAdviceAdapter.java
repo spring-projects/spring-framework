@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.aop;
+package org.springframework.aop.framework.adapter;
 
 import java.io.Serializable;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 
+import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.adapter.AdvisorAdapter;
 
 /**
