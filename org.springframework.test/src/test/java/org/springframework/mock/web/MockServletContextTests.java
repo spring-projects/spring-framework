@@ -16,42 +16,50 @@
 
 package org.springframework.mock.web;
 
+import static org.junit.Assert.*;
+
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 19.02.2006
  */
-public class MockServletContextTests extends TestCase {
+public class MockServletContextTests {
 
+	@Test
 	public void testListFiles() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set paths = sc.getResourcePaths("/web");
+		Set<?> paths = sc.getResourcePaths("/web");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/MockServletContextTests.class"));
 	}
 
+	@Test
 	public void testListSubdirectories() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set paths = sc.getResourcePaths("/");
+		Set<?> paths = sc.getResourcePaths("/");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/"));
 	}
 
+	@Test
 	public void testListNonDirectory() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set paths = sc.getResourcePaths("/web/MockServletContextTests.class");
+		Set<?> paths = sc.getResourcePaths("/web/MockServletContextTests.class");
 		assertNull(paths);
 	}
 
+	@Test
 	public void testListInvalidPath() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set paths = sc.getResourcePaths("/web/invalid");
+		Set<?> paths = sc.getResourcePaths("/web/invalid");
 		assertNull(paths);
 	}
 
+	@Test
 	public void testGetContext() {
 		MockServletContext sc = new MockServletContext();
 		MockServletContext sc2 = new MockServletContext();
@@ -61,6 +69,7 @@ public class MockServletContextTests extends TestCase {
 		assertSame(sc2, sc.getContext("/second"));
 	}
 
+	@Test
 	public void testGetMimeType() {
 		MockServletContext sc = new MockServletContext();
 		assertEquals("text/html", sc.getMimeType("test.html"));
