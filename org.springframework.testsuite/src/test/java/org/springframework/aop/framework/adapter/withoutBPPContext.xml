@@ -5,7 +5,7 @@
 	
 	<bean id="testBeanTarget" class="org.springframework.beans.TestBean"/>
 	
-	<bean id="simpleBeforeAdvice" class="org.springframework.aop.SimpleBeforeAdviceImpl"/>
+	<bean id="simpleBeforeAdvice" class="org.springframework.aop.framework.adapter.SimpleBeforeAdviceImpl"/>
 	
 	<bean id="simpleBeforeAdviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
 		<constructor-arg><ref local="simpleBeforeAdvice"/></constructor-arg>
@@ -16,6 +16,6 @@
 		<property name="interceptorNames"><value>simpleBeforeAdviceAdvisor,testBeanTarget</value></property>
 	</bean>
 	
-	<bean id="testAdvisorAdapter" class="org.springframework.aop.SimpleBeforeAdviceAdapter"/>
+	<bean id="testAdvisorAdapter" class="org.springframework.aop.framework.adapter.SimpleBeforeAdviceAdapter"/>
 	
 </beans>

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.aop;
+package org.springframework.aop.framework.adapter;
+
+import org.springframework.aop.BeforeAdvice;
 
 /**
  * Simple BeforeAdvice for testing.
