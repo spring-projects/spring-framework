@@ -16,6 +16,8 @@
 
 package org.springframework.jmx.export.notification;
 
+import static org.junit.Assert.*;
+
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
@@ -23,48 +25,35 @@ import javax.management.Notification;
 import javax.management.ObjectName;
 import javax.management.RuntimeOperationsException;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.jmx.export.SpringModelMBean;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class ModelMBeanNotificationPublisherTests extends TestCase {
+public final class ModelMBeanNotificationPublisherTests {
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullMBean() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new ModelMBeanNotificationPublisher(null, createObjectName(), this);
-			}
-		}.runTest();
+        new ModelMBeanNotificationPublisher(null, createObjectName(), this);
 	}
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullObjectName() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new ModelMBeanNotificationPublisher(new SpringModelMBean(), null, this);
-			}
-		}.runTest();
+		new ModelMBeanNotificationPublisher(new SpringModelMBean(), null, this);
 	}
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullManagedResource() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), null);
-			}
-		}.runTest();
+		new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), null);
 	}
 
+    @Test(expected=IllegalArgumentException.class)
 	public void testSendNullNotification() throws Exception {
-		final NotificationPublisher publisher
+		NotificationPublisher publisher
 				= new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), this);
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				publisher.sendNotification(null);
-			}
-		}.runTest();
+		publisher.sendNotification(null);
 	}
 
 	public void testSendVanillaNotification() throws Exception {
