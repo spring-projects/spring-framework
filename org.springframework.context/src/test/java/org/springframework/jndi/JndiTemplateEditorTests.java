@@ -17,13 +17,17 @@
 
 package org.springframework.jndi;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class JndiTemplateEditorTests extends TestCase {
+public class JndiTemplateEditorTests {
 
+    @Test
 	public void testNullIsIllegalArgument() {
 		try {
 			new JndiTemplateEditor().setAsText(null);
@@ -34,6 +38,7 @@ public class JndiTemplateEditorTests extends TestCase {
 		}
 	}
 	
+    @Test
 	public void testEmptyStringMeansNullEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
@@ -41,6 +46,7 @@ public class JndiTemplateEditorTests extends TestCase {
 		assertTrue(jt.getEnvironment() == null);
 	}
 	
+    @Test
 	public void testCustomEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		// These properties are meaningless for JNDI, but we don't worry about that:

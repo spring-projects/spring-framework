@@ -16,55 +16,54 @@
 
 package org.springframework.jndi;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
+import org.junit.Test;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 08.07.2003
  */
-public class JndiTemplateTests extends TestCase {
+public class JndiTemplateTests {
 
+    @Test
 	public void testLookupSucceeds() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.lookup(name);
-		mc.setReturnValue(o);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		expect(context.lookup(name)).andReturn(o);
+		context.close();
+		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 
 		Object o2 = jt.lookup(name);
 		assertEquals(o, o2);
-		mc.verify();
+		verify(context);
 	}
 	
+    @Test
 	public void testLookupFails() throws Exception {
 		NameNotFoundException ne = new NameNotFoundException();
 		String name = "foo";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.lookup(name);
-		mc.setThrowable(ne);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		expect(context.lookup(name)).andThrow(ne);
+		context.close();
+		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 
@@ -75,22 +74,20 @@ public class JndiTemplateTests extends TestCase {
 		catch (NameNotFoundException ex) {
 			// Ok
 		}
-		mc.verify();
+		verify(context);
 	}
 	
+    @Test
 	public void testLookupReturnsNull() throws Exception {
 		String name = "foo";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.lookup(name);
-		mc.setReturnValue(null);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		expect(context.lookup(name)).andReturn(null);
+		context.close();
+		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 
@@ -101,23 +98,21 @@ public class JndiTemplateTests extends TestCase {
 		catch (NameNotFoundException ex) {
 			// Ok
 		}
-		mc.verify();
+		verify(context);
 	}
 
+    @Test
 	public void testLookupFailsWithTypeMismatch() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.lookup(name);
-		mc.setReturnValue(o);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		expect(context.lookup(name)).andReturn(o);
+		context.close();
+		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 
@@ -128,69 +123,63 @@ public class JndiTemplateTests extends TestCase {
 		catch (TypeMismatchNamingException ex) {
 			// Ok
 		}
-		mc.verify();
+		verify(context);
 	}
 
+    @Test
 	public void testBind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.bind(name, o);
-		mc.setVoidCallable(1);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		context.bind(name, o);
+		context.close();
+		replay(context);
 		
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 		
 		jt.bind(name, o);
-		mc.verify();
+		verify(context);
 	}
 	
+    @Test
 	public void testRebind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.rebind(name, o);
-		mc.setVoidCallable(1);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		context.rebind(name, o);
+		context.close();
+		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 
 		jt.rebind(name, o);
-		mc.verify();
+		verify(context);
 	}
 
+    @Test
 	public void testUnbind() throws Exception {
 		String name = "something";
-		MockControl mc = MockControl.createControl(Context.class);
-		final Context mock = (Context) mc.getMock();
-		mock.unbind(name);
-		mc.setVoidCallable(1);
-		mock.close();
-		mc.setVoidCallable(1);
-		mc.replay();
+		final Context context = createMock(Context.class);
+		context.unbind(name);
+		context.close();
+		replay(context);
 	
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
-				return mock;
+				return context;
 			}
 		};
 	
 		jt.unbind(name);
-		mc.verify();
+		verify(context);
 	}
 
 }

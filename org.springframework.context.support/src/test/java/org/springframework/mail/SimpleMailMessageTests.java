@@ -16,22 +16,24 @@
 
 package org.springframework.mail;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Chris Beams
  * @since 10.09.2003
  */
-public final class SimpleMailMessageTests extends TestCase {
+public final class SimpleMailMessageTests {
 
+    @Test
 	public void testSimpleMessageCopyCtor() {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("me@mail.org");
@@ -52,10 +54,10 @@ public final class SimpleMailMessageTests extends TestCase {
 		assertEquals("me@mail.org", message.getFrom());
 		assertEquals("reply@mail.org", message.getReplyTo());
 		assertEquals("you@mail.org", message.getTo()[0]);
-		List ccs = Arrays.asList(message.getCc());
+		List<String> ccs = Arrays.asList(message.getCc());
 		assertTrue(ccs.contains("he@mail.org"));
 		assertTrue(ccs.contains("she@mail.org"));
-		List bccs = Arrays.asList(message.getBcc());
+		List<String> bccs = Arrays.asList(message.getBcc());
 		assertTrue(bccs.contains("us@mail.org"));
 		assertTrue(bccs.contains("them@mail.org"));
 		assertEquals(sentDate, message.getSentDate());
@@ -77,6 +79,7 @@ public final class SimpleMailMessageTests extends TestCase {
 		assertEquals("my text", messageCopy.getText());
 	}
 
+    @Test
 	public void testDeepCopyOfStringArrayTypedFieldsOnCopyCtor() throws Exception {
 
 		SimpleMailMessage original = new SimpleMailMessage();
@@ -98,6 +101,7 @@ public final class SimpleMailMessageTests extends TestCase {
 	/**
 	 * Tests that two equal SimpleMailMessages have equal hash codes.
 	 */
+	@Test
 	public final void testHashCode() {
 		SimpleMailMessage message1 = new SimpleMailMessage();
 		message1.setFrom("from@somewhere");
@@ -151,20 +155,14 @@ public final class SimpleMailMessageTests extends TestCase {
 		assertTrue(message1.equals(message2));
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCopyCtorChokesOnNullOriginalMessage() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new SimpleMailMessage(null);
-			}
-		}.runTest();
+		new SimpleMailMessage(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCopyToChokesOnNullTargetMessage() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new SimpleMailMessage().copyTo(null);
-			}
-		}.runTest();
+		new SimpleMailMessage().copyTo(null);
 	}
 
 }
