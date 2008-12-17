@@ -3,7 +3,7 @@
 
 <beans>
 	
-	<bean id="prototypeTest" class="org.springframework.aop.interceptor.SideEffectBean" scope="prototype">
+	<bean id="prototypeTest" class="common.beans.core.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
 	

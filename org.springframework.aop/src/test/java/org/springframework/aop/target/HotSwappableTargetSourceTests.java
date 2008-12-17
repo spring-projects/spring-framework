@@ -24,13 +24,14 @@ import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
+
+import common.beans.core.SideEffectBean;
 
 /**
  * @author Rod Johnson

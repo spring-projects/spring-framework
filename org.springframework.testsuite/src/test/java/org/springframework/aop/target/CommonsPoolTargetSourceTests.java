@@ -25,13 +25,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
+
+import common.beans.core.SideEffectBean;
 
 /**
  * Tests for pooling invoker interceptor.
