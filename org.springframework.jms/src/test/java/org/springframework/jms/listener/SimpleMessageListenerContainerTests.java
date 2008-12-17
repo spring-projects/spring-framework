@@ -16,6 +16,8 @@
 
 package org.springframework.jms.listener;
 
+import static org.junit.Assert.*;
+
 import java.util.HashSet;
 
 import javax.jms.Connection;
@@ -29,14 +31,15 @@ import javax.jms.Session;
 
 import org.easymock.MockControl;
 import org.easymock.internal.AlwaysMatcher;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
 public class SimpleMessageListenerContainerTests extends AbstractMessageListenerContainerTests {
 
@@ -50,7 +53,8 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 	private SimpleMessageListenerContainer container;
 
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.container = (SimpleMessageListenerContainer) getContainer();
 	}
 
@@ -59,6 +63,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 	}
 
 
+	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		assertFalse("The [pubSubLocal] property of SimpleMessageListenerContainer " +
 				"must default to false. Change this test (and the " +
@@ -66,24 +71,19 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 				container.isPubSubNoLocal());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToZeroIsNotAllowed() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				container.setConcurrentConsumers(0);
-				container.afterPropertiesSet();
-			}
-		}.runTest();
+		container.setConcurrentConsumers(0);
+		container.afterPropertiesSet();
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				container.setConcurrentConsumers(-198);
-				container.afterPropertiesSet();
-			}
-		}.runTest();
+		container.setConcurrentConsumers(-198);
+		container.afterPropertiesSet();
 	}
 
+	@Test
 	public void testInitDoesNotStartTheConnectionIfAutoStartIsSetToFalse() throws Exception {
 		MockControl mockMessageConsumer = MockControl.createControl(MessageConsumer.class);
 		MessageConsumer messageConsumer = (MessageConsumer) mockMessageConsumer.getMock();
@@ -131,6 +131,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testInitStartsTheConnectionByDefault() throws Exception {
 		MockControl mockMessageConsumer = MockControl.createControl(MessageConsumer.class);
 		MessageConsumer messageConsumer = (MessageConsumer) mockMessageConsumer.getMock();
@@ -180,6 +181,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testCorrectSessionExposedForSessionAwareMessageListenerInvocation() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
@@ -249,6 +251,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testTaskExecutorCorrectlyInvokedWhenSpecified() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
@@ -308,6 +311,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testRegisteredExceptionListenerIsInvokedOnException() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
@@ -376,6 +380,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testNoRollbackOccursIfSessionIsNotTransactedAndThatExceptionsDo_NOT_Propagate() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
@@ -433,6 +438,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testTransactedSessionsGetRollbackLogicAppliedAndThatExceptionsStillDo_NOT_Propagate() throws Exception {
 		this.container.setSessionTransacted(true);
 
@@ -495,6 +501,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockConnectionFactory.verify();
 	}
 
+	@Test
 	public void testDestroyClosesConsumersSessionsAndConnectionInThatOrder() throws Exception {
 		MockControl mockMessageConsumer = MockControl.createControl(MessageConsumer.class);
 		MessageConsumer messageConsumer = (MessageConsumer) mockMessageConsumer.getMock();

@@ -16,35 +16,36 @@
 
 package org.springframework.jms.support.destination;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+
 import javax.jms.ConnectionFactory;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
-public class JmsDestinationAccessorTests extends TestCase {
+public class JmsDestinationAccessorTests {
 
+    @Test
 	public void testChokesIfDestinationResolverIsetToNullExplcitly() throws Exception {
-		MockControl mockConnectionFactory = MockControl.createControl(ConnectionFactory.class);
-		final ConnectionFactory connectionFactory = (ConnectionFactory) mockConnectionFactory.getMock();
-		mockConnectionFactory.replay();
+		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
+		replay(connectionFactory);
 
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
-				accessor.setConnectionFactory(connectionFactory);
-				accessor.setDestinationResolver(null);
-				accessor.afterPropertiesSet();
-			}
-		}.runTest();
+		try {
+			JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
+			accessor.setConnectionFactory(connectionFactory);
+			accessor.setDestinationResolver(null);
+			accessor.afterPropertiesSet();
+			fail("expected IllegalArgumentException");
+		} catch (IllegalArgumentException ex) { /* expected */ }
 
-		mockConnectionFactory.verify();
+		verify(connectionFactory);
 	}
 
+    @Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
 		assertFalse("The [pubSubDomain] property of JmsDestinationAccessor must default to " +

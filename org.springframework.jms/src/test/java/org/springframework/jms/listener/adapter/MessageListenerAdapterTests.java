@@ -16,6 +16,8 @@
 
 package org.springframework.jms.listener.adapter;
 
+import static org.junit.Assert.*;
+
 import java.io.Serializable;
 
 import javax.jms.BytesMessage;
@@ -33,16 +35,17 @@ import javax.jms.TextMessage;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.junit.Test;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class MessageListenerAdapterTests extends TestCase {
+public class MessageListenerAdapterTests {
 
 	private static final String TEXT = "I fancy a good cuppa right now";
 
@@ -55,6 +58,7 @@ public class MessageListenerAdapterTests extends TestCase {
 	private static final String RESPONSE_TEXT = "... wi' some full fat creamy milk. Top banana.";
 
 
+	@Test
 	public void testWithMessageContentsDelegateForTextMessage() throws Exception {
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
 		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
@@ -76,6 +80,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testWithMessageContentsDelegateForBytesMessage() throws Exception {
 		MockControl mockBytesMessage = MockControl.createControl(BytesMessage.class);
 		BytesMessage bytesMessage = (BytesMessage) mockBytesMessage.getMock();
@@ -101,6 +106,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockBytesMessage.verify();
 	}
 
+	@Test
 	public void testWithMessageContentsDelegateForObjectMessage() throws Exception {
 		MockControl mockObjectMessage = MockControl.createControl(ObjectMessage.class);
 		ObjectMessage objectMessage = (ObjectMessage) mockObjectMessage.getMock();
@@ -121,6 +127,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockObjectMessage.verify();
 	}
 
+	@Test
 	public void testWithMessageContentsDelegateForObjectMessageWithPlainObject() throws Exception {
 		MockControl mockObjectMessage = MockControl.createControl(ObjectMessage.class);
 		ObjectMessage objectMessage = (ObjectMessage) mockObjectMessage.getMock();
@@ -141,6 +148,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockObjectMessage.verify();
 	}
 
+	@Test
 	public void testWithMessageDelegate() throws Exception {
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
 		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
@@ -161,6 +169,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testWhenTheAdapterItselfIsTheDelegate() throws Exception {
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
 		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
@@ -176,6 +185,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testRainyDayWithNoApplicableHandlingMethods() throws Exception {
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
 		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
@@ -192,6 +202,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testThatAnExceptionThrownFromTheHandlingMethodIsSimplySwallowedByDefault() throws Exception {
 		final IllegalArgumentException exception = new IllegalArgumentException();
 
@@ -224,6 +235,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testThatTheDefaultMessageConverterisIndeedTheSimpleMessageConverter() throws Exception {
 		MessageListenerAdapter adapter = new MessageListenerAdapter();
 		assertNotNull("The default [MessageConverter] must never be null.", adapter.getMessageConverter());
@@ -231,16 +243,19 @@ public class MessageListenerAdapterTests extends TestCase {
 				adapter.getMessageConverter() instanceof SimpleMessageConverter);
 	}
 
+	@Test
 	public void testThatWhenNoDelegateIsSuppliedTheDelegateIsAssumedToBeTheMessageListenerAdapterItself() throws Exception {
 		MessageListenerAdapter adapter = new MessageListenerAdapter();
 		assertSame(adapter, adapter.getDelegate());
 	}
 
+	@Test
 	public void testThatTheDefaultMessageHandlingMethodNameIsTheConstantDefault() throws Exception {
 		MessageListenerAdapter adapter = new MessageListenerAdapter();
 		assertEquals(MessageListenerAdapter.ORIGINAL_DEFAULT_LISTENER_METHOD, adapter.getDefaultListenerMethod());
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegate_DoesNotSendReturnTextMessageIfNoSessionSupplied() throws Exception {
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
 		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
@@ -261,6 +276,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateWithDefaultDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
 		MockControl mockDestination = MockControl.createControl(Queue.class);
 		Queue destination = (Queue) mockDestination.getMock();
@@ -320,6 +336,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockQueueSender.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
 		MockControl mockDestination = MockControl.createControl(Queue.class);
 		Queue destination = (Queue) mockDestination.getMock();
@@ -380,6 +397,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockMessageProducer.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestinationAndNoReplyToDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
 		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
 		final TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
@@ -414,11 +432,10 @@ public class MessageListenerAdapterTests extends TestCase {
 				return message;
 			}
 		};
-		new AssertThrows(InvalidDestinationException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(sentTextMessage, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(sentTextMessage, session);
+			fail("expected InvalidDestinationException");
+		} catch(InvalidDestinationException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockSentTextMessage.verify();
@@ -426,6 +443,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockSession.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestination_SendsReturnTextMessageWhenSessionSupplied_AndSendingThrowsJMSException() throws Exception {
 		MockControl mockDestination = MockControl.createControl(Queue.class);
 		Queue destination = (Queue) mockDestination.getMock();
@@ -475,11 +493,10 @@ public class MessageListenerAdapterTests extends TestCase {
 				return message;
 			}
 		};
-		new AssertThrows(JMSException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(sentTextMessage, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(sentTextMessage, session);
+			fail("expected JMSException");
+		} catch(JMSException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockSentTextMessage.verify();
@@ -489,6 +506,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockMessageProducer.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateDoesNotSendReturnTextMessageWhenSessionSupplied_AndListenerMethodThrowsException() throws Exception {
 		MockControl mockMessage = MockControl.createControl(TextMessage.class);
 		final TextMessage message = (TextMessage) mockMessage.getMock();
@@ -509,17 +527,17 @@ public class MessageListenerAdapterTests extends TestCase {
 				return message;
 			}
 		};
-		new AssertThrows(ListenerExecutionFailedException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(message, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(message, session);
+			fail("expected ListenerExecutionFailedException");
+		} catch(ListenerExecutionFailedException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockMessage.verify();
 		mockSession.verify();
 	}
 
+	@Test
 	public void testFailsIfNoDefaultListenerMethodNameIsSupplied() throws Exception {
 		MockControl mockMessage = MockControl.createControl(TextMessage.class);
 		final TextMessage message = (TextMessage) mockMessage.getMock();
@@ -539,6 +557,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockMessage.verify();
 	}
 
+	@Test
 	public void testFailsWhenOverriddenGetListenerMethodNameReturnsNull() throws Exception {
 		MockControl mockMessage = MockControl.createControl(TextMessage.class);
 		final TextMessage message = (TextMessage) mockMessage.getMock();
@@ -561,6 +580,7 @@ public class MessageListenerAdapterTests extends TestCase {
 		mockMessage.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateWhenReturnTypeIsNotAJMSMessageAndNoMessageConverterIsSupplied() throws Exception {
 		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
 		final TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
@@ -582,17 +602,17 @@ public class MessageListenerAdapterTests extends TestCase {
 			}
 		};
 		adapter.setMessageConverter(null);
-		new AssertThrows(MessageConversionException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(sentTextMessage, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(sentTextMessage, session);
+			fail("expected MessageConversionException");
+		} catch(MessageConversionException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockSentTextMessage.verify();
 		mockSession.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateWhenReturnTypeIsAJMSMessageAndNoMessageConverterIsSupplied() throws Exception {
 		MockControl mockDestination = MockControl.createControl(Queue.class);
 		Queue destination = (Queue) mockDestination.getMock();

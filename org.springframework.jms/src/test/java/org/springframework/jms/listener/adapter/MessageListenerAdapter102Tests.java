@@ -16,25 +16,38 @@
 
 package org.springframework.jms.listener.adapter;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.springframework.jms.support.converter.SimpleMessageConverter102;
-import org.springframework.test.AssertThrows;
+import static org.junit.Assert.*;
 
-import javax.jms.*;
+import javax.jms.BytesMessage;
+import javax.jms.InvalidDestinationException;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.QueueSender;
+import javax.jms.QueueSession;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicPublisher;
+import javax.jms.TopicSession;
+
+import org.easymock.MockControl;
+import org.junit.Test;
+import org.springframework.jms.support.converter.SimpleMessageConverter102;
 
 /**
  * Unit tests for the {@link MessageListenerAdapter102} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class MessageListenerAdapter102Tests extends TestCase {
+public final class MessageListenerAdapter102Tests {
 
 	private static final String TEXT = "The Runaways";
 	private static final String CORRELATION_ID = "100";
 	private static final String RESPONSE_TEXT = "Old Lace";
 
 
+	@Test
 	public void testWithMessageContentsDelegateForBytesMessage() throws Exception {
 
 		MockControl mockBytesMessage = MockControl.createControl(BytesMessage.class);
@@ -59,6 +72,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockBytesMessage.verify();
 	}
 
+	@Test
 	public void testWithMessageDelegate() throws Exception {
 
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
@@ -80,12 +94,14 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testThatTheDefaultMessageConverterisIndeedTheSimpleMessageConverter102() throws Exception {
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102();
 		assertNotNull("The default [MessageConverter] must never be null.", adapter.getMessageConverter());
 		assertTrue("The default [MessageConverter] must be of the type [SimpleMessageConverter102]; if you've just changed it, then change this test to reflect your change.", adapter.getMessageConverter() instanceof SimpleMessageConverter102);
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegate_DoesNotSendReturnTextMessageIfNoSessionSupplied() throws Exception {
 
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
@@ -107,6 +123,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockTextMessage.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateWithDefaultDestination_SendsReturnTextMessageWhenSessionSuppliedForQueue() throws Exception {
 
 		MockControl mockDestination = MockControl.createControl(Queue.class);
@@ -167,6 +184,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockQueueSender.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateWithDefaultDestination_SendsReturnTextMessageWhenSessionSuppliedForTopic() throws Exception {
 
 		MockControl mockDestination = MockControl.createControl(Topic.class);
@@ -227,6 +245,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockTopicPublisher.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
 
 		MockControl mockDestination = MockControl.createControl(Queue.class);
@@ -286,6 +305,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockQueueSender.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestinationAndNoReplyToDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
 
 		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
@@ -321,11 +341,10 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 				return message;
 			}
 		};
-		new AssertThrows(InvalidDestinationException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(sentTextMessage, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(sentTextMessage, session);
+			fail("expected InvalidDestinationException");
+		} catch (InvalidDestinationException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockSentTextMessage.verify();
@@ -333,6 +352,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockSession.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestination_SendsReturnTextMessageWhenSessionSupplied_AndSendingThrowsJMSException() throws Exception {
 
 		MockControl mockDestination = MockControl.createControl(Queue.class);
@@ -383,11 +403,10 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 				return message;
 			}
 		};
-		new AssertThrows(JMSException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(sentTextMessage, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(sentTextMessage, session);
+			fail("expected JMSException");
+		} catch (JMSException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockSentTextMessage.verify();
@@ -397,6 +416,7 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 		mockQueueSender.verify();
 	}
 
+	@Test
 	public void testWithResponsiveMessageDelegateDoesNotSendReturnTextMessageWhenSessionSupplied_AndListenerMethodThrowsException() throws Exception {
 
 		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
@@ -418,11 +438,10 @@ public final class MessageListenerAdapter102Tests extends TestCase {
 				return message;
 			}
 		};
-		new AssertThrows(ListenerExecutionFailedException.class) {
-			public void test() throws Exception {
-				adapter.onMessage(sentTextMessage, session);
-			}
-		}.runTest();
+		try {
+			adapter.onMessage(sentTextMessage, session);
+			fail("expected ListenerExecutionFailedException");
+		} catch (ListenerExecutionFailedException ex) { /* expected */ }
 
 		mockDelegate.verify();
 		mockSentTextMessage.verify();

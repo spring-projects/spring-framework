@@ -16,34 +16,27 @@
 
 package org.springframework.jms.listener;
 
-import junit.framework.TestCase;
-
-import org.springframework.test.AssertThrows;
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link AbstractMessageListenerContainer} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public abstract class AbstractMessageListenerContainerTests extends TestCase {
+public abstract class AbstractMessageListenerContainerTests {
 
 	protected abstract AbstractMessageListenerContainer getContainer();
 
-
+	
+	@Test(expected=IllegalArgumentException.class)
 	public void testSettingMessageListenerToANullType() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				getContainer().setMessageListener(null);
-			}
-		}.runTest();
+		getContainer().setMessageListener(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testSettingMessageListenerToAnUnsupportedType() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				getContainer().setMessageListener("Bingo");
-			}
-		}.runTest();
+		getContainer().setMessageListener("Bingo");
 	}
 
 }

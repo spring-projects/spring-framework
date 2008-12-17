@@ -16,18 +16,26 @@
 
 package org.springframework.jms.support;
 
-import junit.framework.TestCase;
-import org.easymock.ArgumentsMatcher;
-import org.easymock.MockControl;
-import org.springframework.jms.support.converter.MessageConversionException;
-import org.springframework.jms.support.converter.SimpleMessageConverter;
-import org.springframework.test.AssertThrows;
+import static org.junit.Assert.*;
 
-import javax.jms.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+
+import org.easymock.ArgumentsMatcher;
+import org.easymock.MockControl;
+import org.junit.Test;
+import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.jms.support.converter.SimpleMessageConverter;
 
 /**
  * Unit tests for the {@link SimpleMessageConverter} class.
@@ -36,8 +44,9 @@ import java.util.Map;
  * @author Rick Evans
  * @since 18.09.2004
  */
-public final class SimpleMessageConverterTests extends TestCase {
+public final class SimpleMessageConverterTests {
 
+    @Test
 	public void testStringConversion() throws JMSException {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
@@ -61,6 +70,7 @@ public final class SimpleMessageConverterTests extends TestCase {
 		messageControl.verify();
 	}
 
+    @Test
 	public void testByteArrayConversion() throws JMSException {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
@@ -99,6 +109,7 @@ public final class SimpleMessageConverterTests extends TestCase {
 		messageControl.verify();
 	}
 
+    @Test
 	public void testMapConversion() throws JMSException {
 
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -134,6 +145,7 @@ public final class SimpleMessageConverterTests extends TestCase {
 		messageControl.verify();
 	}
 
+    @Test
 	public void testSerializableConversion() throws JMSException {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
@@ -157,22 +169,17 @@ public final class SimpleMessageConverterTests extends TestCase {
 		messageControl.verify();
 	}
 
+    @Test(expected=MessageConversionException.class)
 	public void testToMessageThrowsExceptionIfGivenNullObjectToConvert() throws Exception {
-		new AssertThrows(MessageConversionException.class) {
-			public void test() throws Exception {
-				new SimpleMessageConverter().toMessage(null, null);
-			}
-		}.runTest();
+		new SimpleMessageConverter().toMessage(null, null);
 	}
 
+    @Test(expected=MessageConversionException.class)
 	public void testToMessageThrowsExceptionIfGivenIncompatibleObjectToConvert() throws Exception {
-		new AssertThrows(MessageConversionException.class) {
-			public void test() throws Exception {
-				new SimpleMessageConverter().toMessage(new Object(), null);
-			}
-		}.runTest();
+		new SimpleMessageConverter().toMessage(new Object(), null);
 	}
 
+    @Test
 	public void testToMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
 
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -192,6 +199,7 @@ public final class SimpleMessageConverterTests extends TestCase {
 		messageControl.verify();
 	}
 
+    @Test
 	public void testFromMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
 
 		MockControl messageControl = MockControl.createControl(Message.class);
@@ -206,6 +214,7 @@ public final class SimpleMessageConverterTests extends TestCase {
 		messageControl.verify();
 	}
 
+    @Test
 	public void testMapConversionWhereMapHasNonStringTypesForKeys() throws JMSException {
 
 		MockControl messageControl = MockControl.createControl(MapMessage.class);
@@ -222,15 +231,15 @@ public final class SimpleMessageConverterTests extends TestCase {
 		content.put(new Integer(1), "value1");
 
 		final SimpleMessageConverter converter = new SimpleMessageConverter();
-		new AssertThrows(MessageConversionException.class) {
-			public void test() throws Exception {
-				converter.toMessage(content, session);
-			}
-		}.runTest();
+		try {
+			converter.toMessage(content, session);
+			fail("expected MessageConversionException");
+		} catch (MessageConversionException ex) { /* expected */ }
 
 		sessionControl.verify();
 	}
 
+    @Test
 	public void testMapConversionWhereMapHasNNullForKey() throws JMSException {
 
 		MockControl messageControl = MockControl.createControl(MapMessage.class);
@@ -247,11 +256,10 @@ public final class SimpleMessageConverterTests extends TestCase {
 		content.put(null, "value1");
 
 		final SimpleMessageConverter converter = new SimpleMessageConverter();
-		new AssertThrows(MessageConversionException.class) {
-			public void test() throws Exception {
-				converter.toMessage(content, session);
-			}
-		}.runTest();
+		try {
+			converter.toMessage(content, session);
+			fail("expected MessageConversionException");
+		} catch (MessageConversionException ex) { /* expected */ }
 
 		sessionControl.verify();
 	}
