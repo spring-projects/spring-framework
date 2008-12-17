@@ -16,46 +16,40 @@
 
 package org.springframework.scheduling.timer;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
+import static org.junit.Assert.*;
 
 import java.util.Timer;
+
+import org.junit.Test;
 
 /**
  * Unit tests for the {@link TimerTaskExecutor} class.
  *
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class TimerTaskExecutorTests extends TestCase {
+public final class TimerTaskExecutorTests {
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testExecuteChokesWithNullTimer() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				TimerTaskExecutor executor = new TimerTaskExecutor();
-				executor.execute(new NoOpRunnable());
-			}
-		}.runTest();
+		TimerTaskExecutor executor = new TimerTaskExecutor();
+		executor.execute(new NoOpRunnable());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testExecuteChokesWithNullTask() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				TimerTaskExecutor executor = new TimerTaskExecutor(new Timer());
-				executor.execute(null);
-			}
-		}.runTest();
+		TimerTaskExecutor executor = new TimerTaskExecutor(new Timer());
+		executor.execute(null);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testExecuteChokesWithNegativeDelay() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				TimerTaskExecutor executor = new TimerTaskExecutor(new Timer());
-				executor.setDelay(-10);
-				executor.execute(new NoOpRunnable());
-			}
-		}.runTest();
+		TimerTaskExecutor executor = new TimerTaskExecutor(new Timer());
+		executor.setDelay(-10);
+		executor.execute(new NoOpRunnable());
 	}
 
+	@Test
 	public void testExecuteReallyDoesScheduleTheSuppliedTask() throws Exception {
 		final Object monitor = new Object();
 
@@ -71,14 +65,12 @@ public final class TimerTaskExecutorTests extends TestCase {
 		assertTrue("Supplied task (a Runnable) is not being invoked.", task.isRunWasCalled());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullTimer() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new TimerTaskExecutor(null);
-			}
-		}.runTest();
+		new TimerTaskExecutor(null);
 	}
 
+	@Test
 	public void testCreateTimerMethodIsCalledIfNoTimerIsExplicitlySupplied() throws Exception {
 		CreationAwareTimerTaskExecutor executor = new CreationAwareTimerTaskExecutor();
 		executor.afterPropertiesSet();
@@ -87,6 +79,7 @@ public final class TimerTaskExecutorTests extends TestCase {
 				executor.isCreateTimerWasCalled());
 	}
 
+	@Test
 	public void testCreateTimerMethodIsNotCalledIfTimerIsExplicitlySupplied() throws Exception {
 		CreationAwareTimerTaskExecutor executor = new CreationAwareTimerTaskExecutor();
 		executor.setTimer(new Timer());
@@ -96,6 +89,7 @@ public final class TimerTaskExecutorTests extends TestCase {
 				executor.isCreateTimerWasCalled());
 	}
 
+	@Test
 	public void testThatTheDestroyCallbackCancelsTheTimerIfNoTimerIsExplicitlySupplied() throws Exception {
 
 		final CancelAwareTimer timer = new CancelAwareTimer();
@@ -113,6 +107,7 @@ public final class TimerTaskExecutorTests extends TestCase {
 				timer.isCancelWasCalled());
 	}
 
+	@Test
 	public void testThatTheDestroyCallbackDoesNotCancelTheTimerIfTheTimerWasSuppliedExplictly() throws Exception {
 		TimerTaskExecutor executor = new TimerTaskExecutor();
 		CancelAwareTimer timer = new CancelAwareTimer();
