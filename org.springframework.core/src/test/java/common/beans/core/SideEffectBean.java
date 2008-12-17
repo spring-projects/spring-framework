@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.interceptor;
+package common.beans.core;
 
 /**
  * Bean that changes state on a business invocation, so that

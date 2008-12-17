@@ -20,10 +20,11 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import common.beans.core.SideEffectBean;
 
 /**
  * @author Rod Johnson

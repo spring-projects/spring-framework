@@ -37,7 +37,6 @@ import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -56,6 +55,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.TestListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
+
+import common.beans.core.SideEffectBean;
 
 /**
  * @author Rod Johnson
