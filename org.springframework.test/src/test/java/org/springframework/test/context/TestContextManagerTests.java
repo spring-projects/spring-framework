@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -77,18 +76,18 @@ public class TestContextManagerTests {
 		}
 
 		if (logger.isDebugEnabled()) {
-			for (final String listenerName : beforeTestMethodCalls) {
+			for (String listenerName : beforeTestMethodCalls) {
 				logger.debug("'before' listener [" + listenerName + "] (" + usageContext + ").");
 			}
-			for (final String listenerName : afterTestMethodCalls) {
+			for (String listenerName : afterTestMethodCalls) {
 				logger.debug("'after' listener [" + listenerName + "] (" + usageContext + ").");
 			}
 		}
 
 		assertTrue("Verifying execution order of 'before' listeners' (" + usageContext + ").",
-				CollectionUtils.isEqualCollection(expectedBeforeTestMethodCalls, beforeTestMethodCalls));
+				expectedBeforeTestMethodCalls.equals(beforeTestMethodCalls));
 		assertTrue("Verifying execution order of 'after' listeners' (" + usageContext + ").",
-				CollectionUtils.isEqualCollection(expectedAfterTestMethodCalls, afterTestMethodCalls));
+				expectedAfterTestMethodCalls.equals(afterTestMethodCalls));
 	}
 
 	@BeforeClass
