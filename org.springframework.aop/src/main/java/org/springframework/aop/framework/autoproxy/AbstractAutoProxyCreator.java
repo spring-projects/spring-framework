@@ -253,7 +253,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 
-    public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
+	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
 	}

@@ -70,7 +70,7 @@ import org.springframework.util.MethodInvoker;
  * @see #setConcurrent
  */
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
-    implements FactoryBean, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
+	implements FactoryBean, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
 	private String name;
 
@@ -109,7 +109,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	public void setGroup(String group) {
 		this.group = group;
 	}
-	
+
 	/**
 	 * Specify whether or not multiple jobs should be run in a concurrent
 	 * fashion. The behavior when one does not want concurrent jobs to be

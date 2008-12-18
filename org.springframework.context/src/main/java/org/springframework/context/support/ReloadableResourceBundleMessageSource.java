@@ -89,7 +89,7 @@ import org.springframework.util.StringUtils;
  * @see java.util.ResourceBundle
  */
 public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
-    implements ResourceLoaderAware {
+	implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 

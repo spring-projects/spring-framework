@@ -61,136 +61,136 @@ public final class PortletWrappingControllerTests {
 
 	@Before
 	public void setUp() {
-	    ConfigurablePortletApplicationContext applicationContext = new MyApplicationContext();
-	    MockPortletConfig config = new MockPortletConfig(new MockPortletContext(), "wrappedPortlet");
-	    applicationContext.setPortletConfig(config);
-	    applicationContext.refresh();
-	    controller = (PortletWrappingController) applicationContext.getBean(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME);
+		ConfigurablePortletApplicationContext applicationContext = new MyApplicationContext();
+		MockPortletConfig config = new MockPortletConfig(new MockPortletContext(), "wrappedPortlet");
+		applicationContext.setPortletConfig(config);
+		applicationContext.refresh();
+		controller = (PortletWrappingController) applicationContext.getBean(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME);
 	}
 
 
 	@Test
 	public void testActionRequest() throws Exception {
-	    MockActionRequest request = new MockActionRequest();
-	    MockActionResponse response = new MockActionResponse();
-	    request.setParameter("test", "test");
-	    controller.handleActionRequest(request, response);
-	    String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
-	    assertEquals("myPortlet-action", result);
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		request.setParameter("test", "test");
+		controller.handleActionRequest(request, response);
+		String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
+		assertEquals("myPortlet-action", result);
 	}
 
 	@Test
 	public void testRenderRequest() throws Exception {
-	    MockRenderRequest request = new MockRenderRequest();
-	    MockRenderResponse response = new MockRenderResponse();
-	    controller.handleRenderRequest(request, response);
-	    String result = response.getContentAsString();
-	    assertEquals(RENDERED_RESPONSE_CONTENT, result);
+		MockRenderRequest request = new MockRenderRequest();
+		MockRenderResponse response = new MockRenderResponse();
+		controller.handleRenderRequest(request, response);
+		String result = response.getContentAsString();
+		assertEquals(RENDERED_RESPONSE_CONTENT, result);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testActionRequestWithNoParameters() throws Exception {
-	    MockActionRequest request = new MockActionRequest();
-	    MockActionResponse response = new MockActionResponse();
-        controller.handleActionRequest(request, response);
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		controller.handleActionRequest(request, response);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testRejectsPortletClassThatDoesNotImplementPortletInterface() throws Exception {
-        PortletWrappingController controller = new PortletWrappingController();
-        controller.setPortletClass(String.class);
-        controller.afterPropertiesSet();
+		PortletWrappingController controller = new PortletWrappingController();
+		controller.setPortletClass(String.class);
+		controller.afterPropertiesSet();
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testRejectsIfPortletClassIsNotSupplied() throws Exception {
-        PortletWrappingController controller = new PortletWrappingController();
-        controller.setPortletClass(null);
-        controller.afterPropertiesSet();
+		PortletWrappingController controller = new PortletWrappingController();
+		controller.setPortletClass(null);
+		controller.afterPropertiesSet();
 	}
 
 	@Test(expected=IllegalStateException.class)
 	public void testDestroyingTheControllerPropagatesDestroyToWrappedPortlet() throws Exception {
-	    final PortletWrappingController controller = new PortletWrappingController();
-	    controller.setPortletClass(MyPortlet.class);
-	    controller.afterPropertiesSet();
-	    // test for destroy() call being propagated via exception being thrown :(
-        controller.destroy();
+		final PortletWrappingController controller = new PortletWrappingController();
+		controller.setPortletClass(MyPortlet.class);
+		controller.afterPropertiesSet();
+		// test for destroy() call being propagated via exception being thrown :(
+		controller.destroy();
 	}
 
 	@Test
 	public void testPortletName() throws Exception {
-	    MockActionRequest request = new MockActionRequest();
-	    MockActionResponse response = new MockActionResponse();
-	    request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "test");
-	    controller.handleActionRequest(request, response);
-	    String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
-	    assertEquals("wrappedPortlet", result);
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "test");
+		controller.handleActionRequest(request, response);
+		String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
+		assertEquals("wrappedPortlet", result);
 	}
 
 	@Test
 	public void testDelegationToMockPortletConfigIfSoConfigured() throws Exception {
 
-	    final String BEAN_NAME = "Sixpence None The Richer";
+		final String BEAN_NAME = "Sixpence None The Richer";
 
-	    MockActionRequest request = new MockActionRequest();
-	    MockActionResponse response = new MockActionResponse();
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
 
-	    PortletWrappingController controller = new PortletWrappingController();
-	    controller.setPortletClass(MyPortlet.class);
-	    controller.setUseSharedPortletConfig(false);
-	    controller.setBeanName(BEAN_NAME);
-	    controller.afterPropertiesSet();
+		PortletWrappingController controller = new PortletWrappingController();
+		controller.setPortletClass(MyPortlet.class);
+		controller.setUseSharedPortletConfig(false);
+		controller.setBeanName(BEAN_NAME);
+		controller.afterPropertiesSet();
 
-	    request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "true");
-	    controller.handleActionRequest(request, response);
+		request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "true");
+		controller.handleActionRequest(request, response);
 
-	    String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
-	    assertEquals(BEAN_NAME, result);
+		String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
+		assertEquals(BEAN_NAME, result);
 	}
 
 
 	public static final class MyPortlet implements Portlet {
 
-	    private PortletConfig portletConfig;
+		private PortletConfig portletConfig;
 
 
-	    public void init(PortletConfig portletConfig) {
-	        this.portletConfig = portletConfig;
-	    }
+		public void init(PortletConfig portletConfig) {
+			this.portletConfig = portletConfig;
+		}
 
-	    public void processAction(ActionRequest request, ActionResponse response) throws PortletException {
-	        if (request.getParameter("test") != null) {
-	            response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, "myPortlet-action");
-	        } else if (request.getParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME) != null) {
-	            response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, getPortletConfig().getPortletName());
-	        } else {
-	            throw new IllegalArgumentException("no request parameters");
-	        }
-	    }
+		public void processAction(ActionRequest request, ActionResponse response) throws PortletException {
+			if (request.getParameter("test") != null) {
+				response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, "myPortlet-action");
+			} else if (request.getParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME) != null) {
+				response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, getPortletConfig().getPortletName());
+			} else {
+				throw new IllegalArgumentException("no request parameters");
+			}
+		}
 
-	    public void render(RenderRequest request, RenderResponse response) throws IOException {
-	        response.getWriter().write(RENDERED_RESPONSE_CONTENT);
-	    }
+		public void render(RenderRequest request, RenderResponse response) throws IOException {
+			response.getWriter().write(RENDERED_RESPONSE_CONTENT);
+		}
 
-	    public PortletConfig getPortletConfig() {
-	        return this.portletConfig;
-	    }
+		public PortletConfig getPortletConfig() {
+			return this.portletConfig;
+		}
 
-	    public void destroy() {
-	        throw new IllegalStateException("Being destroyed...");
-	    }
+		public void destroy() {
+			throw new IllegalStateException("Being destroyed...");
+		}
 
 	}
 
 	private static final class MyApplicationContext extends StaticPortletApplicationContext {
 
-	    public void refresh() throws BeansException {
-	        MutablePropertyValues pvs = new MutablePropertyValues();
-	        pvs.addPropertyValue("portletClass", MyPortlet.class);
-	        registerSingleton(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME, PortletWrappingController.class, pvs);
-	        super.refresh();
-	    }
+		public void refresh() throws BeansException {
+			MutablePropertyValues pvs = new MutablePropertyValues();
+			pvs.addPropertyValue("portletClass", MyPortlet.class);
+			registerSingleton(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME, PortletWrappingController.class, pvs);
+			super.refresh();
+		}
 	}
 
 }

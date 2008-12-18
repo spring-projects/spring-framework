@@ -80,7 +80,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
-    implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
+	implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
 
 	/** Whether to allow re-registration of a different definition with the same name */
 	private boolean allowBeanDefinitionOverriding = true;

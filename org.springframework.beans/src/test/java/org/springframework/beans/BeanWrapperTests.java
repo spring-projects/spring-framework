@@ -1311,7 +1311,7 @@ public class BeanWrapperTests extends TestCase {
 	}
 
 	public void testSetNumberProperties() {
-    NumberPropertyBean bean = new NumberPropertyBean();
+	NumberPropertyBean bean = new NumberPropertyBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 
 		String byteValue = " " + Byte.MAX_VALUE + " ";

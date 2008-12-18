@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class JndiTemplateTests {
 
-    @Test
+	@Test
 	public void testLookupSucceeds() throws Exception {
 		Object o = new Object();
 		String name = "foo";
@@ -51,8 +51,8 @@ public class JndiTemplateTests {
 		assertEquals(o, o2);
 		verify(context);
 	}
-	
-    @Test
+
+	@Test
 	public void testLookupFails() throws Exception {
 		NameNotFoundException ne = new NameNotFoundException();
 		String name = "foo";
@@ -76,8 +76,8 @@ public class JndiTemplateTests {
 		}
 		verify(context);
 	}
-	
-    @Test
+
+	@Test
 	public void testLookupReturnsNull() throws Exception {
 		String name = "foo";
 		final Context context = createMock(Context.class);
@@ -101,7 +101,7 @@ public class JndiTemplateTests {
 		verify(context);
 	}
 
-    @Test
+	@Test
 	public void testLookupFailsWithTypeMismatch() throws Exception {
 		Object o = new Object();
 		String name = "foo";
@@ -126,7 +126,7 @@ public class JndiTemplateTests {
 		verify(context);
 	}
 
-    @Test
+	@Test
 	public void testBind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
@@ -134,18 +134,18 @@ public class JndiTemplateTests {
 		context.bind(name, o);
 		context.close();
 		replay(context);
-		
+
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
 				return context;
 			}
 		};
-		
+
 		jt.bind(name, o);
 		verify(context);
 	}
-	
-    @Test
+
+	@Test
 	public void testRebind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
@@ -164,20 +164,20 @@ public class JndiTemplateTests {
 		verify(context);
 	}
 
-    @Test
+	@Test
 	public void testUnbind() throws Exception {
 		String name = "something";
 		final Context context = createMock(Context.class);
 		context.unbind(name);
 		context.close();
 		replay(context);
-	
+
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() {
 				return context;
 			}
 		};
-	
+
 		jt.unbind(name);
 		verify(context);
 	}

@@ -36,35 +36,35 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class CommonsLogFactoryBean implements FactoryBean<Log>, InitializingBean {
 
-    private Log log;
+	private Log log;
 
 
-    /**
-     * The name of the log.
-     * <p>This property is required.
-     * @param logName the name of the log
-     */
-    public void setLogName(String logName) {
-        this.log = LogFactory.getLog(logName);
-    }
+	/**
+	 * The name of the log.
+	 * <p>This property is required.
+	 * @param logName the name of the log
+	 */
+	public void setLogName(String logName) {
+		this.log = LogFactory.getLog(logName);
+	}
 
 
-    public void afterPropertiesSet() {
-        if (this.log == null) {
-            throw new IllegalArgumentException("'logName' is required");
-        }
-    }
+	public void afterPropertiesSet() {
+		if (this.log == null) {
+			throw new IllegalArgumentException("'logName' is required");
+		}
+	}
 
-    public Log getObject() {
-        return this.log;
-    }
+	public Log getObject() {
+		return this.log;
+	}
 
-    public Class<? extends Log> getObjectType() {
-        return (this.log != null ? this.log.getClass() : Log.class);
-    }
+	public Class<? extends Log> getObjectType() {
+		return (this.log != null ? this.log.getClass() : Log.class);
+	}
 
-    public boolean isSingleton() {
-        return true;
-    }
+	public boolean isSingleton() {
+		return true;
+	}
 
 }

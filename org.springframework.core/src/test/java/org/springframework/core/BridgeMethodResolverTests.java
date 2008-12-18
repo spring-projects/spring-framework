@@ -1206,7 +1206,7 @@ public class BridgeMethodResolverTests {
 	//-------------------
 
 	@SuppressWarnings("serial")
-    private static class ParameterType implements Serializable {
+	private static class ParameterType implements Serializable {
 
 	}
 

@@ -34,7 +34,7 @@ import javax.naming.NamingException;
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public interface JndiCallback<T> {
-    
+
 	/**
 	 * Do something with the given JNDI context.
 	 * <p>Implementations don't need to worry about error handling
@@ -43,7 +43,7 @@ public interface JndiCallback<T> {
 	 * @throws NamingException if thrown by JNDI methods
 	 * @return a result object, or <code>null</code>
 	 */
-  T doInContext(Context ctx) throws NamingException;
+	T doInContext(Context ctx) throws NamingException;
 
 }
 

@@ -24,5 +24,5 @@ package org.springframework.beans.factory;
  */
 class PackageLevelVisibleBean {
 
-    public static final String CONSTANT = "Wuby";
+	public static final String CONSTANT = "Wuby";
 }

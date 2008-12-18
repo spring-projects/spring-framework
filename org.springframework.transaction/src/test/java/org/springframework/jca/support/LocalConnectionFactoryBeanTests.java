@@ -33,56 +33,56 @@ import org.junit.Test;
 public final class LocalConnectionFactoryBeanTests {
 
 	@Test(expected=IllegalArgumentException.class)
-    public void testManagedConnectionFactoryIsRequired() throws Exception {
-        new LocalConnectionFactoryBean().afterPropertiesSet();
-    }
+	public void testManagedConnectionFactoryIsRequired() throws Exception {
+		new LocalConnectionFactoryBean().afterPropertiesSet();
+	}
 
 	@Test
-    public void testIsSingleton() throws Exception {
-        LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
-        assertTrue(factory.isSingleton());
-    }
+	public void testIsSingleton() throws Exception {
+		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
+		assertTrue(factory.isSingleton());
+	}
 
 	@Test
-    public void testGetObjectTypeIsNullIfConnectionFactoryHasNotBeenConfigured() throws Exception {
-        LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
-        assertNull(factory.getObjectType());
-    }
+	public void testGetObjectTypeIsNullIfConnectionFactoryHasNotBeenConfigured() throws Exception {
+		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
+		assertNull(factory.getObjectType());
+	}
 
 	@Test
-    public void testCreatesVanillaConnectionFactoryIfNoConnectionManagerHasBeenConfigured() throws Exception {
-        
-        final Object CONNECTION_FACTORY = new Object();
-        
-        ManagedConnectionFactory managedConnectionFactory = createMock(ManagedConnectionFactory.class);
+	public void testCreatesVanillaConnectionFactoryIfNoConnectionManagerHasBeenConfigured() throws Exception {
 
-        expect(managedConnectionFactory.createConnectionFactory()).andReturn(CONNECTION_FACTORY);
-        replay(managedConnectionFactory);
+		final Object CONNECTION_FACTORY = new Object();
 
-        LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
-        factory.setManagedConnectionFactory(managedConnectionFactory);
-        factory.afterPropertiesSet();
-        assertEquals(CONNECTION_FACTORY, factory.getObject());
+		ManagedConnectionFactory managedConnectionFactory = createMock(ManagedConnectionFactory.class);
 
-        verify(managedConnectionFactory);
-    }
+		expect(managedConnectionFactory.createConnectionFactory()).andReturn(CONNECTION_FACTORY);
+		replay(managedConnectionFactory);
+
+		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
+		factory.setManagedConnectionFactory(managedConnectionFactory);
+		factory.afterPropertiesSet();
+		assertEquals(CONNECTION_FACTORY, factory.getObject());
+
+		verify(managedConnectionFactory);
+	}
 
 	@Test
-    public void testCreatesManagedConnectionFactoryIfAConnectionManagerHasBeenConfigured() throws Exception {
-        ManagedConnectionFactory managedConnectionFactory = createMock(ManagedConnectionFactory.class);
+	public void testCreatesManagedConnectionFactoryIfAConnectionManagerHasBeenConfigured() throws Exception {
+		ManagedConnectionFactory managedConnectionFactory = createMock(ManagedConnectionFactory.class);
 
-        ConnectionManager connectionManager = createMock(ConnectionManager.class);
+		ConnectionManager connectionManager = createMock(ConnectionManager.class);
 
-        expect(managedConnectionFactory.createConnectionFactory(connectionManager)).andReturn(null);
+		expect(managedConnectionFactory.createConnectionFactory(connectionManager)).andReturn(null);
 
-        replay(connectionManager, managedConnectionFactory);
+		replay(connectionManager, managedConnectionFactory);
 
-        LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
-        factory.setManagedConnectionFactory(managedConnectionFactory);
-        factory.setConnectionManager(connectionManager);
-        factory.afterPropertiesSet();
+		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
+		factory.setManagedConnectionFactory(managedConnectionFactory);
+		factory.setConnectionManager(connectionManager);
+		factory.afterPropertiesSet();
 
-        verify(connectionManager, managedConnectionFactory);
-    }
+		verify(connectionManager, managedConnectionFactory);
+	}
 
 }

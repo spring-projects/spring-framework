@@ -337,26 +337,26 @@ public class FactoryMethodTests {
 		assertEquals("someuser", session.getProperty("mail.smtp.user"));
 		assertEquals("somepw", session.getProperty("mail.smtp.password"));
 	}
-	
+
 }
 
 class MailSession {
 	private Properties props;
 
-    private MailSession() {
+	private MailSession() {
 	}
-	
+
 	public void setProperties(Properties props) {
-        this.props = props;
+		this.props = props;
 	}
-	
-    public static MailSession getDefaultInstance(Properties props) {
-    	MailSession session = new MailSession();
-    	session.setProperties(props);
-    	return session;
-    }
-    
-    public Object getProperty(String key) {
-        return props.get(key);
-    }
+
+	public static MailSession getDefaultInstance(Properties props) {
+		MailSession session = new MailSession();
+		session.setProperties(props);
+		return session;
+	}
+
+	public Object getProperty(String key) {
+		return props.get(key);
+	}
 }

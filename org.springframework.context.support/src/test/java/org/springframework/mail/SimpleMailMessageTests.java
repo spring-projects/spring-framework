@@ -33,7 +33,7 @@ import org.junit.Test;
  */
 public final class SimpleMailMessageTests {
 
-    @Test
+	@Test
 	public void testSimpleMessageCopyCtor() {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("me@mail.org");
@@ -79,7 +79,7 @@ public final class SimpleMailMessageTests {
 		assertEquals("my text", messageCopy.getText());
 	}
 
-    @Test
+	@Test
 	public void testDeepCopyOfStringArrayTypedFieldsOnCopyCtor() throws Exception {
 
 		SimpleMailMessage original = new SimpleMailMessage();

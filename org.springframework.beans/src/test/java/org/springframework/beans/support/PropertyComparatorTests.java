@@ -31,7 +31,7 @@ import org.springframework.util.comparator.CompoundComparator;
  */
 public class PropertyComparatorTests {
 
-    @Test
+	@Test
 	public void testPropertyComparator() {
 		Dog dog = new Dog();
 		dog.setNickName("mace");
@@ -45,7 +45,7 @@ public class PropertyComparatorTests {
 		assertTrue(c.compare(dog2, dog) < 0);
 	}
 
-    @Test
+	@Test
 	public void testPropertyComparatorNulls() {
 		Dog dog = new Dog();
 		Dog dog2 = new Dog();
@@ -53,8 +53,8 @@ public class PropertyComparatorTests {
 		assertTrue(c.compare(dog, dog2) == 0);
 	}
 
-    @SuppressWarnings("unchecked")
-    @Test
+	@SuppressWarnings("unchecked")
+	@Test
 	public void testCompoundComparator() {
 		CompoundComparator<Dog> c = new CompoundComparator<Dog>();
 		c.addComparator(new PropertyComparator("lastName", false, true));
@@ -76,8 +76,8 @@ public class PropertyComparatorTests {
 		assertTrue(c.compare(dog2, dog1) > 0);
 	}
 
-    @SuppressWarnings("unchecked")
-    @Test
+	@SuppressWarnings("unchecked")
+	@Test
 	public void testCompoundComparatorInvert() {
 		CompoundComparator<Dog> c = new CompoundComparator<Dog>();
 		c.addComparator(new PropertyComparator("lastName", false, true));

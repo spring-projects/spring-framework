@@ -85,7 +85,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
  */
 public class ServletWrappingController extends AbstractController
-    implements BeanNameAware, InitializingBean, DisposableBean {
+	implements BeanNameAware, InitializingBean, DisposableBean {
 
 	private Class servletClass;
 
@@ -138,7 +138,7 @@ public class ServletWrappingController extends AbstractController
 		}
 		if (!Servlet.class.isAssignableFrom(this.servletClass)) {
 			throw new IllegalArgumentException("servletClass [" + this.servletClass.getName() +
-			    "] needs to implement interface [javax.servlet.Servlet]");
+				"] needs to implement interface [javax.servlet.Servlet]");
 		}
 		if (this.servletName == null) {
 			this.servletName = this.beanName;
@@ -154,7 +154,7 @@ public class ServletWrappingController extends AbstractController
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
+		throws Exception {
 
 		this.servletInstance.service(request, response);
 		return null;

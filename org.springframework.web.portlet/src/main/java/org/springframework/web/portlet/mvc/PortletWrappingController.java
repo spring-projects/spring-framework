@@ -148,10 +148,10 @@ public class PortletWrappingController extends AbstractController
 		if (this.portletName == null) {
 			this.portletName = this.beanName;
 		}
-        PortletConfig config = this.portletConfig;
-        if (config == null || !this.useSharedPortletConfig) {
-            config = new DelegatingPortletConfig();
-        }
+		PortletConfig config = this.portletConfig;
+		if (config == null || !this.useSharedPortletConfig) {
+			config = new DelegatingPortletConfig();
+		}
 		this.portletInstance = (Portlet) this.portletClass.newInstance();
 		this.portletInstance.init(config);
 	}
@@ -201,7 +201,7 @@ public class PortletWrappingController extends AbstractController
 		public Enumeration getInitParameterNames() {
 			return initParameters.keys();
 		}
-		
+
 		public ResourceBundle getResourceBundle(Locale locale) {
 			return (portletConfig != null ? portletConfig.getResourceBundle(locale) : null);
 		}

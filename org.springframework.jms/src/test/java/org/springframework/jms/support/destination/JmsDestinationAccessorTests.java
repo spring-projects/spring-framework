@@ -29,7 +29,7 @@ import org.junit.Test;
  */
 public class JmsDestinationAccessorTests {
 
-    @Test
+	@Test
 	public void testChokesIfDestinationResolverIsetToNullExplcitly() throws Exception {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		replay(connectionFactory);
@@ -45,7 +45,7 @@ public class JmsDestinationAccessorTests {
 		verify(connectionFactory);
 	}
 
-    @Test
+	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
 		assertFalse("The [pubSubDomain] property of JmsDestinationAccessor must default to " +

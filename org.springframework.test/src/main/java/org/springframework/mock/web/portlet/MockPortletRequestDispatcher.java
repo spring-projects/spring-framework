@@ -51,7 +51,7 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 		this.url = url;
 	}
 
-	
+
 	public void include(RenderRequest request, RenderResponse response) throws PortletException, IOException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
@@ -61,7 +61,7 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 		((MockRenderResponse) response).setIncludedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockPortletRequestDispatcher: including URL [" + this.url + "]");
-    }
+	}
 	}
 
 }

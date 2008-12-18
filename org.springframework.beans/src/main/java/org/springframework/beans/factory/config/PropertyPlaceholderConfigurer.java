@@ -92,7 +92,7 @@ import org.springframework.util.StringValueResolver;
  * @see PropertyOverrideConfigurer
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
-    implements BeanNameAware, BeanFactoryAware {
+	implements BeanNameAware, BeanFactoryAware {
 
 	/** Default placeholder prefix: "${" */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
@@ -288,7 +288,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * @see #resolvePlaceholder(String, java.util.Properties, int)
 	 */
 	protected String parseStringValue(String strVal, Properties props, Set<String> visitedPlaceholders)
-	    throws BeanDefinitionStoreException {
+		throws BeanDefinitionStoreException {
 
 		StringBuilder buf = new StringBuilder(strVal);
 

@@ -61,7 +61,7 @@ import org.springframework.core.Constants;
  * @see SimpleTriggerBean
  */
 public class CronTriggerBean extends CronTrigger
-    implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
+	implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 
 	/** Constants for the CronTrigger class */
 	private static final Constants constants = new Constants(CronTrigger.class);

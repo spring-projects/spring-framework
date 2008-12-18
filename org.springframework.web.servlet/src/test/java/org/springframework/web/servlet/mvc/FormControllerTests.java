@@ -47,24 +47,24 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  */
 public class FormControllerTests extends TestCase {
-	
+
 	public void testReferenceDataOnForm() throws Exception {
 		String formView = "f";
 		String successView = "s";
-		
+
 		RefController mc = new RefController();
 		mc.setFormView(formView);
 		mc.setCommandName("tb");
 		mc.setSuccessView(successView);
 		mc.refDataCount = 0;
-		
+
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
-		
+
 		assertTrue("refDataCount == 1", mc.refDataCount == 1);
-		
+
 		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		int[] numbers = (int[]) mv.getModel().get(mc.NUMBERS_ATT);
 		assertTrue("model is non null", person != null);
@@ -74,22 +74,22 @@ public class FormControllerTests extends TestCase {
 	public void testReferenceDataOnResubmit() throws Exception {
 		String formView = "f";
 		String successView = "s";
-		
+
 		RefController mc = new RefController();
 		mc.setFormView(formView);
 		mc.setCommandName("tb");
 		mc.setSuccessView(successView);
 		mc.refDataCount = 0;
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		request.addParameter("age", "23x");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
 		assertTrue("has errors", mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName()) != null);
-		
+
 		assertTrue("refDataCount == 1", mc.refDataCount == 1);
-		
+
 		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		int[] numbers = (int[]) mv.getModel().get(mc.NUMBERS_ATT);
 		assertTrue("model is non null", person != null);
@@ -99,17 +99,17 @@ public class FormControllerTests extends TestCase {
 	public void testForm() throws Exception {
 		String formView = "f";
 		String successView = "s";
-		
+
 		TestController mc = new TestController();
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("name", "rod");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
-		
+
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("bean age default ok", person.getAge() == TestController.DEFAULT_AGE);
@@ -147,11 +147,11 @@ public class FormControllerTests extends TestCase {
 	public void testSubmitWithoutErrors() throws Exception {
 		String formView = "f";
 		String successView = "s";
-		
+
 		TestController mc = new TestController();
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
-		
+
 		String name = "Rod";
 		int age = 32;
 
@@ -169,7 +169,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age bound ok", person.getAge() == age);
 	}
-	
+
 	public void testSubmitWithoutValidation() throws Exception {
 		String formView = "f";
 		String successView = "s";
@@ -218,12 +218,12 @@ public class FormControllerTests extends TestCase {
 	public void testSubmitPassedByValidator() throws Exception {
 		String formView = "f";
 		String successView = "s";
-		
+
 		TestController mc = new TestController();
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
 		mc.setValidator(new TestValidator());
-		
+
 		String name = "Roderick Johnson";
 		int age = 32;
 
@@ -234,21 +234,21 @@ public class FormControllerTests extends TestCase {
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name: expected '" + successView + "', not '" + mv.getViewName() + "'",
 				mv.getViewName().equals(successView));
-		
+
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age bound ok", person.getAge() == age);
 	}
-	
+
 	public void testSubmit1Mismatch() throws Exception {
 		String formView = "fred";
 		String successView = "tony";
-		
+
 		TestController mc = new TestController();
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
-		
+
 		String name = "Rod";
 		String age = "xxx";
 
@@ -259,7 +259,7 @@ public class FormControllerTests extends TestCase {
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
 				mv.getViewName().equals(formView));
-		
+
 		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
@@ -271,11 +271,11 @@ public class FormControllerTests extends TestCase {
 		assertTrue("Saved invalid value", fe.getRejectedValue().equals(age));
 		assertTrue("Correct field", fe.getField().equals("age"));
 	}
-	
+
 	public void testSubmit1Mismatch1Invalidated() throws Exception {
 		String formView = "fred";
 		String successView = "tony";
-		
+
 		TestController mc = new TestController();
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
@@ -284,7 +284,7 @@ public class FormControllerTests extends TestCase {
 		String name = "Rod";
 		// will be rejected
 		String age = "xxx";
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo.html");
 		request.addParameter("name", name);
 		request.addParameter("age", "" + age);
@@ -292,10 +292,10 @@ public class FormControllerTests extends TestCase {
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
 		mv.getViewName().equals(formView));
-		
+
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
-		
+
 		// yes, but it was rejected after binding by the validator
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age is default", person.getAge() == TestController.DEFAULT_AGE);
@@ -305,7 +305,7 @@ public class FormControllerTests extends TestCase {
 		FieldError fe = errors.getFieldError("age");
 		assertTrue("Saved invalid value", fe.getRejectedValue().equals(age));
 		assertTrue("Correct field", fe.getField().equals("age"));
-		
+
 		// raised by first validator
 		fe = errors.getFieldError("name");
 		assertTrue("Saved invalid value", fe.getRejectedValue().equals(name));
@@ -371,7 +371,7 @@ public class FormControllerTests extends TestCase {
 
 		TestController mc = new TestController() {
 			protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-			    throws ServletException, IOException {
+				throws ServletException, IOException {
 				throw new ServletException("invalid submit");
 			}
 		};
@@ -435,7 +435,7 @@ public class FormControllerTests extends TestCase {
 	public void testFormChangeRequest() throws Exception {
 		String formView = "fred";
 		String successView = "tony";
-    final Float myFloat = new Float("123.45");
+	final Float myFloat = new Float("123.45");
 
 		TestController mc = new TestController() {
 			protected boolean isFormChangeRequest(HttpServletRequest request) {
@@ -569,17 +569,17 @@ public class FormControllerTests extends TestCase {
 
 
 	private static class RefController extends SimpleFormController {
-		
+
 		final String NUMBERS_ATT = "NUMBERS";
-		
+
 		static final int[] NUMBERS = { 1, 2, 3, 4 };
-		
+
 		int refDataCount;
 
 		public RefController() {
 			setCommandClass(TestBean.class);
 		}
-		
+
 		protected Map referenceData(HttpServletRequest request) {
 			++refDataCount;
 			Map m = new HashMap();

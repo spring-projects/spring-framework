@@ -42,7 +42,7 @@ public class ComparatorTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-    public void testComparableComparatorIllegalArgs() {
+	public void testComparableComparatorIllegalArgs() {
 		Comparator c = new ComparableComparator();
 		Object o1 = new Object();
 		Object o2 = new Object();
@@ -70,7 +70,7 @@ public class ComparatorTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-    public void testNullSafeComparatorNullsLow() {
+	public void testNullSafeComparatorNullsLow() {
 		Comparator<String> c = NullSafeComparator.NULLS_LOW;
 		assertTrue(c.compare(null, "boo") < 0);
 	}

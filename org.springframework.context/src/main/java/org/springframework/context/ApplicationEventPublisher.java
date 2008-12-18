@@ -28,7 +28,7 @@ package org.springframework.context;
  * @see org.springframework.context.event.EventPublicationInterceptor
  */
 public interface ApplicationEventPublisher {
-    
+
 	/**
 	 * Notify all listeners registered with this application of an application
 	 * event. Events may be framework events (such as RequestHandledEvent)
