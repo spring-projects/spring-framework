@@ -42,8 +42,8 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  */
 public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
-    implements MessageDrivenBean {
-	
+	implements MessageDrivenBean {
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 

@@ -38,52 +38,52 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public class AtomFeedViewTest {
 
-    private AbstractAtomFeedView view;
+	private AbstractAtomFeedView view;
 
-    @Before
-    public void createView() throws Exception {
-        view = new MyAtomFeedView();
-        setIgnoreWhitespace(true);
-    }
+	@Before
+	public void createView() throws Exception {
+		view = new MyAtomFeedView();
+		setIgnoreWhitespace(true);
+	}
 
-    @Test
-    public void render() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void render() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Map<String, String> model = new HashMap<String, String>();
-        model.put("1", "This is entry 1");
-        model.put("2", "This is entry 2");
+		Map<String, String> model = new HashMap<String, String>();
+		model.put("1", "This is entry 1");
+		model.put("2", "This is entry 2");
 
-        view.render(model, request, response);
-        assertEquals("Invalid content-type", "application/atom+xml", response.getContentType());
-        String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>Test Feed</title>" +
-                "<entry><title>2</title><summary>This is entry 2</summary></entry>" +
-                "<entry><title>1</title><summary>This is entry 1</summary></entry>" + "</feed>";
-        assertXMLEqual(expected, response.getContentAsString());
-    }
+		view.render(model, request, response);
+		assertEquals("Invalid content-type", "application/atom+xml", response.getContentType());
+		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>Test Feed</title>" +
+				"<entry><title>2</title><summary>This is entry 2</summary></entry>" +
+				"<entry><title>1</title><summary>This is entry 1</summary></entry>" + "</feed>";
+		assertXMLEqual(expected, response.getContentAsString());
+	}
 
-    private static class MyAtomFeedView extends AbstractAtomFeedView {
+	private static class MyAtomFeedView extends AbstractAtomFeedView {
 
-        @Override
+		@Override
 		protected void buildFeedMetadata(Map model, Feed feed, HttpServletRequest request) {
-            feed.setTitle("Test Feed");
-        }
+			feed.setTitle("Test Feed");
+		}
 
-        @Override
+		@Override
 		protected List<Entry> buildFeedEntries(Map model, HttpServletRequest request, HttpServletResponse response)
-                throws Exception {
-            List<Entry> entries = new ArrayList<Entry>();
-            for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
-                String name = (String) iterator.next();
-                Entry entry = new Entry();
-                entry.setTitle(name);
-                Content content = new Content();
-                content.setValue((String) model.get(name));
-                entry.setSummary(content);
-                entries.add(entry);
-            }
-            return entries;
-        }
-    }
+				throws Exception {
+			List<Entry> entries = new ArrayList<Entry>();
+			for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
+				String name = (String) iterator.next();
+				Entry entry = new Entry();
+				entry.setTitle(name);
+				Content content = new Content();
+				content.setValue((String) model.get(name));
+				entry.setSummary(content);
+				entries.add(entry);
+			}
+			return entries;
+		}
+	}
 }

@@ -48,13 +48,13 @@ import org.springframework.transaction.TransactionDefinition;
 @Inherited
 @Documented
 public @interface Transactional {
-	
+
 	/**
 	 * The transaction propagation type.
 	 * <p>Defaults to {@link Propagation#REQUIRED}.
 	 */
 	Propagation propagation() default Propagation.REQUIRED;
-	
+
 	/**
 	 * The transaction isolation level.
 	 * <p>Defaults to {@link Isolation#DEFAULT}.
@@ -72,7 +72,7 @@ public @interface Transactional {
 	 * <p>Defaults to <code>false</code>.
 	 */
 	boolean readOnly() default false;
-	
+
 	/**
 	 * Defines zero (0) or more exception {@link Class classes}, which must be a
 	 * subclass of {@link Throwable}, indicating which exception types must cause
@@ -82,7 +82,7 @@ public @interface Transactional {
 	 * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(Class clazz)}
 	 */
 	Class<? extends Throwable>[] rollbackFor() default {};
-	
+
 	/**
 	 * Defines zero (0) or more exception names (for exceptions which must be a
 	 * subclass of {@link Throwable}), indicating which exception types must cause
@@ -99,17 +99,17 @@ public @interface Transactional {
 	 * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(String exceptionName)}
 	 */
 	String[] rollbackForClassName() default {};
-    
+
 	/**
 	 * Defines zero (0) or more exception {@link Class Classes}, which must be a
 	 * subclass of {@link Throwable}, indicating which exception types must <b>not</b>
 	 * cause a transaction rollback.
 	 * <p>This is the preferred way to construct a rollback rule, matching the
-     * exception class and subclasses.
+	 * exception class and subclasses.
 	 * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(Class clazz)}
 	 */
 	Class<? extends Throwable>[] noRollbackFor() default {};
-	
+
 	/**
 	 * Defines zero (0) or more exception names (for exceptions which must be a
 	 * subclass of {@link Throwable}) indicating which exception types must <b>not</b>

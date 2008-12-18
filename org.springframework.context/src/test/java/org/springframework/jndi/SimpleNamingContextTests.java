@@ -46,7 +46,7 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
  */
 public class SimpleNamingContextTests {
 
-    @Test
+	@Test
 	public void testNamingContextBuilder() throws NamingException {
 		SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
 		InitialContextFactory factory = builder.createInitialContextFactory(null);
@@ -174,12 +174,12 @@ public class SimpleNamingContextTests {
 		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(pairMap.get("myds")));
 		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(pairMap.get("mydsX")));
 	}
-	
+
 	/**
 	 * Demonstrates how emptyActivatedContextBuilder() method can be
 	 * used repeatedly, and how it affects creating a new InitialContext()
 	 */
-    @Test
+	@Test
 	public void testCreateInitialContext() throws Exception {
 		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		String name = "foo";
@@ -198,7 +198,7 @@ public class SimpleNamingContextTests {
 		catch (NamingException ex) {
 			// expected
 		}
-		
+
 		// Check the same call will work again, but the context is empty
 		builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		try {
@@ -218,36 +218,36 @@ public class SimpleNamingContextTests {
 
 class StubDataSource implements DataSource {
 
-    public Connection getConnection() throws SQLException {
-        return null;
-    }
+	public Connection getConnection() throws SQLException {
+		return null;
+	}
 
-    public Connection getConnection(String username, String password) throws SQLException {
-        return null;
-    }
+	public Connection getConnection(String username, String password) throws SQLException {
+		return null;
+	}
 
-    public PrintWriter getLogWriter() throws SQLException {
-        return null;
-    }
+	public PrintWriter getLogWriter() throws SQLException {
+		return null;
+	}
 
-    public int getLoginTimeout() throws SQLException {
-        return 0;
-    }
+	public int getLoginTimeout() throws SQLException {
+		return 0;
+	}
 
-    public void setLogWriter(PrintWriter arg0) throws SQLException {
-        
-    }
+	public void setLogWriter(PrintWriter arg0) throws SQLException {
 
-    public void setLoginTimeout(int arg0) throws SQLException {
-        
-    }
+	}
 
-    public boolean isWrapperFor(Class<?> arg0) throws SQLException {
-        return false;
-    }
+	public void setLoginTimeout(int arg0) throws SQLException {
 
-    public <T> T unwrap(Class<T> arg0) throws SQLException {
-        return null;
-    }
-    
+	}
+
+	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
+		return false;
+	}
+
+	public <T> T unwrap(Class<T> arg0) throws SQLException {
+		return null;
+	}
+
 }

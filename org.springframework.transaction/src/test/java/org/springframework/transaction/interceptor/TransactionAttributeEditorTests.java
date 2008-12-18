@@ -33,24 +33,24 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 26.04.2003
  */
 public class TransactionAttributeEditorTests {
-	
-    @Test
+
+	@Test
 	public void testNull() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText(null);
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertTrue(ta == null);
 	}
-	
-    @Test
+
+	@Test
 	public void testEmptyString() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertTrue(ta == null);
 	}
-	
-    @Test
+
+	@Test
 	public void testValidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_REQUIRED");
@@ -60,15 +60,15 @@ public class TransactionAttributeEditorTests {
 		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_DEFAULT);
 		assertTrue(!ta.isReadOnly());
 	}
-	
-    @Test(expected=IllegalArgumentException.class)
+
+	@Test(expected=IllegalArgumentException.class)
 	public void testInvalidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should have failed with bogus propagation code
 		pe.setAsText("XXPROPAGATION_REQUIRED");
 	}
-	
-    @Test
+
+	@Test
 	public void testValidPropagationCodeAndIsolationCode() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_REQUIRED, ISOLATION_READ_UNCOMMITTED");
@@ -77,15 +77,15 @@ public class TransactionAttributeEditorTests {
 		assertTrue(ta.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED);
 		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
 	}
-	
-    @Test(expected=IllegalArgumentException.class)
+
+	@Test(expected=IllegalArgumentException.class)
 	public void testValidPropagationAndIsolationCodesAndInvalidRollbackRule() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should fail with bogus rollback rule
 		pe.setAsText("PROPAGATION_REQUIRED,ISOLATION_READ_UNCOMMITTED,XXX");
-    }
-	
-    @Test
+	}
+
+	@Test
 	public void testValidPropagationCodeAndIsolationCodeAndRollbackRules1() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_MANDATORY,ISOLATION_REPEATABLE_READ,timeout_10,-IOException,+MyRuntimeException");
@@ -102,7 +102,7 @@ public class TransactionAttributeEditorTests {
 		assertTrue(!ta.rollbackOn(new MyRuntimeException("")));
 	}
 
-    @Test
+	@Test
 	public void testValidPropagationCodeAndIsolationCodeAndRollbackRules2() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("+IOException,readOnly,ISOLATION_READ_COMMITTED,-MyRuntimeException,PROPAGATION_SUPPORTS");
@@ -119,7 +119,7 @@ public class TransactionAttributeEditorTests {
 		assertTrue(ta.rollbackOn(new MyRuntimeException("")));
 	}
 
-    @Test
+	@Test
 	public void testDefaultTransactionAttributeToString() {
 		DefaultTransactionAttribute source = new DefaultTransactionAttribute();
 		source.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
@@ -144,7 +144,7 @@ public class TransactionAttributeEditorTests {
 		assertEquals(ta, source);
 	}
 
-    @Test
+	@Test
 	public void testRuleBasedTransactionAttributeToString() {
 		RuleBasedTransactionAttribute source = new RuleBasedTransactionAttribute();
 		source.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
@@ -171,5 +171,5 @@ public class TransactionAttributeEditorTests {
 		source.getRollbackRules().add(new NoRollbackRuleAttribute("IllegalStateException"));
 		assertEquals(ta, source);
 	}
-	
+
 }

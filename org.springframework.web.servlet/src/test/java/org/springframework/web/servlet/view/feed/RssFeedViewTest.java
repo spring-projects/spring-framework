@@ -38,56 +38,56 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public class RssFeedViewTest {
 
-    private AbstractRssFeedView view;
+	private AbstractRssFeedView view;
 
-    @Before
-    public void createView() throws Exception {
-        view = new MyRssFeedView();
-        setIgnoreWhitespace(true);
+	@Before
+	public void createView() throws Exception {
+		view = new MyRssFeedView();
+		setIgnoreWhitespace(true);
 
-    }
+	}
 
-    @Test
-    public void render() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void render() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Map<String, String> model = new HashMap<String, String>();
-        model.put("1", "This is entry 1");
-        model.put("2", "This is entry 2");
+		Map<String, String> model = new HashMap<String, String>();
+		model.put("1", "This is entry 1");
+		model.put("2", "This is entry 2");
 
-        view.render(model, request, response);
-        assertEquals("Invalid content-type", "application/rss+xml", response.getContentType());
-        String expected = "<rss version=\"2.0\">" +
-                "<channel><title>Test Feed</title><link>http://example.com</link><description>Test feed description</description>" +
-                "<item><title>2</title><description>This is entry 2</description></item>" +
-                "<item><title>1</title><description>This is entry 1</description></item>" + "</channel></rss>";
-        assertXMLEqual(expected, response.getContentAsString());
-    }
+		view.render(model, request, response);
+		assertEquals("Invalid content-type", "application/rss+xml", response.getContentType());
+		String expected = "<rss version=\"2.0\">" +
+				"<channel><title>Test Feed</title><link>http://example.com</link><description>Test feed description</description>" +
+				"<item><title>2</title><description>This is entry 2</description></item>" +
+				"<item><title>1</title><description>This is entry 1</description></item>" + "</channel></rss>";
+		assertXMLEqual(expected, response.getContentAsString());
+	}
 
-    private static class MyRssFeedView extends AbstractRssFeedView {
+	private static class MyRssFeedView extends AbstractRssFeedView {
 
-        @Override
+		@Override
 		protected void buildFeedMetadata(Map model, Channel channel, HttpServletRequest request) {
-            channel.setTitle("Test Feed");
-            channel.setDescription("Test feed description");
-            channel.setLink("http://example.com");
-        }
+			channel.setTitle("Test Feed");
+			channel.setDescription("Test feed description");
+			channel.setLink("http://example.com");
+		}
 
-        @Override
+		@Override
 		protected List<Item> buildFeedItems(Map model, HttpServletRequest request, HttpServletResponse response)
-                throws Exception {
-            List<Item> items = new ArrayList<Item>();
-            for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
-                String name = (String) iterator.next();
-                Item item = new Item();
-                item.setTitle(name);
-                Description description = new Description();
-                description.setValue((String) model.get(name));
-                item.setDescription(description);
-                items.add(item);
-            }
-            return items;
-        }
-    }
+				throws Exception {
+			List<Item> items = new ArrayList<Item>();
+			for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
+				String name = (String) iterator.next();
+				Item item = new Item();
+				item.setTitle(name);
+				Description description = new Description();
+				description.setValue((String) model.get(name));
+				item.setDescription(description);
+				items.add(item);
+			}
+			return items;
+		}
+	}
 }

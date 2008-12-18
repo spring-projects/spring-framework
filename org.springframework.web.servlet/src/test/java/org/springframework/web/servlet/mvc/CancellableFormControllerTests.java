@@ -137,7 +137,7 @@ public class CancellableFormControllerTests extends TestCase {
 
 	public void testCancelSubmission() throws Exception {
 		String cancelView = "cancelView";
-    String cancelParameterKey = "cancelRequest";
+	String cancelParameterKey = "cancelRequest";
 
 		TestController ctl = new TestController();
 		ctl.setCancelParamKey(cancelParameterKey);
@@ -155,7 +155,7 @@ public class CancellableFormControllerTests extends TestCase {
 
 	public void testCancelSubmissionWithValidationError() throws Exception {
 		String cancelView = "cancelView";
-    String cancelParameterKey = "cancelRequest";
+	String cancelParameterKey = "cancelRequest";
 
 		TestController ctl = new TestController();
 		ctl.setCancelParamKey(cancelParameterKey);
@@ -179,8 +179,8 @@ public class CancellableFormControllerTests extends TestCase {
 
 	public void testCancelSubmissionWithCustomModelParams() throws Exception {
 		String cancelView = "cancelView";
-    String cancelParameterKey = "cancelRequest";
-    final String reason = "Because I wanted to";
+	String cancelParameterKey = "cancelRequest";
+	final String reason = "Because I wanted to";
 
 		TestController ctl = new TestController() {
 			protected ModelAndView onCancel(HttpServletRequest request, HttpServletResponse response, Object command) {

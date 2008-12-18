@@ -46,7 +46,7 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
  */
 public final class SimpleMessageConverterTests {
 
-    @Test
+	@Test
 	public void testStringConversion() throws JMSException {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
@@ -70,7 +70,7 @@ public final class SimpleMessageConverterTests {
 		messageControl.verify();
 	}
 
-    @Test
+	@Test
 	public void testByteArrayConversion() throws JMSException {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
@@ -109,7 +109,7 @@ public final class SimpleMessageConverterTests {
 		messageControl.verify();
 	}
 
-    @Test
+	@Test
 	public void testMapConversion() throws JMSException {
 
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -145,7 +145,7 @@ public final class SimpleMessageConverterTests {
 		messageControl.verify();
 	}
 
-    @Test
+	@Test
 	public void testSerializableConversion() throws JMSException {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
@@ -169,17 +169,17 @@ public final class SimpleMessageConverterTests {
 		messageControl.verify();
 	}
 
-    @Test(expected=MessageConversionException.class)
+	@Test(expected=MessageConversionException.class)
 	public void testToMessageThrowsExceptionIfGivenNullObjectToConvert() throws Exception {
 		new SimpleMessageConverter().toMessage(null, null);
 	}
 
-    @Test(expected=MessageConversionException.class)
+	@Test(expected=MessageConversionException.class)
 	public void testToMessageThrowsExceptionIfGivenIncompatibleObjectToConvert() throws Exception {
 		new SimpleMessageConverter().toMessage(new Object(), null);
 	}
 
-    @Test
+	@Test
 	public void testToMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
 
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -199,7 +199,7 @@ public final class SimpleMessageConverterTests {
 		messageControl.verify();
 	}
 
-    @Test
+	@Test
 	public void testFromMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
 
 		MockControl messageControl = MockControl.createControl(Message.class);
@@ -214,7 +214,7 @@ public final class SimpleMessageConverterTests {
 		messageControl.verify();
 	}
 
-    @Test
+	@Test
 	public void testMapConversionWhereMapHasNonStringTypesForKeys() throws JMSException {
 
 		MockControl messageControl = MockControl.createControl(MapMessage.class);
@@ -239,7 +239,7 @@ public final class SimpleMessageConverterTests {
 		sessionControl.verify();
 	}
 
-    @Test
+	@Test
 	public void testMapConversionWhereMapHasNNullForKey() throws JMSException {
 
 		MockControl messageControl = MockControl.createControl(MapMessage.class);

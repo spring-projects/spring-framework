@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  */
 @Deprecated
 public abstract class AbstractTransactionalDataSourceSpringContextTests
-    extends AbstractTransactionalSpringContextTests {
+	extends AbstractTransactionalSpringContextTests {
 
 	protected JdbcTemplate jdbcTemplate;
 
@@ -127,7 +127,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 		}
 		super.setComplete();
 	}
-	
+
 	/**
 	 * Count the rows in the given table
 	 * @param tableName table name to count rows in
@@ -136,8 +136,8 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	protected int countRowsInTable(String tableName) {
 		return this.jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
 	}
-	
-	
+
+
 	/**
 	 * Execute the given SQL script. Will be rolled back by default,
 	 * according to the fate of the current transaction.

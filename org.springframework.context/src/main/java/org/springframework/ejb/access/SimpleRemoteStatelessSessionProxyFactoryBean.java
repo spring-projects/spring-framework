@@ -59,7 +59,7 @@ import org.springframework.util.ClassUtils;
  * @see AbstractRemoteSlsbInvokerInterceptor#setRefreshHomeOnConnectFailure
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSlsbInvokerInterceptor
-    implements FactoryBean, BeanClassLoaderAware {
+	implements FactoryBean, BeanClassLoaderAware {
 
 	/** The business interface of the EJB we're proxying */
 	private Class businessInterface;

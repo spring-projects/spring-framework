@@ -135,12 +135,12 @@ public class SimplePortletPostProcessor
 
 		private final PortletContext portletContext;
 
-        private final PortletConfig portletConfig;
+		private final PortletConfig portletConfig;
 
-        public DelegatingPortletConfig(String portletName, PortletContext portletContext, PortletConfig portletConfig) {
+		public DelegatingPortletConfig(String portletName, PortletContext portletContext, PortletConfig portletConfig) {
 			this.portletName = portletName;
 			this.portletContext = portletContext;
-            this.portletConfig = portletConfig;
+			this.portletConfig = portletConfig;
 		}
 
 		public String getPortletName() {
@@ -160,7 +160,7 @@ public class SimplePortletPostProcessor
 		}
 
 		public ResourceBundle getResourceBundle(Locale locale) {
-            return portletConfig == null ? null : portletConfig.getResourceBundle(locale);
+			return portletConfig == null ? null : portletConfig.getResourceBundle(locale);
 		}
 	}
 

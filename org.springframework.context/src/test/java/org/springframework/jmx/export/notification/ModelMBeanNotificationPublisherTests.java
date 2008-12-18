@@ -34,22 +34,22 @@ import org.springframework.jmx.export.SpringModelMBean;
  */
 public final class ModelMBeanNotificationPublisherTests {
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullMBean() throws Exception {
-        new ModelMBeanNotificationPublisher(null, createObjectName(), this);
+		new ModelMBeanNotificationPublisher(null, createObjectName(), this);
 	}
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullObjectName() throws Exception {
 		new ModelMBeanNotificationPublisher(new SpringModelMBean(), null, this);
 	}
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullManagedResource() throws Exception {
 		new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), null);
 	}
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testSendNullNotification() throws Exception {
 		NotificationPublisher publisher
 				= new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), this);

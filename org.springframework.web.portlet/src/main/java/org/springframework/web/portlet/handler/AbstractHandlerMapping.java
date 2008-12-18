@@ -43,7 +43,7 @@ import org.springframework.web.portlet.HandlerMapping;
  * @see org.springframework.web.portlet.HandlerInterceptor
  */
 public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
-    implements HandlerMapping, Ordered {
+	implements HandlerMapping, Ordered {
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 

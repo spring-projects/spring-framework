@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class JndiTemplateEditorTests {
 
-    @Test
+	@Test
 	public void testNullIsIllegalArgument() {
 		try {
 			new JndiTemplateEditor().setAsText(null);
@@ -37,16 +37,16 @@ public class JndiTemplateEditorTests {
 			// OK
 		}
 	}
-	
-    @Test
+
+	@Test
 	public void testEmptyStringMeansNullEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
 		assertTrue(jt.getEnvironment() == null);
 	}
-	
-    @Test
+
+	@Test
 	public void testCustomEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		// These properties are meaningless for JNDI, but we don't worry about that:

@@ -1973,7 +1973,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@SuppressWarnings("unchecked")
-    private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
+	private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		int ageSetByPropertyValue = 27;
@@ -2008,7 +2008,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@SuppressWarnings("unchecked")
-    @Test
+	@Test
 	public void testInitSecurityAwarePrototypeBean() {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
@@ -2267,7 +2267,7 @@ public class DefaultListableBeanFactoryTests {
 		}
 
 		@SuppressWarnings("unchecked")
-        public Object convertIfNecessary(Object value, Class requiredType) {
+		public Object convertIfNecessary(Object value, Class requiredType) {
 			return convertIfNecessary(value, requiredType, null);
 		}
 

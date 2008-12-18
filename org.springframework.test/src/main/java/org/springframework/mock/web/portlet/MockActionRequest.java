@@ -93,7 +93,7 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 		}
 		else {
 			return null;
-        }
+		}
 	}
 
 	public void setCharacterEncoding(String characterEncoding) {
@@ -104,7 +104,7 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
-			    new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
+				new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {

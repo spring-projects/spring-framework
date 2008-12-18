@@ -77,8 +77,8 @@ public class MockPortletURL implements PortletURL {
 		this.portalContext = portalContext;
 		this.urlType = urlType;
 	}
-    
-    
+
+
 	//---------------------------------------------------------------------
 	// PortletURL methods
 	//---------------------------------------------------------------------

@@ -30,13 +30,13 @@ import org.junit.Test;
  */
 public final class JmsAccessorTests {
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
 		accessor.afterPropertiesSet();
-    }
+	}
 
-    @Test
+	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertFalse("The [sessionTransacted] property of JmsAccessor must default to " +
@@ -45,7 +45,7 @@ public final class JmsAccessorTests {
 				accessor.isSessionTransacted());
 	}
 
-    @Test
+	@Test
 	public void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertEquals("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
@@ -55,7 +55,7 @@ public final class JmsAccessorTests {
 				accessor.getSessionAcknowledgeMode());
 	}
 
-    @Test(expected=IllegalArgumentException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
 		new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
 	}

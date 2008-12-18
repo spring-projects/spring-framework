@@ -140,7 +140,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 			assertTrue(ex == nex);
 		}
 	}
-	
+
 	@Test
 	public void testInvokesMethodOnEjbInstance() throws Exception {
 		doTestInvokesMethodOnEjbInstance(true, true);
@@ -178,7 +178,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 
 		final String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb, 2, lookupCount, lookupCount);
-	
+
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 		si.setLookupHomeOnStartup(lookupHomeOnStartup);
 		si.setCacheHome(cacheHome);
@@ -391,7 +391,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 
 
 	@SuppressWarnings("serial")
-    protected class ApplicationException extends Exception {
+	protected class ApplicationException extends Exception {
 
 		public ApplicationException() {
 			super("appException");

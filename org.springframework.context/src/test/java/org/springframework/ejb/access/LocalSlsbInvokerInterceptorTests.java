@@ -43,15 +43,15 @@ public class LocalSlsbInvokerInterceptorTests {
 	public void testPerformsLookup() throws Exception {
 		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
 		replay(ejb);
-		
+
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
-		
+
 		configuredInterceptor(mockContext, jndiName);
-		
+
 		verify(mockContext);
 	}
-	
+
 	@Test
 	public void testLookupFailure() throws Exception {
 		final NamingException nex = new NamingException();
@@ -62,7 +62,7 @@ public class LocalSlsbInvokerInterceptorTests {
 				throw nex;
 			}
 		};
-	
+
 		LocalSlsbInvokerInterceptor si = new LocalSlsbInvokerInterceptor();
 		si.setJndiName("foobar");
 		// default resourceRef=false should cause this to fail, as java:/comp/env will not
@@ -76,7 +76,7 @@ public class LocalSlsbInvokerInterceptorTests {
 			assertTrue(ex == nex);
 		}
 	}
-	
+
 	@Test
 	public void testInvokesMethodOnEjbInstance() throws Exception {
 		Object retVal = new Object();
@@ -84,22 +84,22 @@ public class LocalSlsbInvokerInterceptorTests {
 		expect(ejb.targetMethod()).andReturn(retVal);
 		ejb.remove();
 		replay(ejb);
-	
+
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
-	
+
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
-	
+
 		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessMethods.class } );
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
-	
+
 		assertTrue(target.targetMethod() == retVal);
-	
+
 		verify(mockContext);
 		verify(ejb);
 	}
-	
+
 	@Test
 	public void testInvokesMethodOnEjbInstanceWithSeparateBusinessMethods() throws Exception {
 		Object retVal = new Object();
@@ -148,7 +148,7 @@ public class LocalSlsbInvokerInterceptorTests {
 		verify(mockContext);
 		verify(ejb);
 	}
-	
+
 	@Test
 	public void testApplicationException() throws Exception {
 		testException(new ApplicationException());
@@ -160,15 +160,15 @@ public class LocalSlsbInvokerInterceptorTests {
 		final SlsbHome mockHome = createMock(SlsbHome.class);
 		expect(mockHome.create()).andReturn((LocalInterface)ejbInstance);
 		replay(mockHome);
-		
+
 		final Context mockCtx = createMock(Context.class);
-		
+
 		expect(mockCtx.lookup("java:comp/env/" + jndiName)).andReturn(mockHome);
 		mockCtx.close();
 		replay(mockCtx);
 		return mockCtx;
 	}
-		
+
 	protected LocalSlsbInvokerInterceptor configuredInterceptor(final Context mockCtx, final String jndiName)
 			throws Exception {
 
@@ -181,11 +181,11 @@ public class LocalSlsbInvokerInterceptorTests {
 		si.setJndiName(jndiName);
 		si.setResourceRef(true);
 		si.afterPropertiesSet();
-		
+
 		return si;
 	}
-	
-	
+
+
 	/** 
 	 * Needed so that we can mock the create() method.
 	 */
@@ -212,11 +212,11 @@ public class LocalSlsbInvokerInterceptorTests {
 
 
 	@SuppressWarnings("serial")
-    private class ApplicationException extends Exception {
+	private class ApplicationException extends Exception {
 
 		public ApplicationException() {
 			super("appException");
 		}
 	}
- 
+
 }

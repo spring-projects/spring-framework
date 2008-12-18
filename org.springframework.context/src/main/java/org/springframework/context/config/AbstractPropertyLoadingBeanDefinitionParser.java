@@ -44,11 +44,11 @@ abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingl
 			String[] locations = StringUtils.commaDelimitedListToStringArray(location);
 			builder.addPropertyValue("locations", locations);
 		}
-        String propertiesRef = element.getAttribute("properties-ref");
-        if (StringUtils.hasLength(propertiesRef)) {
-            builder.addPropertyReference("properties", propertiesRef);
-        }
-        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		String propertiesRef = element.getAttribute("properties-ref");
+		if (StringUtils.hasLength(propertiesRef)) {
+			builder.addPropertyReference("properties", propertiesRef);
+		}
+		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 	}
 
 }

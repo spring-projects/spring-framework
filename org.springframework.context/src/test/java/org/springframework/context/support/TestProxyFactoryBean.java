@@ -26,12 +26,12 @@ import org.springframework.beans.factory.FactoryBean;
 public class TestProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		implements FactoryBean, BeanFactoryAware {
 
-    @Override
-    protected Object createMainInterceptor() {
-        return new NoOpAdvice();
-    }
+	@Override
+	protected Object createMainInterceptor() {
+		return new NoOpAdvice();
+	}
 
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-    }
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	}
 
 }
