@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,21 +17,15 @@
 package org.springframework.web.portlet.context;
 
 import java.util.Locale;
-
 import javax.servlet.ServletException;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
@@ -48,36 +42,6 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 
 	private ConfigurableWebApplicationContext root;
 
-	protected ConfigurableApplicationContext createContext() throws Exception {
-		InitAndIB.constructed = false;
-		root = new XmlWebApplicationContext();
-		MockServletContext sc = new MockServletContext("");
-		root.setServletContext(sc);
-		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
-		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
-			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
-					public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
-						if (bean instanceof TestBean) {
-							((TestBean) bean).getFriends().add("myFriend");
-						}
-						return bean;
-					}
-					public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
-						return bean;
-					}
-				});
-			}
-		});
-		root.refresh();
-		XmlWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.setParent(root);
-		wac.setServletContext(sc);
-		wac.setNamespace("test-servlet");
-		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
-		wac.refresh();
-		return wac;
-	}
 
 	/**
 	 * Overridden as we can't trust superclass method
@@ -100,25 +64,6 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 	public void testCount() {
 		assertTrue("should have 14 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 			this.applicationContext.getBeanDefinitionCount() == 14);
-	}
-
-	public void testWithoutMessageSource() throws Exception {
-		MockServletContext sc = new MockServletContext("");
-		XmlWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.setParent(root);
-		wac.setServletContext(sc);
-		wac.setNamespace("testNamespace");
-		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
-		wac.refresh();
-		try {
-			wac.getMessage("someMessage", null, Locale.getDefault());
-			fail("Should have thrown NoSuchMessageException");
-		}
-		catch (NoSuchMessageException ex) {
-			// expected;
-		}
-		String msg = wac.getMessage("someMessage", null, "default", Locale.getDefault());
-		assertTrue("Default message returned", "default".equals(msg));
 	}
 
 	public void testContextNesting() {
