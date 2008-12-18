@@ -16,8 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
