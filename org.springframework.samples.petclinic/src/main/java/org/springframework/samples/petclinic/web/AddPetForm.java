@@ -45,12 +45,12 @@ public class AddPetForm {
 		return this.clinic.getPetTypes();
 	}
 
-    @InitBinder
-    public void setAllowedFields(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields(new String[] {"id"});
-    }
+	@InitBinder
+	public void setAllowedFields(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields(new String[] {"id"});
+	}
 
-    @RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(@PathVariable("ownerId") int ownerId, Model model) {
 		Owner owner = this.clinic.loadOwner(ownerId);
 		Pet pet = new Pet();

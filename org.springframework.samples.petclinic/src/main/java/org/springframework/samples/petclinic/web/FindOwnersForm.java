@@ -31,10 +31,10 @@ public class FindOwnersForm {
 		this.clinic = clinic;
 	}
 
-    @InitBinder
-    public void setAllowedFields(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields(new String[] {"id"});
-    }
+	@InitBinder
+	public void setAllowedFields(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields(new String[] {"id"});
+	}
 
 	@RequestMapping(value = "/owners/form", method = RequestMethod.GET)
 	public  String setupForm(Model model) {
