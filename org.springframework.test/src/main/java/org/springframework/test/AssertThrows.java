@@ -81,7 +81,9 @@ package org.springframework.test;
  * @author Rick Evans
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated favor use of JUnit 4's {@code @Test(expected=...)} support
  */
+@Deprecated
 public abstract class AssertThrows {
 
 	private final Class expectedException;
