@@ -82,17 +82,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.4.0/com.springsource.org.junit-4.4.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.4.0/com.springsource.org.junit-sources-4.4.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -120,6 +109,28 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$IVY_CACHE$/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-sources-1.6.2.RELEASE.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-4.5.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-sources-4.5.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-sources-2.3.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
