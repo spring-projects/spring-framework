@@ -37,10 +37,10 @@ public class AddVisitForm {
 		this.clinic = clinic;
 	}
 
-    @InitBinder
-    public void setAllowedFields(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields(new String[] {"id"});
-    }
+	@InitBinder
+	public void setAllowedFields(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields(new String[] {"id"});
+	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(@PathVariable("petId") int petId, Model model) {

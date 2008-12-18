@@ -35,12 +35,12 @@ public class AddOwnerForm {
 		this.clinic = clinic;
 	}
 
-    @InitBinder
-    public void setAllowedFields(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields(new String[] {"id"});
-    }
+	@InitBinder
+	public void setAllowedFields(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields(new String[] {"id"});
+	}
 
-    @RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(Model model) {
 		Owner owner = new Owner();
 		model.addAttribute(owner);
