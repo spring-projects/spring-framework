@@ -33,7 +33,7 @@ public final class OverloadedAdviceTests {
 	@Test
 	public void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {
 		try {
-			new ClassPathXmlApplicationContext("overloaded-advice-tests.xml", getClass());
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		}
 		catch (BeanCreationException ex) {
 			Throwable cause = ex.getRootCause();
@@ -46,7 +46,7 @@ public final class OverloadedAdviceTests {
 	@Test
 	public void testExceptionOnConfigParsingWithAmbiguousAdviceMethod() {
 		try {
-			new ClassPathXmlApplicationContext("ambiguous-advice-tests.xml", getClass());
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ambiguous.xml", getClass());
 		}
 		catch (BeanCreationException ex) {
 			Throwable cause = ex.getRootCause();

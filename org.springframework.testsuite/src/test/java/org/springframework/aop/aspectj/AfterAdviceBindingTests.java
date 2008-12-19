@@ -45,7 +45,8 @@ public final class AfterAdviceBindingTests {
 
 	@Before
 	public void setUp() throws Exception {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("after-advice-tests.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		AdviceBindingTestAspect afterAdviceAspect = (AdviceBindingTestAspect) ctx.getBean("testAspect");
 		
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");

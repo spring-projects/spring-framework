@@ -54,7 +54,7 @@ public final class BeanNamePointcutTests {
 
 	@Before
 	public void setUp() {
-		ctx = new ClassPathXmlApplicationContext("bean-name-pointcut-tests.xml", getClass());
+		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean2 = (ITestBean) ctx.getBean("testBean2");
 		testBeanContainingNestedBean = (ITestBean) ctx.getBean("testBeanContainingNestedBean");

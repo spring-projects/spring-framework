@@ -50,7 +50,8 @@ public final class BeforeAdviceBindingTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigPath(), getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));

@@ -31,7 +31,7 @@ public final class ImplicitJPArgumentMatchingTests {
 	@Test
 	public void testAspect() {
 		// nothing to really test; it is enough if we don't get error while creating app context
-		new ClassPathXmlApplicationContext("implicit-jp-argument-matching-tests.xml", getClass());
+		new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 	}
 	
 	static class CounterAspect {

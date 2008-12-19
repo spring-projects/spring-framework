@@ -35,7 +35,8 @@ public class DeclareParentsDelegateRefTests {
 
 	@Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("declare-parents-delegate-ref-tests.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		noMethodsBean = (NoMethodsBean) ctx.getBean("noMethodsBean");
 		counter = (Counter) ctx.getBean("counter");
 		counter.reset();

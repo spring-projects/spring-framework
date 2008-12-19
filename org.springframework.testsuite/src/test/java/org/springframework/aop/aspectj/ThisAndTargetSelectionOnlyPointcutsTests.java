@@ -40,7 +40,8 @@ public final class ThisAndTargetSelectionOnlyPointcutsTests {
 	
 	@Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("this-and-target-selectionOnly-pointcuts-tests.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		testBean = (TestInterface) ctx.getBean("testBean");
 		

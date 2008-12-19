@@ -47,7 +47,8 @@ public final class BeanNamePointcutAtAspectTests {
 
 	@org.junit.Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bean-name-pointcut-atAspect-tests.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean2 = (ITestBean) ctx.getBean("testBean2");

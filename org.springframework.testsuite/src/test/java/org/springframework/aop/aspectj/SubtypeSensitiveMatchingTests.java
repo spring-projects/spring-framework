@@ -40,7 +40,8 @@ public final class SubtypeSensitiveMatchingTests {
 
 	@Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("subtype-sensitive-matching.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		nonSerializableBean = (NonSerializableFoo) ctx.getBean("testClassA");
 		serializableBean = (SerializableFoo) ctx.getBean("testClassB");
 		bar = (Bar) ctx.getBean("testClassC");

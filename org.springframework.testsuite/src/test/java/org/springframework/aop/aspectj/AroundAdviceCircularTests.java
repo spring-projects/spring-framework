@@ -27,10 +27,6 @@ import org.springframework.aop.support.AopUtils;
  */
 public final class AroundAdviceCircularTests extends AroundAdviceBindingTests {
 
-	protected String getConfigPath() {
-		return "around-advice-circular-tests.xml";
-	}
-
 	@Test
 	public void testBothBeansAreProxies() {
 		Object tb = ctx.getBean("testBean");

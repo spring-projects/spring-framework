@@ -26,7 +26,6 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -52,13 +51,10 @@ public final class AfterReturningAdviceBindingTests {
 		this.afterAdviceAspect = anAspect;
 	}
 
-	protected String getConfigPath() {
-		return "afterReturning-advice-tests.xml";
-	}
-	
 	@Before
 	public void setUp() throws Exception {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigPath(), getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
 		

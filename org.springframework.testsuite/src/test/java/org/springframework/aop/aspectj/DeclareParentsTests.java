@@ -40,13 +40,9 @@ public final class DeclareParentsTests {
 
 	private ApplicationContext ctx;
 
-	protected String getConfigPath() {
-		return "declare-parents-tests.xml";
-	}
-
 	@Before
 	public void setUp() throws Exception {
-		ctx = new ClassPathXmlApplicationContext(getConfigPath(), getClass());
+		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
