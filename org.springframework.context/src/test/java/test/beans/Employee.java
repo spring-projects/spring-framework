@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -14,22 +15,27 @@
  * limitations under the License.
  */
 
-package test.advice;
+package test.beans;
 
-import java.lang.reflect.Method;
+import org.springframework.beans.TestBean;
 
-import org.springframework.aop.AfterReturningAdvice;
+public class Employee extends TestBean {
+	
+	private String co;
 
-/**
- * Simple before advice example that we can use for counting checks.
- *
- * @author Rod Johnson
- */
-@SuppressWarnings("serial")
-public class CountingAfterReturningAdvice extends MethodCounter implements AfterReturningAdvice {
-
-	public void afterReturning(Object o, Method m, Object[] args, Object target) throws Throwable {
-		count(m);
+	/**
+	 * Constructor for Employee.
+	 */
+	public Employee() {
+		super();
+	}
+	
+	public String getCompany() {
+		return co;
+	}
+	
+	public void setCompany(String co) {
+		this.co = co;
 	}
 
 }

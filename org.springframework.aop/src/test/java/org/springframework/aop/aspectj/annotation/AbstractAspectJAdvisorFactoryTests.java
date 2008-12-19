@@ -49,8 +49,9 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import example.aspects.PerTargetAspect;
-import example.aspects.TwoAdviceAspect;
+import test.aspect.PerTargetAspect;
+import test.aspect.TwoAdviceAspect;
+
 
 /**
  * Abstract tests for AspectJAdvisorFactory.

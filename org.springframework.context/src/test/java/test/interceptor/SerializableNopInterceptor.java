@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package test.advice;
+package test.interceptor;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
 
-import org.springframework.aop.AfterReturningAdvice;
 
 /**
- * Simple before advice example that we can use for counting checks.
- *
+ * Subclass of NopInterceptor that is serializable and
+ * can be used to test proxy serialization.
+ * 
  * @author Rod Johnson
  */
-@SuppressWarnings("serial")
-public class CountingAfterReturningAdvice extends MethodCounter implements AfterReturningAdvice {
-
-	public void afterReturning(Object o, Method m, Object[] args, Object target) throws Throwable {
-		count(m);
+public class SerializableNopInterceptor extends NopInterceptor implements Serializable {
+	
+	/**
+	 * We must override this field and the related methods as
+	 * otherwise count won't be serialized from the non-serializable
+	 * NopInterceptor superclass.
+	 */
+	private int count;
+	
+	public int getCount() {
+		return this.count;
 	}
-
+	
+	protected void increment() {
+		++count;
+	}
+	
 }

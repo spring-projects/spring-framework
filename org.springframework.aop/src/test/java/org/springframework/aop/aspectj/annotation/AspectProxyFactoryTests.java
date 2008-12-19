@@ -21,7 +21,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue;
 
-import example.aspects.PerThisAspect;
+import test.aspect.PerThisAspect;
+
 
 /**
  * @author Rob Harrop
