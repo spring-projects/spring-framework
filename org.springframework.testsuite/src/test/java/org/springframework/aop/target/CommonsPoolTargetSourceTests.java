@@ -54,7 +54,7 @@ public class CommonsPoolTargetSourceTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("org/springframework/aop/target/commonsPoolTests.xml"));
+		this.beanFactory = new XmlBeanFactory(new ClassPathResource(getClass().getSimpleName() + "-context.xml", getClass()));
 	}
 
 	/**

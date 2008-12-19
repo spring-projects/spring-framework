@@ -16,25 +16,33 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
 import org.junit.Test;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.autoproxy.target.AbstractBeanFactoryBasedTargetSourceCreator;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.transaction.NoTransactionException;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import test.advice.CountingBeforeAdvice;
 import test.advice.MethodCounter;
@@ -45,19 +53,28 @@ import test.mixin.Lockable;
  * Tests for auto proxy creation by advisor recognition.
  *
  * @author Rod Johnson
+ * @author Dave Syer
  * @author Chris Beams
  */
-public class AdvisorAutoProxyCreatorTests {
+public final class AdvisorAutoProxyCreatorTests {
+
+	private static final Class<?> CLASS = AdvisorAutoProxyCreatorTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final String DEFAULT_CONTEXT = CLASSNAME + "-context.xml";
+	private static final String COMMON_INTERCEPTORS_CONTEXT = CLASSNAME + "-common-interceptors.xml";
+	private static final String CUSTOM_TARGETSOURCE_CONTEXT = CLASSNAME + "-custom-targetsource.xml";
+	private static final String QUICK_TARGETSOURCE_CONTEXT = CLASSNAME + "-quick-targetsource.xml";
+	private static final String OPTIMIZED_CONTEXT = CLASSNAME + "-optimized.xml";
 
 	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
-
 	private static final String TXMANAGER_BEAN_NAME = "txManager";
 
 	/**
 	 * Return a bean factory with attributes and EnterpriseServices configured.
 	 */
 	protected BeanFactory getBeanFactory() throws IOException {
-		return new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreator.xml");
+		return new ClassPathXmlApplicationContext(DEFAULT_CONTEXT, CLASS);
 	}
 
 	@Test
@@ -101,7 +118,7 @@ public class AdvisorAutoProxyCreatorTests {
 	 */
 	@Test
 	public void testCommonInterceptorAndAdvisor() throws Exception {
-		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreatorWithCommonInterceptors.xml");
+		BeanFactory bf = new ClassPathXmlApplicationContext(COMMON_INTERCEPTORS_CONTEXT, CLASS);
 		ITestBean test1 = (ITestBean) bf.getBean("test1");
 		assertTrue(AopUtils.isAopProxy(test1));
 
@@ -131,7 +148,7 @@ public class AdvisorAutoProxyCreatorTests {
 	 */
 	@Test
 	public void testCustomTargetSourceNoMatch() throws Exception {
-		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
+		BeanFactory bf = new ClassPathXmlApplicationContext(CUSTOM_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertFalse(AopUtils.isAopProxy(test));
 		assertEquals("Rod", test.getName());
@@ -141,7 +158,7 @@ public class AdvisorAutoProxyCreatorTests {
 	@Test
 	public void testCustomPrototypeTargetSource() throws Exception {
 		CountingTestBean.count = 0;
-		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
+		BeanFactory bf = new ClassPathXmlApplicationContext(CUSTOM_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("prototypeTest");
 		assertTrue(AopUtils.isAopProxy(test));
 		Advised advised = (Advised) test;
@@ -156,7 +173,7 @@ public class AdvisorAutoProxyCreatorTests {
 	@Test
 	public void testLazyInitTargetSource() throws Exception {
 		CountingTestBean.count = 0;
-		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
+		BeanFactory bf = new ClassPathXmlApplicationContext(CUSTOM_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("lazyInitTest");
 		assertTrue(AopUtils.isAopProxy(test));
 		Advised advised = (Advised) test;
@@ -171,7 +188,7 @@ public class AdvisorAutoProxyCreatorTests {
 	@Test
 	public void testQuickTargetSourceCreator() throws Exception {
 		ClassPathXmlApplicationContext bf =
-				new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/quickTargetSource.xml");
+				new ClassPathXmlApplicationContext(QUICK_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertFalse(AopUtils.isAopProxy(test));
 		assertEquals("Rod", test.getName());
@@ -213,17 +230,6 @@ public class AdvisorAutoProxyCreatorTests {
 		bf.close();
 	}
 	
-	/*
-	@Test
-	public void testIntroductionIsProxied() throws Exception {
-		BeanFactory bf = getBeanFactory();
-		Object modifiable = bf.getBean("modifiable1");
-		// We can tell it's a CGLIB proxy by looking at the class name
-		System.out.println(modifiable.getClass().getName());
-		assertFalse(modifiable.getClass().getName().equals(ModifiableTestBean.class.getName()));
-	}
-	*/
-
 	@Test
 	public void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -310,7 +316,7 @@ public class AdvisorAutoProxyCreatorTests {
 
 	@Test
 	public void testWithOptimizedProxy() throws Exception {
-		BeanFactory beanFactory = new ClassPathXmlApplicationContext("org/springframework/aop/framework/autoproxy/optimizedAutoProxyCreator.xml");
+		BeanFactory beanFactory = new ClassPathXmlApplicationContext(OPTIMIZED_CONTEXT, CLASS);
 
 		ITestBean testBean = (ITestBean) beanFactory.getBean("optimizedTestBean");
 		assertTrue(AopUtils.isAopProxy(testBean));
@@ -323,42 +329,171 @@ public class AdvisorAutoProxyCreatorTests {
 		assertEquals("Incorrect number of calls to proxy", 2, beforeAdvice.getCalls());
 	}
 
+}
+
+
+class CountingTestBean extends TestBean {
+
+	public static int count = 0;
+
+	public CountingTestBean() {
+		count++;
+	}
+
+}
+
+
+@SuppressWarnings("serial")
+class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
+	
+	public NeverMatchAdvisor() {
+		super(new NopInterceptor());
+	}
 	
 	/**
-	 * Tests an introduction pointcut. This is a prototype, so that it can add
-	 * a Modifiable mixin. Tests that the autoproxy infrastructure can create
-	 * advised objects with independent interceptor instances.
-	 * The Modifiable behaviour of each instance of TestBean should be distinct.
+	 * This method is solely to allow us to create a mixture of dependencies in
+	 * the bean definitions. The dependencies don't have any meaning, and don't
+	 * <b>do</b> anything.
 	 */
-	/*
-	@Test
-	public void testIntroductionViaPrototype() throws Exception {
-		BeanFactory bf = getBeanFactory();
-
-		Object o = bf.getBean("modifiable1");
-		ITestBean modifiable1 = (ITestBean) bf.getBean("modifiable1");
-		ITestBean modifiable2 = (ITestBean) bf.getBean("modifiable2");
+	public void setDependencies(List<?> l) {
 		
-		Advised pc = (Advised) modifiable1;
-		System.err.println(pc.toProxyConfigString());
-		
-		// For convenience only
-		Modifiable mod1 = (Modifiable) modifiable1;  
-		Modifiable mod2 = (Modifiable) modifiable2;  
-		
-		assertFalse(mod1.isModified());
-		assertFalse(mod2.isModified());
-		
-		int newAge = 33;
-		modifiable1.setAge(newAge);
-		assertTrue(mod1.isModified());
-		// Changes to one shouldn't have affected the other
-		assertFalse("Instances of prototype introduction pointcut don't seem distinct", mod2.isModified());
-		mod1.acceptChanges();
-		assertFalse(mod1.isModified());
-		assertEquals(modifiable1.getAge(), newAge);
-		assertFalse(mod1.isModified());
 	}
-	*/
+
+	/**
+	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
+	 */
+	public boolean matches(Method m, Class<?> targetClass) {
+		return false;
+	}
+
+}
+
+
+class NoSetters {
+	
+	public void A() {
+		
+	}
+	
+	public int getB() {
+		return -1;
+	}
+
+}
+
+
+@SuppressWarnings("serial")
+class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implements InitializingBean {
+
+	/**
+	 * Should we insist on the presence of a transaction attribute or refuse to accept one?
+	 */
+	private boolean requireTransactionContext = false;
+
+
+	public void setRequireTransactionContext(boolean requireTransactionContext) {
+		this.requireTransactionContext = requireTransactionContext;
+	}
+
+	public boolean isRequireTransactionContext() {
+		return requireTransactionContext;
+	}
+
+
+	public CountingBeforeAdvice getCountingBeforeAdvice() {
+		return (CountingBeforeAdvice) getAdvice();
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		setAdvice(new TxCountingBeforeAdvice());
+	}
+
+	public boolean matches(Method method, Class<?> targetClass) {
+		return method.getName().startsWith("setAge");
+	}
+
+
+	private class TxCountingBeforeAdvice extends CountingBeforeAdvice {
+
+		public void before(Method method, Object[] args, Object target) throws Throwable {
+			// do transaction checks
+			if (requireTransactionContext) {
+				TransactionInterceptor.currentTransactionStatus();
+			}
+			else {
+				try {
+					TransactionInterceptor.currentTransactionStatus();
+					throw new RuntimeException("Shouldn't have a transaction");
+				}
+				catch (NoTransactionException ex) {
+					// this is Ok
+				}
+			}
+			super.before(method, args, target);
+		}
+	}
+
+}
+
+
+class Rollback {
+	
+	/**
+	 * Inherits transaction attribute.
+	 * Illustrates programmatic rollback.
+	 * @param rollbackOnly
+	 */
+	public void rollbackOnly(boolean rollbackOnly) {
+		if (rollbackOnly) {
+			setRollbackOnly();
+		}
+	}
+	
+	/**
+	 * Extracted in a protected method to facilitate testing
+	 */
+	protected void setRollbackOnly() {
+		TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
+	}
+
+	/**
+	 * @org.springframework.transaction.interceptor.RuleBasedTransaction ( timeout=-1 )
+	 * @org.springframework.transaction.interceptor.RollbackRule ( "java.lang.Exception" )
+	 * @org.springframework.transaction.interceptor.NoRollbackRule ( "ServletException" )
+	 */
+	public void echoException(Exception ex) throws Exception {
+		if (ex != null)
+			throw ex;
+	}
+
+}
+
+
+class SelectivePrototypeTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
+
+	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
+			Class<?> beanClass, String beanName) {
+		if (!beanName.startsWith("prototype")) {
+			return null;
+		}
+		return new PrototypeTargetSource();
+	}
+
+}
+
+
+class NullChecker implements MethodBeforeAdvice {
+
+	public void before(Method method, Object[] args, Object target) throws Throwable {
+		check(args);
+	}
+
+	private void check(Object[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] == null) {
+				throw new IllegalArgumentException("Null argument at position " + i);
+			}
+		}
+	}
 
 }

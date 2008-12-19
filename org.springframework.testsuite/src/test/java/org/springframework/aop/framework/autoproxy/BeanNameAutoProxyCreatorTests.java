@@ -27,6 +27,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import test.advice.CountingBeforeAdvice;
@@ -48,7 +49,8 @@ public class BeanNameAutoProxyCreatorTests {
 	public void setUp() throws IOException {
 		// Note that we need an ApplicationContext, not just a BeanFactory,
 		// for post-processing and hence auto-proxying to work.
-		this.beanFactory = new ClassPathXmlApplicationContext("beanNameAutoProxyCreatorTests.xml", getClass());
+		beanFactory =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 	}
 
 	@Test
@@ -193,6 +195,32 @@ public class BeanNameAutoProxyCreatorTests {
 		assertEquals(age, tb.getAge());
 		assertEquals(2, nop.getCount());
 		assertEquals(2, cba.getCalls());		
+	}
+
+}
+
+
+class CreatesTestBean implements FactoryBean<Object> {
+
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#getObject()
+	 */
+	public Object getObject() throws Exception {
+		return new TestBean();
+	}
+
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+	 */
+	public Class<?> getObjectType() {
+		return TestBean.class;
+	}
+
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
+	 */
+	public boolean isSingleton() {
+		return true;
 	}
 
 }
