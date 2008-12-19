@@ -46,13 +46,9 @@ public class AroundAdviceBindingTests {
 	
 	protected ApplicationContext ctx;
 
-	protected String getConfigPath() {
-		return "around-advice-tests.xml";
-	}
-	
 	@Before
 	public void onSetUp() throws Exception {
-		ctx = new ClassPathXmlApplicationContext(getConfigPath(), getClass());
+		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		
 		AroundAdviceBindingTestAspect  aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
 		

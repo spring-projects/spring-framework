@@ -41,7 +41,8 @@ public final class AfterThrowingAdviceBindingTests {
 
 	@Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("afterThrowing-advice-tests.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		
 		testBean = (ITestBean) ctx.getBean("testBean");
 		afterThrowingAdviceAspect = (AfterThrowingAdviceBindingTestAspect) ctx.getBean("testAspect");

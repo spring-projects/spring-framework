@@ -38,7 +38,8 @@ public final class AspectJExpressionPointcutAdvisorTests {
 
 	@Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("aspectj.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean = (ITestBean) ctx.getBean("testBean");
 		interceptor = (CallCountingInterceptor) ctx.getBean("interceptor");
 	}

@@ -39,26 +39,26 @@ public final class PropertyDependentAspectTests {
 
 	@Test
 	public void testPropertyDependentAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
-		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-before-aspect-test.xml");
+		checkXmlAspect(getClass().getSimpleName() + "-before.xml");
 	}
 
 	@Test
 	public void testPropertyDependentAspectWithPropertyDeclaredAfterAdvice() throws Exception {
-		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-after-aspect-test.xml");
+		checkXmlAspect(getClass().getSimpleName() + "-after.xml");
 	}
 
 	@Test
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
-		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-before-aspect-test.xml");
+		checkAtAspectJAspect(getClass().getSimpleName() + "-atAspectJ-before.xml");
 	}
 
 	@Test
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredAfterAdvice() throws Exception {
-		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-after-aspect-test.xml");
+		checkAtAspectJAspect(getClass().getSimpleName() + "-atAspectJ-after.xml");
 	}
 
 	private void checkXmlAspect(String appContextFile) {
-		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile);
+		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile, getClass());
 		ICounter counter = (ICounter) context.getBean("counter");
 		assertTrue("Proxy didn't get created", counter instanceof Advised);
 
@@ -69,7 +69,7 @@ public final class PropertyDependentAspectTests {
 	}
 
 	private void checkAtAspectJAspect(String appContextFile) {
-		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile);
+		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile, getClass());
 		ICounter counter = (ICounter) context.getBean("counter");
 		assertTrue("Proxy didn't get created", counter instanceof Advised);
 

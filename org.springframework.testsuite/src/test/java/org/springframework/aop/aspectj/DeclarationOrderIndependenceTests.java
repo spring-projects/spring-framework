@@ -39,7 +39,8 @@ public final class DeclarationOrderIndependenceTests {
 
 	@Before
 	public void setUp() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("topsy-turvy-aspect.xml", getClass());
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		aspect = (TopsyTurvyAspect) ctx.getBean("topsyTurvyAspect");
 		target = (TopsyTurvyTarget) ctx.getBean("topsyTurvyTarget");
 	}
