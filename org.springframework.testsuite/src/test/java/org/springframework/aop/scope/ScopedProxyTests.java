@@ -38,18 +38,26 @@ import org.springframework.core.io.ClassPathResource;
  * @author Chris Beams
  */
 public class ScopedProxyTests {
+	
+	private static final Class<?> CLASS = ScopedProxyTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final ClassPathResource LIST_CONTEXT = new ClassPathResource(CLASSNAME + "-list.xml", CLASS);
+	private static final ClassPathResource MAP_CONTEXT = new ClassPathResource(CLASSNAME + "-map.xml", CLASS);
+	private static final ClassPathResource OVERRIDE_CONTEXT = new ClassPathResource(CLASSNAME + "-override.xml", CLASS);
+	private static final ClassPathResource TESTBEAN_CONTEXT = new ClassPathResource(CLASSNAME + "-testbean.xml", CLASS);
 
 	/* SPR-2108 */
 	@Test
 	public void testProxyAssignable() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedMap.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(MAP_CONTEXT);
 		Object baseMap = bf.getBean("singletonMap");
 		assertTrue(baseMap instanceof Map);
 	}
 
 	@Test
 	public void testSimpleProxy() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedMap.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(MAP_CONTEXT);
 		Object simpleMap = bf.getBean("simpleMap");
 		assertTrue(simpleMap instanceof Map);
 		assertTrue(simpleMap instanceof HashMap);
@@ -58,7 +66,7 @@ public class ScopedProxyTests {
 	@Test
 	public void testScopedOverride() throws Exception {
 		GenericApplicationContext ctx = new GenericApplicationContext();
-		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("scopedOverride.xml", getClass()));
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(OVERRIDE_CONTEXT);
 		SimpleMapScope scope = new SimpleMapScope();
 		ctx.getBeanFactory().registerScope("request", scope);
 		ctx.refresh();
@@ -73,7 +81,7 @@ public class ScopedProxyTests {
 
 	@Test
 	public void testJdkScopedProxy() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedTestBean.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(TESTBEAN_CONTEXT);
 		SimpleMapScope scope = new SimpleMapScope();
 		bf.registerScope("request", scope);
 
@@ -90,7 +98,7 @@ public class ScopedProxyTests {
 
 	@Test
 	public void testCglibScopedProxy() {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedList.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(LIST_CONTEXT);
 		SimpleMapScope scope = new SimpleMapScope();
 		bf.registerScope("request", scope);
 

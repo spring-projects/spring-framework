@@ -38,6 +38,6 @@ public interface TargetSourceCreator {
 	 * @return a special TargetSource or <code>null</code> if this TargetSourceCreator isn't
 	 * interested in the particular bean
 	 */
-	TargetSource getTargetSource(Class beanClass, String beanName);
+	TargetSource getTargetSource(Class<?> beanClass, String beanName);
 
 }

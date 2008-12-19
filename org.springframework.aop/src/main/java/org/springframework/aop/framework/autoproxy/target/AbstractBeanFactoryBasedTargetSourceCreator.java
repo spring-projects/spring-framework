@@ -86,7 +86,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	// Implementation of the TargetSourceCreator interface
 	//---------------------------------------------------------------------
 
-	public final TargetSource getTargetSource(Class beanClass, String beanName) {
+	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
 		AbstractBeanFactoryBasedTargetSource targetSource =
 				createBeanFactoryBasedTargetSource(beanClass, beanName);
 		if (targetSource == null) {
@@ -194,6 +194,6 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * @return the AbstractPrototypeBasedTargetSource, or <code>null</code> if we don't match this
 	 */
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
-			Class beanClass, String beanName);
+			Class<?> beanClass, String beanName);
 
 }

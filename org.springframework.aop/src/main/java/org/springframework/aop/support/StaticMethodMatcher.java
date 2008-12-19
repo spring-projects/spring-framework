@@ -30,7 +30,7 @@ public abstract class StaticMethodMatcher implements MethodMatcher {
 		return false;
 	}
 
-	public final boolean matches(Method method, Class targetClass, Object[] args) {
+	public final boolean matches(Method method, Class<?> targetClass, Object[] args) {
 		// should never be invoked because isRuntime() returns false
 		throw new UnsupportedOperationException("Illegal MethodMatcher usage");
 	}

@@ -39,11 +39,11 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
 
 /**
+ * @since 09.12.2003
  * @author Juergen Hoeller
  * @author Chris Beams
- * @since 09.12.2003
  */
-public class AutoProxyCreatorTests {
+public final class AutoProxyCreatorTests {
 
 	@Test
 	public void testBeanNameAutoProxyCreator() {

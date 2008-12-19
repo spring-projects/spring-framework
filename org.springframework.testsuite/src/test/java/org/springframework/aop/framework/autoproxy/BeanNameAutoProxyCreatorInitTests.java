@@ -27,12 +27,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Dave Syer
  * @author Chris Beams
  */
-public class BeanNameAutoProxyCreatorInitTests {
+public final class BeanNameAutoProxyCreatorInitTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testIgnoreAdvisorThatIsCurrentlyCreation() {
 		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("beanNameAutoProxyCreatorInitTests.xml", getClass());
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 		TestBean bean = (TestBean) ctx.getBean("bean");
 		bean.setName("foo");
 		assertEquals("foo", bean.getName());
