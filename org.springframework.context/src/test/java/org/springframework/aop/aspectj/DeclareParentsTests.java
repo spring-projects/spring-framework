@@ -21,12 +21,13 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import test.mixin.Lockable;
 
 /**
  * @author Rod Johnson
