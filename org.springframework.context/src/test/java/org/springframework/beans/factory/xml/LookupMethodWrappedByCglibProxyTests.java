@@ -32,13 +32,18 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class LookupMethodWrappedByCglibProxyTests {
+public final class LookupMethodWrappedByCglibProxyTests {
+	
+	private static final Class<?> CLASS = LookupMethodWrappedByCglibProxyTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final String CONTEXT = CLASSNAME + "-context.xml";
 
 	private ApplicationContext applicationContext;
 
 	@Before
 	public void setUp() {
-		this.applicationContext = new ClassPathXmlApplicationContext("overloadOverrides.xml", getClass());
+		this.applicationContext = new ClassPathXmlApplicationContext(CONTEXT, CLASS);
 		resetInterceptor();
 	}
 
@@ -74,14 +79,15 @@ public class LookupMethodWrappedByCglibProxyTests {
 		return (DebugInterceptor) applicationContext.getBean("interceptor");
 	}
 
-
-	public static abstract class OverloadLookup {
-
-		public abstract ITestBean newTestBean();
-
-		public String testMethod() {
-			return "foo";
-		}
-	}
-
 }
+
+
+abstract class OverloadLookup {
+
+	public abstract ITestBean newTestBean();
+
+	public String testMethod() {
+		return "foo";
+	}
+}
+

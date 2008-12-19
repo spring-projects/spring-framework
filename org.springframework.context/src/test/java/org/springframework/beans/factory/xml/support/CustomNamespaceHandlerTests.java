@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml.support;
 
+import static java.lang.String.format;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -26,37 +27,59 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import test.interceptor.NopInterceptor;
 
 /**
+ * Unit tests for custom XML namespace handler implementations.
+ * 
  * @author Rob Harrop
  * @author Rick Evans
  * @author Chris Beams
  */
 public final class CustomNamespaceHandlerTests {
+	
+	private static final Class<?> CLASS = CustomNamespaceHandlerTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	private static final String FQ_PATH = "org/springframework/beans/factory/xml/support";
+	
+	private static final String NS_PROPS = format("%s/%s.properties", FQ_PATH, CLASSNAME);
+	private static final String NS_XML = format("%s/%s-context.xml", FQ_PATH, CLASSNAME);
+	private static final String TEST_XSD = format("%s/%s.xsd", FQ_PATH, CLASSNAME);
 
 	private DefaultListableBeanFactory beanFactory;
 
-
 	@Before
 	public void setUp() throws Exception {
-		String location = "org/springframework/beans/factory/xml/support/customNamespace.properties";
-		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), location);
+		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(CLASS.getClassLoader(), NS_PROPS);
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setNamespaceHandlerResolver(resolver);
@@ -142,21 +165,21 @@ public final class CustomNamespaceHandlerTests {
 	}
 
 	private Resource getResource() {
-		return new ClassPathResource("customNamespace.xml", getClass());
+		return new ClassPathResource(NS_XML);
 	}
 
 
 	private final class DummySchemaResolver extends PluggableSchemaResolver {
 
 		public DummySchemaResolver() {
-			super(CustomNamespaceHandlerTests.this.getClass().getClassLoader());
+			super(CLASS.getClassLoader());
 		}
 
 
 		public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 			InputSource source = super.resolveEntity(publicId, systemId);
 			if (source == null) {
-				Resource resource = new ClassPathResource("org/springframework/beans/factory/xml/support/spring-test.xsd");
+				Resource resource = new ClassPathResource(TEST_XSD);
 				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
@@ -166,3 +189,90 @@ public final class CustomNamespaceHandlerTests {
 	}
 
 }
+
+
+/**
+ * Custom namespace handler implementation.
+ * 
+ * @author Rob Harrop
+ */
+final class TestNamespaceHandler extends NamespaceHandlerSupport {
+
+	public void init() {
+		registerBeanDefinitionParser("testBean", new TestBeanDefinitionParser());
+		registerBeanDefinitionParser("person", new PersonDefinitionParser());
+
+		registerBeanDefinitionDecorator("set", new PropertyModifyingBeanDefinitionDecorator());
+		registerBeanDefinitionDecorator("debug", new DebugBeanDefinitionDecorator());
+		registerBeanDefinitionDecorator("nop", new NopInterceptorBeanDefinitionDecorator());
+		registerBeanDefinitionDecoratorForAttribute("object-name", new ObjectNameBeanDefinitionDecorator());
+	}
+
+	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
+
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
+			RootBeanDefinition definition = new RootBeanDefinition();
+			definition.setBeanClass(TestBean.class);
+
+			MutablePropertyValues mpvs = new MutablePropertyValues();
+			mpvs.addPropertyValue("name", element.getAttribute("name"));
+			mpvs.addPropertyValue("age", element.getAttribute("age"));
+			definition.setPropertyValues(mpvs);
+
+			parserContext.getRegistry().registerBeanDefinition(element.getAttribute("id"), definition);
+
+			return null;
+		}
+	}
+
+	private static final class PersonDefinitionParser extends AbstractSingleBeanDefinitionParser {
+
+		protected Class<?> getBeanClass(Element element) {
+			return TestBean.class;
+		}
+
+		protected void doParse(Element element, BeanDefinitionBuilder builder) {
+			builder.addPropertyValue("name", element.getAttribute("name"));
+			builder.addPropertyValue("age", element.getAttribute("age"));
+		}
+	}
+
+	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
+
+		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+			Element element = (Element) node;
+			BeanDefinition def = definition.getBeanDefinition();
+
+			MutablePropertyValues mpvs = (def.getPropertyValues() == null) ? new MutablePropertyValues() : def.getPropertyValues();
+			mpvs.addPropertyValue("name", element.getAttribute("name"));
+			mpvs.addPropertyValue("age", element.getAttribute("age"));
+
+			((AbstractBeanDefinition) def).setPropertyValues(mpvs);
+			return definition;
+		}
+	}
+
+	private static class DebugBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
+
+		protected BeanDefinition createInterceptorDefinition(Node node) {
+			return new RootBeanDefinition(DebugInterceptor.class);
+		}
+	}
+
+	private static class NopInterceptorBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
+
+		protected BeanDefinition createInterceptorDefinition(Node node) {
+			return new RootBeanDefinition(NopInterceptor.class);
+		}
+	}
+
+	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
+
+		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+			Attr objectNameAttribute = (Attr) node;
+			definition.getBeanDefinition().setAttribute("objectName", objectNameAttribute.getValue());
+			return definition;
+		}
+	}
+}
+

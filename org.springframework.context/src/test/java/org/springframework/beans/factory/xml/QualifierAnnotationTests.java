@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import static java.lang.String.format;
 import static org.junit.Assert.*;
+import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -36,10 +38,11 @@ import org.springframework.context.support.StaticApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class QualifierAnnotationTests {
+public final class QualifierAnnotationTests {
 
+	private static final String CLASSNAME = QualifierAnnotationTests.class.getName();
 	private static final String CONFIG_LOCATION =
-			"classpath:org/springframework/beans/factory/xml/qualifierAnnotationTests.xml";
+		format("classpath:%s-context.xml", convertClassNameToResourcePath(CLASSNAME));
 
 
 	@Test
