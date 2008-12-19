@@ -16,9 +16,12 @@
 
 package org.springframework.aop.aspectj.generic;
 
+import static org.junit.Assert.*;
+
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests for AspectJ pointcut expression matching when working with bridge methods.
@@ -33,71 +36,73 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * See SPR-3556 for more details.
  *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-public class GenericBridgeMethodMatchingTests extends AbstractDependencyInjectionSpringContextTests {
+public class GenericBridgeMethodMatchingTests {
 
 	protected DerivedInterface<String> testBean;
 
-	protected CounterAspect counterAspect;
+	protected GenericCounterAspect counterAspect;
 
 
-	public GenericBridgeMethodMatchingTests() {
-		setPopulateProtectedVariables(true);
-	}
-
-	@Override
-	protected String getConfigPath() {
-		return "genericBridgeMethodMatchingTests-context.xml";
-	}
-
-	@Override
-	protected void onSetUp() throws Exception {
+	@SuppressWarnings("unchecked")
+	@org.junit.Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		
+		counterAspect = (GenericCounterAspect) ctx.getBean("counterAspect");
 		counterAspect.count = 0;
-		super.onSetUp();
+		
+		testBean = (DerivedInterface<String>) ctx.getBean("testBean");
 	}
 
+
+	@Test
 	public void testGenericDerivedInterfaceMethodThroughInterface() {
 		testBean.genericDerivedInterfaceMethod("");
 		assertEquals(1, counterAspect.count);
 	}
 
+	@Test
 	public void testGenericBaseInterfaceMethodThroughInterface() {
 		testBean.genericBaseInterfaceMethod("");
 		assertEquals(1, counterAspect.count);
 	}
 
+}
 
-	public interface BaseInterface<T> {
 
-		void genericBaseInterfaceMethod(T t);
+interface BaseInterface<T> {
+
+	void genericBaseInterfaceMethod(T t);
+}
+
+
+interface DerivedInterface<T> extends BaseInterface<T> {
+
+	public void genericDerivedInterfaceMethod(T t);
+}
+
+
+class DerivedStringParameterizedClass implements DerivedInterface<String> {
+
+	public void genericDerivedInterfaceMethod(String t) {
 	}
 
-
-	public interface DerivedInterface<T> extends BaseInterface<T> {
-
-		public void genericDerivedInterfaceMethod(T t);
+	public void genericBaseInterfaceMethod(String t) {
 	}
+}
 
+@Aspect
+class GenericCounterAspect {
 
-	public static class DerivedStringParameterizedClass implements DerivedInterface<String> {
+	public int count;
 
-		public void genericDerivedInterfaceMethod(String t) {
-		}
-
-		public void genericBaseInterfaceMethod(String t) {
-		}
-	}
-	
-	@Aspect
-	public static class CounterAspect {
-
-		public int count;
-
-		@Before("execution(* *..BaseInterface+.*(..))")
-		public void increment() {
-			count++;
-		}
-
+	@Before("execution(* *..BaseInterface+.*(..))")
+	public void increment() {
+		count++;
 	}
 
 }
+

@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml.support;
 
 import org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator;
 import org.springframework.aop.interceptor.DebugInterceptor;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -34,6 +33,8 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import test.interceptor.NopInterceptor;
 
 /**
  * @author Rob Harrop

@@ -23,12 +23,12 @@ import java.io.Serializable;
 
 import net.sf.cglib.core.CodeGenerationException;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.ITestBean;
@@ -36,6 +36,10 @@ import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import test.advice.CountingBeforeAdvice;
+import test.interceptor.NopInterceptor;
+import test.mixin.LockMixinAdvisor;
 
 /**
  * Additional and overridden tests for the CGLIB proxy.
@@ -46,7 +50,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public class CglibProxyTests extends AbstractAopProxyTests {
+@SuppressWarnings("serial")
+public final class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
+
+	private static final String DEPENDENCY_CHECK_CONTEXT =  CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
+
 
 	protected Object createProxy(ProxyCreatorSupport as) {
 		as.setProxyTargetClass(true);
@@ -330,7 +338,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	@Test
 	public void testWithDependencyChecking() {
 		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/aop/framework/withDependencyChecking.xml");
+				new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass());
 		ctx.getBean("testBean");
 	}
 
@@ -426,6 +434,64 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 		public final void foo() {
 		}
+	}
+
+}
+
+
+class CglibTestBean {
+
+	private String name;
+
+	public CglibTestBean() {
+		setName("Some Default");
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+}
+
+
+class NoArgCtorTestBean {
+
+	private boolean called = false;
+	
+	public NoArgCtorTestBean(String x, int y) {
+		called = true;
+	}
+	
+	public boolean wasCalled() {
+		return called;
+	}
+	
+	public void reset() {
+		called = false;
+	}
+
+}
+
+
+class ProtectedMethodTestBean {
+
+	protected String getString() {
+		return "foo";
+	}
+
+}
+
+
+class UnsupportedInterceptor implements MethodInterceptor {
+
+	/**
+	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
+	 */
+	public Object invoke(MethodInvocation mi) throws Throwable {
+		throw new UnsupportedOperationException(mi.getMethod().getName());
 	}
 
 }

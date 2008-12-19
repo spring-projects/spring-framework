@@ -16,41 +16,47 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
+import static org.junit.Assert.assertEquals;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class AnnotationPointcutTests extends AbstractDependencyInjectionSpringContextTests {
+public final class AnnotationPointcutTests {
 
 	private AnnotatedTestBean testBean;
 
-	@Override
-	protected String getConfigPath() {
-		return "annotationPointcut.xml";
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		
+		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
 	}
 
-	public void setTestBean(AnnotatedTestBean testBean) {
-		this.testBean = testBean;
-	}
-
+	@Test
 	public void testAnnotationBindingInAroundAdvice() {
 		assertEquals("this value", testBean.doThis());
 	}
 
+	@Test
 	public void testNoMatchingWithoutAnnotationPresent() {
 		assertEquals("doTheOther", testBean.doTheOther());
 	}
 
-
-	public static class TestMethodInterceptor implements MethodInterceptor {
-
-		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-			return "this value";
-		}
-	}
-
 }
+
+
+class TestMethodInterceptor implements MethodInterceptor {
+
+	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+		return "this value";
+	}
+}
+

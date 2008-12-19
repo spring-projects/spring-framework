@@ -18,15 +18,17 @@ package org.springframework.aop.config;
 
 import static org.junit.Assert.*;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import test.advice.CountingBeforeAdvice;
 
 /**
  * @author Rob Harrop
@@ -35,13 +37,11 @@ public class AopNamespaceHandlerTests {
 
 	private ApplicationContext context;
 
+	
 	@Before
 	public void setUp() {
-		this.context = new ClassPathXmlApplicationContext(getConfigLocation());
-	}
-
-	protected String getConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerTests.xml";
+		this.context =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 	}
 
 	@Test
@@ -103,3 +103,51 @@ public class AopNamespaceHandlerTests {
 	}
 
 }
+
+
+class CountingAspectJAdvice {
+
+	private int beforeCount;
+
+	private int afterCount;
+
+	private int aroundCount;
+
+	public void myBeforeAdvice() throws Throwable {
+		this.beforeCount++;
+	}
+
+	public void myAfterAdvice() throws Throwable {
+		this.afterCount++;
+	}
+
+	public void myAroundAdvice(ProceedingJoinPoint pjp) throws Throwable {
+		this.aroundCount++;
+		pjp.proceed();
+	}
+	
+	public void myAfterReturningAdvice(int age) {
+		this.afterCount++;
+	}
+
+	public void myAfterThrowingAdvice(RuntimeException ex) {
+		this.afterCount++;
+	}
+	
+	public void mySetAgeAdvice(int newAge, ITestBean bean) {
+		// no-op
+	}
+	
+	public int getBeforeCount() {
+		return this.beforeCount;
+	}
+
+	public int getAfterCount() {
+		return this.afterCount;
+	}
+
+	public int getAroundCount() {
+		return this.aroundCount;
+	}
+}
+

@@ -1,4 +1,3 @@
-package org.springframework.aop.aspectj;
 /*
  * Copyright 2002-2006 the original author or authors.
  *
@@ -14,6 +13,8 @@ package org.springframework.aop.aspectj;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
 

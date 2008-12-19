@@ -34,15 +34,16 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class AopNamespaceHandlerScopeTests {
+public final class AopNamespaceHandlerScopeTests {
 
 	private ApplicationContext context;
 
 	@Before
 	public void setUp() {
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.setConfigLocations(new String[] {"classpath:org/springframework/aop/config/aopNamespaceHandlerScopeTests.xml"});
+		wac.setConfigLocations(new String[] {"classpath:org/springframework/aop/config/AopNamespaceHandlerScopeTests-context.xml"});
 		wac.refresh();
 		this.context = wac;
 	}

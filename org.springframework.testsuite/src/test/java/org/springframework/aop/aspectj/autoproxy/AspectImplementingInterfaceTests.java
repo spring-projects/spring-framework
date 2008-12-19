@@ -16,47 +16,47 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
+import static org.junit.Assert.*;
+
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Test for ensuring the aspects aren't advised. See SPR-3893 for more details.
  *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-public class AspectImplementingInterfaceTests extends AbstractDependencyInjectionSpringContextTests {
-	protected ITestBean testBean;
-	protected AnInterface interfaceExtendingAspect;
+public final class AspectImplementingInterfaceTests {
 
-	public AspectImplementingInterfaceTests() {
-		setPopulateProtectedVariables(true);
-	}
-
-	protected String getConfigPath() {
-		return "aspect-implementing-interface-tests.xml";
-	}
-
-	protected void onSetUp() throws Exception {
-		super.onSetUp();
-	}
-
+	@Test
 	public void testProxyCreation() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		
+		ITestBean testBean = (ITestBean) ctx.getBean("testBean");
+		AnInterface interfaceExtendingAspect = (AnInterface) ctx.getBean("interfaceExtendingAspect");
+		
 		assertTrue(testBean instanceof Advised);
 		assertFalse(interfaceExtendingAspect instanceof Advised);
 	}
 
-	public static interface AnInterface {
-		public void interfaceMethod();
-	}
-	
-	public static class InterfaceExtendingAspect implements AnInterface {
-		public void increment(ProceedingJoinPoint pjp) throws Throwable {
-			pjp.proceed();
-		}
+}
 
-		public void interfaceMethod() {
-		}
+
+interface AnInterface {
+	public void interfaceMethod();
+}
+
+
+class InterfaceExtendingAspect implements AnInterface {
+	public void increment(ProceedingJoinPoint pjp) throws Throwable {
+		pjp.proceed();
+	}
+
+	public void interfaceMethod() {
 	}
 }

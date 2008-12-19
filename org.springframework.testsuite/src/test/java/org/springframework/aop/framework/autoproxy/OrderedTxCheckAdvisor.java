@@ -18,11 +18,12 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.lang.reflect.Method;
 
-import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+
+import test.advice.CountingBeforeAdvice;
 
 /**
  * Before advisor that allow us to manipulate ordering to check

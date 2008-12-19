@@ -18,9 +18,21 @@ package org.springframework.aop.aspectj.autoproxy.benchmark;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StopWatch;
@@ -32,19 +44,14 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class BenchmarkTests {
-
-	private static final String ASPECTJ_CONTEXT = "/org/springframework/aop/aspectj/autoproxy/benchmark/aspectj.xml";
-
-	private static final String SPRING_AOP_CONTEXT = "/org/springframework/aop/aspectj/autoproxy/benchmark/springAop.xml";
-
-	/**
-	 * Change the return number to a higher number to make this test useful.
-	 */
-	protected int getCount() {
-		return 10;
-	}
+public final class BenchmarkTests {
 	
+	private static final Class<?> CLASS = BenchmarkTests.class;
+
+	private static final String ASPECTJ_CONTEXT = CLASS.getSimpleName() + "-aspectj.xml";
+
+	private static final String SPRING_AOP_CONTEXT = CLASS.getSimpleName() + "-springAop.xml";
+
 	@Test
 	public void testRepeatedAroundAdviceInvocationsWithAspectJ() {
 		testRepeatedAroundAdviceInvocations(ASPECTJ_CONTEXT, getCount(), "AspectJ");
@@ -84,9 +91,16 @@ public class BenchmarkTests {
 	public void testRepeatedMixWithSpringAop() {
 		testMix(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
+	
+	/**
+	 * Change the return number to a higher number to make this test useful.
+	 */
+	protected int getCount() {
+		return 10;
+	}
 
 	private long testRepeatedAroundAdviceInvocations(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file);
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated around advice invocations with " + technology);
@@ -105,7 +119,7 @@ public class BenchmarkTests {
 	}
 	
 	private long testBeforeAdviceWithoutJoinPoint(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file);
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated before advice invocations with " + technology);
@@ -126,7 +140,7 @@ public class BenchmarkTests {
 	}
 	
 	private long testAfterReturningAdviceWithoutJoinPoint(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file);
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated after returning advice invocations with " + technology);
@@ -148,7 +162,7 @@ public class BenchmarkTests {
 	}
 	
 	private long testMix(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file);
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated mixed invocations with " + technology);
@@ -173,6 +187,92 @@ public class BenchmarkTests {
 		sw.stop();
 		System.out.println(sw.prettyPrint());
 		return sw.getLastTaskTimeMillis();
+	}
+
+}
+
+
+class MultiplyReturnValueInterceptor implements MethodInterceptor {
+	
+	private int multiple = 2;
+	
+	public int invocations;
+	
+	public void setMultiple(int multiple) {
+		this.multiple = multiple;
+	}
+	
+	public int getMultiple() {
+		return this.multiple;
+	}
+	
+	public Object invoke(MethodInvocation mi) throws Throwable {
+		++invocations;
+		int result = (Integer) mi.proceed();
+		return result * this.multiple;
+	}
+
+}
+
+
+class TraceAfterReturningAdvice implements AfterReturningAdvice {
+	
+	public int afterTakesInt;
+	
+	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+		++afterTakesInt;
+	}
+	
+	public static Advisor advisor() {
+		return new DefaultPointcutAdvisor(
+			new StaticMethodMatcherPointcut() {
+				public boolean matches(Method method, Class<?> targetClass) {
+					return method.getParameterTypes().length == 1 &&
+						method.getParameterTypes()[0].equals(Integer.class);
+				}
+			},
+			new TraceAfterReturningAdvice());
+	}
+
+}
+
+
+@Aspect
+class TraceAspect {
+	
+	public int beforeStringReturn;
+	
+	public int afterTakesInt;
+	
+	@Before("execution(String *.*(..))")
+	public void traceWithoutJoinPoint() {
+		++beforeStringReturn;
+	}
+	
+	@AfterReturning("execution(void *.*(int))")
+	public void traceWithoutJoinPoint2() {
+		++afterTakesInt;
+	}
+
+}
+
+
+class TraceBeforeAdvice implements MethodBeforeAdvice {
+	
+	public int beforeStringReturn;
+	
+	public void before(Method method, Object[] args, Object target) throws Throwable {
+		++beforeStringReturn;
+	}
+	
+	public static Advisor advisor() {
+		return new DefaultPointcutAdvisor(
+			new StaticMethodMatcherPointcut() {
+				public boolean matches(Method method, Class<?> targetClass) {
+					return method.getReturnType().equals(String.class);
+				}
+			},
+			new TraceBeforeAdvice());
 	}
 
 }
