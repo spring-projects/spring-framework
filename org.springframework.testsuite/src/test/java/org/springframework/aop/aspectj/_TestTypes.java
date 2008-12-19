@@ -1,3 +1,4 @@
+package org.springframework.aop.aspectj;
 /*
  * Copyright 2002-2006 the original author or authors.
  *
@@ -14,9 +15,24 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj;
-
 import org.aspectj.lang.JoinPoint;
+
+/**
+ * Definitions of testing types for use in within this package.
+ * Wherever possible, test types should be defined local to the java
+ * file that makes use of them.  In some cases however, a test type may
+ * need to be shared across tests.  Such types reside here, with the
+ * intention of reducing the surface area of java files within this
+ * package.  This allows developers to think about tests first, and deal
+ * with these second class testing artifacts on an as-needed basis.
+ * 
+ * Types here should be defined as package-private top level classes in
+ * order to avoid needing to fully qualify, e.g.: _TestTypes$Foo.
+ *
+ * @author Chris Beams
+ */
+final class _TestTypes { }
+
 
 /**
  * Aspect used as part of before before advice binding tests and
@@ -68,4 +84,56 @@ class AdviceBindingTestAspect {
 		void needsJoinPointStaticPart(String s);
 	}
 
+}
+
+
+/**
+ * @author Ramnivas Laddad
+ */
+interface ICounter {
+
+	void increment();
+
+	void decrement();
+
+	int getCount();
+
+	void setCount(int counter);
+
+	void reset();
+
+}
+
+
+/**
+ * A simple counter for use in simple tests (for example, how many times an advice was executed)
+ * 
+ * @author Ramnivas Laddad
+ */
+final class Counter implements ICounter {
+
+	private int count;
+
+	public Counter() {
+	}
+
+	public void increment() {
+		count++;
+	}
+	
+	public void decrement() {
+		count--;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int counter) {
+		this.count = counter;
+	}
+	
+	public void reset() {
+		this.count = 0;
+	}
 }
