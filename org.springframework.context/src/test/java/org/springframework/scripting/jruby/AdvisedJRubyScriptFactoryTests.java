@@ -16,43 +16,53 @@
 
 package org.springframework.scripting.jruby;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scripting.Messenger;
 
+import test.advice.CountingBeforeAdvice;
+
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
-public class AdvisedJRubyScriptFactoryTests extends TestCase {
+public final class AdvisedJRubyScriptFactoryTests {
+	
+	private static final Class<?> CLASS = AdvisedJRubyScriptFactoryTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final String FACTORYBEAN_CONTEXT = CLASSNAME + "-factoryBean.xml";
+	private static final String APC_CONTEXT = CLASSNAME + "-beanNameAutoProxyCreator.xml";
 
-	public void testAdviseWithProxyFactoryBean() throws Exception {
-		ApplicationContext context =
-				new ClassPathXmlApplicationContext("advisedByProxyFactoryBean.xml", getClass());
+	@Test
+	public void testAdviseWithProxyFactoryBean() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(FACTORYBEAN_CONTEXT, CLASS);
 
-		Messenger bean = (Messenger) context.getBean("messenger");
+		Messenger bean = (Messenger) ctx.getBean("messenger");
 		assertTrue("Bean is not a proxy", AopUtils.isAopProxy(bean));
 		assertTrue("Bean is not an Advised object", bean instanceof Advised);
 
-		CountingBeforeAdvice advice = (CountingBeforeAdvice) context.getBean("advice");
+		CountingBeforeAdvice advice = (CountingBeforeAdvice) ctx.getBean("advice");
 		assertEquals(0, advice.getCalls());
 		bean.getMessage();
 		assertEquals(1, advice.getCalls());
 	}
 
-	public void testAdviseWithBeanNameAutoProxyCreator() throws Exception {
-		ApplicationContext context =
-				new ClassPathXmlApplicationContext("advisedByBeanNameAutoProxyCreator.xml", getClass());
+	@Test
+	public void testAdviseWithBeanNameAutoProxyCreator() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(APC_CONTEXT, CLASS);
 
-		Messenger bean = (Messenger) context.getBean("messenger");
+		Messenger bean = (Messenger) ctx.getBean("messenger");
 		assertTrue("Bean is not a proxy", AopUtils.isAopProxy(bean));
 		assertTrue("Bean is not an Advised object", bean instanceof Advised);
 
-		CountingBeforeAdvice advice = (CountingBeforeAdvice) context.getBean("advice");
+		CountingBeforeAdvice advice = (CountingBeforeAdvice) ctx.getBean("advice");
 		assertEquals(0, advice.getCalls());
 		bean.getMessage();
 		assertEquals(1, advice.getCalls());

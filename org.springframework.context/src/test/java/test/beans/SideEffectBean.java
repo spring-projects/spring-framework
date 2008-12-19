@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package test.advice;
-
-import java.lang.reflect.Method;
-
-import org.springframework.aop.AfterReturningAdvice;
+package test.beans;
 
 /**
- * Simple before advice example that we can use for counting checks.
- *
+ * Bean that changes state on a business invocation, so that
+ * we can check whether it's been invoked
+ * 
  * @author Rod Johnson
  */
-@SuppressWarnings("serial")
-public class CountingAfterReturningAdvice extends MethodCounter implements AfterReturningAdvice {
-
-	public void afterReturning(Object o, Method m, Object[] args, Object target) throws Throwable {
-		count(m);
+public class SideEffectBean {
+	
+	private int count;
+	
+	public void setCount(int count) {
+		this.count = count;
+	}
+	
+	public int getCount() {
+		return this.count;
+	}
+	
+	public void doWork() {
+		++count;
 	}
 
 }

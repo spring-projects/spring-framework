@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -34,7 +35,6 @@ import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.junit.Ignore;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -49,15 +49,18 @@ import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembl
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 
+import test.interceptor.NopInterceptor;
+
 /**
- * Integration tests for the MBeanExporter class.
+ * Integration tests for the {@link MBeanExporter} class.
  * 
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Chris Beams
  */
-public class MBeanExporterTests extends AbstractMBeanServerTests {
+public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:test=jmxMBeanAdaptor";
 

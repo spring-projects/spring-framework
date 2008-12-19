@@ -27,15 +27,17 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.support.ObjectNameManager;
 
+import test.interceptor.NopInterceptor;
+
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemblerTests {
 
