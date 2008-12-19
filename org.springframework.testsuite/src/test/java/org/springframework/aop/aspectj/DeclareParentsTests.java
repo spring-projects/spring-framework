@@ -16,18 +16,46 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class DeclareParentsTests extends AbstractAdviceBindingTests {
+public final class DeclareParentsTests {
+
+	private ITestBean testBeanProxy;
+	
+	private TestBean testBeanTarget;
+
+	private ApplicationContext ctx;
 
 	protected String getConfigPath() {
 		return "declare-parents-tests.xml";
 	}
 
+	@Before
+	public void setUp() throws Exception {
+		ctx = new ClassPathXmlApplicationContext(getConfigPath(), getClass());
+		
+		testBeanProxy = (ITestBean) ctx.getBean("testBean");
+		assertTrue(AopUtils.isAopProxy(testBeanProxy));
+		
+		// we need the real target too, not just the proxy...
+		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
+	}
+		
+	@Test
 	public void testIntroductionWasMade() {
 		assertTrue("Introduction must have been made", testBeanProxy instanceof Lockable);
 	}
@@ -36,8 +64,9 @@ public class DeclareParentsTests extends AbstractAdviceBindingTests {
 	// to org.springframework..* it also matches introduction.
 	// Perhaps generated advisor bean definition could be made to depend
 	// on the introduction, in which case this would not be a problem.
+	@Test
 	public void testLockingWorks() {
-		Object introductionObject = applicationContext.getBean("introduction");
+		Object introductionObject = ctx.getBean("introduction");
 		assertFalse("Introduction should not be proxied", AopUtils.isAopProxy(introductionObject));
 
 		Lockable lockable = (Lockable) testBeanProxy;
@@ -54,6 +83,17 @@ public class DeclareParentsTests extends AbstractAdviceBindingTests {
 		}
 		catch (IllegalStateException ex) {
 			// expected
+		}
+	}
+
+}
+
+
+class NonAnnotatedMakeLockable {
+
+	public void checkNotLocked(Lockable mixin) {
+		if (mixin.locked()) {
+			throw new IllegalStateException("locked");
 		}
 	}
 

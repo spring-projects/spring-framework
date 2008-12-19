@@ -16,46 +16,45 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.*;
+
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-
+import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Test for correct application of the bean() PCD for &#64;AspectJ-based aspects.
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSpringContextTests {
+public final class BeanNamePointcutAtAspectTests {
 
-	protected ITestBean testBean1;
+	private ITestBean testBean1;
 
-	protected ITestBean testBean2;
+	private ITestBean testBean2;
 
-	protected ITestBean testBean3;
+	private ITestBean testBean3;
 
-	protected CounterAspect counterAspect;
+	private CounterAspect counterAspect;
 
 
-	public BeanNamePointcutAtAspectTests() {
-		setPopulateProtectedVariables(true);
+	@org.junit.Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bean-name-pointcut-atAspect-tests.xml", getClass());
+		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
+		testBean1 = (ITestBean) ctx.getBean("testBean1");
+		testBean2 = (ITestBean) ctx.getBean("testBean2");
+		testBean3 = (ITestBean) ctx.getBean("testBean3");
 	}
 
-	protected String getConfigPath() {
-		return "bean-name-pointcut-atAspect-tests.xml";
-	}
-
-	protected void onSetUp() throws Exception {
-		counterAspect.count = 0;
-		super.onSetUp();
-	}
-
-
+	@Test
 	public void testMatchingBeanName() {
 		assertTrue("Expected a proxy", testBean1 instanceof Advised);
 		// Call two methods to test for SPR-3953-like condition
@@ -64,12 +63,14 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 		assertEquals(2 /*TODO: make this 3 when upgrading to AspectJ 1.6.0 and advice in CounterAspect are uncommented*/, counterAspect.count);
 	}
 
+	@Test
 	public void testNonMatchingBeanName() {
 		assertFalse("Didn't expect a proxy", testBean3 instanceof Advised);
 		testBean3.setAge(20);
 		assertEquals(0, counterAspect.count);
 	}
 
+	@Test
 	public void testProgrammaticProxyCreation() {
 		ITestBean testBean = new TestBean();
 
@@ -86,32 +87,17 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 		assertEquals("Programmatically created proxy shouldn't match bean()", 0, myCounterAspect.count);
 	}
 
+}
 
-	@Aspect
-	public static class CounterAspect {
 
-		int count;
+@Aspect
+class CounterAspect {
 
-		@Before("execution(* set*(..)) && bean(testBean1)")
-		public void increment1ForAnonymousPointcut() {
-			count++;
-		}
+	int count;
 
-//		@Pointcut("execution(* setAge(..)) && bean(testBean1)")
-//		public void testBean1SetAge() {}
-//
-//		@Pointcut("execution(* setAge(..)) && bean(testBean2)")
-//		public void testBean2SetAge() {}
-//
-//		@Before("testBean1SetAge()")
-//		public void increment1() {
-//			count++;
-//		}
-//
-//		@Before("testBean2SetAge()")
-//		public void increment2() {
-//			count++;
-//		}
+	@Before("execution(* set*(..)) && bean(testBean1)")
+	public void increment1ForAnonymousPointcut() {
+		count++;
 	}
-
+	
 }

@@ -16,52 +16,49 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.fail;
+
+import java.lang.reflect.Method;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.beans.ITestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.Ordered;
 
 /**
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class AspectAndAdvicePrecedenceTests extends AbstractDependencyInjectionSpringContextTests {
+public final class AspectAndAdvicePrecedenceTests {
 
 	private PrecedenceTestAspect highPrecedenceAspect;
+	
 	private PrecedenceTestAspect lowPrecedenceAspect;
-	private SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice;
+	
 	private SimpleSpringBeforeAdvice highPrecedenceSpringAdvice;
+	
+	private SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice;
+	
 	private ITestBean testBean;
 	
 
-	public AspectAndAdvicePrecedenceTests() {
-		setAutowireMode(AUTOWIRE_BY_NAME);
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("advice-precedence-tests.xml", getClass());
+		highPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("highPrecedenceAspect");
+		lowPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("lowPrecedenceAspect");
+		highPrecedenceSpringAdvice = (SimpleSpringBeforeAdvice) ctx.getBean("highPrecedenceSpringAdvice");
+		lowPrecedenceSpringAdvice = (SimpleSpringBeforeAdvice) ctx.getBean("lowPrecedenceSpringAdvice");
+		testBean = (ITestBean) ctx.getBean("testBean");
 	}
-
-	public void setHighPrecedenceAspect(PrecedenceTestAspect highPrecedenceAspect) {
-		this.highPrecedenceAspect = highPrecedenceAspect;
-	}
-
-	public void setLowPrecedenceAspect(PrecedenceTestAspect lowPrecedenceAspect) {
-		this.lowPrecedenceAspect = lowPrecedenceAspect;
-	}
-
-	public void setLowPrecedenceSpringAdvice(SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice) {
-		this.lowPrecedenceSpringAdvice = lowPrecedenceSpringAdvice;
-	}
-
-	public void setHighPrecedenceSpringAdvice(SimpleSpringBeforeAdvice highPrecedenceSpringAdvice) {
-		this.highPrecedenceSpringAdvice = highPrecedenceSpringAdvice;
-	}
-	
-	public void setTestBean(ITestBean testBean) {
-		this.testBean = testBean;
-	}
-
-	protected String getConfigPath() {
-		return "advice-precedence-tests.xml";
-	}
-
 
 	// ========== end of test case set up, start of tests proper ===================
 
+	@Test
 	public void testAdviceOrder() {
 		PrecedenceTestAspect.Collaborator collaborator = new PrecedenceVerifyingCollaborator();
 		this.highPrecedenceAspect.setCollaborator(collaborator);
@@ -135,6 +132,110 @@ public class AspectAndAdvicePrecedenceTests extends AbstractDependencyInjectionS
 		public void afterAdviceTwo(String beanName) {
 			checkAdvice("afterAdviceTwo(" + beanName + ")");
 		}
+	}
+
+}
+
+
+class PrecedenceTestAspect implements BeanNameAware, Ordered {
+
+	private String name;
+
+	private int order = Ordered.LOWEST_PRECEDENCE;
+
+	private Collaborator collaborator;
+
+
+	public void setBeanName(String name) {
+		this.name = name;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setCollaborator(Collaborator collaborator) {
+		this.collaborator = collaborator;
+	}
+
+	public void beforeAdviceOne() {
+		this.collaborator.beforeAdviceOne(this.name);
+	}
+
+	public void beforeAdviceTwo() {
+		this.collaborator.beforeAdviceTwo(this.name);
+	}
+
+	public int aroundAdviceOne(ProceedingJoinPoint pjp) {
+		int ret = -1;
+		this.collaborator.aroundAdviceOne(this.name);
+		try {
+			ret = ((Integer)pjp.proceed()).intValue();
+		} 
+		catch(Throwable t) { throw new RuntimeException(t); }
+		this.collaborator.aroundAdviceOne(this.name);
+		return ret;
+	}
+
+	public int aroundAdviceTwo(ProceedingJoinPoint pjp) {
+		int ret = -1;
+		this.collaborator.aroundAdviceTwo(this.name);
+		try {
+			ret = ((Integer)pjp.proceed()).intValue();
+		} 
+		catch(Throwable t) {throw new RuntimeException(t);}
+		this.collaborator.aroundAdviceTwo(this.name);
+		return ret;
+	}
+
+	public void afterAdviceOne() {
+		this.collaborator.afterAdviceOne(this.name);
+	}
+
+	public void afterAdviceTwo() {
+		this.collaborator.afterAdviceTwo(this.name);
+	}
+
+
+	public interface Collaborator {
+
+		void beforeAdviceOne(String beanName);
+		void beforeAdviceTwo(String beanName);
+		void aroundAdviceOne(String beanName);
+		void aroundAdviceTwo(String beanName);
+		void afterAdviceOne(String beanName);
+		void afterAdviceTwo(String beanName);
+	}
+
+}
+
+
+class SimpleSpringBeforeAdvice implements MethodBeforeAdvice, BeanNameAware {
+
+	private PrecedenceTestAspect.Collaborator collaborator;
+	private String name;
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
+	 */
+	public void before(Method method, Object[] args, Object target)
+			throws Throwable {
+		this.collaborator.beforeAdviceOne(this.name);
+	}
+
+	public void setCollaborator(PrecedenceTestAspect.Collaborator collaborator) {
+		this.collaborator = collaborator;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
+	 */
+	public void setBeanName(String name) {
+		this.name = name;
 	}
 
 }

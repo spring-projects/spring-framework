@@ -16,62 +16,49 @@
 
 package org.springframework.aop.aspectj;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-public class DeclareParentsDelegateRefTests extends AbstractDependencyInjectionSpringContextTests {
+public class DeclareParentsDelegateRefTests {
 
 	protected NoMethodsBean noMethodsBean;
 
-	protected CounterImpl counter;
+	protected Counter counter;
 	
 
-	public DeclareParentsDelegateRefTests() {
-		setPopulateProtectedVariables(true);
-	}
-	
-	protected void onSetUp() throws Exception {
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("declare-parents-delegate-ref-tests.xml", getClass());
+		noMethodsBean = (NoMethodsBean) ctx.getBean("noMethodsBean");
+		counter = (Counter) ctx.getBean("counter");
 		counter.reset();
 	}
 
-	protected String getConfigPath() {
-		return "declare-parents-delegate-ref-tests.xml";
-	}
-
-
+	@Test
 	public void testIntroductionWasMade() {
-		assertTrue("Introduction must have been made", noMethodsBean instanceof Counter);
+		assertTrue("Introduction must have been made", noMethodsBean instanceof ICounter);
 	}
 	
+	@Test
 	public void testIntroductionDelegation() {
-		((Counter)noMethodsBean).increment();
-		assertEquals("Delegate's counter should be updated", 1, counter.count);
-	}
-
-	public static interface NoMethodsBean {
-	}
-
-	public static class NoMethodsBeanImpl implements NoMethodsBean {
-	}
-
-	public static interface Counter {
-		public void increment();
-	}
-	
-
-	public static class CounterImpl implements Counter {
-
-		int count;
-		
-		public void increment() {
-			count++;
-		}
-
-		public void reset() {
-			count = 0;
-		}
+		((ICounter)noMethodsBean).increment();
+		assertEquals("Delegate's counter should be updated", 1, counter.getCount());
 	}
 
 }
+
+
+interface NoMethodsBean {
+}
+
+
+class NoMethodsBeanImpl implements NoMethodsBean {
+}
+	

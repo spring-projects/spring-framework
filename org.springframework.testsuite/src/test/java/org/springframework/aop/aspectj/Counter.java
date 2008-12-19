@@ -21,7 +21,7 @@ package org.springframework.aop.aspectj;
  * 
  * @author Ramnivas Laddad
  */
-public class Counter implements ICounter {
+final class Counter implements ICounter {
 
 	private int count;
 

@@ -11,5 +11,5 @@
 	<bean id="testBean2" class="org.springframework.beans.TestBean"/>	
 	<bean id="testBean3" class="org.springframework.beans.TestBean"/>
 
-	<bean id="counterAspect" class="org.springframework.aop.aspectj.BeanNamePointcutAtAspectTests$CounterAspect"/>
+	<bean id="counterAspect" class="org.springframework.aop.aspectj.CounterAspect"/>
 </beans>

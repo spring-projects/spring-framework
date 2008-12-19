@@ -19,7 +19,7 @@ package org.springframework.aop.aspectj;
 /**
  * @author Ramnivas Laddad
  */
-public interface ICounter {
+interface ICounter {
 
 	void increment();
 

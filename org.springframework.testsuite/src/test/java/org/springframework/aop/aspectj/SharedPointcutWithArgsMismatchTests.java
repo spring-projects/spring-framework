@@ -16,49 +16,52 @@
 
 package org.springframework.aop.aspectj;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * See SPR-1682.
  * 
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class SharedPointcutWithArgsMismatch extends AbstractDependencyInjectionSpringContextTests {
+public final class SharedPointcutWithArgsMismatchTests {
 
 	private ToBeAdvised toBeAdvised;
 
-
-	public void setToBeAdvised(ToBeAdvised tba) {
-		this.toBeAdvised = tba;
+	
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("args-mismatch.xml", getClass());
+		toBeAdvised = (ToBeAdvised) ctx.getBean("toBeAdvised");
 	}
 
-	protected String getConfigPath() {
-		return "args-mismatch.xml";
-	}
-
-
+	@Test
 	public void testMismatchedArgBinding() {
 		this.toBeAdvised.foo("Hello");
 	}
 
 
-	public static class ToBeAdvised {
-
-		public void foo(String s) {
-			System.out.println(s);
-		}
-	}
-
-
-	public static class MyAspect {
-
-		public void doBefore(int x) {
-			System.out.println(x);
-		}
-
-		public void doBefore(String x) {
-			System.out.println(x);
-		}
-	}
-
 }
+
+
+class ToBeAdvised {
+
+	public void foo(String s) {
+		System.out.println(s);
+	}
+}
+
+
+class MyAspect {
+
+	public void doBefore(int x) {
+		System.out.println(x);
+	}
+
+	public void doBefore(String x) {
+		System.out.println(x);
+	}
+}
+
