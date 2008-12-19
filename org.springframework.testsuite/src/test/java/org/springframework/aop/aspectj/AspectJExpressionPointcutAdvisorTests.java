@@ -16,38 +16,35 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.assertEquals;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class AspectJExpressionPointcutAdvisorTests extends AbstractDependencyInjectionSpringContextTests {
+public final class AspectJExpressionPointcutAdvisorTests {
 
 	private ITestBean testBean;
 
 	private CallCountingInterceptor interceptor;
 
-
-	public void setTestBean(ITestBean testBean) {
-		this.testBean = testBean;
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("aspectj.xml", getClass());
+		testBean = (ITestBean) ctx.getBean("testBean");
+		interceptor = (CallCountingInterceptor) ctx.getBean("interceptor");
 	}
 
-	public void setInterceptor(CallCountingInterceptor interceptor) {
-		this.interceptor = interceptor;
-	}
-
-	protected String getConfigPath() {
-		return "aspectj.xml";
-	}
-
-	protected void onSetUp() throws Exception {
-		interceptor.reset();
-	}
-
-
-	public void testPointcutting() throws Exception {
+	@Test
+	public void testPointcutting() {
 		assertEquals("Count should be 0", 0, interceptor.getCount());
 		testBean.getSpouses();
 		assertEquals("Count should be 1", 1, interceptor.getCount());
@@ -55,4 +52,23 @@ public class AspectJExpressionPointcutAdvisorTests extends AbstractDependencyInj
 		assertEquals("Count should be 1", 1, interceptor.getCount());
 	}
 
+}
+
+
+class CallCountingInterceptor implements MethodInterceptor {
+
+	private int count;
+
+	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+		count++;
+		return methodInvocation.proceed();
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void reset() {
+		this.count = 0;
+	}
 }

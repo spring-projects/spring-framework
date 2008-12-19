@@ -16,81 +16,94 @@
 
 package org.springframework.aop.aspectj;
 
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.aspectj.AdviceBindingTestAspect.AdviceBindingCollaborator;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests for various parameter binding scenarios with before advice.
  *
  * @author Adrian Colyer
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class AfterAdviceBindingTests extends AbstractAdviceBindingTests {
-
-	private AdviceBindingTestAspect afterAdviceAspect;
-
-	private MockControl mockControl;
+public final class AfterAdviceBindingTests {
 
 	private AdviceBindingCollaborator mockCollaborator;
+	
+	private ITestBean testBeanProxy;
+	
+	private TestBean testBeanTarget;
 
-
-	public void setAfterAdviceAspect(AdviceBindingTestAspect anAspect) {
-		this.afterAdviceAspect = anAspect;
-	}
-
-	protected String getConfigPath() {
-		return "after-advice-tests.xml";
-	}
-
-	protected void onSetUp() throws Exception {
-		super.onSetUp();
-		mockControl = MockControl.createNiceControl(AdviceBindingCollaborator.class);
-		mockCollaborator = (AdviceBindingCollaborator) mockControl.getMock();
+	@Before
+	public void setUp() throws Exception {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("after-advice-tests.xml", getClass());
+		AdviceBindingTestAspect afterAdviceAspect = (AdviceBindingTestAspect) ctx.getBean("testAspect");
+		
+		testBeanProxy = (ITestBean) ctx.getBean("testBean");
+		assertTrue(AopUtils.isAopProxy(testBeanProxy));
+		
+		// we need the real target too, not just the proxy...
+		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
+		
+		mockCollaborator = createNiceMock(AdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 	}
 
-	
+	@Test
 	public void testOneIntArg() {
 		mockCollaborator.oneIntArg(5);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testOneObjectArgBindingProxyWithThis() {
 		mockCollaborator.oneObjectArg(this.testBeanProxy);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testOneObjectArgBindingTarget() {
 		mockCollaborator.oneObjectArg(this.testBeanTarget);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getDoctor();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testOneIntAndOneObjectArgs() {
 		mockCollaborator.oneIntAndOneObject(5,this.testBeanProxy);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testNeedsJoinPoint() {
 		mockCollaborator.needsJoinPoint("getAge");
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testNeedsJoinPointStaticPart() {
 		mockCollaborator.needsJoinPointStaticPart("getAge");
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
 }

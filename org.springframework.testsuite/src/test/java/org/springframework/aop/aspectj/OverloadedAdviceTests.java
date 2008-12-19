@@ -28,12 +28,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class OverloadedAdviceTests {
+public final class OverloadedAdviceTests {
 
 	@Test
 	public void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {
 		try {
-			new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/overloaded-advice-tests.xml");
+			new ClassPathXmlApplicationContext("overloaded-advice-tests.xml", getClass());
 		}
 		catch (BeanCreationException ex) {
 			Throwable cause = ex.getRootCause();
@@ -46,7 +46,7 @@ public class OverloadedAdviceTests {
 	@Test
 	public void testExceptionOnConfigParsingWithAmbiguousAdviceMethod() {
 		try {
-			new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/ambiguous-advice-tests.xml");
+			new ClassPathXmlApplicationContext("ambiguous-advice-tests.xml", getClass());
 		}
 		catch (BeanCreationException ex) {
 			Throwable cause = ex.getRootCause();
@@ -57,3 +57,16 @@ public class OverloadedAdviceTests {
 	}
 
 }
+
+
+class OverloadedAdviceTestAspect {
+
+	public void myBeforeAdvice(String name) {
+		// no-op
+	}
+	
+	public void myBeforeAdvice(int age) {
+		// no-op
+	}
+}
+

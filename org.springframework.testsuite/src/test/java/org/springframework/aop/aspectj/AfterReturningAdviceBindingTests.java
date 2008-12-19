@@ -16,14 +16,18 @@
 
 package org.springframework.aop.aspectj;
 
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect.AfterReturningAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests for various parameter binding scenarios with before advice.
@@ -31,16 +35,15 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * @author Adrian Colyer
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class AfterReturningAdviceBindingTests extends AbstractDependencyInjectionSpringContextTests {
+public final class AfterReturningAdviceBindingTests {
 
 	private AfterReturningAdviceBindingTestAspect afterAdviceAspect;
 
 	private ITestBean testBeanProxy;
 
 	private TestBean testBeanTarget;
-
-	private MockControl mockControl;
 
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
 	
@@ -49,121 +52,172 @@ public class AfterReturningAdviceBindingTests extends AbstractDependencyInjectio
 		this.afterAdviceAspect = anAspect;
 	}
 
-	public void setTestBean(ITestBean aBean) throws Exception {
-		assertTrue(AopUtils.isAopProxy(aBean));
-		this.testBeanProxy = aBean;
-		// we need the real target too, not just the proxy...
-		this.testBeanTarget = (TestBean) ((Advised)aBean).getTargetSource().getTarget();
-	}
-
 	protected String getConfigPath() {
 		return "afterReturning-advice-tests.xml";
 	}
 	
-	protected void onSetUp() throws Exception {
-		super.onSetUp();
-		mockControl = MockControl.createNiceControl(AfterReturningAdviceBindingCollaborator.class);
-		mockCollaborator = (AfterReturningAdviceBindingCollaborator) mockControl.getMock();
+	@Before
+	public void setUp() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigPath(), getClass());
+		
+		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
+		
+		mockCollaborator = createNiceMock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
+		
+		testBeanProxy = (ITestBean) ctx.getBean("testBean");
+		assertTrue(AopUtils.isAopProxy(testBeanProxy));
+		
+		// we need the real target too, not just the proxy...
+		this.testBeanTarget = (TestBean) ((Advised)testBeanProxy).getTargetSource().getTarget();
 	}
 
 
-	// simple test to ensure all is well with the xml file
-	// note that this implicitly tests that the arg-names binding is working
-	public void testParse() {
-	}
-	
+	@Test
 	public void testOneIntArg() {
 		mockCollaborator.oneIntArg(5);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testOneObjectArg() {
 		mockCollaborator.oneObjectArg(this.testBeanProxy);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testOneIntAndOneObjectArgs() {
 		mockCollaborator.oneIntAndOneObject(5,this.testBeanProxy);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testNeedsJoinPoint() {
 		mockCollaborator.needsJoinPoint("getAge");
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testNeedsJoinPointStaticPart() {
 		mockCollaborator.needsJoinPointStaticPart("getAge");
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 
+	@Test
 	public void testReturningString() {
 		mockCollaborator.oneString("adrian");
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setName("adrian");
 		testBeanProxy.getName();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testReturningObject() {
 		mockCollaborator.oneObjectArg(this.testBeanTarget);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.returnsThis();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testReturningBean() {
 		mockCollaborator.oneTestBeanArg(this.testBeanTarget);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.returnsThis();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testReturningBeanArray() {
 		this.testBeanTarget.setSpouse(new TestBean());
 		ITestBean[] spouses = (ITestBean[]) this.testBeanTarget.getSpouses();
 		mockCollaborator.testBeanArrayArg(spouses);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.getSpouses();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 
+	@Test
 	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
 		// we need a strict mock for this...
-		mockControl = MockControl.createControl(AfterReturningAdviceBindingCollaborator.class);
-		mockCollaborator = (AfterReturningAdviceBindingCollaborator) mockControl.getMock();
+		mockCollaborator = createMock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 		
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testReturningByType() {
 		mockCollaborator.objectMatchNoArgs();
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.returnsThis();
-		mockControl.verify();
+		verify(mockCollaborator);
 	}
 	
+	@Test
 	public void testReturningPrimitive() {
 		mockCollaborator.oneInt(20);
-		mockControl.replay();
+		replay(mockCollaborator);
 		testBeanProxy.setAge(20);
 		testBeanProxy.haveBirthday();
-		mockControl.verify();
+		verify(mockCollaborator);
+	}
+
+}
+
+
+final class AfterReturningAdviceBindingTestAspect extends AdviceBindingTestAspect {
+
+	private AfterReturningAdviceBindingCollaborator getCollaborator() {
+		return (AfterReturningAdviceBindingCollaborator) this.collaborator;
+	}
+	
+	public void oneString(String name) {
+		getCollaborator().oneString(name);
+	}
+	
+	public void oneTestBeanArg(TestBean bean) {
+		getCollaborator().oneTestBeanArg(bean);
+	}
+	
+	public void testBeanArrayArg(ITestBean[] beans) {
+		getCollaborator().testBeanArrayArg(beans);
+	}
+
+	public void objectMatchNoArgs() {
+		getCollaborator().objectMatchNoArgs();
+	}
+	
+	public void stringMatchNoArgs() {
+		getCollaborator().stringMatchNoArgs();
+	}
+	
+	public void oneInt(int result) {
+		getCollaborator().oneInt(result);
+	}
+
+	interface AfterReturningAdviceBindingCollaborator extends AdviceBindingCollaborator {
+
+		void oneString(String s);
+		void oneTestBeanArg(TestBean b);
+		void testBeanArrayArg(ITestBean[] b);
+		void objectMatchNoArgs();
+		void stringMatchNoArgs();
+		void oneInt(int result);
 	}
 
 }

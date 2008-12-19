@@ -16,13 +16,20 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.*;
+
+import java.io.Serializable;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.framework.Advised;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class SubtypeSensitiveMatchingTests extends AbstractDependencyInjectionSpringContextTests {
+public final class SubtypeSensitiveMatchingTests {
 
 	private NonSerializableFoo nonSerializableBean;
 
@@ -31,36 +38,56 @@ public class SubtypeSensitiveMatchingTests extends AbstractDependencyInjectionSp
 	private Bar bar;
 	
 
-	public void setNonSerializableFoo(NonSerializableFoo aBean) {
-		this.nonSerializableBean = aBean;
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("subtype-sensitive-matching.xml", getClass());
+		nonSerializableBean = (NonSerializableFoo) ctx.getBean("testClassA");
+		serializableBean = (SerializableFoo) ctx.getBean("testClassB");
+		bar = (Bar) ctx.getBean("testClassC");
 	}
 
-	public void setSerializableFoo(SerializableFoo aBean) {
-		this.serializableBean = aBean;
-	}
-	
-	public void setBar(Bar aBean) {
-		this.bar = aBean;
-	}
-	
-	protected String getConfigPath() {
-		return "subtype-sensitive-matching.xml";
-	}
-
-
+	@Test
 	public void testBeansAreProxiedOnStaticMatch() {
 		assertTrue("bean with serializable type should be proxied",
 				this.serializableBean instanceof Advised);
 	}
 	
+	@Test
 	public void testBeansThatDoNotMatchBasedSolelyOnRuntimeTypeAreNotProxied() {
 		assertFalse("bean with non-serializable type should not be proxied",
 				this.nonSerializableBean instanceof Advised);		
 	}
 	
+	@Test
 	public void testBeansThatDoNotMatchBasedOnOtherTestAreProxied() {
 		assertTrue("bean with args check should be proxied",
 				this.bar instanceof Advised);
 	}
 
+}
+
+//strange looking interfaces are just to set up certain test conditions...
+interface NonSerializableFoo { void foo(); }
+
+interface SerializableFoo extends Serializable { void foo(); }
+
+class SubtypeMatchingTestClassA implements NonSerializableFoo {
+	
+	public void foo() {}
+	
+}
+
+@SuppressWarnings("serial")
+class SubtypeMatchingTestClassB implements SerializableFoo {
+	
+	public void foo() {}
+
+}
+
+interface Bar { void bar(Object o); }
+
+class SubtypeMatchingTestClassC implements Bar {
+
+	public void bar(Object o) {}
+	
 }

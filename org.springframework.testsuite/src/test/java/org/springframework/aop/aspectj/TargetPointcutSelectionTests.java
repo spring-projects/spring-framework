@@ -16,42 +16,45 @@
 
 package org.springframework.aop.aspectj;
 
+import static org.junit.Assert.assertEquals;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests for target selection matching (see SPR-3783).
  * Thanks to Tomasz Blachowicz for the bug report!
  *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-public class TargetPointcutSelectionTests extends AbstractDependencyInjectionSpringContextTests {
+public final class TargetPointcutSelectionTests {
 
-	protected TestInterface testImpl1;
-	protected TestInterface testImpl2;
-	protected TestAspect testAspectForTestImpl1;
-	protected TestAspect testAspectForAbstractTestImpl;
-	protected TestInterceptor testInterceptor;
+	public TestInterface testImpl1;
+	public TestInterface testImpl2;
+	public TestAspect testAspectForTestImpl1;
+	public TestAspect testAspectForAbstractTestImpl;
+	public TestInterceptor testInterceptor;
 	
 
-	public TargetPointcutSelectionTests() {
-		setPopulateProtectedVariables(true);
-	}
-	
-	protected String getConfigPath() {
-		return "targetPointcutSelectionTests.xml";
-	}
-	
-	protected void onSetUp() throws Exception {
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("targetPointcutSelectionTests.xml", getClass());
+		testImpl1 = (TestInterface) ctx.getBean("testImpl1");
+		testImpl2 = (TestInterface) ctx.getBean("testImpl2");
+		testAspectForTestImpl1 = (TestAspect) ctx.getBean("testAspectForTestImpl1");
+		testAspectForAbstractTestImpl = (TestAspect) ctx.getBean("testAspectForAbstractTestImpl");
+		testInterceptor = (TestInterceptor) ctx.getBean("testInterceptor");
+		
 		testAspectForTestImpl1.count = 0;
 		testAspectForAbstractTestImpl.count = 0;
 		testInterceptor.count = 0;
-		super.onSetUp();
 	}
-
-
+	
+	@Test
 	public void testTargetSelectionForMatchedType() {
 		testImpl1.interfaceMethod();
 		assertEquals("Should have been advised by POJO advice for impl", 1, testAspectForTestImpl1.count);
@@ -59,6 +62,7 @@ public class TargetPointcutSelectionTests extends AbstractDependencyInjectionSpr
 		assertEquals("Should have been advised by advisor", 1, testInterceptor.count);
 	}
 
+	@Test
 	public void testTargetNonSelectionForMismatchedType() {
 		testImpl2.interfaceMethod();
 		assertEquals("Shouldn't have been advised by POJO advice for impl", 0, testAspectForTestImpl1.count);

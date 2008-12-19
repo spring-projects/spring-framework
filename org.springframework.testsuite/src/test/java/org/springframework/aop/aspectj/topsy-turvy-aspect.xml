@@ -16,7 +16,7 @@
       <aop:declare-parents
         types-matching="*..TopsyTurvyTarget+"
         implement-interface="java.io.Serializable"
-        default-impl="org.springframework.aop.aspectj.SerializableMixin"/>
+        default-impl="org.springframework.aop.aspectj.DeclarationOrderIndependenceTests$SerializableMixin"/>
       <aop:after-returning pointcut-ref="pc2" method="afterReturning"/>
       <aop:pointcut id="pc1" expression="execution(* *..do*(..))"/>
       <aop:around pointcut-ref="pc2"
@@ -25,7 +25,7 @@
       <aop:declare-parents
         types-matching="*..TopsyTurvyTarget+"
         implement-interface="org.springframework.beans.factory.BeanNameAware"
-        default-impl="org.springframework.aop.aspectj.BeanNameAwareMixin"/>          
+        default-impl="org.springframework.aop.aspectj.DeclarationOrderIndependenceTests$BeanNameAwareMixin"/>          
     </aop:aspect>
   </aop:config>
   

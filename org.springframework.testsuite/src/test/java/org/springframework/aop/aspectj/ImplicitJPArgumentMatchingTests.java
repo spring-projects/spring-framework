@@ -16,32 +16,25 @@
 package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.springframework.beans.TestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests to check if the first implicit join point argument is correctly processed.
  * See SPR-3723 for more details.
  *   
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-public class ImplicitJPArgumentMatchingTests extends AbstractDependencyInjectionSpringContextTests {
-	protected TestBean testBean; 
+public final class ImplicitJPArgumentMatchingTests {
 	
-	public ImplicitJPArgumentMatchingTests() {
-		setPopulateProtectedVariables(true);
-	}
-
-	protected String getConfigPath() {
-		return "implicit-jp-argument-matching-tests.xml";
-	}
-
+	@Test
 	public void testAspect() {
 		// nothing to really test; it is enough if we don't get error while creating app context
-		testBean.setCountry("US");
+		new ClassPathXmlApplicationContext("implicit-jp-argument-matching-tests.xml", getClass());
 	}
 	
-	public static class CounterAspect {
+	static class CounterAspect {
 		public void increment(ProceedingJoinPoint pjp, Object bean, Object argument) throws Throwable {
 			pjp.proceed();
 		}

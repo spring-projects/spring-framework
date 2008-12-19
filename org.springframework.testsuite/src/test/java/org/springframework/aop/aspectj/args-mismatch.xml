@@ -14,7 +14,7 @@
 		</aop:aspect>
 	</aop:config>
 	
-	<bean id="someBean" class="org.springframework.aop.aspectj.SharedPointcutWithArgsMismatch$ToBeAdvised"/>
+	<bean id="toBeAdvised" class="org.springframework.aop.aspectj.ToBeAdvised"/>
 
-	<bean id="testAspect" class="org.springframework.aop.aspectj.SharedPointcutWithArgsMismatch$MyAspect"/>
+	<bean id="testAspect" class="org.springframework.aop.aspectj.MyAspect"/>
 </beans>
