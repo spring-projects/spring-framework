@@ -31,6 +31,8 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
+import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -42,10 +44,9 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -61,9 +62,23 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+
+import test.advice.CountingAfterReturningAdvice;
+import test.advice.CountingBeforeAdvice;
+import test.advice.MethodCounter;
+import test.advice.MyThrowsHandler;
+import test.interceptor.NopInterceptor;
+import test.interceptor.SerializableNopInterceptor;
+import test.interceptor.TimestampIntroductionInterceptor;
+import test.mixin.LockMixin;
+import test.mixin.LockMixinAdvisor;
+import test.mixin.Lockable;
+import test.mixin.LockedException;
+import test.util.TimeStamped;
 
 /**
  * @author Rod Johnson
@@ -804,7 +819,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
-			 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
+			 * @see test.util.TimeStamped#getTimeStamp()
 			 */
 			public long getTimeStamp() {
 				throw new UnsupportedOperationException();
@@ -1904,4 +1919,130 @@ public abstract class AbstractAopProxyTests {
 		}
 	}
 
+	
+	@SuppressWarnings("serial")
+	public static class CountingMultiAdvice extends MethodCounter implements MethodBeforeAdvice,
+			AfterReturningAdvice, ThrowsAdvice {
+	
+		public void before(Method m, Object[] args, Object target) throws Throwable {
+			count(m);
+		}
+	
+		public void afterReturning(Object o, Method m, Object[] args, Object target)
+				throws Throwable {
+			count(m);
+		}
+	
+		public void afterThrowing(ServletException sex) throws Throwable {
+			count(ServletException.class.getName());
+		}
+	
+		public void afterThrowing(DataAccessException ex) throws Throwable {
+			count(DataAccessException.class.getName());
+		}
+	
+	}
+	
+	
+	@SuppressWarnings("serial")
+	public static class CountingThrowsAdvice extends MethodCounter implements ThrowsAdvice {
+
+		public void afterThrowing(ServletException sex) throws Throwable {
+			count(ServletException.class.getName());
+		}
+
+		public void afterThrowing(DataAccessException ex) throws Throwable {
+			count(DataAccessException.class.getName());
+		}
+
+	}
+	
+	
+	static class MockTargetSource implements TargetSource {
+		
+		private Object target;
+		
+		public int gets;
+		
+		public int releases;
+		
+		public void reset() {
+			this.target = null;
+			gets = releases = 0;
+		}
+		
+		public void setTarget(Object target) {
+			this.target = target;
+		}
+
+		/**
+		 * @see org.springframework.aop.TargetSource#getTargetClass()
+		 */
+		public Class<?> getTargetClass() {
+			return target.getClass();
+		}
+
+		/**
+		 * @see org.springframework.aop.TargetSource#getTarget()
+		 */
+		public Object getTarget() throws Exception {
+			++gets;
+			return target;
+		}
+
+		/**
+		 * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
+		 */
+		public void releaseTarget(Object pTarget) throws Exception {
+			if (pTarget != this.target)
+				throw new RuntimeException("Released wrong target");
+			++releases;
+		}
+		
+		/**
+		 * Check that gets and releases match
+		 *
+		 */
+		public void verify() {
+			if (gets != releases)
+				throw new RuntimeException("Expectation failed: " + gets + " gets and " + releases + " releases");
+		}
+
+		/**
+		 * @see org.springframework.aop.TargetSource#isStatic()
+		 */
+		public boolean isStatic() {
+			return false;
+		}
+
+	}
+	
+	
+	static abstract class ExposedInvocationTestBean extends TestBean {
+
+		public String getName() {
+			MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
+			assertions(invocation);
+			return super.getName();
+		}
+
+		public void absquatulate() {
+			MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
+			assertions(invocation);
+			super.absquatulate();
+		}
+		
+		protected abstract void assertions(MethodInvocation invocation);
+	}
+	
+	
+	static class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
+		protected void assertions(MethodInvocation invocation) {
+			TestCase.assertTrue(invocation.getThis() == this);
+			TestCase.assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
+		}
+	}
+	
 }
+

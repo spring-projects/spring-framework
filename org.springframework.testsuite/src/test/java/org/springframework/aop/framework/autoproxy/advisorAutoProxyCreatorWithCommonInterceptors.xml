@@ -20,14 +20,14 @@
 		</property>
 	</bean>
 
-	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor" />
+	<bean id="nopInterceptor" class="test.interceptor.NopInterceptor" />
 
 	<!--
 		Stateful mixin. Will apply to all objects
 		Note that singleton property is false.
 	-->
 	<bean id="lockableAdvisor"
-		class="org.springframework.aop.framework.LockMixinAdvisor"
+		class="test.mixin.LockMixinAdvisor"
 		scope="prototype"
 	/>
 	

@@ -22,6 +22,8 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
+import java.io.Serializable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -32,12 +34,13 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
+ * @since 13.03.2003
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
- * @since 13.03.2003
  */
-public class JdkDynamicProxyTests extends AbstractAopProxyTests {
+@SuppressWarnings("serial")
+public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
 
 	protected Object createProxy(ProxyCreatorSupport as) {
 		assertFalse("Not forcible CGLIB", as.isProxyTargetClass());

@@ -18,11 +18,16 @@ package org.springframework.aop.framework.adapter;
 
 import static org.junit.Assert.*;
 
+import java.io.Serializable;
+
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-import org.springframework.aop.*;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -31,11 +36,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Dmitriy Kopylenko
  * @author Chris Beams
  */
-public class AdvisorAdapterRegistrationTests {
+public final class AdvisorAdapterRegistrationTests {
 
 	@Test
 	public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withoutBPPContext.xml");
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-without-bpp.xml", getClass());
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
 		try {
@@ -50,7 +56,8 @@ public class AdvisorAdapterRegistrationTests {
 
 	@Test
 	public void testAdvisorAdapterRegistrationManagerPresentInContext() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withBPPContext.xml");
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-with-bpp.xml", getClass());
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
 		try {
@@ -68,4 +75,57 @@ public class AdvisorAdapterRegistrationTests {
 		return (SimpleBeforeAdviceImpl) advisor.getAdvice();
 	}
 
+}
+
+
+interface SimpleBeforeAdvice extends BeforeAdvice {
+
+	void before() throws Throwable;
+
+}
+
+
+@SuppressWarnings("serial")
+class SimpleBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
+
+	public boolean supportsAdvice(Advice advice) {
+		return (advice instanceof SimpleBeforeAdvice);
+	}
+
+	public MethodInterceptor getInterceptor(Advisor advisor) {
+		SimpleBeforeAdvice advice = (SimpleBeforeAdvice) advisor.getAdvice();
+		return new SimpleBeforeAdviceInterceptor(advice) ;
+	}
+
+}
+
+
+class SimpleBeforeAdviceImpl implements SimpleBeforeAdvice {
+	
+	private int invocationCounter;
+
+	public void before() throws Throwable {
+		++invocationCounter;
+	}
+
+	public int getInvocationCounter() {
+		return invocationCounter;
+	}
+
+}
+
+
+final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
+	
+	private SimpleBeforeAdvice advice;
+	
+	public SimpleBeforeAdviceInterceptor(SimpleBeforeAdvice advice) {
+		this.advice = advice;
+	}
+
+	public Object invoke(MethodInvocation mi) throws Throwable {
+		advice.before();
+		return mi.proceed();
+	}
+	
 }

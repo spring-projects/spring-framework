@@ -16,29 +16,35 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class AnnotationBindingTests extends AbstractDependencyInjectionSpringContextTests {
+public final class AnnotationBindingTests {
 
 	private AnnotatedTestBean testBean;
 
-	@Override
-	protected String getConfigPath() {
-		return "around-advice-tests.xml";
+	@Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		
+		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
 	}
 
-	public void setTestBean(AnnotatedTestBean testBean) {
-		this.testBean = testBean;
-	}
-
+	@Test
 	public void testAnnotationBindingInAroundAdvice() {
 		assertEquals("this value", testBean.doThis());
 		assertEquals("that value", testBean.doThat());
 	}
 
+	@Test
 	public void testNoMatchingWithoutAnnotationPresent() {
 		assertEquals("doTheOther", testBean.doTheOther());
 	}

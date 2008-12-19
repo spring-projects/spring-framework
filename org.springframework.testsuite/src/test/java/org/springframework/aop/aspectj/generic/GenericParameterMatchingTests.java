@@ -16,54 +16,56 @@
 
 package org.springframework.aop.aspectj.generic;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Collection;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests that poitncut matching is correct with generic method parameter.
  * See SPR-3904 for more details.
  *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-public class GenericParameterMatchingTests extends AbstractDependencyInjectionSpringContextTests {
+public final class GenericParameterMatchingTests {
 
-	protected CounterAspect counterAspect;
+	private CounterAspect counterAspect;
 
-	protected GenericInterface<String> testBean;
+	private GenericInterface<String> testBean;
 
 
-	public GenericParameterMatchingTests() {
-		setPopulateProtectedVariables(true);
-	}
-
-	@Override
-	protected String getConfigPath() {
-		return "genericParameterMatchingTests-context.xml";
-	}
-
-	@Override
-	protected void onSetUp() throws Exception {
+	@SuppressWarnings("unchecked")
+	@org.junit.Before
+	public void setUp() {
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		
+		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		counterAspect.reset();
-		super.onSetUp();
+		
+		testBean = (GenericInterface<String>) ctx.getBean("testBean");
 	}
 
-
+	
+	@Test
 	public void testGenericInterfaceGenericArgExecution() {
 		testBean.save("");
 		assertEquals(1, counterAspect.genericInterfaceGenericArgExecutionCount);
 	}
 
+	@Test
 	public void testGenericInterfaceGenericCollectionArgExecution() {
 		testBean.saveAll(null);
-		// TODO: uncomment once we officially update to AspectJ 1.6.0
-		//assertEquals(1, counterAspect.genericInterfaceGenericCollectionArgExecutionCount);
+		assertEquals(1, counterAspect.genericInterfaceGenericCollectionArgExecutionCount);
 	}
 	
+	@Test
 	public void testGenericInterfaceSubtypeGenericCollectionArgExecution() {
 		testBean.saveAll(null);
 		assertEquals(1, counterAspect.genericInterfaceSubtypeGenericCollectionArgExecutionCount);
@@ -89,7 +91,7 @@ public class GenericParameterMatchingTests extends AbstractDependencyInjectionSp
 
 
 	@Aspect
-	public static class CounterAspect {
+	static class CounterAspect {
 
 		int genericInterfaceGenericArgExecutionCount;
 		int genericInterfaceGenericCollectionArgExecutionCount;

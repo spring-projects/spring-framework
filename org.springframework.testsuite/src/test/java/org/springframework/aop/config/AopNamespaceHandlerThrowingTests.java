@@ -19,45 +19,30 @@ package org.springframework.aop.config;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.xml.sax.SAXParseException;
 
 /**
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class AopNamespaceHandlerThrowingTests {
-
-	private ApplicationContext context;
-
-	protected String getOKConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerThrowingOKTests.xml";
-	}
-
-	protected String getErrorConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerThrowingErrorTests.xml";
-	}
+public final class AopNamespaceHandlerThrowingTests {
 
 	@Test
 	public void testThrowingOnThrowingAdvice() {
-		this.context = new ClassPathXmlApplicationContext(getOKConfigLocation());
+		new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ok.xml", getClass());
 	}
 	
 	@Test
 	public void testParseThrowingOnOtherAdviceType() {
 		try {
-			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass());
 			fail("Expected BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
 			assertTrue(ex.contains(SAXParseException.class));
 		}
-	}
-
-	protected ITestBean getTestBean() {
-		return (ITestBean) this.context.getBean("testBean");
 	}
 
 }

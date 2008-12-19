@@ -19,8 +19,9 @@ package org.springframework.aop.framework.autoproxy;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+
+import test.interceptor.NopInterceptor;
 
 /**
  * 

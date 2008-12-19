@@ -16,31 +16,42 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 import org.springframework.beans.ITestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.TestBean;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Chris Beams
  */
-public class AspectJAutoProxyCreatorAndLazyInitTargetSourceTests extends AbstractDependencyInjectionSpringContextTests {
+public final class AspectJAutoProxyCreatorAndLazyInitTargetSourceTests {
 
-	public AspectJAutoProxyCreatorAndLazyInitTargetSourceTests() {
-		setAutowireMode(AUTOWIRE_BY_NAME);
-	}
-
-	@Override
-	protected String getConfigPath() {
-		return "lazy.xml";
-	}
-
+	@Test
 	public void testAdrian() {
-		ITestBean adrian = (ITestBean) applicationContext.getBean("adrian");
+		ClassPathXmlApplicationContext ctx =
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		
+		ITestBean adrian = (ITestBean) ctx.getBean("adrian");
 		assertEquals(0, LazyTestBean.instantiations);
 		assertNotNull(adrian);
 		adrian.getAge();
 		assertEquals(68, adrian.getAge());
 		assertEquals(1, LazyTestBean.instantiations);
+	}
+
+}
+
+
+class LazyTestBean extends TestBean {
+
+	public static int instantiations;
+
+	public LazyTestBean() {
+		++instantiations;
 	}
 
 }

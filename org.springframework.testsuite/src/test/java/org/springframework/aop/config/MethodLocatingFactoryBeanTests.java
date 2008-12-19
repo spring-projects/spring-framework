@@ -16,179 +16,118 @@
 
 package org.springframework.aop.config;
 
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 
-import org.easymock.MockControl;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.mock.easymock.AbstractScalarMockTemplate;
-import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
+ * @author Chris Beams
  */
 public final class MethodLocatingFactoryBeanTests {
 
 	private static final String BEAN_NAME = "string";
-
+	private MethodLocatingFactoryBean factory;
+	private BeanFactory beanFactory;
+	
+	@Before
+	public void setUp() {
+		factory = new MethodLocatingFactoryBean();
+		
+		// methods must set up expectations and call replay() manually for this mock
+		beanFactory = createMock(BeanFactory.class);
+	}
+	
+	@After
+	public void tearDown() {
+		verify(beanFactory);
+	}
 
 	@Test
-	public void testIsSingleton() throws Exception {
-		MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
+	public void testIsSingleton() {
+		replay(beanFactory);
 		assertTrue(factory.isSingleton());
 	}
 
 	@Test
-	public void testGetObjectType() throws Exception {
-		MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
+	public void testGetObjectType() {
+		replay(beanFactory);
 		assertEquals(Method.class, factory.getObjectType());
 	}
 
-	@Test
-	public void testWithNullTargetBeanName() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				new AssertThrows(IllegalArgumentException.class) {
-					public void test() throws Exception {
-						MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-						factory.setMethodName("toString()");
-						factory.setBeanFactory(beanFactory);
-					}
-				}.runTest();
-			}
-		}.test();
+	@Test(expected=IllegalArgumentException.class)
+	public void testWithNullTargetBeanName() {
+		replay(beanFactory);
+		
+		factory.setMethodName("toString()");
+		factory.setBeanFactory(beanFactory);
 	}
 
-	@Test
-	public void testWithEmptyTargetBeanName() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				new AssertThrows(IllegalArgumentException.class) {
-					public void test() throws Exception {
-						MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-						factory.setTargetBeanName("");
-						factory.setMethodName("toString()");
-						factory.setBeanFactory(beanFactory);
-					}
-				}.runTest();
-			}
-		}.test();
+	@Test(expected=IllegalArgumentException.class)
+	public void testWithEmptyTargetBeanName() {
+		replay(beanFactory);
+		
+		factory.setTargetBeanName("");
+		factory.setMethodName("toString()");
+		factory.setBeanFactory(beanFactory);
 	}
 
-	@Test
-	public void testWithNullTargetMethodName() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				new AssertThrows(IllegalArgumentException.class) {
-					public void test() throws Exception {
-						MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-						factory.setTargetBeanName(BEAN_NAME);
-						factory.setBeanFactory(beanFactory);
-					}
-				}.runTest();
-			}
-		}.test();
+	@Test(expected=IllegalArgumentException.class)
+	public void testWithNullTargetMethodName() {
+		replay(beanFactory);
+		
+		factory.setTargetBeanName(BEAN_NAME);
+		factory.setBeanFactory(beanFactory);
 	}
 
-	@Test
-	public void testWithEmptyTargetMethodName() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			public void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				new AssertThrows(IllegalArgumentException.class) {
-					public void test() throws Exception {
-						MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-						factory.setTargetBeanName(BEAN_NAME);
-						factory.setMethodName("");
-						factory.setBeanFactory(beanFactory);
-					}
-				}.runTest();
-			}
-		}.test();
+	@Test(expected=IllegalArgumentException.class)
+	public void testWithEmptyTargetMethodName() {
+		replay(beanFactory);
+		
+		factory.setTargetBeanName(BEAN_NAME);
+		factory.setMethodName("");
+		factory.setBeanFactory(beanFactory);
 	}
 
-	@Test
-	public void testWhenTargetBeanClassCannotBeResolved() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {
-				beanFactory.getType(BEAN_NAME);
-				mockControl.setReturnValue(null);
-			}
-			protected void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				new AssertThrows(IllegalArgumentException.class) {
-					public void test() throws Exception {
-						MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-						factory.setTargetBeanName(BEAN_NAME);
-						factory.setMethodName("toString()");
-						factory.setBeanFactory(beanFactory);
-					}
-				}.runTest();
-			}
-		}.test();
+	@Test(expected=IllegalArgumentException.class)
+	public void testWhenTargetBeanClassCannotBeResolved() {
+		expect(beanFactory.getType(BEAN_NAME)).andReturn(null);
+		replay(beanFactory);
+		
+		factory.setTargetBeanName(BEAN_NAME);
+		factory.setMethodName("toString()");
+		factory.setBeanFactory(beanFactory);
 	}
 
 	@Test
 	public void testSunnyDayPath() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {
-				beanFactory.getType(BEAN_NAME);
-				mockControl.setReturnValue(String.class);
-			}
-			protected void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-				factory.setTargetBeanName(BEAN_NAME);
-				factory.setMethodName("toString()");
-				factory.setBeanFactory(beanFactory);
-				Object result = factory.getObject();
-				assertNotNull(result);
-				assertTrue(result instanceof Method);
-				Method method = (Method) result;
-				assertEquals("Bingo", method.invoke("Bingo", new Object[]{}));
-			}
-		}.test();
+		expect(beanFactory.getType(BEAN_NAME)).andReturn(String.class);
+		replay(beanFactory);
+		
+		factory.setTargetBeanName(BEAN_NAME);
+		factory.setMethodName("toString()");
+		factory.setBeanFactory(beanFactory);
+		Object result = factory.getObject();
+		assertNotNull(result);
+		assertTrue(result instanceof Method);
+		Method method = (Method) result;
+		assertEquals("Bingo", method.invoke("Bingo", new Object[]{}));
 	}
 
-	@Test
-	public void testWhereMethodCannotBeResolved() throws Exception {
-		new BeanFactoryScalarMockTemplate() {
-			protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {
-				beanFactory.getType(BEAN_NAME);
-				mockControl.setReturnValue(String.class);
-			}
-			protected void doTestInternal(final BeanFactory beanFactory) throws Exception {
-				new AssertThrows(IllegalArgumentException.class) {
-					public void test() throws Exception {
-						MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
-						factory.setTargetBeanName(BEAN_NAME);
-						factory.setMethodName("loadOfOld()");
-						factory.setBeanFactory(beanFactory);
-					}
-				}.runTest();
-			}
-		}.test();
-	}
-
-
-	private static abstract class BeanFactoryScalarMockTemplate extends AbstractScalarMockTemplate {
-
-		public BeanFactoryScalarMockTemplate() {
-			super(BeanFactory.class);
-		}
-
-		public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
-			setupBeanFactoryExpectations(mockControl, (BeanFactory) mockObject);
-		}
-
-		public void doTest(Object mockObject) throws Exception {
-			doTestInternal((BeanFactory) mockObject);
-		}
-
-		protected void setupBeanFactoryExpectations(MockControl mockControl, BeanFactory beanFactory) throws Exception {
-		}
-
-		protected abstract void doTestInternal(final BeanFactory beanFactory) throws Exception;
+	@Test(expected=IllegalArgumentException.class)
+	public void testWhereMethodCannotBeResolved() {
+		expect(beanFactory.getType(BEAN_NAME)).andReturn(String.class);
+		replay(beanFactory);
+		
+		factory.setTargetBeanName(BEAN_NAME);
+		factory.setMethodName("loadOfOld()");
+		factory.setBeanFactory(beanFactory);
 	}
 
 }

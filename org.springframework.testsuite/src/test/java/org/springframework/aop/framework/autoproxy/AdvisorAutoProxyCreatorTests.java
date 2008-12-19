@@ -26,10 +26,6 @@ import javax.servlet.ServletException;
 
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.CountingBeforeAdvice;
-import org.springframework.aop.framework.Lockable;
-import org.springframework.aop.framework.MethodCounter;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.LazyInitTargetSource;
@@ -39,6 +35,11 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.CallCountingTransactionManager;
+
+import test.advice.CountingBeforeAdvice;
+import test.advice.MethodCounter;
+import test.interceptor.NopInterceptor;
+import test.mixin.Lockable;
 
 /**
  * Tests for auto proxy creation by advisor recognition.

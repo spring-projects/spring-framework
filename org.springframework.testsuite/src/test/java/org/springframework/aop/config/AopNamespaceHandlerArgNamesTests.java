@@ -19,44 +19,29 @@ package org.springframework.aop.config;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class AopNamespaceHandlerArgNamesTests {
-
-	private ApplicationContext context;
-
-	protected String getOKConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerArgNamesOKTests.xml";
-	}
-
-	protected String getErrorConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerArgNamesErrorTests.xml";
-	}
+public final class AopNamespaceHandlerArgNamesTests {
 
 	@Test
 	public void testArgNamesOK() {
-		this.context = new ClassPathXmlApplicationContext(getOKConfigLocation());
+		new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ok.xml", getClass());
 	}
 	
 	@Test
 	public void testArgNamesError() {
 		try {
-			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
+			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass());
 			fail("Expected BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
 			assertTrue(ex.contains(IllegalArgumentException.class));
 		}
-	}
-
-	protected ITestBean getTestBean() {
-		return (ITestBean) this.context.getBean("testBean");
 	}
 
 }

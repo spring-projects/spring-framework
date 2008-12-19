@@ -24,17 +24,14 @@ import org.springframework.beans.ITestBean;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
-public class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
+public final class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
 
 	@Test
 	public void testIsClassProxy() {
 		ITestBean bean = getTestBean();
 		assertTrue("Should be a CGLIB proxy", AopUtils.isCglibProxy(bean));
-	}
-
-	protected String getConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerProxyTargetClassTests.xml";
 	}
 
 }
