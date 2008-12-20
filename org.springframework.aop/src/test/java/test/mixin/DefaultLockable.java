@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework;
-
-import java.lang.reflect.Method;
-
-import org.springframework.aop.MethodBeforeAdvice;
+package test.mixin;
 
 /**
- * Simple before advice example that we can use for counting checks.
- *
+ * Simple implementation of Lockable interface for use in mixins.
+ * 
  * @author Rod Johnson
  */
-public class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
+public class DefaultLockable implements Lockable {
 
-	public void before(Method m, Object[] args, Object target) throws Throwable {
-		count(m);
+	private boolean locked;
+
+	public void lock() {
+		this.locked = true;
+	}
+
+	public void unlock() {
+		this.locked = false;
+	}
+
+	public boolean locked() {
+		return this.locked;
 	}
 
 }

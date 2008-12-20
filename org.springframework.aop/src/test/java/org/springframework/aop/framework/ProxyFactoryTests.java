@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,25 @@ package org.springframework.aop.framework;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.interceptor.DebugInterceptor;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+
+import test.advice.MethodCounter;
+import test.interceptor.NopInterceptor;
+import test.util.TimeStamped;
 
 /**
  * Also tests AdvisedSupport and ProxyCreatorSupport superclasses.
@@ -41,7 +48,7 @@ import org.springframework.beans.TestBean;
  * @author Chris Beams
  * @since 14.05.2003
  */
-public class ProxyFactoryTests {
+public final class ProxyFactoryTests {
 
 	@Test
 	public void testIndexOfMethods() {
@@ -308,6 +315,45 @@ public class ProxyFactoryTests {
 
 		public void foo() {
 		}
+	}
+
+}
+
+
+/**
+ * Simple before advice example that we can use for counting checks.
+ *
+ * @author Rod Johnson
+ */
+@SuppressWarnings("serial")
+class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
+
+	public void before(Method m, Object[] args, Object target) throws Throwable {
+		count(m);
+	}
+
+}
+
+
+@SuppressWarnings("serial")
+class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
+	implements TimeStamped {
+
+	private long ts;
+
+	public TimestampIntroductionInterceptor() {
+	}
+
+	public TimestampIntroductionInterceptor(long ts) {
+		this.ts = ts;
+	}
+	
+	public void setTime(long ts) {
+		this.ts = ts;
+	}
+
+	public long getTimeStamp() {
+		return ts;
 	}
 
 }

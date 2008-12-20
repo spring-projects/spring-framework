@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.interceptor;
+package test.interceptor;
 
 import java.io.Serializable;
+
 
 
 /**
@@ -24,7 +25,9 @@ import java.io.Serializable;
  * can be used to test proxy serialization.
  * 
  * @author Rod Johnson
+ * @author Chris Beams
  */
+@SuppressWarnings("serial")
 public class SerializableNopInterceptor extends NopInterceptor implements Serializable {
 	
 	/**

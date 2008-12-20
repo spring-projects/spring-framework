@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,19 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 03.09.2004
  */
-public class PrototypeTargetTests {
+public final class PrototypeTargetTests {
+	
+	private static final Class<?> CLASS = PrototypeTargetTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	private static final ClassPathResource CONTEXT = new ClassPathResource(CLASSNAME + "-context.xml", CLASS);
 
 	@Test
 	public void testPrototypeProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
-		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("prototypeTarget.xml", getClass()));
+		XmlBeanFactory xbf = new XmlBeanFactory(CONTEXT);
 		for (int i = 0; i < 10; i++) {
 			TestBean tb = (TestBean) xbf.getBean("testBeanPrototype");
 			tb.doSomething();
@@ -47,7 +52,7 @@ public class PrototypeTargetTests {
 	@Test
 	public void testSingletonProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
-		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("prototypeTarget.xml", getClass()));
+		XmlBeanFactory xbf = new XmlBeanFactory(CONTEXT);
 		for (int i = 0; i < 10; i++) {
 			TestBean tb = (TestBean) xbf.getBean("testBeanSingleton");
 			tb.doSomething();

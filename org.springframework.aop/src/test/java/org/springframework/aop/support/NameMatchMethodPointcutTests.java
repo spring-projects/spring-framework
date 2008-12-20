@@ -22,11 +22,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.util.SerializationTestUtils;
+
+import test.interceptor.NopInterceptor;
+import test.interceptor.SerializableNopInterceptor;
 
 /**
  * @author Rod Johnson

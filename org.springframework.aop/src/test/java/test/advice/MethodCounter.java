@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework;
+package test.advice;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
- * Useful abstract superclass for counting advices etc.
+ * Abstract superclass for counting advices etc.
  * 
  * @author Rod Johnson
+ * @author Chris Beams
  */
+@SuppressWarnings("serial")
 public class MethodCounter implements Serializable {
 
 	/** Method name --> count, does not understand overloading */
-	private HashMap map = new HashMap();
+	private HashMap<String, Integer> map = new HashMap<String, Integer>();
 
 	private int allCount;
 
@@ -37,14 +39,14 @@ public class MethodCounter implements Serializable {
 	}
 
 	protected void count(String methodName) {
-		Integer i = (Integer) map.get(methodName);
+		Integer i = map.get(methodName);
 		i = (i != null) ? new Integer(i.intValue() + 1) : new Integer(1);
 		map.put(methodName, i);
 		++allCount;
 	}
 
 	public int getCalls(String methodName) {
-		Integer i = (Integer) map.get(methodName);
+		Integer i = map.get(methodName);
 		return (i != null ? i.intValue() : 0);
 	}
 

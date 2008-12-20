@@ -34,7 +34,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.aop.ThrowsAdvice;
-import org.springframework.aop.framework.MethodCounter;
+
+import test.advice.MethodCounter;
 
 /**
  * Unit tests for {@link ThrowsAdviceInterceptor}
@@ -42,7 +43,7 @@ import org.springframework.aop.framework.MethodCounter;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class ThrowsAdviceInterceptorTests {
+public final class ThrowsAdviceInterceptorTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testNoHandlerMethods() {

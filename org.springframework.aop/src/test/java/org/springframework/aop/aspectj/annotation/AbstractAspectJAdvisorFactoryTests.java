@@ -42,8 +42,6 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.framework.DefaultLockable;
-import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
@@ -56,6 +54,8 @@ import org.springframework.util.ObjectUtils;
 
 import test.aspect.PerTargetAspect;
 import test.aspect.TwoAdviceAspect;
+import test.mixin.DefaultLockable;
+import test.mixin.Lockable;
 
 /**
  * Abstract tests for AspectJAdvisorFactory.
@@ -1023,6 +1023,8 @@ interface Modifiable {
 	void acceptChanges();
 	
 }
+
+
 
 
 class NotLockable {

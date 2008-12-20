@@ -31,7 +31,7 @@ import org.junit.Test;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class CustomizableTraceInterceptorTests {
+public final class CustomizableTraceInterceptorTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetEmptyEnterMessage() {
