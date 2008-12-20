@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package example.annotations.transaction;
+package test.annotation.transaction;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
