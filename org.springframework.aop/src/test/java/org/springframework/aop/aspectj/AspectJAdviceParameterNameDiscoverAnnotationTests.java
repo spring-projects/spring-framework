@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.junit.Test;
 
 
 /**
@@ -28,14 +29,17 @@ import org.aspectj.lang.ProceedingJoinPoint;
  * doesn't matter in the grand scheme of things...
  *
  * @author Adrian Colyer
+ * @author Chris Beams
  */
-public class AspectJAdviceParameterNameDiscoverAnnotationTests extends AspectJAdviceParameterNameDiscovererTests {
+public final class AspectJAdviceParameterNameDiscoverAnnotationTests
+		extends AspectJAdviceParameterNameDiscovererTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MyAnnotation {}
 	
 	public void pjpAndAnAnnotation(ProceedingJoinPoint pjp, MyAnnotation ann) {}
 
+	@Test
 	public void testAnnotationBinding() {
 		assertParameterNames(getMethod("pjpAndAnAnnotation"),
 				"execution(* *(..)) && @annotation(ann)",

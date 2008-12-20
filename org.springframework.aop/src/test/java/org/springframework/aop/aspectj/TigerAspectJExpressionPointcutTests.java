@@ -33,12 +33,12 @@ import test.annotation.transaction.Tx;
 
 
 /** 
- * Java5-specific AspectJExpressionPointcutTests.
+ * Java5-specific {@link AspectJExpressionPointcutTests}.
  *
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class TigerAspectJExpressionPointcutTests {
+public final class TigerAspectJExpressionPointcutTests {
 
 	// TODO factor into static in AspectJExpressionPointcut
 	private Method getAge;

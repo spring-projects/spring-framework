@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
 import org.springframework.beans.ITestBean;
@@ -35,7 +36,7 @@ import org.springframework.beans.TestBean;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class ArgumentBindingTests {
+public final class ArgumentBindingTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testBindingInPointcutUsedByAdvice() {
@@ -96,6 +97,7 @@ public class ArgumentBindingTests {
 @interface Transactional {
 }
 
+
 /**
  * @author Juergen Hoeller
  */
@@ -106,6 +108,24 @@ class PointcutWithAnnotationArgument {
 	public Object around(ProceedingJoinPoint pjp, Transactional transaction) throws Throwable {
 		System.out.println("Invoked with transaction " + transaction);
 		throw new IllegalStateException();
+	}
+
+}
+
+
+/**
+ * @author Adrian Colyer
+ */
+@Aspect
+class NamedPointcutWithArgs {
+
+	@Pointcut("execution(* *(..)) && args(s,..)")
+	public void pointcutWithArgs(String s) {}
+
+	@Around("pointcutWithArgs(aString)")
+	public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
+		System.out.println("got '" + aString + "' at '" + pjp + "'");
+		throw new IllegalArgumentException(aString);
 	}
 
 }

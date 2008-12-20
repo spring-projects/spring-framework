@@ -27,7 +27,7 @@ import org.springframework.beans.TestBean;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public class BeanNamePointcutMatchingTests {
+public final class BeanNamePointcutMatchingTests {
 
 	@Test
 	public void testMatchingPointcuts() {

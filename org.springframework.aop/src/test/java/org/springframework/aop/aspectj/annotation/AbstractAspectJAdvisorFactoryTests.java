@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.aop.aspectj.annotation;
 import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -31,14 +33,16 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Test;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.framework.DefaultLockable;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
@@ -48,16 +52,17 @@ import org.springframework.beans.TestBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.ObjectUtils;
 
 import test.aspect.PerTargetAspect;
 import test.aspect.TwoAdviceAspect;
-
 
 /**
  * Abstract tests for AspectJAdvisorFactory.
  * See subclasses for tests of concrete factories.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  */
 public abstract class AbstractAspectJAdvisorFactoryTests {
 	
@@ -860,4 +865,199 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 	}
 
+}
+
+
+/**
+ * Add a DeclareParents field in concrete subclasses, to identify
+ * the type pattern to apply the introduction to.
+ *
+ * @author Rod Johnson
+ * @since 2.0
+ */
+@Aspect
+abstract class AbstractMakeModifiable {
+	
+	public interface MutableModifable extends Modifiable {
+		void markDirty();
+	}
+	
+	public static class ModifiableImpl implements MutableModifable {
+		private boolean modified;
+		
+		public void acceptChanges() {
+			modified = false;
+		}
+		
+		public boolean isModified() {
+			return modified;
+		}
+		
+		public void markDirty() {
+			this.modified = true;
+		}
+	}
+	
+	@Before(value="execution(void set*(*)) && this(modifiable) && args(newValue)", 
+			argNames="modifiable,newValue")
+	public void recordModificationIfSetterArgumentDiffersFromOldValue(JoinPoint jp, 
+		MutableModifable mixin, Object newValue) {
+		
+		/*
+		 * We use the mixin to check and, if necessary, change,
+		 * modification status. We need the JoinPoint to get the 
+		 * setter method. We use newValue for comparison. 
+		 * We try to invoke the getter if possible.
+		 */
+		
+		if (mixin.isModified()) {
+			// Already changed, don't need to change again
+			//System.out.println("changed");
+			return;
+		}
+		
+		// Find the current raw value, by invoking the corresponding setter
+		Method correspondingGetter =  getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
+		boolean modified = true;
+		if (correspondingGetter != null) {
+			try {
+				Object oldValue = correspondingGetter.invoke(jp.getTarget());
+				//System.out.println("Old value=" + oldValue + "; new=" + newValue);
+				modified = !ObjectUtils.nullSafeEquals(oldValue, newValue);
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
+				// Don't sweat on exceptions; assume value was modified
+			}
+		}
+		else {
+			//System.out.println("cannot get getter for " + jp);
+		}
+		if (modified) {
+			mixin.markDirty();
+		}
+	}
+	
+	private Method getGetterFromSetter(Method setter) {
+		String getterName = setter.getName().replaceFirst("set", "get");
+		try {
+			return setter.getDeclaringClass().getMethod(getterName, (Class[]) null);
+		} 
+		catch (NoSuchMethodException ex) {
+			// must be write only
+			return null;
+		}
+	}
+
+}
+
+
+/**
+ * Adds a declare parents pointcut.
+ * @author Rod Johnson
+ * @since 2.0
+ */
+@Aspect
+class MakeITestBeanModifiable extends AbstractMakeModifiable {
+	
+	@DeclareParents(value = "org.springframework.beans.ITestBean+",
+			defaultImpl=ModifiableImpl.class)
+	public static MutableModifable mixin;
+
+}
+
+
+/**
+ * Demonstrates introductions, AspectJ annotation style.
+ */
+@Aspect
+class MakeLockable {
+	
+	@DeclareParents(value = "org.springframework..*",
+			defaultImpl=DefaultLockable.class)
+	public static Lockable mixin;
+	
+	@Before(value="execution(void set*(*)) && this(mixin)", argNames="mixin")
+	public void checkNotLocked(
+		Lockable mixin)  // Bind to arg
+	{
+		// Can also obtain the mixin (this) this way
+		//Lockable mixin = (Lockable) jp.getThis();
+		if (mixin.locked()) {
+			throw new IllegalStateException();
+		}
+	}
+
+}
+
+
+class CannotBeUnlocked implements Lockable, Comparable<Object> {
+
+	public void lock() {
+	}
+
+	public void unlock() {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean locked() {
+		return true;
+	}
+
+	public int compareTo(Object arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+}
+
+
+/**
+ * Used as a mixin.
+ *
+ * @author Rod Johnson
+ */
+interface Modifiable {
+
+	boolean isModified();
+	
+	void acceptChanges();
+	
+}
+
+
+class NotLockable {
+	
+	private int intValue;
+
+	public int getIntValue() {
+		return intValue;
+	}
+
+	public void setIntValue(int intValue) {
+		this.intValue = intValue;
+	}
+
+}
+
+
+@Aspect("perthis(execution(* *.getSpouse()))")
+class PerThisAspect {
+
+	public int count;
+
+	/**
+	 * Just to check that this doesn't cause problems with introduction processing
+	 */
+	private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+
+	@Around("execution(int *.getAge())")
+	public int returnCountAsAge() {
+		return count++;
+	}
+
+	@Before("execution(void *.set*(int))")
+	public void countSetter() {
+		++count;
+	}
+	
 }
