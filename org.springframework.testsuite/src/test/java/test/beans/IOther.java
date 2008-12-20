@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -14,27 +15,10 @@
  * limitations under the License.
  */
 
-package common.beans.core;
+package test.beans;
 
-/**
- * Bean that changes state on a business invocation, so that
- * we can check whether it's been invoked
- * @author Rod Johnson
- */
-public class SideEffectBean {
+public interface IOther {
 	
-	private int count;
-	
-	public void setCount(int count) {
-		this.count = count;
-	}
-	
-	public int getCount() {
-		return this.count;
-	}
-	
-	public void doWork() {
-		++count;
-	}
+	void absquatulate();
 
 }
