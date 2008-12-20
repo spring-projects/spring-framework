@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.aop.aspectj.annotation;
 
 import static org.junit.Assert.*;
 
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
-import org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue;
 
 import test.aspect.PerThisAspect;
 
@@ -29,7 +31,7 @@ import test.aspect.PerThisAspect;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class AspectProxyFactoryTests {
+public final class AspectProxyFactoryTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNonAspect() {
@@ -114,6 +116,34 @@ public class AspectProxyFactoryTests {
 		public void setAge(int age) {
 			this.age = age;
 		}
+	}
+
+}
+
+
+/**
+ * @author Rod Johnson
+ */
+@Aspect
+class MultiplyReturnValue {
+
+	private int multiple = 2;
+
+	public int invocations;
+
+	public void setMultiple(int multiple) {
+		this.multiple = multiple;
+	}
+
+	public int getMultiple() {
+		return this.multiple;
+	}
+
+	@Around("execution(int *.getAge())")
+	public Object doubleReturnValue(ProceedingJoinPoint pjp) throws Throwable {
+		++this.invocations;
+		int result = (Integer) pjp.proceed();
+		return result * this.multiple;
 	}
 
 }

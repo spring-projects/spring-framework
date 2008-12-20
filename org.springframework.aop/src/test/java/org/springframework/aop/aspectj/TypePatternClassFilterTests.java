@@ -35,14 +35,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  */
 public final class TypePatternClassFilterTests {
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void testInvalidPattern() {
-		try {
-			new TypePatternClassFilter("-");
-			fail("Pattern must be recognized as invalid.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		// should throw - pattern must be recognized as invalid
+		new TypePatternClassFilter("-");
 	}
 
 	@Test

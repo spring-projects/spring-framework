@@ -25,11 +25,12 @@ import java.lang.reflect.Method;
 
 /**
  * Unit tests for the {@link AspectJAdviceParameterNameDiscoverer} class.
- * <p/>
- * <p>See also <code>TigerAspectJAdviceParameterNameDiscovererTests</code> in
+ *
+ * <p>See also {@link TigerAspectJAdviceParameterNameDiscovererTests} in
  * the 'tiger' tree for tests relating to annotations.
  *
  * @author Adrian Colyer
+ * @author Chris Beams
  */
 public class AspectJAdviceParameterNameDiscovererTests {
 
