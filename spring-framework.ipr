@@ -222,12 +222,12 @@
           <module name="context-support" />
           <module name="jdbc" />
           <module name="jms" />
-          <module name="org.springframework.testsuite" />
+          <module name="org.springframework.integration-tests" />
           <module name="beans" />
           <module name="context" />
           <module name="orm" />
           <module name="web-servlet" />
-          <module name="testsuite" />
+          <module name="integration-tests" />
           <module name="web">
             <files>
               <file url="file://$PROJECT_DIR$/org.springframework.web/src/test/resources/org/springframework/web/context/request/requestScopeTests.xml" />
@@ -239,13 +239,13 @@
       </facet-type>
       <facet-type id="web">
         <modules>
-          <module name="org.springframework.testsuite" />
-          <module name="testsuite" />
+          <module name="org.springframework.integration-tests" />
+          <module name="integration-tests" />
         </modules>
       </facet-type>
       <facet-type id="jpa">
         <modules>
-          <module name="testsuite" />
+          <module name="integration-tests" />
         </modules>
       </facet-type>
       <facet-type id="Grails" />
@@ -533,7 +533,7 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.orm/orm.iml" filepath="$PROJECT_DIR$/org.springframework.orm/orm.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.test/test.iml" filepath="$PROJECT_DIR$/org.springframework.test/test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.springframework.testsuite/testsuite.iml" filepath="$PROJECT_DIR$/org.springframework.testsuite/testsuite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.integration-tests/integration-tests.iml" filepath="$PROJECT_DIR$/org.springframework.integration-tests/integration-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.transaction/transaction.iml" filepath="$PROJECT_DIR$/org.springframework.transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web/web.iml" filepath="$PROJECT_DIR$/org.springframework.web/web.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web.portlet/web-portlet.iml" filepath="$PROJECT_DIR$/org.springframework.web.portlet/web-portlet.iml" />
