@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,43 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.parsing;
+package test.parsing;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.CollectionFactory;
+import org.springframework.beans.factory.parsing.AliasDefinition;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.DefaultsDefinition;
+import org.springframework.beans.factory.parsing.ImportDefinition;
+import org.springframework.beans.factory.parsing.ReaderEventListener;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
-	private final List defaults = new LinkedList();
+	private final List<DefaultsDefinition> defaults = new LinkedList<DefaultsDefinition>();
 
-	private final Map componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, Object> componentDefinitions = new LinkedHashMap<String, Object>(8);
 
-	private final Map aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, Object> aliasMap = new LinkedHashMap<String, Object>(8);
 
-	private final List imports = new LinkedList();
+	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 
 
 	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.defaults.add(defaultsDefinition);
 	}
 
-	public List getDefaults() {
+	public List<DefaultsDefinition> getDefaults() {
 		return Collections.unmodifiableList(this.defaults);
 	}
 
@@ -57,10 +63,11 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 	}
 
 	public ComponentDefinition[] getComponentDefinitions() {
-		Collection collection = this.componentDefinitions.values();
-		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
+		Collection<Object> collection = this.componentDefinitions.values();
+		return collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
 		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
@@ -70,8 +77,8 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		aliases.add(aliasDefinition);
 	}
 
-	public List getAliases(String beanName) {
-		List aliases = (List) this.aliasMap.get(beanName);
+	public List<?> getAliases(String beanName) {
+		List<?> aliases = (List<?>) this.aliasMap.get(beanName);
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
@@ -79,7 +86,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		this.imports.add(importDefinition);
 	}
 
-	public List getImports() {
+	public List<ImportDefinition> getImports() {
 		return Collections.unmodifiableList(this.imports);
 	}
 
