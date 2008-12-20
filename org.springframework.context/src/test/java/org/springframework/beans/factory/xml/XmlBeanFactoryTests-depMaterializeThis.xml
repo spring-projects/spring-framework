@@ -5,10 +5,6 @@
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"/>
 
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource"><ref local="dataSource"/></property>
-	</bean>
-
 	<bean id="dao" class="org.springframework.beans.factory.xml.DummyDao" autowire="constructor"/>
 
 	<bean id="boPrototype" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"
@@ -18,15 +14,9 @@
 		<property name="targetBeanName"><value>boPrototype</value></property>
 	</bean>
 
-	<bean id="prototypeBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
+	<bean id="prototypeBenchmark" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target"><ref local="prototypeTargetSource"/></property>
 		<property name="proxyInterfaces"><value>org.springframework.beans.factory.xml.DummyBo</value></property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
 	</bean>
 
 	<bean id="boSingleton" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"/>

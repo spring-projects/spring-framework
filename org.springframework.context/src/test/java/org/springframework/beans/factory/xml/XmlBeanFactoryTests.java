@@ -28,8 +28,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
@@ -578,10 +576,10 @@ public final class XmlBeanFactoryTests {
 		XmlBeanFactory xbf = new XmlBeanFactory(COMPLEX_FACTORY_CIRCLE_CONTEXT);
 		xbf.getBean("proxy1");
 		// check that unused instances from autowiring got removed
-		assertEquals(5, xbf.getSingletonCount());
+		assertEquals(4, xbf.getSingletonCount());
 		// properly create the remaining two instances
 		xbf.getBean("proxy2");
-		assertEquals(7, xbf.getSingletonCount());
+		assertEquals(5, xbf.getSingletonCount());
 	}
 
 	public @Test void testNoSuchFactoryBeanMethod() {
@@ -614,7 +612,7 @@ public final class XmlBeanFactoryTests {
 		catch (BeanCreationException ex) {
 			assertTrue(ex.getResourceDescription().indexOf("initializers.xml") != -1);
 			assertEquals("init-method2", ex.getBeanName());
-			assertTrue(ex.getCause() instanceof ServletException);
+			assertTrue(ex.getCause() instanceof IOException);
 		}
 	}
 
@@ -680,7 +678,7 @@ public final class XmlBeanFactoryTests {
 			xbf.getBean("lazy-and-bad");
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof ServletException);
+			assertTrue(ex.getCause() instanceof IOException);
 		}
 	}
 
@@ -1387,8 +1385,8 @@ public final class XmlBeanFactoryTests {
 	public static class BadInitializer {
 
 		/** Init method */
-		public void init2() throws ServletException {
-			throw new ServletException();
+		public void init2() throws IOException {
+			throw new IOException();
 		}
 	}
 
@@ -1433,7 +1431,7 @@ public final class XmlBeanFactoryTests {
 		}
 
 		/** Init method */
-		public void customInit() throws ServletException {
+		public void customInit() throws IOException {
 			if (!this.afterPropertiesSetInvoked) {
 				fail();
 			}
