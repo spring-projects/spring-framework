@@ -13,7 +13,7 @@
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.jms,org.springframework.jms"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.orm,org.springframework.orm"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.test,org.springframework.test"/>
-<project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.testsuite,org.springframework.testsuite"/>
+<project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.integration-tests,org.springframework.integration-tests"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.transaction,org.springframework.transaction"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.web,org.springframework.web"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.web.portlet,org.springframework.web.portlet"/>
