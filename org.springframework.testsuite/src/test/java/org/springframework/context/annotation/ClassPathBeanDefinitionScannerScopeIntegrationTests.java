@@ -39,7 +39,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class ClassPathBeanDefinitionScannerScopeTests {
+public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 	private static final String DEFAULT_NAME = "default";
 

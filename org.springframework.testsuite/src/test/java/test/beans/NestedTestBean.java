@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.

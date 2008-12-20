@@ -27,16 +27,18 @@ import javax.servlet.ServletException;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.NoTransactionException;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import test.advice.CountingBeforeAdvice;
 import test.advice.MethodCounter;
+import test.beans.ITestBean;
 import test.interceptor.NopInterceptor;
 
 /**
@@ -311,3 +313,38 @@ class Rollback {
 
 }
 
+
+@SuppressWarnings("serial")
+class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
+
+	public TransactionDefinition lastDefinition;
+	public int begun;
+	public int commits;
+	public int rollbacks;
+	public int inflight;
+
+	protected Object doGetTransaction() {
+		return new Object();
+	}
+
+	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		this.lastDefinition = definition;
+		++begun;
+		++inflight;
+	}
+
+	protected void doCommit(DefaultTransactionStatus status) {
+		++commits;
+		--inflight;
+	}
+
+	protected void doRollback(DefaultTransactionStatus status) {
+		++rollbacks;
+		--inflight;
+	}
+	
+	public void clear() {
+		begun = commits = rollbacks = inflight = 0;
+	}
+
+}

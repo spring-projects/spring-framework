@@ -24,14 +24,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * Integration tests for scoped proxy use in conjunction with aop: namespace.
