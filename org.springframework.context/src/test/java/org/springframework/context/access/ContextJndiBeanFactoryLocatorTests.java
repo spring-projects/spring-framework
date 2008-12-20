@@ -16,6 +16,10 @@
 
 package org.springframework.context.access;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
@@ -26,10 +30,20 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 /**
  * @author Colin Sampaleanu
+ * @author Chris Beams
  */
-public class ContextJndiBeanFactoryLocatorTests extends TestCase {
+public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
 
-	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
+	private static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
+	
+	private static final Class<?> CLASS = ContextJndiBeanFactoryLocatorTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final String FQ_PATH = "/org/springframework/context/access/";
+	
+	private static final String COLLECTIONS_CONTEXT = FQ_PATH + CLASSNAME + "-collections.xml";
+	private static final String PARENT_CONTEXT = FQ_PATH + CLASSNAME + "-parent.xml";
+	
 
 	public void testBeanFactoryPathRequiredFromJndiEnvironment() throws Exception {
 		// Set up initial context but don't bind anything
@@ -87,10 +101,8 @@ public class ContextJndiBeanFactoryLocatorTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentWithSingleFile() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
-		String path = "org/springframework/beans/factory/xml/collections.xml";
-
 		// Set up initial context
-		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
+		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, COLLECTIONS_CONTEXT);
 
 		ContextJndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
 		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
@@ -101,7 +113,7 @@ public class ContextJndiBeanFactoryLocatorTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentWithMultipleFiles() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
-		String path = "/org/springframework/beans/factory/xml/collections.xml /org/springframework/beans/factory/xml/parent.xml";
+		String path = String.format("%s %s", COLLECTIONS_CONTEXT, PARENT_CONTEXT);
 
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
@@ -110,6 +122,45 @@ public class ContextJndiBeanFactoryLocatorTests extends TestCase {
 		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
 		assertTrue(bf.containsBean("rod"));
 		assertTrue(bf.containsBean("inheritedTestBean"));
+	}
+
+}
+
+
+class MapAndSet {
+
+	private Object obj;
+
+	public MapAndSet(Map<?, ?> map) {
+		this.obj = map;
+	}
+
+	public MapAndSet(Set<?> set) {
+		this.obj = set;
+	}
+
+	public Object getObject() {
+		return obj;
+	}
+}
+
+
+
+/**
+ * Bean that exposes a simple property that can be set
+ * to a mix of references and individual values.
+ */
+class MixedCollectionBean {
+
+	private Collection<?> jumble;
+
+
+	public void setJumble(Collection<?> jumble) {
+		this.jumble = jumble;
+	}
+
+	public Collection<?> getJumble() {
+		return jumble;
 	}
 
 }
