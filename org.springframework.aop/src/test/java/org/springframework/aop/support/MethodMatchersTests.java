@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+
+import test.util.SerializationTestUtils;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class MethodMatchersTests {
+public final class MethodMatchersTests {
 
 	private final Method EXCEPTION_GETMESSAGE;
 
@@ -106,20 +107,20 @@ public class MethodMatchersTests {
 		public StartsWithMatcher(String s) {
 			this.prefix = s;
 		}
-		public boolean matches(Method m, Class targetClass) {
+		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith(prefix);
 		}
 	}
 
 
 	private static class TestDynamicMethodMatcherWhichMatches extends DynamicMethodMatcher {
-		public boolean matches(Method m, Class targetClass, Object[] args) {
+		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return true;
 		}
 	}
 
 	private static class TestDynamicMethodMatcherWhichDoesNotMatch extends DynamicMethodMatcher {
-		public boolean matches(Method m, Class targetClass, Object[] args) {
+		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return false;
 		}
 	}

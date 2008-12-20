@@ -27,7 +27,8 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+
+import test.util.SerializationTestUtils;
 
 /**
  * @author Juergen Hoeller

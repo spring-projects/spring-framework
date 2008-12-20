@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,21 @@ import org.springframework.core.io.ClassPathResource;
  * @author Chris Beams
  * @since 07.01.2005
  */
-public class LazyInitTargetSourceTests {
+public final class LazyInitTargetSourceTests {
+	
+	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final ClassPathResource SINGLETON_CONTEXT =
+		new ClassPathResource(CLASSNAME + "-singleton.xml", CLASS);
+	private static final ClassPathResource CUSTOM_TARGET_CONTEXT =
+		new ClassPathResource(CLASSNAME + "-customTarget.xml", CLASS);
+	private static final ClassPathResource FACTORY_BEAN_CONTEXT =
+		new ClassPathResource(CLASSNAME + "-factoryBean.xml", CLASS);
 
 	@Test
 	public void testLazyInitSingletonTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("lazyInitSingletonTests.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(SINGLETON_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
@@ -46,7 +56,7 @@ public class LazyInitTargetSourceTests {
 
 	@Test
 	public void testCustomLazyInitSingletonTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("customLazyInitTarget.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(CUSTOM_TARGET_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
@@ -57,7 +67,7 @@ public class LazyInitTargetSourceTests {
 
 	@Test
 	public void testLazyInitFactoryBeanTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("lazyInitFactoryBean.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(FACTORY_BEAN_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		Set<?> set1 = (Set<?>) bf.getBean("proxy1");

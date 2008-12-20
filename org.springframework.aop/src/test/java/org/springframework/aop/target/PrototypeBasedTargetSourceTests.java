@@ -25,16 +25,17 @@ import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.util.SerializationTestUtils;
+
+import test.util.SerializationTestUtils;
 
 /**
- * Unit tests relating to the abstract AbstractPrototypeBasedTargetSource
+ * Unit tests relating to the abstract {@link AbstractPrototypeBasedTargetSource}
  * and not subclasses.
  *
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class PrototypeBasedTargetSourceTests {
+public final class PrototypeBasedTargetSourceTests {
 
 	@Test
 	public void testSerializability() throws Exception {

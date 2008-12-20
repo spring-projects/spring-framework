@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,19 @@ import org.springframework.core.io.ClassPathResource;
  * @author Mark Fisher
  * @author Chris Beams
  */
-public class ScopedProxyAutowireTests {
+public final class ScopedProxyAutowireTests {
+	
+	private static final Class<?> CLASS = ScopedProxyAutowireTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final ClassPathResource SCOPED_AUTOWIRE_TRUE_CONTEXT =
+		new ClassPathResource(CLASSNAME + "-scopedAutowireTrue.xml", CLASS);
+	private static final ClassPathResource SCOPED_AUTOWIRE_FALSE_CONTEXT =
+		new ClassPathResource(CLASSNAME + "-scopedAutowireFalse.xml", CLASS);
 
 	@Test
 	public void testScopedProxyInheritsAutowireCandidateFalse() {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedAutowireFalse.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(SCOPED_AUTOWIRE_FALSE_CONTEXT);
 		TestBean autowired = (TestBean) bf.getBean("autowired");
 		TestBean unscoped = (TestBean) bf.getBean("unscoped");
 		assertSame(unscoped, autowired.getChild());
@@ -38,7 +46,7 @@ public class ScopedProxyAutowireTests {
 
 	@Test
 	public void testScopedProxyReplacesAutowireCandidateTrue() {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedAutowireTrue.xml", getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(SCOPED_AUTOWIRE_TRUE_CONTEXT);
 		TestBean autowired = (TestBean) bf.getBean("autowired");
 		TestBean scoped = (TestBean) bf.getBean("scoped");
 		assertSame(scoped, autowired.getChild());

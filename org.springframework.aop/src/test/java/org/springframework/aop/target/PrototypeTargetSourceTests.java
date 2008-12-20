@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,10 @@ import test.beans.SideEffectBean;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class PrototypeTargetSourceTests {
+public final class PrototypeTargetSourceTests {
+	
+	private static final ClassPathResource CONTEXT =
+		new ClassPathResource("PrototypeTargetSourceTests-context.xml", PrototypeTargetSourceTests.class);
 	
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
@@ -40,7 +43,7 @@ public class PrototypeTargetSourceTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("prototypeTests.xml", getClass()));
+		this.beanFactory = new XmlBeanFactory(CONTEXT);
 	}
 
 	/**

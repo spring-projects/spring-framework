@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,17 @@ import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.SerializationTestUtils;
 
 import test.beans.SideEffectBean;
 import test.interceptor.SerializableNopInterceptor;
+import test.util.SerializationTestUtils;
 
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class HotSwappableTargetSourceTests {
+public final class HotSwappableTargetSourceTests {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
@@ -47,7 +47,8 @@ public class HotSwappableTargetSourceTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("hotSwapTests.xml", getClass()));
+		this.beanFactory = new XmlBeanFactory(
+				new ClassPathResource("HotSwappableTargetSourceTests-context.xml", getClass()));
 	}
 	
 	/**

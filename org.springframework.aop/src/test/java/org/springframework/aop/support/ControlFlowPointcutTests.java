@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import test.interceptor.NopInterceptor;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class ControlFlowPointcutTests {
+public final class ControlFlowPointcutTests {
 	
 	@Test
 	public void testMatches() {

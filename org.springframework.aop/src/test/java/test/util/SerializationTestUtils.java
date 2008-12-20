@@ -3,7 +3,9 @@
  * of the Apache Software License.
  */
 
-package org.springframework.util;
+package test.util;
+
+import static org.junit.Assert.*;
 
 import java.awt.Point;
 import java.io.ByteArrayInputStream;
@@ -15,18 +17,18 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 
 /**
  * Utilities for testing serializability of objects.
  * Exposes static methods for use in other test cases.
- * Extends TestCase only to test itself.
+ * Contains {@link org.junit.Test} methods to test itself.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class SerializationTestUtils extends TestCase {
+public final class SerializationTestUtils {
 	
 	public static void testSerialization(Object o) throws IOException {
 		OutputStream baos = new ByteArrayOutputStream();
@@ -59,25 +61,16 @@ public class SerializationTestUtils extends TestCase {
 		return o2;
 	}
 	
-	public SerializationTestUtils(String s) {
-		super(s);
-	}
-	
+	@Test(expected=NotSerializableException.class)
 	public void testWithNonSerializableObject() throws IOException {
 		TestBean o = new TestBean();
 		assertFalse(o instanceof Serializable);
-		
 		assertFalse(isSerializable(o));
 		
-		try {
-			testSerialization(o);
-			fail();
-		}
-		catch (NotSerializableException ex) {
-			// Ok
-		}
+		testSerialization(o);
 	}
 	
+	@Test
 	public void testWithSerializableObject() throws Exception {
 		int x = 5;
 		int y = 10;
