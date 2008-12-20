@@ -1,4 +1,0 @@
-Bundle-SymbolicName: org.springframework.testsuite
-Bundle-Name: Spring Testsuite
-Bundle-Vendor: SpringSource
-Bundle-ManifestVersion: 2

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.springframework.testsuite</name>
+	<name>org.springframework.integration-tests</name>
 	<comment></comment>
 	<projects>
 	</projects>

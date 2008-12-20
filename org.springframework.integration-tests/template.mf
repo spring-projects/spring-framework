@@ -1,0 +1,4 @@
+Bundle-SymbolicName: org.springframework.integration-tests
+Bundle-Name: Spring Framework Integration Tests
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
