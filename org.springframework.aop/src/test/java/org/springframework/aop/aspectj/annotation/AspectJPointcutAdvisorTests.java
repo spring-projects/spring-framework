@@ -24,7 +24,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.framework.AopConfigException;
 
-import test.aspect.PerTargetAspect;
+import test.aop.PerTargetAspect;
 import test.beans.TestBean;
 
 

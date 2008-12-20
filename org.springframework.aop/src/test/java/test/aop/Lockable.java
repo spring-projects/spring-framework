@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test.mixin;
+package test.aop;
 
 
 /**

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package test.aspect;
+package test.aop;
 
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

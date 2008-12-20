@@ -23,10 +23,10 @@ import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 
+import test.aop.NopInterceptor;
+import test.aop.SerializableNopInterceptor;
 import test.beans.Person;
 import test.beans.SerializablePerson;
-import test.interceptor.NopInterceptor;
-import test.interceptor.SerializableNopInterceptor;
 import test.util.SerializationTestUtils;
 
 /**

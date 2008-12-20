@@ -11,7 +11,7 @@
 		<property name="targetBeanName"><value>prototypeTest</value></property>
 	</bean>
 	
-	<bean id="debugInterceptor" class="test.interceptor.NopInterceptor" />
+	<bean id="debugInterceptor" class="test.aop.NopInterceptor" />
 	
 	<!--
 		We want to invoke the getStatsMixin method on our ThreadLocal invoker

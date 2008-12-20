@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 
+import test.aop.NopInterceptor;
 import test.beans.ITestBean;
 import test.beans.TestBean;
-import test.interceptor.NopInterceptor;
 
 /**
  * @author Rod Johnson

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test.advice;
+package test.aop;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;

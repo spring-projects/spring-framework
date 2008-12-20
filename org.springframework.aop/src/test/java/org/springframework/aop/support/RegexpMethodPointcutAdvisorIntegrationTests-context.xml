@@ -9,7 +9,7 @@
 		<property name="age"><value>666</value></property>
 	</bean>
 
-	<bean id="nopInterceptor" class="test.interceptor.SerializableNopInterceptor"/>
+	<bean id="nopInterceptor" class="test.aop.SerializableNopInterceptor"/>
 
 	<bean id="settersAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice"><ref local="nopInterceptor"/></property>

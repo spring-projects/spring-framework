@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- *
+ * Copyright 2002-2008 the original author or authors.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package test.aspect;
+package test.aop;
 
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
+/**
+ * Simple implementation of Lockable interface for use in mixins.
+ * 
+ * @author Rod Johnson
+ */
+public class DefaultLockable implements Lockable {
 
-@Aspect("perthis(execution(* getAge()))")
-public class PerThisAspect {
+	private boolean locked;
 
-	private int invocations = 0;
-
-	public int getInvocations() {
-		return this.invocations;
+	public void lock() {
+		this.locked = true;
 	}
 
-	@Around("execution(* getAge())")
-	public int changeAge(ProceedingJoinPoint pjp) throws Throwable {
-		return invocations++;
+	public void unlock() {
+		this.locked = false;
+	}
+
+	public boolean locked() {
+		return this.locked;
 	}
 
 }
