@@ -16,24 +16,26 @@
 
 package org.springframework.context.access;
 
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertNotNull;
 
-import org.easymock.MockControl;
+import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Unit test for ContextBeanFactoryReference
+ * Unit test for {@link ContextBeanFactoryReference}
  * 
  * @author Colin Sampaleanu
+ * @author Chris Beams
  */
-public class ContextBeanFactoryReferenceTests extends TestCase {
+public class ContextBeanFactoryReferenceTests {
 	
+	@Test
 	public void testAllOperations() {
-		MockControl control = MockControl.createControl(ConfigurableApplicationContext.class);
-		ConfigurableApplicationContext ctx = (ConfigurableApplicationContext) control.getMock();
+		ConfigurableApplicationContext ctx = createMock(ConfigurableApplicationContext.class);
 
 		ctx.close();
-		control.replay();
+		replay(ctx);
 
 		ContextBeanFactoryReference bfr = new ContextBeanFactoryReference(ctx);
 
@@ -47,6 +49,6 @@ public class ContextBeanFactoryReferenceTests extends TestCase {
 			// expected
 		}
 
-		control.verify();
+		verify(ctx);
 	}
 }

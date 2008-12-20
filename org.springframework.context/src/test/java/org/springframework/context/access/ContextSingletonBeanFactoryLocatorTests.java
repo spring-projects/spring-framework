@@ -34,6 +34,10 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  */
 public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactoryLocatorTests {
+	
+	private static final Class<?> CLASS = ContextSingletonBeanFactoryLocatorTests.class;
+	private static final String CONTEXT = CLASS.getSimpleName() + "-context.xml";
+	
 
 	@Test
 	public void testBaseBeanFactoryDefs() {
@@ -46,8 +50,7 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 	@Test
 	public void testBasicFunctionality() {
 		ContextSingletonBeanFactoryLocator facLoc = new ContextSingletonBeanFactoryLocator(
-				"classpath*:" + ClassUtils.addResourcePathToPackagePath(
-				getClass(), "ContextSingletonBeanFactoryLocatorTests.xml"));
+				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		
 		basicFunctionalityTest(facLoc);
 
@@ -65,26 +68,23 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 
 	/**
 	 * This test can run multiple times, but due to static keyed lookup of the locators,
-	 * 2nd and subsequent calls will actuall get back same locator instance. This is not
+	 * 2nd and subsequent calls will actually get back same locator instance. This is not
 	 * really an issue, since the contained bean factories will still be loaded and released.
 	 */
 	@Test
 	public void testGetInstance() {
 		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.
 		BeanFactoryLocator facLoc = ContextSingletonBeanFactoryLocator.getInstance(
-				ClassUtils.addResourcePathToPackagePath(
-				getClass(), "ContextSingletonBeanFactoryLocatorTests.xml"));
+				ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest1(facLoc);
 		
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
-				"classpath*:" + ClassUtils.addResourcePathToPackagePath(
-				getClass(), "ContextSingletonBeanFactoryLocatorTests.xml"));
+				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest2(facLoc);
 
 		// This will actually get another locator instance, as the key is the resource name.
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
-				"classpath:" + ClassUtils.addResourcePathToPackagePath(
-				getClass(), "ContextSingletonBeanFactoryLocatorTests.xml"));
+				"classpath:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest3(facLoc);
 	}
 

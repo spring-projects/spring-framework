@@ -74,7 +74,7 @@
 		</property>
 	</bean>
 	
-	<bean id="jumble" class="org.springframework.beans.factory.xml.MixedCollectionBean">	
+	<bean id="jumble" class="org.springframework.context.access.MixedCollectionBean">	
 		<property name="jumble">
 			<list>
 				<ref local="david"/>
@@ -85,7 +85,7 @@
 		</property>
 	</bean>
 	
-	<bean id="jumble2" class="org.springframework.beans.factory.xml.MixedCollectionBean" lazy-init="true">
+	<bean id="jumble2" class="org.springframework.context.access.MixedCollectionBean" lazy-init="true">
 		<property name="jumble">
 			<list>
 				<ref local="david"/>
@@ -352,7 +352,7 @@
 		</property>
 	</bean>
 
-	<bean id="setAndMap" class="org.springframework.beans.factory.xml.MapAndSet">
+	<bean id="setAndMap" class="org.springframework.context.access.MapAndSet">
 		<constructor-arg>
 			<map>
 				<description>My Map</description>
