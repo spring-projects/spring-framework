@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
@@ -32,6 +31,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
 
 import test.beans.SideEffectBean;
+import test.interceptor.SerializableNopInterceptor;
 
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.junit.Test;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class PerformanceMonitorInterceptorTests {
+public final class PerformanceMonitorInterceptorTests {
 
 	@Test
 	public void testSuffixAndPrefixAssignment() {
@@ -57,14 +57,12 @@ public class PerformanceMonitorInterceptorTests {
 		expect(mi.proceed()).andReturn(null);
 		log.trace(isA(String.class));
 
-		replay(mi);
-		replay(log);
+		replay(mi, log);
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
 		interceptor.invokeUnderTrace(mi, log);
 
-		verify(log);
-		verify(mi);
+		verify(mi, log);
 	}
 
 	@Test
@@ -78,8 +76,7 @@ public class PerformanceMonitorInterceptorTests {
 		expect(mi.proceed()).andThrow(new IllegalArgumentException());
 		log.trace(isA(String.class));
 
-		replay(mi);
-		replay(log);
+		replay(mi, log);
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
 		try {
@@ -89,8 +86,7 @@ public class PerformanceMonitorInterceptorTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		verify(log);
-		verify(mi);
+		verify(mi, log);
 	}
 
 }

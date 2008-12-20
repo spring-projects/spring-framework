@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework;
+package test.mixin;
 
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
-public class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
-	implements TimeStamped {
-
-	private long ts;
-
-	public TimestampIntroductionInterceptor() {
-	}
-
-	public TimestampIntroductionInterceptor(long ts) {
-		this.ts = ts;
-	}
+/**
+ * Simple interface to use for mixins
+ * 
+ * @author Rod Johnson
+ *
+ */
+public interface Lockable {
 	
-	public void setTime(long ts) {
-		this.ts = ts;
-	}
-
-	public long getTimeStamp() {
-		return ts;
-	}
-
+	void lock();
+	
+	void unlock();
+	
+	boolean locked();
 }

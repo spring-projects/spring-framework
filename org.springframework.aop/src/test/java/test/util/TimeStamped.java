@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework;
-
+package test.util;
 
 /**
- * Simple interface to use for mixins
- * 
- * @author Rod Johnson
+ * This interface can be implemented by cacheable objects or cache entries,
+ * to enable the freshness of objects to be checked.
  *
+ * @author Rod Johnson
  */
-public interface Lockable {
+public interface TimeStamped {
 	
-	void lock();
-	
-	void unlock();
-	
-	boolean locked();
+	/**
+	 * Return the timestamp for this object.
+	 * @return long the timestamp for this object,
+	 * as returned by System.currentTimeMillis()
+	 */
+	long getTimeStamp();
+
 }

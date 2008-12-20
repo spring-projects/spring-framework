@@ -6,7 +6,7 @@
 -->
 <beans>
 	
-	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="test.interceptor.NopInterceptor"/>
 
 	<bean id="exposeInvocation" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
 		<property name="targetClass">
@@ -19,7 +19,7 @@
 
 	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
-			<bean class="org.springframework.aop.framework.InvocationCheckExposedInvocationTestBean" />
+			<bean class="org.springframework.aop.interceptor.InvocationCheckExposedInvocationTestBean" />
 		</property>
 		<property name="interceptorNames">
 			<value>exposeInvocation,countingBeforeAdvice,nopInterceptor</value>

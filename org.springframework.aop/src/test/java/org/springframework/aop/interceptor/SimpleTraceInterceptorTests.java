@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,12 @@ public final class SimpleTraceInterceptorTests {
 		expect(mi.proceed()).andReturn(null);
 		log.trace(isA(String.class));
 
-		replay(log);
-		replay(mi);
+		replay(mi, log);
 
 		SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 		interceptor.invokeUnderTrace(mi, log);
 
-		verify(log);
-		verify(mi);
+		verify(mi, log);
 	}
 
 	public void testExceptionPathStillLogsCorrectly() throws Throwable {
@@ -69,8 +67,7 @@ public final class SimpleTraceInterceptorTests {
 		expect(mi.proceed()).andThrow(exception);
 		log.trace(isA(String.class));
 
-		replay(log);
-		replay(mi);
+		replay(mi, log);
 
 		final SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 
@@ -80,8 +77,7 @@ public final class SimpleTraceInterceptorTests {
 		} catch (IllegalArgumentException expected) {
 		}
 
-		verify(log);
-		verify(mi);
+		verify(mi, log);
 	}
 
 }

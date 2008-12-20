@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class AopProxyUtilsTests {
+public final class AopProxyUtilsTests {
 	
 	@Test
 	public void testCompleteProxiedInterfacesWorksWithNull() {
@@ -124,7 +124,7 @@ public class AopProxyUtilsTests {
 		assertEquals(Comparable.class, userInterfaces[1]);
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void testProxiedUserInterfacesWithNoInterface() {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
 				new InvocationHandler() {
@@ -132,13 +132,7 @@ public class AopProxyUtilsTests {
 						return null;
 					}
 				});
-		try {
-			AopProxyUtils.proxiedUserInterfaces(proxy);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		AopProxyUtils.proxiedUserInterfaces(proxy);
 	}
 
 }
