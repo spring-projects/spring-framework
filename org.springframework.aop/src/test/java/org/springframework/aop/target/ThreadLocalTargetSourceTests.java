@@ -32,6 +32,9 @@ import test.beans.SideEffectBean;
  * @author Chris Beams
  */
 public class ThreadLocalTargetSourceTests {
+	
+	private static final ClassPathResource CONTEXT =
+		new ClassPathResource("ThreadLocalTargetSourceTests-context.xml", ThreadLocalTargetSourceTests.class);
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
@@ -40,7 +43,7 @@ public class ThreadLocalTargetSourceTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("threadLocalTests.xml", getClass()));
+		this.beanFactory = new XmlBeanFactory(CONTEXT);
 	}
 	
 	/**

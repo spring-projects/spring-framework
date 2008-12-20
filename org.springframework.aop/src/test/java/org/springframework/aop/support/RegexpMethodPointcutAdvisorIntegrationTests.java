@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,26 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.SerializationTestUtils;
 
 import test.interceptor.NopInterceptor;
 import test.interceptor.SerializableNopInterceptor;
+import test.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class RegexpMethodPointcutAdvisorIntegrationTests {
+public final class RegexpMethodPointcutAdvisorIntegrationTests {
+	
+	private static final Class<?> CLASS = RegexpMethodPointcutAdvisorIntegrationTests.class;
+	private static final String CLASSNAME = CLASS.getSimpleName();
+	
+	private static final ClassPathResource CONTEXT =
+		new ClassPathResource(CLASSNAME + "-context.xml", CLASS);
 
 	@Test
 	public void testSinglePattern() throws Throwable {
-		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("regexpSetterTests.xml", getClass())); 
+		BeanFactory bf = new XmlBeanFactory(CONTEXT); 
 		ITestBean advised = (ITestBean) bf.getBean("settersAdvised");
 		// Interceptor behind regexp advisor
 		NopInterceptor nop = (NopInterceptor) bf.getBean("nopInterceptor");
@@ -57,7 +63,7 @@ public class RegexpMethodPointcutAdvisorIntegrationTests {
 	
 	@Test
 	public void testMultiplePatterns() throws Throwable {
-		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("regexpSetterTests.xml", getClass())); 
+		BeanFactory bf = new XmlBeanFactory(CONTEXT); 
 		// This is a CGLIB proxy, so we can proxy it to the target class
 		TestBean advised = (TestBean) bf.getBean("settersAndAbsquatulateAdvised");
 		// Interceptor behind regexp advisor
@@ -80,7 +86,7 @@ public class RegexpMethodPointcutAdvisorIntegrationTests {
 	
 	@Test
 	public void testSerialization() throws Throwable {
-		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("regexpSetterTests.xml", getClass())); 
+		BeanFactory bf = new XmlBeanFactory(CONTEXT); 
 		// This is a CGLIB proxy, so we can proxy it to the target class
 		Person p = (Person) bf.getBean("serializableSettersAdvised");
 		// Interceptor behind regexp advisor

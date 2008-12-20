@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.springframework.core.io.ClassPathResource;
  * @author Chris Beams
  * @since 2.0
  */
-public class CommonsPoolTargetSourceProxyTests {
+public final class CommonsPoolTargetSourceProxyTests {
 
 	@Test
 	public void testProxy() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource("commonsPoolProxyTests.xml", getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("CommonsPoolTargetSourceProxyTests-context.xml", getClass()));
 		beanFactory.preInstantiateSingletons();
 		ITestBean bean = (ITestBean)beanFactory.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(bean));

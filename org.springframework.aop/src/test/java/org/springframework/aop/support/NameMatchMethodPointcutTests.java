@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
-import org.springframework.util.SerializationTestUtils;
 
 import test.interceptor.NopInterceptor;
 import test.interceptor.SerializableNopInterceptor;
+import test.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class NameMatchMethodPointcutTests {
+public final class NameMatchMethodPointcutTests {
 	
 	protected NameMatchMethodPointcut pc;
 	

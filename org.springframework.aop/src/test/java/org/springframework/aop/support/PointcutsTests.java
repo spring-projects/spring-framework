@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class PointcutsTests {
+public final class PointcutsTests {
 	
 	public static Method TEST_BEAN_SET_AGE;
 	public static Method TEST_BEAN_GET_AGE;
