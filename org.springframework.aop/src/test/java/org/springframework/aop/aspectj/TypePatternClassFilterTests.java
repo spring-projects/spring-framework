@@ -20,11 +20,12 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.CountingTestBean;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
+import test.beans.IOther;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * Unit tests for the {@link TypePatternClassFilter} class.
@@ -43,7 +44,7 @@ public final class TypePatternClassFilterTests {
 
 	@Test
 	public void testValidPatternMatching() {
-		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.*");
+		TypePatternClassFilter tpcf = new TypePatternClassFilter("test.beans.*");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(IOther.class));
@@ -54,7 +55,7 @@ public final class TypePatternClassFilterTests {
 
 	@Test
 	public void testSubclassMatching() {
-		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.ITestBean+");
+		TypePatternClassFilter tpcf = new TypePatternClassFilter("test.beans.ITestBean+");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(CountingTestBean.class));

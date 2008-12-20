@@ -23,7 +23,8 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
-import org.springframework.beans.TestBean;
+
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson

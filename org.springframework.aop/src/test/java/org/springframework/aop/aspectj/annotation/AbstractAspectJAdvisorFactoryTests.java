@@ -45,8 +45,6 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -54,6 +52,8 @@ import org.springframework.util.ObjectUtils;
 
 import test.aspect.PerTargetAspect;
 import test.aspect.TwoAdviceAspect;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 import test.mixin.DefaultLockable;
 import test.mixin.Lockable;
 
@@ -638,7 +638,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 
-	@Aspect("pertypewithin(org.springframework.beans.IOther+)")
+	@Aspect("pertypewithin(test.beans.IOther+)")
 	public static class PerTypeWithinAspect {
 
 		public int count;
@@ -847,7 +847,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 
 	@Aspect
-	@DeclarePrecedence("org.springframework..*")
+	@DeclarePrecedence("test..*")
 	public static class DeclarePrecedenceShouldSucceed {
 
 		@Pointcut("execution(int *.getAge())")
@@ -960,7 +960,7 @@ abstract class AbstractMakeModifiable {
 @Aspect
 class MakeITestBeanModifiable extends AbstractMakeModifiable {
 	
-	@DeclareParents(value = "org.springframework.beans.ITestBean+",
+	@DeclareParents(value = "test.beans.ITestBean+",
 			defaultImpl=ModifiableImpl.class)
 	public static MutableModifable mixin;
 

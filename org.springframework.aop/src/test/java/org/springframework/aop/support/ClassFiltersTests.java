@@ -20,9 +20,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.aop.ClassFilter;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.core.NestedRuntimeException;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson

@@ -4,7 +4,7 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="test" class="org.springframework.beans.TestBean">	
+	<bean id="test" class="test.beans.TestBean">	
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 	</bean>
@@ -21,15 +21,15 @@
 	</bean>
 
 	<bean id="settersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
+		<property name="proxyInterfaces"><value>test.beans.ITestBean</value></property>		
 		<property name="target"><ref local="test"/></property>
 		<property name="interceptorNames"><value>settersAdvisor</value></property>		
 	</bean>
 
 	<bean id="serializableSettersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.beans.Person</value></property>
+		<property name="proxyInterfaces"><value>test.beans.Person</value></property>
 		<property name="target">
-			<bean class="org.springframework.beans.SerializablePerson">
+			<bean class="test.beans.SerializablePerson">
 				<property name="name"><value>serializableSettersAdvised</value></property>
 			</bean>
 		</property>
@@ -48,7 +48,7 @@
 	</bean>
 
 	<bean id="settersAndAbsquatulateAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
+		<property name="proxyInterfaces"><value>test.beans.ITestBean</value></property>		
 		<!-- Force CGLIB so we can cast to TestBean -->
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="target"><ref local="test"/></property>	

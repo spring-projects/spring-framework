@@ -22,10 +22,10 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.springframework.aop.MethodMatcher;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 
+import test.beans.IOther;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 import test.util.SerializationTestUtils;
 
 /**

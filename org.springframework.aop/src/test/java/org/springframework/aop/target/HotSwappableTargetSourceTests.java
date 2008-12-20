@@ -24,11 +24,11 @@ import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.beans.Person;
-import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import test.beans.Person;
+import test.beans.SerializablePerson;
 import test.beans.SideEffectBean;
 import test.interceptor.SerializableNopInterceptor;
 import test.util.SerializationTestUtils;

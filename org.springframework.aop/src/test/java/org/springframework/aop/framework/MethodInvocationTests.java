@@ -25,7 +25,8 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson

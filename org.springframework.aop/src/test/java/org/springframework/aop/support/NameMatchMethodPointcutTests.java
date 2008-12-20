@@ -22,9 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.Person;
-import org.springframework.beans.SerializablePerson;
 
+import test.beans.Person;
+import test.beans.SerializablePerson;
 import test.interceptor.NopInterceptor;
 import test.interceptor.SerializableNopInterceptor;
 import test.util.SerializationTestUtils;

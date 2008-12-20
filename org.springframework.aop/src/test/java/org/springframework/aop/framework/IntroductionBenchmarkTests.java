@@ -18,9 +18,10 @@ package org.springframework.aop.framework;
 
 import org.junit.Test;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.util.StopWatch;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * Benchmarks for introductions.

@@ -32,11 +32,11 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 
 import test.advice.MethodCounter;
+import test.beans.IOther;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 import test.interceptor.NopInterceptor;
 import test.util.TimeStamped;
 

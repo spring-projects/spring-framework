@@ -26,10 +26,10 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
 
 import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
+import test.beans.TestBean;
 
 
 /** 
@@ -70,7 +70,7 @@ public final class TigerAspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchGenericArgument() {
-		String expression = "execution(* set*(java.util.List<org.springframework.beans.TestBean>) )";
+		String expression = "execution(* set*(java.util.List<test.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
 		

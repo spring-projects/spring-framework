@@ -21,11 +21,11 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.SerializablePerson;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
+import test.beans.SerializablePerson;
+import test.beans.TestBean;
 import test.util.SerializationTestUtils;
 
 /**

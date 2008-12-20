@@ -19,7 +19,8 @@ package org.springframework.aop.aspectj;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+
+import test.beans.TestBean;
 
 /**
  * Tests for matching of bean() pointcut designator.

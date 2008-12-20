@@ -34,12 +34,12 @@
 
 	<!-- ================ Definitions for second ThreadLocalTargetSource ====== -->
 	
-	<bean id="test" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="test" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
 	
-	<bean id="wife" class="org.springframework.beans.TestBean">
+	<bean id="wife" class="test.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 	
