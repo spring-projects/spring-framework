@@ -6,7 +6,7 @@
 -->
 <beans>
 	
-	<bean id="nopInterceptor" class="test.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="test.aop.NopInterceptor"/>
 
 	<bean id="exposeInvocation" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
 		<property name="targetClass">

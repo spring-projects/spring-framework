@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package test.aspect;
+package test.aop;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 
-@Aspect
-public class TwoAdviceAspect {
-	private int totalCalls;
+@Aspect("perthis(execution(* getAge()))")
+public class PerThisAspect {
+
+	private int invocations = 0;
+
+	public int getInvocations() {
+		return this.invocations;
+	}
 
 	@Around("execution(* getAge())")
-	public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
-		return totalCalls;
+	public int changeAge(ProceedingJoinPoint pjp) throws Throwable {
+		return invocations++;
 	}
 
-	@Before("execution(* setAge(int)) && args(newAge)")
-	public void countSet(int newAge) throws Exception {
-		++totalCalls;
-	}
 }

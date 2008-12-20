@@ -50,12 +50,12 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.ObjectUtils;
 
-import test.aspect.PerTargetAspect;
-import test.aspect.TwoAdviceAspect;
+import test.aop.DefaultLockable;
+import test.aop.Lockable;
+import test.aop.PerTargetAspect;
+import test.aop.TwoAdviceAspect;
 import test.beans.ITestBean;
 import test.beans.TestBean;
-import test.mixin.DefaultLockable;
-import test.mixin.Lockable;
 
 /**
  * Abstract tests for AspectJAdvisorFactory.

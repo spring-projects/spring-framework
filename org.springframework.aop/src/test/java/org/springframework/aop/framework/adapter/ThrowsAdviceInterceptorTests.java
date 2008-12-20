@@ -35,7 +35,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.aop.ThrowsAdvice;
 
-import test.advice.MethodCounter;
+import test.aop.MethodCounter;
 
 /**
  * Unit tests for {@link ThrowsAdviceInterceptor}

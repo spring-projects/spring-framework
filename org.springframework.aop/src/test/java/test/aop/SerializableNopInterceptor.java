@@ -14,27 +14,35 @@
  * limitations under the License.
  */
 
-package test.mixin;
+package test.aop;
+
+import java.io.Serializable;
+
+
 
 /**
- * Simple implementation of Lockable interface for use in mixins.
+ * Subclass of NopInterceptor that is serializable and
+ * can be used to test proxy serialization.
  * 
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public class DefaultLockable implements Lockable {
-
-	private boolean locked;
-
-	public void lock() {
-		this.locked = true;
+@SuppressWarnings("serial")
+public class SerializableNopInterceptor extends NopInterceptor implements Serializable {
+	
+	/**
+	 * We must override this field and the related methods as
+	 * otherwise count won't be serialized from the non-serializable
+	 * NopInterceptor superclass.
+	 */
+	private int count;
+	
+	public int getCount() {
+		return this.count;
 	}
-
-	public void unlock() {
-		this.locked = false;
+	
+	protected void increment() {
+		++count;
 	}
-
-	public boolean locked() {
-		return this.locked;
-	}
-
+	
 }

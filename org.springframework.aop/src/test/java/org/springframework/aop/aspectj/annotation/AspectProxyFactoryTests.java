@@ -23,7 +23,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
 
-import test.aspect.PerThisAspect;
+import test.aop.PerThisAspect;
 
 
 /**

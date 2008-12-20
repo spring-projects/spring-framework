@@ -27,10 +27,10 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import test.aop.SerializableNopInterceptor;
 import test.beans.Person;
 import test.beans.SerializablePerson;
 import test.beans.SideEffectBean;
-import test.interceptor.SerializableNopInterceptor;
 import test.util.SerializationTestUtils;
 
 

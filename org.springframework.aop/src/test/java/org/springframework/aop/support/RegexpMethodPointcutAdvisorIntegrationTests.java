@@ -24,11 +24,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import test.aop.NopInterceptor;
+import test.aop.SerializableNopInterceptor;
 import test.beans.ITestBean;
 import test.beans.Person;
 import test.beans.TestBean;
-import test.interceptor.NopInterceptor;
-import test.interceptor.SerializableNopInterceptor;
 import test.util.SerializationTestUtils;
 
 /**

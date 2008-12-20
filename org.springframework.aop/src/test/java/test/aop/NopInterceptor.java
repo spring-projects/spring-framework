@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test.interceptor;
+package test.aop;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

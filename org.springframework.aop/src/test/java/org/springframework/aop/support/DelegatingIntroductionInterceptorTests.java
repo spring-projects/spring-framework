@@ -27,13 +27,13 @@ import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 
+import test.aop.SerializableNopInterceptor;
 import test.beans.INestedTestBean;
 import test.beans.ITestBean;
 import test.beans.NestedTestBean;
 import test.beans.Person;
 import test.beans.SerializablePerson;
 import test.beans.TestBean;
-import test.interceptor.SerializableNopInterceptor;
 import test.util.SerializationTestUtils;
 import test.util.TimeStamped;
 

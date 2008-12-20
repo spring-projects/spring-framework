@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
 
-import test.aspect.PerTargetAspect;
+import test.aop.PerTargetAspect;
 
 
 /**
