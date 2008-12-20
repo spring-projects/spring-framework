@@ -18,7 +18,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+
+import test.beans.TestBean;
 
 /**
  * Utilities for testing serializability of objects.

@@ -20,10 +20,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import test.beans.ITestBean;
 import test.beans.SideEffectBean;
 
 

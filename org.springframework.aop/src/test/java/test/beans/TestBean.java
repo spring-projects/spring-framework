@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,8 +78,6 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 	private INestedTestBean doctor = new NestedTestBean();
 
 	private INestedTestBean lawyer = new NestedTestBean();
-
-	private IndexedTestBean nestedIndexedBean;
 
 	private boolean destroyed;
 
@@ -327,14 +325,6 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 
 	public void setSomeBoolean(Boolean someBoolean) {
 		this.someBoolean = someBoolean;
-	}
-
-	public IndexedTestBean getNestedIndexedBean() {
-		return nestedIndexedBean;
-	}
-
-	public void setNestedIndexedBean(IndexedTestBean nestedIndexedBean) {
-		this.nestedIndexedBean = nestedIndexedBean;
 	}
 
 	public List<?> getOtherColours() {

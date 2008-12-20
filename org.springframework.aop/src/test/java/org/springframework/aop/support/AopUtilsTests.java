@@ -26,8 +26,8 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.target.EmptyTargetSource;
-import org.springframework.beans.TestBean;
 
+import test.beans.TestBean;
 import test.interceptor.NopInterceptor;
 import test.util.SerializationTestUtils;
 

@@ -24,10 +24,10 @@ import org.junit.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 
+import test.beans.DerivedTestBean;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 import test.util.SerializationTestUtils;
 
 /**

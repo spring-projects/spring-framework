@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -14,10 +15,10 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
-public interface INestedTestBean {
+public interface IOther {
 
-	public String getCompany();
+	void absquatulate();
 
 }

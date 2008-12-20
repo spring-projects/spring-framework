@@ -21,10 +21,11 @@ import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests

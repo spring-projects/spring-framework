@@ -21,9 +21,10 @@ import static org.junit.Assert.*;
 import java.util.Set;
 
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.ITestBean;
 
 /**
  * @author Juergen Hoeller

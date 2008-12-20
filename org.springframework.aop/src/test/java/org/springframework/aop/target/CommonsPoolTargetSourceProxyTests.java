@@ -20,10 +20,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.ITestBean;
 
 /**
  * @author Rob Harrop

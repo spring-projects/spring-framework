@@ -21,9 +21,9 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 
+import test.beans.ITestBean;
+import test.beans.TestBean;
 import test.interceptor.NopInterceptor;
 
 /**

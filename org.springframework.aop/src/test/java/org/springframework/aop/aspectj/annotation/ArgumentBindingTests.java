@@ -28,8 +28,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * @author Adrian Colyer
