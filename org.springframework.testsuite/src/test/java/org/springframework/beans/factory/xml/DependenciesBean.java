@@ -22,11 +22,15 @@ import org.springframework.beans.factory.BeanFactoryAware;
 
 /**
  * Simple bean used to test dependency checking.
+ * 
+ * Note: would be defined within {@link XmlBeanFactoryTestTypes}, but must be a public type
+ * in order to satisfy test dependencies.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 04.09.2003
  */
-public class DependenciesBean implements BeanFactoryAware {
+public final class DependenciesBean implements BeanFactoryAware {
 	
 	private int age;
 	

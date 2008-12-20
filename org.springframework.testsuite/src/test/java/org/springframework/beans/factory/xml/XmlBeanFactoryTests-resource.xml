@@ -3,7 +3,7 @@
 
 <beans>
 
-	<import resource="resourceImport.xml"/> 
+	<import resource="XmlBeanFactoryTests-resourceImport.xml"/> 
 
 	<bean id="resource2" class="org.springframework.beans.ResourceTestBean">
 		<constructor-arg index="0">

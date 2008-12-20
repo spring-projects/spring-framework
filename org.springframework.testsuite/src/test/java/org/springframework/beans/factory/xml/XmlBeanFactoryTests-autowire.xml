@@ -47,15 +47,15 @@
 
 	<bean id="parentAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
 		<constructor-arg>
-			<value>/org/springframework/beans/factory/xml/collections.xml</value>
+			<value>/org/springframework/beans/factory/xml/XmlBeanFactoryTests-collections.xml</value>
 		</constructor-arg>
 	</bean>
 
 	<bean id="childAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
 		<constructor-arg>
 			<list>
-				<value>/org/springframework/beans/factory/xml/constructor-arg.xml</value>
-				<value>/org/springframework/beans/factory/xml/initializers.xml</value>
+				<value>/org/springframework/beans/factory/xml/XmlBeanFactoryTests-constructorArg.xml</value>
+				<value>/org/springframework/beans/factory/xml/XmlBeanFactoryTests-initializers.xml</value>
 			</list>
 		</constructor-arg>
 		<constructor-arg><ref bean="parentAppCtx"/></constructor-arg>
