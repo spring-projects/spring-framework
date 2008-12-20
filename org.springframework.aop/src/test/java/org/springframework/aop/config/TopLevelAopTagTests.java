@@ -27,14 +27,19 @@ import org.springframework.core.io.ClassPathResource;
  * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
  * 
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public final class TopLevelAopTagTests {
+	
+	private static final Class<?> CLASS = TopLevelAopTagTests.class;
+	private static final ClassPathResource CONTEXT =
+		new ClassPathResource(CLASS.getSimpleName() + "-context.xml", CLASS);
 
 	@Test
 	public void testParse() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource("topLevelAop.xml", getClass()));
+		reader.loadBeanDefinitions(CONTEXT);
 
 		assertTrue(beanFactory.containsBeanDefinition("testPointcut"));
 	}
