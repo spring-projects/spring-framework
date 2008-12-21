@@ -17,12 +17,13 @@
 package org.springframework.aop.support;
 
 import static org.junit.Assert.assertEquals;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.aop.NopInterceptor;
 import test.aop.SerializableNopInterceptor;
@@ -37,11 +38,8 @@ import test.util.SerializationTestUtils;
  */
 public final class RegexpMethodPointcutAdvisorIntegrationTests {
 	
-	private static final Class<?> CLASS = RegexpMethodPointcutAdvisorIntegrationTests.class;
-	private static final String CLASSNAME = CLASS.getSimpleName();
-	
-	private static final ClassPathResource CONTEXT =
-		new ClassPathResource(CLASSNAME + "-context.xml", CLASS);
+	private static final Resource CONTEXT =
+		qualifiedResource(RegexpMethodPointcutAdvisorIntegrationTests.class, "context.xml");
 
 	@Test
 	public void testSinglePattern() throws Throwable {

@@ -17,12 +17,12 @@
 package org.springframework.aop.config;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Mark Fisher
@@ -30,19 +30,10 @@ import org.springframework.core.io.ClassPathResource;
  */
 public final class AopNamespaceHandlerPointcutErrorTests {
 	
-	private static final Class<?> CLASS = AopNamespaceHandlerPointcutErrorTests.class;
-	private static final String CLASSNAME = CLASS.getSimpleName();
-	
-	private static final ClassPathResource DUPLICATION_CONTEXT = 
-		new ClassPathResource(CLASSNAME + "-pointcutDuplication.xml", CLASS);
-	
-	private static final ClassPathResource MISSING_CONTEXT = 
-		new ClassPathResource(CLASSNAME + "-pointcutMissing.xml", CLASS);
-
 	@Test
 	public void testDuplicatePointcutConfig() {
 		try {
-			new XmlBeanFactory(DUPLICATION_CONTEXT);
+			new XmlBeanFactory(qualifiedResource(getClass(), "pointcutDuplication.xml"));
 			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -53,7 +44,7 @@ public final class AopNamespaceHandlerPointcutErrorTests {
 	@Test
 	public void testMissingPointcutConfig() {
 		try {
-			new XmlBeanFactory(MISSING_CONTEXT);
+			new XmlBeanFactory(qualifiedResource(getClass(), "pointcutMissing.xml"));
 			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {

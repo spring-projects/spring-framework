@@ -17,6 +17,7 @@
 package org.springframework.aop.target;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,7 +26,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.aop.SerializableNopInterceptor;
 import test.beans.Person;
@@ -39,6 +40,8 @@ import test.util.SerializationTestUtils;
  * @author Chris Beams
  */
 public final class HotSwappableTargetSourceTests {
+	
+	private static final Resource CONTEXT = qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml");
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
@@ -47,8 +50,7 @@ public final class HotSwappableTargetSourceTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(
-				new ClassPathResource("HotSwappableTargetSourceTests-context.xml", getClass()));
+		this.beanFactory = new XmlBeanFactory(CONTEXT);
 	}
 	
 	/**

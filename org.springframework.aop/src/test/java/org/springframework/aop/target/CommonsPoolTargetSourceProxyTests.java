@@ -17,12 +17,13 @@
 package org.springframework.aop.target;
 
 import static org.junit.Assert.assertTrue;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.beans.ITestBean;
 
@@ -32,12 +33,15 @@ import test.beans.ITestBean;
  * @since 2.0
  */
 public final class CommonsPoolTargetSourceProxyTests {
+	
+	private static final Resource CONTEXT =
+		qualifiedResource(CommonsPoolTargetSourceProxyTests.class, "context.xml");
 
 	@Test
 	public void testProxy() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource("CommonsPoolTargetSourceProxyTests-context.xml", getClass()));
+		reader.loadBeanDefinitions(CONTEXT);
 		beanFactory.preInstantiateSingletons();
 		ITestBean bean = (ITestBean)beanFactory.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(bean));

@@ -43,7 +43,6 @@ public final class NameMatchMethodPointcutTests {
 
 	/**
 	 * Create an empty pointcut, populating instance variables.
-	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Before
 	public void setUp() {

@@ -17,6 +17,7 @@
 package org.springframework.aop.config;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +31,7 @@ import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.parsing.CollectingReaderEventListener;
 
@@ -42,12 +43,11 @@ import test.parsing.CollectingReaderEventListener;
 public final class AopNamespaceHandlerEventTests {
 
 	private static final Class<?> CLASS = AopNamespaceHandlerEventTests.class;
-	private static final String CLASSNAME = CLASS.getSimpleName();
 	
-	private static final String CONTEXT =  CLASSNAME + "-context.xml";
-	private static final String POINTCUT_EVENTS_CONTEXT =  CLASSNAME + "-pointcutEvents.xml";
-	private static final String POINTCUT_REF_CONTEXT = CLASSNAME + "-pointcutRefEvents.xml";
-	private static final String DIRECT_POINTCUT_EVENTS_CONTEXT = CLASSNAME + "-directPointcutEvents.xml";
+	private static final Resource CONTEXT =  qualifiedResource(CLASS, "context.xml");
+	private static final Resource POINTCUT_EVENTS_CONTEXT =  qualifiedResource(CLASS, "pointcutEvents.xml");
+	private static final Resource POINTCUT_REF_CONTEXT = qualifiedResource(CLASS, "pointcutRefEvents.xml");
+	private static final Resource DIRECT_POINTCUT_EVENTS_CONTEXT = qualifiedResource(CLASS, "directPointcutEvents.xml");
 	
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
@@ -65,7 +65,7 @@ public final class AopNamespaceHandlerEventTests {
 
 	@Test
 	public void testPointcutEvents() throws Exception {
-		loadBeansFrom(POINTCUT_EVENTS_CONTEXT);
+		this.reader.loadBeanDefinitions(POINTCUT_EVENTS_CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 1, componentDefinitions.length);
 		assertTrue("No holder with nested components", componentDefinitions[0] instanceof CompositeComponentDefinition);
@@ -89,7 +89,7 @@ public final class AopNamespaceHandlerEventTests {
 
 	@Test
 	public void testAdvisorEventsWithPointcutRef() throws Exception {
-		loadBeansFrom(POINTCUT_REF_CONTEXT);
+		this.reader.loadBeanDefinitions(POINTCUT_REF_CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 2, componentDefinitions.length);
 
@@ -118,7 +118,7 @@ public final class AopNamespaceHandlerEventTests {
 
 	@Test
 	public void testAdvisorEventsWithDirectPointcut() throws Exception {
-		loadBeansFrom(DIRECT_POINTCUT_EVENTS_CONTEXT);
+		this.reader.loadBeanDefinitions(DIRECT_POINTCUT_EVENTS_CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 2, componentDefinitions.length);
 
@@ -147,7 +147,7 @@ public final class AopNamespaceHandlerEventTests {
 
 	@Test
 	public void testAspectEvent() throws Exception {
-		loadBeansFrom(CONTEXT);
+		this.reader.loadBeanDefinitions(CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 5, componentDefinitions.length);
 
@@ -190,10 +190,6 @@ public final class AopNamespaceHandlerEventTests {
 		assertTrue(nestedComponentDefs2[0] instanceof PointcutComponentDefinition);
 		PointcutComponentDefinition pcd = (PointcutComponentDefinition) nestedComponentDefs2[0];
 		assertEquals("Incorrect number of BeanDefinitions", 1, pcd.getBeanDefinitions().length);
-	}
-
-	private void loadBeansFrom(String path) {
-		this.reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
 	}
 
 }
