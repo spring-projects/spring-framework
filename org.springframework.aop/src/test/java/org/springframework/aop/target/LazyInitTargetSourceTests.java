@@ -17,12 +17,13 @@
 package org.springframework.aop.target;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.beans.ITestBean;
 
@@ -35,14 +36,10 @@ import test.beans.ITestBean;
 public final class LazyInitTargetSourceTests {
 	
 	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
-	private static final String CLASSNAME = CLASS.getSimpleName();
 	
-	private static final ClassPathResource SINGLETON_CONTEXT =
-		new ClassPathResource(CLASSNAME + "-singleton.xml", CLASS);
-	private static final ClassPathResource CUSTOM_TARGET_CONTEXT =
-		new ClassPathResource(CLASSNAME + "-customTarget.xml", CLASS);
-	private static final ClassPathResource FACTORY_BEAN_CONTEXT =
-		new ClassPathResource(CLASSNAME + "-factoryBean.xml", CLASS);
+	private static final Resource SINGLETON_CONTEXT = qualifiedResource(CLASS, "singleton.xml");
+	private static final Resource CUSTOM_TARGET_CONTEXT = qualifiedResource(CLASS, "customTarget.xml");
+	private static final Resource FACTORY_BEAN_CONTEXT = qualifiedResource(CLASS, "factoryBean.xml");
 
 	@Test
 	public void testLazyInitSingletonTargetSource() {

@@ -19,13 +19,14 @@ package org.springframework.aop.aspectj;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.aop.framework.autoproxy.CountingTestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
+import test.beans.CountingTestBean;
 import test.beans.IOther;
 import test.beans.ITestBean;
 import test.beans.TestBean;
+import test.beans.subpkg.DeepBean;
 
 /**
  * Unit tests for the {@link TypePatternClassFilter} class.
@@ -48,7 +49,7 @@ public final class TypePatternClassFilterTests {
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(IOther.class));
-		assertFalse("Must be excluded: in wrong package", tpcf.matches(CountingTestBean.class));
+		assertFalse("Must be excluded: in wrong package", tpcf.matches(DeepBean.class));
 		assertFalse("Must be excluded: in wrong package", tpcf.matches(BeanFactory.class));
 		assertFalse("Must be excluded: in wrong package", tpcf.matches(DefaultListableBeanFactory.class));
 	}

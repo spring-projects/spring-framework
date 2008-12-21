@@ -17,10 +17,11 @@
 package org.springframework.aop.scope;
 
 import static org.junit.Assert.assertSame;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Mark Fisher
@@ -29,12 +30,9 @@ import org.springframework.core.io.ClassPathResource;
 public final class ScopedProxyAutowireTests {
 	
 	private static final Class<?> CLASS = ScopedProxyAutowireTests.class;
-	private static final String CLASSNAME = CLASS.getSimpleName();
 	
-	private static final ClassPathResource SCOPED_AUTOWIRE_TRUE_CONTEXT =
-		new ClassPathResource(CLASSNAME + "-scopedAutowireTrue.xml", CLASS);
-	private static final ClassPathResource SCOPED_AUTOWIRE_FALSE_CONTEXT =
-		new ClassPathResource(CLASSNAME + "-scopedAutowireFalse.xml", CLASS);
+	private static final Resource SCOPED_AUTOWIRE_TRUE_CONTEXT = qualifiedResource(CLASS, "scopedAutowireTrue.xml");
+	private static final Resource SCOPED_AUTOWIRE_FALSE_CONTEXT = qualifiedResource(CLASS, "scopedAutowireFalse.xml");
 
 	@Test
 	public void testScopedProxyInheritsAutowireCandidateFalse() {

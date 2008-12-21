@@ -16,14 +16,14 @@
 
 package org.springframework.aop.framework;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Juergen Hoeller
@@ -32,9 +32,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public final class PrototypeTargetTests {
 	
-	private static final Class<?> CLASS = PrototypeTargetTests.class;
-	private static final String CLASSNAME = CLASS.getSimpleName();
-	private static final ClassPathResource CONTEXT = new ClassPathResource(CLASSNAME + "-context.xml", CLASS);
+	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetTests.class, "context.xml");
 
 	@Test
 	public void testPrototypeProxyWithPrototypeTarget() {

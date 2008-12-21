@@ -17,11 +17,12 @@
 package org.springframework.aop.config;
 
 import static org.junit.Assert.assertTrue;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
@@ -31,9 +32,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public final class TopLevelAopTagTests {
 	
-	private static final Class<?> CLASS = TopLevelAopTagTests.class;
-	private static final ClassPathResource CONTEXT =
-		new ClassPathResource(CLASS.getSimpleName() + "-context.xml", CLASS);
+	private static final Resource CONTEXT = qualifiedResource(TopLevelAopTagTests.class, "context.xml");
 
 	@Test
 	public void testParse() throws Exception {

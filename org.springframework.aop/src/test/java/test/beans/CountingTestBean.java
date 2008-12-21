@@ -18,9 +18,8 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework.autoproxy;
+package test.beans;
 
-import test.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
