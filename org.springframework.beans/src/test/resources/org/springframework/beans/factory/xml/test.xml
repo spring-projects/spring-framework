@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="validEmptyWithDescription" class="org.springframework.beans.TestBean">
+	<bean id="validEmptyWithDescription" class="test.beans.TestBean">
 		<description>
 			I have no properties and I'm happy without them.
 		</description>
@@ -12,7 +12,7 @@
 	<!--
 		Check automatic creation of alias, to allow for names that are illegal as XML ids.
 	-->
-	<bean id="aliased" class="  org.springframework.beans.TestBean  " name="myalias">
+	<bean id="aliased" class="  test.beans.TestBean  " name="myalias">
 		<property name="name"><value>aliased</value></property>
 	</bean>
 
@@ -20,17 +20,17 @@
 
 	<alias name="multiAliased" alias="alias3"/>
 
-	<bean id="multiAliased" class="org.springframework.beans.TestBean" name="alias1,alias2">
+	<bean id="multiAliased" class="test.beans.TestBean" name="alias1,alias2">
 		<property name="name"><value>aliased</value></property>
 	</bean>
 
 	<alias name="multiAliased" alias="alias4"/>
 
-	<bean class="org.springframework.beans.TestBean" name="aliasWithoutId1,aliasWithoutId2,aliasWithoutId3">
+	<bean class="test.beans.TestBean" name="aliasWithoutId1,aliasWithoutId2,aliasWithoutId3">
 		<property name="name"><value>aliased</value></property>
 	</bean>
 
-	<bean class="org.springframework.beans.TestBean">
+	<bean class="test.beans.TestBean">
 		<property name="name"><null/></property>
 	</bean>
 
@@ -40,7 +40,7 @@
 
 	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
 
-	<bean id="rod" class="org.springframework.beans.TestBean">
+	<bean id="rod" class="test.beans.TestBean">
 		<property name="name"><value><!-- a comment -->Rod</value></property>
 		<property name="age"><value>31</value></property>
 		<property name="spouse"><ref bean="father"/></property>
@@ -52,20 +52,20 @@
 		<!-- Should inherit age -->
 	</bean>
 
-	<bean id="kerry" class="org.springframework.beans.TestBean">
+	<bean id="kerry" class="test.beans.TestBean">
 		<property name="name"><value>Ker<!-- a comment -->ry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref local="rod"/></property>
 		<property name="touchy"><value></value></property>
 	</bean>
 
-	<bean id="kathy" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="kathy" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>Kathy</value></property>
 		<property name="age"><value>28</value></property>
 		<property name="spouse"><ref bean="father"/></property>
 	</bean>
 
-	<bean id="typeMismatch" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="typeMismatch" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
 		<property name="spouse"><ref local="rod"/></property>
@@ -113,14 +113,14 @@
 		<property name="testBean2"><ref bean="kathy"/></property>
 	</bean>
 
-	<bean id="listenerVeto" class="org.springframework.beans.TestBean">
+	<bean id="listenerVeto" class="test.beans.TestBean">
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>
 	</bean>
 
-	<bean id="validEmpty" class="org.springframework.beans.TestBean"/>
+	<bean id="validEmpty" class="test.beans.TestBean"/>
 
-	<bean id="commentsInValue" class="org.springframework.beans.TestBean">
+	<bean id="commentsInValue" class="test.beans.TestBean">
 	  <property name="name"><value>this is<!-- don't mind me --> a <![CDATA[<!--comment-->]]></value></property>
 	</bean>
 

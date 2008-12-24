@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

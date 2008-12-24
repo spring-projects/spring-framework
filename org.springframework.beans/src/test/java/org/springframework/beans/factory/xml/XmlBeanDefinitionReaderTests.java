@@ -21,7 +21,6 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 import org.xml.sax.InputSource;
 
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -29,6 +28,8 @@ import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+
+import test.beans.TestBean;
 
 /**
  * @author Rick Evans

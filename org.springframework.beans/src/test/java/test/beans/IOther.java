@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
 public interface IOther {
 

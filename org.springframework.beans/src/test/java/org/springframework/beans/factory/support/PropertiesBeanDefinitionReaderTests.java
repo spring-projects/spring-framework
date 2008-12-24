@@ -18,7 +18,8 @@ package org.springframework.beans.factory.support;
 
 import junit.framework.TestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.beans.TestBean;
+
+import test.beans.TestBean;
 
 /**
  * @author Rob Harrop

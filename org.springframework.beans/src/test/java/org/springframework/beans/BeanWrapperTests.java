@@ -49,6 +49,10 @@ import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 import test.beans.BooleanTestBean;
+import test.beans.ITestBean;
+import test.beans.IndexedTestBean;
+import test.beans.NumberTestBean;
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson

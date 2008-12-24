@@ -2,7 +2,8 @@ package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.beans.TestBean;
+
+import test.beans.TestBean;
 
 import java.util.List;
 import java.util.Set;

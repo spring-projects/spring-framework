@@ -18,10 +18,11 @@ package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * @author Rob Harrop

@@ -42,14 +42,14 @@ import org.junit.Test;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.NumberTestBean;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
 
 import test.beans.BooleanTestBean;
+import test.beans.ITestBean;
+import test.beans.IndexedTestBean;
+import test.beans.NumberTestBean;
+import test.beans.TestBean;
 
 /**
  * Unit tests for the various PropertyEditors in Spring.
@@ -572,9 +572,9 @@ public class CustomEditorTests {
 	@Test
 	public void testClassEditor() {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("org.springframework.beans.TestBean");
+		classEditor.setAsText(TestBean.class.getName());
 		assertEquals(TestBean.class, classEditor.getValue());
-		assertEquals("org.springframework.beans.TestBean", classEditor.getAsText());
+		assertEquals(TestBean.class.getName(), classEditor.getAsText());
 
 		classEditor.setAsText(null);
 		assertEquals("", classEditor.getAsText());
@@ -593,9 +593,9 @@ public class CustomEditorTests {
 	@Test
 	public void testClassEditorWithArray() {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("org.springframework.beans.TestBean[]");
+		classEditor.setAsText("test.beans.TestBean[]");
 		assertEquals(TestBean[].class, classEditor.getValue());
-		assertEquals("org.springframework.beans.TestBean[]", classEditor.getAsText());
+		assertEquals("test.beans.TestBean[]", classEditor.getAsText());
 	}
 
 	/*

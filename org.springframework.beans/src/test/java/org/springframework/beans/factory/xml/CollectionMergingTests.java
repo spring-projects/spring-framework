@@ -24,10 +24,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.TestBean;
 
 /**
  * Unit and integration tests for the collection merging support.

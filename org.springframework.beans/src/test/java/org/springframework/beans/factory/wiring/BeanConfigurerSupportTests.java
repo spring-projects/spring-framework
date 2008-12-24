@@ -19,10 +19,11 @@ package org.springframework.beans.factory.wiring;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
+import test.beans.TestBean;
 
 /**
  * @author Rick Evans

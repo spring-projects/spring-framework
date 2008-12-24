@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-import org.springframework.beans.GenericIntegerBean;
-import org.springframework.beans.GenericSetOfIntegerBean;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -41,6 +39,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 
 import test.beans.GenericBean;
+import test.beans.GenericIntegerBean;
+import test.beans.GenericSetOfIntegerBean;
 
 /**
  * @author Juergen Hoeller

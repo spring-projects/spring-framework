@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.TestBean;
+import test.beans.TestBean;
 
 /**
  * Test class for Spring's ability to create objects using

@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.NestedTestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -37,6 +33,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import test.beans.ITestBean;
+import test.beans.IndexedTestBean;
+import test.beans.NestedTestBean;
+import test.beans.TestBean;
 
 /**
  * @author Juergen Hoeller

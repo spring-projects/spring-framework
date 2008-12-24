@@ -31,6 +31,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
 import test.beans.DerivedTestBean;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * Unit tests for {@link BeanUtils}.

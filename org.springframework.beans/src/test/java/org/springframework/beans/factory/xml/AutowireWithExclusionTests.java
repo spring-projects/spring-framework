@@ -19,7 +19,6 @@ package org.springframework.beans.factory.xml;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.CountingFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -27,6 +26,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.TestBean;
 
 /**
  * @author Rob Harrop
