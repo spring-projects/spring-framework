@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.parsing;
+package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.parsing.AliasDefinition;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.DefaultsDefinition;
+import org.springframework.beans.factory.parsing.ImportDefinition;
+import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.core.CollectionFactory;
 
 /**

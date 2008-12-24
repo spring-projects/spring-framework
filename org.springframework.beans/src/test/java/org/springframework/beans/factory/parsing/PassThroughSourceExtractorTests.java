@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,31 @@
 
 package org.springframework.beans.factory.parsing;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
+ * Unit tests for {@link PassThroughSourceExtractor}.
+ * 
  * @author Rick Evans
+ * @author Chris Beams
  */
-public final class PassThroughSourceExtractorTests extends TestCase {
+public final class PassThroughSourceExtractorTests {
 
+	@Test
 	public void testPassThroughContract() throws Exception {
 		Object source  = new Object();
 		Object extractedSource = new PassThroughSourceExtractor().extractSource(source, null);
-		assertSame("The contract of PassThroughSourceExtractor states that the supplied source object *must* be returned as-is", source, extractedSource);
+		assertSame("The contract of PassThroughSourceExtractor states that the supplied " +
+				"source object *must* be returned as-is", source, extractedSource);
 	}
 
+	@Test
 	public void testPassThroughContractEvenWithNull() throws Exception {
 		Object extractedSource = new PassThroughSourceExtractor().extractSource(null, null);
-		assertNull("The contract of PassThroughSourceExtractor states that the supplied source object *must* be returned as-is (even if null)", extractedSource);
+		assertNull("The contract of PassThroughSourceExtractor states that the supplied " +
+				"source object *must* be returned as-is (even if null)", extractedSource);
 	}
 
 }
