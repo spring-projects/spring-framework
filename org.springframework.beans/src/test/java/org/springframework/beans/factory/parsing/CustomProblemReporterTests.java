@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,28 @@
 
 package org.springframework.beans.factory.parsing;
 
+import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.beans.TestBean;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 2.0
  */
-public class CustomProblemReporterTests extends TestCase {
+public final class CustomProblemReporterTests {
+	
+	private static final Resource CONTEXT = qualifiedResource(CustomProblemReporterTests.class, "context.xml");
 
 	private CollatingProblemReporter problemReporter;
 
@@ -40,15 +46,17 @@ public class CustomProblemReporterTests extends TestCase {
 	private XmlBeanDefinitionReader reader;
 
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() {
 		this.problemReporter = new CollatingProblemReporter();
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setProblemReporter(this.problemReporter);
 	}
 
-	public void testErrorsAreCollated() throws Exception {
-		this.reader.loadBeanDefinitions(new ClassPathResource("withErrors.xml", getClass()));
+	@Test
+	public void testErrorsAreCollated() {
+		this.reader.loadBeanDefinitions(CONTEXT);
 		assertEquals("Incorrect number of errors collated", 4, this.problemReporter.getErrors().length);
 
 		TestBean bean = (TestBean) this.beanFactory.getBean("validBean");
@@ -58,9 +66,9 @@ public class CustomProblemReporterTests extends TestCase {
 
 	private static class CollatingProblemReporter implements ProblemReporter {
 
-		private List errors = new ArrayList();
+		private List<Problem> errors = new ArrayList<Problem>();
 
-		private List warnings = new ArrayList();
+		private List<Problem> warnings = new ArrayList<Problem>();
 
 
 		public void fatal(Problem problem) {
@@ -73,7 +81,7 @@ public class CustomProblemReporterTests extends TestCase {
 		}
 
 		public Problem[] getErrors() {
-			return (Problem[]) this.errors.toArray(new Problem[this.errors.size()]);
+			return this.errors.toArray(new Problem[this.errors.size()]);
 		}
 
 		public void warning(Problem problem) {
@@ -82,7 +90,7 @@ public class CustomProblemReporterTests extends TestCase {
 		}
 
 		public Problem[] getWarnings() {
-			return (Problem[]) this.warnings.toArray(new Problem[this.warnings.size()]);
+			return this.warnings.toArray(new Problem[this.warnings.size()]);
 		}
 	}
 

@@ -16,16 +16,18 @@
 
 package org.springframework.beans.factory.parsing;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-import org.springframework.beans.factory.parsing.ParseState;
+import org.junit.Test;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 2.0
  */
-public class ParseStateTests extends TestCase {
+public class ParseStateTests {
 
+	@Test
 	public void testSimple() throws Exception {
 		MockEntry entry = new MockEntry();
 
@@ -36,6 +38,7 @@ public class ParseStateTests extends TestCase {
 		assertNull("Should get null on peek()", parseState.peek());
 	}
 
+	@Test
 	public void testNesting() throws Exception {
 		MockEntry one = new MockEntry();
 		MockEntry two = new MockEntry();
@@ -55,6 +58,7 @@ public class ParseStateTests extends TestCase {
 		assertEquals(one, parseState.peek());
 	}
 
+	@Test
 	public void testSnapshot() throws Exception {
 		MockEntry entry = new MockEntry();
 
