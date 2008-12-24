@@ -11,7 +11,7 @@
   <!-- this definition could be inside one beanRefFactory.xml file -->
   <bean id="a.qualified.name.of.some.sort"
       class="org.springframework.beans.factory.xml.XmlBeanFactory">
-    <constructor-arg value="org/springframework/beans/factory/access/beans1.xml"/>
+    <constructor-arg value="org/springframework/beans/factory/access/SingletonBeanFactoryLocatorTests-beans1.xml"/>
   </bean>
 
   <!-- while the following two could be inside another, also on the classpath,
@@ -19,7 +19,7 @@
 
   <bean id="another.qualified.name"
       class="org.springframework.beans.factory.xml.XmlBeanFactory">
-    <constructor-arg value="org/springframework/beans/factory/access/beans1.xml"/>
+    <constructor-arg value="org/springframework/beans/factory/access/SingletonBeanFactoryLocatorTests-beans1.xml"/>
     <constructor-arg ref="a.qualified.name.of.some.sort"/> <!-- parent bean factory -->
   </bean>
 
