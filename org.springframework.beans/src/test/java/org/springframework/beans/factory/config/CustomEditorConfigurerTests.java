@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.*;
+
 import java.beans.PropertyEditorSupport;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -24,8 +26,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -37,11 +38,15 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import test.beans.TestBean;
 
 /**
+ * Unit tests for {@link CustomEditorConfigurer}.
+ * 
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 31.07.2004
  */
-public class CustomEditorConfigurerTests extends TestCase {
+public final class CustomEditorConfigurerTests {
 
+	@Test
 	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
@@ -67,6 +72,7 @@ public class CustomEditorConfigurerTests extends TestCase {
 		assertEquals(df.parse("2.12.1975"), tb2.getSomeMap().get("myKey"));
 	}
 
+	@Test
 	public void testCustomEditorConfigurerWithEditorClassName() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
@@ -84,6 +90,7 @@ public class CustomEditorConfigurerTests extends TestCase {
 		assertEquals(df.parse("2.12.1975"), tb.getDate());
 	}
 
+	@Test
 	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
@@ -101,6 +108,7 @@ public class CustomEditorConfigurerTests extends TestCase {
 		assertEquals("test", tb.getStringArray()[0]);
 	}
 
+	@Test
 	public void testCustomEditorConfigurerWithUnresolvableEditor() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
@@ -117,6 +125,7 @@ public class CustomEditorConfigurerTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCustomEditorConfigurerWithIgnoredUnresolvableEditor() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();

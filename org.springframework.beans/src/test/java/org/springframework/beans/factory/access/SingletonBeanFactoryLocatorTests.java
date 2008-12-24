@@ -25,6 +25,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.ClassUtils;
 
 /**
+ * Unit tests for {@link SingletonBeanFactoryLocator}.
+ * 
  * @author Colin Sampaleanu
  * @author Chris Beams
  */

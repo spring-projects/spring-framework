@@ -22,7 +22,7 @@
 			<util:property-path path="configuredBean.name"/>
 		</property>
 		<property name="someProperties">
-			<util:properties location="classpath:/org/springframework/beans/factory/config/util.properties"/>
+			<util:properties location="classpath:/org/springframework/beans/factory/xml/util.properties"/>
 		</property>
 	</bean>
 
@@ -147,35 +147,35 @@
 	</bean>
 
 	<util:properties id="myProperties"
-			location="classpath:/org/springframework/beans/factory/config/util.properties"/>
+			location="classpath:/org/springframework/beans/factory/xml/util.properties"/>
 
 	<util:properties id="myScopedProperties"
-			location="classpath:/org/springframework/beans/factory/config/util.properties" scope="prototype"/>
+			location="classpath:/org/springframework/beans/factory/xml/util.properties" scope="prototype"/>
 
 	<util:properties id="myLocalProperties">
 		<prop key="foo2">bar2</prop>
 	</util:properties>
 
 	<util:properties id="myMergedProperties"
-			location="classpath:/org/springframework/beans/factory/config/util.properties">
+			location="classpath:/org/springframework/beans/factory/xml/util.properties">
 		<prop key="foo2">bar2</prop>
 	</util:properties>
 
 	<util:properties id="defaultLocalOverrideProperties" 
-			location="classpath:/org/springframework/beans/factory/config/util.properties">
+			location="classpath:/org/springframework/beans/factory/xml/util.properties">
 		<prop key="foo">local</prop>
 		<prop key="foo2">local2</prop>
 	</util:properties>
 
 	<util:properties id="trueLocalOverrideProperties" 
-			location="classpath:/org/springframework/beans/factory/config/util.properties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties"
 			local-override="true">
 		<prop key="foo">local</prop>
 		<prop key="foo2">local2</prop>
 	</util:properties>
 
 	<util:properties id="falseLocalOverrideProperties"
-			location="classpath:/org/springframework/beans/factory/config/util.properties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties"
 			local-override="false">
 		<prop key="foo">local</prop>
 		<prop key="foo2">local2</prop>

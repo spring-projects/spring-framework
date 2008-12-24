@@ -31,11 +31,13 @@ import org.springframework.core.NestedCheckedException;
 import org.springframework.core.NestedRuntimeException;
 
 /**
+ * Unit tests for {@link ServiceLocatorFactoryBean}.
+ * 
  * @author Colin Sampaleanu
  * @author Rick Evans
  * @author Chris Beams
  */
-public class ServiceLocatorFactoryBeanTests {
+public final class ServiceLocatorFactoryBeanTests {
 
 	private DefaultListableBeanFactory bf;
 	

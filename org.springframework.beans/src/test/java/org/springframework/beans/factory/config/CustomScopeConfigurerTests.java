@@ -15,6 +15,7 @@
  */
 
 package org.springframework.beans.factory.config;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
 
@@ -26,11 +27,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
+ * Unit tests for {@link CustomScopeConfigurer}.
+ *
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class CustomScopeConfigurerTests {
+public final class CustomScopeConfigurerTests {
 
 	private static final String FOO_SCOPE = "fooScope";
 	private ConfigurableListableBeanFactory factory;
