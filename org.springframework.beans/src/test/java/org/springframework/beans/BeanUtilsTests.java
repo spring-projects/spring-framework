@@ -16,26 +16,31 @@
 
 package org.springframework.beans;
 
+import static org.junit.Assert.*;
+
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
 /**
+ * Unit tests for {@link BeanUtils}.
+ * 
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 19.05.2003
  */
-public class BeanUtilsTests extends TestCase {
+public final class BeanUtilsTests {
 
+	@Test
 	public void testInstantiateClass() {
 		// give proper class
 		BeanUtils.instantiateClass(ArrayList.class);
@@ -59,6 +64,7 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetPropertyDescriptors() throws Exception {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
@@ -66,6 +72,7 @@ public class BeanUtilsTests extends TestCase {
 		assertEquals("Invalid number of descriptors returned", actual.length, descriptors.length);
 	}
 
+	@Test
 	public void testBeanPropertyIsArray() {
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
 		for (int i = 0; i < descriptors.length; i++) {
@@ -77,10 +84,12 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFindEditorByConvention() {
 		assertEquals(ResourceEditor.class, BeanUtils.findEditorByConvention(Resource.class).getClass());
 	}
 
+	@Test
 	public void testCopyProperties() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
@@ -96,6 +105,7 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
 	}
 
+	@Test
 	public void testCopyPropertiesWithDifferentTypes1() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		tb.setName("rod");
@@ -111,6 +121,7 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
 	}
 
+	@Test
 	public void testCopyPropertiesWithDifferentTypes2() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
@@ -126,6 +137,7 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
 	}
 
+	@Test
 	public void testCopyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
 		assertTrue("Name empty", tb.getName() == null);
@@ -143,6 +155,7 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
 	}
 
+	@Test
 	public void testCopyPropertiesWithIgnore() throws Exception {
 		TestBean tb = new TestBean();
 		assertTrue("Name empty", tb.getName() == null);
@@ -160,6 +173,7 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
 	}
 
+	@Test
 	public void testCopyPropertiesWithIgnoredNonExistingProperty() {
 		NameAndSpecialProperty source = new NameAndSpecialProperty();
 		source.setName("name");
@@ -168,12 +182,14 @@ public class BeanUtilsTests extends TestCase {
 		assertEquals(target.getName(), "name");
 	}
 
+	@Test
 	public void testResolveSimpleSignature() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
 
+	@Test
 	public void testResolveInvalidSignature() throws Exception {
 		try {
 			BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
@@ -192,17 +208,20 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testResolveWithAndWithoutArgList() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", new Class[]{String.class, int.class});
 		assertSignatureEquals(desiredMethod, "doSomethingElse");
 		assertNull(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class));
 	}
 
+	@Test
 	public void testResolveTypedSignature() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", new Class[]{String.class, int.class});
 		assertSignatureEquals(desiredMethod, "doSomethingElse(java.lang.String, int)");
 	}
 
+	@Test
 	public void testResolveOverloadedSignature() throws Exception {
 		// test resolve with no args
 		Method desiredMethod = MethodSignatureBean.class.getMethod("overloaded");
@@ -217,6 +236,7 @@ public class BeanUtilsTests extends TestCase {
 		assertSignatureEquals(desiredMethod, "overloaded(java.lang.String, org.springframework.beans.factory.BeanFactory)");
 	}
 
+	@Test
 	public void testResolveSignatureWithArray() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAnArray", new Class[]{String[].class});
 		assertSignatureEquals(desiredMethod, "doSomethingWithAnArray(java.lang.String[])");

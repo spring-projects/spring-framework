@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,38 @@
 
 package org.springframework.beans;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class BeanWrapperEnumTests extends TestCase {
+public final class BeanWrapperEnumTests {
 
+	@Test
 	public void testCustomEnum() {
-		GenericBean gb = new GenericBean();
+		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", "VALUE_1");
-		Assert.assertEquals(CustomEnum.VALUE_1, gb.getCustomEnum());
+		assertEquals(CustomEnum.VALUE_1, gb.getCustomEnum());
 	}
 
+	@Test
 	public void testCustomEnumWithNull() {
-		GenericBean gb = new GenericBean();
+		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", null);
-		Assert.assertEquals(null, gb.getCustomEnum());
+		assertEquals(null, gb.getCustomEnum());
 	}
 
+	@Test
 	public void testCustomEnumWithEmptyString() {
-		GenericBean gb = new GenericBean();
+		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", "");
-		Assert.assertEquals(null, gb.getCustomEnum());
+		assertEquals(null, gb.getCustomEnum());
 	}
 
 }
