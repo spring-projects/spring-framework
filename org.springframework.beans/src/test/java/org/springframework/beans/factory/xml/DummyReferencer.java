@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.DummyFactory;
 
+import test.beans.DummyFactory;
 import test.beans.TestBean;
 
 /**

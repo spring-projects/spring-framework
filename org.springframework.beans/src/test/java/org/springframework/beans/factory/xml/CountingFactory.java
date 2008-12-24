@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.xml;
+
+import org.springframework.beans.factory.FactoryBean;
 
 import test.beans.TestBean;
 

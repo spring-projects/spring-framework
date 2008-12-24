@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,9 +30,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
+import test.beans.DummyFactory;
 import test.beans.ITestBean;
 import test.beans.IndexedTestBean;
 import test.beans.TestBean;
@@ -42,7 +44,13 @@ import test.beans.TestBean;
  * @author Chris Beams
  * @since 04.07.2003
  */
-public class BeanFactoryUtilsTests {
+public final class BeanFactoryUtilsTests {
+	
+	private static final Class<?> CLASS = BeanFactoryUtilsTests.class;
+	private static final Resource ROOT_CONTEXT = qualifiedResource(CLASS, "root.xml"); 
+	private static final Resource MIDDLE_CONTEXT = qualifiedResource(CLASS, "middle.xml"); 
+	private static final Resource LEAF_CONTEXT = qualifiedResource(CLASS, "leaf.xml"); 
+	private static final Resource DEPENDENT_BEANS_CONTEXT = qualifiedResource(CLASS, "dependentBeans.xml"); 
 
 	private ConfigurableListableBeanFactory listableBeanFactory;
 
@@ -52,10 +60,10 @@ public class BeanFactoryUtilsTests {
 	public void setUp() {
 		// Interesting hierarchical factory to test counts.
 		// Slow to read so we cache it.
-		XmlBeanFactory grandParent = new XmlBeanFactory(new ClassPathResource("root.xml", getClass()));
-		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("middle.xml", getClass()), grandParent);
-		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("leaf.xml", getClass()), parent);
-		this.dependentBeansBF = new XmlBeanFactory(new ClassPathResource("dependentBeans.xml", getClass()));
+		XmlBeanFactory grandParent = new XmlBeanFactory(ROOT_CONTEXT);
+		XmlBeanFactory parent = new XmlBeanFactory(MIDDLE_CONTEXT, grandParent);
+		XmlBeanFactory child = new XmlBeanFactory(LEAF_CONTEXT, parent);
+		this.dependentBeansBF = new XmlBeanFactory(DEPENDENT_BEANS_CONTEXT);
 		dependentBeansBF.preInstantiateSingletons();
 		this.listableBeanFactory = child;
 	}

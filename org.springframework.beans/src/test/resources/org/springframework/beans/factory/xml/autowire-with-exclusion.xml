@@ -19,7 +19,7 @@
 	  </property>
 	</bean>
 
-	<bean class="org.springframework.beans.factory.CountingFactory">
+	<bean class="org.springframework.beans.factory.xml.CountingFactory">
 		<property name="testBean" ref="rob"/>
 	</bean>
 

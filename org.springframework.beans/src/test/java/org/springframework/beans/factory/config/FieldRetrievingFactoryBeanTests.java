@@ -102,7 +102,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 
 	public void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
-		fr.setBeanName("org.springframework.beans.factory.PackageLevelVisibleBean.CONSTANT");
+		fr.setBeanName("test.beans.PackageLevelVisibleBean.CONSTANT");
 		fr.afterPropertiesSet();
 		assertEquals("Wuby", fr.getObject());
 	}

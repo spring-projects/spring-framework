@@ -72,9 +72,9 @@
 	</bean>
 
 	<!-- Test of lifecycle callbacks -->
-	<bean id="mustBeInitialized" class="org.springframework.beans.factory.MustBeInitialized"/>
+	<bean id="mustBeInitialized" class="org.springframework.beans.factory.xml.MustBeInitialized"/>
 
-	<bean id="lifecycle" class="org.springframework.beans.factory.LifecycleBean"
+	<bean id="lifecycle" class="test.beans.LifecycleBean"
 		  init-method="declaredInitMethod">
 		<property name="initMethodDeclared"><value>true</value></property>
 	</bean>
@@ -85,10 +85,10 @@
 	</bean>
 
 	<!-- Factory beans are automatically treated differently -->
-	<bean id="singletonFactory"	class="org.springframework.beans.factory.DummyFactory">
+	<bean id="singletonFactory"	class="test.beans.DummyFactory">
 	</bean>
 
-	<bean id="prototypeFactory"	class="org.springframework.beans.factory.DummyFactory">
+	<bean id="prototypeFactory"	class="test.beans.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 

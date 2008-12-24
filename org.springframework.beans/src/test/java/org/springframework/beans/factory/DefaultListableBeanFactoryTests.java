@@ -70,7 +70,9 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.util.StopWatch;
 
 import test.beans.DerivedTestBean;
+import test.beans.DummyFactory;
 import test.beans.ITestBean;
+import test.beans.LifecycleBean;
 import test.beans.NestedTestBean;
 import test.beans.TestBean;
 
@@ -83,7 +85,7 @@ import test.beans.TestBean;
  * @author Sam Brannen
  * @author Chris Beams
  */
-public class DefaultListableBeanFactoryTests {
+public final class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
@@ -2366,6 +2368,24 @@ public class DefaultListableBeanFactoryTests {
 		
 		public void doWork() {
 			++count;
+		}
+
+	}
+	
+	private static class KnowsIfInstantiated {
+		
+		private static boolean instantiated;
+		
+		public static void clearInstantiationRecord() {
+			instantiated = false;
+		}
+		
+		public static boolean wasInstantiated() {
+			return instantiated;
+		}
+
+		public KnowsIfInstantiated() {
+			instantiated = true;
 		}
 
 	}

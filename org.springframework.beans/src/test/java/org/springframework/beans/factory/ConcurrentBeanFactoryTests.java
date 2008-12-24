@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.*;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,10 +27,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -38,9 +40,10 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Guillaume Poirier
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 10.03.2004
  */
-public class ConcurrentBeanFactoryTests extends TestCase {
+public final class ConcurrentBeanFactoryTests {
 
 	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
 
@@ -62,11 +65,12 @@ public class ConcurrentBeanFactoryTests extends TestCase {
 
 	private BeanFactory factory;
 
-	private final Set set = Collections.synchronizedSet(new HashSet());
+	private final Set<TestRun> set = Collections.synchronizedSet(new HashSet<TestRun>());
 
 	private Throwable ex = null;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("concurrent.xml", getClass()));
 		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
@@ -76,20 +80,22 @@ public class ConcurrentBeanFactoryTests extends TestCase {
 		this.factory = factory;
 	}
 
+	@Test
 	public void testSingleThread() {
 		for (int i = 0; i < 100; i++) {
 			performTest();
 		}
 	}
 
+	@Test
 	public void testConcurrent() {
 		for (int i = 0; i < 100; i++) {
 			TestRun run = new TestRun();
 			run.setDaemon(true);
 			set.add(run);
 		}
-		for (Iterator it = new HashSet(set).iterator(); it.hasNext();) {
-			TestRun run = (TestRun) it.next();
+		for (Iterator<TestRun> it = new HashSet<TestRun>(set).iterator(); it.hasNext();) {
+			TestRun run = it.next();
 			run.start();
 		}
 		logger.info("Thread creation over, " + set.size() + " still active.");

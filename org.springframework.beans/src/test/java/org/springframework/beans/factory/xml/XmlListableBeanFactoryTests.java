@@ -25,16 +25,15 @@ import junit.framework.Assert;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.DummyFactory;
-import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 
+import test.beans.DummyFactory;
 import test.beans.ITestBean;
+import test.beans.LifecycleBean;
 import test.beans.TestBean;
 
 /**
