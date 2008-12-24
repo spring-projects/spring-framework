@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.xml;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.ListableBeanFactory;
 
 import junit.framework.Assert;
 

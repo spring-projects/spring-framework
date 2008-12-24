@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package test.beans;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
@@ -24,6 +29,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
+ * @author Chris Beams
  * @since 12.03.2003
  */
 public class LifecycleBean implements BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {

@@ -16,9 +16,9 @@
 		<property name="age"><value>25</value></property>
 	</bean>
 
-	<bean id="testFactory1" class="org.springframework.beans.factory.DummyFactory"/>
+	<bean id="testFactory1" class="test.beans.DummyFactory"/>
 
-	<bean id="testFactory2" class="org.springframework.beans.factory.DummyFactory">
+	<bean id="testFactory2" class="test.beans.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 

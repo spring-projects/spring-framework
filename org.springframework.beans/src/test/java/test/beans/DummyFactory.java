@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package test.beans;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import test.beans.TestBean;
 
 /**
  * Simple factory to allow testing of FactoryBean support in AbstractBeanFactory.
@@ -30,10 +35,11 @@ import test.beans.TestBean;
  * factories get this lifecycle callback if they want.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 10.03.2003
  */
 public class DummyFactory
-		implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+		implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
 	public static final String SINGLETON_NAME = "Factory singleton";
 
@@ -159,7 +165,7 @@ public class DummyFactory
 		}
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
 

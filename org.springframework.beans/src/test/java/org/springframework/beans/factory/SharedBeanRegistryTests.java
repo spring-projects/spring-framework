@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 
@@ -28,10 +29,12 @@ import test.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 04.07.2006
  */
-public class SharedBeanRegistryTests extends TestCase {
+public final class SharedBeanRegistryTests {
 
+	@Test
 	public void testSingletons() {
 		DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
 
@@ -39,7 +42,7 @@ public class SharedBeanRegistryTests extends TestCase {
 		beanRegistry.registerSingleton("tb", tb);
 		assertSame(tb, beanRegistry.getSingleton("tb"));
 
-		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", new ObjectFactory() {
+		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", new ObjectFactory<Object>() {
 			public Object getObject() throws BeansException {
 				return new TestBean();
 			}
@@ -58,6 +61,7 @@ public class SharedBeanRegistryTests extends TestCase {
 		assertEquals(0, beanRegistry.getSingletonNames().length);
 	}
 
+	@Test
 	public void testDisposableBean() {
 		DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
 

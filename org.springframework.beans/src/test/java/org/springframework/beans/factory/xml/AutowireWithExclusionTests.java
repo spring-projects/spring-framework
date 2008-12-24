@@ -19,7 +19,6 @@ package org.springframework.beans.factory.xml;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 
-import org.springframework.beans.factory.CountingFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

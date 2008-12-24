@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package org.springframework.beans.factory;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
@@ -29,19 +30,22 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class FactoryBeanTests {
+public final class FactoryBeanTests {
 
+	private static final Class<?> CLASS = FactoryBeanTests.class;
+	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml"); 
+	private static final Resource WITH_AUTOWIRING_CONTEXT = qualifiedResource(CLASS, "withAutowiring.xml"); 
+	
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("factoryBeanReturnsNull.xml", getClass()));
+		XmlBeanFactory factory = new XmlBeanFactory(RETURNS_NULL_CONTEXT);
 		Object result = factory.getBean("factoryBean");
 		assertNull(result);
 	}
 
 	@Test
 	public void testFactoryBeansWithAutowiring() throws Exception {
-		XmlBeanFactory factory =
-				new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml", getClass()));
+		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
 		
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
@@ -58,8 +62,7 @@ public class FactoryBeanTests {
 
 	@Test
 	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
-		XmlBeanFactory factory =
-				new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml", getClass()));
+		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
 		
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);

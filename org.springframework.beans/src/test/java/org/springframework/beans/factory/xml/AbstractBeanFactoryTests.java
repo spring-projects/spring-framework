@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.xml;
 
 import java.beans.PropertyEditorSupport;
 import java.util.StringTokenizer;
@@ -24,8 +24,16 @@ import junit.framework.Assert;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyBatchUpdateException;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanIsNotAFactoryException;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
+import test.beans.DummyFactory;
+import test.beans.LifecycleBean;
 import test.beans.TestBean;
 
 /**
@@ -325,6 +333,34 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			tb.setAge(Integer.parseInt(st.nextToken()));
 			setValue(tb);
 		}
+	}
+
+}
+
+
+/**
+ * Simple test of BeanFactory initialization
+ * @author Rod Johnson
+ * @since 12.03.2003
+ */
+class MustBeInitialized implements InitializingBean {
+
+	private boolean inited;
+
+	/**
+	 * @see InitializingBean#afterPropertiesSet()
+	 */
+	public void afterPropertiesSet() throws Exception {
+		this.inited = true;
+	}
+
+	/**
+	 * Dummy business method that will fail unless the factory
+	 * managed the bean's lifecycle correctly
+	 */
+	public void businessMethod() {
+		if (!this.inited)
+			throw new RuntimeException("Factory didn't call afterPropertiesSet() on MustBeInitialized object");
 	}
 
 }

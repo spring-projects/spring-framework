@@ -109,14 +109,14 @@
 		<property name="name"><idref bean="verbose"/></property>
 	</bean>
 
-	<bean id="emptyMap" class="org.springframework.beans.factory.HasMap">
+	<bean id="emptyMap" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="map">
 			<map>
 			</map>
 		</property>
 	</bean>
 	
-	<bean id="literalMap" class="org.springframework.beans.factory.HasMap">	
+	<bean id="literalMap" class="org.springframework.beans.factory.xml.HasMap">	
 		<property name="map">
 			<map>
 				<entry key="foo" value="bar"/>
@@ -126,7 +126,7 @@
 		</property>
 	</bean>
 
-	<bean id="mixedMap" class="org.springframework.beans.factory.HasMap">
+	<bean id="mixedMap" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="map">
 			<map>
 				<entry key-ref="fooKey">
@@ -158,7 +158,7 @@
 		<constructor-arg value="jenny"/>
 	</bean>
 
-	<bean id="pMixedMap" class="org.springframework.beans.factory.HasMap" scope="prototype">
+	<bean id="pMixedMap" class="org.springframework.beans.factory.xml.HasMap" scope="prototype">
 		<property name="map">
 			<map>
 				<entry key="foo" value="bar"/>
@@ -167,7 +167,7 @@
 		</property>
 	</bean>
 
-	<bean id="mixedMapWithList" class="org.springframework.beans.factory.HasMap">
+	<bean id="mixedMapWithList" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="map">
 			<map>
 				<entry>
@@ -199,7 +199,7 @@
 		</property>
 	</bean>
 	
-	<bean id="emptySet" class="org.springframework.beans.factory.HasMap">
+	<bean id="emptySet" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="set">
 			<set>
 			</set>
@@ -207,7 +207,7 @@
 	</bean>
 
 
-	<bean id="set" class="org.springframework.beans.factory.HasMap">
+	<bean id="set" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="set">
 			<set>
 				<value>bar</value>
@@ -217,7 +217,7 @@
 		</property>
 	</bean>
 
-	<bean id="emptyProps" class="org.springframework.beans.factory.HasMap">
+	<bean id="emptyProps" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="props">
 			<props>
 			</props>
@@ -225,7 +225,7 @@
 	</bean>
 	
 	
-	<bean id="props" class="org.springframework.beans.factory.HasMap">	
+	<bean id="props" class="org.springframework.beans.factory.xml.HasMap">	
 		<property name="props">
 			<props>
 				<prop key="foo">bar</prop>
@@ -234,7 +234,7 @@
 		</property>
 	</bean>
 	
-	<bean id="propsViaMap" class="org.springframework.beans.factory.HasMap">
+	<bean id="propsViaMap" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="props">
 			<map>
 				<entry key="foo" value="bar"/>
@@ -243,7 +243,7 @@
 		</property>
 	</bean>
 
-	<bean id="objectArray" class="org.springframework.beans.factory.HasMap">
+	<bean id="objectArray" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="objectArray">
 			<list>
 				<value>one</value>
@@ -252,7 +252,7 @@
 		</property>
 	</bean>
 	
-	<bean id="classArray" class="org.springframework.beans.factory.HasMap">	
+	<bean id="classArray" class="org.springframework.beans.factory.xml.HasMap">	
 		<property name="classArray">
 			<list>
 				<value>java.lang.String</value>
@@ -261,7 +261,7 @@
 		</property>
 	</bean>
 	
-	<bean id="integerArray" class="org.springframework.beans.factory.HasMap">
+	<bean id="integerArray" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="integerArray">
 			<list>
 				<value>0</value>
