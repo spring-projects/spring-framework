@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.beans;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 /**
  * @author Rod Johnson
+ * @author Chris Beams
  */
-public abstract class AbstractPropertyValuesTests extends TestCase { 
+public abstract class AbstractPropertyValuesTests { 
 
 	/**
 	 * Must contain: forname=Tony surname=Blair age=50
@@ -37,7 +38,7 @@ public abstract class AbstractPropertyValuesTests extends TestCase {
 		assertTrue("Doesn't contain tory", !pvs.contains("tory"));
 
 		PropertyValue[] ps = pvs.getPropertyValues();
-		Map m = new HashMap();
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("forname", "Tony");
 		m.put("surname", "Blair");
 		m.put("age", "50");
