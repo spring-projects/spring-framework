@@ -18,6 +18,8 @@ package org.springframework.beans;
 
 import java.util.Set;
 
+import test.beans.GenericBean;
+
 /**
  * @author Juergen Hoeller
  */

@@ -42,13 +42,14 @@ import org.junit.Test;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.BooleanTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NumberTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+
+import test.beans.BooleanTestBean;
 
 /**
  * Unit tests for the various PropertyEditors in Spring.

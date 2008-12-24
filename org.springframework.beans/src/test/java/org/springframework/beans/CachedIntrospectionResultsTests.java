@@ -16,15 +16,18 @@
 
 package org.springframework.beans;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.springframework.core.OverridingClassLoader;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class CachedIntrospectionResultsTests extends TestCase {
+public final class CachedIntrospectionResultsTests {
 
+	@Test
 	public void testAcceptClassLoader() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(TestBean.class);
 		assertTrue(bw.isWritableProperty("name"));
@@ -32,7 +35,7 @@ public class CachedIntrospectionResultsTests extends TestCase {
 		assertTrue(CachedIntrospectionResults.classCache.containsKey(TestBean.class));
 
 		ClassLoader child = new OverridingClassLoader(getClass().getClassLoader());
-		Class tbClass = child.loadClass("org.springframework.beans.TestBean");
+		Class<?> tbClass = child.loadClass("org.springframework.beans.TestBean");
 		assertFalse(CachedIntrospectionResults.classCache.containsKey(tbClass));
 		CachedIntrospectionResults.acceptClassLoader(child);
 		bw = new BeanWrapperImpl(tbClass);

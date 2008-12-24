@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 
 package org.springframework.beans;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class PropertyAccessorUtilsTests extends TestCase {
+public final class PropertyAccessorUtilsTests {
 
+	@Test
 	public void testCanonicalPropertyName() {
 		assertEquals("map", PropertyAccessorUtils.canonicalPropertyName("map"));
 		assertEquals("map[key1]", PropertyAccessorUtils.canonicalPropertyName("map[key1]"));
@@ -37,6 +41,7 @@ public class PropertyAccessorUtilsTests extends TestCase {
 		assertEquals("map[key1].name", PropertyAccessorUtils.canonicalPropertyName("map[\"key1\"].name"));
 	}
 
+	@Test
 	public void testCanonicalPropertyNames() {
 		String[] original =
 				new String[] {"map", "map[key1]", "map['key1']", "map[\"key1\"]", "map[key1][key2]",

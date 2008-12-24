@@ -30,6 +30,8 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
+import test.beans.DerivedTestBean;
+
 /**
  * Unit tests for {@link BeanUtils}.
  * 

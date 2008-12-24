@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import static org.junit.Assert.*;
+
 import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,11 +36,11 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
-import junit.framework.TestCase;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.FlushMode;
-
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -46,14 +48,18 @@ import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
+import test.beans.BooleanTestBean;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @author Arjen Poutsma
+ * @author Chris Beams
  */
-public class BeanWrapperTests extends TestCase {
+public final class BeanWrapperTests {
 
+	@Test
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -63,12 +69,14 @@ public class BeanWrapperTests extends TestCase {
 	/**
 	 * Shouldn't throw an exception: should just return false
 	 */
+	@Test
 	public void testIsReadablePropertyNoSuchProperty() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
 		assertFalse(bw.isReadableProperty("xxxxx"));
 	}
 
+	@Test
 	public void testIsReadablePropertyNull() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -81,6 +89,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testIsWritablePropertyNull() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -93,6 +102,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testReadableAndWritableForIndexedProperties() {
 		BeanWrapper bw = new BeanWrapperImpl(IndexedTestBean.class);
 
@@ -137,6 +147,7 @@ public class BeanWrapperTests extends TestCase {
 		assertFalse(bw.isWritableProperty("array[key1]"));
 	}
 
+	@Test
 	public void testTypeDeterminationForIndexedProperty() {
 		BeanWrapper bw = new BeanWrapperImpl(IndexedTestBean.class);
 		assertEquals(null, bw.getPropertyType("map[key0]"));
@@ -150,6 +161,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(String.class, bw.getPropertyType("map[key0]"));
 	}
 
+	@Test
 	public void testGetterThrowsException() {
 		GetterBean gb = new GetterBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -157,6 +169,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Set name to tom", gb.getName().equals("tom"));
 	}
 
+	@Test
 	public void testEmptyPropertyValuesSet() {
 		TestBean t = new TestBean();
 		int age = 50;
@@ -177,6 +190,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAllValid() {
 		TestBean t = new TestBean();
 		String newName = "tony";
@@ -199,6 +213,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBeanWrapperUpdates() {
 		TestBean t = new TestBean();
 		int newAge = 33;
@@ -215,6 +230,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testValidNullUpdate() {
 		TestBean t = new TestBean();
 		t.setName("Frank");	// we need to change it back
@@ -229,6 +245,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("spouse is now null", t.getSpouse() == null);
 	}
 
+	@Test
 	public void testIgnoringIndexedProperty() {
 		MutablePropertyValues values = new MutablePropertyValues();
 		values.addPropertyValue("toBeIgnored[0]", new Integer(42));
@@ -236,6 +253,7 @@ public class BeanWrapperTests extends TestCase {
 		bw.setPropertyValues(values, true);
 	}
 
+	@Test
 	public void testConvertPrimitiveToString() {
 		MutablePropertyValues values = new MutablePropertyValues();
 		values.addPropertyValue("name", new Integer(42));
@@ -245,6 +263,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("42", tb.getName());
 	}
 
+	@Test
 	public void testConvertClassToString() {
 		MutablePropertyValues values = new MutablePropertyValues();
 		values.addPropertyValue("name", Integer.class);
@@ -259,6 +278,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(Integer.class.toString(), tb.getName());
 	}
 
+	@Test
 	public void testBooleanObject() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -273,6 +293,7 @@ public class BeanWrapperTests extends TestCase {
 
 	}
 
+	@Test
 	public void testNumberObjects() {
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -306,6 +327,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(tb.getBigDecimal()));
 	}
 
+	@Test
 	public void testNumberCoercion() {
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -339,18 +361,19 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(tb.getBigDecimal()));
 	}
 
+	@Test
 	public void testEnumByFieldName() {
 		EnumTester et = new EnumTester();
 		BeanWrapper bw = new BeanWrapperImpl(et);
 
-		bw.setPropertyValue("flushMode", "MANUAL");
-		assertEquals(FlushMode.MANUAL, et.getFlushMode());
+		bw.setPropertyValue("autowire", "BY_NAME");
+		assertEquals(Autowire.BY_NAME, et.getAutowire());
 
-		bw.setPropertyValue("flushMode", "  AUTO ");
-		assertEquals(FlushMode.AUTO, et.getFlushMode());
+		bw.setPropertyValue("autowire", "  BY_TYPE ");
+		assertEquals(Autowire.BY_TYPE, et.getAutowire());
 
 		try {
-			bw.setPropertyValue("flushMode", "EVER");
+			bw.setPropertyValue("autowire", "NHERITED");
 			fail("Should have thrown TypeMismatchException");
 		}
 		catch (TypeMismatchException ex) {
@@ -358,6 +381,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPropertiesProperty() throws Exception {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
@@ -375,6 +399,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Freedom==slavery", freedomVal.equals("slavery"));
 	}
 
+	@Test
 	public void testStringArrayProperty() throws Exception {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
@@ -384,7 +409,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 
-		List list = new ArrayList();
+		List<String> list = new ArrayList<String>();
 		list.add("foo");
 		list.add("fi");
 		list.add("fi");
@@ -394,13 +419,13 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 
-		Set set = new HashSet();
+		Set<String> set = new HashSet<String>();
 		set.add("foo");
 		set.add("fi");
 		set.add("fum");
 		bw.setPropertyValue("stringArray", set);
 		assertTrue("stringArray length = 3", pt.stringArray.length == 3);
-		List result = Arrays.asList(pt.stringArray);
+		List<String> result = Arrays.asList(pt.stringArray);
 		assertTrue("correct values", result.contains("foo") && result.contains("fi") && result.contains("fum"));
 
 		bw.setPropertyValue("stringArray", "one");
@@ -411,6 +436,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("stringArray is null", pt.stringArray == null);
 	}
 
+	@Test
 	public void testStringArrayPropertyWithCustomStringEditor() throws Exception {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
@@ -425,7 +451,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 
-		List list = new ArrayList();
+		List<String> list = new ArrayList<String>();
 		list.add("4foo");
 		list.add("7fi");
 		list.add("6fi");
@@ -435,13 +461,13 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 
-		Set set = new HashSet();
+		Set<String> set = new HashSet<String>();
 		set.add("4foo");
 		set.add("7fi");
 		set.add("6fum");
 		bw.setPropertyValue("stringArray", set);
 		assertTrue("stringArray length = 3", pt.stringArray.length == 3);
-		List result = Arrays.asList(pt.stringArray);
+		List<String> result = Arrays.asList(pt.stringArray);
 		assertTrue("correct values", result.contains("foo") && result.contains("fi") && result.contains("fum"));
 
 		bw.setPropertyValue("stringArray", "8one");
@@ -449,6 +475,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("one"));
 	}
 
+	@Test
 	public void testStringArrayPropertyWithStringSplitting() throws Exception {
 		PropsTester pt = new PropsTester();
 		BeanWrapperImpl bw = new BeanWrapperImpl(pt);
@@ -458,6 +485,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
 	}
 
+	@Test
 	public void testStringArrayPropertyWithCustomStringDelimiter() throws Exception {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
@@ -467,6 +495,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
 	}
 
+	@Test
 	public void testStringPropertyWithCustomEditor() throws Exception {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -488,6 +517,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("", tb.getName());
 	}
 
+	@Test
 	public void testIntArrayProperty() {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
@@ -502,7 +532,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 				pt.intArray[2] == 2 && pt.intArray[3] == 3);
 
-		List list = new ArrayList();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new Integer(4));
 		list.add("5");
 		list.add(new Integer(2));
@@ -512,13 +542,13 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 				pt.intArray[2] == 2 && pt.intArray[3] == 3);
 
-		Set set = new HashSet();
+		Set<Object> set = new HashSet<Object>();
 		set.add("4");
 		set.add(new Integer(5));
 		set.add("3");
 		bw.setPropertyValue("intArray", set);
 		assertTrue("intArray length = 3", pt.intArray.length == 3);
-		List result = new ArrayList();
+		List<Integer> result = new ArrayList<Integer>();
 		result.add(new Integer(pt.intArray[0]));
 		result.add(new Integer(pt.intArray[1]));
 		result.add(new Integer(pt.intArray[2]));
@@ -542,6 +572,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.intArray[0] == 1);
 	}
 
+	@Test
 	public void testIntArrayPropertyWithCustomEditor() {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
@@ -574,6 +605,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.intArray[0] == 1);
 	}
 
+	@Test
 	public void testIntArrayPropertyWithStringSplitting() throws Exception {
 		PropsTester pt = new PropsTester();
 		BeanWrapperImpl bw = new BeanWrapperImpl(pt);
@@ -583,6 +615,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5);
 	}
 
+	@Test
 	public void testIndividualAllValid() {
 		TestBean t = new TestBean();
 		String newName = "tony";
@@ -602,6 +635,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void test2Invalid() {
 		TestBean t = new TestBean();
 		String newName = "tony";
@@ -625,6 +659,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPossibleMatches() {
 		TestBean tb = new TestBean();
 		try {
@@ -639,6 +674,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testTypeMismatch() {
 		TestBean t = new TestBean();
 		try {
@@ -651,6 +687,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEmptyValueForPrimitiveProperty() {
 		TestBean t = new TestBean();
 		try {
@@ -666,6 +703,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetPropertyValuesIgnoresInvalidNestedOnRequest() {
 		ITestBean rod = new TestBean();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -685,6 +723,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetNestedProperty() {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 35);
@@ -699,6 +738,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("spousesSpouse = initial point", rod == spousesSpouse);
 	}
 
+	@Test
 	public void testGetNestedPropertyNullValue() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 35);
@@ -716,6 +756,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetNestedProperty() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 0);
@@ -735,6 +776,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(rod, bw.getPropertyValue("spouse.spouse"));
 	}
 
+	@Test
 	public void testSetNestedPropertyNullValue() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		BeanWrapper bw = new BeanWrapperImpl(rod);
@@ -749,6 +791,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSetNestedPropertyPolymorphic() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new Employee();
@@ -770,6 +813,7 @@ public class BeanWrapperTests extends TestCase {
 				"Lewisham".equals(kbw.getPropertyValue("spouse.spouse.spouse.spouse.company")));
 	}
 
+	@Test
 	public void testNullObject() {
 		try {
 			new BeanWrapperImpl((Object) null);
@@ -780,6 +824,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testNestedProperties() {
 		String doctorCompany = "";
 		String lawyerCompany = "Dr. Sueem";
@@ -791,6 +836,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(lawyerCompany, tb.getLawyer().getCompany());
 	}
 
+	@Test
 	public void testIndexedProperties() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -853,6 +899,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("nameB", bw.getPropertyValue("map[key4][1].name"));
 	}
 
+	@Test
 	public void testIndexedPropertiesWithDirectAccess() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -911,6 +958,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(tb5, bw.getPropertyValue("map['key9']"));
 	}
 
+	@Test
 	public void testMapAccessWithTypeConversion() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -943,6 +991,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testMapAccessWithUnmodifiableMap() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -955,7 +1004,7 @@ public class BeanWrapperTests extends TestCase {
 			}
 		});
 
-		Map inputMap = new HashMap();
+		Map<Integer, String> inputMap = new HashMap<Integer, String>();
 		inputMap.put(new Integer(1), "rod");
 		inputMap.put(new Integer(2), "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -965,6 +1014,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
 	}
 
+	@Test
 	public void testMapAccessWithCustomUnmodifiableMap() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -977,7 +1027,7 @@ public class BeanWrapperTests extends TestCase {
 			}
 		});
 
-		Map inputMap = new HashMap();
+		Map<Object, Object> inputMap = new HashMap<Object, Object>();
 		inputMap.put(new Integer(1), "rod");
 		inputMap.put(new Integer(2), "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -987,6 +1037,8 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
 	}
 
+	@SuppressWarnings("unchecked") // must work with raw map in this test
+	@Test
 	public void testRawMapAccessWithNoEditorRegistered() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1001,6 +1053,7 @@ public class BeanWrapperTests extends TestCase {
 		assertFalse(readOnlyMap.isAccessed());
 	}
 
+	@Test
 	public void testPrimitiveArray() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1010,6 +1063,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(2, tb.getArray()[1]);
 	}
 
+	@Test
 	public void testLargeMatchingPrimitiveArray() {
 		if (LogFactory.getLog(BeanWrapperTests.class).isTraceEnabled()) {
 			// Skip this test: Trace logging blows the time limit.
@@ -1065,6 +1119,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Took too long", sw.getLastTaskTimeMillis() > time1);
 	}
 
+	@Test
 	public void testLargeMatchingPrimitiveArrayWithSpecificEditor() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1082,6 +1137,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(1, tb.getArray()[1]);
 	}
 
+	@Test
 	public void testLargeMatchingPrimitiveArrayWithIndexSpecificEditor() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1099,6 +1155,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(1, tb.getArray()[1]);
 	}
 
+	@Test
 	public void testPropertiesInProtectedBaseBean() {
 		DerivedFromProtectedBaseBean bean = new DerivedFromProtectedBaseBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1107,6 +1164,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("someValue", bean.getSomeProperty());
 	}
 
+	@Test
 	public void testErrorMessageOfNestedProperty() {
 		ITestBean parent = new TestBean();
 		ITestBean child = new DifferentTestBean();
@@ -1121,19 +1179,20 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testMatchingCollections() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Collection coll = new HashSet();
+		Collection<String> coll = new HashSet<String>();
 		coll.add("coll1");
 		bw.setPropertyValue("collection", coll);
-		Set set = new HashSet();
+		Set<String> set = new HashSet<String>();
 		set.add("set1");
 		bw.setPropertyValue("set", set);
-		SortedSet sortedSet = new TreeSet();
+		SortedSet<String> sortedSet = new TreeSet<String>();
 		sortedSet.add("sortedSet1");
 		bw.setPropertyValue("sortedSet", sortedSet);
-		List list = new LinkedList();
+		List<String> list = new LinkedList<String>();
 		list.add("list1");
 		bw.setPropertyValue("list", list);
 		assertSame(coll, tb.getCollection());
@@ -1142,19 +1201,21 @@ public class BeanWrapperTests extends TestCase {
 		assertSame(list, tb.getList());
 	}
 
+	@SuppressWarnings("unchecked") // list cannot be properly parameterized as it breaks other tests
+	@Test
 	public void testNonMatchingCollections() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Collection coll = new ArrayList();
+		Collection<String> coll = new ArrayList<String>();
 		coll.add("coll1");
 		bw.setPropertyValue("collection", coll);
-		List set = new LinkedList();
+		List<String> set = new LinkedList<String>();
 		set.add("set1");
 		bw.setPropertyValue("set", set);
-		List sortedSet = new ArrayList();
+		List<String> sortedSet = new ArrayList<String>();
 		sortedSet.add("sortedSet1");
 		bw.setPropertyValue("sortedSet", sortedSet);
-		Set list = new HashSet();
+		Set<String> list = new HashSet<String>();
 		list.add("list1");
 		bw.setPropertyValue("list", list);
 		assertEquals(1, tb.getCollection().size());
@@ -1167,19 +1228,21 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	@SuppressWarnings("unchecked") // list cannot be properly parameterized as it breaks other tests
+	@Test
 	public void testCollectionsWithArrayValues() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Collection coll = new HashSet();
+		Collection<String> coll = new HashSet<String>();
 		coll.add("coll1");
 		bw.setPropertyValue("collection", coll.toArray());
-		List set = new LinkedList();
+		List<String> set = new LinkedList<String>();
 		set.add("set1");
 		bw.setPropertyValue("set", set.toArray());
-		List sortedSet = new ArrayList();
+		List<String> sortedSet = new ArrayList<String>();
 		sortedSet.add("sortedSet1");
 		bw.setPropertyValue("sortedSet", sortedSet.toArray());
-		Set list = new HashSet();
+		Set<String> list = new HashSet<String>();
 		list.add("list1");
 		bw.setPropertyValue("list", list.toArray());
 		assertEquals(1, tb.getCollection().size());
@@ -1192,19 +1255,21 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	@SuppressWarnings("unchecked") // list cannot be properly parameterized as it breaks other tests
+	@Test
 	public void testCollectionsWithIntArrayValues() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Collection coll = new HashSet();
+		Collection<Integer> coll = new HashSet<Integer>();
 		coll.add(new Integer(0));
 		bw.setPropertyValue("collection", new int[] {0});
-		List set = new LinkedList();
+		List<Integer> set = new LinkedList<Integer>();
 		set.add(new Integer(1));
 		bw.setPropertyValue("set", new int[] {1});
-		List sortedSet = new ArrayList();
+		List<Integer> sortedSet = new ArrayList<Integer>();
 		sortedSet.add(new Integer(2));
 		bw.setPropertyValue("sortedSet", new int[] {2});
-		Set list = new HashSet();
+		Set<Integer> list = new HashSet<Integer>();
 		list.add(new Integer(3));
 		bw.setPropertyValue("list", new int[] {3});
 		assertEquals(1, tb.getCollection().size());
@@ -1217,19 +1282,21 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	@SuppressWarnings("unchecked") // list cannot be properly parameterized as it breaks other tests
+	@Test
 	public void testCollectionsWithIntegerValues() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Collection coll = new HashSet();
+		Collection<Integer> coll = new HashSet<Integer>();
 		coll.add(new Integer(0));
 		bw.setPropertyValue("collection", new Integer(0));
-		List set = new LinkedList();
+		List<Integer> set = new LinkedList<Integer>();
 		set.add(new Integer(1));
 		bw.setPropertyValue("set", new Integer(1));
-		List sortedSet = new ArrayList();
+		List<Integer> sortedSet = new ArrayList<Integer>();
 		sortedSet.add(new Integer(2));
 		bw.setPropertyValue("sortedSet", new Integer(2));
-		Set list = new HashSet();
+		Set<Integer> list = new HashSet<Integer>();
 		list.add(new Integer(3));
 		bw.setPropertyValue("list", new Integer(3));
 		assertEquals(1, tb.getCollection().size());
@@ -1242,16 +1309,18 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	@SuppressWarnings("unchecked") // list cannot be properly parameterized as it breaks other tests
+	@Test
 	public void testCollectionsWithStringValues() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		List set = new LinkedList();
+		List<String> set = new LinkedList<String>();
 		set.add("set1");
 		bw.setPropertyValue("set", "set1");
-		List sortedSet = new ArrayList();
+		List<String> sortedSet = new ArrayList<String>();
 		sortedSet.add("sortedSet1");
 		bw.setPropertyValue("sortedSet", "sortedSet1");
-		Set list = new HashSet();
+		Set<String> list = new HashSet<String>();
 		list.add("list1");
 		bw.setPropertyValue("list", "list1");
 		assertEquals(1, tb.getSet().size());
@@ -1262,6 +1331,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	@Test
 	public void testCollectionsWithStringValuesAndCustomEditor() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1282,26 +1352,28 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().contains("list1"));
 	}
 
+	@Test
 	public void testMatchingMaps() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Map map = new HashMap();
+		Map<String, String> map = new HashMap<String, String>();
 		map.put("key", "value");
 		bw.setPropertyValue("map", map);
-		SortedMap sortedMap = new TreeMap();
+		SortedMap<?, ?> sortedMap = new TreeMap<Object, Object>();
 		map.put("sortedKey", "sortedValue");
 		bw.setPropertyValue("sortedMap", sortedMap);
 		assertSame(map, tb.getMap());
 		assertSame(sortedMap, tb.getSortedMap());
 	}
 
+	@Test
 	public void testNonMatchingMaps() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Map map = new TreeMap();
+		Map<String, String> map = new TreeMap<String, String>();
 		map.put("key", "value");
 		bw.setPropertyValue("map", map);
-		Map sortedMap = new HashMap();
+		Map<String, String> sortedMap = new TreeMap<String, String>();
 		sortedMap.put("sortedKey", "sortedValue");
 		bw.setPropertyValue("sortedMap", sortedMap);
 		assertEquals(1, tb.getMap().size());
@@ -1310,6 +1382,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("sortedValue", tb.getSortedMap().get("sortedKey"));
 	}
 
+	@Test
 	public void testSetNumberProperties() {
 	NumberPropertyBean bean = new NumberPropertyBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1359,6 +1432,7 @@ public class BeanWrapperTests extends TestCase {
 
 	}
 
+	@Test
 	public void testAlternativesForTypo() {
 		IntelliBean ib = new IntelliBean();
 		BeanWrapper bw = new BeanWrapperImpl(ib);
@@ -1371,6 +1445,7 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAlternativesForTypos() {
 		IntelliBean ib = new IntelliBean();
 		BeanWrapper bw = new BeanWrapperImpl(ib);
@@ -1398,14 +1473,14 @@ public class BeanWrapperTests extends TestCase {
 
 	private static class EnumTester {
 
-		private FlushMode flushMode;
+		private Autowire autowire;
 
-		public void setFlushMode(FlushMode flushMode) {
-			this.flushMode = flushMode;
+		public void setAutowire(Autowire autowire) {
+			this.autowire = autowire;
 		}
 
-		public FlushMode getFlushMode() {
-			return flushMode;
+		public Autowire getAutowire() {
+			return autowire;
 		}
 	}
 
@@ -1608,8 +1683,29 @@ public class BeanWrapperTests extends TestCase {
 		public void setMyStringss(String string) {}
 	}
 
+	private static class Employee extends TestBean {
 
-	public static class ReadOnlyMap extends HashMap {
+		private String co;
+
+		/**
+		 * Constructor for Employee.
+		 */
+		public Employee() {
+			super();
+		}
+
+		public String getCompany() {
+			return co;
+		}
+
+		public void setCompany(String co) {
+			this.co = co;
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	public static class ReadOnlyMap extends HashMap<Object, Object> {
 
 		private boolean frozen = false;
 
@@ -1619,7 +1715,7 @@ public class BeanWrapperTests extends TestCase {
 			this.frozen = true;
 		}
 
-		public ReadOnlyMap(Map map) {
+		public ReadOnlyMap(Map<Object, Object> map) {
 			super(map);
 			this.frozen = true;
 		}
@@ -1633,12 +1729,12 @@ public class BeanWrapperTests extends TestCase {
 			}
 		}
 
-		public Set entrySet() {
+		public Set<Entry<Object, Object>> entrySet() {
 			this.accessed = true;
 			return super.entrySet();
 		}
 
-		public Set keySet() {
+		public Set<Object> keySet() {
 			this.accessed = true;
 			return super.keySet();
 		}

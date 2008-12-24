@@ -22,6 +22,6 @@
 		</property>
 	</bean>
 
-	<bean id="derivedSally" class="org.springframework.beans.DerivedTestBean" p:name="Sally Greenwood" p:spouseRef="r"/>
+	<bean id="derivedSally" class="test.beans.DerivedTestBean" p:name="Sally Greenwood" p:spouseRef="r"/>
 
 </beans>
