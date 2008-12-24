@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
 import java.io.IOException;
 
 /**
- * Interface used for {@link org.springframework.beans.TestBean}.
+ * Interface used for {@link test.beans.TestBean}.
  *
  * <p>Two methods are the same as on Person, but if this
  * extends person it breaks quite a few tests..

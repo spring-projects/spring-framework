@@ -26,14 +26,15 @@ import net.sf.cglib.proxy.NoOp;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ObjectUtils;
+
+import test.beans.ITestBean;
+import test.beans.IndexedTestBean;
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson

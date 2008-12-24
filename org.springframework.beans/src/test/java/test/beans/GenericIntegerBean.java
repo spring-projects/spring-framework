@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
-import test.beans.GenericBean;
 
 /**
  * @author Juergen Hoeller

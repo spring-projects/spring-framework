@@ -25,7 +25,6 @@ import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -34,6 +33,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.TestBean;
 
 /**
  * @author Rob Harrop

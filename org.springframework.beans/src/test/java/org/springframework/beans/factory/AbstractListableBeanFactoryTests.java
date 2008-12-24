@@ -18,7 +18,7 @@ package org.springframework.beans.factory;
 
 import junit.framework.Assert;
 
-import org.springframework.beans.TestBean;
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson

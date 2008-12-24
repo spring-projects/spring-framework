@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
-import java.util.Set;
-
-import test.beans.GenericBean;
+import org.springframework.core.enums.ShortCodedLabeledEnum;
 
 /**
- * @author Juergen Hoeller
+ * @author Rob Harrop
  */
-public class GenericSetOfIntegerBean extends GenericBean<Set<Integer>> {
+public class Colour extends ShortCodedLabeledEnum {
+
+	public static final Colour RED = new Colour(0, "RED");
+	public static final Colour BLUE = new Colour(1, "BLUE");
+	public static final Colour GREEN = new Colour(2, "GREEN");
+	public static final Colour PURPLE = new Colour(3, "PURPLE");
+
+	private Colour(int code, String label) {
+		super(code, label);
+	}
 
 }

@@ -3,7 +3,7 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<bean id="jenny" class="org.springframework.beans.TestBean">	
+	<bean id="jenny" class="test.beans.TestBean">	
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
@@ -12,7 +12,7 @@
 		</property>
 	</bean>
 	
-	<bean id="david" class="org.springframework.beans.TestBean">	
+	<bean id="david" class="test.beans.TestBean">	
 		<description>
 			Simple bean, without any collections.
 		</description>
@@ -23,7 +23,7 @@
 		<property name="age"><value>27</value></property>
 	</bean>
 	
-	<bean id="rod" class="org.springframework.beans.TestBean">	
+	<bean id="rod" class="test.beans.TestBean">	
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>32</value></property>
 		<property name="friends">
@@ -35,7 +35,7 @@
 		</property>
 	</bean>
 	
-	<bean id="pJenny" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="pJenny" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
@@ -44,12 +44,12 @@
 		</property>
 	</bean>
 
-	<bean id="pDavid" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="pDavid" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>David</value></property>
 		<property name="age"><value>27</value></property>
 	</bean>
 
-	<bean id="pRod" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="pRod" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>32</value></property>
 		<property name="friends">
@@ -63,7 +63,7 @@
 	<!--
 		Try setting a collection property to a single value
 	-->
-	<bean id="loner" class="org.springframework.beans.TestBean">	
+	<bean id="loner" class="test.beans.TestBean">	
 		<property name="name"><value>loner</value></property>
 		<property name="age"><value>26</value></property>
 		<property name="friends">
@@ -97,15 +97,15 @@
 		</property>
 	</bean>
 
-	<bean id="verbose" class="org.springframework.beans.TestBean">
+	<bean id="verbose" class="test.beans.TestBean">
 		<property name="name"><value>verbose</value></property>
 	</bean>
 	
-	<bean id="verbose2" class="org.springframework.beans.TestBean">	
+	<bean id="verbose2" class="test.beans.TestBean">	
 		<property name="name"><idref local="verbose"/></property>
 	</bean>
 
-	<bean id="verbose3" class="org.springframework.beans.TestBean">	
+	<bean id="verbose3" class="test.beans.TestBean">	
 		<property name="name"><idref bean="verbose"/></property>
 	</bean>
 

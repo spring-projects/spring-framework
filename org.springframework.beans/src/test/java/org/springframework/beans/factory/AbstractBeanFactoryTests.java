@@ -24,8 +24,9 @@ import junit.framework.Assert;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyBatchUpdateException;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+
+import test.beans.TestBean;
 
 /**
  * Subclasses must implement setUp() to initialize bean factory

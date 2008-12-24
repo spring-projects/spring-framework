@@ -39,6 +39,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import test.beans.GenericBean;
+import test.beans.GenericIntegerBean;
+import test.beans.GenericSetOfIntegerBean;
+import test.beans.TestBean;
 
 /**
  * @author Juergen Hoeller

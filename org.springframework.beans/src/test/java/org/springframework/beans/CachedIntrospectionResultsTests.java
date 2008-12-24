@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.core.OverridingClassLoader;
 
+import test.beans.TestBean;
+
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -35,7 +37,7 @@ public final class CachedIntrospectionResultsTests {
 		assertTrue(CachedIntrospectionResults.classCache.containsKey(TestBean.class));
 
 		ClassLoader child = new OverridingClassLoader(getClass().getClassLoader());
-		Class<?> tbClass = child.loadClass("org.springframework.beans.TestBean");
+		Class<?> tbClass = child.loadClass("test.beans.TestBean");
 		assertFalse(CachedIntrospectionResults.classCache.containsKey(tbClass));
 		CachedIntrospectionResults.acceptClassLoader(child);
 		bw = new BeanWrapperImpl(tbClass);
