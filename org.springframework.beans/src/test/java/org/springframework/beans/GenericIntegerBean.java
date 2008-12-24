@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import test.beans.GenericBean;
+
 /**
  * @author Juergen Hoeller
  */

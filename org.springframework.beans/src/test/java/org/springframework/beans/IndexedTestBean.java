@@ -34,13 +34,13 @@ public class IndexedTestBean {
 
 	private TestBean[] array;
 
-	private Collection collection;
+	private Collection<?> collection;
 
 	private List list;
 
-	private Set set;
+	private Set<? super Object> set;
 
-	private SortedSet sortedSet;
+	private SortedSet<? super Object> sortedSet;
 
 	private Map map;
 
@@ -69,13 +69,13 @@ public class IndexedTestBean {
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
 		this.array = new TestBean[] {tb0, tb1};
-		this.list = new ArrayList();
+		this.list = new ArrayList<Object>();
 		this.list.add(tb2);
 		this.list.add(tb3);
-		this.set = new TreeSet();
+		this.set = new TreeSet<Object>();
 		this.set.add(tb6);
 		this.set.add(tb7);
-		this.map = new HashMap();
+		this.map = new HashMap<Object, Object>();
 		this.map.put("key1", tb4);
 		this.map.put("key2", tb5);
 		this.map.put("key.3", tb5);
@@ -94,11 +94,11 @@ public class IndexedTestBean {
 		this.array = array;
 	}
 
-	public Collection getCollection() {
+	public Collection<?> getCollection() {
 		return collection;
 	}
 
-	public void setCollection(Collection collection) {
+	public void setCollection(Collection<?> collection) {
 		this.collection = collection;
 	}
 
@@ -110,19 +110,19 @@ public class IndexedTestBean {
 		this.list = list;
 	}
 
-	public Set getSet() {
+	public Set<?> getSet() {
 		return set;
 	}
 
-	public void setSet(Set set) {
+	public void setSet(Set<? super Object> set) {
 		this.set = set;
 	}
 
-	public SortedSet getSortedSet() {
+	public SortedSet<? super Object> getSortedSet() {
 		return sortedSet;
 	}
 
-	public void setSortedSet(SortedSet sortedSet) {
+	public void setSortedSet(SortedSet<? super Object> sortedSet) {
 		this.sortedSet = sortedSet;
 	}
 

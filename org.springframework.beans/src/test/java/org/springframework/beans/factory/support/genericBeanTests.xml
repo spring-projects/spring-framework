@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="listOfArrays" class="org.springframework.beans.GenericBean">
+	<bean id="listOfArrays" class="test.beans.GenericBean">
 		<property name="listOfArrays">
 			<list>
 				<list>

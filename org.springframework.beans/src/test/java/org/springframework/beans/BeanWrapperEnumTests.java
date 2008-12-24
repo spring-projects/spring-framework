@@ -20,6 +20,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import test.beans.CustomEnum;
+import test.beans.GenericBean;
+
 /**
  * @author Juergen Hoeller
  * @author Chris Beams

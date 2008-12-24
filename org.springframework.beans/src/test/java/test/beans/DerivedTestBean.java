@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package test.beans;
 
 import java.io.Serializable;
 
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 

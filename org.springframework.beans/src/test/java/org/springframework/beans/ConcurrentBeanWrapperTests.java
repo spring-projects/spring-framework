@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -24,29 +26,32 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
 
 /**
  * @author Guillaume Poirier
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 08.03.2004
  */
-public class ConcurrentBeanWrapperTests extends TestCase {
+public final class ConcurrentBeanWrapperTests {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private Set set = Collections.synchronizedSet(new HashSet());
+	private Set<TestRun> set = Collections.synchronizedSet(new HashSet<TestRun>());
 
 	private Throwable ex = null;
 
+	@Test
 	public void testSingleThread() {
 		for (int i = 0; i < 100; i++) {
 			performSet();
 		}
 	}
-
+	
+	@Test
 	public void testConcurrent() {
 		for (int i = 0; i < 10; i++) {
 			TestRun run = new TestRun(this);
@@ -79,7 +84,7 @@ public class ConcurrentBeanWrapperTests extends TestCase {
 
 		assertTrue("The System properties must not be empty", p.size() != 0);
 
-		for (Iterator i = p.entrySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = p.entrySet().iterator(); i.hasNext();) {
 			i.next();
 			if (Math.random() > 0.9) {
 				i.remove();

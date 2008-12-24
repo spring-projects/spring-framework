@@ -39,7 +39,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
@@ -72,6 +71,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.StopWatch;
+
+import test.beans.DerivedTestBean;
 
 import common.beans.core.SideEffectBean;
 
