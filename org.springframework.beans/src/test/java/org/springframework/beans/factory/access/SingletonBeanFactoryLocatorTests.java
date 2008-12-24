@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.beans.factory.access;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.ClassUtils;
@@ -26,12 +28,14 @@ import org.springframework.util.ClassUtils;
  * @author Colin Sampaleanu
  * @author Chris Beams
  */
-public class SingletonBeanFactoryLocatorTests {
+public final class SingletonBeanFactoryLocatorTests {
+	private static final Class<?> CLASS = SingletonBeanFactoryLocatorTests.class;
+	private static final String REF1_XML = CLASS.getSimpleName() + "-ref1.xml";
 
 	@Test
 	public void testBasicFunctionality() {
 		SingletonBeanFactoryLocator facLoc = new SingletonBeanFactoryLocator(
-				"classpath*:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		
 		basicFunctionalityTest(facLoc);
 	}
@@ -73,16 +77,16 @@ public class SingletonBeanFactoryLocatorTests {
 	public void testGetInstance() {
 		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
-				ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+				ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		getInstanceTest1(facLoc);
 		
 		facLoc = SingletonBeanFactoryLocator.getInstance(
-				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		getInstanceTest2(facLoc);
 
 		// This will actually get another locator instance, as the key is the resource name.
 		facLoc = SingletonBeanFactoryLocator.getInstance(
-				"classpath:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+				"classpath:" + ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		getInstanceTest3(facLoc);
 		
 	}
@@ -179,4 +183,56 @@ public class SingletonBeanFactoryLocatorTests {
 		bfr.release();
 	}
 
+}
+
+
+class TestBean {
+
+	private String name;
+
+	private List<?> list;
+
+	private Object objRef;
+
+	/**
+	 * @return Returns the name.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name The name to set.
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return Returns the list.
+	 */
+	public List<?> getList() {
+		return list;
+	}
+
+	/**
+	 * @param list The list to set.
+	 */
+	public void setList(List<?> list) {
+		this.list = list;
+	}
+
+	/**
+	 * @return Returns the object.
+	 */
+	public Object getObjRef() {
+		return objRef;
+	}
+
+	/**
+	 * @param object The object to set.
+	 */
+	public void setObjRef(Object object) {
+		this.objRef = object;
+	}
 }
