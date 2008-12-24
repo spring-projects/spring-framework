@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -25,23 +26,24 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.Resource;
 
 /**
+ * Unit tests for {@link CustomAutowireConfigurer}.
+ * 
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class CustomAutowireConfigurerTests {
+public final class CustomAutowireConfigurerTests {
 
-	private static final String CONFIG_LOCATION =
-			"classpath:org/springframework/beans/factory/annotation/customAutowireConfigurer.xml";
-
+	private static final Resource CONTEXT = qualifiedResource(CustomAutowireConfigurerTests.class, "context.xml");
 
 	@Test
 	public void testCustomResolver() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
-		reader.loadBeanDefinitions(CONFIG_LOCATION);
+		reader.loadBeanDefinitions(CONTEXT);
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
 		CustomResolver customResolver = new CustomResolver();
 		bf.setAutowireCandidateResolver(customResolver);

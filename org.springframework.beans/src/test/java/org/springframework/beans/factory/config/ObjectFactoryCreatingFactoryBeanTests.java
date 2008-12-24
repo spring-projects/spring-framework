@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,65 +16,72 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
+
 import java.util.Date;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.easymock.MockControl;
+import org.springframework.core.io.Resource;
 
 /**
- * Unit tests for the ObjectFactoryCreatingFactoryBean class.
+ * Unit tests for {@link ObjectFactoryCreatingFactoryBean}.
  *
  * @author Colin Sampaleanu
  * @author Rick Evans
+ * @author Chris Beams
  * @since 2004-05-11
  */
-public final class ObjectFactoryCreatingFactoryBeanTests extends TestCase {
+public final class ObjectFactoryCreatingFactoryBeanTests {
 
+	private static final Resource CONTEXT =
+		qualifiedResource(ObjectFactoryCreatingFactoryBeanTests.class, "context.xml");
+	
 	private BeanFactory beanFactory;
 
-
-	protected void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource(
-				"ObjectFactoryCreatingFactoryBeanTests.xml", getClass()));
+	@Before
+	public void setUp() {
+		this.beanFactory = new XmlBeanFactory(CONTEXT);
 	}
 
-
+	@Test
 	public void testBasicOperation() throws BeansException {
 		TestBean testBean = (TestBean) beanFactory.getBean("testBean");
-		ObjectFactory objectFactory = testBean.getObjectFactory();
+		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
 		assertTrue(date1 != date2);
 	}
 
+	@Test
 	public void testDoesNotComplainWhenTargetBeanNameRefersToSingleton() throws Exception {
 		final String targetBeanName = "singleton";
 		final String expectedSingleton = "Alicia Keys";
 
-		MockControl mock = MockControl.createControl(BeanFactory.class);
-		BeanFactory beanFactory = (BeanFactory) mock.getMock();
-		beanFactory.getBean(targetBeanName);
-		mock.setReturnValue(expectedSingleton);
-		mock.replay();
+		BeanFactory beanFactory = createMock(BeanFactory.class);
+		expect(beanFactory.getBean(targetBeanName)).andReturn(expectedSingleton);
+		replay(beanFactory);
 
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
 		factory.setTargetBeanName(targetBeanName);
 		factory.setBeanFactory(beanFactory);
 		factory.afterPropertiesSet();
-		ObjectFactory objectFactory = (ObjectFactory) factory.getObject();
+		ObjectFactory<?> objectFactory = (ObjectFactory<?>) factory.getObject();
 		Object actualSingleton = objectFactory.getObject();
 		assertSame(expectedSingleton, actualSingleton);
 		
-		mock.verify();
+		verify(beanFactory);
+
 	}
 
+	@Test
 	public void testWhenTargetBeanNameIsNull() throws Exception {
 		try {
 			new ObjectFactoryCreatingFactoryBean().afterPropertiesSet();
@@ -83,6 +90,7 @@ public final class ObjectFactoryCreatingFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException expected) {}
 	}
 
+	@Test
 	public void testWhenTargetBeanNameIsEmptyString() throws Exception {
 		try {
 			ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
@@ -93,6 +101,7 @@ public final class ObjectFactoryCreatingFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException expected) {}
 	}
 
+	@Test
 	public void testWhenTargetBeanNameIsWhitespacedString() throws Exception {
 		try {
 			ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
@@ -103,6 +112,7 @@ public final class ObjectFactoryCreatingFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException expected) {}
 	}
 
+	@Test
 	public void testEnsureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() throws Exception {
 		assertEquals("Must be reporting that it creates ObjectFactory instances (as per class contract).",
 			ObjectFactory.class, new ObjectFactoryCreatingFactoryBean().getObjectType());
@@ -111,14 +121,14 @@ public final class ObjectFactoryCreatingFactoryBeanTests extends TestCase {
 
 	public static class TestBean {
 
-		public ObjectFactory objectFactory;
+		public ObjectFactory<?> objectFactory;
 
 
-		public ObjectFactory getObjectFactory() {
+		public ObjectFactory<?> getObjectFactory() {
 			return objectFactory;
 		}
 
-		public void setObjectFactory(ObjectFactory objectFactory) {
+		public void setObjectFactory(ObjectFactory<?> objectFactory) {
 			this.objectFactory = objectFactory;
 		}
 

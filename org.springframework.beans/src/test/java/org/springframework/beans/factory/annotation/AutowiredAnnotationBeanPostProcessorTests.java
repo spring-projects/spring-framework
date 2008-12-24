@@ -40,12 +40,14 @@ import test.beans.NestedTestBean;
 import test.beans.TestBean;
 
 /**
+ * Unit tests for {@link AutowiredAnnotationBeanPostProcessor}.
+ * 
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
  * @author Chris Beams
  */
-public class AutowiredAnnotationBeanPostProcessorTests {
+public final class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testIncompleteBeanDefinition() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,31 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.assertEquals;
+import static test.util.TestResourceUtils.qualifiedResource;
+
 import java.sql.Connection;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.beans.TestBean;
 
 /**
+ * Unit tests for {@link FieldRetrievingFactoryBean}.
+ * 
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 31.07.2004
  */
-public class FieldRetrievingFactoryBeanTests extends TestCase {
+public final class FieldRetrievingFactoryBeanTests {
+	
+	private static final Resource CONTEXT =
+		qualifiedResource(FieldRetrievingFactoryBeanTests.class, "context.xml");
 
+	@Test
 	public void testStaticField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setStaticField("java.sql.Connection.TRANSACTION_SERIALIZABLE");
@@ -39,6 +48,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
 	}
 
+	@Test
 	public void testStaticFieldWithWhitespace() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setStaticField("  java.sql.Connection.TRANSACTION_SERIALIZABLE  ");
@@ -46,6 +56,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
 	}
 
+	@Test
 	public void testStaticFieldViaClassAndFieldName() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetClass(Connection.class);
@@ -54,6 +65,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
 	}
 
+	@Test
 	public void testNonStaticField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		PublicFieldHolder target = new PublicFieldHolder();
@@ -63,6 +75,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(target.publicField, fr.getObject());
 	}
 
+	@Test
 	public void testNothingButBeanName() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setBeanName("java.sql.Connection.TRANSACTION_SERIALIZABLE");
@@ -70,6 +83,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
 	}
 
+	@Test
 	public void testJustTargetField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetField("TRANSACTION_SERIALIZABLE");
@@ -80,6 +94,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testJustTargetClass() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetClass(Connection.class);
@@ -90,6 +105,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testJustTargetObject() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetObject(new PublicFieldHolder());
@@ -100,6 +116,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setBeanName("test.beans.PackageLevelVisibleBean.CONSTANT");
@@ -107,9 +124,10 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals("Wuby", fr.getObject());
 	}
 
+	@Test
 	public void testBeanNameSyntaxWithBeanFactory() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("fieldRetrieving.xml", getClass()));
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		TestBean testBean = (TestBean) bf.getBean("testBean");
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), testBean.getSomeIntegerArray()[0]);
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), testBean.getSomeIntegerArray()[1]);

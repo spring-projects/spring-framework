@@ -19,9 +19,16 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.factory.ObjectFactory;
 
 /**
+ * Shared test types for this package.
+ * 
+ * @author Chris Beams
+ */
+final class TestTypes {}
+
+/**
  * @author Juergen Hoeller
  */
-public class NoOpScope implements Scope {
+class NoOpScope implements Scope {
 
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		throw new UnsupportedOperationException();

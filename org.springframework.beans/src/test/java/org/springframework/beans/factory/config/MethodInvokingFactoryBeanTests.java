@@ -16,23 +16,28 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
 
 /**
+ * Unit tests for {@link MethodInvokingFactoryBean}.
+ * 
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 21.11.2003
  */
-public class MethodInvokingFactoryBeanTests extends TestCase {
+public final class MethodInvokingFactoryBeanTests {
 
+	@Test
 	public void testParameterValidation() throws Exception {
 		String validationError = "improper validation of input properties";
 
@@ -119,6 +124,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.afterPropertiesSet();
 	}
 
+	@Test
 	public void testGetObjectType() throws Exception {
 		TestClass1 tc1 = new TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
@@ -132,7 +138,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
-		Class objType = mcfb.getObjectType();
+		Class<?> objType = mcfb.getObjectType();
 		assertTrue(objType.equals(void.class));
 
 		// verify that we can call a method with args that are subtypes of the
@@ -141,7 +147,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
+		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello"});
 		mcfb.afterPropertiesSet();
 		mcfb.getObjectType();
 
@@ -160,6 +166,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetObject() throws Exception {
 		// singleton, non-static
 		TestClass1 tc1 = new TestClass1();
@@ -217,16 +224,17 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
+		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello"});
 		// should pass
 		mcfb.afterPropertiesSet();
 	}
 
+	@Test
 	public void testArgumentConversion() throws Exception {
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello", "bogus"});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method with wrong number of args");
@@ -251,14 +259,14 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello", "bogus"});
 		mcfb.afterPropertiesSet();
 		assertEquals("hello", mcfb.getObject());
 
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), new Object()});
+		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), new Object()});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method when shouldn't have matched");
@@ -268,6 +276,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testInvokeWithNullArgument() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetClass(TestClass1.class);
@@ -277,6 +286,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		methodInvoker.invoke();
 	}
 
+	@Test
 	public void testInvokeWithIntArgument() throws Exception {
 		ArgumentConvertingMethodInvoker methodInvoker = new ArgumentConvertingMethodInvoker();
 		methodInvoker.setTargetClass(TestClass1.class);
@@ -293,6 +303,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		methodInvoker.invoke();
 	}
 
+	@Test
 	public void testInvokeWithIntArguments() throws Exception {
 		ArgumentConvertingMethodInvoker methodInvoker = new ArgumentConvertingMethodInvoker();
 		methodInvoker.setTargetClass(TestClass1.class);
@@ -363,23 +374,23 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		public static void intArguments(int[] arg) {
 		}
 
-		public static String supertypes(Collection c, Integer i) {
+		public static String supertypes(Collection<?> c, Integer i) {
 			return i.toString();
 		}
 
-		public static String supertypes(Collection c, List l, String s) {
+		public static String supertypes(Collection<?> c, List<?> l, String s) {
 			return s;
 		}
 
-		public static String supertypes2(Collection c, List l, Integer i) {
+		public static String supertypes2(Collection<?> c, List<?> l, Integer i) {
 			return i.toString();
 		}
 
-		public static String supertypes2(Collection c, List l, String s, Integer i) {
+		public static String supertypes2(Collection<?> c, List<?> l, String s, Integer i) {
 			return s;
 		}
 
-		public static String supertypes2(Collection c, List l, String s, String s2) {
+		public static String supertypes2(Collection<?> c, List<?> l, String s, String s2) {
 			return s;
 		}
 	}

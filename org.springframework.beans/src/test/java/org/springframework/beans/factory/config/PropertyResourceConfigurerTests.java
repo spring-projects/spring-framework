@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import static org.junit.Assert.*;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import test.beans.IndexedTestBean;
@@ -53,8 +53,13 @@ import test.beans.TestBean;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class PropertyResourceConfigurerTests {
+public final class PropertyResourceConfigurerTests {
 
+	private static final Class<?> CLASS = PropertyResourceConfigurerTests.class;
+	private static final Resource TEST_PROPS = qualifiedResource(CLASS, "test.properties");
+	private static final Resource XTEST_PROPS = qualifiedResource(CLASS, "xtest.properties"); // does not exist
+	private static final Resource TEST_PROPS_XML = qualifiedResource(CLASS, "test.properties.xml");
+	
 	private DefaultListableBeanFactory factory;
 
 	@Before
@@ -205,7 +210,7 @@ public class PropertyResourceConfigurerTests {
 		factory.registerBeanDefinition("tb", def);
 
 		PropertyOverrideConfigurer poc = new PropertyOverrideConfigurer();
-		poc.setLocation(new ClassPathResource("org/springframework/beans/factory/config/test.properties"));
+		poc.setLocation(TEST_PROPS);
 		poc.postProcessBeanFactory(factory);
 
 		IndexedTestBean tb = (IndexedTestBean) factory.getBean("tb");
@@ -221,11 +226,7 @@ public class PropertyResourceConfigurerTests {
 		factory.registerBeanDefinition("tb", def);
 
 		PropertyOverrideConfigurer poc = new PropertyOverrideConfigurer();
-		poc.setLocations(new Resource[] {
-				new ClassPathResource("org/springframework/beans/factory/config/test.properties"),
-				new ClassPathResource("org/springframework/beans/factory/config/xtest.properties")
-			}
-		);
+		poc.setLocations(new Resource[] { TEST_PROPS, XTEST_PROPS });
 		poc.setIgnoreResourceNotFound(true);
 		poc.postProcessBeanFactory(factory);
 
@@ -242,7 +243,7 @@ public class PropertyResourceConfigurerTests {
 		factory.registerBeanDefinition("tb", def);
 
 		PropertyOverrideConfigurer poc = new PropertyOverrideConfigurer();
-		poc.setLocation(new ClassPathResource("org/springframework/beans/factory/config/test-properties.xml"));
+		poc.setLocation(TEST_PROPS_XML);
 		poc.postProcessBeanFactory(factory);
 
 		IndexedTestBean tb = (IndexedTestBean) factory.getBean("tb");

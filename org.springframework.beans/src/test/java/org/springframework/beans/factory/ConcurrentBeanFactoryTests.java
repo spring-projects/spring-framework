@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -35,7 +36,7 @@ import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Guillaume Poirier
@@ -46,17 +47,15 @@ import org.springframework.core.io.ClassPathResource;
 public final class ConcurrentBeanFactoryTests {
 
 	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
-
-	private static final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-
-	private static final Date date1;
-
-	private static final Date date2;
+	private static final Resource CONTEXT = qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml");
+	
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
+	private static final Date DATE_1, DATE_2;
 
 	static {
 		try {
-			date1 = df.parse("2004/08/08");
-			date2 = df.parse("2000/02/02");
+			DATE_1 = DATE_FORMAT.parse("2004/08/08");
+			DATE_2 = DATE_FORMAT.parse("2000/02/02");
 		}
 		catch (ParseException e) {
 			throw new RuntimeException(e);
@@ -71,10 +70,10 @@ public final class ConcurrentBeanFactoryTests {
 
 	@Before
 	public void setUp() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("concurrent.xml", getClass()));
+		XmlBeanFactory factory = new XmlBeanFactory(CONTEXT);
 		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
-				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) df.clone(), false));
+				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) DATE_FORMAT.clone(), false));
 			}
 		});
 		this.factory = factory;
@@ -119,8 +118,8 @@ public final class ConcurrentBeanFactoryTests {
 		ConcurrentBean b1 = (ConcurrentBean) factory.getBean("bean1");
 		ConcurrentBean b2 = (ConcurrentBean) factory.getBean("bean2");
 
-		assertEquals(b1.getDate(), date1);
-		assertEquals(b2.getDate(), date2);
+		assertEquals(b1.getDate(), DATE_1);
+		assertEquals(b2.getDate(), DATE_2);
 	}
 
 
