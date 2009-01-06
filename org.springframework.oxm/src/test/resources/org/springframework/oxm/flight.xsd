@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+        targetNamespace="http://samples.springframework.org/flight"
+        xmlns:tns="http://samples.springframework.org/flight">
+    <element name="flights">
+        <complexType>
+            <sequence>
+                <element name="flight" type="tns:flightType"
+                         maxOccurs="unbounded">
+                </element>
+            </sequence>
+        </complexType>
+    </element>
+    <element name="flight" type="tns:flightType"/>
+    <complexType name="flightType">
+        <sequence>
+            <element name="number" type="long"/>
+        </sequence>
+    </complexType>
+</schema>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:oxm="http://www.springframework.org/schema/oxm" xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd">
+    <oxm:jaxb1-marshaller id="jaxb1Marshaller" contextPath="org.springframework.oxm.jaxb1"/>
+    <oxm:jibx-marshaller id="jibxMarshaller" target-class="org.springframework.oxm.jibx.Flights"/>
+    <oxm:xmlbeans-marshaller id="xmlBeansMarshaller" options="xmlBeansOptions"/>
+
+    <bean id="xmlBeansOptions" class="org.springframework.oxm.xmlbeans.XmlOptionsFactoryBean">
+        <property name="options">
+            <props>
+                <prop key="SAVE_PRETTY_PRINT">true</prop>
+            </props>
+        </property>
+    </bean>
+</beans>
