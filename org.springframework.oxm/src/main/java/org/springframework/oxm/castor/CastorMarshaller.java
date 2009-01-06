@@ -264,33 +264,39 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
     // Marshalling
     //
 
-    protected final void marshalDomNode(Object graph, Node node) throws XmlMappingException {
+    @Override
+	protected final void marshalDomNode(Object graph, Node node) throws XmlMappingException {
         marshalSaxHandlers(graph, new DomContentHandler(node), null);
     }
 
-    protected final void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
+    @Override
+	protected final void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
             throws XmlMappingException {
         Marshaller marshaller = xmlContext.createMarshaller();
         marshaller.setContentHandler(contentHandler);
         marshal(graph, marshaller);
     }
 
-    protected final void marshalOutputStream(Object graph, OutputStream outputStream)
+    @Override
+	protected final void marshalOutputStream(Object graph, OutputStream outputStream)
             throws XmlMappingException, IOException {
         marshalWriter(graph, new OutputStreamWriter(outputStream, encoding));
     }
 
-    protected final void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
+    @Override
+	protected final void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
         Marshaller marshaller = xmlContext.createMarshaller();
         marshaller.setWriter(writer);
         marshal(graph, marshaller);
     }
 
-    protected final void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) throws XmlMappingException {
+    @Override
+	protected final void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) throws XmlMappingException {
         marshalSaxHandlers(graph, new StaxEventContentHandler(eventWriter), null);
     }
 
-    protected final void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
+    @Override
+	protected final void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
         marshalSaxHandlers(graph, new StaxStreamContentHandler(streamWriter), null);
     }
 
@@ -327,7 +333,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
     // Unmarshalling
     //
 
-    protected final Object unmarshalDomNode(Node node) throws XmlMappingException {
+    @Override
+	protected final Object unmarshalDomNode(Node node) throws XmlMappingException {
         try {
             return createUnmarshaller().unmarshal(node);
         }
@@ -336,7 +343,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
         }
     }
 
-    protected final Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
+    @Override
+	protected final Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
         try {
             return createUnmarshaller().unmarshal(new InputSource(inputStream));
         }
@@ -345,7 +353,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
         }
     }
 
-    protected final Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
+    @Override
+	protected final Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
         try {
             return createUnmarshaller().unmarshal(new InputSource(reader));
         }
@@ -354,7 +363,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
         }
     }
 
-    protected final Object unmarshalXmlEventReader(XMLEventReader eventReader) {
+    @Override
+	protected final Object unmarshalXmlEventReader(XMLEventReader eventReader) {
         XMLReader reader = new StaxEventXmlReader(eventReader);
         try {
             return unmarshalSaxReader(reader, new InputSource());
@@ -364,7 +374,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
         }
     }
 
-    protected final Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
+    @Override
+	protected final Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
             throws XmlMappingException, IOException {
         UnmarshalHandler unmarshalHandler = createUnmarshaller().createHandler();
         try {
@@ -378,7 +389,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
         }
     }
 
-    protected final Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
+    @Override
+	protected final Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
         XMLReader reader = new StaxStreamXmlReader(streamReader);
         try {
             return unmarshalSaxReader(reader, new InputSource());

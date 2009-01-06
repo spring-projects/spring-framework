@@ -20,27 +20,31 @@ import org.springframework.oxm.Unmarshaller;
 
 public class JibxUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
-    protected Unmarshaller createUnmarshaller() throws Exception {
+    @Override
+	protected Unmarshaller createUnmarshaller() throws Exception {
         JibxMarshaller unmarshaller = new JibxMarshaller();
         unmarshaller.setTargetClass(Flights.class);
         unmarshaller.afterPropertiesSet();
         return unmarshaller;
     }
 
-    protected void testFlights(Object o) {
+    @Override
+	protected void testFlights(Object o) {
         Flights flights = (Flights) o;
         assertNotNull("Flights is null", flights);
         assertEquals("Invalid amount of flight elements", 1, flights.sizeFlightList());
         testFlight(flights.getFlight(0));
     }
 
-    protected void testFlight(Object o) {
+    @Override
+	protected void testFlight(Object o) {
         FlightType flight = (FlightType) o;
         assertNotNull("Flight is null", flight);
         assertEquals("Number is invalid", 42L, flight.getNumber());
     }
 
-    public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
+    @Override
+	public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
         // JiBX does not support reading XML fragments, hence the override here
     }
 }

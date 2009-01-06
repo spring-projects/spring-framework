@@ -33,11 +33,13 @@ class XmlBeansMarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitio
 
     public static final String XML_BEANS_MARSHALLER_CLASS_NAME = "org.springframework.oxm.xmlbeans.XmlBeansMarshaller";
 
-    protected String getBeanClassName(Element element) {
+    @Override
+	protected String getBeanClassName(Element element) {
         return XML_BEANS_MARSHALLER_CLASS_NAME;
     }
 
-    protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
+    @Override
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
         String optionsName = element.getAttribute("options");
         if (StringUtils.hasText(optionsName)) {
             beanDefinitionBuilder.addPropertyReference("xmlOptions", optionsName);

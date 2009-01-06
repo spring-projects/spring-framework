@@ -29,14 +29,16 @@ public class Jaxb1MarshallerTest extends AbstractJaxbMarshallerTestCase {
 
     private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb1";
 
-    protected final Marshaller createMarshaller() throws Exception {
+    @Override
+	protected final Marshaller createMarshaller() throws Exception {
         Jaxb1Marshaller marshaller = new Jaxb1Marshaller();
         marshaller.setContextPaths(new String[]{CONTEXT_PATH});
         marshaller.afterPropertiesSet();
         return marshaller;
     }
 
-    protected Object createFlights() {
+    @Override
+	protected Object createFlights() {
         FlightType flight = new FlightTypeImpl();
         flight.setNumber(42L);
         Flights flights = new FlightsImpl();

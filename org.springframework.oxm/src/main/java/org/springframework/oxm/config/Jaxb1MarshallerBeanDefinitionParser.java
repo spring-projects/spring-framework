@@ -30,7 +30,8 @@ class Jaxb1MarshallerBeanDefinitionParser extends AbstractSimpleBeanDefinitionPa
 
     public static final String JAXB1_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jaxb.Jaxb1Marshaller";
 
-    protected String getBeanClassName(Element element) {
+    @Override
+	protected String getBeanClassName(Element element) {
         return JAXB1_MARSHALLER_CLASS_NAME;
     }
 }

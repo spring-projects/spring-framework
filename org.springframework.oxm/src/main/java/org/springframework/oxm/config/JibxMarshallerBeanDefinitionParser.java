@@ -30,7 +30,8 @@ class JibxMarshallerBeanDefinitionParser extends AbstractSimpleBeanDefinitionPar
 
     private static final String JIBX_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jibx.JibxMarshaller";
 
-    protected String getBeanClassName(Element element) {
+    @Override
+	protected String getBeanClassName(Element element) {
         return JIBX_MARSHALLER_CLASS_NAME;
     }
 

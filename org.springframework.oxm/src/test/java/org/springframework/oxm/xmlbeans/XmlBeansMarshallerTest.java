@@ -27,7 +27,8 @@ import org.springframework.samples.flight.FlightsDocument.Flights;
 
 public class XmlBeansMarshallerTest extends AbstractMarshallerTestCase {
 
-    protected Marshaller createMarshaller() throws Exception {
+    @Override
+	protected Marshaller createMarshaller() throws Exception {
         return new XmlBeansMarshaller();
     }
 
@@ -41,7 +42,8 @@ public class XmlBeansMarshallerTest extends AbstractMarshallerTestCase {
         }
     }
 
-    protected Object createFlights() {
+    @Override
+	protected Object createFlights() {
         FlightsDocument flightsDocument = FlightsDocument.Factory.newInstance();
         Flights flights = flightsDocument.addNewFlights();
         FlightType flightType = flights.addNewFlight();

@@ -31,11 +31,13 @@ import org.springframework.xml.transform.StringSource;
 
 public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
-    protected Unmarshaller createUnmarshaller() throws Exception {
+    @Override
+	protected Unmarshaller createUnmarshaller() throws Exception {
         return new XmlBeansMarshaller();
     }
 
-    protected void testFlights(Object o) {
+    @Override
+	protected void testFlights(Object o) {
         FlightsDocument flightsDocument = (FlightsDocument) o;
         assertNotNull("FlightsDocument is null", flightsDocument);
         Flights flights = flightsDocument.getFlights();
@@ -43,7 +45,8 @@ public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
         testFlight(flights.getFlightArray(0));
     }
 
-    protected void testFlight(Object o) {
+    @Override
+	protected void testFlight(Object o) {
         FlightType flight = null;
         if (o instanceof FlightType) {
             flight = (FlightType) o;
@@ -56,7 +59,8 @@ public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
         assertEquals("Number is invalid", 42L, flight.getNumber());
     }
 
-    public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
+    @Override
+	public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
         streamReader.nextTag(); // skip to flights
