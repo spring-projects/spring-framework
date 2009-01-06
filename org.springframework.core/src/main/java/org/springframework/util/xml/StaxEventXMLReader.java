@@ -52,7 +52,7 @@ import org.springframework.util.StringUtils;
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
  * @since 1.0.0
  */
-class StaxEventXmlReader extends AbstractStaxXmlReader {
+class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private final XMLEventReader reader;
 
@@ -64,7 +64,7 @@ class StaxEventXmlReader extends AbstractStaxXmlReader {
 	 * @param reader the <code>XMLEventReader</code> to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
-	StaxEventXmlReader(XMLEventReader reader) {
+	StaxEventXMLReader(XMLEventReader reader) {
 		try {
 			XMLEvent event = reader.peek();
 			if (event == null || !(event.isStartDocument() || event.isStartElement())) {

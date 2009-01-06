@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
  * @since 1.0.0
  */
-class StaxStreamXmlReader extends AbstractStaxXmlReader {
+class StaxStreamXMLReader extends AbstractStaxXMLReader {
 
 	private final XMLStreamReader reader;
 
@@ -51,7 +51,7 @@ class StaxStreamXmlReader extends AbstractStaxXmlReader {
 	 * @param reader the <code>XMLEventReader</code> to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
-	StaxStreamXmlReader(XMLStreamReader reader) {
+	StaxStreamXMLReader(XMLStreamReader reader) {
 		int event = reader.getEventType();
 		if (!(event == XMLStreamConstants.START_DOCUMENT || event == XMLStreamConstants.START_ELEMENT)) {
 			throw new IllegalStateException("XMLEventReader not at start of document or element");

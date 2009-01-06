@@ -27,20 +27,20 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.AttributesImpl;
 
-public class StaxEventXmlReaderTest extends AbstractStaxXmlReaderTestCase {
+public class StaxEventXMLReaderTest extends AbstractStaxXMLReaderTestCase {
 
 	public static final String CONTENT = "<root xmlns='http://springframework.org/spring-ws'><child/></root>";
 
 	@Override
-	protected AbstractStaxXmlReader createStaxXmlReader(InputStream inputStream) throws XMLStreamException {
-		return new StaxEventXmlReader(inputFactory.createXMLEventReader(inputStream));
+	protected AbstractStaxXMLReader createStaxXmlReader(InputStream inputStream) throws XMLStreamException {
+		return new StaxEventXMLReader(inputFactory.createXMLEventReader(inputStream));
 	}
 
 	public void testPartial() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(CONTENT));
 		eventReader.nextTag(); // skip to root
-		StaxEventXmlReader xmlReader = new StaxEventXmlReader(eventReader);
+		StaxEventXMLReader xmlReader = new StaxEventXMLReader(eventReader);
 
 		MockControl mockControl = MockControl.createStrictControl(ContentHandler.class);
 		mockControl.setDefaultMatcher(new SaxArgumentMatcher());

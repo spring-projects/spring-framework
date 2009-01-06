@@ -40,7 +40,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-public abstract class AbstractStaxXmlReaderTestCase {
+public abstract class AbstractStaxXMLReaderTestCase {
 
 	protected static XMLInputFactory inputFactory;
 
@@ -73,7 +73,7 @@ public abstract class AbstractStaxXmlReaderTestCase {
 		standardReader.parse(new InputSource(createTestInputStream()));
 		contentHandlerControl.replay();
 
-		AbstractStaxXmlReader staxXmlReader = createStaxXmlReader(createTestInputStream());
+		AbstractStaxXMLReader staxXmlReader = createStaxXmlReader(createTestInputStream());
 		staxXmlReader.setFeature("http://xml.org/sax/features/namespaces", true);
 		staxXmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
 
@@ -90,7 +90,7 @@ public abstract class AbstractStaxXmlReaderTestCase {
 		standardReader.parse(new InputSource(createTestInputStream()));
 		contentHandlerControl.replay();
 
-		AbstractStaxXmlReader staxXmlReader = createStaxXmlReader(createTestInputStream());
+		AbstractStaxXMLReader staxXmlReader = createStaxXmlReader(createTestInputStream());
 		staxXmlReader.setFeature("http://xml.org/sax/features/namespaces", true);
 		staxXmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 
@@ -107,7 +107,7 @@ public abstract class AbstractStaxXmlReaderTestCase {
 		standardReader.parse(new InputSource(createTestInputStream()));
 		contentHandlerControl.replay();
 
-		AbstractStaxXmlReader staxXmlReader = createStaxXmlReader(createTestInputStream());
+		AbstractStaxXMLReader staxXmlReader = createStaxXmlReader(createTestInputStream());
 		staxXmlReader.setFeature("http://xml.org/sax/features/namespaces", false);
 		staxXmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 
@@ -136,14 +136,14 @@ public abstract class AbstractStaxXmlReaderTestCase {
 		inputFactory.setProperty("javax.xml.stream.isReplacingEntityReferences", Boolean.FALSE);
 		inputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", Boolean.FALSE);
 
-		AbstractStaxXmlReader staxXmlReader = createStaxXmlReader(testLexicalHandlerXml.getInputStream());
+		AbstractStaxXMLReader staxXmlReader = createStaxXmlReader(testLexicalHandlerXml.getInputStream());
 
 		staxXmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", lexicalHandler);
 		staxXmlReader.parse(new InputSource());
 		lexicalHandlerControl.verify();
 	}
 
-	protected abstract AbstractStaxXmlReader createStaxXmlReader(InputStream inputStream) throws XMLStreamException;
+	protected abstract AbstractStaxXMLReader createStaxXmlReader(InputStream inputStream) throws XMLStreamException;
 
 	/** Easymock <code>ArgumentMatcher</code> implementation that matches SAX arguments. */
 	protected static class SaxArgumentMatcher extends AbstractMatcher {

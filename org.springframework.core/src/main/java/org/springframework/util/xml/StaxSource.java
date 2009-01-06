@@ -58,7 +58,7 @@ public class StaxSource extends SAXSource {
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	public StaxSource(XMLStreamReader streamReader) {
-		super(new StaxStreamXmlReader(streamReader), new InputSource());
+		super(new StaxStreamXMLReader(streamReader), new InputSource());
 		this.streamReader = streamReader;
 	}
 
@@ -71,7 +71,7 @@ public class StaxSource extends SAXSource {
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	public StaxSource(XMLEventReader eventReader) {
-		super(new StaxEventXmlReader(eventReader), new InputSource());
+		super(new StaxEventXMLReader(eventReader), new InputSource());
 		this.eventReader = eventReader;
 	}
 

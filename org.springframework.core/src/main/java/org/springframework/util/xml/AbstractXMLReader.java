@@ -36,7 +36,7 @@ import org.xml.sax.ext.LexicalHandler;
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
  * @since 3.0
  */
-abstract class AbstractXmlReader implements XMLReader {
+abstract class AbstractXMLReader implements XMLReader {
 
 	private DTDHandler dtdHandler;
 
