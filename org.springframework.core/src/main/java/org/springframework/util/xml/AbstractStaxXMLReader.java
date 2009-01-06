@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
  * @since 3.0
  */
-abstract class AbstractStaxXmlReader extends AbstractXmlReader {
+abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	private static final String NAMESPACES_FEATURE_NAME = "http://xml.org/sax/features/namespaces";
 
