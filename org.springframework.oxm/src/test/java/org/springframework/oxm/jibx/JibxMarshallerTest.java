@@ -24,14 +24,16 @@ import org.springframework.xml.transform.StringResult;
 
 public class JibxMarshallerTest extends AbstractMarshallerTestCase {
 
-    protected Marshaller createMarshaller() throws Exception {
+    @Override
+	protected Marshaller createMarshaller() throws Exception {
         JibxMarshaller marshaller = new JibxMarshaller();
         marshaller.setTargetClass(Flights.class);
         marshaller.afterPropertiesSet();
         return marshaller;
     }
 
-    protected Object createFlights() {
+    @Override
+	protected Object createFlights() {
         Flights flights = new Flights();
         FlightType flight = new FlightType();
         flight.setNumber(42L);

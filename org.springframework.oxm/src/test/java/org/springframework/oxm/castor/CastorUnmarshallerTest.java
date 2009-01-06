@@ -25,20 +25,23 @@ import org.springframework.oxm.Unmarshaller;
 
 public class CastorUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
-    protected void testFlights(Object o) {
+    @Override
+	protected void testFlights(Object o) {
         Flights flights = (Flights) o;
         assertNotNull("Flights is null", flights);
         assertEquals("Invalid amount of flight elements", 1, flights.getFlightCount());
         testFlight(flights.getFlight()[0]);
     }
 
-    protected void testFlight(Object o) {
+    @Override
+	protected void testFlight(Object o) {
         Flight flight = (Flight) o;
         assertNotNull("Flight is null", flight);
         assertEquals("Number is invalid", 42L, flight.getNumber());
     }
 
-    protected Unmarshaller createUnmarshaller() throws Exception {
+    @Override
+	protected Unmarshaller createUnmarshaller() throws Exception {
         CastorMarshaller marshaller = new CastorMarshaller();
         ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
         marshaller.setMappingLocation(mappingLocation);

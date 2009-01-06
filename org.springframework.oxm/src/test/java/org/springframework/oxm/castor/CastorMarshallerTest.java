@@ -25,7 +25,8 @@ import org.xml.sax.ContentHandler;
 
 public class CastorMarshallerTest extends AbstractMarshallerTestCase {
 
-    protected Marshaller createMarshaller() throws Exception {
+    @Override
+	protected Marshaller createMarshaller() throws Exception {
         CastorMarshaller marshaller = new CastorMarshaller();
         ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
         marshaller.setMappingLocation(mappingLocation);
@@ -33,7 +34,8 @@ public class CastorMarshallerTest extends AbstractMarshallerTestCase {
         return marshaller;
     }
 
-    protected Object createFlights() {
+    @Override
+	protected Object createFlights() {
         Flight flight = new Flight();
         flight.setNumber(42L);
         Flights flights = new Flights();

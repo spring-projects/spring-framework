@@ -37,11 +37,13 @@ class Jaxb2MarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 
     private static final String JAXB2_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jaxb.Jaxb2Marshaller";
 
-    protected String getBeanClassName(Element element) {
+    @Override
+	protected String getBeanClassName(Element element) {
         return JAXB2_MARSHALLER_CLASS_NAME;
     }
 
-    protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
+    @Override
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
         String contextPath = element.getAttribute("contextPath");
         if (StringUtils.hasText(contextPath)) {
             beanDefinitionBuilder.addPropertyValue("contextPath", contextPath);

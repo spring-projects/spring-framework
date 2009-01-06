@@ -84,7 +84,8 @@ public class Jaxb1Marshaller extends AbstractJaxbMarshaller implements BeanClass
 
     }
 
-    protected final JAXBContext createJaxbContext() throws JAXBException {
+    @Override
+	protected final JAXBContext createJaxbContext() throws JAXBException {
         if (!StringUtils.hasLength(getContextPath())) {
             throw new IllegalArgumentException("contextPath is required");
         }
@@ -95,7 +96,8 @@ public class Jaxb1Marshaller extends AbstractJaxbMarshaller implements BeanClass
                 JAXBContext.newInstance(getContextPath());
     }
 
-    protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
+    @Override
+	protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
         unmarshaller.setValidating(validating);
     }
 

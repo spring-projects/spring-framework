@@ -267,7 +267,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
      * JAXBContext
      */
 
-    protected JAXBContext createJaxbContext() throws Exception {
+    @Override
+	protected JAXBContext createJaxbContext() throws Exception {
         if (JaxbUtils.getJaxbVersion() < JaxbUtils.JAXB_2) {
             throw new IllegalStateException(
                     "Cannot use Jaxb2Marshaller in combination with JAXB 1.0. Use Jaxb1Marshaller instead.");
@@ -330,7 +331,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
      * Marshaller/Unmarshaller
      */
 
-    protected void initJaxbMarshaller(Marshaller marshaller) throws JAXBException {
+    @Override
+	protected void initJaxbMarshaller(Marshaller marshaller) throws JAXBException {
         if (schema != null) {
             marshaller.setSchema(schema);
         }
@@ -344,7 +346,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
         }
     }
 
-    protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
+    @Override
+	protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
         if (schema != null) {
             unmarshaller.setSchema(schema);
         }
@@ -454,7 +457,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
             this.mimeContainer = mimeContainer;
         }
 
-        public String addMtomAttachment(byte[] data,
+        @Override
+		public String addMtomAttachment(byte[] data,
                                         int offset,
                                         int length,
                                         String mimeType,
@@ -464,7 +468,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
             return addMtomAttachment(new DataHandler(dataSource), elementNamespace, elementLocalName);
         }
 
-        public String addMtomAttachment(DataHandler dataHandler, String elementNamespace, String elementLocalName) {
+        @Override
+		public String addMtomAttachment(DataHandler dataHandler, String elementNamespace, String elementLocalName) {
             String host = getHost(elementNamespace, dataHandler);
             String contentId = UUID.randomUUID() + "@" + host;
             mimeContainer.addAttachment("<" + contentId + ">", dataHandler);
@@ -488,7 +493,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
             return dataHandler.getName();
         }
 
-        public String addSwaRefAttachment(DataHandler dataHandler) {
+        @Override
+		public String addSwaRefAttachment(DataHandler dataHandler) {
             String contentId = UUID.randomUUID() + "@" + dataHandler.getName();
             mimeContainer.addAttachment(contentId, dataHandler);
             return contentId;
@@ -508,7 +514,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
             this.mimeContainer = mimeContainer;
         }
 
-        public byte[] getAttachmentAsByteArray(String cid) {
+        @Override
+		public byte[] getAttachmentAsByteArray(String cid) {
             try {
                 DataHandler dataHandler = getAttachmentAsDataHandler(cid);
                 return FileCopyUtils.copyToByteArray(dataHandler.getInputStream());
@@ -518,7 +525,8 @@ public class Jaxb2Marshaller extends AbstractJaxbMarshaller
             }
         }
 
-        public DataHandler getAttachmentAsDataHandler(String contentId) {
+        @Override
+		public DataHandler getAttachmentAsDataHandler(String contentId) {
             if (contentId.startsWith("cid:")) {
                 contentId = contentId.substring("cid:".length());
                 try {

@@ -173,7 +173,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
     // Supported Marshalling
     //
 
-    protected void marshalOutputStream(Object graph, OutputStream outputStream)
+    @Override
+	protected void marshalOutputStream(Object graph, OutputStream outputStream)
             throws XmlMappingException, IOException {
         try {
             IMarshallingContext marshallingContext = createMarshallingContext();
@@ -184,7 +185,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
+    @Override
+	protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
         try {
             IMarshallingContext marshallingContext = createMarshallingContext();
             marshallingContext.marshalDocument(graph, encoding, standalone, writer);
@@ -194,7 +196,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
+    @Override
+	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
         try {
             MarshallingContext marshallingContext = (MarshallingContext) createMarshallingContext();
             IXMLWriter xmlWriter = new StAXWriter(marshallingContext.getNamespaces(), streamWriter);
@@ -210,7 +213,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
     // Unsupported Marshalling
     //
 
-    protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
+    @Override
+	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
         try {
             // JiBX does not support DOM natively, so we write to a buffer first, and transform that to the Node
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -227,7 +231,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
+    @Override
+	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
             throws XmlMappingException {
         try {
             // JiBX does not support SAX natively, so we write to a buffer first, and transform that to the handlers
@@ -247,7 +252,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
+    @Override
+	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
         ContentHandler contentHandler = new StaxEventContentHandler(eventWriter);
         marshalSaxHandlers(graph, contentHandler, null);
     }
@@ -256,7 +262,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
     // Unmarshalling
     //
 
-    protected Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
+    @Override
+	protected Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
         try {
             IUnmarshallingContext unmarshallingContext = createUnmarshallingContext();
             return unmarshallingContext.unmarshalDocument(inputStream, null);
@@ -266,7 +273,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
+    @Override
+	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
         try {
             IUnmarshallingContext unmarshallingContext = createUnmarshallingContext();
             return unmarshallingContext.unmarshalDocument(reader);
@@ -276,7 +284,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
+    @Override
+	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
         try {
             UnmarshallingContext unmarshallingContext = (UnmarshallingContext) createUnmarshallingContext();
             IXMLReader xmlReader = new StAXReaderWrapper(streamReader, null, true);
@@ -288,7 +297,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected Object unmarshalXmlEventReader(XMLEventReader eventReader) {
+    @Override
+	protected Object unmarshalXmlEventReader(XMLEventReader eventReader) {
         try {
             XMLStreamReader streamReader = new XmlEventStreamReader(eventReader);
             return unmarshalXmlStreamReader(streamReader);
@@ -302,7 +312,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
     // Unsupported Unmarshalling
     //
 
-    protected Object unmarshalDomNode(Node node) throws XmlMappingException {
+    @Override
+	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
         try {
             Transformer transformer = transformerFactory.newTransformer();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -318,7 +329,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
         }
     }
 
-    protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
+    @Override
+	protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
             throws XmlMappingException, IOException {
         try {
             Transformer transformer = transformerFactory.newTransformer();
