@@ -111,8 +111,8 @@ class DomContentHandler implements ContentHandler {
 	}
 
 	/*
-		 * Unsupported
-		 */
+	 * Unsupported
+	 */
 
 	public void setDocumentLocator(Locator locator) {
 	}
