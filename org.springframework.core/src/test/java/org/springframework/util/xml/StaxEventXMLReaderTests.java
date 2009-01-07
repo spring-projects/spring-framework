@@ -27,7 +27,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.AttributesImpl;
 
-public class StaxEventXMLReaderTest extends AbstractStaxXMLReaderTestCase {
+public class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 
 	public static final String CONTENT = "<root xmlns='http://springframework.org/spring-ws'><child/></root>";
 

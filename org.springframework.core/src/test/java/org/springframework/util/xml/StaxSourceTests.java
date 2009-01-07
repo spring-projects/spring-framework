@@ -29,7 +29,7 @@ import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class StaxSourceTest {
+public class StaxSourceTests {
 
 	private static final String XML = "<root xmlns='namespace'><child/></root>";
 
