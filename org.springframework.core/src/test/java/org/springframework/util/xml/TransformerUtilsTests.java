@@ -16,7 +16,13 @@
 
 package org.springframework.util.xml;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Properties;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -24,9 +30,16 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stax.StAXResult;
+import javax.xml.transform.stax.StAXSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -87,6 +100,58 @@ public class TransformerUtilsTests {
 	@Test
 	public void enableIndentingWithZeroIndentAmount() throws Exception {
 		TransformerUtils.enableIndenting(new StubTransformer(), 0);
+	}
+
+	@Test
+	public void isStaxSourceInvalid() throws Exception {
+		assertFalse("A StAX Source", TransformerUtils.isStaxSource(new DOMSource()));
+		assertFalse("A StAX Source", TransformerUtils.isStaxSource(new SAXSource()));
+		assertFalse("A StAX Source", TransformerUtils.isStaxSource(new StreamSource()));
+	}
+
+	@Test
+	public void isStaxSource() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		String expected = "<element/>";
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(expected));
+		StaxSource source = new StaxSource(streamReader);
+
+		assertTrue("Not a StAX Source", TransformerUtils.isStaxSource(source));
+	}
+
+	@Test
+	public void isStaxSourceJaxp14() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		String expected = "<element/>";
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(expected));
+		StAXSource source = new StAXSource(streamReader);
+
+		assertTrue("Not a StAX Source", TransformerUtils.isStaxSource(source));
+	}
+
+	@Test
+	public void isStaxResultInvalid() throws Exception {
+		assertFalse("A StAX Result", TransformerUtils.isStaxResult(new DOMResult()));
+		assertFalse("A StAX Result", TransformerUtils.isStaxResult(new SAXResult()));
+		assertFalse("A StAX Result", TransformerUtils.isStaxResult(new StreamResult()));
+	}
+
+	@Test
+	public void isStaxResult() throws Exception {
+		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(new StringWriter());
+		StaxResult result = new StaxResult(streamWriter);
+
+		assertTrue("Not a StAX Result", TransformerUtils.isStaxResult(result));
+	}
+
+	@Test
+	public void isStaxResultJaxp14() throws Exception {
+		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(new StringWriter());
+		StAXResult result = new StAXResult(streamWriter);
+
+		assertTrue("Not a StAX Result", TransformerUtils.isStaxResult(result));
 	}
 
 	private static class StubTransformer extends Transformer {
