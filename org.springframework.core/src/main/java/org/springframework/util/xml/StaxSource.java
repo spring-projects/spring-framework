@@ -43,7 +43,7 @@ import org.xml.sax.XMLReader;
  * @see javax.xml.transform.Transformer
  * @since 3.0
  */
-public class StaxSource extends SAXSource {
+class StaxSource extends SAXSource {
 
 	private XMLEventReader eventReader;
 
@@ -57,7 +57,7 @@ public class StaxSource extends SAXSource {
 	 * @param streamReader the <code>XMLStreamReader</code> to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
-	public StaxSource(XMLStreamReader streamReader) {
+	StaxSource(XMLStreamReader streamReader) {
 		super(new StaxStreamXMLReader(streamReader), new InputSource());
 		this.streamReader = streamReader;
 	}
@@ -70,7 +70,7 @@ public class StaxSource extends SAXSource {
 	 * @param eventReader the <code>XMLEventReader</code> to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
-	public StaxSource(XMLEventReader eventReader) {
+	StaxSource(XMLEventReader eventReader) {
 		super(new StaxEventXMLReader(eventReader), new InputSource());
 		this.eventReader = eventReader;
 	}
@@ -82,7 +82,7 @@ public class StaxSource extends SAXSource {
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
 	 */
-	public XMLEventReader getXMLEventReader() {
+	XMLEventReader getXMLEventReader() {
 		return eventReader;
 	}
 
@@ -93,7 +93,7 @@ public class StaxSource extends SAXSource {
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
 	 */
-	public XMLStreamReader getXMLStreamReader() {
+	XMLStreamReader getXMLStreamReader() {
 		return streamReader;
 	}
 

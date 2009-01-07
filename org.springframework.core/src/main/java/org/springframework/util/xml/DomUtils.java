@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Costin Leau
+ * @author Arjen Poutsma
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
  * @since 1.2
