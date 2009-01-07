@@ -27,28 +27,28 @@ import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ContentHandler;
 
 import org.springframework.util.Assert;
 
 /**
- * Convenience methods for working with the DOM API,
- * in particular for working with DOM Nodes and DOM Elements.
+ * Convenience methods for working with the DOM API, in particular for working with DOM Nodes and DOM Elements.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Costin Leau
- * @since 1.2
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
+ * @since 1.2
  */
 public abstract class DomUtils {
 
 	/**
-	 * Retrieve all child elements of the given DOM element that match any of
-	 * the given element names. Only look at the direct child level of the
-	 * given element; do not go into further depth (in contrast to the
-	 * DOM API's <code>getElementsByTagName</code> method).
-	 * @param ele the DOM element to analyze
+	 * Retrieve all child elements of the given DOM element that match any of the given element names. Only look at the
+	 * direct child level of the given element; do not go into further depth (in contrast to the DOM API's
+	 * <code>getElementsByTagName</code> method).
+	 *
+	 * @param ele		   the DOM element to analyze
 	 * @param childEleNames the child element names to look for
 	 * @return a List of child <code>org.w3c.dom.Element</code> instances
 	 * @see org.w3c.dom.Element
@@ -70,27 +70,26 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Retrieve all child elements of the given DOM element that match
-	 * the given element name. Only look at the direct child level of the
-	 * given element; do not go into further depth (in contrast to the
-	 * DOM API's <code>getElementsByTagName</code> method).
-	 * @param ele the DOM element to analyze
+	 * Retrieve all child elements of the given DOM element that match the given element name. Only look at the direct
+	 * child level of the given element; do not go into further depth (in contrast to the DOM API's
+	 * <code>getElementsByTagName</code> method).
+	 *
+	 * @param ele		  the DOM element to analyze
 	 * @param childEleName the child element name to look for
 	 * @return a List of child <code>org.w3c.dom.Element</code> instances
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
 	public static List<Element> getChildElementsByTagName(Element ele, String childEleName) {
-		return getChildElementsByTagName(ele, new String[] {childEleName});
+		return getChildElementsByTagName(ele, new String[]{childEleName});
 	}
 
 	/**
-	 * Utility method that returns the first child element
-	 * identified by its name.
-	 * @param ele the DOM element to analyze
+	 * Utility method that returns the first child element identified by its name.
+	 *
+	 * @param ele		  the DOM element to analyze
 	 * @param childEleName the child element name to look for
-	 * @return the <code>org.w3c.dom.Element</code> instance,
-	 * or <code>null</code> if none found
+	 * @return the <code>org.w3c.dom.Element</code> instance, or <code>null</code> if none found
 	 */
 	public static Element getChildElementByTagName(Element ele, String childEleName) {
 		Assert.notNull(ele, "Element must not be null");
@@ -106,12 +105,11 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Utility method that returns the first child element value
-	 * identified by its name.
-	 * @param ele the DOM element to analyze
+	 * Utility method that returns the first child element value identified by its name.
+	 *
+	 * @param ele		  the DOM element to analyze
 	 * @param childEleName the child element name to look for
-	 * @return the extracted text value,
-	 * or <code>null</code> if no child element found
+	 * @return the extracted text value, or <code>null</code> if no child element found
 	 */
 	public static String getChildElementValueByTagName(Element ele, String childEleName) {
 		Element child = getChildElementByTagName(ele, childEleName);
@@ -119,9 +117,9 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Extract the text value from the given DOM element, ignoring XML comments.
-	 * <p>Appends all CharacterData nodes and EntityReference nodes
-	 * into a single String value, excluding Comment nodes.
+	 * Extract the text value from the given DOM element, ignoring XML comments. <p>Appends all CharacterData nodes and
+	 * EntityReference nodes into a single String value, excluding Comment nodes.
+	 *
 	 * @see CharacterData
 	 * @see EntityReference
 	 * @see Comment
@@ -140,9 +138,8 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Namespace-aware equals comparison. Returns <code>true</code> if either
-	 * {@link Node#getLocalName} or {@link Node#getNodeName} equals <code>desiredName</code>,
-	 * otherwise returns <code>false</code>.
+	 * Namespace-aware equals comparison. Returns <code>true</code> if either {@link Node#getLocalName} or {@link
+	 * Node#getNodeName} equals <code>desiredName</code>, otherwise returns <code>false</code>.
 	 */
 	public static boolean nodeNameEquals(Node node, String desiredName) {
 		Assert.notNull(node, "Node must not be null");
@@ -151,15 +148,21 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Matches the given node's name and local name against the given desired name.
+	 * Returns a SAX <code>ContentHandler</code> that transforms callback calls to DOM <code>Node</code>s.
+	 *
+	 * @param node the node to publish events to
+	 * @return the content handler
 	 */
+	public static ContentHandler createContentHandler(Node node) {
+		return new DomContentHandler(node);
+	}
+
+	/** Matches the given node's name and local name against the given desired name. */
 	private static boolean nodeNameMatch(Node node, String desiredName) {
 		return (desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName()));
 	}
 
-	/**
-	 * Matches the given node's name and local name against the given desired names.
-	 */
+	/** Matches the given node's name and local name against the given desired names. */
 	private static boolean nodeNameMatch(Node node, Collection desiredNames) {
 		return (desiredNames.contains(node.getNodeName()) || desiredNames.contains(node.getLocalName()));
 	}
