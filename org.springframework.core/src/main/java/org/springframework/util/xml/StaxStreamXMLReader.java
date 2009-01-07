@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * @see #setDTDHandler(org.xml.sax.DTDHandler)
  * @see #setEntityResolver(org.xml.sax.EntityResolver)
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
- * @since 1.0.0
+ * @since 3.0
  */
 class StaxStreamXMLReader extends AbstractStaxXMLReader {
 
