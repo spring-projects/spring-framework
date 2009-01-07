@@ -20,7 +20,7 @@ import java.io.Writer;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 
-public class StaxStreamContentHandlerTest extends AbstractStaxContentHandlerTestCase {
+public class StaxStreamContentHandlerTests extends AbstractStaxContentHandlerTestCase {
 
 	@Override
 	protected AbstractStaxContentHandler createStaxContentHandler(Writer writer) throws XMLStreamException {
