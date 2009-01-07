@@ -43,7 +43,7 @@ import org.xml.sax.ContentHandler;
  * @see javax.xml.transform.Transformer
  * @since 3.0
  */
-public class StaxResult extends SAXResult {
+class StaxResult extends SAXResult {
 
 	private XMLEventWriter eventWriter;
 
@@ -54,7 +54,7 @@ public class StaxResult extends SAXResult {
 	 *
 	 * @param streamWriter the <code>XMLStreamWriter</code> to write to
 	 */
-	public StaxResult(XMLStreamWriter streamWriter) {
+	StaxResult(XMLStreamWriter streamWriter) {
 		super.setHandler(new StaxStreamContentHandler(streamWriter));
 		this.streamWriter = streamWriter;
 	}
@@ -64,7 +64,7 @@ public class StaxResult extends SAXResult {
 	 *
 	 * @param eventWriter the <code>XMLEventWriter</code> to write to
 	 */
-	public StaxResult(XMLEventWriter eventWriter) {
+	StaxResult(XMLEventWriter eventWriter) {
 		super.setHandler(new StaxEventContentHandler(eventWriter));
 		this.eventWriter = eventWriter;
 	}
@@ -76,7 +76,7 @@ public class StaxResult extends SAXResult {
 	 * @param eventWriter  the <code>XMLEventWriter</code> to write to
 	 * @param eventFactory the <code>XMLEventFactory</code> to use for creating events
 	 */
-	public StaxResult(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
+	StaxResult(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
 		super.setHandler(new StaxEventContentHandler(eventWriter, eventFactory));
 		this.eventWriter = eventWriter;
 	}
@@ -88,18 +88,18 @@ public class StaxResult extends SAXResult {
 	 * @return the StAX event writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLEventWriter)
 	 */
-	public XMLEventWriter getXMLEventWriter() {
+	XMLEventWriter getXMLEventWriter() {
 		return eventWriter;
 	}
 
 	/**
-	 * Returns the <code>XMLStreamWriter</code> used by this <code>StaxResult</code>. If this <code>StaxResult</code>
-	 * was created with an <code>XMLEventConsumer</code>, the result will be <code>null</code>.
+	 * Returns the <code>XMLStreamWriter</code> used by this <code>StaxResult</code>. If this <code>StaxResult</code> was
+	 * created with an <code>XMLEventConsumer</code>, the result will be <code>null</code>.
 	 *
 	 * @return the StAX stream writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLStreamWriter)
 	 */
-	public XMLStreamWriter getXMLStreamWriter() {
+	XMLStreamWriter getXMLStreamWriter() {
 		return streamWriter;
 	}
 
