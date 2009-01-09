@@ -17,61 +17,65 @@ package org.springframework.oxm.castor;
 
 import javax.xml.transform.sax.SAXResult;
 
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractMarshallerTestCase;
 import org.springframework.oxm.Marshaller;
-import org.xml.sax.ContentHandler;
 
 public class CastorMarshallerTest extends AbstractMarshallerTestCase {
 
-    @Override
+	@Override
 	protected Marshaller createMarshaller() throws Exception {
-        CastorMarshaller marshaller = new CastorMarshaller();
-        ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
-        marshaller.setMappingLocation(mappingLocation);
-        marshaller.afterPropertiesSet();
-        return marshaller;
-    }
+		CastorMarshaller marshaller = new CastorMarshaller();
+		ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
+		marshaller.setMappingLocation(mappingLocation);
+		marshaller.afterPropertiesSet();
+		return marshaller;
+	}
 
-    @Override
+	@Override
 	protected Object createFlights() {
-        Flight flight = new Flight();
-        flight.setNumber(42L);
-        Flights flights = new Flights();
-        flights.addFlight(flight);
-        return flights;
-    }
+		Flight flight = new Flight();
+		flight.setNumber(42L);
+		Flights flights = new Flights();
+		flights.addFlight(flight);
+		return flights;
+	}
 
-    public void testMarshalSaxResult() throws Exception {
-        MockControl handlerControl = MockControl.createControl(ContentHandler.class);
-        ContentHandler handlerMock = (ContentHandler) handlerControl.getMock();
-        handlerMock.startDocument();
-        handlerMock.startPrefixMapping("tns", "http://samples.springframework.org/flight");
-        handlerMock.startElement("http://samples.springframework.org/flight", "flights", "tns:flights", null);
-        handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
-        handlerMock.startElement("http://samples.springframework.org/flight", "flight", "tns:flight", null);
-        handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
-        handlerMock.startElement("http://samples.springframework.org/flight", "number", "tns:number", null);
-        handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
-        handlerMock.characters(new char[]{'4', '2'}, 0, 2);
-        handlerControl.setMatcher(MockControl.ARRAY_MATCHER);
-        handlerMock.endElement("http://samples.springframework.org/flight", "number", "tns:number");
-        handlerMock.endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
-        handlerMock.endElement("http://samples.springframework.org/flight", "flights", "tns:flights");
-        handlerMock.endPrefixMapping("tns");
-        handlerMock.endDocument();
+	@Test
+	public void marshalSaxResult() throws Exception {
+		ContentHandler handlerMock = createMock(ContentHandler.class);
+		handlerMock.startDocument();
+		handlerMock.startPrefixMapping("tns", "http://samples.springframework.org/flight");
+		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("tns:flights"),
+				isA(Attributes.class));
+		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("tns:flight"),
+				isA(Attributes.class));
+		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("tns:number"),
+				isA(Attributes.class));
+		handlerMock.characters(aryEq(new char[]{'4', '2'}), eq(0), eq(2));
+		handlerMock.endElement("http://samples.springframework.org/flight", "number", "tns:number");
+		handlerMock.endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
+		handlerMock.endElement("http://samples.springframework.org/flight", "flights", "tns:flights");
+		handlerMock.endPrefixMapping("tns");
+		handlerMock.endDocument();
 
-        handlerControl.replay();
-        SAXResult result = new SAXResult(handlerMock);
-        marshaller.marshal(flights, result);
-        handlerControl.verify();
-    }
+		replay(handlerMock);
+		SAXResult result = new SAXResult(handlerMock);
+		marshaller.marshal(flights, result);
+		verify(handlerMock);
+	}
 
-    public void testSupports() throws Exception {
-        assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
-        assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
-    }
+	@Test
+	public void supports() throws Exception {
+		assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
+		assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
+	}
 
 
 }

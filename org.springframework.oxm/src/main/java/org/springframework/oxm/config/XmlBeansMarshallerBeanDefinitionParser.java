@@ -27,22 +27,22 @@ import org.springframework.util.StringUtils;
  * Parser for the <code>&lt;oxm:xmlbeans-marshaller/&gt; element.
  *
  * @author Arjen Poutsma
- * @since 1.5.0
+ * @since 3.0
  */
 class XmlBeansMarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-    public static final String XML_BEANS_MARSHALLER_CLASS_NAME = "org.springframework.oxm.xmlbeans.XmlBeansMarshaller";
+	public static final String XML_BEANS_MARSHALLER_CLASS_NAME = "org.springframework.oxm.xmlbeans.XmlBeansMarshaller";
 
-    @Override
+	@Override
 	protected String getBeanClassName(Element element) {
-        return XML_BEANS_MARSHALLER_CLASS_NAME;
-    }
+		return XML_BEANS_MARSHALLER_CLASS_NAME;
+	}
 
-    @Override
+	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
-        String optionsName = element.getAttribute("options");
-        if (StringUtils.hasText(optionsName)) {
-            beanDefinitionBuilder.addPropertyReference("xmlOptions", optionsName);
-        }
-    }
+		String optionsName = element.getAttribute("options");
+		if (StringUtils.hasText(optionsName)) {
+			beanDefinitionBuilder.addPropertyReference("xmlOptions", optionsName);
+		}
+	}
 }

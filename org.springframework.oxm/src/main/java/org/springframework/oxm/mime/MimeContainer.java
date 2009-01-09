@@ -23,40 +23,40 @@ import javax.activation.DataHandler;
  *
  * @author Arjen Poutsma
  * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/">XML-binary Optimized Packaging</a>
- * @since 1.0.0
+ * @since 3.0
  */
 public interface MimeContainer {
 
-    /**
-     * Indicates whether this container is a XOP package.
-     *
-     * @return <code>true</code> when the constraints specified in <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#identifying_xop_documents">Identifying
-     *         XOP Documents</a> are met.
-     * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#xop_packages">XOP Packages</a>
-     */
-    boolean isXopPackage();
+	/**
+	 * Indicates whether this container is a XOP package.
+	 *
+	 * @return <code>true</code> when the constraints specified in <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#identifying_xop_documents">Identifying
+	 *         XOP Documents</a> are met.
+	 * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#xop_packages">XOP Packages</a>
+	 */
+	boolean isXopPackage();
 
-    /**
-     * Turns this message into a XOP package.
-     *
-     * @return <code>true</code> when the message is a XOP package
-     * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#xop_packages">XOP Packages</a>
-     */
-    boolean convertToXopPackage();
+	/**
+	 * Turns this message into a XOP package.
+	 *
+	 * @return <code>true</code> when the message is a XOP package
+	 * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#xop_packages">XOP Packages</a>
+	 */
+	boolean convertToXopPackage();
 
-    /**
-     * Adds the given data handler as an attachment to this container.
-     *
-     * @param contentId   the content id of the attachment
-     * @param dataHandler the data handler containing the data of the attachment
-     */
-    void addAttachment(String contentId, DataHandler dataHandler);
+	/**
+	 * Adds the given data handler as an attachment to this container.
+	 *
+	 * @param contentId   the content id of the attachment
+	 * @param dataHandler the data handler containing the data of the attachment
+	 */
+	void addAttachment(String contentId, DataHandler dataHandler);
 
-    /**
-     * Returns the attachment with the given content id, or <code>null</code> if not found.
-     *
-     * @param contentId the content id
-     * @return the attachment, as a data handler
-     */
-    DataHandler getAttachment(String contentId);
+	/**
+	 * Returns the attachment with the given content id, or <code>null</code> if not found.
+	 *
+	 * @param contentId the content id
+	 * @return the attachment, as a data handler
+	 */
+	DataHandler getAttachment(String contentId);
 }

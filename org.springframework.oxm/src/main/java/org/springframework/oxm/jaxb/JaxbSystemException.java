@@ -25,11 +25,11 @@ import org.springframework.oxm.UncategorizedXmlMappingException;
  *
  * @author Arjen Poutsma
  * @see JaxbUtils#convertJaxbException(javax.xml.bind.JAXBException)
- * @since 1.0.0
+ * @since 3.0
  */
 public class JaxbSystemException extends UncategorizedXmlMappingException {
 
-    public JaxbSystemException(JAXBException ex) {
-        super(ex.getMessage(), ex);
-    }
+	public JaxbSystemException(JAXBException ex) {
+		super(ex.getMessage(), ex);
+	}
 }

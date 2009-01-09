@@ -18,43 +18,43 @@ package org.springframework.oxm.castor;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
 import org.exolab.castor.xml.XMLException;
+
 import org.springframework.oxm.XmlMappingException;
 
 /**
  * Generic utility methods for working with Castor. Mainly for internal use within the framework.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class CastorUtils {
 
-    /**
-     * Converts the given <code>XMLException</code> to an appropriate exception from the
-     * <code>org.springframework.oxm</code> hierarchy.
-     * <p/>
-     * A boolean flag is used to indicate whether this exception occurs during marshalling or unmarshalling, since
-     * Castor itself does not make this distinction in its exception hierarchy.
-     *
-     * @param ex          Castor <code>XMLException</code> that occured
-     * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>), or
-     *                    unmarshalling (<code>false</code>)
-     * @return the corresponding <code>XmlMappingException</code>
-     */
-    public static XmlMappingException convertXmlException(XMLException ex, boolean marshalling) {
-        if (ex instanceof MarshalException) {
-            MarshalException marshalException = (MarshalException) ex;
-            if (marshalling) {
-                return new CastorMarshallingFailureException(marshalException);
-            }
-            else {
-                return new CastorUnmarshallingFailureException(marshalException);
-            }
-        }
-        else if (ex instanceof ValidationException) {
-            return new CastorValidationFailureException((ValidationException) ex);
-        }
-        // fallback
-        return new CastorSystemException("Unknown Castor exception: " + ex.getMessage(), ex);
-    }
+	/**
+	 * Converts the given <code>XMLException</code> to an appropriate exception from the
+	 * <code>org.springframework.oxm</code> hierarchy. <p/> A boolean flag is used to indicate whether this exception
+	 * occurs during marshalling or unmarshalling, since Castor itself does not make this distinction in its exception
+	 * hierarchy.
+	 *
+	 * @param ex		  Castor <code>XMLException</code> that occured
+	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>), or unmarshalling
+	 *                    (<code>false</code>)
+	 * @return the corresponding <code>XmlMappingException</code>
+	 */
+	public static XmlMappingException convertXmlException(XMLException ex, boolean marshalling) {
+		if (ex instanceof MarshalException) {
+			MarshalException marshalException = (MarshalException) ex;
+			if (marshalling) {
+				return new CastorMarshallingFailureException(marshalException);
+			}
+			else {
+				return new CastorUnmarshallingFailureException(marshalException);
+			}
+		}
+		else if (ex instanceof ValidationException) {
+			return new CastorValidationFailureException((ValidationException) ex);
+		}
+		// fallback
+		return new CastorSystemException("Unknown Castor exception: " + ex.getMessage(), ex);
+	}
 
 }

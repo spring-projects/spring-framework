@@ -32,8 +32,10 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
-import junit.framework.TestCase;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -43,154 +45,160 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.oxm.jaxb2.FlightType;
-import org.springframework.oxm.jaxb2.Flights;
 import org.springframework.oxm.mime.MimeContainer;
-import org.springframework.xml.transform.StaxSource;
-import org.springframework.xml.transform.StringSource;
+import org.springframework.util.xml.StaxUtils;
 
-public class Jaxb2UnmarshallerTest extends TestCase {
+public class Jaxb2UnmarshallerTest {
 
-    private static final String INPUT_STRING = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-            "<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
+	private static final String INPUT_STRING = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
-    private Jaxb2Marshaller unmarshaller;
+	private Jaxb2Marshaller unmarshaller;
 
-    protected void setUp() throws Exception {
-        unmarshaller = new Jaxb2Marshaller();
-        unmarshaller.setContextPath("org.springframework.oxm.jaxb2");
-        unmarshaller.setSchema(new ClassPathResource("org/springframework/oxm/flight.xsd"));
-        unmarshaller.afterPropertiesSet();
-    }
+	@Before
+	public void createMarshaller() throws Exception {
+		unmarshaller = new Jaxb2Marshaller();
+		unmarshaller.setContextPath("org.springframework.oxm.jaxb");
+		unmarshaller.setSchema(new ClassPathResource("org/springframework/oxm/flight.xsd"));
+		unmarshaller.afterPropertiesSet();
+	}
 
-    public void testUnmarshalDomSource() throws Exception {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document document = builder.newDocument();
-        Element flightsElement = document.createElementNS("http://samples.springframework.org/flight", "tns:flights");
-        document.appendChild(flightsElement);
-        Element flightElement = document.createElementNS("http://samples.springframework.org/flight", "tns:flight");
-        flightsElement.appendChild(flightElement);
-        Element numberElement = document.createElementNS("http://samples.springframework.org/flight", "tns:number");
-        flightElement.appendChild(numberElement);
-        Text text = document.createTextNode("42");
-        numberElement.appendChild(text);
-        DOMSource source = new DOMSource(document);
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalDomSource() throws Exception {
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document document = builder.newDocument();
+		Element flightsElement = document.createElementNS("http://samples.springframework.org/flight", "tns:flights");
+		document.appendChild(flightsElement);
+		Element flightElement = document.createElementNS("http://samples.springframework.org/flight", "tns:flight");
+		flightsElement.appendChild(flightElement);
+		Element numberElement = document.createElementNS("http://samples.springframework.org/flight", "tns:number");
+		flightElement.appendChild(numberElement);
+		Text text = document.createTextNode("42");
+		numberElement.appendChild(text);
+		DOMSource source = new DOMSource(document);
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalStreamSourceReader() throws Exception {
-        StreamSource source = new StreamSource(new StringReader(INPUT_STRING));
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalStreamSourceReader() throws Exception {
+		StreamSource source = new StreamSource(new StringReader(INPUT_STRING));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalStreamSourceInputStream() throws Exception {
-        StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void testUnmarshalStreamSourceInputStream() throws Exception {
+		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalSAXSource() throws Exception {
-        XMLReader reader = XMLReaderFactory.createXMLReader();
-        SAXSource source = new SAXSource(reader, new InputSource(new StringReader(INPUT_STRING)));
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalSAXSource() throws Exception {
+		XMLReader reader = XMLReaderFactory.createXMLReader();
+		SAXSource source = new SAXSource(reader, new InputSource(new StringReader(INPUT_STRING)));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalStaxSourceXmlStreamReader() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-        StaxSource source = new StaxSource(streamReader);
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalStaxSourceXmlStreamReader() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
+		Source source = StaxUtils.createStaxSource(streamReader);
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalStaxSourceXmlEventReader() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(INPUT_STRING));
-        StaxSource source = new StaxSource(eventReader);
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalStaxSourceXmlEventReader() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(INPUT_STRING));
+		Source source = StaxUtils.createStaxSource(eventReader);
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalStaxSourceXmlStreamReaderJaxp14() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-        StAXSource source = new StAXSource(streamReader);
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalStaxSourceXmlStreamReaderJaxp14() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
+		StAXSource source = new StAXSource(streamReader);
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testUnmarshalStaxSourceXmlEventReaderJaxp14() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(INPUT_STRING));
-        StAXSource source = new StAXSource(eventReader);
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalStaxSourceXmlEventReaderJaxp14() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(INPUT_STRING));
+		StAXSource source = new StAXSource(eventReader);
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testMarshalAttachments() throws Exception {
-        unmarshaller = new Jaxb2Marshaller();
-        unmarshaller.setClassesToBeBound(new Class[]{BinaryObject.class});
-        unmarshaller.setMtomEnabled(true);
-        unmarshaller.afterPropertiesSet();
-        MimeContainer mimeContainer = createMock(MimeContainer.class);
+	@Test
+	public void marshalAttachments() throws Exception {
+		unmarshaller = new Jaxb2Marshaller();
+		unmarshaller.setClassesToBeBound(new Class[]{BinaryObject.class});
+		unmarshaller.setMtomEnabled(true);
+		unmarshaller.afterPropertiesSet();
+		MimeContainer mimeContainer = createMock(MimeContainer.class);
 
-        Resource logo = new ClassPathResource("spring-ws.png", getClass());
-        DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
+		Resource logo = new ClassPathResource("spring-ws.png", getClass());
+		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
 
-        expect(mimeContainer.isXopPackage()).andReturn(true);
-        expect(mimeContainer.getAttachment(
-                "<6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws>"))
-                .andReturn(dataHandler);
-        expect(mimeContainer.getAttachment(
-                "<99bd1592-0521-41a2-9688-a8bfb40192fb@http://springframework.org/spring-ws>"))
-                .andReturn(dataHandler);
-        expect(mimeContainer.getAttachment("696cfb9a-4d2d-402f-bb5c-59fa69e7f0b3@spring-ws.png"))
-                .andReturn(dataHandler);
-        replay(mimeContainer);
-        String content = "<binaryObject xmlns='http://springframework.org/spring-ws'>" + "<bytes>" +
-                "<xop:Include href='cid:6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws' xmlns:xop='http://www.w3.org/2004/08/xop/include'/>" +
-                "</bytes>" + "<dataHandler>" +
-                "<xop:Include href='cid:99bd1592-0521-41a2-9688-a8bfb40192fb@http://springframework.org/spring-ws' xmlns:xop='http://www.w3.org/2004/08/xop/include'/>" +
-                "</dataHandler>" +
-                "<swaDataHandler>696cfb9a-4d2d-402f-bb5c-59fa69e7f0b3@spring-ws.png</swaDataHandler>" +
-                "</binaryObject>";
+		expect(mimeContainer.isXopPackage()).andReturn(true);
+		expect(mimeContainer.getAttachment(
+				"<6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws>")).andReturn(dataHandler);
+		expect(mimeContainer.getAttachment(
+				"<99bd1592-0521-41a2-9688-a8bfb40192fb@http://springframework.org/spring-ws>")).andReturn(dataHandler);
+		expect(mimeContainer.getAttachment("696cfb9a-4d2d-402f-bb5c-59fa69e7f0b3@spring-ws.png"))
+				.andReturn(dataHandler);
+		replay(mimeContainer);
+		String content = "<binaryObject xmlns='http://springframework.org/spring-ws'>" + "<bytes>" +
+				"<xop:Include href='cid:6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws' xmlns:xop='http://www.w3.org/2004/08/xop/include'/>" +
+				"</bytes>" + "<dataHandler>" +
+				"<xop:Include href='cid:99bd1592-0521-41a2-9688-a8bfb40192fb@http://springframework.org/spring-ws' xmlns:xop='http://www.w3.org/2004/08/xop/include'/>" +
+				"</dataHandler>" +
+				"<swaDataHandler>696cfb9a-4d2d-402f-bb5c-59fa69e7f0b3@spring-ws.png</swaDataHandler>" +
+				"</binaryObject>";
 
-        Source source = new StringSource(content);
-        Object result = unmarshaller.unmarshal(source, mimeContainer);
-        assertTrue("Result is not a BinaryObject", result instanceof BinaryObject);
-        verify(mimeContainer);
-        BinaryObject object = (BinaryObject) result;
-        assertNotNull("bytes property not set", object.getBytes());
-        assertTrue("bytes property not set", object.getBytes().length > 0);
-        assertNotNull("datahandler property not set", object.getSwaDataHandler());
-    }
+		StringReader reader = new StringReader(content);
+		Object result = unmarshaller.unmarshal(new StreamSource(reader), mimeContainer);
+		assertTrue("Result is not a BinaryObject", result instanceof BinaryObject);
+		verify(mimeContainer);
+		BinaryObject object = (BinaryObject) result;
+		assertNotNull("bytes property not set", object.getBytes());
+		assertTrue("bytes property not set", object.getBytes().length > 0);
+		assertNotNull("datahandler property not set", object.getSwaDataHandler());
+	}
 
-    private void testFlights(Object o) {
-        Flights flights = (Flights) o;
-        assertNotNull("Flights is null", flights);
-        assertEquals("Invalid amount of flight elements", 1, flights.getFlight().size());
-        testFlight(flights.getFlight().get(0));
-    }
+	private void testFlights(Object o) {
+		Flights flights = (Flights) o;
+		assertNotNull("Flights is null", flights);
+		assertEquals("Invalid amount of flight elements", 1, flights.getFlight().size());
+		testFlight(flights.getFlight().get(0));
+	}
 
-    private void testFlight(Object o) {
-        FlightType flight = (FlightType) o;
-        assertNotNull("Flight is null", flight);
-        assertEquals("Number is invalid", 42L, flight.getNumber());
-    }
+	private void testFlight(Object o) {
+		FlightType flight = (FlightType) o;
+		assertNotNull("Flight is null", flight);
+		assertEquals("Number is invalid", 42L, flight.getNumber());
+	}
 
-    public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-        streamReader.nextTag(); // skip to flights
-        streamReader.nextTag(); // skip to flight
-        StaxSource source = new StaxSource(streamReader);
-        JAXBElement<FlightType> element = (JAXBElement<FlightType>) unmarshaller.unmarshal(source);
-        FlightType flight = element.getValue();
-        testFlight(flight);
-    }
+	@Test
+	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
+		streamReader.nextTag(); // skip to flights
+		streamReader.nextTag(); // skip to flight
+		Source source = StaxUtils.createStaxSource(streamReader);
+		JAXBElement<FlightType> element = (JAXBElement<FlightType>) unmarshaller.unmarshal(source);
+		FlightType flight = element.getValue();
+		testFlight(flight);
+	}
 
 
 }

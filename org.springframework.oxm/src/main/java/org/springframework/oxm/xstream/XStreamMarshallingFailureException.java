@@ -19,31 +19,32 @@ package org.springframework.oxm.xstream;
 import com.thoughtworks.xstream.alias.CannotResolveClassException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.io.StreamException;
+
 import org.springframework.oxm.MarshallingFailureException;
 
 /**
  * XStream-specific subclass of <code>MarshallingFailureException</code>.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class XStreamMarshallingFailureException extends MarshallingFailureException {
 
-    public XStreamMarshallingFailureException(String msg) {
-        super(msg);
-    }
+	public XStreamMarshallingFailureException(String msg) {
+		super(msg);
+	}
 
-    public XStreamMarshallingFailureException(StreamException ex) {
-        super("XStream marshalling exception: " + ex.getMessage(), ex);
+	public XStreamMarshallingFailureException(StreamException ex) {
+		super("XStream marshalling exception: " + ex.getMessage(), ex);
 
-    }
+	}
 
-    public XStreamMarshallingFailureException(CannotResolveClassException ex) {
-        super("XStream resolving exception: " + ex.getMessage(), ex);
-    }
+	public XStreamMarshallingFailureException(CannotResolveClassException ex) {
+		super("XStream resolving exception: " + ex.getMessage(), ex);
+	}
 
-    public XStreamMarshallingFailureException(ConversionException ex) {
-        super("XStream conversion exception: " + ex.getMessage(), ex);
-    }
+	public XStreamMarshallingFailureException(ConversionException ex) {
+		super("XStream conversion exception: " + ex.getMessage(), ex);
+	}
 
 }

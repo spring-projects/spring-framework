@@ -20,34 +20,32 @@ import javax.xml.transform.Result;
 
 /**
  * Defines the contract for Object XML Mapping Marshallers. Implementations of this interface can serialize a given
- * Object to an XML Stream.
- * <p/>
- * Although the <code>marshal</code> method accepts a <code>java.lang.Object</code> as its first parameter, most
- * <code>Marshaller</code> implementations cannot handle arbitrary <code>java.lang.Object</code>. Instead, a object
- * class must be registered with the marshaller, or have a common base class.
+ * Object to an XML Stream. <p/> Although the <code>marshal</code> method accepts a <code>java.lang.Object</code> as its
+ * first parameter, most <code>Marshaller</code> implementations cannot handle arbitrary <code>java.lang.Object</code>.
+ * Instead, a object class must be registered with the marshaller, or have a common base class.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public interface Marshaller {
 
-    /**
-     * Marshals the object graph with the given root into the provided {@link Result}.
-     *
-     * @param graph  the root of the object graph to marshal
-     * @param result the result to marshal to
-     * @throws XmlMappingException if the given object cannot be marshalled to the result
-     * @throws IOException         if an I/O exception occurs
-     */
-    void marshal(Object graph, Result result) throws XmlMappingException, IOException;
+	/**
+	 * Marshals the object graph with the given root into the provided {@link Result}.
+	 *
+	 * @param graph  the root of the object graph to marshal
+	 * @param result the result to marshal to
+	 * @throws XmlMappingException if the given object cannot be marshalled to the result
+	 * @throws IOException		 if an I/O exception occurs
+	 */
+	void marshal(Object graph, Result result) throws XmlMappingException, IOException;
 
-    /**
-     * Indicates whether this marshaller can marshal instances of the supplied type.
-     *
-     * @param clazz the class that this marshaller is being asked if it can marshal
-     * @return <code>true</code> if this marshaller can indeed marshal instances of the supplied class;
-     *         <code>false</code> otherwise
-     */
-    boolean supports(Class clazz);
+	/**
+	 * Indicates whether this marshaller can marshal instances of the supplied type.
+	 *
+	 * @param clazz the class that this marshaller is being asked if it can marshal
+	 * @return <code>true</code> if this marshaller can indeed marshal instances of the supplied class; <code>false</code>
+	 *         otherwise
+	 */
+	boolean supports(Class clazz);
 
 }

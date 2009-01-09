@@ -19,45 +19,46 @@ package org.springframework.oxm.config;
 import java.util.Iterator;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * Parser for the <code>&lt;oxm:jaxb2-marshaller/&gt; element.
  *
  * @author Arjen Poutsma
- * @since 1.5.0
+ * @since 3.0
  */
 class Jaxb2MarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-    private static final String JAXB2_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jaxb.Jaxb2Marshaller";
+	private static final String JAXB2_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jaxb.Jaxb2Marshaller";
 
-    @Override
+	@Override
 	protected String getBeanClassName(Element element) {
-        return JAXB2_MARSHALLER_CLASS_NAME;
-    }
+		return JAXB2_MARSHALLER_CLASS_NAME;
+	}
 
-    @Override
+	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
-        String contextPath = element.getAttribute("contextPath");
-        if (StringUtils.hasText(contextPath)) {
-            beanDefinitionBuilder.addPropertyValue("contextPath", contextPath);
-        }
-        List classes = DomUtils.getChildElementsByTagName(element, "class-to-be-bound");
-        if (!classes.isEmpty()) {
-            ManagedList classesToBeBound = new ManagedList(classes.size());
-            for (Iterator iterator = classes.iterator(); iterator.hasNext();) {
-                Element classToBeBound = (Element) iterator.next();
-                String className = classToBeBound.getAttribute("name");
-                classesToBeBound.add(className);
-            }
-            beanDefinitionBuilder.addPropertyValue("classesToBeBound", classesToBeBound);
-        }
-    }
+		String contextPath = element.getAttribute("contextPath");
+		if (StringUtils.hasText(contextPath)) {
+			beanDefinitionBuilder.addPropertyValue("contextPath", contextPath);
+		}
+		List classes = DomUtils.getChildElementsByTagName(element, "class-to-be-bound");
+		if (!classes.isEmpty()) {
+			ManagedList classesToBeBound = new ManagedList(classes.size());
+			for (Iterator iterator = classes.iterator(); iterator.hasNext();) {
+				Element classToBeBound = (Element) iterator.next();
+				String className = classToBeBound.getAttribute("name");
+				classesToBeBound.add(className);
+			}
+			beanDefinitionBuilder.addPropertyValue("classesToBeBound", classesToBeBound);
+		}
+	}
 
 }

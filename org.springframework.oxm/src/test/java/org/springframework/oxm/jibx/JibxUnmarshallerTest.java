@@ -15,36 +15,42 @@
  */
 package org.springframework.oxm.jibx;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Ignore;
+
 import org.springframework.oxm.AbstractUnmarshallerTestCase;
 import org.springframework.oxm.Unmarshaller;
 
+@Ignore
 public class JibxUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
-    @Override
+	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
-        JibxMarshaller unmarshaller = new JibxMarshaller();
-        unmarshaller.setTargetClass(Flights.class);
-        unmarshaller.afterPropertiesSet();
-        return unmarshaller;
-    }
+		JibxMarshaller unmarshaller = new JibxMarshaller();
+		unmarshaller.setTargetClass(Flights.class);
+		unmarshaller.afterPropertiesSet();
+		return unmarshaller;
+	}
 
-    @Override
+	@Override
 	protected void testFlights(Object o) {
-        Flights flights = (Flights) o;
-        assertNotNull("Flights is null", flights);
-        assertEquals("Invalid amount of flight elements", 1, flights.sizeFlightList());
-        testFlight(flights.getFlight(0));
-    }
+		Flights flights = (Flights) o;
+		assertNotNull("Flights is null", flights);
+		assertEquals("Invalid amount of flight elements", 1, flights.sizeFlightList());
+		testFlight(flights.getFlight(0));
+	}
 
-    @Override
+	@Override
 	protected void testFlight(Object o) {
-        FlightType flight = (FlightType) o;
-        assertNotNull("Flight is null", flight);
-        assertEquals("Number is invalid", 42L, flight.getNumber());
-    }
+		FlightType flight = (FlightType) o;
+		assertNotNull("Flight is null", flight);
+		assertEquals("Number is invalid", 42L, flight.getNumber());
+	}
 
-    @Override
-	public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
-        // JiBX does not support reading XML fragments, hence the override here
-    }
+	@Override
+	@Ignore
+	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
+		// JiBX does not support reading XML fragments, hence the override here
+	}
 }

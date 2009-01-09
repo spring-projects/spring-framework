@@ -25,16 +25,16 @@ import java.lang.reflect.Type;
  * {@link Method#getGenericReturnType()}.
  *
  * @author Arjen Poutsma
- * @since 1.0.2
+ * @since 3.0
  */
 public interface GenericMarshaller extends Marshaller {
 
-    /**
-     * Indicates whether this marshaller can marshal instances of the supplied type.
-     *
-     * @param type the type that this marshaller is being asked if it can marshal
-     * @return <code>true</code> if this marshaller can indeed marshal instances of the supplied type;
-     *         <code>false</code> otherwise
-     */
-    boolean supports(Type type);
+	/**
+	 * Indicates whether this marshaller can marshal instances of the supplied type.
+	 *
+	 * @param type the type that this marshaller is being asked if it can marshal
+	 * @return <code>true</code> if this marshaller can indeed marshal instances of the supplied type; <code>false</code>
+	 *         otherwise
+	 */
+	boolean supports(Type type);
 }

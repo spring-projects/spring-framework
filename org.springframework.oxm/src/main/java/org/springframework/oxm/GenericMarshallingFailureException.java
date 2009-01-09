@@ -21,18 +21,18 @@ package org.springframework.oxm;
  * @author Arjen Poutsma
  * @see MarshallingFailureException
  * @see UnmarshallingFailureException
- * @since 1.0.0
+ * @since 3.0
  */
 public abstract class GenericMarshallingFailureException extends XmlMappingException {
 
-    /** Constructor for <code>GenericMarshallingFailureException</code>. */
-    public GenericMarshallingFailureException(String msg) {
-        super(msg);
-    }
+	/** Constructor for <code>GenericMarshallingFailureException</code>. */
+	public GenericMarshallingFailureException(String msg) {
+		super(msg);
+	}
 
-    /** Constructor for <code>GenericMarshallingFailureException</code>. */
-    public GenericMarshallingFailureException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	/** Constructor for <code>GenericMarshallingFailureException</code>. */
+	public GenericMarshallingFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 
 }

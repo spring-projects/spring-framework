@@ -19,75 +19,70 @@ import java.io.StringReader;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTestCase;
 import org.springframework.oxm.Unmarshaller;
-import org.springframework.samples.flight.FlightDocument;
-import org.springframework.samples.flight.FlightType;
-import org.springframework.samples.flight.FlightsDocument;
-import org.springframework.samples.flight.FlightsDocument.Flights;
-import org.springframework.xml.transform.StaxSource;
-import org.springframework.xml.transform.StringSource;
+import org.springframework.util.xml.StaxUtils;
 
+@Ignore
 public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
-    @Override
+	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
-        return new XmlBeansMarshaller();
-    }
+		return new XmlBeansMarshaller();
+	}
 
-    @Override
+	@Override
 	protected void testFlights(Object o) {
-        FlightsDocument flightsDocument = (FlightsDocument) o;
-        assertNotNull("FlightsDocument is null", flightsDocument);
-        Flights flights = flightsDocument.getFlights();
-        assertEquals("Invalid amount of flight elements", 1, flights.sizeOfFlightArray());
-        testFlight(flights.getFlightArray(0));
-    }
+		FlightsDocument flightsDocument = (FlightsDocument) o;
+		assertNotNull("FlightsDocument is null", flightsDocument);
+		FlightsDocument.Flights flights = flightsDocument.getFlights();
+		assertEquals("Invalid amount of flight elements", 1, flights.sizeOfFlightArray());
+		testFlight(flights.getFlightArray(0));
+	}
 
-    @Override
+	@Override
 	protected void testFlight(Object o) {
-        FlightType flight = null;
-        if (o instanceof FlightType) {
-            flight = (FlightType) o;
-        }
-        else if (o instanceof FlightDocument) {
-            FlightDocument flightDocument = (FlightDocument) o;
-            flight = flightDocument.getFlight();
-        }
-        assertNotNull("Flight is null", flight);
-        assertEquals("Number is invalid", 42L, flight.getNumber());
-    }
+		FlightType flight = null;
+		if (o instanceof FlightType) {
+			flight = (FlightType) o;
+		}
+		else if (o instanceof FlightDocument) {
+			FlightDocument flightDocument = (FlightDocument) o;
+			flight = flightDocument.getFlight();
+		}
+		assertNotNull("Flight is null", flight);
+		assertEquals("Number is invalid", 42L, flight.getNumber());
+	}
 
-    @Override
-	public void testUnmarshalPartialStaxSourceXmlStreamReader() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-        streamReader.nextTag(); // skip to flights
-        assertEquals("Invalid element", new QName("http://samples.springframework.org/flight", "flights"),
-                streamReader.getName());
-        streamReader.nextTag(); // skip to flight
-        assertEquals("Invalid element", new QName("http://samples.springframework.org/flight", "flight"),
-                streamReader.getName());
-        StaxSource source = new StaxSource(streamReader);
-        Object flight = unmarshaller.unmarshal(source);
-        testFlight(flight);
-    }
+	@Override
+	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
+		streamReader.nextTag(); // skip to flights
+		assertEquals("Invalid element", new QName("http://samples.springframework.org/flight", "flights"),
+				streamReader.getName());
+		streamReader.nextTag(); // skip to flight
+		assertEquals("Invalid element", new QName("http://samples.springframework.org/flight", "flight"),
+				streamReader.getName());
+		Source source = StaxUtils.createStaxSource(streamReader);
+		Object flight = unmarshaller.unmarshal(source);
+		testFlight(flight);
+	}
 
-    public void testValidate() throws Exception {
-        ((XmlBeansMarshaller) unmarshaller).setValidating(true);
-
-        try {
-            String invalidInput = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-                    "<tns:flight><tns:number>abc</tns:number></tns:flight></tns:flights>";
-            unmarshaller.unmarshal(new StringSource(invalidInput));
-            fail("Expected a XmlBeansValidationFailureException");
-        }
-        catch (XmlBeansValidationFailureException ex) {
-            // expected
-        }
-
-
-    }
+	@Test(expected = XmlBeansValidationFailureException.class)
+	public void testValidate() throws Exception {
+		((XmlBeansMarshaller) unmarshaller).setValidating(true);
+		String invalidInput = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+				"<tns:flight><tns:number>abc</tns:number></tns:flight></tns:flights>";
+		unmarshaller.unmarshal(new StreamSource(new StringReader(invalidInput)));
+	}
 
 }

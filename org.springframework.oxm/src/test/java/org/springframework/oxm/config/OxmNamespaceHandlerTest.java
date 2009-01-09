@@ -16,37 +16,50 @@
 
 package org.springframework.oxm.config;
 
+import org.apache.xmlbeans.XmlOptions;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.oxm.jaxb.Jaxb1Marshaller;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.oxm.jibx.JibxMarshaller;
 import org.springframework.oxm.xmlbeans.XmlBeansMarshaller;
 
-import junit.framework.TestCase;
-import org.apache.xmlbeans.XmlOptions;
+public class OxmNamespaceHandlerTest {
 
-public class OxmNamespaceHandlerTest extends TestCase {
+	private ApplicationContext applicationContext;
 
-    private ApplicationContext applicationContext;
+	@Before
+	public void createAppContext() throws Exception {
+		applicationContext = new ClassPathXmlApplicationContext("oxmNamespaceHandlerTest.xml", getClass());
+	}
 
-    protected void setUp() throws Exception {
-        applicationContext = new ClassPathXmlApplicationContext("oxmNamespaceHandlerTest.xml", getClass());
-    }
+	@Test
+	@Ignore
+	public void jibxMarshaller() throws Exception {
+		applicationContext.getBean("jibxMarshaller", JibxMarshaller.class);
+	}
 
-    public void testJaxb1Marshaller() throws Exception {
-        applicationContext.getBean("jaxb1Marshaller", Jaxb1Marshaller.class);
-    }
+	@Test
+	public void xmlBeansMarshaller() throws Exception {
+		XmlBeansMarshaller marshaller = applicationContext.getBean("xmlBeansMarshaller", XmlBeansMarshaller.class);
+		XmlOptions options = marshaller.getXmlOptions();
+		assertNotNull("Options not set", options);
+		assertTrue("option not set", options.hasOption("SAVE_PRETTY_PRINT"));
+		assertEquals("option not set", "true", options.get("SAVE_PRETTY_PRINT"));
+	}
 
-    public void testJibxMarshaller() throws Exception {
-        applicationContext.getBean("jibxMarshaller", JibxMarshaller.class);
-    }
+	@Test
+	public void jaxb2ContextPathMarshaller() throws Exception {
+		applicationContext.getBean("contextPathMarshaller", Jaxb2Marshaller.class);
+	}
 
-    public void testXmlBeansMarshaller() throws Exception {
-        XmlBeansMarshaller marshaller =
-                (XmlBeansMarshaller) applicationContext.getBean("xmlBeansMarshaller", XmlBeansMarshaller.class);
-        XmlOptions options = marshaller.getXmlOptions();
-        assertNotNull("Options not set", options);
-        assertTrue("option not set", options.hasOption("SAVE_PRETTY_PRINT"));
-        assertEquals("option not set", "true", options.get("SAVE_PRETTY_PRINT"));
-    }
+	@Test
+	public void jaxb2ClassesToBeBoundMarshaller() throws Exception {
+		applicationContext.getBean("classesMarshaller", Jaxb2Marshaller.class);
+	}
+
 }

@@ -17,6 +17,7 @@
 package org.springframework.oxm.jibx;
 
 import org.jibx.runtime.ValidationException;
+
 import org.springframework.oxm.ValidationFailureException;
 
 /**
@@ -24,12 +25,12 @@ import org.springframework.oxm.ValidationFailureException;
  *
  * @author Arjen Poutsma
  * @see JibxUtils#convertJibxException(org.jibx.runtime.JiBXException,boolean)
- * @since 1.0.0
+ * @since 3.0
  */
 public class JibxValidationFailureException extends ValidationFailureException {
 
-    public JibxValidationFailureException(ValidationException ex) {
-        super("JiBX validation exception: " + ex.getMessage(), ex);
-    }
+	public JibxValidationFailureException(ValidationException ex) {
+		super("JiBX validation exception: " + ex.getMessage(), ex);
+	}
 
 }

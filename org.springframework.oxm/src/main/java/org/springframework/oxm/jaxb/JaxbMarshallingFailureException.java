@@ -24,12 +24,12 @@ import org.springframework.oxm.MarshallingFailureException;
  *
  * @author Arjen Poutsma
  * @see JaxbUtils#convertJaxbException
- * @since 1.0.0
+ * @since 3.0
  */
 public class JaxbMarshallingFailureException extends MarshallingFailureException {
 
-    public JaxbMarshallingFailureException(MarshalException ex) {
-        super("JAXB marshalling exception: " + ex.getMessage(), ex);
-    }
+	public JaxbMarshallingFailureException(MarshalException ex) {
+		super("JAXB marshalling exception: " + ex.getMessage(), ex);
+	}
 
 }

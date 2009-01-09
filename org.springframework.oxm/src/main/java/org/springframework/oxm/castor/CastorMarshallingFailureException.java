@@ -16,6 +16,7 @@
 package org.springframework.oxm.castor;
 
 import org.exolab.castor.xml.MarshalException;
+
 import org.springframework.oxm.MarshallingFailureException;
 
 /**
@@ -23,12 +24,12 @@ import org.springframework.oxm.MarshallingFailureException;
  *
  * @author Arjen Poutsma
  * @see CastorUtils#convertXmlException
- * @since 1.0.0
+ * @since 3.0
  */
 public class CastorMarshallingFailureException extends MarshallingFailureException {
 
-    public CastorMarshallingFailureException(MarshalException ex) {
-        super("Castor marshalling exception: " + ex.getMessage(), ex);
-    }
+	public CastorMarshallingFailureException(MarshalException ex) {
+		super("Castor marshalling exception: " + ex.getMessage(), ex);
+	}
 
 }

@@ -19,12 +19,12 @@ package org.springframework.oxm;
  * Superclass for exceptions that cannot be distinguished further.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public abstract class UncategorizedXmlMappingException extends XmlMappingException {
 
-    /** Constructor for <code>UncategorizedXmlMappingException</code>. */
-    protected UncategorizedXmlMappingException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	/** Constructor for <code>UncategorizedXmlMappingException</code>. */
+	protected UncategorizedXmlMappingException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 }

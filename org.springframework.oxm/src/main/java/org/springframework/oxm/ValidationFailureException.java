@@ -19,17 +19,17 @@ package org.springframework.oxm;
  * Exception thrown on marshalling validation failure.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class ValidationFailureException extends XmlMappingException {
 
-    /** Constructor for <code>ValidationFailureException</code>. */
-    public ValidationFailureException(String msg) {
-        super(msg);
-    }
+	/** Constructor for <code>ValidationFailureException</code>. */
+	public ValidationFailureException(String msg) {
+		super(msg);
+	}
 
-    /** Constructor for <code>ValidationFailureException</code>. */
-    public ValidationFailureException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	/** Constructor for <code>ValidationFailureException</code>. */
+	public ValidationFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 }

@@ -16,6 +16,7 @@
 package org.springframework.oxm.castor;
 
 import org.exolab.castor.xml.ValidationException;
+
 import org.springframework.oxm.ValidationFailureException;
 
 /**
@@ -23,11 +24,11 @@ import org.springframework.oxm.ValidationFailureException;
  *
  * @author Arjen Poutsma
  * @see CastorUtils#convertXmlException
- * @since 1.0.0
+ * @since 3.0
  */
 public class CastorValidationFailureException extends ValidationFailureException {
 
-    public CastorValidationFailureException(ValidationException ex) {
-        super("Castor validation exception: " + ex.getMessage(), ex);
-    }
+	public CastorValidationFailureException(ValidationException ex) {
+		super("Castor validation exception: " + ex.getMessage(), ex);
+	}
 }

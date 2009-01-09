@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns="http://www.springframework.org/schema/oxm" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:beans="http://www.springframework.org/schema/beans"
-            xmlns:tool="http://www.springframework.org/schema/tool"
-            targetNamespace="http://www.springframework.org/schema/oxm" elementFormDefault="qualified"
-            attributeFormDefault="unqualified">
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			xmlns:tool="http://www.springframework.org/schema/tool"
+			targetNamespace="http://www.springframework.org/schema/oxm" elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
 
     <xsd:import namespace="http://www.springframework.org/schema/beans"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
@@ -13,35 +13,6 @@
             Defines the elements used in Spring's Object/XML Mapping integration.
         </xsd:documentation>
     </xsd:annotation>
-
-    <xsd:element name="jaxb1-marshaller">
-        <xsd:complexType>
-            <xsd:annotation>
-                <xsd:documentation source="java:org.springframework.oxm.jaxb.Jaxb1Marshaller">
-                    Defines a JAXB1 Marshaller.
-                </xsd:documentation>
-                <xsd:appinfo>
-                    <tool:annotation>
-                        <tool:exports type="org.springframework.oxm.jaxb.Jaxb1Marshaller"/>
-                    </tool:annotation>
-                </xsd:appinfo>
-            </xsd:annotation>
-            <xsd:complexContent>
-                <xsd:extension base="beans:identifiedType">
-                    <xsd:attribute name="contextPath" type="xsd:string" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>The JAXB Context path</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="validating" type="xsd:boolean" default="false">
-                        <xsd:annotation>
-                            <xsd:documentation>Whether incoming XML should be validated.</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                </xsd:extension>
-            </xsd:complexContent>
-        </xsd:complexType>
-    </xsd:element>
 
     <xsd:element name="jaxb2-marshaller">
         <xsd:complexType>

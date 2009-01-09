@@ -19,56 +19,56 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.xml.transform.stream.StreamSource;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTestCase;
 import org.springframework.oxm.Unmarshaller;
 
 public class CastorUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
-    @Override
+	@Override
 	protected void testFlights(Object o) {
-        Flights flights = (Flights) o;
-        assertNotNull("Flights is null", flights);
-        assertEquals("Invalid amount of flight elements", 1, flights.getFlightCount());
-        testFlight(flights.getFlight()[0]);
-    }
+		Flights flights = (Flights) o;
+		assertNotNull("Flights is null", flights);
+		assertEquals("Invalid amount of flight elements", 1, flights.getFlightCount());
+		testFlight(flights.getFlight()[0]);
+	}
 
-    @Override
+	@Override
 	protected void testFlight(Object o) {
-        Flight flight = (Flight) o;
-        assertNotNull("Flight is null", flight);
-        assertEquals("Number is invalid", 42L, flight.getNumber());
-    }
+		Flight flight = (Flight) o;
+		assertNotNull("Flight is null", flight);
+		assertEquals("Number is invalid", 42L, flight.getNumber());
+	}
 
-    @Override
+	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
-        CastorMarshaller marshaller = new CastorMarshaller();
-        ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
-        marshaller.setMappingLocation(mappingLocation);
-        marshaller.afterPropertiesSet();
-        return marshaller;
-    }
+		CastorMarshaller marshaller = new CastorMarshaller();
+		ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
+		marshaller.setMappingLocation(mappingLocation);
+		marshaller.afterPropertiesSet();
+		return marshaller;
+	}
 
-    public void testUnmarshalTargetClass() throws Exception {
-        CastorMarshaller unmarshaller = new CastorMarshaller();
-        unmarshaller.setTargetClass(Flights.class);
-        unmarshaller.afterPropertiesSet();
-        StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
-        Object flights = unmarshaller.unmarshal(source);
-        testFlights(flights);
-    }
+	@Test
+	public void unmarshalTargetClass() throws Exception {
+		CastorMarshaller unmarshaller = new CastorMarshaller();
+		unmarshaller.setTargetClass(Flights.class);
+		unmarshaller.afterPropertiesSet();
+		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+	}
 
-    public void testSetBothTargetClassAndMapping() throws IOException {
-        try {
-            CastorMarshaller marshaller = new CastorMarshaller();
-            marshaller.setMappingLocation(new ClassPathResource("mapping.xml", CastorMarshaller.class));
-            marshaller.setTargetClass(getClass());
-            marshaller.afterPropertiesSet();
-            fail("IllegalArgumentException expected");
-        }
-        catch (IllegalArgumentException ex) {
-            // expected
-        }
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetBothTargetClassAndMapping() throws IOException {
+		CastorMarshaller marshaller = new CastorMarshaller();
+		marshaller.setMappingLocation(new ClassPathResource("mapping.xml", CastorMarshaller.class));
+		marshaller.setTargetClass(getClass());
+		marshaller.afterPropertiesSet();
+	}
 
 }

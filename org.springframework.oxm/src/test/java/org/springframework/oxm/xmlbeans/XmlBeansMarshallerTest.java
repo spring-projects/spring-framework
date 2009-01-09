@@ -19,43 +19,42 @@ import java.io.ByteArrayOutputStream;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.xmlbeans.XmlObject;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.springframework.oxm.AbstractMarshallerTestCase;
 import org.springframework.oxm.Marshaller;
-import org.springframework.samples.flight.FlightType;
-import org.springframework.samples.flight.FlightsDocument;
-import org.springframework.samples.flight.FlightsDocument.Flights;
 
+@Ignore
 public class XmlBeansMarshallerTest extends AbstractMarshallerTestCase {
 
-    @Override
+	@Override
 	protected Marshaller createMarshaller() throws Exception {
-        return new XmlBeansMarshaller();
-    }
+		return new XmlBeansMarshaller();
+	}
 
-    public void testMarshalNonXmlObject() throws Exception {
-        try {
-            marshaller.marshal(new Object(), new StreamResult(new ByteArrayOutputStream()));
-            fail("XmlBeansMarshaller did not throw ClassCastException for non-XmlObject");
-        }
-        catch (ClassCastException e) {
-            // Expected behavior
-        }
-    }
-
-    @Override
+	@Override
 	protected Object createFlights() {
-        FlightsDocument flightsDocument = FlightsDocument.Factory.newInstance();
-        Flights flights = flightsDocument.addNewFlights();
-        FlightType flightType = flights.addNewFlight();
-        flightType.setNumber(42L);
-        return flightsDocument;
-    }
+		FlightsDocument flightsDocument = FlightsDocument.Factory.newInstance();
+		FlightsDocument.Flights flights = flightsDocument.addNewFlights();
+		FlightType flightType = flights.addNewFlight();
+		flightType.setNumber(42L);
+		return flightsDocument;
+	}
 
-    public void testSupports() throws Exception {
-        assertTrue("XmlBeansMarshaller does not support XmlObject", marshaller.supports(XmlObject.class));
-        assertFalse("XmlBeansMarshaller supports other objects", marshaller.supports(Object.class));
-        assertTrue("XmlBeansMarshaller does not support FlightsDocument", marshaller.supports(FlightsDocument.class));
-        assertTrue("XmlBeansMarshaller does not support Flights", marshaller.supports(Flights.class));
-        assertTrue("XmlBeansMarshaller does not support FlightType", marshaller.supports(FlightType.class));
-    }
+	@Test(expected = ClassCastException.class)
+	public void testMarshalNonXmlObject() throws Exception {
+		marshaller.marshal(new Object(), new StreamResult(new ByteArrayOutputStream()));
+	}
+
+	@Test
+	public void supports() throws Exception {
+		assertTrue("XmlBeansMarshaller does not support XmlObject", marshaller.supports(XmlObject.class));
+		assertFalse("XmlBeansMarshaller supports other objects", marshaller.supports(Object.class));
+		assertTrue("XmlBeansMarshaller does not support FlightsDocument", marshaller.supports(FlightsDocument.class));
+		assertTrue("XmlBeansMarshaller does not support Flights", marshaller.supports(FlightsDocument.Flights.class));
+		assertTrue("XmlBeansMarshaller does not support FlightType", marshaller.supports(FlightType.class));
+	}
 }

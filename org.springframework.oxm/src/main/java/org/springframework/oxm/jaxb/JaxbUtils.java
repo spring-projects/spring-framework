@@ -27,58 +27,58 @@ import org.springframework.util.ClassUtils;
  * Generic utility methods for working with JAXB. Mainly for internal use within the framework.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public abstract class JaxbUtils {
 
-    public static final int JAXB_1 = 0;
+	public static final int JAXB_1 = 0;
 
-    public static final int JAXB_2 = 1;
+	public static final int JAXB_2 = 1;
 
-    private static final String JAXB_2_CLASS_NAME = "javax.xml.bind.Binder";
+	private static final String JAXB_2_CLASS_NAME = "javax.xml.bind.Binder";
 
-    private static int jaxbVersion = JAXB_1;
+	private static int jaxbVersion = JAXB_1;
 
-    static {
-        try {
-            ClassUtils.forName(JAXB_2_CLASS_NAME);
-            jaxbVersion = JAXB_2;
-        }
-        catch (ClassNotFoundException ex1) {
-            // leave JAXB 1 as default
-        }
-    }
+	static {
+		try {
+			ClassUtils.forName(JAXB_2_CLASS_NAME);
+			jaxbVersion = JAXB_2;
+		}
+		catch (ClassNotFoundException ex1) {
+			// leave JAXB 1 as default
+		}
+	}
 
-    /**
-     * Gets the major JAXB version. This means we can do things like if <code>(getJaxbVersion() &lt;= JAXB_2)</code>.
-     *
-     * @return a code comparable to the JAXP_XX codes in this class
-     * @see #JAXB_1
-     * @see #JAXB_2
-     */
-    public static int getJaxbVersion() {
-        return jaxbVersion;
-    }
+	/**
+	 * Gets the major JAXB version. This means we can do things like if <code>(getJaxbVersion() &lt;= JAXB_2)</code>.
+	 *
+	 * @return a code comparable to the JAXP_XX codes in this class
+	 * @see #JAXB_1
+	 * @see #JAXB_2
+	 */
+	public static int getJaxbVersion() {
+		return jaxbVersion;
+	}
 
-    /**
-     * Converts the given <code>JAXBException</code> to an appropriate exception from the
-     * <code>org.springframework.oxm</code> hierarchy.
-     *
-     * @param ex <code>JAXBException</code> that occured
-     * @return the corresponding <code>XmlMappingException</code>
-     */
-    public static XmlMappingException convertJaxbException(JAXBException ex) {
-        if (ex instanceof MarshalException) {
-            return new JaxbMarshallingFailureException((MarshalException) ex);
-        }
-        else if (ex instanceof UnmarshalException) {
-            return new JaxbUnmarshallingFailureException((UnmarshalException) ex);
-        }
-        else if (ex instanceof ValidationException) {
-            return new JaxbValidationFailureException((ValidationException) ex);
-        }
-        // fallback
-        return new JaxbSystemException(ex);
-    }
+	/**
+	 * Converts the given <code>JAXBException</code> to an appropriate exception from the
+	 * <code>org.springframework.oxm</code> hierarchy.
+	 *
+	 * @param ex <code>JAXBException</code> that occured
+	 * @return the corresponding <code>XmlMappingException</code>
+	 */
+	public static XmlMappingException convertJaxbException(JAXBException ex) {
+		if (ex instanceof MarshalException) {
+			return new JaxbMarshallingFailureException((MarshalException) ex);
+		}
+		else if (ex instanceof UnmarshalException) {
+			return new JaxbUnmarshallingFailureException((UnmarshalException) ex);
+		}
+		else if (ex instanceof ValidationException) {
+			return new JaxbValidationFailureException((ValidationException) ex);
+		}
+		// fallback
+		return new JaxbSystemException(ex);
+	}
 
 }

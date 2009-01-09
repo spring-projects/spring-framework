@@ -268,10 +268,11 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="oxm" />
   </component>
   <component name="copyright">
     <Base>
-      <setting name="state" value="2" />
+      <setting name="state" value="1" />
     </Base>
   </component>
 </module>

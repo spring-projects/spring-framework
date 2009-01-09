@@ -21,34 +21,35 @@ import javax.xml.stream.XMLStreamException;
 import com.thoughtworks.xstream.alias.CannotResolveClassException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.io.StreamException;
+
 import org.springframework.oxm.UnmarshallingFailureException;
 
 /**
  * XStream-specific subclass of <code>UnmarshallingFailureException</code>.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class XStreamUnmarshallingFailureException extends UnmarshallingFailureException {
 
-    public XStreamUnmarshallingFailureException(StreamException ex) {
-        super("XStream unmarshalling exception: " + ex.getMessage(), ex);
-    }
+	public XStreamUnmarshallingFailureException(StreamException ex) {
+		super("XStream unmarshalling exception: " + ex.getMessage(), ex);
+	}
 
-    public XStreamUnmarshallingFailureException(CannotResolveClassException ex) {
-        super("XStream resolving exception: " + ex.getMessage(), ex);
-    }
+	public XStreamUnmarshallingFailureException(CannotResolveClassException ex) {
+		super("XStream resolving exception: " + ex.getMessage(), ex);
+	}
 
-    public XStreamUnmarshallingFailureException(ConversionException ex) {
-        super("XStream conversion exception: " + ex.getMessage(), ex);
-    }
+	public XStreamUnmarshallingFailureException(ConversionException ex) {
+		super("XStream conversion exception: " + ex.getMessage(), ex);
+	}
 
-    public XStreamUnmarshallingFailureException(String msg) {
-        super(msg);
-    }
+	public XStreamUnmarshallingFailureException(String msg) {
+		super(msg);
+	}
 
-    public XStreamUnmarshallingFailureException(String msg, XMLStreamException ex) {
-        super(msg, ex);
-    }
+	public XStreamUnmarshallingFailureException(String msg, XMLStreamException ex) {
+		super(msg, ex);
+	}
 
 }

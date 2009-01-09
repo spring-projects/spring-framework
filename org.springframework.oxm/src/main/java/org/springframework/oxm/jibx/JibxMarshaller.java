@@ -60,314 +60,309 @@ import org.springframework.oxm.AbstractMarshaller;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.xml.stream.StaxEventContentHandler;
-import org.springframework.xml.stream.XmlEventStreamReader;
+import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the <code>Marshaller</code> and <code>Unmarshaller</code> interfaces for JiBX.
- * <p/>
- * The typical usage will be to set the <code>targetClass</code> and optionally the <code>bindingName</code> property on
- * this bean, and to refer to it.
+ * Implementation of the <code>Marshaller</code> and <code>Unmarshaller</code> interfaces for JiBX. <p/> The typical
+ * usage will be to set the <code>targetClass</code> and optionally the <code>bindingName</code> property on this bean,
+ * and to refer to it.
  *
  * @author Arjen Poutsma
  * @see org.jibx.runtime.IMarshallingContext
  * @see org.jibx.runtime.IUnmarshallingContext
- * @since 1.0.0
+ * @since 3.0
  */
 public class JibxMarshaller extends AbstractMarshaller implements InitializingBean {
 
-    private Class targetClass;
+	private Class targetClass;
 
-    private String bindingName;
+	private String bindingName;
 
-    private IBindingFactory bindingFactory;
+	private IBindingFactory bindingFactory;
 
-    private static TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private static TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
-    private int indent = -1;
+	private int indent = -1;
 
-    private String encoding;
+	private String encoding;
 
-    private Boolean standalone;
+	private Boolean standalone;
 
-    /** Sets the optional binding name for this instance. */
-    public void setBindingName(String bindingName) {
-        this.bindingName = bindingName;
-    }
+	/** Sets the optional binding name for this instance. */
+	public void setBindingName(String bindingName) {
+		this.bindingName = bindingName;
+	}
 
-    /** Sets the target class for this instance. This property is required. */
-    public void setTargetClass(Class targetClass) {
-        this.targetClass = targetClass;
-    }
+	/** Sets the target class for this instance. This property is required. */
+	public void setTargetClass(Class targetClass) {
+		this.targetClass = targetClass;
+	}
 
-    /** Sets the number of nesting indent spaces. Default is <code>-1</code>, i.e. no indentation. */
-    public void setIndent(int indent) {
-        this.indent = indent;
-    }
+	/** Sets the number of nesting indent spaces. Default is <code>-1</code>, i.e. no indentation. */
+	public void setIndent(int indent) {
+		this.indent = indent;
+	}
 
-    /** Sets the document encoding using for marshalling. Default is UTF-8. */
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+	/** Sets the document encoding using for marshalling. Default is UTF-8. */
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 
-    /** Sets the document standalone flag for marshalling. By default, this flag is not present. */
-    public void setStandalone(Boolean standalone) {
-        this.standalone = standalone;
-    }
+	/** Sets the document standalone flag for marshalling. By default, this flag is not present. */
+	public void setStandalone(Boolean standalone) {
+		this.standalone = standalone;
+	}
 
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(targetClass, "targetClass is required");
-        if (logger.isInfoEnabled()) {
-            if (StringUtils.hasLength(bindingName)) {
-                logger.info("Configured for target class [" + targetClass + "] using binding [" + bindingName + "]");
-            }
-            else {
-                logger.info("Configured for target class [" + targetClass + "]");
-            }
-        }
-        try {
-            if (StringUtils.hasLength(bindingName)) {
-                bindingFactory = BindingDirectory.getFactory(bindingName, targetClass);
-            }
-            else {
-                bindingFactory = BindingDirectory.getFactory(targetClass);
-            }
-        }
-        catch (JiBXException ex) {
-            throw new JibxSystemException(ex);
-        }
-    }
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(targetClass, "targetClass is required");
+		if (logger.isInfoEnabled()) {
+			if (StringUtils.hasLength(bindingName)) {
+				logger.info("Configured for target class [" + targetClass + "] using binding [" + bindingName + "]");
+			}
+			else {
+				logger.info("Configured for target class [" + targetClass + "]");
+			}
+		}
+		try {
+			if (StringUtils.hasLength(bindingName)) {
+				bindingFactory = BindingDirectory.getFactory(bindingName, targetClass);
+			}
+			else {
+				bindingFactory = BindingDirectory.getFactory(targetClass);
+			}
+		}
+		catch (JiBXException ex) {
+			throw new JibxSystemException(ex);
+		}
+	}
 
-    public boolean supports(Class clazz) {
-        Assert.notNull(clazz, "'clazz' must not be null");
-        String[] mappedClasses = bindingFactory.getMappedClasses();
-        String className = clazz.getName();
-        for (int i = 0; i < mappedClasses.length; i++) {
-            if (className.equals(mappedClasses[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean supports(Class clazz) {
+		Assert.notNull(clazz, "'clazz' must not be null");
+		String[] mappedClasses = bindingFactory.getMappedClasses();
+		String className = clazz.getName();
+		for (String mappedClass : mappedClasses) {
+			if (className.equals(mappedClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    /**
-     * Convert the given <code>JiBXException</code> to an appropriate exception from the
-     * <code>org.springframework.oxm</code> hierarchy.
-     * <p/>
-     * The default implementation delegates to <code>JibxUtils</code>. Can be overridden in subclasses.
-     * <p/>
-     * A boolean flag is used to indicate whether this exception occurs during marshalling or unmarshalling, since JiBX
-     * itself does not make this distinction in its exception hierarchy.
-     *
-     * @param ex          <code>JiBXException</code> that occured
-     * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>), or
-     *                    unmarshalling (<code>false</code>)
-     * @return the corresponding <code>XmlMappingException</code> instance
-     * @see JibxUtils#convertJibxException(org.jibx.runtime.JiBXException,boolean)
-     */
-    public XmlMappingException convertJibxException(JiBXException ex, boolean marshalling) {
-        return JibxUtils.convertJibxException(ex, marshalling);
-    }
+	/**
+	 * Convert the given <code>JiBXException</code> to an appropriate exception from the
+	 * <code>org.springframework.oxm</code> hierarchy. <p/> The default implementation delegates to <code>JibxUtils</code>.
+	 * Can be overridden in subclasses. <p/> A boolean flag is used to indicate whether this exception occurs during
+	 * marshalling or unmarshalling, since JiBX itself does not make this distinction in its exception hierarchy.
+	 *
+	 * @param ex		  <code>JiBXException</code> that occured
+	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>), or unmarshalling
+	 *                    (<code>false</code>)
+	 * @return the corresponding <code>XmlMappingException</code> instance
+	 * @see JibxUtils#convertJibxException(org.jibx.runtime.JiBXException,boolean)
+	 */
+	public XmlMappingException convertJibxException(JiBXException ex, boolean marshalling) {
+		return JibxUtils.convertJibxException(ex, marshalling);
+	}
 
-    //
-    // Supported Marshalling
-    //
+	//
+	// Supported Marshalling
+	//
 
-    @Override
+	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream)
-            throws XmlMappingException, IOException {
-        try {
-            IMarshallingContext marshallingContext = createMarshallingContext();
-            marshallingContext.marshalDocument(graph, encoding, standalone, outputStream);
-        }
-        catch (JiBXException ex) {
-            throw convertJibxException(ex, true);
-        }
-    }
+			throws XmlMappingException, IOException {
+		try {
+			IMarshallingContext marshallingContext = createMarshallingContext();
+			marshallingContext.marshalDocument(graph, encoding, standalone, outputStream);
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, true);
+		}
+	}
 
-    @Override
+	@Override
 	protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
-        try {
-            IMarshallingContext marshallingContext = createMarshallingContext();
-            marshallingContext.marshalDocument(graph, encoding, standalone, writer);
-        }
-        catch (JiBXException ex) {
-            throw convertJibxException(ex, true);
-        }
-    }
+		try {
+			IMarshallingContext marshallingContext = createMarshallingContext();
+			marshallingContext.marshalDocument(graph, encoding, standalone, writer);
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, true);
+		}
+	}
 
-    @Override
+	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
-        try {
-            MarshallingContext marshallingContext = (MarshallingContext) createMarshallingContext();
-            IXMLWriter xmlWriter = new StAXWriter(marshallingContext.getNamespaces(), streamWriter);
-            marshallingContext.setXmlWriter(xmlWriter);
-            marshallingContext.marshalDocument(graph);
-        }
-        catch (JiBXException ex) {
-            throw convertJibxException(ex, false);
-        }
-    }
+		try {
+			MarshallingContext marshallingContext = (MarshallingContext) createMarshallingContext();
+			IXMLWriter xmlWriter = new StAXWriter(marshallingContext.getNamespaces(), streamWriter);
+			marshallingContext.setXmlWriter(xmlWriter);
+			marshallingContext.marshalDocument(graph);
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, false);
+		}
+	}
 
-    //
-    // Unsupported Marshalling
-    //
+	//
+	// Unsupported Marshalling
+	//
 
-    @Override
+	@Override
 	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
-        try {
-            // JiBX does not support DOM natively, so we write to a buffer first, and transform that to the Node
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            marshalOutputStream(graph, os);
-            ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.transform(new StreamSource(is), new DOMResult(node));
-        }
-        catch (IOException ex) {
-            throw new JibxSystemException(ex);
-        }
-        catch (TransformerException ex) {
-            throw new JibxSystemException(ex);
-        }
-    }
+		try {
+			// JiBX does not support DOM natively, so we write to a buffer first, and transform that to the Node
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			marshalOutputStream(graph, os);
+			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.transform(new StreamSource(is), new DOMResult(node));
+		}
+		catch (IOException ex) {
+			throw new JibxSystemException(ex);
+		}
+		catch (TransformerException ex) {
+			throw new JibxSystemException(ex);
+		}
+	}
 
-    @Override
+	@Override
 	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
-            throws XmlMappingException {
-        try {
-            // JiBX does not support SAX natively, so we write to a buffer first, and transform that to the handlers
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            marshalOutputStream(graph, os);
-            ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-            Transformer transformer = transformerFactory.newTransformer();
-            SAXResult saxResult = new SAXResult(contentHandler);
-            saxResult.setLexicalHandler(lexicalHandler);
-            transformer.transform(new StreamSource(is), saxResult);
-        }
-        catch (IOException ex) {
-            throw new JibxSystemException(ex);
-        }
-        catch (TransformerException ex) {
-            throw new JibxSystemException(ex);
-        }
-    }
+			throws XmlMappingException {
+		try {
+			// JiBX does not support SAX natively, so we write to a buffer first, and transform that to the handlers
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			marshalOutputStream(graph, os);
+			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+			Transformer transformer = transformerFactory.newTransformer();
+			SAXResult saxResult = new SAXResult(contentHandler);
+			saxResult.setLexicalHandler(lexicalHandler);
+			transformer.transform(new StreamSource(is), saxResult);
+		}
+		catch (IOException ex) {
+			throw new JibxSystemException(ex);
+		}
+		catch (TransformerException ex) {
+			throw new JibxSystemException(ex);
+		}
+	}
 
-    @Override
+	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
-        ContentHandler contentHandler = new StaxEventContentHandler(eventWriter);
-        marshalSaxHandlers(graph, contentHandler, null);
-    }
+		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
+		marshalSaxHandlers(graph, contentHandler, null);
+	}
 
-    //
-    // Unmarshalling
-    //
+	//
+	// Unmarshalling
+	//
 
-    @Override
+	@Override
 	protected Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
-        try {
-            IUnmarshallingContext unmarshallingContext = createUnmarshallingContext();
-            return unmarshallingContext.unmarshalDocument(inputStream, null);
-        }
-        catch (JiBXException ex) {
-            throw convertJibxException(ex, false);
-        }
-    }
+		try {
+			IUnmarshallingContext unmarshallingContext = createUnmarshallingContext();
+			return unmarshallingContext.unmarshalDocument(inputStream, null);
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, false);
+		}
+	}
 
-    @Override
+	@Override
 	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
-        try {
-            IUnmarshallingContext unmarshallingContext = createUnmarshallingContext();
-            return unmarshallingContext.unmarshalDocument(reader);
-        }
-        catch (JiBXException ex) {
-            throw convertJibxException(ex, false);
-        }
-    }
+		try {
+			IUnmarshallingContext unmarshallingContext = createUnmarshallingContext();
+			return unmarshallingContext.unmarshalDocument(reader);
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, false);
+		}
+	}
 
-    @Override
+	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
-        try {
-            UnmarshallingContext unmarshallingContext = (UnmarshallingContext) createUnmarshallingContext();
-            IXMLReader xmlReader = new StAXReaderWrapper(streamReader, null, true);
-            unmarshallingContext.setDocument(xmlReader);
-            return unmarshallingContext.unmarshalElement();
-        }
-        catch (JiBXException ex) {
-            throw convertJibxException(ex, false);
-        }
-    }
+		try {
+			UnmarshallingContext unmarshallingContext = (UnmarshallingContext) createUnmarshallingContext();
+			IXMLReader xmlReader = new StAXReaderWrapper(streamReader, null, true);
+			unmarshallingContext.setDocument(xmlReader);
+			return unmarshallingContext.unmarshalElement();
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, false);
+		}
+	}
 
-    @Override
+	@Override
 	protected Object unmarshalXmlEventReader(XMLEventReader eventReader) {
-        try {
-            XMLStreamReader streamReader = new XmlEventStreamReader(eventReader);
-            return unmarshalXmlStreamReader(streamReader);
-        }
-        catch (XMLStreamException ex) {
-            throw new JibxSystemException(ex);
-        }
-    }
+		try {
+			XMLStreamReader streamReader = StaxUtils.createEventStreamReader(eventReader);
+			return unmarshalXmlStreamReader(streamReader);
+		}
+		catch (XMLStreamException ex) {
+			throw new JibxSystemException(ex);
+		}
+	}
 
-    //
-    // Unsupported Unmarshalling
-    //
+	//
+	// Unsupported Unmarshalling
+	//
 
-    @Override
+	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
-        try {
-            Transformer transformer = transformerFactory.newTransformer();
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            transformer.transform(new DOMSource(node), new StreamResult(os));
-            ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-            return unmarshalInputStream(is);
-        }
-        catch (IOException ex) {
-            throw new JibxSystemException(ex);
-        }
-        catch (TransformerException ex) {
-            throw new JibxSystemException(ex);
-        }
-    }
+		try {
+			Transformer transformer = transformerFactory.newTransformer();
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			transformer.transform(new DOMSource(node), new StreamResult(os));
+			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+			return unmarshalInputStream(is);
+		}
+		catch (IOException ex) {
+			throw new JibxSystemException(ex);
+		}
+		catch (TransformerException ex) {
+			throw new JibxSystemException(ex);
+		}
+	}
 
-    @Override
+	@Override
 	protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
-            throws XmlMappingException, IOException {
-        try {
-            Transformer transformer = transformerFactory.newTransformer();
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            transformer.transform(new SAXSource(xmlReader, inputSource), new StreamResult(os));
-            ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-            return unmarshalInputStream(is);
-        }
-        catch (IOException ex) {
-            throw new JibxSystemException(ex);
-        }
-        catch (TransformerException ex) {
-            throw new JibxSystemException(ex);
-        }
-    }
+			throws XmlMappingException, IOException {
+		try {
+			Transformer transformer = transformerFactory.newTransformer();
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			transformer.transform(new SAXSource(xmlReader, inputSource), new StreamResult(os));
+			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+			return unmarshalInputStream(is);
+		}
+		catch (IOException ex) {
+			throw new JibxSystemException(ex);
+		}
+		catch (TransformerException ex) {
+			throw new JibxSystemException(ex);
+		}
+	}
 
-    /**
-     * Creates a new <code>IMarshallingContext</code>, set with the correct indentation.
-     *
-     * @return the created marshalling context
-     * @throws JiBXException in case of errors
-     */
-    protected IMarshallingContext createMarshallingContext() throws JiBXException {
-        IMarshallingContext marshallingContext = bindingFactory.createMarshallingContext();
-        marshallingContext.setIndent(indent);
-        return marshallingContext;
-    }
+	/**
+	 * Creates a new <code>IMarshallingContext</code>, set with the correct indentation.
+	 *
+	 * @return the created marshalling context
+	 * @throws JiBXException in case of errors
+	 */
+	protected IMarshallingContext createMarshallingContext() throws JiBXException {
+		IMarshallingContext marshallingContext = bindingFactory.createMarshallingContext();
+		marshallingContext.setIndent(indent);
+		return marshallingContext;
+	}
 
-    /**
-     * Creates a new <code>IUnmarshallingContext</code>, set with the correct indentation.
-     *
-     * @return the created unmarshalling context
-     * @throws JiBXException in case of errors
-     */
-    protected IUnmarshallingContext createUnmarshallingContext() throws JiBXException {
-        return bindingFactory.createUnmarshallingContext();
-    }
+	/**
+	 * Creates a new <code>IUnmarshallingContext</code>, set with the correct indentation.
+	 *
+	 * @return the created unmarshalling context
+	 * @throws JiBXException in case of errors
+	 */
+	protected IUnmarshallingContext createUnmarshallingContext() throws JiBXException {
+		return bindingFactory.createUnmarshallingContext();
+	}
 
 
 }
