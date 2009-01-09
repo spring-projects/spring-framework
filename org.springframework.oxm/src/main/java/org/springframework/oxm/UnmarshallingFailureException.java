@@ -19,17 +19,17 @@ package org.springframework.oxm;
  * Exception thrown on unmarshalling failure.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class UnmarshallingFailureException extends GenericMarshallingFailureException {
 
-    /** Constructor for <code>UnmarshallingFailureException</code>. */
-    public UnmarshallingFailureException(String msg) {
-        super(msg);
-    }
+	/** Constructor for <code>UnmarshallingFailureException</code>. */
+	public UnmarshallingFailureException(String msg) {
+		super(msg);
+	}
 
-    /** Constructor for <code>UnmarshallingFailureException</code>. */
-    public UnmarshallingFailureException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	/** Constructor for <code>UnmarshallingFailureException</code>. */
+	public UnmarshallingFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 }

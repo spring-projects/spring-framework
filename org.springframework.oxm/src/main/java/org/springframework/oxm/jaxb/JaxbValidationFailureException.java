@@ -24,12 +24,12 @@ import org.springframework.oxm.ValidationFailureException;
  *
  * @author Arjen Poutsma
  * @see JaxbUtils#convertJaxbException
- * @since 1.0.0
+ * @since 3.0
  */
 public class JaxbValidationFailureException extends ValidationFailureException {
 
-    public JaxbValidationFailureException(ValidationException ex) {
-        super("JAXB validation exception: " + ex.getMessage(), ex);
-    }
+	public JaxbValidationFailureException(ValidationException ex) {
+		super("JAXB validation exception: " + ex.getMessage(), ex);
+	}
 
 }

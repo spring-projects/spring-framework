@@ -23,12 +23,12 @@ import org.springframework.oxm.UncategorizedXmlMappingException;
  * distinguished further.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class XStreamSystemException extends UncategorizedXmlMappingException {
 
-    public XStreamSystemException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	public XStreamSystemException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 
 }

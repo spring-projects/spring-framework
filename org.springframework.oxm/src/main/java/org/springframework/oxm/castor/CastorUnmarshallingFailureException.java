@@ -16,23 +16,24 @@
 package org.springframework.oxm.castor;
 
 import org.exolab.castor.xml.MarshalException;
-import org.springframework.oxm.UnmarshallingFailureException;
 import org.xml.sax.SAXException;
+
+import org.springframework.oxm.UnmarshallingFailureException;
 
 /**
  * Castor-specific subclass of <code>UnmarshallingFailureException</code>.
  *
  * @author Arjen Poutsma
  * @see CastorUtils#convertXmlException
- * @since 1.0.0
+ * @since 3.0
  */
 public class CastorUnmarshallingFailureException extends UnmarshallingFailureException {
 
-    public CastorUnmarshallingFailureException(MarshalException ex) {
-        super("Castor unmarshalling exception: " + ex.getMessage(), ex);
-    }
+	public CastorUnmarshallingFailureException(MarshalException ex) {
+		super("Castor unmarshalling exception: " + ex.getMessage(), ex);
+	}
 
-    public CastorUnmarshallingFailureException(SAXException ex) {
-        super("Castor unmarshalling exception: " + ex.getMessage(), ex);
-    }
+	public CastorUnmarshallingFailureException(SAXException ex) {
+		super("Castor unmarshalling exception: " + ex.getMessage(), ex);
+	}
 }

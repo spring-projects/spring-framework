@@ -24,11 +24,11 @@ import org.springframework.oxm.UncategorizedXmlMappingException;
  *
  * @author Arjen Poutsma
  * @see JibxUtils#convertJibxException(org.jibx.runtime.JiBXException,boolean)
- * @since 1.0.0
+ * @since 3.0
  */
 public class JibxSystemException extends UncategorizedXmlMappingException {
 
-    public JibxSystemException(Exception ex) {
-        super(ex.getMessage(), ex);
-    }
+	public JibxSystemException(Exception ex) {
+		super(ex.getMessage(), ex);
+	}
 }

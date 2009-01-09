@@ -22,12 +22,12 @@ import org.springframework.oxm.UncategorizedXmlMappingException;
  * distinguished further.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class XmlBeansSystemException extends UncategorizedXmlMappingException {
 
-    public XmlBeansSystemException(Exception e) {
-        super(e.getMessage(), e);
-    }
+	public XmlBeansSystemException(Exception e) {
+		super(e.getMessage(), e);
+	}
 
 }

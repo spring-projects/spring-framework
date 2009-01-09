@@ -16,24 +16,25 @@
 package org.springframework.oxm.xmlbeans;
 
 import org.apache.xmlbeans.XmlException;
-import org.springframework.oxm.UnmarshallingFailureException;
 import org.xml.sax.SAXException;
+
+import org.springframework.oxm.UnmarshallingFailureException;
 
 /**
  * XMLBeans-specific subclass of <code>UnmarshallingFailureException</code>.
  *
  * @author Arjen Poutsma
  * @see XmlBeansUtils#convertXmlBeansException(Exception,boolean)
- * @since 1.0.0
+ * @since 3.0
  */
 public class XmlBeansUnmarshallingFailureException extends UnmarshallingFailureException {
 
-    public XmlBeansUnmarshallingFailureException(XmlException ex) {
-        super("XMLBeans unmarshalling exception: " + ex.getMessage(), ex);
-    }
+	public XmlBeansUnmarshallingFailureException(XmlException ex) {
+		super("XMLBeans unmarshalling exception: " + ex.getMessage(), ex);
+	}
 
-    public XmlBeansUnmarshallingFailureException(SAXException ex) {
-        super("XMLBeans unmarshalling exception: " + ex.getMessage(), ex);
-    }
+	public XmlBeansUnmarshallingFailureException(SAXException ex) {
+		super("XMLBeans unmarshalling exception: " + ex.getMessage(), ex);
+	}
 
 }

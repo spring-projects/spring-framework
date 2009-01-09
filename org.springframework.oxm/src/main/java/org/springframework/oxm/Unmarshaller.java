@@ -19,32 +19,31 @@ import java.io.IOException;
 import javax.xml.transform.Source;
 
 /**
- * Defines the contract for Object XML Mapping unmarshallers.
- * <p/>
- * <p>Implementations of this interface can deserialize a given XML Stream to an Object graph.
+ * Defines the contract for Object XML Mapping unmarshallers. <p/> <p>Implementations of this interface can deserialize
+ * a given XML Stream to an Object graph.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public interface Unmarshaller {
 
-    /**
-     * Unmarshals the given {@link Source} into an object graph.
-     *
-     * @param source the source to marshal from
-     * @return the object graph
-     * @throws XmlMappingException if the given source cannot be mapped to an object
-     * @throws IOException         if an I/O Exception occurs
-     */
-    Object unmarshal(Source source) throws XmlMappingException, IOException;
+	/**
+	 * Unmarshals the given {@link Source} into an object graph.
+	 *
+	 * @param source the source to marshal from
+	 * @return the object graph
+	 * @throws XmlMappingException if the given source cannot be mapped to an object
+	 * @throws IOException		 if an I/O Exception occurs
+	 */
+	Object unmarshal(Source source) throws XmlMappingException, IOException;
 
-    /**
-     * Indicates whether this unmarshaller can unmarshal instances of the supplied type.
-     *
-     * @param clazz the class that this unmarshaller is being asked if it can marshal
-     * @return <code>true</code> if this unmarshaller can indeed unmarshal to the supplied class; <code>false</code>
-     *         otherwise
-     */
-    boolean supports(Class clazz);
+	/**
+	 * Indicates whether this unmarshaller can unmarshal instances of the supplied type.
+	 *
+	 * @param clazz the class that this unmarshaller is being asked if it can marshal
+	 * @return <code>true</code> if this unmarshaller can indeed unmarshal to the supplied class; <code>false</code>
+	 *         otherwise
+	 */
+	boolean supports(Class clazz);
 
 }

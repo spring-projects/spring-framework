@@ -19,66 +19,73 @@ package org.springframework.oxm.xstream;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.Properties;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import org.springframework.xml.transform.StaxSource;
+import org.springframework.util.xml.StaxUtils;
 
-public class XStreamUnmarshallerTest extends TestCase {
+public class XStreamUnmarshallerTest {
 
-    protected static final String INPUT_STRING = "<flight><flightNumber>42</flightNumber></flight>";
+	protected static final String INPUT_STRING = "<flight><flightNumber>42</flightNumber></flight>";
 
-    private XStreamMarshaller unmarshaller;
+	private XStreamMarshaller unmarshaller;
 
-    protected void setUp() throws Exception {
-        unmarshaller = new XStreamMarshaller();
-        Properties aliases = new Properties();
-        aliases.setProperty("flight", Flight.class.getName());
-        unmarshaller.setAliases(aliases);
-    }
+	@Before
+	public void creteUnmarshaller() throws Exception {
+		unmarshaller = new XStreamMarshaller();
+		Properties aliases = new Properties();
+		aliases.setProperty("flight", AnnotatedFlight.class.getName());
+		unmarshaller.setAliases(aliases);
+	}
 
-    private void testFlight(Object o) {
-        assertTrue("Unmarshalled object is not Flights", o instanceof Flight);
-        Flight flight = (Flight) o;
-        assertNotNull("Flight is null", flight);
-        assertEquals("Number is invalid", 42L, flight.getFlightNumber());
-    }
+	private void testFlight(Object o) {
+		assertTrue("Unmarshalled object is not Flights", o instanceof AnnotatedFlight);
+		AnnotatedFlight flight = (AnnotatedFlight) o;
+		assertNotNull("Flight is null", flight);
+		assertEquals("Number is invalid", 42L, flight.getFlightNumber());
+	}
 
-    public void testUnmarshalDomSource() throws Exception {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document document = builder.parse(new InputSource(new StringReader(INPUT_STRING)));
-        DOMSource source = new DOMSource(document);
-        Object flight = unmarshaller.unmarshal(source);
-        testFlight(flight);
-    }
+	@Test
+	public void unmarshalDomSource() throws Exception {
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document document = builder.parse(new InputSource(new StringReader(INPUT_STRING)));
+		DOMSource source = new DOMSource(document);
+		Object flight = unmarshaller.unmarshal(source);
+		testFlight(flight);
+	}
 
-    public void testUnmarshalStaxSourceXmlStreamReader() throws Exception {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-        StaxSource source = new StaxSource(streamReader);
-        Object flights = unmarshaller.unmarshal(source);
-        testFlight(flights);
-    }
+	@Test
+	public void unmarshalStaxSourceXmlStreamReader() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
+		Source source = StaxUtils.createStaxSource(streamReader);
+		Object flights = unmarshaller.unmarshal(source);
+		testFlight(flights);
+	}
 
-    public void testUnmarshalStreamSourceInputStream() throws Exception {
-        StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
-        Object flights = unmarshaller.unmarshal(source);
-        testFlight(flights);
-    }
+	@Test
+	public void unmarshalStreamSourceInputStream() throws Exception {
+		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlight(flights);
+	}
 
-    public void testUnmarshalStreamSourceReader() throws Exception {
-        StreamSource source = new StreamSource(new StringReader(INPUT_STRING));
-        Object flights = unmarshaller.unmarshal(source);
-        testFlight(flights);
-    }
+	@Test
+	public void unmarshalStreamSourceReader() throws Exception {
+		StreamSource source = new StreamSource(new StringReader(INPUT_STRING));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlight(flights);
+	}
 }
 

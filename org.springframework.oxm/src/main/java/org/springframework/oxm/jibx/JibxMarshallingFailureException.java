@@ -17,6 +17,7 @@
 package org.springframework.oxm.jibx;
 
 import org.jibx.runtime.JiBXException;
+
 import org.springframework.oxm.MarshallingFailureException;
 
 /**
@@ -24,11 +25,11 @@ import org.springframework.oxm.MarshallingFailureException;
  *
  * @author Arjen Poutsma
  * @see JibxUtils#convertJibxException(org.jibx.runtime.JiBXException,boolean)
- * @since 1.0.0
+ * @since 3.0
  */
 public class JibxMarshallingFailureException extends MarshallingFailureException {
 
-    public JibxMarshallingFailureException(JiBXException ex) {
-        super("JiBX marshalling exception: " + ex.getMessage(), ex);
-    }
+	public JibxMarshallingFailureException(JiBXException ex) {
+		super("JiBX marshalling exception: " + ex.getMessage(), ex);
+	}
 }

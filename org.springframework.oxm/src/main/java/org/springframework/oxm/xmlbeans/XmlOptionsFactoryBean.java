@@ -20,60 +20,60 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.xmlbeans.XmlOptions;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Factory bean that configures an XMLBeans <code>XmlOptions</code> object and provides it as a bean reference.
- * <p/>
+ * Factory bean that configures an XMLBeans <code>XmlOptions</code> object and provides it as a bean reference. <p/>
  * Typical usage will be to set XMLBeans options on this bean, and refer to it in the <code>XmlBeansMarshaller</code>.
  *
  * @author Arjen Poutsma
  * @see XmlOptions
  * @see #setOptions(java.util.Map)
  * @see XmlBeansMarshaller#setXmlOptions(org.apache.xmlbeans.XmlOptions)
- * @since 1.0.0
+ * @since 3.0
  */
 public class XmlOptionsFactoryBean implements FactoryBean, InitializingBean {
 
-    private XmlOptions xmlOptions;
+	private XmlOptions xmlOptions;
 
-    private Map options;
+	private Map options;
 
-    /** Returns the singleton <code>XmlOptions</code>. */
-    public Object getObject() throws Exception {
-        return xmlOptions;
-    }
+	/** Returns the singleton <code>XmlOptions</code>. */
+	public Object getObject() throws Exception {
+		return xmlOptions;
+	}
 
-    /** Returns the class of <code>XmlOptions</code>. */
-    public Class getObjectType() {
-        return XmlOptions.class;
-    }
+	/** Returns the class of <code>XmlOptions</code>. */
+	public Class getObjectType() {
+		return XmlOptions.class;
+	}
 
-    /** Returns <code>true</code>. */
-    public boolean isSingleton() {
-        return true;
-    }
+	/** Returns <code>true</code>. */
+	public boolean isSingleton() {
+		return true;
+	}
 
-    /**
-     * Sets options on the underlying <code>XmlOptions</code> object. The keys of the supplied map should be one of the
-     * string constants defined in <code>XmlOptions</code>, the values vary per option.
-     *
-     * @see XmlOptions#put(Object,Object)
-     * @see XmlOptions#SAVE_PRETTY_PRINT
-     * @see XmlOptions#LOAD_STRIP_COMMENTS
-     */
-    public void setOptions(Map options) {
-        this.options = options;
-    }
+	/**
+	 * Sets options on the underlying <code>XmlOptions</code> object. The keys of the supplied map should be one of the
+	 * string constants defined in <code>XmlOptions</code>, the values vary per option.
+	 *
+	 * @see XmlOptions#put(Object,Object)
+	 * @see XmlOptions#SAVE_PRETTY_PRINT
+	 * @see XmlOptions#LOAD_STRIP_COMMENTS
+	 */
+	public void setOptions(Map options) {
+		this.options = options;
+	}
 
-    public void afterPropertiesSet() throws Exception {
-        xmlOptions = new XmlOptions();
-        if (options != null) {
-            for (Iterator iterator = options.keySet().iterator(); iterator.hasNext();) {
-                Object option = iterator.next();
-                xmlOptions.put(option, options.get(option));
-            }
-        }
-    }
+	public void afterPropertiesSet() throws Exception {
+		xmlOptions = new XmlOptions();
+		if (options != null) {
+			for (Iterator iterator = options.keySet().iterator(); iterator.hasNext();) {
+				Object option = iterator.next();
+				xmlOptions.put(option, options.get(option));
+			}
+		}
+	}
 }

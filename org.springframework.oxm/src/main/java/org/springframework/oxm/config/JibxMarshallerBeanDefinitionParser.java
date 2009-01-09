@@ -24,15 +24,15 @@ import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
  * Parser for the <code>&lt;oxm:jibx-marshaller/&gt; element.
  *
  * @author Arjen Poutsma
- * @since 1.5.0
+ * @since 3.0
  */
 class JibxMarshallerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-    private static final String JIBX_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jibx.JibxMarshaller";
+	private static final String JIBX_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jibx.JibxMarshaller";
 
-    @Override
+	@Override
 	protected String getBeanClassName(Element element) {
-        return JIBX_MARSHALLER_CLASS_NAME;
-    }
+		return JIBX_MARSHALLER_CLASS_NAME;
+	}
 
 }

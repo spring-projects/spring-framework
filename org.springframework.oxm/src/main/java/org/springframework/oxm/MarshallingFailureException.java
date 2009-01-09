@@ -19,26 +19,26 @@ package org.springframework.oxm;
  * Exception thrown on marshalling failure.
  *
  * @author Arjen Poutsma
- * @since 1.0.0
+ * @since 3.0
  */
 public class MarshallingFailureException extends GenericMarshallingFailureException {
 
-    /**
-     * Construct a <code>MarshallingFailureException</code> with the specified detail message.
-     *
-     * @param msg the detail message
-     */
-    public MarshallingFailureException(String msg) {
-        super(msg);
-    }
+	/**
+	 * Construct a <code>MarshallingFailureException</code> with the specified detail message.
+	 *
+	 * @param msg the detail message
+	 */
+	public MarshallingFailureException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * Construct a <code>MarshallingFailureException</code> with the specified detail message and nested exception.
-     *
-     * @param msg the detail message
-     * @param ex  the nested exception
-     */
-    public MarshallingFailureException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	/**
+	 * Construct a <code>MarshallingFailureException</code> with the specified detail message and nested exception.
+	 *
+	 * @param msg the detail message
+	 * @param ex  the nested exception
+	 */
+	public MarshallingFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 }

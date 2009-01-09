@@ -25,16 +25,16 @@ import java.lang.reflect.Type;
  * Method#getGenericParameterTypes()} and {@link Method#getGenericReturnType()}.
  *
  * @author Arjen Poutsma
- * @since 1.0.2
+ * @since 3.0
  */
 public interface GenericUnmarshaller extends Unmarshaller {
 
-    /**
-     * Indicates whether this unmarshaller can unmarshal instances of the supplied type.
-     *
-     * @param type the type that this unmarshaller is being asked if it can marshal
-     * @return <code>true</code> if this unmarshaller can indeed unmarshal to the supplied type; <code>false</code>
-     *         otherwise
-     */
-    boolean supports(Type type);
+	/**
+	 * Indicates whether this unmarshaller can unmarshal instances of the supplied type.
+	 *
+	 * @param type the type that this unmarshaller is being asked if it can marshal
+	 * @return <code>true</code> if this unmarshaller can indeed unmarshal to the supplied type; <code>false</code>
+	 *         otherwise
+	 */
+	boolean supports(Type type);
 }

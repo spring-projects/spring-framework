@@ -16,66 +16,73 @@
 
 package org.springframework.oxm.jibx;
 
+import java.io.StringWriter;
+import javax.xml.transform.stream.StreamResult;
+
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import org.custommonkey.xmlunit.XMLUnit;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTestCase;
 import org.springframework.oxm.Marshaller;
-import org.springframework.xml.transform.StringResult;
 
+@Ignore
 public class JibxMarshallerTest extends AbstractMarshallerTestCase {
 
-    @Override
+	@Override
 	protected Marshaller createMarshaller() throws Exception {
-        JibxMarshaller marshaller = new JibxMarshaller();
-        marshaller.setTargetClass(Flights.class);
-        marshaller.afterPropertiesSet();
-        return marshaller;
-    }
+		JibxMarshaller marshaller = new JibxMarshaller();
+		marshaller.setTargetClass(Flights.class);
+		marshaller.afterPropertiesSet();
+		return marshaller;
+	}
 
-    @Override
+	@Override
 	protected Object createFlights() {
-        Flights flights = new Flights();
-        FlightType flight = new FlightType();
-        flight.setNumber(42L);
-        flights.addFlight(flight);
-        return flights;
-    }
+		Flights flights = new Flights();
+		FlightType flight = new FlightType();
+		flight.setNumber(42L);
+		flights.addFlight(flight);
+		return flights;
+	}
 
-    public void testAfterPropertiesSetNoContextPath() throws Exception {
-        try {
-            JibxMarshaller marshaller = new JibxMarshaller();
-            marshaller.afterPropertiesSet();
-            fail("Should have thrown an IllegalArgumentException");
-        }
-        catch (IllegalArgumentException e) {
-        }
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void afterPropertiesSetNoContextPath() throws Exception {
+		JibxMarshaller marshaller = new JibxMarshaller();
+		marshaller.afterPropertiesSet();
+	}
 
-    public void testIndentation() throws Exception {
-        ((JibxMarshaller) marshaller).setIndent(4);
-        StringResult result = new StringResult();
-        marshaller.marshal(flights, result);
-        XMLUnit.setIgnoreWhitespace(false);
-        String expected = "<?xml version=\"1.0\"?>\n" +
-                "<flights xmlns=\"http://samples.springframework.org/flight\">\n" + "    <flight>\n" +
-                "        <number>42</number>\n" + "    </flight>\n" + "</flights>";
-        assertXMLEqual(expected, result.toString());
-    }
+	@Test
+	public void indentation() throws Exception {
+		((JibxMarshaller) marshaller).setIndent(4);
+		StringWriter writer = new StringWriter();
+		marshaller.marshal(flights, new StreamResult(writer));
+		XMLUnit.setIgnoreWhitespace(false);
+		String expected =
+				"<?xml version=\"1.0\"?>\n" + "<flights xmlns=\"http://samples.springframework.org/flight\">\n" +
+						"    <flight>\n" + "        <number>42</number>\n" + "    </flight>\n" + "</flights>";
+		assertXMLEqual(expected, writer.toString());
+	}
 
-    public void testEncodingAndStandalone() throws Exception {
-        ((JibxMarshaller) marshaller).setEncoding("ISO-8859-1");
-        ((JibxMarshaller) marshaller).setStandalone(Boolean.TRUE);
-        StringResult result = new StringResult();
-        marshaller.marshal(flights, result);
-        assertTrue("Encoding and standalone not set",
-                result.toString().startsWith("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>"));
-    }
+	@Test
+	public void encodingAndStandalone() throws Exception {
+		((JibxMarshaller) marshaller).setEncoding("ISO-8859-1");
+		((JibxMarshaller) marshaller).setStandalone(Boolean.TRUE);
+		StringWriter writer = new StringWriter();
+		marshaller.marshal(flights, new StreamResult(writer));
+		assertTrue("Encoding and standalone not set",
+				writer.toString().startsWith("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>"));
+	}
 
-    public void testSupports() throws Exception {
-        assertTrue("JibxMarshaller does not support Flights", marshaller.supports(Flights.class));
-        assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
-        assertFalse("JibxMarshaller supports illegal type", marshaller.supports(getClass()));
-    }
+	@Test
+	public void testSupports() throws Exception {
+		assertTrue("JibxMarshaller does not support Flights", marshaller.supports(Flights.class));
+		assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
+		assertFalse("JibxMarshaller supports illegal type", marshaller.supports(getClass()));
+	}
 
 
 }
