@@ -76,6 +76,39 @@ public abstract class StaxUtils {
 	}
 
 	/**
+	 * Creates a StAX {@link Result} for the given {@link XMLStreamWriter}. Returns a {@link StAXResult} under JAXP 1.4 or
+	 * higher, or a {@link StaxResult} otherwise.
+	 *
+	 * @param streamWriter the StAX stream writer
+	 * @return a result wrapping <code>streamWriter</code>
+	 */
+	public static Result createStaxResult(XMLStreamWriter streamWriter) {
+		if (JaxpVersion.isAtLeastJaxp14()) {
+			return Jaxp14StaxHandler.createStaxResult(streamWriter);
+		}
+		else {
+			return new StaxResult(streamWriter);
+		}
+	}
+
+	/**
+	 * Creates a StAX {@link Result} for the given {@link XMLEventWriter}. Returns a {@link StAXResult} under JAXP 1.4 or
+	 * higher, or a {@link StaxResult} otherwise.
+	 *
+	 * @param eventWriter the StAX event writer
+	 * @return a result wrapping <code>streamReader</code>
+	 * @throws XMLStreamException in case of StAX errors
+	 */
+	public static Result createStaxResult(XMLEventWriter eventWriter) throws XMLStreamException {
+		if (JaxpVersion.isAtLeastJaxp14()) {
+			return Jaxp14StaxHandler.createStaxResult(eventWriter);
+		}
+		else {
+			return new StaxResult(eventWriter);
+		}
+	}
+
+	/**
 	 * Indicates whether the given {@link javax.xml.transform.Source} is a StAX Source.
 	 *
 	 * @return <code>true</code> if <code>source</code> is a Spring {@link org.springframework.util.xml.StaxSource} or JAXP
@@ -250,6 +283,14 @@ public abstract class StaxUtils {
 
 		private static Source createStaxSource(XMLEventReader eventReader) throws XMLStreamException {
 			return new StAXSource(eventReader);
+		}
+
+		private static Result createStaxResult(XMLStreamWriter streamWriter) {
+			return new StAXResult(streamWriter);
+		}
+
+		private static Result createStaxResult(XMLEventWriter eventWriter) {
+			return new StAXResult(eventWriter);
 		}
 
 		private static boolean isStaxSource(Source source) {
