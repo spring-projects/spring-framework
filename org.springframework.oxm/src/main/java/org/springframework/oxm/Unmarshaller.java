@@ -44,6 +44,6 @@ public interface Unmarshaller {
 	 * @return <code>true</code> if this unmarshaller can indeed unmarshal to the supplied class; <code>false</code>
 	 *         otherwise
 	 */
-	boolean supports(Class clazz);
+	boolean supports(Class<?> clazz);
 
 }

@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.springframework.oxm.AbstractMarshallerTestCase;
 import org.springframework.oxm.Marshaller;
 
-@Ignore
+@Ignore("Code generation not yet support by Spring Build")
 public class JibxMarshallerTest extends AbstractMarshallerTestCase {
 
 	@Override
