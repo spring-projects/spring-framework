@@ -16,126 +16,40 @@
 
 package org.springframework.oxm.jaxb;
 
-import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.oxm.AbstractUnmarshallerTestCase;
+import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.xml.StaxUtils;
 
-public class Jaxb2UnmarshallerTest {
+public class Jaxb2UnmarshallerTest extends AbstractUnmarshallerTestCase {
 
 	private static final String INPUT_STRING = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	private Jaxb2Marshaller unmarshaller;
 
-	@Before
-	public void createMarshaller() throws Exception {
+	@Override
+	public Unmarshaller createUnmarshaller() throws Exception {
 		unmarshaller = new Jaxb2Marshaller();
 		unmarshaller.setContextPath("org.springframework.oxm.jaxb");
 		unmarshaller.setSchema(new ClassPathResource("org/springframework/oxm/flight.xsd"));
 		unmarshaller.afterPropertiesSet();
-	}
-
-	@Test
-	public void unmarshalDomSource() throws Exception {
-		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document document = builder.newDocument();
-		Element flightsElement = document.createElementNS("http://samples.springframework.org/flight", "tns:flights");
-		document.appendChild(flightsElement);
-		Element flightElement = document.createElementNS("http://samples.springframework.org/flight", "tns:flight");
-		flightsElement.appendChild(flightElement);
-		Element numberElement = document.createElementNS("http://samples.springframework.org/flight", "tns:number");
-		flightElement.appendChild(numberElement);
-		Text text = document.createTextNode("42");
-		numberElement.appendChild(text);
-		DOMSource source = new DOMSource(document);
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void unmarshalStreamSourceReader() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(INPUT_STRING));
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void testUnmarshalStreamSourceInputStream() throws Exception {
-		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void unmarshalSAXSource() throws Exception {
-		XMLReader reader = XMLReaderFactory.createXMLReader();
-		SAXSource source = new SAXSource(reader, new InputSource(new StringReader(INPUT_STRING)));
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void unmarshalStaxSourceXmlStreamReader() throws Exception {
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-		Source source = StaxUtils.createStaxSource(streamReader);
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void unmarshalStaxSourceXmlEventReader() throws Exception {
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(INPUT_STRING));
-		Source source = StaxUtils.createStaxSource(eventReader);
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void unmarshalStaxSourceXmlStreamReaderJaxp14() throws Exception {
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
-		StAXSource source = new StAXSource(streamReader);
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
-
-	@Test
-	public void unmarshalStaxSourceXmlEventReaderJaxp14() throws Exception {
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(INPUT_STRING));
-		StAXSource source = new StAXSource(eventReader);
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
+		return unmarshaller;
 	}
 
 	@Test
@@ -175,20 +89,23 @@ public class Jaxb2UnmarshallerTest {
 		assertNotNull("datahandler property not set", object.getSwaDataHandler());
 	}
 
-	private void testFlights(Object o) {
+	@Override
+	protected void testFlights(Object o) {
 		Flights flights = (Flights) o;
 		assertNotNull("Flights is null", flights);
 		assertEquals("Invalid amount of flight elements", 1, flights.getFlight().size());
 		testFlight(flights.getFlight().get(0));
 	}
 
-	private void testFlight(Object o) {
+	@Override
+	protected void testFlight(Object o) {
 		FlightType flight = (FlightType) o;
 		assertNotNull("Flight is null", flight);
 		assertEquals("Number is invalid", 42L, flight.getNumber());
 	}
 
 	@Test
+	@Override
 	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));

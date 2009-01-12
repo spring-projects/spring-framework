@@ -46,6 +46,6 @@ public interface Marshaller {
 	 * @return <code>true</code> if this marshaller can indeed marshal instances of the supplied class; <code>false</code>
 	 *         otherwise
 	 */
-	boolean supports(Class clazz);
+	boolean supports(Class<?> clazz);
 
 }

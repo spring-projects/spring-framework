@@ -55,7 +55,9 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 	private boolean validating = false;
 
-	/** Returns the <code>XmlOptions</code>. */
+	/**
+	 * Returns the <code>XmlOptions</code>.
+	 */
 	public XmlOptions getXmlOptions() {
 		return xmlOptions;
 	}
@@ -69,18 +71,24 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		this.xmlOptions = xmlOptions;
 	}
 
-	/** Returns whether this marshaller should validate in- and outgoing documents. */
+	/**
+	 * Returns whether this marshaller should validate in- and outgoing documents.
+	 */
 	public boolean isValidating() {
 		return validating;
 	}
 
-	/** Sets whether this marshaller should validate in- and outgoing documents.  Default is <code>false</code>. */
+	/**
+	 * Sets whether this marshaller should validate in- and outgoing documents.  Default is <code>false</code>.
+	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
 	}
 
-	/** Returns true if the given class is an implementation of {@link XmlObject}. */
-	public boolean supports(Class clazz) {
+	/**
+	 * Returns true if the given class is an implementation of {@link XmlObject}.
+	 */
+	public boolean supports(Class<?> clazz) {
 		return XmlObject.class.isAssignableFrom(clazz);
 	}
 

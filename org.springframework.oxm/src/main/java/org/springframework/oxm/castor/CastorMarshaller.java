@@ -75,7 +75,9 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class CastorMarshaller extends AbstractMarshaller implements InitializingBean {
 
-	/** The default encoding used for stream access. */
+	/**
+	 * The default encoding used for stream access.
+	 */
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 	private Resource[] mappingLocations;
@@ -96,7 +98,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private Properties namespaceMappings;
 
-	/** Returns whether the Castor  {@link Unmarshaller} should ignore attributes that do not match a specific field. */
+	/**
+	 * Returns whether the Castor  {@link Unmarshaller} should ignore attributes that do not match a specific field.
+	 */
 	public boolean getIgnoreExtraAttributes() {
 		return ignoreExtraAttributes;
 	}
@@ -111,7 +115,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.ignoreExtraAttributes = ignoreExtraAttributes;
 	}
 
-	/** Returns whether the Castor  {@link Unmarshaller} should ignore elements that do not match a specific field. */
+	/**
+	 * Returns whether the Castor  {@link Unmarshaller} should ignore elements that do not match a specific field.
+	 */
 	public boolean getIgnoreExtraElements() {
 		return ignoreExtraElements;
 	}
@@ -126,7 +132,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.ignoreExtraElements = ignoreExtraElements;
 	}
 
-	/** Returns whether the Castor {@link Unmarshaller} should preserve "ignorable" whitespace. */
+	/**
+	 * Returns whether the Castor {@link Unmarshaller} should preserve "ignorable" whitespace.
+	 */
 	public boolean getWhitespacePreserve() {
 		return whitespacePreserve;
 	}
@@ -140,7 +148,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.whitespacePreserve = whitespacePreserve;
 	}
 
-	/** Returns whether this marshaller should validate in- and outgoing documents. */
+	/**
+	 * Returns whether this marshaller should validate in- and outgoing documents.
+	 */
 	public boolean isValidating() {
 		return validating;
 	}
@@ -154,7 +164,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.validating = validating;
 	}
 
-	/** Returns the namespace mappings. Property names are interpreted as namespace prefixes; values are namespace URIs. */
+	/**
+	 * Returns the namespace mappings. Property names are interpreted as namespace prefixes; values are namespace URIs.
+	 */
 	public Properties getNamespaceMappings() {
 		return namespaceMappings;
 	}
@@ -177,12 +189,16 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.encoding = encoding;
 	}
 
-	/** Sets the locations of the Castor XML Mapping files. */
+	/**
+	 * Sets the locations of the Castor XML Mapping files.
+	 */
 	public void setMappingLocation(Resource mappingLocation) {
 		mappingLocations = new Resource[]{mappingLocation};
 	}
 
-	/** Sets the locations of the Castor XML Mapping files. */
+	/**
+	 * Sets the locations of the Castor XML Mapping files.
+	 */
 	public void setMappingLocations(Resource[] mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
@@ -223,8 +239,10 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		}
 	}
 
-	/** Returns <code>true</code> for all classes, i.e. Castor supports arbitrary classes. */
-	public boolean supports(Class clazz) {
+	/**
+	 * Returns <code>true</code> for all classes, i.e. Castor supports arbitrary classes.
+	 */
+	public boolean supports(Class<?> clazz) {
 		return true;
 	}
 

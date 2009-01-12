@@ -88,27 +88,37 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	private Boolean standalone;
 
-	/** Sets the optional binding name for this instance. */
+	/**
+	 * Sets the optional binding name for this instance.
+	 */
 	public void setBindingName(String bindingName) {
 		this.bindingName = bindingName;
 	}
 
-	/** Sets the target class for this instance. This property is required. */
+	/**
+	 * Sets the target class for this instance. This property is required.
+	 */
 	public void setTargetClass(Class targetClass) {
 		this.targetClass = targetClass;
 	}
 
-	/** Sets the number of nesting indent spaces. Default is <code>-1</code>, i.e. no indentation. */
+	/**
+	 * Sets the number of nesting indent spaces. Default is <code>-1</code>, i.e. no indentation.
+	 */
 	public void setIndent(int indent) {
 		this.indent = indent;
 	}
 
-	/** Sets the document encoding using for marshalling. Default is UTF-8. */
+	/**
+	 * Sets the document encoding using for marshalling. Default is UTF-8.
+	 */
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
 
-	/** Sets the document standalone flag for marshalling. By default, this flag is not present. */
+	/**
+	 * Sets the document standalone flag for marshalling. By default, this flag is not present.
+	 */
 	public void setStandalone(Boolean standalone) {
 		this.standalone = standalone;
 	}
@@ -136,7 +146,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 	}
 
-	public boolean supports(Class clazz) {
+	public boolean supports(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' must not be null");
 		String[] mappedClasses = bindingFactory.getMappedClasses();
 		String className = clazz.getName();
