@@ -44,7 +44,7 @@ public class MarshallingViewTest {
 	}
 
 	@Test
-	public void testGetContentType() {
+	public void getContentType() {
 		assertEquals("Invalid content type", "application/xml", view.getContentType());
 	}
 
