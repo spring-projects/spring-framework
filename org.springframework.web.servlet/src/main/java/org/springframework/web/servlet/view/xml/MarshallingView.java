@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view.xml;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.stream.StreamResult;
@@ -27,8 +26,9 @@ import javax.xml.transform.stream.StreamResult;
 import org.springframework.beans.BeansException;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Spring-MVC {@link View} that allows for response context to be rendered as the result of marshalling by a {@link
@@ -41,9 +41,11 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class MarshallingView extends AbstractUrlBasedView {
+public class MarshallingView extends AbstractView {
 
-	/** Default content type. Overridable as bean property. */
+	/**
+	 * Default content type. Overridable as bean property.
+	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
 	private Marshaller marshaller;
@@ -58,14 +60,18 @@ public class MarshallingView extends AbstractUrlBasedView {
 		setContentType(DEFAULT_CONTENT_TYPE);
 	}
 
-	/** Constructs a new <code>MarshallingView</code> with the given {@link Marshaller} set. */
+	/**
+	 * Constructs a new <code>MarshallingView</code> with the given {@link Marshaller} set.
+	 */
 	public MarshallingView(Marshaller marshaller) {
 		Assert.notNull(marshaller, "'marshaller' must not be null");
 		setContentType(DEFAULT_CONTENT_TYPE);
 		this.marshaller = marshaller;
 	}
 
-	/** Sets the {@link Marshaller} to be used by this view. */
+	/**
+	 * Sets the {@link Marshaller} to be used by this view.
+	 */
 	public void setMarshaller(Marshaller marshaller) {
 		Assert.notNull(marshaller, "'marshaller' must not be null");
 		this.marshaller = marshaller;
@@ -99,9 +105,7 @@ public class MarshallingView extends AbstractUrlBasedView {
 		response.setContentType(getContentType());
 		response.setContentLength(bos.size());
 
-		ServletOutputStream out = response.getOutputStream();
-		bos.writeTo(out);
-		out.flush();
+		FileCopyUtils.copy(bos.toByteArray(), response.getOutputStream());
 	}
 
 	/**
