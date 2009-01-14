@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.handler;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,8 +48,8 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 			throws ServletException, IOException {
 
 		if (this.authorizedRoles != null) {
-			for (int i = 0; i < this.authorizedRoles.length; i++) {
-				if (request.isUserInRole(this.authorizedRoles[i])) {
+			for (String role : this.authorizedRoles) {
+				if (request.isUserInRole(role)) {
 					return true;
 				}
 			}
