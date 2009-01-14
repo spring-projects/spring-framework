@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,6 @@
 
 package org.springframework.mock.web.portlet;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
@@ -36,23 +28,26 @@ import javax.portlet.PortletMode;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class MockActionRequest extends MockPortletRequest implements ActionRequest {
-
-	private String characterEncoding;
-
-	private byte[] content;
-
-	private String contentType;
-
+public class MockActionRequest extends MockClientDataRequest implements ActionRequest {
 
 	/**
 	 * Create a new MockActionRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
-	 * @see MockPortalContext
-	 * @see MockPortletContext
+	 * @see org.springframework.mock.web.portlet.MockPortalContext
+	 * @see org.springframework.mock.web.portlet.MockPortletContext
 	 */
 	public MockActionRequest() {
 		super();
+	}
+
+	/**
+	 * Create a new MockActionRequest with a default {@link MockPortalContext}
+	 * and a default {@link MockPortletContext}.
+	 * @param actionName the name of the action to trigger
+	 */
+	public MockActionRequest(String actionName) {
+		super();
+		setParameter(ActionRequest.ACTION_NAME, actionName);
 	}
 
 	/**
@@ -83,49 +78,9 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 	}
 
 
-	public void setContent(byte[] content) {
-		this.content = content;
-	}
-
-	public InputStream getPortletInputStream() throws IOException {
-		if (this.content != null) {
-			return new ByteArrayInputStream(this.content);
-		}
-		else {
-			return null;
-		}
-	}
-
-	public void setCharacterEncoding(String characterEncoding) {
-		this.characterEncoding = characterEncoding;
-	}
-
-	public BufferedReader getReader() throws UnsupportedEncodingException {
-		if (this.content != null) {
-			InputStream sourceStream = new ByteArrayInputStream(this.content);
-			Reader sourceReader = (this.characterEncoding != null) ?
-				new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
-			return new BufferedReader(sourceReader);
-		}
-		else {
-			return null;
-		}
-	}
-
-	public String getCharacterEncoding() {
-		return characterEncoding;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	public String getContentType() {
-		return contentType;
-	}
-
-	public int getContentLength() {
-		return (this.content != null ? content.length : -1);
+	@Override
+	protected String getLifecyclePhase() {
+		return ACTION_PHASE;
 	}
 
 }

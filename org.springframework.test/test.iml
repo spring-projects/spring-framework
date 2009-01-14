@@ -45,10 +45,12 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/javax.portlet/com.springsource.javax.portlet/1.0.0/com.springsource.javax.portlet-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-sources-2.0.0.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

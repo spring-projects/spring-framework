@@ -22,6 +22,8 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +63,15 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 		((MockRenderResponse) response).setIncludedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockPortletRequestDispatcher: including URL [" + this.url + "]");
+		}
 	}
+
+	public void include(PortletRequest request, PortletResponse response) throws PortletException, IOException {
+		// TODO
+	}
+
+	public void forward(PortletRequest request, PortletResponse response) throws PortletException, IOException {
+		// TODO
 	}
 
 }
