@@ -16,18 +16,10 @@
 
 package org.springframework.mock.web.portlet;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-
 import javax.portlet.PortalContext;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletModeException;
-import javax.portlet.PortletSecurityException;
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
@@ -42,13 +34,11 @@ import org.springframework.util.CollectionUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class MockPortletURL implements PortletURL {
+public class MockPortletURL extends MockBaseURL implements PortletURL {
 
 	public static final String URL_TYPE_RENDER = "render";
 
 	public static final String URL_TYPE_ACTION = "action";
-
-	private static final String ENCODING = "UTF-8";
 
 
 	private final PortalContext portalContext;
@@ -58,10 +48,6 @@ public class MockPortletURL implements PortletURL {
 	private WindowState windowState;
 
 	private PortletMode portletMode;
-
-	private final Map<String, String[]> parameters = new LinkedHashMap<String, String[]>();
-
-	private boolean secure = false;
 
 
 	/**
@@ -90,6 +76,10 @@ public class MockPortletURL implements PortletURL {
 		this.windowState = windowState;
 	}
 
+	public WindowState getWindowState() {
+		return this.windowState;
+	}
+
 	public void setPortletMode(PortletMode portletMode) throws PortletModeException {
 		if (!CollectionUtils.contains(this.portalContext.getSupportedPortletModes(), portletMode)) {
 			throw new PortletModeException("PortletMode not supported", portletMode);
@@ -97,77 +87,12 @@ public class MockPortletURL implements PortletURL {
 		this.portletMode = portletMode;
 	}
 
-	public void setParameter(String key, String value) {
-		Assert.notNull(key, "Parameter key must be null");
-		Assert.notNull(value, "Parameter value must not be null");
-		this.parameters.put(key, new String[] {value});
+	public PortletMode getPortletMode() {
+		return this.portletMode;
 	}
 
-	public void setParameter(String key, String[] values) {
-		Assert.notNull(key, "Parameter key must be null");
-		Assert.notNull(values, "Parameter values must not be null");
-		this.parameters.put(key, values);
-	}
-
-	public void setParameters(Map parameters) {
-		Assert.notNull(parameters, "Parameters Map must not be null");
-		this.parameters.clear();
-		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			Assert.isTrue(entry.getKey() instanceof String, "Key must be of type String");
-			Assert.isTrue(entry.getValue() instanceof String[], "Value must be of type String[]");
-			this.parameters.put((String) entry.getKey(), (String[]) entry.getValue());
-		}
-	}
-
-	public Set<String> getParameterNames() {
-		return this.parameters.keySet();
-	}
-
-	public String getParameter(String name) {
-		String[] arr = this.parameters.get(name);
-		return (arr != null && arr.length > 0 ? arr[0] : null);
-	}
-
-	public String[] getParameterValues(String name) {
-		return this.parameters.get(name);
-	}
-
-	public Map<String, String[]> getParameterMap() {
-		return Collections.unmodifiableMap(this.parameters);
-	}
-
-	public void setSecure(boolean secure) throws PortletSecurityException {
-		this.secure = secure;
-	}
-
-	public boolean isSecure() {
-		return this.secure;
-	}
-
-
-	private String encodeParameter(String name, String value) {
-		try {
-			return URLEncoder.encode(name, ENCODING) + "=" + URLEncoder.encode(value, ENCODING);
-		}
-		catch (UnsupportedEncodingException ex) {
-			return null;
-		}
-	}
-
-	private String encodeParameter(String name, String[] values) {
-		try {
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0, n = values.length; i < n; i++) {
-				sb.append((i > 0 ? ";" : "") +
-						URLEncoder.encode(name, ENCODING) + "=" +
-						URLEncoder.encode(values[i], ENCODING));
-			}
-			return sb.toString();
-		}
-		catch (UnsupportedEncodingException ex) {
-			return null;
-		}
+	public void removePublicRenderParameter(String name) {
+		this.parameters.remove(name);
 	}
 
 
@@ -183,7 +108,7 @@ public class MockPortletURL implements PortletURL {
 		for (Map.Entry<String, String[]> entry : this.parameters.entrySet()) {
 			sb.append(";").append(encodeParameter("param_" + entry.getKey(), entry.getValue()));
 		}
-		return (this.secure ? "https:" : "http:") +
+		return (isSecure() ? "https:" : "http:") +
 				"//localhost/mockportlet?" + sb.toString();
 	}
 

@@ -17,7 +17,9 @@
 package org.springframework.mock.web.portlet;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,6 +29,7 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletModeException;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
+import javax.xml.namespace.QName;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -38,15 +41,11 @@ import org.springframework.util.CollectionUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class MockActionResponse extends MockPortletResponse implements ActionResponse {
+public class MockActionResponse extends MockStateAwareResponse implements ActionResponse {
 
-	private WindowState windowState;
-
-	private PortletMode portletMode;
+	private boolean redirectAllowed = true;
 
 	private String redirectedUrl;
-
-	private final Map<String, String[]> renderParameters = new LinkedHashMap<String, String[]>();
 
 
 	/**
@@ -71,93 +70,60 @@ public class MockActionResponse extends MockPortletResponse implements ActionRes
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set WindowState after sendRedirect has been called");
 		}
-		if (!CollectionUtils.contains(getPortalContext().getSupportedWindowStates(), windowState)) {
-			throw new WindowStateException("WindowState not supported", windowState);
-		}
-		this.windowState = windowState;
-	}
-
-	public WindowState getWindowState() {
-		return windowState;
+		super.setWindowState(windowState);
+		this.redirectAllowed = false;
 	}
 
 	public void setPortletMode(PortletMode portletMode) throws PortletModeException {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set PortletMode after sendRedirect has been called");
 		}
-		if (!CollectionUtils.contains(getPortalContext().getSupportedPortletModes(), portletMode)) {
-			throw new PortletModeException("PortletMode not supported", portletMode);
-		}
-		this.portletMode = portletMode;
+		super.setPortletMode(portletMode);
+		this.redirectAllowed = false;
 	}
 
-	public PortletMode getPortletMode() {
-		return portletMode;
-	}
-
-	public void sendRedirect(String url) throws IOException {
-		if (this.windowState != null || this.portletMode != null || !this.renderParameters.isEmpty()) {
-			throw new IllegalStateException(
-					"Cannot call sendRedirect after windowState, portletMode, or renderParameters have been set");
-		}
-		Assert.notNull(url, "Redirect URL must not be null");
-		this.redirectedUrl = url;
-	}
-
-	public String getRedirectedUrl() {
-		return redirectedUrl;
-	}
-
-	public void setRenderParameters(Map parameters) {
+	public void setRenderParameters(Map<String, String[]> parameters) {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set render parameters after sendRedirect has been called");
 		}
-		Assert.notNull(parameters, "Parameters Map must not be null");
-		this.renderParameters.clear();
-		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			Assert.isTrue(entry.getKey() instanceof String, "Key must be of type String");
-			Assert.isTrue(entry.getValue() instanceof String[], "Value must be of type String[]");
-			this.renderParameters.put((String) entry.getKey(), (String[]) entry.getValue());
-		}
+		super.setRenderParameters(parameters);
+		this.redirectAllowed = false;
 	}
 
 	public void setRenderParameter(String key, String value) {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set render parameters after sendRedirect has been called");
 		}
-		Assert.notNull(key, "Parameter key must not be null");
-		Assert.notNull(value, "Parameter value must not be null");
-		this.renderParameters.put(key, new String[] {value});
-	}
-
-	public String getRenderParameter(String key) {
-		Assert.notNull(key, "Parameter key must not be null");
-		String[] arr = this.renderParameters.get(key);
-		return (arr != null && arr.length > 0 ? arr[0] : null);
+		super.setRenderParameter(key, value);
+		this.redirectAllowed = false;
 	}
 
 	public void setRenderParameter(String key, String[] values) {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set render parameters after sendRedirect has been called");
 		}
-		Assert.notNull(key, "Parameter key must not be null");
-		Assert.notNull(values, "Parameter values must not be null");
-		this.renderParameters.put(key, values);
+		super.setRenderParameter(key, values);
+		this.redirectAllowed = false;
 	}
 
-	public String[] getRenderParameterValues(String key) {
-		Assert.notNull(key, "Parameter key must not be null");
-		return this.renderParameters.get(key);
+	public void sendRedirect(String location) throws IOException {
+		if (!this.redirectAllowed) {
+			throw new IllegalStateException(
+					"Cannot call sendRedirect after windowState, portletMode, or renderParameters have been set");
+		}
+		Assert.notNull(location, "Redirect URL must not be null");
+		this.redirectedUrl = location;
 	}
 
-	public Iterator getRenderParameterNames() {
-		return this.renderParameters.keySet().iterator();
+	public void sendRedirect(String location, String renderUrlParamName) throws IOException {
+		sendRedirect(location);
+		if (renderUrlParamName != null) {
+			setRenderParameter(renderUrlParamName, location);
+		}
 	}
 
-	public Map getRenderParameterMap() {
-		return Collections.unmodifiableMap(this.renderParameters);
+	public String getRedirectedUrl() {
+		return this.redirectedUrl;
 	}
-
 
 }

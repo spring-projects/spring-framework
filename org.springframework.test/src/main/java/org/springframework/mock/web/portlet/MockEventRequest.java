@@ -16,65 +16,71 @@
 
 package org.springframework.mock.web.portlet;
 
+import javax.portlet.Event;
+import javax.portlet.EventRequest;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
-import javax.portlet.PortletMode;
-import javax.portlet.RenderRequest;
 
 /**
  * Mock implementation of the {@link javax.portlet.RenderRequest} interface.
  *
- * @author John A. Lewis
  * @author Juergen Hoeller
- * @since 2.0
+ * @since 3.0
  */
-public class MockRenderRequest extends MockPortletRequest implements RenderRequest {
+public class MockEventRequest extends MockPortletRequest implements EventRequest {
+
+	private final Event event;
+
+	private String method;
+
 
 	/**
 	 * Create a new MockRenderRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
-	 * @see MockPortalContext
-	 * @see MockPortletContext
+	 * @param event the event that this request wraps
 	 */
-	public MockRenderRequest() {
+	public MockEventRequest(Event event) {
 		super();
-	}
-
-	/**
-	 * Create a new MockRenderRequest with a default {@link MockPortalContext}
-	 * and a default {@link MockPortletContext}.
-	 * @param portletMode the mode that the portlet runs in
-	 */
-	public MockRenderRequest(PortletMode portletMode) {
-		super();
-		setPortletMode(portletMode);
+		this.event = event;
 	}
 
 	/**
 	 * Create a new MockRenderRequest with a default {@link MockPortalContext}.
+	 * @param event the event that this request wraps
 	 * @param portletContext the PortletContext that the request runs in
 	 */
-	public MockRenderRequest(PortletContext portletContext) {
+	public MockEventRequest(Event event, PortletContext portletContext) {
 		super(portletContext);
+		this.event = event;
 	}
 
 	/**
 	 * Create a new MockRenderRequest.
+	 * @param event the event that this request wraps
 	 * @param portalContext the PortletContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
-	public MockRenderRequest(PortalContext portalContext, PortletContext portletContext) {
+	public MockEventRequest(Event event, PortalContext portalContext, PortletContext portletContext) {
 		super(portalContext, portletContext);
+		this.event = event;
 	}
 
 
 	@Override
 	protected String getLifecyclePhase() {
-		return RENDER_PHASE;
+		return EVENT_PHASE;
 	}
 
-	public String getETag() {
-		return getProperty(RenderRequest.ETAG);
+	public Event getEvent() {
+		return this.event;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
+	}
+
+	public String getMethod() {
+		return this.method;
 	}
 
 }

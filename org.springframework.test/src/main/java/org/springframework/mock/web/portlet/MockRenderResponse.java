@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,19 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Locale;
-
+import javax.portlet.CacheControl;
 import javax.portlet.PortalContext;
+import javax.portlet.PortletMode;
 import javax.portlet.PortletURL;
+import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceURL;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -38,25 +45,11 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class MockRenderResponse extends MockPortletResponse implements RenderResponse {
-
-	private String contentType;
-
-	private String namespace = "MockPortlet";
+public class MockRenderResponse extends MockMimeResponse implements RenderResponse {
 
 	private String title;
 
-	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
-
-	private PrintWriter writer;
-
-	private Locale locale = Locale.getDefault();
-
-	private int bufferSize = 4096;
-
-	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-	private boolean committed;
+	private Collection<PortletMode> nextPossiblePortletModes;
 
 	private String includedUrl;
 
@@ -78,126 +71,36 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 		super(portalContext);
 	}
 
+	/**
+	 * Create a new MockRenderResponse.
+	 * @param portalContext the PortalContext defining the supported
+	 * PortletModes and WindowStates
+	 * @param request the corresponding render request that this response
+	 * is generated for
+	 */
+	public MockRenderResponse(PortalContext portalContext, RenderRequest request) {
+		super(portalContext, request);
+	}
+
 
 	//---------------------------------------------------------------------
 	// RenderResponse methods
 	//---------------------------------------------------------------------
-
-	public String getContentType() {
-		return this.contentType;
-	}
-
-	public PortletURL createRenderURL() {
-		PortletURL url = new MockPortletURL(getPortalContext(), MockPortletURL.URL_TYPE_RENDER);
-		return url;
-	}
-
-	public PortletURL createActionURL() {
-		PortletURL url = new MockPortletURL(getPortalContext(), MockPortletURL.URL_TYPE_ACTION);
-		return url;
-	}
-
-	public String getNamespace() {
-		return this.namespace;
-	}
 
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
 	public String getTitle() {
-		return title;
+		return this.title;
 	}
 
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
+	public void setNextPossiblePortletModes(Collection<PortletMode> portletModes) {
+		this.nextPossiblePortletModes = portletModes;
 	}
 
-	public void setCharacterEncoding(String characterEncoding) {
-		this.characterEncoding = characterEncoding;
-	}
-
-	public String getCharacterEncoding() {
-		return this.characterEncoding;
-	}
-
-	public PrintWriter getWriter() throws UnsupportedEncodingException {
-		if (this.writer == null) {
-			Writer targetWriter = (this.characterEncoding != null
-					? new OutputStreamWriter(this.outputStream, this.characterEncoding)
-					: new OutputStreamWriter(this.outputStream));
-			this.writer = new PrintWriter(targetWriter);
-		}
-		return this.writer;
-	}
-
-	public byte[] getContentAsByteArray() {
-		flushBuffer();
-		return this.outputStream.toByteArray();
-	}
-
-	public String getContentAsString() throws UnsupportedEncodingException {
-		flushBuffer();
-		return (this.characterEncoding != null)
-				? this.outputStream.toString(this.characterEncoding)
-				: this.outputStream.toString();
-	}
-
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
-
-	public Locale getLocale() {
-		return this.locale;
-	}
-
-	public void setBufferSize(int bufferSize) {
-		this.bufferSize = bufferSize;
-	}
-
-	public int getBufferSize() {
-		return this.bufferSize;
-	}
-
-	public void flushBuffer() {
-		if (this.writer != null) {
-			this.writer.flush();
-		}
-		if (this.outputStream != null) {
-			try {
-				this.outputStream.flush();
-			}
-			catch (IOException ex) {
-				throw new IllegalStateException("Could not flush OutputStream: " + ex.getMessage());
-			}
-		}
-		this.committed = true;
-	}
-
-	public void resetBuffer() {
-		if (this.committed) {
-			throw new IllegalStateException("Cannot reset buffer - response is already committed");
-		}
-		this.outputStream.reset();
-	}
-
-	public void setCommitted(boolean committed) {
-		this.committed = committed;
-	}
-
-	public boolean isCommitted() {
-		return this.committed;
-	}
-
-	public void reset() {
-		resetBuffer();
-		this.characterEncoding = null;
-		this.contentType = null;
-		this.locale = null;
-	}
-
-	public OutputStream getPortletOutputStream() throws IOException {
-		return this.outputStream;
+	public Collection<PortletMode> getNextPossiblePortletModes() {
+		return this.nextPossiblePortletModes;
 	}
 
 
@@ -210,7 +113,7 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 	}
 
 	public String getIncludedUrl() {
-		return includedUrl;
+		return this.includedUrl;
 	}
 
 }
