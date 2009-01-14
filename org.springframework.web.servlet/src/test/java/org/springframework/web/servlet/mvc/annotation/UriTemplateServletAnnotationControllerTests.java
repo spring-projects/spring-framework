@@ -24,7 +24,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class UriTemplateServletAnnotationControllerTests {
 
 	private DispatcherServlet servlet;
@@ -33,12 +35,22 @@ public class UriTemplateServletAnnotationControllerTests {
 	public void simple() throws Exception {
 		initServlet(SimpleUriTemplateController.class);
 
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42", response.getContentAsString());
+	}
+
+	@Test
+	public void multiple() throws Exception {
+		initServlet(MultipleUriTemplateController.class);
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("test-42-21", response.getContentAsString());
 	}
-	
+
 	@Test
 	public void binding() throws Exception {
 		initServlet(BindingUriTemplateController.class);
@@ -83,11 +95,27 @@ public class UriTemplateServletAnnotationControllerTests {
 		servlet.init(new MockServletConfig());
 	}
 
+	/*
+	 * Controllers
+	 */
+
 	@Controller
 	public static class SimpleUriTemplateController {
 
+		@RequestMapping("/{root}")
+		public void handle(@PathVariable("root") String root, Writer writer) throws IOException {
+			assertEquals("Invalid path variable value", "42", root);
+			writer.write("test-" + root);
+		}
+
+	}
+
+	@Controller
+	public static class MultipleUriTemplateController {
+
 		@RequestMapping("/hotels/{hotel}/bookings/{booking}")
-		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking, Writer writer) throws IOException {
+		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking, Writer writer)
+				throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", 21, booking);
 			writer.write("test-" + hotel + "-" + booking);
@@ -108,7 +136,8 @@ public class UriTemplateServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/hotels/{hotel}/dates/{date}")
-		public void handle(@PathVariable("hotel") String hotel, @PathVariable Date date, Writer writer) throws IOException {
+		public void handle(@PathVariable("hotel") String hotel, @PathVariable Date date, Writer writer)
+				throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
 			writer.write("test-" + hotel);
@@ -132,6 +161,7 @@ public class UriTemplateServletAnnotationControllerTests {
 
 	@Controller
 	public static class AmbiguousUriTemplateController {
+
 		@RequestMapping("/hotels/{hotel}")
 		public void handleVars(Writer writer) throws IOException {
 			writer.write("variables");
