@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.context.support;
+
+import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,6 +91,23 @@ public abstract class SpringBeanAutowiringSupport {
 						"Make sure this class gets constructed in a Spring web application. Proceeding without injection.");
 			}
 		}
+	}
+
+
+	/**
+	 * Process <code>@Autowired</code> injection for the given target object,
+	 * based on the current root web application context as stored in the ServletContext.
+	 * <p>Intended for use as a delegate.
+	 * @param target the target object to process
+	 * @param servletContext the ServletContext to find the Spring web application context in
+	 * @see WebApplicationContextUtils#getWebApplicationContext(javax.servlet.ServletContext)
+	 */
+	public static void processInjectionBasedOnServletContext(Object target, ServletContext servletContext) {
+		Assert.notNull(target, "Target object must not be null");
+		WebApplicationContext cc = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(cc.getAutowireCapableBeanFactory());
+		bpp.processInjection(target);
 	}
 
 }
