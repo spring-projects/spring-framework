@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,14 +50,7 @@ import org.springframework.web.servlet.ModelAndView;
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView}.
  * So actually, this method is the main entrypoint for the
  * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
- * which delegates requests to controllers. This method - and also this interface -
- * should preferrably not be implemented by custom controllers <i>directly</i>, since
- * abstract controller also provided by this package already provide a lot of
- * functionality for typical use cases in web applications. A few examples of
- * those controllers:
- * {@link AbstractController AbstractController},
- * {@link AbstractCommandController AbstractCommandController},
- * {@link SimpleFormController SimpleFormController}.</p>
+ * which delegates requests to controllers.</p>
  *
  * <p>So basically any <i>direct</i> implementation of the Controller interface
  * just handles HttpServletRequests and should return a ModelAndView, to be further
@@ -100,15 +93,13 @@ import org.springframework.web.servlet.ModelAndView;
  * you all those references through convenient accessors - but requires an
  * ApplicationContext reference on initialization.
  *
- * <p>Controllers can optionally implement the LastModified interface.
+ * <p>Controllers can optionally implement the {@link LastModified} interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see LastModified
  * @see SimpleControllerHandlerAdapter
  * @see AbstractController
- * @see AbstractCommandController
- * @see SimpleFormController
  * @see org.springframework.mock.web.MockHttpServletRequest
  * @see org.springframework.mock.web.MockHttpServletResponse
  * @see org.springframework.context.ApplicationContextAware
