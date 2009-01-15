@@ -24,14 +24,15 @@ import javax.xml.transform.stream.StreamSource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTestCase;
 import org.springframework.oxm.Unmarshaller;
+import org.springframework.samples.flight.FlightDocument;
+import org.springframework.samples.flight.FlightType;
+import org.springframework.samples.flight.FlightsDocument;
 import org.springframework.util.xml.StaxUtils;
 
-@Ignore("Code generation not yet support by Spring Build")
 public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
 	@Override
