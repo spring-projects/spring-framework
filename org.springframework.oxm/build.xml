@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="org.springframework.oxm">
+<project name="org.springframework.oxm" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<property file="${basedir}/../build.properties"/>
 	<import file="${basedir}/../build-spring-framework/package-bundle.xml"/>
 	<import file="${basedir}/../spring-build/standard/default.xml"/>
+
+	<macrodef name="test-post-compile">
+		<attribute name="classpath.id"/>
+		<attribute name="input.dir"/>
+		<attribute name="output.dir"/>
+		<attribute name="resources.dir"/>
+		<sequential>
+			<ivy:cachepath resolveId="jibx.classpath" pathid="jibx.classpath" organisation="net.sourceforge.jibx"
+						   module="com.springsource.org.jibx.binding" revision="1.1.5"
+						   conf="runtime" type="jar" inline="true" log="download-only"/>
+			<taskdef name="jibx-bind" classname="org.jibx.binding.ant.CompileTask" classpathref="jibx.classpath"/>
+
+			<jibx-bind load="true" binding="${basedir}/src/test/resources/org/springframework/oxm/jibx/binding.xml">
+				<classpathset dir="@{output.dir}">
+					<include name="**/jibx/**/*"/>
+				</classpathset>
+			</jibx-bind>
+		</sequential>
+	</macrodef>
+
 </project>
