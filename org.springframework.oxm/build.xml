@@ -4,6 +4,37 @@
 	<import file="${basedir}/../build-spring-framework/package-bundle.xml"/>
 	<import file="${basedir}/../spring-build/standard/default.xml"/>
 
+	<property name="schema" value="${basedir}/src/test/resources/org/springframework/oxm/flight.xsd"/>
+
+	<macrodef name="test-pre-compile">
+		<attribute name="classpath.id"/>
+		<attribute name="input.dir"/>
+		<attribute name="output.dir"/>
+		<attribute name="resources.dir"/>
+		<sequential>
+			<!-- JAXB2 -->
+			<!--
+			   <ivy:cachepath resolveId="xmlbeans.classpath" pathid="xmlbeans.classpath" organisation="org.apache.xmlbeans"
+						  module="com.springsource.org.apache.xmlbeans" revision="2.4.0"
+						  conf="runtime" type="jar" inline="true" log="download-only"/>
+			   <taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask" classpathref="maven.test.classpath"/>
+			   <xjc target="${generate.target.directory}" package="org.springframework.oxm.jaxb1" schema="${schema}">
+				   <produces dir="${generate.target.directory}" includes="**/jaxb1/**/*.java"/>
+			   </xjc>
+   -->
+
+			<!-- XMLBeans -->
+			<ivy:cachepath resolveId="xmlbeans.classpath" pathid="xmlbeans.classpath" organisation="org.apache.xmlbeans"
+						   module="com.springsource.org.apache.xmlbeans" revision="2.4.0"
+						   conf="runtime" type="jar" inline="true" log="download-only"/>
+			<taskdef name="xmlbeans" classname="org.apache.xmlbeans.impl.tool.XMLBean"
+					 classpathref="xmlbeans.classpath"/>
+			<xmlbeans schema="${schema}" classgendir="@{output.dir}" classpathref="xmlbeans.classpath" compiler="modern"
+					  verbose="false"/>
+		</sequential>
+
+	</macrodef>
+
 	<macrodef name="test-post-compile">
 		<attribute name="classpath.id"/>
 		<attribute name="input.dir"/>
