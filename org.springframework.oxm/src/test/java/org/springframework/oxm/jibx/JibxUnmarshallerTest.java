@@ -22,7 +22,6 @@ import org.junit.Ignore;
 import org.springframework.oxm.AbstractUnmarshallerTestCase;
 import org.springframework.oxm.Unmarshaller;
 
-@Ignore("Code generation not yet support by Spring Build")
 public class JibxUnmarshallerTest extends AbstractUnmarshallerTestCase {
 
 	@Override

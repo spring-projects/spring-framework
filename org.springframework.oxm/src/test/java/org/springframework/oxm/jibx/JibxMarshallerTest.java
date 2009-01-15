@@ -23,13 +23,11 @@ import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import org.custommonkey.xmlunit.XMLUnit;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTestCase;
 import org.springframework.oxm.Marshaller;
 
-@Ignore("Code generation not yet support by Spring Build")
 public class JibxMarshallerTest extends AbstractMarshallerTestCase {
 
 	@Override
