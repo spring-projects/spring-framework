@@ -12,16 +12,30 @@
 		<attribute name="output.dir"/>
 		<attribute name="resources.dir"/>
 		<sequential>
+			<!-- Castor -->
+			<!--
+			<ivy:cachepath resolveId="castor.classpath" pathid="castor.classpath"
+						   organisation="org.codehaus.castor" module="com.springsource.org.castor" revision="1.2.0"
+						   conf="runtime" type="jar" inline="true" log="download-only"/>
+			<taskdef name="castor" classname="org.castor.anttask.CastorCodeGenTask"
+					 classpathref="castor.classpath"/>
+			<castor types="j2" warnings="false" file="${schema}" todir="${basedir}/castor/test"
+						   package="org.springframework.oxm.castor"/>
+		   -->
+
 			<!-- JAXB2 -->
 			<!--
-			   <ivy:cachepath resolveId="xmlbeans.classpath" pathid="xmlbeans.classpath" organisation="org.apache.xmlbeans"
-						  module="com.springsource.org.apache.xmlbeans" revision="2.4.0"
+		    <ivy:cachepath resolveId="jaxb.classpath" pathid="jaxb.classpath" organisation="com.sun.xml"
+						  module="com.springsource.com.sun.xml.bind" revision="2.1.7"
 						  conf="runtime" type="jar" inline="true" log="download-only"/>
-			   <taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask" classpathref="maven.test.classpath"/>
-			   <xjc target="${generate.target.directory}" package="org.springframework.oxm.jaxb1" schema="${schema}">
-				   <produces dir="${generate.target.directory}" includes="**/jaxb1/**/*.java"/>
-			   </xjc>
-   -->
+			<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask"
+					 classpathref="jaxb.classpath"/>
+			<xjc destdir="${basedir}/jaxb/test"
+				 package="org.springframework.oxm.jaxb"
+				 schema="${schema}">
+				<produces dir="${basedir}/jaxb/test" includes="**/*.java"/>
+			</xjc>
+			-->
 
 			<!-- XMLBeans -->
 			<ivy:cachepath resolveId="xmlbeans.classpath" pathid="xmlbeans.classpath" organisation="org.apache.xmlbeans"
