@@ -5,8 +5,8 @@
 	<import file="${basedir}/../spring-build/standard/default.xml"/>
 
 	<property name="schema" value="${basedir}/src/test/resources/org/springframework/oxm/flight.xsd"/>
-	<property name="test.castor.dir" value="${target.dir}/castor/staging/test"/>
-	<property name="test.jaxb.dir" value="${target.dir}/jaxb/staging/test"/>
+	<property name="test.castor.dir" value="${target.dir}/castor/test"/>
+	<property name="test.jaxb.dir" value="${target.dir}/jaxb/test"/>
 
 	<macrodef name="test-compile">
 		<attribute name="classpath.id"/>
