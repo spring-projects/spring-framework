@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
 
 /**
- * Mock implementation of the {@link javax.portlet.RenderRequest} interface.
+ * Mock implementation of the {@link javax.portlet.EventRequest} interface.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -35,9 +35,10 @@ public class MockEventRequest extends MockPortletRequest implements EventRequest
 
 
 	/**
-	 * Create a new MockRenderRequest with a default {@link MockPortalContext}
+	 * Create a new MockEventRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
 	 * @param event the event that this request wraps
+	 * @see MockEvent
 	 */
 	public MockEventRequest(Event event) {
 		super();
@@ -45,9 +46,10 @@ public class MockEventRequest extends MockPortletRequest implements EventRequest
 	}
 
 	/**
-	 * Create a new MockRenderRequest with a default {@link MockPortalContext}.
+	 * Create a new MockEventRequest with a default {@link MockPortalContext}.
 	 * @param event the event that this request wraps
 	 * @param portletContext the PortletContext that the request runs in
+	 * @see MockEvent
 	 */
 	public MockEventRequest(Event event, PortletContext portletContext) {
 		super(portletContext);
@@ -55,7 +57,7 @@ public class MockEventRequest extends MockPortletRequest implements EventRequest
 	}
 
 	/**
-	 * Create a new MockRenderRequest.
+	 * Create a new MockEventRequest.
 	 * @param event the event that this request wraps
 	 * @param portalContext the PortletContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in

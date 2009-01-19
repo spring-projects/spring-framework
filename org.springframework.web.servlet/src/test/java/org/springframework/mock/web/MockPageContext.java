@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import javax.el.ELContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -59,23 +61,23 @@ public class MockPageContext extends PageContext {
 
 	private final ServletConfig servletConfig;
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new HashMap<String, Object>();
 
 	private JspWriter out;
 
 
 	/**
-	 * Create new MockPageContext with a default {@link org.springframework.mock.web.MockServletContext},
-	 * {@link org.springframework.mock.web.MockHttpServletRequest}, {@link org.springframework.mock.web.MockHttpServletResponse},
-	 * {@link org.springframework.mock.web.MockServletConfig}.
+	 * Create new MockPageContext with a default {@link MockServletContext},
+	 * {@link MockHttpServletRequest}, {@link MockHttpServletResponse},
+	 * {@link MockServletConfig}.
 	 */
 	public MockPageContext() {
 		this(null, null, null, null);
 	}
 
 	/**
-	 * Create new MockPageContext with a default {@link org.springframework.mock.web.MockHttpServletRequest},
-	 * {@link org.springframework.mock.web.MockHttpServletResponse}, {@link org.springframework.mock.web.MockServletConfig}.
+	 * Create new MockPageContext with a default {@link MockHttpServletRequest},
+	 * {@link MockHttpServletResponse}, {@link MockServletConfig}.
 	 * @param servletContext the ServletContext that the JSP page runs in
 	 * (only necessary when actually accessing the ServletContext)
 	 */
@@ -244,11 +246,12 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
-	public Enumeration getAttributeNames() {
-		return this.attributes.keys();
+	public Enumeration<String> getAttributeNames() {
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
-	public Enumeration getAttributeNamesInScope(int scope) {
+	@SuppressWarnings("unchecked")
+	public Enumeration<String> getAttributeNamesInScope(int scope) {
 		switch (scope) {
 			case PAGE_SCOPE:
 				return getAttributeNames();
@@ -276,7 +279,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public ELContext getELContext() {
-		throw new UnsupportedOperationException("getELContext");
+		return null;
 	}
 
 	public VariableResolver getVariableResolver() {
@@ -288,7 +291,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Object getPage() {
-		throw new UnsupportedOperationException("getPage");
+		return this;
 	}
 
 	public ServletRequest getRequest() {
@@ -300,7 +303,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Exception getException() {
-		throw new UnsupportedOperationException("getException");
+		return null;
 	}
 
 	public ServletConfig getServletConfig() {
