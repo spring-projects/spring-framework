@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,15 @@ abstract class ServletAnnotationMappingUtils {
 	 * @param request the current HTTP request to check
 	 */
 	public static boolean checkRequestMethod(RequestMethod[] methods, HttpServletRequest request) {
-		if (!ObjectUtils.isEmpty(methods)) {
-			boolean match = false;
-			for (RequestMethod method : methods) {
-				if (method.name().equals(request.getMethod())) {
-					match = true;
-				}
-			}
-			if (!match) {
-				return false;
+		if (ObjectUtils.isEmpty(methods)) {
+			return true;
+		}
+		for (RequestMethod method : methods) {
+			if (method.name().equals(request.getMethod())) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
