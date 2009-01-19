@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,15 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import javax.portlet.CacheControl;
-import javax.portlet.PortalContext;
-import javax.portlet.PortletMode;
-import javax.portlet.PortletURL;
 import javax.portlet.MimeResponse;
-import javax.portlet.ResourceURL;
+import javax.portlet.PortalContext;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletURL;
+import javax.portlet.ResourceURL;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
@@ -65,6 +63,8 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 	private boolean committed;
 
 	private String includedUrl;
+
+	private String forwardedUrl;
 
 
 	/**
@@ -217,6 +217,27 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 
 	public CacheControl getCacheControl() {
 		return this.cacheControl;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Methods for MockPortletRequestDispatcher
+	//---------------------------------------------------------------------
+
+	public void setIncludedUrl(String includedUrl) {
+		this.includedUrl = includedUrl;
+	}
+
+	public String getIncludedUrl() {
+		return this.includedUrl;
+	}
+
+	public void setForwardedUrl(String forwardedUrl) {
+		this.forwardedUrl = forwardedUrl;
+	}
+
+	public String getForwardedUrl() {
+		return this.forwardedUrl;
 	}
 
 }

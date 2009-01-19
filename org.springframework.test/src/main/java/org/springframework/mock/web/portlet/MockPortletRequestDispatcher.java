@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package org.springframework.mock.web.portlet;
 
 import java.io.IOException;
-
 import javax.portlet.PortletException;
+import javax.portlet.PortletRequest;
 import javax.portlet.PortletRequestDispatcher;
+import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,23 +54,31 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 
 
 	public void include(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+		include((PortletRequest) request, (PortletResponse) response);
+	}
+
+	public void include(PortletRequest request, PortletResponse response) throws PortletException, IOException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-		if (!(response instanceof MockRenderResponse)) {
-			throw new IllegalArgumentException("MockPortletRequestDispatcher requires MockRenderResponse");
+		if (!(response instanceof MockMimeResponse)) {
+			throw new IllegalArgumentException("MockPortletRequestDispatcher requires MockMimeResponse");
 		}
-		((MockRenderResponse) response).setIncludedUrl(this.url);
+		((MockMimeResponse) response).setIncludedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockPortletRequestDispatcher: including URL [" + this.url + "]");
 		}
 	}
 
-	public void include(PortletRequest request, PortletResponse response) throws PortletException, IOException {
-		// TODO
-	}
-
 	public void forward(PortletRequest request, PortletResponse response) throws PortletException, IOException {
-		// TODO
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
+		if (!(response instanceof MockMimeResponse)) {
+			throw new IllegalArgumentException("MockPortletRequestDispatcher requires MockMimeResponse");
+		}
+		((MockMimeResponse) response).setForwardedUrl(this.url);
+		if (logger.isDebugEnabled()) {
+			logger.debug("MockPortletRequestDispatcher: forwarding to URL [" + this.url + "]");
+		}
 	}
 
 }
