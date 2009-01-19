@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.security.Principal;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,8 +31,14 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SourceFilteringListener;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -128,6 +133,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/** Should we publish a ServletRequestHandledEvent at the end of each request? */
 	private boolean publishEvents = true;
+
+	/** Expose LocaleContext and RequestAttributes as inheritable for child threads? */
+	private boolean threadContextInheritable = false;
 
 	/** Should we dispatch an HTTP OPTIONS request to {@link #doService}? */
 	private boolean dispatchOptionsRequest = false;
@@ -228,6 +236,22 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	public void setPublishEvents(boolean publishEvents) {
 		this.publishEvents = publishEvents;
+	}
+
+	/**
+	 * Set whether to expose the LocaleContext and RequestAttributes as inheritable
+	 * for child threads (using an {@link java.lang.InheritableThreadLocal}).
+	 * <p>Default is "false", to avoid side effects on spawned background threads.
+	 * Switch this to "true" to enable inheritance for custom child threads which
+	 * are spawned during request processing and only used for this request
+	 * (that is, ending after their initial task, without reuse of the thread).
+	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
+	 * accessing a thread pool which is configured to potentially add new threads
+	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * since this will expose the inherited context to such a pooled thread.
+	 */
+	public void setThreadContextInheritable(boolean threadContextInheritable) {
+		this.threadContextInheritable = threadContextInheritable;
 	}
 
 	/**
@@ -574,6 +598,19 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 		Throwable failureCause = null;
 
+		// Expose current LocaleResolver and request as LocaleContext.
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
+
+		// Expose current RequestAttributes to current thread.
+		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound request context to thread: " + request);
+		}
+
 		try {
 			doService(request, response);
 		}
@@ -591,6 +628,16 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		finally {
+			// Reset thread-bound context.
+			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
+			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
+
+			// Clear request attributes.
+			requestAttributes.requestCompleted();
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cleared thread-bound request context: " + request);
+			}
+
 			if (failureCause != null) {
 				this.logger.debug("Could not complete request", failureCause);
 			}
@@ -608,6 +655,16 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 								processingTime, failureCause));
 			}
 		}
+	}
+
+	/**
+	 * Build a LocaleContext for the given request, exposing the request's
+	 * primary locale as current locale.
+	 * @param request current HTTP request
+	 * @return the corresponding LocaleContext
+	 */
+	protected LocaleContext buildLocaleContext(HttpServletRequest request) {
+		return new SimpleLocaleContext(request.getLocale());
 	}
 
 	/**

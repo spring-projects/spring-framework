@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,6 +165,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Mapping
 public @interface RequestMapping {
 
 	/**
@@ -202,8 +203,7 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this HTTP method restriction (i.e. the type-level restriction
 	 * gets checked before the handler method is even resolved).
-	 * <p><b>Currently only supported in Servlet environments!</b>
-	 * To be supported for Portlet 2.0 resource requests in Spring 3.0 as well.
+	 * <p>Supported for Servlet environments as well as Portlet 2.0 environments.
 	 */
 	RequestMethod[] method() default {};
 

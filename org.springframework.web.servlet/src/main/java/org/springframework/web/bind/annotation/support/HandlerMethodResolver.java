@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,9 @@ public class HandlerMethodResolver {
 
 	private final Set<Method> modelAttributeMethods = new LinkedHashSet<Method>();
 
-	private final RequestMapping typeLevelMapping;
+	private RequestMapping typeLevelMapping;
 
-	private final boolean sessionAttributesFound;
+	private boolean sessionAttributesFound;
 
 	private final Set<String> sessionAttributeNames = new HashSet<String>();
 
@@ -65,13 +65,13 @@ public class HandlerMethodResolver {
 
 
 	/**
-	 * Create a new HandlerMethodResolver for the specified handler type.
+	 * Initialize a new HandlerMethodResolver for the specified handler type.
 	 * @param handlerType the handler class to introspect
 	 */
-	public HandlerMethodResolver(final Class<?> handlerType) {
+	public void init(final Class<?> handlerType) {
 		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) {
-				if (method.isAnnotationPresent(RequestMapping.class)) {
+				if (isHandlerMethod(method)) {
 					handlerMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
 				}
 				else if (method.isAnnotationPresent(InitBinder.class)) {
@@ -89,6 +89,10 @@ public class HandlerMethodResolver {
 			this.sessionAttributeNames.addAll(Arrays.asList(sessionAttributes.value()));
 			this.sessionAttributeTypes.addAll(Arrays.asList(sessionAttributes.types()));
 		}
+	}
+
+	protected boolean isHandlerMethod(Method method) {
+		return method.isAnnotationPresent(RequestMapping.class);
 	}
 
 
