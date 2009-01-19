@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,19 @@
 
 package org.springframework.web.portlet.util;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.portlet.MockActionRequest;
@@ -41,8 +39,6 @@ import org.springframework.mock.web.portlet.MockPortletSession;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Unit tests for {@link PortletUtils}.
- * 
  * @author Rick Evans
  * @author Chris Beams
  */
@@ -303,27 +299,14 @@ public final class PortletUtilsTests {
 		PortletUtils.exposeRequestAttributes(new MockPortletRequest(), null);
 	}
 
-
-	@SuppressWarnings("unchecked")
-	@Test(expected=ClassCastException.class)
-	public void testExposeRequestAttributesWithAttributesMapContainingBadKeyType() throws Exception {
-		MockPortletRequest request = new MockPortletRequest();
-		Map attributes = new HashMap<Object, Object>();
-		attributes.put(new Object(), "bad key type");
-		PortletUtils.exposeRequestAttributes(request, attributes);
-	}
-
-
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testExposeRequestAttributesSunnyDay() throws Exception {
 		MockPortletRequest request = new MockPortletRequest();
-		Map attributes = new HashMap<Object, Object>();
+		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("ace", "Rick Hunter");
 		attributes.put("mentor", "Roy Fokker");
 		PortletUtils.exposeRequestAttributes(request, attributes);
-		assertEquals("Obviously all of the entries in the supplied attributes Map are not being copied over (exposed)",
-				attributes.size(), countElementsIn(request.getAttributeNames()));
 		assertEquals("Rick Hunter", request.getAttribute("ace"));
 		assertEquals("Roy Fokker", request.getAttribute("mentor"));
 	}
@@ -332,10 +315,8 @@ public final class PortletUtilsTests {
 	@Test
 	public void testExposeRequestAttributesWithEmptyAttributesMapIsAnIdempotentOperation() throws Exception {
 		MockPortletRequest request = new MockPortletRequest();
-		Map attributes = new HashMap<Object, Object>();
+		Map<String, String> attributes = new HashMap<String, String>();
 		PortletUtils.exposeRequestAttributes(request, attributes);
-		assertEquals("Obviously all of the entries in the supplied attributes Map are not being copied over (exposed)",
-				attributes.size(), countElementsIn(request.getAttributeNames()));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -543,16 +524,6 @@ public final class PortletUtilsTests {
 		assertEquals("foo", sessionAttribute);
 
 		verify(request, session);
-	}
-
-
-	private static int countElementsIn(Enumeration<?> enumeration) {
-		int count = 0;
-		while (enumeration.hasMoreElements()) {
-			enumeration.nextElement();
-			++count;
-		}
-		return count;
 	}
 
 

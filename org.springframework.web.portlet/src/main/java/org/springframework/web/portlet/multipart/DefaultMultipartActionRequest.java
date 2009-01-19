@@ -24,9 +24,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.portlet.ActionRequest;
+import javax.portlet.filter.ActionRequestWrapper;
 
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.portlet.util.ActionRequestWrapper;
 
 /**
  * Default implementation of the {@link MultipartActionRequest} interface.

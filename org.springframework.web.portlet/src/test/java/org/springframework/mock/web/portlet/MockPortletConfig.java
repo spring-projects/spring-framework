@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,19 @@
 
 package org.springframework.mock.web.portlet;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.LinkedHashMap;
-import java.util.Collections;
+import java.util.Set;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 import org.springframework.util.Assert;
 
@@ -45,6 +48,18 @@ public class MockPortletConfig implements PortletConfig {
 	private final Map<Locale, ResourceBundle> resourceBundles = new HashMap<Locale, ResourceBundle>();
 
 	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
+
+	private final Set<String> publicRenderParameterNames = new LinkedHashSet<String>();
+
+	private String defaultNamespace = XMLConstants.NULL_NS_URI;
+
+	private final Set<QName> publishingEventQNames = new LinkedHashSet<QName>();
+
+	private final Set<QName> processingEventQNames = new LinkedHashSet<QName>();
+
+	private final Set<Locale> supportedLocales = new LinkedHashSet<Locale>();
+
+	private final Map<String, String[]> containerRuntimeOptions = new LinkedHashMap<String, String[]>();
 
 
 	/**
@@ -111,6 +126,58 @@ public class MockPortletConfig implements PortletConfig {
 
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
+	}
+
+	public void addPublicRenderParameterName(String name) {
+		this.publicRenderParameterNames.add(name);
+	}
+
+	public Enumeration<String> getPublicRenderParameterNames() {
+		return Collections.enumeration(this.publicRenderParameterNames);
+	}
+
+	public void setDefaultNamespace(String defaultNamespace) {
+		this.defaultNamespace = defaultNamespace;
+	}
+
+	public String getDefaultNamespace() {
+		return this.defaultNamespace;
+	}
+
+	public void addPublishingEventQName(QName name) {
+		this.publishingEventQNames.add(name);
+	}
+
+	public Enumeration<QName> getPublishingEventQNames() {
+		return Collections.enumeration(this.publishingEventQNames);
+	}
+
+	public void addProcessingEventQName(QName name) {
+		this.processingEventQNames.add(name);
+	}
+
+	public Enumeration<QName> getProcessingEventQNames() {
+		return Collections.enumeration(this.processingEventQNames);
+	}
+
+	public void addSupportedLocale(Locale locale) {
+		this.supportedLocales.add(locale);
+	}
+
+	public Enumeration<Locale> getSupportedLocales() {
+		return Collections.enumeration(this.supportedLocales);
+	}
+
+	public void addContainerRuntimeOption(String key, String value) {
+		this.containerRuntimeOptions.put(key, new String[] {value});
+	}
+
+	public void addContainerRuntimeOption(String key, String[] values) {
+		this.containerRuntimeOptions.put(key, values);
+	}
+
+	public Map<String, String[]> getContainerRuntimeOptions() {
+		return Collections.unmodifiableMap(this.containerRuntimeOptions);
 	}
 
 }

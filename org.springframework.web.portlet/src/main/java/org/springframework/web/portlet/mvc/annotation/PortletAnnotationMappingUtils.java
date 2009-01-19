@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
+import java.util.Set;
+import javax.portlet.ClientDataRequest;
 import javax.portlet.PortletRequest;
 
 import org.springframework.util.ObjectUtils;
@@ -30,7 +32,7 @@ import org.springframework.web.portlet.util.PortletUtils;
 abstract class PortletAnnotationMappingUtils {
 
 	/**
-	 * Check whether the given request matches the specified request methods.
+	 * Check whether the given portlet modes matches the specified type-level modes.
 	 * @param modes the mapped portlet modes to check
 	 * @param typeLevelModes the type-level mode mappings to check against
 	 */
@@ -52,10 +54,28 @@ abstract class PortletAnnotationMappingUtils {
 	}
 
 	/**
+	 * Check whether the given request matches the specified request methods.
+	 * @param methods the request methods to check against
+	 * @param request the current request to check
+	 */
+	public static boolean checkRequestMethod(Set<String> methods, PortletRequest request) {
+		if (!methods.isEmpty()) {
+			if (!(request instanceof ClientDataRequest)) {
+				return false;
+			}
+			String method = ((ClientDataRequest) request).getMethod();
+			if (!methods.contains(method)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Check whether the given request matches the specified parameter conditions.
 	 * @param params the parameter conditions, following
 	 * {@link org.springframework.web.bind.annotation.RequestMapping#params()}
-	 * @param request the current HTTP request to check
+	 * @param request the current request to check
 	 */
 	public static boolean checkParameters(String[] params, PortletRequest request) {
 		if (!ObjectUtils.isEmpty(params)) {

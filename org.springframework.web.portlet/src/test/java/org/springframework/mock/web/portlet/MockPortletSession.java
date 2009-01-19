@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,23 @@ public class MockPortletSession implements PortletSession {
 	}
 
 	public PortletContext getPortletContext() {
-		return portletContext;
+		return this.portletContext;
+	}
+
+	public Map<String, Object> getAttributeMap() {
+		return Collections.unmodifiableMap(this.portletAttributes);
+	}
+
+	public Map<String, Object> getAttributeMap(int scope) {
+		if (scope == PortletSession.PORTLET_SCOPE) {
+			return Collections.unmodifiableMap(this.portletAttributes);
+		}
+		else if (scope == PortletSession.APPLICATION_SCOPE) {
+			return Collections.unmodifiableMap(this.applicationAttributes);
+		}
+		else {
+			return Collections.emptyMap();
+		}
 	}
 
 }

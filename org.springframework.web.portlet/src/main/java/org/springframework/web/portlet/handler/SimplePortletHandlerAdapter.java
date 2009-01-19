@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,21 @@ package org.springframework.web.portlet.handler;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventPortlet;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.Portlet;
+import javax.portlet.PortletContext;
+import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
+import javax.portlet.ResourceServingPortlet;
 
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.context.PortletContextAware;
 
 /**
  * Adapter to use the Portlet interface with the generic DispatcherPortlet.
@@ -49,8 +58,16 @@ import org.springframework.web.portlet.ModelAndView;
  * @see SimplePortletPostProcessor
  * @see org.springframework.web.portlet.mvc.PortletWrappingController
  */
-public class SimplePortletHandlerAdapter implements HandlerAdapter {
+public class SimplePortletHandlerAdapter implements HandlerAdapter, PortletContextAware {
 	
+	private PortletContext portletContext;
+
+
+	public void setPortletContext(PortletContext portletContext) {
+		this.portletContext = portletContext;
+	}
+
+
 	public boolean supports(Object handler) {
 		return (handler instanceof Portlet);
 	}
@@ -66,6 +83,34 @@ public class SimplePortletHandlerAdapter implements HandlerAdapter {
 
 		((Portlet) handler).render(request, response);
 		return null;
+	}
+
+	public ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler)
+			throws Exception {
+
+		if (handler instanceof ResourceServingPortlet) {
+			((ResourceServingPortlet) handler).serveResource(request, response);
+		}
+		else {
+			// equivalent to Portlet 2.0 GenericPortlet
+			if (request.getResourceID() != null) {
+				PortletRequestDispatcher rd = this.portletContext.getRequestDispatcher(request.getResourceID());
+				if (rd != null) {
+					rd.forward(request, response);
+				}
+			}
+		}
+		return null;
+	}
+
+	public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
+		if (handler instanceof EventPortlet) {
+			((EventPortlet) handler).processEvent(request, response);
+		}
+		else {
+			// if no event processing method was found just keep render params
+			response.setRenderParameters(request);
+		}
 	}
 
 }

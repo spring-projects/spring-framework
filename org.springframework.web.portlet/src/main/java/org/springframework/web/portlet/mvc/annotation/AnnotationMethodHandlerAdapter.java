@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,20 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.ClientDataRequest;
+import javax.portlet.Event;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
+import javax.portlet.MimeResponse;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
@@ -39,6 +46,8 @@ import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
 
@@ -54,11 +63,14 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
@@ -72,6 +84,10 @@ import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
+import org.springframework.web.portlet.bind.annotation.ActionMapping;
+import org.springframework.web.portlet.bind.annotation.EventMapping;
+import org.springframework.web.portlet.bind.annotation.RenderMapping;
+import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import org.springframework.web.portlet.context.PortletWebRequest;
 import org.springframework.web.portlet.handler.PortletContentGenerator;
 import org.springframework.web.portlet.handler.PortletSessionRequiredException;
@@ -218,14 +234,25 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		return doHandle(request, response, handler);
 	}
 
+	public ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler) throws Exception {
+		checkAndPrepare(request, response);
+		return doHandle(request, response, handler);
+	}
+
+	public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
+		Object returnValue = doHandle(request, response, handler);
+		if (returnValue != null) {
+			throw new IllegalStateException("Invalid action method return value: " + returnValue);
+		}
+	}
+
 	protected ModelAndView doHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
 		ExtendedModelMap implicitModel = null;
 
-		if (request instanceof RenderRequest && response instanceof RenderResponse) {
-			RenderRequest renderRequest = (RenderRequest) request;
-			RenderResponse renderResponse = (RenderResponse) response;
+		if (response instanceof MimeResponse) {
+			MimeResponse mimeResponse = (MimeResponse) response;
 			// Detect implicit model from associated action phase.
-			if (renderRequest.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
+			if (request.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
 				PortletSession session = request.getPortletSession(false);
 				if (session != null) {
 					implicitModel = (ExtendedModelMap) session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
@@ -233,11 +260,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 			if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
 				// Always prevent caching in case of session attribute management.
-				checkAndPrepare(renderRequest, renderResponse, this.cacheSecondsForSessionAttributeHandlers);
+				checkAndPrepare(request, mimeResponse, this.cacheSecondsForSessionAttributeHandlers);
 			}
 			else {
 				// Uses configured default cacheSeconds setting.
-				checkAndPrepare(renderRequest, renderResponse);
+				checkAndPrepare(request, mimeResponse);
 			}
 		}
 
@@ -265,7 +292,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		PortletWebRequest webRequest = new PortletWebRequest(request, response);
 		PortletHandlerMethodResolver methodResolver = getMethodResolver(handler);
-		Method handlerMethod = methodResolver.resolveHandlerMethod(request, response);
+		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
 		PortletHandlerMethodInvoker methodInvoker = new PortletHandlerMethodInvoker(methodResolver);
 
 		Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
@@ -324,42 +351,51 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 	private static class PortletHandlerMethodResolver extends HandlerMethodResolver {
 
+		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
+
 		public PortletHandlerMethodResolver(Class<?> handlerType) {
-			super(handlerType);
+			init(handlerType);
 		}
 
-		public Method resolveHandlerMethod(PortletRequest request, PortletResponse response) throws PortletException {
-			String lookupMode = request.getPortletMode().toString();
+		@Override
+		protected boolean isHandlerMethod(Method method) {
+			RequestMappingInfo mappingInfo = new RequestMappingInfo();
+			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+			ActionMapping actionMapping = AnnotationUtils.findAnnotation(method, ActionMapping.class);
+			RenderMapping renderMapping = AnnotationUtils.findAnnotation(method, RenderMapping.class);
+			ResourceMapping resourceMapping = AnnotationUtils.findAnnotation(method, ResourceMapping.class);
+			EventMapping eventMapping = AnnotationUtils.findAnnotation(method, EventMapping.class);
+			if (actionMapping != null) {
+				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.value(), actionMapping.params());
+			}
+			if (renderMapping != null) {
+				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
+			}
+			if (resourceMapping != null) {
+				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), resourceMapping.params());
+			}
+			if (eventMapping != null) {
+				mappingInfo.initPhaseMapping(PortletRequest.EVENT_PHASE, eventMapping.value(), eventMapping.params());
+			}
+			if (requestMapping != null) {
+				mappingInfo.initStandardMapping(requestMapping.value(), requestMapping.method(), requestMapping.params());
+				if (mappingInfo.phase == null) {
+					mappingInfo.phase = determineDefaultPhase(method);
+				}
+			}
+			this.mappings.put(method, mappingInfo);
+			return (mappingInfo.phase != null);
+		}
+
+		public Method resolveHandlerMethod(PortletRequest request) throws PortletException {
 			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
 			for (Method handlerMethod : getHandlerMethods()) {
-				RequestMapping mapping = AnnotationUtils.findAnnotation(handlerMethod, RequestMapping.class);
-				RequestMappingInfo mappingInfo = new RequestMappingInfo();
-				mappingInfo.modes = mapping.value();
-				mappingInfo.params = mapping.params();
-				mappingInfo.action = isActionMethod(handlerMethod);
-				mappingInfo.render = isRenderMethod(handlerMethod);
-				boolean match = false;
-				if (mappingInfo.modes.length > 0) {
-					for (String mappedMode : mappingInfo.modes) {
-						if (mappedMode.equalsIgnoreCase(lookupMode)) {
-							if (checkParameters(request, response, mappingInfo)) {
-								match = true;
-							}
-							else {
-								break;
-							}
-						}
-					}
-				}
-				else {
-					// No modes specified: parameter match sufficient.
-					match = checkParameters(request, response, mappingInfo);
-				}
-				if (match) {
+				RequestMappingInfo mappingInfo = this.mappings.get(handlerMethod);
+				if (mappingInfo.match(request)) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
 						throw new IllegalStateException("Ambiguous handler methods mapped for portlet mode '" +
-								lookupMode + "': {" + oldMappedMethod + ", " + handlerMethod +
+								request.getPortletMode() + "': {" + oldMappedMethod + ", " + handlerMethod +
 								"}. If you intend to handle the same mode in multiple methods, then factor " +
 								"them out into a dedicated handler class with that mode mapped at the type level!");
 					}
@@ -376,8 +412,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 							bestMappingMatch = mapping;
 						}
 						else {
-							if ((bestMappingMatch.modes.length == 0 && mapping.modes.length > 0) ||
-									bestMappingMatch.params.length < mapping.params.length) {
+							if (mapping.isBetterMatchThan(bestMappingMatch)) {
 								bestMappingMatch = mapping;
 							}
 						}
@@ -386,50 +421,123 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 			else {
-				throw new UnavailableException("No matching handler method found for portlet request: mode '" +
-						request.getPortletMode() + "', type '" + (response instanceof ActionResponse ? "action" : "render") +
+				throw new UnavailableException(
+						"No matching handler method found for portlet request: mode '" + request.getPortletMode() +
+						"', phase '" + request.getAttribute(PortletRequest.LIFECYCLE_PHASE) +
 						"', parameters " + StylerUtils.style(request.getParameterMap()));
 			}
 		}
 
-		private boolean checkParameters(PortletRequest request, PortletResponse response, RequestMappingInfo mapping) {
-			if (response instanceof RenderResponse) {
-				if (mapping.action) {
-					return false;
-				}
-			}
-			else if (response instanceof ActionResponse) {
-				if (mapping.render) {
-					return false;
-				}
-			}
-			return PortletAnnotationMappingUtils.checkParameters(mapping.params, request);
-		}
-
-		private boolean isActionMethod(Method handlerMethod) {
+		private String determineDefaultPhase(Method handlerMethod) {
 			if (!void.class.equals(handlerMethod.getReturnType())) {
-				return false;
+				return PortletRequest.RENDER_PHASE;
 			}
 			for (Class<?> argType : handlerMethod.getParameterTypes()) {
 				if (ActionRequest.class.isAssignableFrom(argType) || ActionResponse.class.isAssignableFrom(argType) ||
 						InputStream.class.isAssignableFrom(argType) || Reader.class.isAssignableFrom(argType)) {
-					return true;
+					return PortletRequest.ACTION_PHASE;
+				}
+				else if (RenderRequest.class.isAssignableFrom(argType) || RenderResponse.class.isAssignableFrom(argType) ||
+						OutputStream.class.isAssignableFrom(argType) || Writer.class.isAssignableFrom(argType)) {
+					return PortletRequest.RENDER_PHASE;
+				}
+				else if (ResourceRequest.class.isAssignableFrom(argType) || ResourceResponse.class.isAssignableFrom(argType)) {
+					return PortletRequest.RESOURCE_PHASE;
+				}
+				else if (EventRequest.class.isAssignableFrom(argType) || EventResponse.class.isAssignableFrom(argType)) {
+					return PortletRequest.EVENT_PHASE;
 				}
 			}
-			return false;
+			return "";
+		}
+	}
+
+
+	private static class RequestMappingInfo  {
+
+		public Set<PortletMode> modes = new HashSet<PortletMode>();
+
+		public String phase;
+
+		public String value;
+
+		public Set<String> methods = new HashSet<String>();
+
+		public String[] params = new String[0];
+
+		public void initStandardMapping(String[] modes, RequestMethod[] methods, String[] params) {
+			for (String mode : modes) {
+				this.modes.add(new PortletMode(mode));
+			}
+			for (RequestMethod method : methods) {
+				this.methods.add(method.name());
+			}
+			this.params = StringUtils.mergeStringArrays(this.params, params);
 		}
 
-		private boolean isRenderMethod(Method handlerMethod) {
-			if (!void.class.equals(handlerMethod.getReturnType())) {
-				return true;
+		public void initPhaseMapping(String phase, String value, String[] params) {
+			if (this.phase != null) {
+				throw new IllegalStateException(
+						"Invalid mapping - more than one phase specified: '" + this.phase + "', '" + phase + "'");
 			}
-			for (Class<?> argType : handlerMethod.getParameterTypes()) {
-				if (RenderRequest.class.isAssignableFrom(argType) || RenderResponse.class.isAssignableFrom(argType) ||
-						OutputStream.class.isAssignableFrom(argType) || Writer.class.isAssignableFrom(argType)) {
-					return true;
+			this.phase = phase;
+			this.value = value;
+			this.params = StringUtils.mergeStringArrays(this.params, params);
+		}
+
+		public boolean match(PortletRequest request) {
+			if (!this.modes.isEmpty() && !this.modes.contains(request.getPortletMode())) {
+				return false;
+			}
+			if (StringUtils.hasLength(this.phase) &&
+					!this.phase.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))) {
+				return false;
+			}
+			if (StringUtils.hasLength(this.value)) {
+				if (this.phase.equals(PortletRequest.ACTION_PHASE) &&
+						!this.value.equals(request.getParameter(ActionRequest.ACTION_NAME))) {
+					return false;
+				}
+				else if (this.phase.equals(PortletRequest.RENDER_PHASE) &&
+						!(new WindowState(this.value)).equals(request.getWindowState())) {
+					return false;
+				}
+				else if (this.phase.equals(PortletRequest.RESOURCE_PHASE) &&
+						!this.value.equals(((ResourceRequest) request).getResourceID())) {
+					return false;
+				}
+				else if (this.phase.equals(PortletRequest.EVENT_PHASE)) {
+					Event event = ((EventRequest) request).getEvent();
+					if (!this.value.equals(event.getName()) && !this.value.equals(event.getQName().toString())) {
+						return false;
+					}
 				}
 			}
-			return false;
+			return PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
+					PortletAnnotationMappingUtils.checkParameters(this.params, request);
+		}
+
+		public boolean isBetterMatchThan(RequestMappingInfo other) {
+			return ((!this.modes.isEmpty() && other.modes.isEmpty()) ||
+					(StringUtils.hasLength(this.phase) && !StringUtils.hasLength(other.phase)) ||
+					(StringUtils.hasLength(this.value) && !StringUtils.hasLength(other.value)) ||
+					(!this.methods.isEmpty() && other.methods.isEmpty()) ||
+					this.params.length > other.params.length);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			RequestMappingInfo other = (RequestMappingInfo) obj;
+			return (this.modes.equals(other.modes) &&
+					ObjectUtils.nullSafeEquals(this.phase, other.phase) &&
+					ObjectUtils.nullSafeEquals(this.value, other.value) &&
+					this.methods.equals(other.methods) &&
+					Arrays.equals(this.params, other.params));
+		}
+
+		@Override
+		public int hashCode() {
+			return (ObjectUtils.nullSafeHashCode(this.modes) * 29 + this.phase.hashCode());
 		}
 	}
 
@@ -505,28 +613,34 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				return request.getLocale();
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {
-				if (!(request instanceof ActionRequest)) {
-					throw new IllegalStateException("InputStream can only get obtained for ActionRequest");
+				if (!(request instanceof ClientDataRequest)) {
+					throw new IllegalStateException("InputStream can only get obtained for Action/ResourceRequest");
 				}
-				return ((ActionRequest) request).getPortletInputStream();
+				return ((ClientDataRequest) request).getPortletInputStream();
 			}
 			else if (Reader.class.isAssignableFrom(parameterType)) {
-				if (!(request instanceof ActionRequest)) {
-					throw new IllegalStateException("Reader can only get obtained for ActionRequest");
+				if (!(request instanceof ClientDataRequest)) {
+					throw new IllegalStateException("Reader can only get obtained for Action/ResourceRequest");
 				}
-				return ((ActionRequest) request).getReader();
+				return ((ClientDataRequest) request).getReader();
 			}
 			else if (OutputStream.class.isAssignableFrom(parameterType)) {
-				if (!(response instanceof RenderResponse)) {
-					throw new IllegalStateException("OutputStream can only get obtained for RenderResponse");
+				if (!(response instanceof MimeResponse)) {
+					throw new IllegalStateException("OutputStream can only get obtained for Render/ResourceResponse");
 				}
-				return ((RenderResponse) response).getPortletOutputStream();
+				return ((MimeResponse) response).getPortletOutputStream();
 			}
 			else if (Writer.class.isAssignableFrom(parameterType)) {
-				if (!(response instanceof RenderResponse)) {
-					throw new IllegalStateException("Writer can only get obtained for RenderResponse");
+				if (!(response instanceof MimeResponse)) {
+					throw new IllegalStateException("Writer can only get obtained for Render/ResourceResponse");
 				}
-				return ((RenderResponse) response).getWriter();
+				return ((MimeResponse) response).getWriter();
+			}
+			else if (Event.class.equals(parameterType)) {
+				if (!(request instanceof EventRequest)) {
+					throw new IllegalStateException("Event can only get obtained from EventRequest");
+				}
+				return ((EventRequest) request).getEvent();
 			}
 			return super.resolveStandardArgument(parameterType, webRequest);
 		}
@@ -578,30 +692,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
 			}
-		}
-	}
-
-
-	private static class RequestMappingInfo {
-
-		public String[] modes = new String[0];
-
-		public String[] params = new String[0];
-
-		private boolean action = false;
-
-		private boolean render = false;
-
-		@Override
-		public boolean equals(Object obj) {
-			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.action == other.action && this.render == other.render &&
-					Arrays.equals(this.modes, other.modes) && Arrays.equals(this.params, other.params));
-		}
-
-		@Override
-		public int hashCode() {
-			return (Arrays.hashCode(this.modes) * 29 + Arrays.hashCode(this.params));
 		}
 	}
 

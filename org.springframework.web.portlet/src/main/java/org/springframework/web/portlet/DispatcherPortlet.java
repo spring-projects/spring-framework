@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,17 @@ import java.util.Map;
 import java.util.Properties;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
+import javax.portlet.MimeResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 import javax.portlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
@@ -42,18 +47,12 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.i18n.LocaleContext;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartException;
-import org.springframework.web.portlet.context.PortletRequestAttributes;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
 import org.springframework.web.portlet.multipart.PortletMultipartResolver;
 import org.springframework.web.servlet.View;
@@ -74,17 +73,15 @@ import org.springframework.web.servlet.ViewResolver;
  *
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is a {@link org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping}
- * on Java 5+; there is no default on Java 1.4. HandlerMapping objects can be defined as
- * beans in the portlet's application context, implementing the HandlerMapping interface,
- * overriding the default HandlerMapping if present. HandlerMappings can be given any
- * bean name (they are tested by type).
+ * Default is a {@link org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping}.
+ * HandlerMapping objects can be defined as beans in the portlet's application context,
+ * implementing the HandlerMapping interface, overriding the default HandlerMapping if present.
+ * HandlerMappings can be given any bean name (they are tested by type).
  *
  * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
  * The default adapter is {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter}
  * for Spring's {@link org.springframework.web.portlet.mvc.Controller} interface.
- * When running in a Java 5+ environment, a default
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
+ * A default {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
  * will be registered as well. HandlerAdapter objects can be added as beans in the
  * application context, overriding the default HandlerAdapter. Like HandlerMappings,
  * HandlerAdapters can be given any bean name (they are tested by type).
@@ -253,9 +250,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/** URL that points to the ViewRendererServlet */
 	private String viewRendererUrl = DEFAULT_VIEW_RENDERER_URL;
 
-	/** Expose LocaleContext and RequestAttributes as inheritable for child threads? */
-	private boolean threadContextInheritable = false;
-
 
 	/** MultipartResolver used by this portlet */
 	private PortletMultipartResolver multipartResolver;
@@ -323,22 +317,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	public void setViewRendererUrl(String viewRendererUrl) {
 		this.viewRendererUrl = viewRendererUrl;
-	}
-
-	/**
-	 * Set whether to expose the LocaleContext and RequestAttributes as inheritable
-	 * for child threads (using an {@link java.lang.InheritableThreadLocal}).
-	 * <p>Default is "false", to avoid side effects on spawned background threads.
-	 * Switch this to "true" to enable inheritance for custom child threads which
-	 * are spawned during request processing and only used for this request
-	 * (that is, ending after their initial task, without reuse of the thread).
-	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
-	 * accessing a thread pool which is configured to potentially add new threads
-	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
-	 * since this will expose the inherited context to such a pooled thread.
-	 */
-	public void setThreadContextInheritable(boolean threadContextInheritable) {
-		this.threadContextInheritable = threadContextInheritable;
 	}
 
 
@@ -638,19 +616,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received action request");
 		}
 
-		// Expose current LocaleResolver and request as LocaleContext.
-		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
-
-		// Expose current RequestAttributes to current thread.
-		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
-		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
-		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound action request context to thread: " + request);
-		}
-
 		ActionRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
@@ -713,16 +678,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (processedRequest instanceof MultipartActionRequest && processedRequest != request) {
 				this.multipartResolver.cleanupMultipart((MultipartActionRequest) processedRequest);
 			}
-
-			// Reset thread-bound context.
-			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
-			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
-
-			// Clear request attributes.
-			requestAttributes.requestCompleted();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound action request context: " + request);
-			}
 		}
 	}
 
@@ -739,19 +694,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	protected void doRenderService(RenderRequest request, RenderResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received render request");
-		}
-
-		// Expose current LocaleResolver and request as LocaleContext.
-		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
-
-		// Expose current RequestAttributes to current thread.
-		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
-		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
-		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound render request context to thread: " + request);
 		}
 
 		HandlerExecutionChain mappedHandler = null;
@@ -843,30 +785,184 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, request, response, ex);
 			throw ex;
 		}
+	}
 
-		finally {
-			// Reset thread-bound context.
-			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
-			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
+	/**
+	 * Processes the actual dispatching to the handler for resource requests.
+	 * <p>The handler will be obtained by applying the portlet's HandlerMappings in order.
+	 * The HandlerAdapter will be obtained by querying the portlet's installed
+	 * HandlerAdapters to find the first that supports the handler class.
+	 * @param request current portlet render request
+	 * @param response current portlet render response
+	 * @throws Exception in case of any kind of processing failure
+	 */
+	@Override
+	protected void doResourceService(ResourceRequest request, ResourceResponse response) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received resource request");
+		}
 
-			// Clear request attributes.
-			requestAttributes.requestCompleted();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound render request context: " + request);
+		HandlerExecutionChain mappedHandler = null;
+		int interceptorIndex = -1;
+
+		try {
+			ModelAndView mv = null;
+			try {
+				// Check for forwarded exception from the action phase
+				PortletSession session = request.getPortletSession(false);
+				if (session != null) {
+					if (request.getParameter(ACTION_EXCEPTION_RENDER_PARAMETER) != null) {
+						Exception ex = (Exception) session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+						if (ex != null) {
+							logger.debug("Render phase found exception caught during action phase - rethrowing it");
+							throw ex;
+						}
+					}
+					else {
+						session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+					}
+				}
+
+				// Determine handler for the current request.
+				mappedHandler = getHandler(request, false);
+				if (mappedHandler == null || mappedHandler.getHandler() == null) {
+					noHandlerFound(request, response);
+					return;
+				}
+
+				// Apply preHandle methods of registered interceptors.
+				HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+				if (interceptors != null) {
+					for (int i = 0; i < interceptors.length; i++) {
+						HandlerInterceptor interceptor = interceptors[i];
+						if (!interceptor.preHandleResource(request, response, mappedHandler.getHandler())) {
+							triggerAfterResourceCompletion(mappedHandler, interceptorIndex, request, response, null);
+							return;
+						}
+						interceptorIndex = i;
+					}
+				}
+
+				// Actually invoke the handler.
+				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+				mv = ha.handleResource(request, response, mappedHandler.getHandler());
+
+				// Apply postHandle methods of registered interceptors.
+				if (interceptors != null) {
+					for (int i = interceptors.length - 1; i >= 0; i--) {
+						HandlerInterceptor interceptor = interceptors[i];
+						interceptor.postHandleResource(request, response, mappedHandler.getHandler(), mv);
+					}
+				}
 			}
+			catch (ModelAndViewDefiningException ex) {
+				logger.debug("ModelAndViewDefiningException encountered", ex);
+				mv = ex.getModelAndView();
+			}
+			catch (Exception ex) {
+				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
+				mv = processHandlerException(request, response, handler, ex);
+			}
+
+			// Did the handler return a view to render?
+			if (mv != null && !mv.isEmpty()) {
+				render(mv, request, response);
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Null ModelAndView returned to DispatcherPortlet with name '" +
+							getPortletName() + "': assuming HandlerAdapter completed request handling");
+				}
+			}
+
+			// Trigger after-completion for successful outcome.
+			triggerAfterResourceCompletion(mappedHandler, interceptorIndex, request, response, null);
+		}
+
+		catch (Exception ex) {
+			// Trigger after-completion for thrown exception.
+			triggerAfterResourceCompletion(mappedHandler, interceptorIndex, request, response, ex);
+			throw ex;
+		}
+		catch (Error err) {
+			PortletException ex =
+					new PortletException("Error occured during request processing: " + err.getMessage(), err);
+			// Trigger after-completion for thrown exception.
+			triggerAfterResourceCompletion(mappedHandler, interceptorIndex, request, response, ex);
+			throw ex;
 		}
 	}
 
-
 	/**
-	 * Build a LocaleContext for the given request, exposing the request's
-	 * primary locale as current locale.
-	 * @param request current HTTP request
-	 * @return the corresponding LocaleContext
+	 * Processes the actual dispatching to the handler for event requests.
+	 * <p>The handler will be obtained by applying the portlet's HandlerMappings in order.
+	 * The HandlerAdapter will be obtained by querying the portlet's installed
+	 * HandlerAdapters to find the first that supports the handler class.
+	 * @param request current portlet action request
+	 * @param response current portlet Action response
+	 * @throws Exception in case of any kind of processing failure
 	 */
-	protected LocaleContext buildLocaleContext(PortletRequest request) {
-		return new SimpleLocaleContext(request.getLocale());
+	@Override
+	protected void doEventService(EventRequest request, EventResponse response) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received action request");
+		}
+
+		HandlerExecutionChain mappedHandler = null;
+		int interceptorIndex = -1;
+
+		try {
+			// Determine handler for the current request.
+			mappedHandler = getHandler(request, false);
+			if (mappedHandler == null || mappedHandler.getHandler() == null) {
+				noHandlerFound(request, response);
+				return;
+			}
+
+			// Apply preHandle methods of registered interceptors.
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
+				for (int i = 0; i < interceptors.length; i++) {
+					HandlerInterceptor interceptor = interceptors[i];
+					if (!interceptor.preHandleEvent(request, response, mappedHandler.getHandler())) {
+						triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, null);
+						return;
+					}
+					interceptorIndex = i;
+				}
+			}
+
+			// Actually invoke the handler.
+			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+			ha.handleEvent(request, response, mappedHandler.getHandler());
+
+			// Trigger after-completion for successful outcome.
+			triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, null);
+		}
+
+		catch (Exception ex) {
+			// Trigger after-completion for thrown exception.
+			triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, ex);
+			// Forward the exception to the render phase to be displayed.
+			try {
+				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
+				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
+				logger.debug("Caught exception during action phase - forwarding to render phase", ex);
+			}
+			catch (IllegalStateException ex2) {
+				// Probably sendRedirect called... need to rethrow exception immediately.
+				throw ex;
+			}
+		}
+		catch (Error err) {
+			PortletException ex =
+					new PortletException("Error occured during request processing: " + err.getMessage(), err);
+			// Trigger after-completion for thrown exception.
+			triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, ex);
+			throw ex;
+		}
 	}
+
 
 	/**
 	 * Convert the request into a multipart request, and make multipart resolver available.
@@ -929,11 +1025,11 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	protected void noHandlerFound(PortletRequest request, PortletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
 			pageNotFoundLogger.warn("No mapping found for current request " +
-					"in DispatcherPortlet with name '" + getPortletName() + "'" +
-					", mode '" + request.getPortletMode() + "'" +
-					", type '" + (response instanceof ActionResponse ? "action" : "render") + "'" +
-					", session '" + request.getRequestedSessionId() + "'" +
-					", user '" + getUsernameForRequest(request) + "'");
+					"in DispatcherPortlet with name '" + getPortletName() +
+					"', mode '" + request.getPortletMode() +
+					"', phase '" + request.getAttribute(PortletRequest.LIFECYCLE_PHASE) +
+					"', session '" + request.getRequestedSessionId() +
+					"', user '" + getUsernameForRequest(request) + "'");
 		}
 		throw new UnavailableException("No handler found for request");
 	}
@@ -957,67 +1053,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				"]: Does your handler implement a supported interface like Controller?");
 	}
 
-	/**
-	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
-	 * @param request current portlet request
-	 * @param response current portlet response
-	 * @param handler the executed handler, or null if none chosen at the time of
-	 * the exception (for example, if multipart resolution failed)
-	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding ModelAndView to forward to
-	 * @throws Exception if no error ModelAndView found
-	 */
-	protected ModelAndView processHandlerException(
-			RenderRequest request, RenderResponse response, Object handler, Exception ex)
-			throws Exception {
-
-		ModelAndView exMv = null;
-		for (Iterator<HandlerExceptionResolver> it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-			HandlerExceptionResolver resolver = it.next();
-			exMv = resolver.resolveException(request, response, handler, ex);
-		}
-		if (exMv != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
-			}
-			logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
-			return exMv;
-		}
-		else {
-			throw ex;
-		}
-	}
-
-	/**
-	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
-	 * Will just invoke afterCompletion for all interceptors whose preHandle
-	 * invocation has successfully completed and returned true.
-	 * @param mappedHandler the mapped HandlerExecutionChain
-	 * @param interceptorIndex index of last interceptor that successfully completed
-	 * @param ex Exception thrown on handler execution, or null if none
-	 * @see HandlerInterceptor#afterRenderCompletion
-	 */
-	private void triggerAfterActionCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
-			ActionRequest request, ActionResponse response, Exception ex)
-			throws Exception {
-
-		// Apply afterCompletion methods of registered interceptors.
-		if (mappedHandler != null) {
-			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
-			if (interceptors != null) {
-				for (int i = interceptorIndex; i >= 0; i--) {
-					HandlerInterceptor interceptor = interceptors[i];
-					try {
-						interceptor.afterActionCompletion(request, response, mappedHandler.getHandler(), ex);
-					}
-					catch (Throwable ex2) {
-						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
-					}
-				}
-			}
-		}
-	}
-
 
 	/**
 	 * Render the given ModelAndView. This is the last stage in handling a request.
@@ -1027,7 +1062,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param response current portlet render response
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
+	protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 		View view = null;
 		if (mv.isReference()) {
 			// We need to resolve the view name.
@@ -1087,7 +1122,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
-	protected View resolveViewName(String viewName, Map model, RenderRequest request) throws Exception {
+	protected View resolveViewName(String viewName, Map model, PortletRequest request) throws Exception {
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, request.getLocale());
 			if (view != null) {
@@ -1107,7 +1142,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param response current portlet render response
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	protected void doRender(View view, Map model, RenderRequest request, RenderResponse response) throws Exception {
+	protected void doRender(View view, Map model, PortletRequest request, MimeResponse response) throws Exception {
 		// Expose Portlet ApplicationContext to view objects.
 		request.setAttribute(ViewRendererServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
 
@@ -1117,6 +1152,99 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 		// Include the content of the view in the render response.
 		getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
+	}
+
+
+	/**
+	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @param handler the executed handler, or null if none chosen at the time of
+	 * the exception (for example, if multipart resolution failed)
+	 * @param ex the exception that got thrown during handler execution
+	 * @return a corresponding ModelAndView to forward to
+	 * @throws Exception if no error ModelAndView found
+	 */
+	protected ModelAndView processHandlerException(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex)
+			throws Exception {
+
+		ModelAndView exMv = null;
+		for (Iterator<HandlerExceptionResolver> it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+			HandlerExceptionResolver resolver = it.next();
+			exMv = resolver.resolveException(request, response, handler, ex);
+		}
+		if (exMv != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+			}
+			logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
+			return exMv;
+		}
+		else {
+			throw ex;
+		}
+	}
+
+	/**
+	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @param handler the executed handler, or null if none chosen at the time of
+	 * the exception (for example, if multipart resolution failed)
+	 * @param ex the exception that got thrown during handler execution
+	 * @return a corresponding ModelAndView to forward to
+	 * @throws Exception if no error ModelAndView found
+	 */
+	protected ModelAndView processHandlerException(
+			ResourceRequest request, ResourceResponse response, Object handler, Exception ex)
+			throws Exception {
+
+		ModelAndView exMv = null;
+		for (Iterator<HandlerExceptionResolver> it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+			HandlerExceptionResolver resolver = it.next();
+			exMv = resolver.resolveException(request, response, handler, ex);
+		}
+		if (exMv != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+			}
+			logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
+			return exMv;
+		}
+		else {
+			throw ex;
+		}
+	}
+
+	/**
+	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preHandle
+	 * invocation has successfully completed and returned true.
+	 * @param mappedHandler the mapped HandlerExecutionChain
+	 * @param interceptorIndex index of last interceptor that successfully completed
+	 * @param ex Exception thrown on handler execution, or null if none
+	 * @see HandlerInterceptor#afterRenderCompletion
+	 */
+	private void triggerAfterActionCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+			ActionRequest request, ActionResponse response, Exception ex)
+			throws Exception {
+
+		// Apply afterCompletion methods of registered interceptors.
+		if (mappedHandler != null) {
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
+				for (int i = interceptorIndex; i >= 0; i--) {
+					HandlerInterceptor interceptor = interceptors[i];
+					try {
+						interceptor.afterActionCompletion(request, response, mappedHandler.getHandler(), ex);
+					}
+					catch (Throwable ex2) {
+						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -1140,6 +1268,66 @@ public class DispatcherPortlet extends FrameworkPortlet {
 					HandlerInterceptor interceptor = interceptors[i];
 					try {
 						interceptor.afterRenderCompletion(request, response, mappedHandler.getHandler(), ex);
+					}
+					catch (Throwable ex2) {
+						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preHandle
+	 * invocation has successfully completed and returned true.
+	 * @param mappedHandler the mapped HandlerExecutionChain
+	 * @param interceptorIndex index of last interceptor that successfully completed
+	 * @param ex Exception thrown on handler execution, or null if none
+	 * @see HandlerInterceptor#afterRenderCompletion
+	 */
+	private void triggerAfterResourceCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+			ResourceRequest request, ResourceResponse response, Exception ex)
+			throws Exception {
+
+		// Apply afterCompletion methods of registered interceptors.
+		if (mappedHandler != null) {
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
+				for (int i = interceptorIndex; i >= 0; i--) {
+					HandlerInterceptor interceptor = interceptors[i];
+					try {
+						interceptor.afterResourceCompletion(request, response, mappedHandler.getHandler(), ex);
+					}
+					catch (Throwable ex2) {
+						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preHandle
+	 * invocation has successfully completed and returned true.
+	 * @param mappedHandler the mapped HandlerExecutionChain
+	 * @param interceptorIndex index of last interceptor that successfully completed
+	 * @param ex Exception thrown on handler execution, or null if none
+	 * @see HandlerInterceptor#afterRenderCompletion
+	 */
+	private void triggerAfterEventCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+			EventRequest request, EventResponse response, Exception ex)
+			throws Exception {
+
+		// Apply afterCompletion methods of registered interceptors.
+		if (mappedHandler != null) {
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
+				for (int i = interceptorIndex; i >= 0; i--) {
+					HandlerInterceptor interceptor = interceptors[i];
+					try {
+						interceptor.afterEventCompletion(request, response, mappedHandler.getHandler(), ex);
 					}
 					catch (Throwable ex2) {
 						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);

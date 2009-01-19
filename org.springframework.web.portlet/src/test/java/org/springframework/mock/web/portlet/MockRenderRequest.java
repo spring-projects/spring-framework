@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
 import javax.portlet.RenderRequest;
+import javax.portlet.WindowState;
 
 /**
  * Mock implementation of the {@link javax.portlet.RenderRequest} interface.
@@ -51,6 +52,18 @@ public class MockRenderRequest extends MockPortletRequest implements RenderReque
 	}
 
 	/**
+	 * Create a new MockRenderRequest with a default {@link MockPortalContext}
+	 * and a default {@link MockPortletContext}.
+	 * @param portletMode the mode that the portlet runs in
+	 * @param windowState the window state to run the portlet in
+	 */
+	public MockRenderRequest(PortletMode portletMode, WindowState windowState) {
+		super();
+		setPortletMode(portletMode);
+		setWindowState(windowState);
+	}
+
+	/**
 	 * Create a new MockRenderRequest with a default {@link MockPortalContext}.
 	 * @param portletContext the PortletContext that the request runs in
 	 */
@@ -65,6 +78,16 @@ public class MockRenderRequest extends MockPortletRequest implements RenderReque
 	 */
 	public MockRenderRequest(PortalContext portalContext, PortletContext portletContext) {
 		super(portalContext, portletContext);
+	}
+
+
+	@Override
+	protected String getLifecyclePhase() {
+		return RENDER_PHASE;
+	}
+
+	public String getETag() {
+		return getProperty(RenderRequest.ETAG);
 	}
 
 }

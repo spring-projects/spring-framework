@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,12 @@ package org.springframework.web.portlet.handler;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequestInterceptor;
@@ -101,6 +105,37 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 
 	public void afterRenderCompletion(
 			RenderRequest request, RenderResponse response, Object handler, Exception ex) throws Exception {
+
+		this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
+	}
+
+	public boolean preHandleResource(ResourceRequest request, ResourceResponse response, Object handler)
+			throws Exception {
+
+		this.requestInterceptor.preHandle(new PortletWebRequest(request));
+		return true;
+	}
+
+	public void postHandleResource(ResourceRequest request, ResourceResponse response, Object handler, ModelAndView modelAndView)
+			throws Exception {
+
+		this.requestInterceptor.postHandle(new PortletWebRequest(request),
+				(modelAndView != null ? modelAndView.getModelMap() : null));
+	}
+
+	public void afterResourceCompletion(ResourceRequest request, ResourceResponse response, Object handler,
+			Exception ex) throws Exception {
+
+		this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
+	}
+
+	public boolean preHandleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
+		this.requestInterceptor.preHandle(new PortletWebRequest(request));
+		return true;
+	}
+
+	public void afterEventCompletion(EventRequest request, EventResponse response, Object handler, Exception ex)
+			throws Exception {
 
 		this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
 	}

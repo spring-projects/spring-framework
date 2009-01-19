@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package org.springframework.web.portlet.handler;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
-
+import javax.portlet.MimeResponse;
+import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 import javax.portlet.WindowState;
 
 import org.apache.commons.logging.Log;
@@ -190,6 +193,18 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		}
 	}
 
+	public ModelAndView resolveException(
+			ResourceRequest request, ResourceResponse response, Object handler, Exception ex) {
+
+		if (shouldApplyTo(request, handler)) {
+			return doResolveException(request, response, handler, ex);
+		}
+		else {
+			return null;
+		}
+	}
+
+
 	/**
 	 * Check whether this resolver is supposed to apply to the given handler.
 	 * <p>The default implementation checks against the specified mapped handlers
@@ -203,19 +218,19 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @see #setMappedHandlers
 	 * @see #setMappedHandlerClasses
 	 */
-	protected boolean shouldApplyTo(RenderRequest request, Object handler) {
+	protected boolean shouldApplyTo(PortletRequest request, Object handler) {
 		// If the portlet is minimized and we don't want to render then return null.
 		if (WindowState.MINIMIZED.equals(request.getWindowState()) && !this.renderWhenMinimized) {
 			return false;
 		}
-
+		// Check mapped handlers...
 		if (handler != null) {
 			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
 				return true;
 			}
 			if (this.mappedHandlerClasses != null) {
-				for (int i = 0; i < this.mappedHandlerClasses.length; i++) {
-					if (this.mappedHandlerClasses[i].isInstance(handler)) {
+				for (Class mappedClass : this.mappedHandlerClasses) {
+					if (mappedClass.isInstance(handler)) {
 						return true;
 					}
 				}
@@ -236,7 +251,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @return a corresponding ModelAndView to forward to, or null for default processing
 	 */
 	protected ModelAndView doResolveException(
-			RenderRequest request, RenderResponse response, Object handler, Exception ex) {
+			PortletRequest request, MimeResponse response, Object handler, Exception ex) {
 
 		// Log exception, both at debug log level and at warn level, if desired.
 		if (logger.isDebugEnabled()) {
@@ -266,7 +281,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @see #buildLogMessage
 	 * @see org.apache.commons.logging.Log#warn(Object, Throwable)
 	 */
-	protected void logException(Exception ex, RenderRequest request) {
+	protected void logException(Exception ex, PortletRequest request) {
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
 			this.warnLogger.warn(buildLogMessage(ex, request), ex);
 		}
@@ -279,7 +294,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @param request current portlet request (useful for obtaining metadata)
 	 * @return the log message to use
 	 */
-	protected String buildLogMessage(Exception ex, RenderRequest request) {
+	protected String buildLogMessage(Exception ex, PortletRequest request) {
 		return "Handler execution resulted in exception";
 	}
 
@@ -292,7 +307,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @param request current portlet request (useful for obtaining metadata)
 	 * @return the resolved view name, or <code>null</code> if none found
 	 */
-	protected String determineViewName(Exception ex, RenderRequest request) {
+	protected String determineViewName(Exception ex, PortletRequest request) {
 		String viewName = null;
 		// Check for specific exception mappings.
 		if (this.exceptionMappings != null) {
@@ -348,7 +363,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
-		if (exceptionClass.getName().indexOf(exceptionMapping) != -1) {
+		if (exceptionClass.getName().contains(exceptionMapping)) {
 			// Found it!
 			return depth;
 		}
@@ -369,7 +384,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @return the ModelAndView instance
 	 * @see #getModelAndView(String, Exception)
 	 */
-	protected ModelAndView getModelAndView(String viewName, Exception ex, RenderRequest request) {
+	protected ModelAndView getModelAndView(String viewName, Exception ex, PortletRequest request) {
 		return getModelAndView(viewName, ex);
 	}
 

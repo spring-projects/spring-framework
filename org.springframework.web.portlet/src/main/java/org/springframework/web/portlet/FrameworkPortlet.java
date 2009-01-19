@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,17 @@ package org.springframework.web.portlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -37,8 +40,14 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SourceFilteringListener;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
+import org.springframework.web.portlet.context.PortletRequestAttributes;
 import org.springframework.web.portlet.context.PortletRequestHandledEvent;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
@@ -136,6 +145,9 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	/** Should we publish a PortletRequestHandledEvent at the end of each request? */
 	private boolean publishEvents = true;
 
+	/** Expose LocaleContext and RequestAttributes as inheritable for child threads? */
+	private boolean threadContextInheritable = false;
+
 	/** USER_INFO attributes that may contain the username of the current user */
 	private String[] userinfoUsernameAttributes = DEFAULT_USERINFO_ATTRIBUTE_NAMES;
 
@@ -206,13 +218,6 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	}
 
 	/**
-	 * Return whether to publish this portlet's context as a PortletContext attribute.
-	 */
-	public boolean isPublishContext() {
-		return this.publishContext;
-	}
-
-	/**
 	 * Set whether this portlet should publish a PortletRequestHandledEvent at the end
 	 * of each request. Default is true; can be turned off for a slight performance
 	 * improvement, provided that no ApplicationListeners rely on such events.
@@ -223,11 +228,19 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	}
 
 	/**
-	 * Return whether this portlet should publish a PortletRequestHandledEvent at the end
-	 * of each request.
+	 * Set whether to expose the LocaleContext and RequestAttributes as inheritable
+	 * for child threads (using an {@link java.lang.InheritableThreadLocal}).
+	 * <p>Default is "false", to avoid side effects on spawned background threads.
+	 * Switch this to "true" to enable inheritance for custom child threads which
+	 * are spawned during request processing and only used for this request
+	 * (that is, ending after their initial task, without reuse of the thread).
+	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
+	 * accessing a thread pool which is configured to potentially add new threads
+	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * since this will expose the inherited context to such a pooled thread.
 	 */
-	public boolean isPublishEvents() {
-		return this.publishEvents;
+	public void setThreadContextInheritable(boolean threadContextInheritable) {
+		this.threadContextInheritable = threadContextInheritable;
 	}
 
 	/**
@@ -237,15 +250,6 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	 */
 	public void setUserinfoUsernameAttributes(String[] userinfoUsernameAttributes) {
 		this.userinfoUsernameAttributes = userinfoUsernameAttributes;
-	}
-
-	/**
-	 * Returns the list of attributes that will be searched in the USER_INFO map
-	 * when trying to find the username of the current user
-	 * @see #getUsernameForRequest
-	 */
-	public String[] getUserinfoUsernameAttributes() {
-		return this.userinfoUsernameAttributes;
 	}
 
 
@@ -297,7 +301,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 			onRefresh(pac);
 		}
 
-		if (isPublishContext()) {
+		if (this.publishContext) {
 			// publish the context as a portlet context attribute
 			String attName = getPortletContextAttributeName();
 			getPortletContext().setAttribute(attName, pac);
@@ -447,6 +451,16 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	}
 
 	/**
+	 * Delegate action requests to processRequest/doActionService.
+	 */
+	@Override
+	public final void processAction(ActionRequest request, ActionResponse response)
+			throws PortletException, IOException {
+
+		processRequest(request, response);
+	}
+
+	/**
 	 * Delegate render requests to processRequest/doRenderService.
 	 */
 	@Override
@@ -456,16 +470,20 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 		processRequest(request, response);
 	}
 
-	/**
-	 * Delegate action requests to processRequest/doActionService.
-	 */
 	@Override
-	public final void processAction(ActionRequest request, ActionResponse response)
+	public void serveResource(ResourceRequest request, ResourceResponse response)
 			throws PortletException, IOException {
 
 		processRequest(request, response);
 	}
-	
+
+	@Override
+	public void processEvent(EventRequest request, EventResponse response)
+			throws PortletException, IOException {
+
+		processRequest(request, response);
+	}
+
 	/**
 	 * Process this request, publishing an event regardless of the outcome.
 	 * The actual event handling is performed by the abstract
@@ -479,12 +497,35 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 		long startTime = System.currentTimeMillis();
 		Throwable failureCause = null;
 
+		// Expose current LocaleResolver and request as LocaleContext.
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
+
+		// Expose current RequestAttributes to current thread.
+		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
+		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound request context to thread: " + request);
+		}
+
 		try {
-			if (request instanceof ActionRequest) {
+			String phase = (String) request.getAttribute(PortletRequest.LIFECYCLE_PHASE);
+			if (PortletRequest.ACTION_PHASE.equals(phase)) {
 				doActionService((ActionRequest) request, (ActionResponse) response);
 			}
-			else {
+			else if (PortletRequest.RENDER_PHASE.equals(phase)) {
 				doRenderService((RenderRequest) request, (RenderResponse) response);
+			}
+			else if (PortletRequest.RESOURCE_PHASE.equals(phase)) {
+				doResourceService((ResourceRequest) request, (ResourceResponse) response);
+			}
+			else if (PortletRequest.EVENT_PHASE.equals(phase)) {
+				doEventService((EventRequest) request, (EventResponse) response);
+			}
+			else {
+				throw new IllegalStateException("Invalid portlet request phase: " + phase);
 			}
 		}
 		catch (PortletException ex) {
@@ -501,13 +542,23 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 		}
 
 		finally {
+			// Reset thread-bound context.
+			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
+			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
+
+			// Clear request attributes.
+			requestAttributes.requestCompleted();
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cleared thread-bound resource request context: " + request);
+			}
+
 			if (failureCause != null) {
 				logger.error("Could not complete request", failureCause);
 			}
 			else {
 				logger.debug("Successfully completed request");
 			}
-			if (isPublishEvents()) {
+			if (this.publishEvents) {
 				// Whether or not we succeeded, publish an event.
 				long processingTime = System.currentTimeMillis() - startTime;
 				this.portletApplicationContext.publishEvent(
@@ -518,6 +569,16 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 								processingTime, failureCause));
 			}
 		}
+	}
+
+	/**
+	 * Build a LocaleContext for the given request, exposing the request's
+	 * primary locale as current locale.
+	 * @param request current HTTP request
+	 * @return the corresponding LocaleContext
+	 */
+	protected LocaleContext buildLocaleContext(PortletRequest request) {
+		return new SimpleLocaleContext(request.getLocale());
 	}
 
 	/**
@@ -560,6 +621,21 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 		return null;
 	}
 
+
+	/**
+	 * Subclasses must implement this method to do the work of action request handling.
+	 * <p>The contract is essentially the same as that for the <code>processAction</code>
+	 * method of GenericPortlet.
+	 * <p>This class intercepts calls to ensure that exception handling and
+	 * event publication takes place.
+	 * @param request current action request
+	 * @param response current action response
+	 * @throws Exception in case of any kind of processing failure
+	 * @see javax.portlet.GenericPortlet#processAction
+	 */
+	protected abstract void doActionService(ActionRequest request, ActionResponse response)
+			throws Exception;
+
 	/**
 	 * Subclasses must implement this method to do the work of render request handling.
 	 * <p>The contract is essentially the same as that for the <code>doDispatch</code>
@@ -575,17 +651,31 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 			throws Exception;
 
 	/**
-	 * Subclasses must implement this method to do the work of action request handling.
-	 * <p>The contract is essentially the same as that for the <code>processAction</code>
+	 * Subclasses must implement this method to do the work of resource request handling.
+	 * <p>The contract is essentially the same as that for the <code>serveResource</code>
 	 * method of GenericPortlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.
-	 * @param request current action request
-	 * @param response current action response
+	 * @param request current resource request
+	 * @param response current resource response
 	 * @throws Exception in case of any kind of processing failure
-	 * @see javax.portlet.GenericPortlet#processAction
+	 * @see javax.portlet.GenericPortlet#serveResource
 	 */
-	protected abstract void doActionService(ActionRequest request, ActionResponse response)
+	protected abstract void doResourceService(ResourceRequest request, ResourceResponse response)
+			throws Exception;
+
+	/**
+	 * Subclasses must implement this method to do the work of event request handling.
+	 * <p>The contract is essentially the same as that for the <code>processEvent</code>
+	 * method of GenericPortlet.
+	 * <p>This class intercepts calls to ensure that exception handling and
+	 * event publication takes place.
+	 * @param request current event request
+	 * @param response current event response
+	 * @throws Exception in case of any kind of processing failure
+	 * @see javax.portlet.GenericPortlet#processEvent
+	 */
+	protected abstract void doEventService(EventRequest request, EventResponse response)
 			throws Exception;
 
 
