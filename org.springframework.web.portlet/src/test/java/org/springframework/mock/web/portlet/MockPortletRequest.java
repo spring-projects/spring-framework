@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.WindowState;
+import javax.servlet.http.Cookie;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -90,6 +91,12 @@ public class MockPortletRequest implements PortletRequest {
 
 	private int serverPort = 80;
 
+	private String windowID;
+
+	private Cookie[] cookies;
+
+	private final Set<String> publicParameterNames = new HashSet<String>();
+
 
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}
@@ -120,12 +127,20 @@ public class MockPortletRequest implements PortletRequest {
 		this.portletContext = (portletContext != null ? portletContext : new MockPortletContext());
 		this.responseContentTypes.add("text/html");
 		this.locales.add(Locale.ENGLISH);
+		this.attributes.put(LIFECYCLE_PHASE, getLifecyclePhase());
 	}
 
 
 	//---------------------------------------------------------------------
 	// Lifecycle methods
 	//---------------------------------------------------------------------
+
+	/**
+	 * Return the Portlet 2.0 lifecycle id for the current phase.
+	 */
+	protected String getLifecyclePhase() {
+		return null;
+	}
 
 	/**
 	 * Return whether this request is still active (that is, not completed yet).
@@ -363,7 +378,7 @@ public class MockPortletRequest implements PortletRequest {
 		return this.parameters.get(name);
 	}
 
-	public Map getParameterMap() {
+	public Map<String, String[]> getParameterMap() {
 		return Collections.unmodifiableMap(this.parameters);
 	}
 
@@ -457,6 +472,56 @@ public class MockPortletRequest implements PortletRequest {
 
 	public int getServerPort() {
 		return this.serverPort;
+	}
+
+	public void setWindowID(String windowID) {
+		this.windowID = windowID;
+	}
+
+	public String getWindowID() {
+		return this.windowID;
+	}
+
+	public void setCookies(Cookie[] cookies) {
+		this.cookies = cookies;
+	}
+
+	public Cookie[] getCookies() {
+		return this.cookies;
+	}
+
+	public Map<String, String[]> getPrivateParameterMap() {
+		if (!this.publicParameterNames.isEmpty()) {
+			Map<String, String[]> filtered = new LinkedHashMap<String, String[]>();
+			for (String key : this.parameters.keySet()) {
+				if (!this.publicParameterNames.contains(key)) {
+					filtered.put(key, this.parameters.get(key));
+				}
+			}
+			return filtered;
+		}
+		else {
+			return Collections.unmodifiableMap(this.parameters);
+		}
+	}
+
+	public Map<String, String[]> getPublicParameterMap() {
+		if (!this.publicParameterNames.isEmpty()) {
+			Map<String, String[]> filtered = new LinkedHashMap<String, String[]>();
+			for (String key : this.parameters.keySet()) {
+				if (this.publicParameterNames.contains(key)) {
+					filtered.put(key, this.parameters.get(key));
+				}
+			}
+			return filtered;
+		}
+		else {
+			return Collections.emptyMap();
+		}
+	}
+
+	public void registerPublicParameter(String name) {
+		this.publicParameterNames.add(name);
 	}
 
 }

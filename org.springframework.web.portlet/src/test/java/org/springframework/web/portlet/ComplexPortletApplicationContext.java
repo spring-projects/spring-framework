@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -50,6 +53,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.portlet.bind.PortletRequestBindingException;
 import org.springframework.web.portlet.context.PortletRequestHandledEvent;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
+import org.springframework.web.portlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.portlet.handler.ParameterHandlerMapping;
 import org.springframework.web.portlet.handler.ParameterMappingInterceptor;
 import org.springframework.web.portlet.handler.PortletModeHandlerMapping;
@@ -352,17 +356,18 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			((MyHandler) delegate).doSomething(request);
 			return null;
 		}
+
+		public ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler)
+				throws Exception {
+			return null;
+		}
+
+		public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
+		}
 	}
 
 
-	public static class MyHandlerInterceptor1 implements HandlerInterceptor {
-
-		public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
-			return true;
-		}
-
-		public void afterActionCompletion(ActionRequest request, ActionResponse response, Object handler, Exception ex) {
-		}
+	public static class MyHandlerInterceptor1 extends HandlerInterceptorAdapter {
 
 		public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 		    throws PortletException {
@@ -398,14 +403,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 	}
 
 
-	public static class MyHandlerInterceptor2 implements HandlerInterceptor {
-
-		public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
-			return true;
-		}
-
-		public void afterActionCompletion(ActionRequest request, ActionResponse response, Object handler, Exception ex) {
-		}
+	public static class MyHandlerInterceptor2 extends HandlerInterceptorAdapter {
 
 		public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 		    throws PortletException {

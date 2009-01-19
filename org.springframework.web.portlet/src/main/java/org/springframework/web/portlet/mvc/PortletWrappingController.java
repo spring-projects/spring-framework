@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.web.portlet.mvc;
 
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Map;
 import java.util.ResourceBundle;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
@@ -28,6 +30,8 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -79,7 +83,7 @@ public class PortletWrappingController extends AbstractController
 
 	private String portletName;
 
-	private Properties initParameters = new Properties();
+	private Map<String, String> initParameters = new LinkedHashMap<String, String>();
 
 	private String beanName;
 
@@ -128,7 +132,7 @@ public class PortletWrappingController extends AbstractController
 	 * Specify init parameters for the portlet to wrap,
 	 * as name-value pairs.
 	 */
-	public void setInitParameters(Properties initParameters) {
+	public void setInitParameters(Map<String, String> initParameters) {
 		this.initParameters = initParameters;
 	}
 
@@ -195,17 +199,40 @@ public class PortletWrappingController extends AbstractController
 		}
 
 		public String getInitParameter(String paramName) {
-			return initParameters.getProperty(paramName);
+			return initParameters.get(paramName);
 		}
 
-		public Enumeration getInitParameterNames() {
-			return initParameters.keys();
+		public Enumeration<String> getInitParameterNames() {
+			return Collections.enumeration(initParameters.keySet());
 		}
 
 		public ResourceBundle getResourceBundle(Locale locale) {
 			return (portletConfig != null ? portletConfig.getResourceBundle(locale) : null);
 		}
 
+		public Enumeration<String> getPublicRenderParameterNames() {
+			return Collections.enumeration(new HashSet<String>());
+		}
+
+		public String getDefaultNamespace() {
+			return XMLConstants.NULL_NS_URI;
+		}
+
+		public Enumeration<QName> getPublishingEventQNames() {
+			return Collections.enumeration(new HashSet<QName>());
+		}
+
+		public Enumeration<QName> getProcessingEventQNames() {
+			return Collections.enumeration(new HashSet<QName>());
+		}
+
+		public Enumeration<Locale> getSupportedLocales() {
+			return Collections.enumeration(new HashSet<Locale>());
+		}
+
+		public Map<String, String[]> getContainerRuntimeOptions() {
+			return (portletConfig != null ? portletConfig.getContainerRuntimeOptions() : null);
+		}
 	}
 
 }

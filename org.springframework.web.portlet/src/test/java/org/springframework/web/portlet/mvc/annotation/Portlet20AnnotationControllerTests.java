@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.portlet.mvc.annotation;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventResponse;
 import javax.portlet.MimeResponse;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
@@ -31,7 +33,9 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.StateAwareResponse;
 import javax.portlet.UnavailableException;
+import javax.portlet.WindowState;
 
 import junit.framework.TestCase;
 
@@ -47,10 +51,15 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
+import org.springframework.mock.web.portlet.MockEvent;
+import org.springframework.mock.web.portlet.MockEventRequest;
+import org.springframework.mock.web.portlet.MockEventResponse;
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
+import org.springframework.mock.web.portlet.MockResourceRequest;
+import org.springframework.mock.web.portlet.MockResourceResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -70,14 +79,18 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.bind.annotation.ActionMapping;
+import org.springframework.web.portlet.bind.annotation.EventMapping;
+import org.springframework.web.portlet.bind.annotation.RenderMapping;
+import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.mvc.AbstractController;
 
 /**
  * @author Juergen Hoeller
- * @since 2.5
+ * @since 3.0
  */
-public class PortletAnnotationControllerTests extends TestCase {
+public class Portlet20AnnotationControllerTests extends TestCase {
 
 	public void testStandardHandleMethod() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
@@ -434,6 +447,83 @@ public class PortletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testPortlet20DispatchingController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
+				wac.setPortletContext(new MockPortletContext());
+				RootBeanDefinition bd = new RootBeanDefinition(MyPortlet20DispatchingController.class);
+				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller", bd);
+				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
+				wac.refresh();
+				return wac;
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		MockActionRequest actionRequest = new MockActionRequest("this");
+		MockActionResponse actionResponse = new MockActionResponse();
+		portlet.processAction(actionRequest, actionResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value", response.getContentAsString());
+
+		actionRequest = new MockActionRequest("that");
+		actionResponse = new MockActionResponse();
+		portlet.processAction(actionRequest, actionResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value2", response.getContentAsString());
+
+		MockEventRequest eventRequest = new MockEventRequest(new MockEvent("event1"));
+		MockEventResponse eventResponse = new MockEventResponse();
+		portlet.processEvent(eventRequest, eventResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(eventResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value3", response.getContentAsString());
+
+		eventRequest = new MockEventRequest(new MockEvent("event2"));
+		eventResponse = new MockEventResponse();
+		portlet.processEvent(eventRequest, eventResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(eventResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value4", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.NORMAL);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		MockResourceRequest resourceRequest = new MockResourceRequest("resource1");
+		MockResourceResponse resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertEquals("myResource", resourceResponse.getContentAsString());
+
+		resourceRequest = new MockResourceRequest("resource2");
+		resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertEquals("myDefaultResource", resourceResponse.getContentAsString());
+	}
+
 
 	@RequestMapping("VIEW")
 	private static class MyController extends AbstractController {
@@ -449,21 +539,25 @@ public class PortletAnnotationControllerTests extends TestCase {
 	private static class MyAdaptedController {
 
 		@RequestMapping("VIEW")
+		@ActionMapping
 		public void myHandle(ActionRequest request, ActionResponse response) throws IOException {
 			response.setRenderParameter("test", "value");
 		}
 
 		@RequestMapping("EDIT")
+		@RenderMapping
 		public void myHandle(@RequestParam("param1")String p1, @RequestParam("param2")int p2, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
 		@RequestMapping("HELP")
+		@RenderMapping
 		public void myHandle(TestBean tb, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("VIEW")
+		@RenderMapping
 		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
@@ -474,21 +568,25 @@ public class PortletAnnotationControllerTests extends TestCase {
 	private static class MyAdaptedController2 {
 
 		@RequestMapping("VIEW")
+		@ActionMapping
 		public void myHandle(ActionRequest request, ActionResponse response) throws IOException {
 			response.setRenderParameter("test", "value");
 		}
 
 		@RequestMapping("EDIT")
+		@RenderMapping
 		public void myHandle(@RequestParam("param1")String p1, int param2, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("HELP")
+		@RenderMapping
 		public void myHandle(TestBean tb, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("VIEW")
+		@RenderMapping
 		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
@@ -499,22 +597,24 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@RequestMapping({"VIEW", "EDIT", "HELP"})
 	private static class MyAdaptedController3 {
 
-		@RequestMapping
+		@ActionMapping
 		public void myHandle(ActionRequest request, ActionResponse response) {
 			response.setRenderParameter("test", "value");
 		}
 
 		@RequestMapping("EDIT")
+		@RenderMapping
 		public void myHandle(@RequestParam("param1")String p1, @RequestParam("param2")int p2, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
 		@RequestMapping("HELP")
+		@RenderMapping
 		public void myHandle(TestBean tb, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
-		@RequestMapping
+		@RenderMapping
 		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
@@ -533,6 +633,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("VIEW")
+		@RenderMapping
 		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
 				model.addAttribute("myKey", "myValue");
@@ -554,6 +655,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("VIEW")
+		@RenderMapping
 		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, Model model) {
 			if (!model.containsAttribute("myKey")) {
 				model.addAttribute("myKey", "myValue");
@@ -574,6 +676,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("VIEW")
+		@RenderMapping
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
 				model.addAttribute("myKey", "myValue");
@@ -582,6 +685,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("EDIT")
+		@RenderMapping
 		public String myOtherHandle(TB tb, BindingResult errors, ExtendedModelMap model, MySpecialArg arg) {
 			TestBean tbReal = (TestBean) tb;
 			tbReal.setName("myName");
@@ -618,6 +722,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
 
 		@RequestMapping("VIEW")
+		@RenderMapping
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
 				model.addAttribute("myKey", "myValue");
@@ -687,7 +792,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		@Autowired
 		private PortletRequest request;
 
-		@RequestMapping
+		@RenderMapping
 		public void myHandle(RenderResponse response) throws IOException {
 			if (this.portletContext == null || this.session == null || this.request == null) {
 				throw new IllegalStateException();
@@ -695,17 +800,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("myView");
 		}
 
-		@RequestMapping(params = {"view", "!lang"})
+		@RenderMapping(params = {"view", "!lang"})
 		public void myOtherHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("myOtherView");
 		}
 
-		@RequestMapping(params = {"view=my", "lang=de"})
+		@RenderMapping(params = {"view=my", "lang=de"})
 		public void myLangHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("myLangView");
 		}
 
-		@RequestMapping(params = "surprise")
+		@RenderMapping(params = "surprise")
 		public void mySurpriseHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
 		}
@@ -723,12 +828,12 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@RequestMapping("EDIT")
 	private static class MySpecialParameterDispatchingController {
 
-		@RequestMapping(params = "myParam=mySpecialValue")
+		@RenderMapping(params = "myParam=mySpecialValue")
 		public void myHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("mySpecialView");
 		}
 
-		@RequestMapping
+		@RenderMapping
 		public void myDefaultHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("myDefaultView");
 		}
@@ -739,9 +844,55 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@RequestMapping("EDIT")
 	private static class MyOtherSpecialParameterDispatchingController {
 
-		@RequestMapping(params = "myParam=myOtherSpecialValue")
+		@RenderMapping(params = "myParam=myOtherSpecialValue")
 		public void myHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("myOtherSpecialView");
+		}
+	}
+
+
+	@Controller
+	@RequestMapping("VIEW")
+	private static class MyPortlet20DispatchingController {
+
+		@ActionMapping("this")
+		public void myHandle(StateAwareResponse response) {
+			response.setRenderParameter("test", "value");
+		}
+
+		@ActionMapping("that")
+		public void myHandle2(StateAwareResponse response) {
+			response.setRenderParameter("test", "value2");
+		}
+
+		@EventMapping("event1")
+		public void myHandle(EventResponse response) throws IOException {
+			response.setRenderParameter("test", "value3");
+		}
+
+		@EventMapping("event2")
+		public void myHandle2(EventResponse response) throws IOException {
+			response.setRenderParameter("test", "value4");
+		}
+
+		@RenderMapping("MAXIMIZED")
+		public void myHandle(Writer writer, @RequestParam("test") String renderParam) throws IOException {
+			writer.write("myLargeView-" + renderParam);
+		}
+
+		@RenderMapping
+		public void myDefaultHandle(Writer writer) throws IOException {
+			writer.write("myView");
+		}
+
+		@ResourceMapping("resource1")
+		public void myResource(Writer writer) throws IOException {
+			writer.write("myResource");
+		}
+
+		@ResourceMapping
+		public void myDefaultResource(Writer writer) throws IOException {
+			writer.write("myDefaultResource");
 		}
 	}
 

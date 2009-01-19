@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,7 @@ import org.springframework.web.portlet.ModelAndView;
  * request and - if applicable - returning an appropriate ModelAndView.
  * So actually, these method are the main entrypoint for the
  * {@link org.springframework.web.portlet.DispatcherPortlet DispatcherPortlet}
- * which delegates requests to controllers. These method - and also this interface -
- * should preferrably not be implemented by custom controllers <i>directly</i>, since
- * abstract controllers also provided by this package already provide a lot of
- * functionality for typical use cases in portlet applications. A few examples of
- * those controllers:
- * {@link AbstractController AbstractController},
- * {@link AbstractCommandController AbstractCommandController},
- * {@link AbstractFormController AbstractFormController},
- * {@link SimpleFormController SimpleFormController}.</p>
+ * which delegates requests to controllers.</p>
  * 
  * <p>So basically any <i>direct</i> implementation of the Controller interface
  * just handles RenderRequests/ActionRequests and should return a ModelAndView, to be
@@ -64,19 +56,16 @@ import org.springframework.web.portlet.ModelAndView;
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
  * @since 2.0
+ * @see ResourceAwareController
+ * @see EventAwareController
  * @see SimpleControllerHandlerAdapter
  * @see AbstractController
- * @see AbstractCommandController
- * @see AbstractFormController
- * @see SimpleFormController
- * @see org.springframework.context.ApplicationContextAware
- * @see org.springframework.context.ResourceLoaderAware
  * @see org.springframework.web.portlet.context.PortletContextAware
  */
 public interface Controller {
 
 	/**
-	 * Process the action request.  There is nothing to return.
+	 * Process the action request. There is nothing to return.
 	 * @param request current portlet action request
 	 * @param response current portlet action response
 	 * @throws Exception in case of errors

@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
@@ -80,6 +81,7 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 			Collections.sort(predicates);
 			for (PortletRequestMappingPredicate predicate : predicates) {
 				if (predicate.match(request)) {
+					predicate.validate(request);
 					return predicateMap.get(predicate);
 				}
 			}
@@ -187,6 +189,13 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 		 * @param request current portlet request
 		 */
 		boolean match(PortletRequest request);
+
+		/**
+		 * Validate this predicate's mapping against the current request.
+		 * @param request current portlet request
+		 * @throws PortletException if validation failed
+		 */
+		void validate(PortletRequest request) throws PortletException;
 	}
 
 }

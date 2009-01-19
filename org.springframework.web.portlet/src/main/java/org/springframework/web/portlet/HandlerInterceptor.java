@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.EventResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.ResourceResponse;
+import javax.portlet.ResourceRequest;
 
 /**
  * Workflow interface that allows for customized handler execution chains.
@@ -130,7 +134,7 @@ public interface HandlerInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler)
-	    throws Exception;
+			throws Exception;
 
 	/**
 	 * Callback after completion of request processing in the action phase, that is,
@@ -149,7 +153,7 @@ public interface HandlerInterceptor {
 	 */
 	void afterActionCompletion(
 			ActionRequest request, ActionResponse response, Object handler, Exception ex)
-	    throws Exception;
+			throws Exception;
 
 	/**
 	 * Intercept the execution of a handler in the render phase.
@@ -169,7 +173,7 @@ public interface HandlerInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
-	    throws Exception;
+			throws Exception;
 
 	/**
 	 * Intercept the execution of a handler in the render phase.
@@ -206,6 +210,103 @@ public interface HandlerInterceptor {
 	 */
 	void afterRenderCompletion(
 			RenderRequest request, RenderResponse response, Object handler, Exception ex)
+			throws Exception;
+
+	/**
+	 * Intercept the execution of a handler in the render phase.
+	 * <p>Called after a HandlerMapping determines an appropriate handler object
+	 * to handle a {@link RenderRequest}, but before said HandlerAdapter actually
+	 * invokes the handler.
+	 * <p>{@link DispatcherPortlet} processes a handler in an execution chain,
+	 * consisting of any number of interceptors, with the handler itself at the end.
+	 * With this method, each interceptor can decide to abort the execution chain,
+	 * typically throwing an exception or writing a custom response.
+	 * @param request current portlet render request
+	 * @param response current portlet render response
+	 * @param handler chosen handler to execute, for type and/or instance evaluation
+	 * @return <code>true</code> if the execution chain should proceed with the
+	 * next interceptor or the handler itself. Else, <code>DispatcherPortlet</code>
+	 * assumes that this interceptor has already dealt with the response itself
+	 * @throws Exception in case of errors
+	 */
+	boolean preHandleResource(ResourceRequest request, ResourceResponse response, Object handler)
+			throws Exception;
+
+	/**
+	 * Intercept the execution of a handler in the render phase.
+	 * <p>Called after a {@link HandlerAdapter} actually invoked the handler, but
+	 * before the <code>DispatcherPortlet</code> renders the view. Can thus expose
+	 * additional model objects to the view via the given {@link ModelAndView}.
+	 * <p><code>DispatcherPortlet</code> processes a handler in an execution chain,
+	 * consisting of any number of interceptors, with the handler itself at the end.
+	 * With this method, each interceptor can post-process an execution, getting
+	 * applied in inverse order of the execution chain.
+	 * @param request current portlet render request
+	 * @param response current portlet render response
+	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param modelAndView the <code>ModelAndView</code> that the handler returned
+	 * (can also be <code>null</code>)
+	 * @throws Exception in case of errors
+	 */
+	void postHandleResource(
+			ResourceRequest request, ResourceResponse response, Object handler, ModelAndView modelAndView)
+			throws Exception;
+
+	/**
+	 * Callback after completion of request processing, that is, after rendering
+	 * the view. Will be called on any outcome of handler execution, thus allowing
+	 * for proper resource cleanup.
+	 * <p>Note: Will only be called if this interceptor's
+	 * {@link #preHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object)}
+	 * method has successfully completed and returned <code>true</code>!
+	 * @param request current portlet render request
+	 * @param response current portlet render response
+	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param ex exception thrown on handler execution, if any
+	 * @throws Exception in case of errors
+	 */
+	void afterResourceCompletion(
+			ResourceRequest request, ResourceResponse response, Object handler, Exception ex)
+			throws Exception;
+
+
+	/**
+	 * Intercept the execution of a handler in the action phase.
+	 * <p>Called after a HandlerMapping determines an appropriate handler object
+	 * to handle an {@link ActionRequest}, but before said HandlerAdapter actually
+	 * invokes the handler.
+	 * <p>{@link DispatcherPortlet} processes a handler in an execution chain,
+	 * consisting of any number of interceptors, with the handler itself at the end.
+	 * With this method, each interceptor can decide to abort the execution chain,
+	 * typically throwing an exception or writing a custom response.
+	 * @param request current portlet action request
+	 * @param response current portlet action response
+	 * @param handler chosen handler to execute, for type and/or instance evaluation
+	 * @return <code>true</code> if the execution chain should proceed with the
+	 * next interceptor or the handler itself. Else, <code>DispatcherPortlet</code>
+	 * assumes that this interceptor has already dealt with the response itself
+	 * @throws Exception in case of errors
+	 */
+	boolean preHandleEvent(EventRequest request, EventResponse response, Object handler)
+			throws Exception;
+
+	/**
+	 * Callback after completion of request processing in the action phase, that is,
+	 * after rendering the view. Will be called on any outcome of handler execution,
+	 * thus allowing for proper resource cleanup.
+	 * <p>Note: Will only be called if this interceptor's
+	 * {@link #preHandleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object)}
+	 * method has successfully completed and returned <code>true</code>!
+	 * @param request current portlet action request
+	 * @param response current portlet action response
+	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param ex exception thrown on handler execution, if any (only included as
+	 * additional context information for the case where a handler threw an exception;
+	 * request execution may have failed even when this argument is <code>null</code>)
+	 * @throws Exception in case of errors
+	 */
+	void afterEventCompletion(
+			EventRequest request, EventResponse response, Object handler, Exception ex)
 			throws Exception;
 
 }

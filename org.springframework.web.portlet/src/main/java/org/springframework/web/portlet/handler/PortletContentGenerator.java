@@ -16,11 +16,10 @@
 
 package org.springframework.web.portlet.handler;
 
+import javax.portlet.MimeResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
 
 import org.springframework.web.portlet.context.PortletApplicationObjectSupport;
 
@@ -102,7 +101,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * @param response current portlet response
 	 * @throws PortletException if the request cannot be handled because a check failed
 	 */
-	protected final void checkAndPrepare(RenderRequest request, RenderResponse response)
+	protected final void checkAndPrepare(PortletRequest request, MimeResponse response)
 			throws PortletException {
 
 		checkAndPrepare(request, response, this.cacheSeconds);
@@ -118,8 +117,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * response should be cacheable for, 0 to prevent caching
 	 * @throws PortletException if the request cannot be handled because a check failed
 	 */
-	protected final void checkAndPrepare(
-			RenderRequest request, RenderResponse response, int cacheSeconds)
+	protected final void checkAndPrepare(PortletRequest request, MimeResponse response, int cacheSeconds)
 			throws PortletException {
 
 		check(request, response);
@@ -129,7 +127,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	/**
 	 * Prevent the render response from being cached.
 	 */
-	protected final void preventCaching(RenderResponse response) {
+	protected final void preventCaching(MimeResponse response) {
 		cacheForSeconds(response, 0);
 	}
 
@@ -139,8 +137,8 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * @param seconds number of seconds into the future that the response
 	 * should be cacheable for
 	 */
-	protected final void cacheForSeconds(RenderResponse response, int seconds) {
-		response.setProperty(RenderResponse.EXPIRATION_CACHE, Integer.toString(seconds));
+	protected final void cacheForSeconds(MimeResponse response, int seconds) {
+		response.setProperty(MimeResponse.EXPIRATION_CACHE, Integer.toString(seconds));
 	}
 
 	/**
@@ -149,7 +147,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * @param seconds positive number of seconds into the future that the
 	 * response should be cacheable for, 0 to prevent caching
 	 */
-	protected final void applyCacheSeconds(RenderResponse response, int seconds) {
+	protected final void applyCacheSeconds(MimeResponse response, int seconds) {
 		if (seconds > 0) {
 			cacheForSeconds(response, seconds);
 		}
