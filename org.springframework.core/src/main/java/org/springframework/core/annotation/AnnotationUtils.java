@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public abstract class AnnotationUtils {
 	 * supplied {@link Method}, traversing its super methods if no annotation
 	 * can be found on the given method itself.
 	 * <p>Annotations on methods are not inherited by default, so we need to handle
-	 * this explicitly. Tge
+	 * this explicitly.
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation class to look for
 	 * @return the annotation found, or <code>null</code> if none found

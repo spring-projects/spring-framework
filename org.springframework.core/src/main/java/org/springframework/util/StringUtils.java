@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,7 +354,9 @@ public abstract class StringUtils {
 		if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
 			return 0;
 		}
-		int count = 0, pos = 0, idx = 0;
+		int count = 0;
+		int pos = 0;
+		int idx = 0;
 		while ((idx = str.indexOf(sub, pos)) != -1) {
 			++count;
 			pos = idx + sub.length();
@@ -738,8 +740,7 @@ public abstract class StringUtils {
 		}
 		List<String> result = new ArrayList<String>();
 		result.addAll(Arrays.asList(array1));
-		for (int i = 0; i < array2.length; i++) {
-			String str = array2[i];
+		for (String str : array2) {
 			if (!result.contains(str)) {
 				result.add(str);
 			}
@@ -818,8 +819,8 @@ public abstract class StringUtils {
 			return array;
 		}
 		Set<String> set = new TreeSet<String>();
-		for (int i = 0; i < array.length; i++) {
-			set.add(array[i]);
+		for (String element : array) {
+			set.add(element);
 		}
 		return toStringArray(set);
 	}
@@ -882,10 +883,9 @@ public abstract class StringUtils {
 			return null;
 		}
 		Properties result = new Properties();
-		for (int i = 0; i < array.length; i++) {
-			String element = array[i];
+		for (String element : array) {
 			if (charsToDelete != null) {
-				element = deleteAny(array[i], charsToDelete);
+				element = deleteAny(element, charsToDelete);
 			}
 			String[] splittedElement = split(element, delimiter);
 			if (splittedElement == null) {
@@ -1028,8 +1028,8 @@ public abstract class StringUtils {
 	public static Set<String> commaDelimitedListToSet(String str) {
 		Set<String> set = new TreeSet<String>();
 		String[] tokens = commaDelimitedListToStringArray(str);
-		for (int i = 0; i < tokens.length; i++) {
-			set.add(tokens[i]);
+		for (String token : tokens) {
+			set.add(token);
 		}
 		return set;
 	}
