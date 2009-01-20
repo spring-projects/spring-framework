@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -653,29 +654,31 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		@Override
-		@SuppressWarnings({"unchecked"})
-		protected Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
-				NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
+		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+				throws Exception {
 
-			Class paramType = methodParam.getParameterType();
-			if (pathVarName.length() == 0) {
-				pathVarName = methodParam.getParameterName();
-				if (pathVarName == null) {
-					throw new IllegalStateException("No variable name specified for @PathVariable argument of type [" +
-							paramType.getName() + "], and no parameter name information found in class file either.");
-				}
+			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			Cookie cookieValue = WebUtils.getCookie(servletRequest, cookieName);
+			if (Cookie.class.isAssignableFrom(paramType)) {
+				return cookieValue;
 			}
+			else {
+				return cookieValue.getValue();
+			}
+		}
+
+		@Override
+		@SuppressWarnings({"unchecked"})
+		protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
+				throws Exception {
+
 			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
 			Map<String, String> uriTemplateVariables =
 					(Map<String, String>) servletRequest.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			if (uriTemplateVariables == null || !uriTemplateVariables.containsKey(pathVarName)) {
 				throw new IllegalStateException("Could not find @PathVariable [" + pathVarName + "] in @RequestMapping");
 			}
-			String pathVarValue = uriTemplateVariables.get(pathVarName);
-
-			WebDataBinder binder = createBinder(webRequest, null, pathVarName);
-			initBinder(handlerForInitBinderCall, pathVarName, binder, webRequest);
-			return binder.convertIfNecessary(pathVarValue, paramType, methodParam);
+			return uriTemplateVariables.get(pathVarName);
 		}
 
 		@Override

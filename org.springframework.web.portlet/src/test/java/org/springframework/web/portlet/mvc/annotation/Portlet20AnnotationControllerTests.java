@@ -36,8 +36,10 @@ import javax.portlet.RenderResponse;
 import javax.portlet.StateAwareResponse;
 import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
+import javax.servlet.http.Cookie;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
@@ -67,8 +69,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -90,9 +94,10 @@ import org.springframework.web.portlet.mvc.AbstractController;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class Portlet20AnnotationControllerTests extends TestCase {
+public class Portlet20AnnotationControllerTests {
 
-	public void testStandardHandleMethod() throws Exception {
+	@Test
+	public void standardHandleMethod() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -109,19 +114,22 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("test", response.getContentAsString());
 	}
 
-	public void testAdaptedHandleMethods() throws Exception {
+	@Test
+	public void adaptedHandleMethods() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController.class);
 	}
 
-	public void testAdaptedHandleMethods2() throws Exception {
+	@Test
+	public void adaptedHandleMethods2() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController2.class);
 	}
 
-	public void testAdaptedHandleMethods3() throws Exception {
+	@Test
+	public void adaptedHandleMethods3() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
-	public void doTestAdaptedHandleMethods(final Class controllerClass) throws Exception {
+	private void doTestAdaptedHandleMethods(final Class controllerClass) throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -140,9 +148,11 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		MockRenderRequest request = new MockRenderRequest(PortletMode.EDIT);
 		request.addParameter("param1", "value1");
 		request.addParameter("param2", "2");
+		request.addProperty("header1", "10");
+		request.setCookies(new Cookie("cookie1", "3"));
 		MockRenderResponse response = new MockRenderResponse();
 		portlet.render(request, response);
-		assertEquals("test-value1-2", response.getContentAsString());
+		assertEquals("test-value1-2-10-3", response.getContentAsString());
 
 		request = new MockRenderRequest(PortletMode.HELP);
 		request.addParameter("name", "name1");
@@ -159,7 +169,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("test-name1-typeMismatch", response.getContentAsString());
 	}
 
-	public void testFormController() throws Exception {
+	@Test
+	public void formController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -181,7 +192,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
-	public void testModelFormController() throws Exception {
+	@Test
+	public void modelFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -203,7 +215,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
-	public void testCommandProvidingFormController() throws Exception {
+	@Test
+	public void commandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -229,7 +242,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testTypedCommandProvidingFormController() throws Exception {
+	@Test
+	public void typedCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -276,7 +290,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("myView-myName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testBinderInitializingCommandProvidingFormController() throws Exception {
+	@Test
+	public void binderInitializingCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -299,7 +314,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
+	@Test
+	public void specificBinderInitializingCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
@@ -322,7 +338,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
-	public void testParameterDispatchingController() throws Exception {
+	@Test
+	public void parameterDispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
@@ -362,7 +379,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testTypeLevelParameterDispatchingController() throws Exception {
+	@Test
+	public void typeLevelParameterDispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
@@ -447,7 +465,8 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
-	public void testPortlet20DispatchingController() throws Exception {
+	@Test
+	public void portlet20DispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
@@ -525,6 +544,10 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 	}
 
 
+	/*
+	 * Controllers
+	 */
+
 	@RequestMapping("VIEW")
 	private static class MyController extends AbstractController {
 
@@ -546,8 +569,10 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 
 		@RequestMapping("EDIT")
 		@RenderMapping
-		public void myHandle(@RequestParam("param1")String p1, @RequestParam("param2")int p2, RenderResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + p2);
+		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2,
+				@RequestHeader("header1") long h1, @CookieValue("cookie1") Cookie c1,
+				RenderResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1 + "-" + c1.getValue());
 		}
 
 		@RequestMapping("HELP")
@@ -575,8 +600,9 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 
 		@RequestMapping("EDIT")
 		@RenderMapping
-		public void myHandle(@RequestParam("param1")String p1, int param2, RenderResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2);
+		public void myHandle(@RequestParam("param1") String p1, int param2, RenderResponse response,
+				@RequestHeader("header1") String h1, @CookieValue("cookie1") String c1) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + h1 + "-" + c1);
 		}
 
 		@RequestMapping("HELP")
@@ -604,8 +630,9 @@ public class Portlet20AnnotationControllerTests extends TestCase {
 
 		@RequestMapping("EDIT")
 		@RenderMapping
-		public void myHandle(@RequestParam("param1")String p1, @RequestParam("param2")int p2, RenderResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + p2);
+		public void myHandle(@RequestParam("param1") String p1, int param2, @RequestHeader Integer header1,
+				@CookieValue int cookie1, RenderResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1 + "-" + cookie1);
 		}
 
 		@RequestMapping("HELP")

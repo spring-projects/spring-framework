@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation which indicates that a method parameter should be bound to a web request header.
- * Supported for {@link RequestMapping} annotated handler methods in Servlet and Portlet environments.
+ * Supported for annotated handler methods in Servlet and Portlet environments.
  *
  * @author Juergen Hoeller
  * @since 3.0
  * @see RequestMapping
+ * @see RequestParam
+ * @see CookieValue
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */

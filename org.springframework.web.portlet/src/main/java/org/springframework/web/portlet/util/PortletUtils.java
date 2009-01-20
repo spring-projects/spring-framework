@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
+import javax.servlet.http.Cookie;
 
 import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
@@ -270,6 +269,7 @@ public abstract class PortletUtils {
 		return mutex;
 	}
 
+
 	/**
 	 * Expose the given Map as request attributes, using the keys as attribute names
 	 * and the values as corresponding attribute values. Keys must be Strings.
@@ -284,6 +284,25 @@ public abstract class PortletUtils {
 		}
 	}
 
+	/**
+	 * Retrieve the first cookie with the given name. Note that multiple
+	 * cookies can have the same name but different paths or domains.
+	 * @param request current servlet request
+	 * @param name cookie name
+	 * @return the first cookie with the given name, or <code>null</code> if none is found
+	 */
+	public static Cookie getCookie(PortletRequest request, String name) {
+		Assert.notNull(request, "Request must not be null");
+		Cookie cookies[] = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (name.equals(cookie.getName())) {
+					return cookie;
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Check if a specific input type="submit" parameter was sent in the request,
