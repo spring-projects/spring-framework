@@ -19,7 +19,7 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.el.ELContext;
 import javax.servlet.Servlet;
@@ -61,7 +61,7 @@ public class MockPageContext extends PageContext {
 
 	private final ServletConfig servletConfig;
 
-	private final Map<String, Object> attributes = new HashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private JspWriter out;
 

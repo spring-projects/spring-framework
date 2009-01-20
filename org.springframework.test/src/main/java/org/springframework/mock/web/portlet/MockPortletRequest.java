@@ -482,7 +482,7 @@ public class MockPortletRequest implements PortletRequest {
 		return this.windowID;
 	}
 
-	public void setCookies(Cookie[] cookies) {
+	public void setCookies(Cookie... cookies) {
 		this.cookies = cookies;
 	}
 

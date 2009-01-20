@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,7 +96,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// ServletRequest properties
 	//---------------------------------------------------------------------
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private String characterEncoding;
 
@@ -146,7 +145,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
 	 */
-	private final Map<String, HeaderValueHolder> headers = new Hashtable<String, HeaderValueHolder>();
+	private final Map<String, HeaderValueHolder> headers = new LinkedHashMap<String, HeaderValueHolder>();
 
 	private String method;
 
@@ -285,7 +284,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return this.attributes.keys();
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public String getCharacterEncoding() {
@@ -612,7 +611,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.authType;
 	}
 
-	public void setCookies(Cookie[] cookies) {
+	public void setCookies(Cookie... cookies) {
 		this.cookies = cookies;
 	}
 

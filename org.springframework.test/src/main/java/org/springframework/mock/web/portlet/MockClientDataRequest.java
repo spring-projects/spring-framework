@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import javax.portlet.ClientDataRequest;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
-import javax.portlet.PortletMode;
 
 /**
  * Mock implementation of the {@link javax.portlet.ClientDataRequest} interface.
