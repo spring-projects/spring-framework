@@ -17,11 +17,6 @@
 package org.springframework.mock.web.portlet;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortalContext;
@@ -29,10 +24,8 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletModeException;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
-import javax.xml.namespace.QName;
 
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.portlet.ActionResponse} interface.
