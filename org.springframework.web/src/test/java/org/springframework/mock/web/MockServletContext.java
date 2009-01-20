@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,11 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-
 import javax.activation.FileTypeMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -90,11 +89,11 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
-	private final Map contexts = new HashMap();
+	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
 
-	private final Properties initParameters = new Properties();
+	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
 
-	private final Hashtable attributes = new Hashtable();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private String servletContextName = "MockServletContext";
 
@@ -174,7 +173,7 @@ public class MockServletContext implements ServletContext {
 		if (this.contextPath.equals(contextPath)) {
 			return this;
 		}
-		return (ServletContext) this.contexts.get(contextPath);
+		return this.contexts.get(contextPath);
 	}
 
 	public int getMajorVersion() {
@@ -189,7 +188,7 @@ public class MockServletContext implements ServletContext {
 		return MimeTypeResolver.getMimeType(filePath);
 	}
 
-	public Set getResourcePaths(String path) {
+	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
 		try {
@@ -198,10 +197,10 @@ public class MockServletContext implements ServletContext {
 			if (ObjectUtils.isEmpty(fileList)) {
 				return null;
 			}
-			Set resourcePaths = new LinkedHashSet(fileList.length);
-			for (int i = 0; i < fileList.length; i++) {
-				String resultPath = actualPath + fileList[i];
-				if (resource.createRelative(fileList[i]).getFile().isDirectory()) {
+			Set<String> resourcePaths = new LinkedHashSet<String>(fileList.length);
+			for (String fileEntry : fileList) {
+				String resultPath = actualPath + fileEntry;
+				if (resource.createRelative(fileEntry).getFile().isDirectory()) {
 					resultPath += "/";
 				}
 				resourcePaths.add(resultPath);
@@ -260,12 +259,12 @@ public class MockServletContext implements ServletContext {
 		return null;
 	}
 
-	public Enumeration getServlets() {
-		return Collections.enumeration(Collections.EMPTY_SET);
+	public Enumeration<Servlet> getServlets() {
+		return Collections.enumeration(new HashSet<Servlet>());
 	}
 
-	public Enumeration getServletNames() {
-		return Collections.enumeration(Collections.EMPTY_SET);
+	public Enumeration<String> getServletNames() {
+		return Collections.enumeration(new HashSet<String>());
 	}
 
 	public void log(String message) {
@@ -297,16 +296,16 @@ public class MockServletContext implements ServletContext {
 
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
-		return this.initParameters.getProperty(name);
+		return this.initParameters.get(name);
 	}
 
 	public void addInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
-		this.initParameters.setProperty(name, value);
+		this.initParameters.put(name, value);
 	}
 
-	public Enumeration getInitParameterNames() {
-		return this.initParameters.keys();
+	public Enumeration<String> getInitParameterNames() {
+		return Collections.enumeration(this.initParameters.keySet());
 	}
 
 	public Object getAttribute(String name) {
@@ -314,8 +313,8 @@ public class MockServletContext implements ServletContext {
 		return this.attributes.get(name);
 	}
 
-	public Enumeration getAttributeNames() {
-		return this.attributes.keys();
+	public Enumeration<String> getAttributeNames() {
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public void setAttribute(String name, Object value) {

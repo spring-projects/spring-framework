@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +39,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
- * interface. Supports the Servlet 2.4 API level.
+ * interface. Supports the Servlet 2.5 API level.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
@@ -88,12 +86,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// HttpServletResponse properties
 	//---------------------------------------------------------------------
 
-	private final List cookies = new ArrayList();
+	private final List<Cookie> cookies = new ArrayList<Cookie>();
 
 	/**
 	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
 	 */
-	private final Map headers = new HashMap();
+	private final Map<String, HeaderValueHolder> headers = new HashMap<String, HeaderValueHolder>();
 
 	private int status = HttpServletResponse.SC_OK;
 
@@ -266,13 +264,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public Cookie[] getCookies() {
-		return (Cookie[]) this.cookies.toArray(new Cookie[this.cookies.size()]);
+		return this.cookies.toArray(new Cookie[this.cookies.size()]);
 	}
 
 	public Cookie getCookie(String name) {
 		Assert.notNull(name, "Cookie name must not be null");
-		for (Iterator it = this.cookies.iterator(); it.hasNext();) {
-			Cookie cookie = (Cookie) it.next();
+		for (Cookie cookie : this.cookies) {
 			if (name.equals(cookie.getName())) {
 				return cookie;
 			}
@@ -288,7 +285,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Return the names of all specified headers as a Set of Strings.
 	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
 	 */
-	public Set getHeaderNames() {
+	public Set<String> getHeaderNames() {
 		return this.headers.keySet();
 	}
 
@@ -308,9 +305,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
 	 */
-	public List getHeaders(String name) {
+	public List<Object> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValues() : Collections.EMPTY_LIST);
+		return (header != null ? header.getValues() : Collections.emptyList());
 	}
 
 	/**
@@ -372,11 +369,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setDateHeader(String name, long value) {
-		setHeaderValue(name, new Long(value));
+		setHeaderValue(name, value);
 	}
 
 	public void addDateHeader(String name, long value) {
-		addHeaderValue(name, new Long(value));
+		addHeaderValue(name, value);
 	}
 
 	public void setHeader(String name, String value) {
@@ -388,11 +385,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setIntHeader(String name, int value) {
-		setHeaderValue(name, new Integer(value));
+		setHeaderValue(name, value);
 	}
 
 	public void addIntHeader(String name, int value) {
-		addHeaderValue(name, new Integer(value));
+		addHeaderValue(name, value);
 	}
 
 	private void setHeaderValue(String name, Object value) {
