@@ -16,8 +16,8 @@
 
 package org.springframework.mock.web.portlet;
 
-import javax.portlet.EventResponse;
 import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 
 /**
  * Mock implementation of the {@link javax.portlet.EventResponse} interface.
