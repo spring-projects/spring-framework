@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.servlet.ServletInputStream;
 
 import org.springframework.util.Assert;
@@ -26,12 +25,12 @@ import org.springframework.util.Assert;
 /**
  * Delegating implementation of {@link javax.servlet.ServletInputStream}.
  *
- * <p>Used by {@link org.springframework.mock.web.MockHttpServletRequest}; typically not directly
+ * <p>Used by {@link MockHttpServletRequest}; typically not directly
  * used for testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see org.springframework.mock.web.MockHttpServletRequest
+ * @see MockHttpServletRequest
  */
 public class DelegatingServletInputStream extends ServletInputStream {
 
