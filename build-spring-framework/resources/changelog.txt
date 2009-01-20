@@ -1,6 +1,24 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-http://www.springframework.org
+http://www.springsource.org
+
+
+Changes in version 3.0.0.M2 (2009-01-23)
+----------------------------------------
+
+* introduced OXM support package (originating from Spring Web Services)
+* introduced OXM-based MarshallingMessageConverter for JMS
+* introduced OXM-based MarshallingView for Spring MVC
+* refined @PathVariable handling
+* updated Spring Portlet mocks for Portlet API 2.0
+* updated Spring Portlet MVC infrastructure for Portlet API 2.0
+* added resource and event methods to Portlet HandlerAdapter/HandlerInterceptor
+* added resolveException method for resource requests to HandlerExceptionResolver
+* introduced Resource/EventAwareController subinterfaces of Portlet Controller
+* introduced @Action/@Render/@Resource/@EventMapping annotations for Portlet MVC
+* added @RequestHeader support for Portlet MVC
+* introduced @CookieValue annotation for Servlet and Portlet MVC handler methods
+
 
 Changes in version 3.0.0.M1 (2008-12-05)
 ----------------------------------------
