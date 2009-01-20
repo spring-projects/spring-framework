@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -158,10 +159,11 @@ public class HandlerMethodInvoker {
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
 			String headerName = null;
-			boolean required = false;
-			String defaultValue = null;
+			String cookieName = null;
 			String pathVarName = null;
 			String attrName = null;
+			boolean required = false;
+			String defaultValue = null;
 			int found = 0;
 			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
@@ -180,14 +182,21 @@ public class HandlerMethodInvoker {
 					defaultValue = requestHeader.defaultValue();
 					found++;
 				}
-				else if (ModelAttribute.class.isInstance(paramAnn)) {
-					ModelAttribute attr = (ModelAttribute) paramAnn;
-					attrName = attr.value();
+				else if (CookieValue.class.isInstance(paramAnn)) {
+					CookieValue cookieValue = (CookieValue) paramAnn;
+					cookieName = cookieValue.value();
+					required = cookieValue.required();
+					defaultValue = cookieValue.defaultValue();
 					found++;
 				}
 				else if (PathVariable.class.isInstance(paramAnn)) {
 					PathVariable pathVar = (PathVariable) paramAnn;
 					pathVarName = pathVar.value();
+					found++;
+				}
+				else if (ModelAttribute.class.isInstance(paramAnn)) {
+					ModelAttribute attr = (ModelAttribute) paramAnn;
+					attrName = attr.value();
 					found++;
 				}
 			}
@@ -229,6 +238,12 @@ public class HandlerMethodInvoker {
 			else if (headerName != null) {
 				args[i] = resolveRequestHeader(headerName, required, defaultValue, methodParam, webRequest, handler);
 			}
+			else if (cookieName != null) {
+				args[i] = resolveCookieValue(cookieName, required, defaultValue, methodParam, webRequest, handler);
+			}
+			else if (pathVarName != null) {
+				args[i] = resolvePathVariable(pathVarName, methodParam, webRequest, handler);
+			}
 			else if (attrName != null) {
 				WebDataBinder binder = resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
 				boolean assignBindingResult = (args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
@@ -241,9 +256,6 @@ public class HandlerMethodInvoker {
 					i++;
 				}
 				implicitModel.putAll(binder.getBindingResult().getModel());
-			}
-			else if (pathVarName != null) {
-				args[i] = resolvePathVariable(pathVarName, methodParam, webRequest, handler);
 			}
 		}
 
@@ -406,6 +418,62 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
 	}
 
+	private Object resolveCookieValue(String cookieName, boolean required, String defaultValue,
+			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
+			throws Exception {
+
+		Class paramType = methodParam.getParameterType();
+		if (cookieName.length() == 0) {
+			cookieName = getRequiredParameterName(methodParam);
+		}
+		Object cookieValue = resolveCookieValue(cookieName, paramType, webRequest);
+		if (cookieValue == null) {
+			if (StringUtils.hasText(defaultValue)) {
+				cookieValue = defaultValue;
+			}
+			else if (required) {
+				raiseMissingCookieException(cookieName, paramType);
+			}
+			checkValue(cookieName, cookieValue, paramType);
+		}
+		WebDataBinder binder = createBinder(webRequest, null, cookieName);
+		initBinder(handlerForInitBinderCall, cookieName, binder, webRequest);
+		return binder.convertIfNecessary(cookieValue, paramType, methodParam);
+	}
+
+	/**
+	 * Resolves the given {@link CookieValue @CookieValue} annotation.
+	 * Throws an UnsupportedOperationException by default.
+	 */
+	protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+			throws Exception {
+
+		throw new UnsupportedOperationException("@CookieValue not supported");
+	}
+
+	private Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
+			NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
+
+		Class paramType = methodParam.getParameterType();
+		if (pathVarName.length() == 0) {
+			pathVarName = getRequiredParameterName(methodParam);
+		}
+		String pathVarValue = resolvePathVariable(pathVarName, paramType, webRequest);
+		WebDataBinder binder = createBinder(webRequest, null, pathVarName);
+		initBinder(handlerForInitBinderCall, pathVarName, binder, webRequest);
+		return binder.convertIfNecessary(pathVarValue, paramType, methodParam);
+	}
+
+	/**
+	 * Resolves the given {@link PathVariable @PathVariable} annotation.
+	 * Throws an UnsupportedOperationException by default.
+	 */
+	protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
+			throws Exception {
+
+		throw new UnsupportedOperationException("@PathVariable not supported");
+	}
+
 	private String getRequiredParameterName(MethodParameter methodParam) {
 		String name = methodParam.getParameterName();
 		if (name == null) {
@@ -450,17 +518,6 @@ public class HandlerMethodInvoker {
 		WebDataBinder binder = createBinder(webRequest, bindObject, name);
 		initBinder(handler, name, binder, webRequest);
 		return binder;
-	}
-
-	/**
-	 * Resolves the given {@link org.springframework.web.bind.annotation.PathVariable @PathVariable}
-	 * variable. Throws an UnsupportedOperationException by default. Overridden in
-	 * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.ServletHandlerMethodInvoker}.
-	 */
-	protected Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
-			NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
-
-		throw new UnsupportedOperationException("@PathVariable not supported");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -525,18 +582,19 @@ public class HandlerMethodInvoker {
 		throw new IllegalStateException("Missing header '" + headerName + "' of type [" + paramType.getName() + "]");
 	}
 
+	protected void raiseMissingCookieException(String cookieName, Class paramType) throws Exception {
+		throw new IllegalStateException("Missing cookie value '" + cookieName + "' of type [" + paramType.getName() + "]");
+	}
+
 	protected void raiseSessionRequiredException(String message) throws Exception {
 		throw new IllegalStateException(message);
 	}
 
-	protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
-			throws Exception {
-
+	protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 		return new WebRequestDataBinder(target, objectName);
 	}
 
 	protected void doBind(NativeWebRequest webRequest, WebDataBinder binder, boolean failOnErrors) throws Exception {
-
 		WebRequestDataBinder requestBinder = (WebRequestDataBinder) binder;
 		requestBinder.bind(webRequest);
 		if (failOnErrors) {

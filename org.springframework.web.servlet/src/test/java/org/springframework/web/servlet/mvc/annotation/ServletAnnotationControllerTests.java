@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -61,6 +62,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -283,9 +285,10 @@ public class ServletAnnotationControllerTests {
 		request.addParameter("param1", "value1");
 		request.addParameter("param2", "2");
 		request.addHeader("header1", "10");
+		request.setCookies(new Cookie("cookie1", "3"));
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-value1-2-10", response.getContentAsString());
+		assertEquals("test-value1-2-10-3", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/myPath3.do");
 		request.addParameter("param1", "value1");
@@ -835,8 +838,9 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/myPath2.do")
 		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2,
-				@RequestHeader("header1") long h1, HttpServletResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1);
+				@RequestHeader("header1") long h1, @CookieValue("cookie1") Cookie c1,
+				HttpServletResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1 + "-" + c1.getValue());
 		}
 
 		@RequestMapping("/myPath3")
@@ -862,8 +866,8 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/myPath2.do")
 		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response,
-				@RequestHeader("header1") String h1) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + h1);
+				@RequestHeader("header1") String h1, @CookieValue("cookie1") String c1) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + h1 + "-" + c1);
 		}
 
 		@RequestMapping("/myPath3")
@@ -883,8 +887,8 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/myPath2.do")
 		public void myHandle(@RequestParam("param1") T p1, int param2, @RequestHeader Integer header1,
-				HttpServletResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1);
+				@CookieValue int cookie1, HttpServletResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1 + "-" + cookie1);
 		}
 
 		@InitBinder
@@ -907,8 +911,8 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		public void myHandle(@RequestParam("param1") String p1, int param2, @RequestHeader Integer header1,
-				HttpServletResponse response) throws IOException {
-			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1);
+				@CookieValue int cookie1, HttpServletResponse response) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1 + "-" + cookie1);
 		}
 
 		@RequestMapping("/myPath3")

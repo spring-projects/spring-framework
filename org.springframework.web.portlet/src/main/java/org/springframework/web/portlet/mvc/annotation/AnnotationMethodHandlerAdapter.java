@@ -50,6 +50,7 @@ import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
+import javax.servlet.http.Cookie;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Conventions;
@@ -575,6 +576,20 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			servletBinder.bind((PortletRequest) webRequest.getNativeRequest());
 			if (failOnErrors) {
 				servletBinder.closeNoCatch();
+			}
+		}
+
+		@Override
+		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+				throws Exception {
+
+			PortletRequest portletRequest = (PortletRequest) webRequest.getNativeRequest();
+			Cookie cookieValue = PortletUtils.getCookie(portletRequest, cookieName);
+			if (Cookie.class.isAssignableFrom(paramType)) {
+				return cookieValue;
+			}
+			else {
+				return cookieValue.getValue();
 			}
 		}
 
