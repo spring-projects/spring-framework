@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.mock.web;
 
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Properties;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
@@ -40,18 +41,18 @@ public class MockServletConfig implements ServletConfig {
 
 	private final String servletName;
 
-	private final Properties initParameters = new Properties();
+	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
 
 
 	/**
-	 * Create a new MockServletConfig with a default {@link org.springframework.mock.web.MockServletContext}.
+	 * Create a new MockServletConfig with a default {@link MockServletContext}.
 	 */
 	public MockServletConfig() {
 		this(null, "");
 	}
 
 	/**
-	 * Create a new MockServletConfig with a default {@link org.springframework.mock.web.MockServletContext}.
+	 * Create a new MockServletConfig with a default {@link MockServletContext}.
 	 * @param servletName the name of the servlet
 	 */
 	public MockServletConfig(String servletName) {
@@ -78,25 +79,25 @@ public class MockServletConfig implements ServletConfig {
 
 
 	public String getServletName() {
-		return servletName;
+		return this.servletName;
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void addInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
-		this.initParameters.setProperty(name, value);
+		this.initParameters.put(name, value);
 	}
 
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
-		return this.initParameters.getProperty(name);
+		return this.initParameters.get(name);
 	}
 
-	public Enumeration getInitParameterNames() {
-		return this.initParameters.keys();
+	public Enumeration<String> getInitParameterNames() {
+		return Collections.enumeration(this.initParameters.keySet());
 	}
 
 }
