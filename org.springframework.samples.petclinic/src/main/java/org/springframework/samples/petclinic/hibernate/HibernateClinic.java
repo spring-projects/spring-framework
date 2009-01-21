@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
@@ -13,7 +14,6 @@ import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataAccessException;
 
 /**
  * Hibernate implementation of the Clinic interface.
@@ -35,9 +35,12 @@ import org.springframework.dao.DataAccessException;
 @Transactional
 public class HibernateClinic implements Clinic {
 
-	@Autowired
 	private SessionFactory sessionFactory;
-
+	
+	@Autowired
+	public HibernateClinic(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
