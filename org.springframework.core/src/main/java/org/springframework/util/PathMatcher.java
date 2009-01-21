@@ -16,11 +16,12 @@
 
 package org.springframework.util;
 
+import java.util.Comparator;
 import java.util.Map;
 
 /**
  * Strategy interface for <code>String</code>-based path matching.
- * 
+ *
  * <p>Used by {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver},
  * {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping},
  * {@link org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver},
@@ -102,4 +103,16 @@ public interface PathMatcher {
 	 * @return a map, containing variable names as keys; variables values as values
 	 */
 	Map<String, String> extractUriTemplateVariables(String pattern, String path);
+
+	/**
+	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
+	 *
+	 * <p>The full algorithm used depends on the underlying implementation, but generally, the returned
+	 * <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List, java.util.Comparator) sort} a
+	 * list so that more specific patterns come before generic patterns.
+	 *
+	 * @param path the full path to use for comparison
+	 * @return a comparator capable of sorting patterns in order of explicitness
+	 */
+	Comparator<String> getPatternComparator(String path);
 }

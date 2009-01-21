@@ -16,8 +16,11 @@
 
 package org.springframework.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -320,5 +323,98 @@ public class AntPathMatcherTests {
 		assertEquals(Collections.singletonMap("B", "b"), result);
 	}
 
+	@Test
+	public void patternComparator() {
+		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
+
+		assertEquals(0, comparator.compare(null, null));
+		assertEquals(1, comparator.compare(null, "/hotels/new"));
+		assertEquals(-1, comparator.compare("/hotels/new", null));
+
+		assertEquals(0, comparator.compare("/hotels/new", "/hotels/new"));
+
+		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/*"));
+		assertEquals(1, comparator.compare("/hotels/*", "/hotels/new"));
+		assertEquals(0, comparator.compare("/hotels/*", "/hotels/*"));
+
+		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/{hotel}"));
+		assertEquals(1, comparator.compare("/hotels/{hotel}", "/hotels/new"));
+		assertEquals(0, comparator.compare("/hotels/{hotel}", "/hotels/{hotel}"));
+
+		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
+		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
+	}
+
+	@Test
+	public void patternComparatorSort() {
+		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
+		List<String> paths = new ArrayList<String>(3);
+
+		paths.add(null);
+		paths.add("/hotels/new");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertNull(paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/new");
+		paths.add(null);
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertNull(paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/*");
+		paths.add("/hotels/new");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertEquals("/hotels/*", paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/new");
+		paths.add("/hotels/*");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertEquals("/hotels/*", paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/**");
+		paths.add("/hotels/*");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/*", paths.get(0));
+		assertEquals("/hotels/**", paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/*");
+		paths.add("/hotels/**");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/*", paths.get(0));
+		assertEquals("/hotels/**", paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/{hotel}");
+		paths.add("/hotels/new");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertEquals("/hotels/{hotel}", paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/new");
+		paths.add("/hotels/{hotel}");
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertEquals("/hotels/{hotel}", paths.get(1));
+		paths.clear();
+
+		paths.add("/hotels/*");
+		paths.add("/hotels/{hotel}");
+		paths.add("/hotels/new");
+		Collections.shuffle(paths);
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new", paths.get(0));
+		assertEquals("/hotels/{hotel}", paths.get(1));
+		assertEquals("/hotels/*", paths.get(2));
+		paths.clear();
+	}
 
 }
