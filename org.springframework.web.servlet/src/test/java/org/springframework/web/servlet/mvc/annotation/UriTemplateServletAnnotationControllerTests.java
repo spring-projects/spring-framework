@@ -65,7 +65,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	public void ambiguous() throws Exception {
 		initServlet(AmbiguousUriTemplateController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/12345");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/new");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("specific", response.getContentAsString());
@@ -162,15 +162,24 @@ public class UriTemplateServletAnnotationControllerTests {
 	@Controller
 	public static class AmbiguousUriTemplateController {
 
-		@RequestMapping("/hotels/{hotel}")
-		public void handleVars(Writer writer) throws IOException {
-			writer.write("variables");
-		}
-
-		@RequestMapping("/hotels/12345")
+		@RequestMapping("/hotels/new")
 		public void handleSpecific(Writer writer) throws IOException {
 			writer.write("specific");
 		}
+
+/*
+		@RequestMapping("/hotels/{hotel}")
+		public void handleVars(@PathVariable("hotel") String hotel, Writer writer) throws IOException {
+			assertEquals("Invalid path variable value", "42", hotel);
+			writer.write("variables");
+		}
+*/
+
+		@RequestMapping("/hotels/*")
+		public void handleWildCard(Writer writer) throws IOException {
+			writer.write("wildcard");
+		}
+
 
 	}
 

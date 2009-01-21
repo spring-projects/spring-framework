@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -801,6 +802,24 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Test
+	public void pathOrdering() throws ServletException, IOException {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(PathOrderingController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/dir/myPath1.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("method1", response.getContentAsString());
+	}
 
 	/*
 	 * Controllers
@@ -1347,6 +1366,21 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping(value="/otherPath.do", method = RequestMethod.GET)
 		public void get() {
+		}
+	}
+
+	@Controller
+	public static class PathOrderingController {
+
+
+		@RequestMapping(value = {"/dir/myPath1.do", "/**/*.do"})
+		public void method1(Writer writer) throws IOException {
+			writer.write("method1");
+		}
+
+		@RequestMapping("/dir/*.do")
+		public void method2(Writer writer) throws IOException {
+			writer.write("method2");
 		}
 	}
 
