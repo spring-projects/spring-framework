@@ -28,7 +28,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/javax.jdo/com.springsource.javax.jdo/2.0.0/com.springsource.javax.jdo-2.0.0.jar" sourcepath="/IVY_CACHE/javax.jdo/com.springsource.javax.jdo/2.0.0/com.springsource.javax.jdo-sources-2.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.jms/com.springsource.javax.jms/1.1.0/com.springsource.javax.jms-1.1.0.jar" sourcepath="/IVY_CACHE/javax.jms/com.springsource.javax.jms/1.1.0/com.springsource.javax.jms-sources-1.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.mail/com.springsource.javax.mail/1.4.0/com.springsource.javax.mail-1.4.0.jar" sourcepath="/IVY_CACHE/javax.mail/com.springsource.javax.mail/1.4.0/com.springsource.javax.mail-sources-1.4.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/javax.portlet/com.springsource.javax.portlet/1.0.0/com.springsource.javax.portlet-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar" sourcepath="/IVY_CACHE/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-sources-1.5.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.servlet/com.springsource.javax.servlet/2.5.0/com.springsource.javax.servlet-2.5.0.jar" sourcepath="/IVY_CACHE/javax.servlet/com.springsource.javax.servlet/2.5.0/com.springsource.javax.servlet-sources-2.5.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.servlet/com.springsource.javax.servlet.jsp/2.1.0/com.springsource.javax.servlet.jsp-2.1.0.jar" sourcepath="/IVY_CACHE/javax.servlet/com.springsource.javax.servlet.jsp/2.1.0/com.springsource.javax.servlet.jsp-sources-2.1.0.jar"/>
@@ -86,5 +85,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.lang/2.1.0/com.springsource.org.apache.commons.lang-2.1.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.lang/2.1.0/com.springsource.org.apache.commons.lang-sources-2.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-2.7.6.jar" sourcepath="/IVY_CACHE/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-sources-2.7.6.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.serp/com.springsource.serp/1.13.1/com.springsource.serp-1.13.1.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-2.0.0.jar" sourcepath="/IVY_CACHE/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-sources-2.0.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
