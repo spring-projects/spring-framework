@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -52,6 +53,7 @@ import java.util.Map;
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Arjen Poutsma
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -286,6 +288,75 @@ public class AntPathMatcher implements PathMatcher {
 		boolean result = doMatch(pattern, path, true, variables);
 		Assert.state(result, "Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
 		return variables;
+	}
+
+	/**
+	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
+	 *
+	 * <p>The returned <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List,
+	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
+	 * generic patterns. So given a list with the following patterns:
+	 * <ol>
+	 * <li><code>/hotels/new</code></li>
+	 * <li><code>/hotels/{hotel}</code></li>
+	 * <li><code>/hotels/*</code></li>
+	 * </ol>
+	 * the returned comparator will sort this list so that the order will be as indicated. 
+	 *
+	 * @param path the full path to use for comparison
+	 * @return a comparator capable of sorting patterns in order of explicitness
+	 */
+	public Comparator<String> getPatternComparator(String path) {
+		return new AntPatternComparator(path);
+	}
+
+	private static class AntPatternComparator implements Comparator<String>{
+
+		private final String path;
+
+		private AntPatternComparator(String path) {
+			this.path = path;
+		}
+
+		public int compare(String pattern1, String pattern2) {
+			if (pattern1 == null && pattern2 == null) {
+				return 0;
+			}
+			else if (pattern1 == null) {
+				return 1;
+			}
+			else if (pattern2 == null) {
+				return -1;
+			}
+			boolean pattern1EqualsPath = pattern1.equals(path);
+			boolean pattern2EqualsPath = pattern2.equals(path);
+			if (pattern1EqualsPath && pattern2EqualsPath) {
+				return 0;
+			}
+			else if (pattern1EqualsPath) {
+				return -1;
+			}
+			else if (pattern2EqualsPath) {
+				return 1;
+			}
+			int wildCardCount1 = StringUtils.countOccurrencesOf(pattern1, "*");
+			int wildCardCount2 = StringUtils.countOccurrencesOf(pattern2, "*");
+			if (wildCardCount1 < wildCardCount2) {
+				return -1;
+			}
+			else if (wildCardCount2 < wildCardCount1) {
+				return 1;
+			}
+			int bracketCount1 = StringUtils.countOccurrencesOf(pattern1, "{");
+			int bracketCount2 = StringUtils.countOccurrencesOf(pattern1, "{");
+			if (bracketCount1 < bracketCount2) {
+				return -1;
+			}
+			else if (bracketCount1 < bracketCount2) {
+				return 1;
+			}
+			return 0;
+		}
 	}
 
 }
