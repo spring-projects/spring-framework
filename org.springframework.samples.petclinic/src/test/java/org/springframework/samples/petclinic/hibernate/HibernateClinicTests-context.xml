@@ -3,7 +3,9 @@
 	xmlns:p="http://www.springframework.org/schema/p"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<bean class="org.springframework.samples.petclinic.hibernate.HibernateClinic" />
+	<bean class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
+		<constructor-arg ref="sessionFactory"/>
+	</bean>
 
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"
 		p:dataSource-ref="dataSource" p:mappingResources="petclinic.hbm.xml">
