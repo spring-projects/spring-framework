@@ -22,9 +22,13 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -434,8 +438,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		public Method resolveHandlerMethod(HttpServletRequest request) throws ServletException {
 			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+			Comparator<String> pathComparator = pathMatcher.getPatternComparator(lookupPath);
 			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
-			Map<RequestMappingInfo, String> targetPathMatches = new LinkedHashMap<RequestMappingInfo, String>();
 			Set<String> allowedMethods = new LinkedHashSet<String>(7);
 			String resolvedMethodName = null;
 			for (Method handlerMethod : getHandlerMethods()) {
@@ -450,11 +454,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
+					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);					
 					for (String mappedPath : mappingInfo.paths) {
 						if (isPathMatch(mappedPath, lookupPath)) {
 							if (checkParameters(mappingInfo, request)) {
 								match = true;
-								targetPathMatches.put(mappingInfo, mappedPath);
+								matchedPaths.add(mappedPath);
 							}
 							else {
 								for (RequestMethod requestMethod : mappingInfo.methods) {
@@ -464,6 +469,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 							}
 						}
 					}
+					Collections.sort(matchedPaths, pathComparator);
+					mappingInfo.matchedPaths = matchedPaths.toArray(new String[matchedPaths.size()]);					
 				}
 				else {
 					// No paths specified: parameter match sufficient.
@@ -504,34 +511,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					}
 				}
 			}
-			if (targetHandlerMethods.size() == 1) {
-				if (targetPathMatches.size() == 1) {
-					extractHandlerMethodUriTemplates(targetPathMatches.values().iterator().next(), lookupPath, request);
-				}
-				return targetHandlerMethods.values().iterator().next();
-			}
-			else if (!targetHandlerMethods.isEmpty()) {
-				RequestMappingInfo bestMappingMatch = null;
-				String bestPathMatch = null;
-				for (RequestMappingInfo mapping : targetHandlerMethods.keySet()) {
-					String mappedPath = targetPathMatches.get(mapping);
-					if (bestMappingMatch == null) {
-						bestMappingMatch = mapping;
-						bestPathMatch = mappedPath;
-					}
-					else {
-						if (isBetterPathMatch(mappedPath, bestPathMatch, lookupPath) ||
-								(!isBetterPathMatch(bestPathMatch, mappedPath, lookupPath) &&
-										(isBetterMethodMatch(mapping, bestMappingMatch) ||
-										(!isBetterMethodMatch(bestMappingMatch, mapping) &&
-												isBetterParamMatch(mapping, bestMappingMatch))))) {
-							bestMappingMatch = mapping;
-							bestPathMatch = mappedPath;
-						}
-					}
-				}
-				if (bestPathMatch != null) {
-					extractHandlerMethodUriTemplates(bestPathMatch, lookupPath, request);
+			if (!targetHandlerMethods.isEmpty()) {
+				List<RequestMappingInfo> matches = new ArrayList<RequestMappingInfo>(targetHandlerMethods.keySet());
+				RequestMappingInfoComparator requestMappingInfoComparator = new RequestMappingInfoComparator(pathComparator);
+				Collections.sort(matches, requestMappingInfoComparator);
+				RequestMappingInfo bestMappingMatch = matches.get(0);
+				if (bestMappingMatch.matchedPaths.length > 0) {
+					extractHandlerMethodUriTemplates(bestMappingMatch.matchedPaths[0], lookupPath, request);
 				}
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
@@ -563,20 +549,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		private boolean checkParameters(RequestMappingInfo mapping, HttpServletRequest request) {
 			return ServletAnnotationMappingUtils.checkRequestMethod(mapping.methods, request) &&
 					ServletAnnotationMappingUtils.checkParameters(mapping.params, request);
-		}
-
-		private boolean isBetterPathMatch(String mappedPath, String mappedPathToCompare, String lookupPath) {
-			return (mappedPath != null &&
-					(mappedPathToCompare == null || mappedPathToCompare.length() < mappedPath.length() ||
-							(mappedPath.equals(lookupPath) && !mappedPathToCompare.equals(lookupPath))));
-		}
-
-		private boolean isBetterMethodMatch(RequestMappingInfo mapping, RequestMappingInfo mappingToCompare) {
-			return (mappingToCompare.methods.length == 0 && mapping.methods.length > 0);
-		}
-
-		private boolean isBetterParamMatch(RequestMappingInfo mapping, RequestMappingInfo mappingToCompare) {
-			return (mappingToCompare.params.length < mapping.params.length);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -770,14 +742,20 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 
-	private static class RequestMappingInfo {
+	static class RequestMappingInfo {
 
-		public String[] paths = new String[0];
+		String[] paths = new String[0];
 
-		public RequestMethod[] methods = new RequestMethod[0];
+		String[] matchedPaths = new String[0];
 
-		public String[] params = new String[0];
+		RequestMethod[] methods = new RequestMethod[0];
 
+		String[] params = new String[0];
+
+		String bestMatchedPath() {
+			return matchedPaths.length > 0 ? matchedPaths[0] : null;
+		}
+		
 		@Override
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
@@ -792,4 +770,51 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 	}
 
+	/**
+	 * Comparator capable of sorting {@link RequestMappingInfo}s (RHIs) so that sorting a list with this comparator will
+	 * result in:
+	 * <ul>
+	 * <li>RHIs with {@linkplain RequestMappingInfo#matchedPaths better matched paths} take prescedence over those with
+	 * a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String) path pattern
+	 * comparator}.) Typically, this means that patterns without wild chards and uri templates will be ordered before those without.</li>
+	 * <li>RHIs with one single {@linkplain RequestMappingInfo#methods request method} will be ordered before those
+	 * without a method, or with more than one method.</li>
+	 * <li>RHIs with more {@linkplain RequestMappingInfo#params request parameters} will be ordered before those with
+	 * less parameters</li>
+	 * </ol>
+	 */
+	static class RequestMappingInfoComparator implements Comparator<RequestMappingInfo> {
+
+		private final Comparator<String> pathComparator;
+
+		RequestMappingInfoComparator(Comparator<String> pathComparator) {
+			this.pathComparator = pathComparator;
+		}
+
+		public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
+			int pathComparison = pathComparator.compare(info1.bestMatchedPath(), info2.bestMatchedPath());
+			if (pathComparison != 0) {
+				return pathComparison;
+			}
+			int info1MethodCount = info1.methods.length;
+			int info2MethodCount = info2.methods.length;
+			if (info1MethodCount == 0 && info2MethodCount > 0) {
+				return 1;
+			}
+			else if (info2MethodCount == 0 && info1MethodCount > 0) {
+				return -1;
+			}
+			else if (info1MethodCount == 1 & info2MethodCount > 1) {
+				return -1;
+
+			}
+			else if (info2MethodCount == 1 & info1MethodCount > 1) {
+				return 1;
+			}
+			int info1ParamCount = info1.params.length;
+			int info2ParamCount = info2.params.length;
+			return (info1ParamCount < info2ParamCount ? 1 : (info1ParamCount == info2ParamCount ? 0 : -1));
+		}
+	}
+	
 }
