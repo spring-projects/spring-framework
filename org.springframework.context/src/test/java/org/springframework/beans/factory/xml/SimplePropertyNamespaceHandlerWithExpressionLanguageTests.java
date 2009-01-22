@@ -24,7 +24,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Tests for combining the expression language and the p namespace. This test
+ * Tests for combining the expression language and the p namespace. Due to the required EL dependency, this test is in
+ * context module rather than the beans module.
  *
  * @author Arjen Poutsma
  */
