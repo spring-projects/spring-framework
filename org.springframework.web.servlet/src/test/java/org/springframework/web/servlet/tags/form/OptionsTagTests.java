@@ -24,12 +24,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockPageContext;
@@ -43,11 +44,13 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Scott Andrews
  */
-public class OptionsTagTests extends AbstractHtmlElementTagTests {
+public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 	private static final String COMMAND_NAME = "testBean";
 
+	private SelectTag selectTag;
 	private OptionsTag tag;
 
 	protected void onSetUp() {
@@ -56,7 +59,13 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 				return new TagWriter(getWriter());
 			}
 		};
-		this.tag.setParent(new SelectTag());
+		selectTag = new SelectTag() {
+			protected TagWriter createTagWriter() {
+				return new TagWriter(getWriter());
+			}
+		};
+		selectTag.setPageContext(getPageContext());
+		this.tag.setParent(selectTag);
 		this.tag.setPageContext(getPageContext());
 	}
 
@@ -148,22 +157,79 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithoutItems() throws Exception {
-		getPageContext().setAttribute(
-				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
-
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
+		this.selectTag.setPath("testBean");
+		
+		this.selectTag.doStartTag();
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
+		this.tag.doEndTag();
+		this.selectTag.doEndTag();
+		
 		String output = getOutput();
-		output = "<doc>" + output + "</doc>";
-
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-
+		
 		List children = rootElement.elements();
 		assertEquals("Incorrect number of children", 0, children.size());
+	}
+
+	public void testWithoutItemsEnumParent() throws Exception {
+		BeanWithEnum testBean = new BeanWithEnum();
+		testBean.setTestEnum(TestEnum.VALUE_2);
+		getPageContext().getRequest().setAttribute("testBean", testBean);
+		
+		this.selectTag.setPath("testBean.testEnum");
+
+		this.selectTag.doStartTag();
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.SKIP_BODY, result);
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+		this.selectTag.doEndTag();
+
+		String output = getWriter().toString();
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		
+		assertEquals(2, rootElement.elements().size());
+		Node value1 = rootElement.selectSingleNode("option[@value = 'VALUE_1']");
+		Node value2 = rootElement.selectSingleNode("option[@value = 'VALUE_2']");
+		assertEquals("TestEnum: VALUE_1", value1.getText());
+		assertEquals("TestEnum: VALUE_2", value2.getText());
+		assertEquals(value2, rootElement.selectSingleNode("option[@selected]"));
+	}
+
+	public void testWithoutItemsEnumParentWithExplicitLabelsAndValues() throws Exception {
+		BeanWithEnum testBean = new BeanWithEnum();
+		testBean.setTestEnum(TestEnum.VALUE_2);
+		getPageContext().getRequest().setAttribute("testBean", testBean);
+		
+		this.selectTag.setPath("testBean.testEnum");
+		this.tag.setItemLabel("enumLabel");
+		this.tag.setItemValue("enumValue");
+
+		this.selectTag.doStartTag();
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.SKIP_BODY, result);
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+		this.selectTag.doEndTag();
+
+		String output = getWriter().toString();
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		
+		assertEquals(2, rootElement.elements().size());
+		Node value1 = rootElement.selectSingleNode("option[@value = 'Value: VALUE_1']");
+		Node value2 = rootElement.selectSingleNode("option[@value = 'Value: VALUE_2']");
+		assertEquals("Label: VALUE_1", value1.getText());
+		assertEquals("Label: VALUE_2", value2.getText());
+		assertEquals(value2, rootElement.selectSingleNode("option[@selected]"));
 	}
 
 	protected void extendRequest(MockHttpServletRequest request) {

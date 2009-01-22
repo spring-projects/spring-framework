@@ -42,7 +42,8 @@ import org.springframework.web.servlet.support.BindStatus;
  * the <code>labelProperty</code>). These properties are then used when
  * rendering each element of the array/{@link Collection} as an '<code>option</code>'.
  * If either property name is omitted, the value of {@link Object#toString()} of
- * the corresponding array/{@link Collection} element is used instead.
+ * the corresponding array/{@link Collection} element is used instead.  However, 
+ * if the item is an enum, {@link Enum#name()} is used as the default value.
  * </p>
  * <h3>Using a {@link Map}:</h3>
  * <p>
@@ -83,6 +84,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Scott Andrews
  * @since 2.0
  */
 class OptionWriter {
@@ -134,6 +136,9 @@ class OptionWriter {
 		else if (this.optionSource instanceof Map) {
 			renderFromMap(tagWriter);
 		}
+		else if (this.optionSource instanceof Class && this.optionSource.getClass().isEnum()) {
+			renderFromEnum(tagWriter);
+		}
 		else {
 			throw new JspException(
 					"Type [" + this.optionSource.getClass().getName() + "] is not valid for option items");
@@ -178,6 +183,14 @@ class OptionWriter {
 	}
 
 	/**
+	 * Renders the inner '<code>option</code>' tags using the {@link #optionSource}.
+	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
+	 */
+	private void renderFromEnum(final TagWriter tagWriter) throws JspException {
+		doRenderFromCollection(CollectionUtils.arrayToList(((Class) this.optionSource).getEnumConstants()), tagWriter);
+	}
+
+	/**
 	 * Renders the inner '<code>option</code>' tags using the supplied {@link Collection} of
 	 * objects as the source. The value of the {@link #valueProperty} field is used
 	 * when rendering the '<code>value</code>' of the '<code>option</code>' and the value of the
@@ -187,7 +200,16 @@ class OptionWriter {
 		for (Iterator it = optionCollection.iterator(); it.hasNext();) {
 			Object item = it.next();
 			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
-			Object value = (this.valueProperty != null ? wrapper.getPropertyValue(this.valueProperty) : item);
+			Object value;
+			if (this.valueProperty != null) {
+				value = wrapper.getPropertyValue(this.valueProperty);
+			} 
+			else if (item instanceof Enum) {
+				value = ((Enum<?>) item).name();
+			} 
+			else {
+				value = item;
+			}
 			Object label = (this.labelProperty != null ? wrapper.getPropertyValue(this.labelProperty) : item);
 			renderOption(tagWriter, item, value, label);
 		}
