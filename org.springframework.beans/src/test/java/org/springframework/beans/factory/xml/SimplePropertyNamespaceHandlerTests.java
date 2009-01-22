@@ -16,22 +16,25 @@
 
 package org.springframework.beans.factory.xml;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.ClassPathResource;
 
-import test.beans.ITestBean;
-import test.beans.TestBean;
-
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  */
-public class ShortcutTests extends TestCase {
+public class SimplePropertyNamespaceHandlerTests {
 
-	public void testSimpleBeanConfigured() throws Exception {
-		XmlBeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("shortcutTests.xml", getClass()));
+	@Test
+	public void simpleBeanConfigured() throws Exception {
+		XmlBeanFactory beanFactory =
+				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
 		ITestBean rob = (TestBean) beanFactory.getBean("rob");
 		ITestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals("Rob Harrop", rob.getName());
@@ -39,27 +42,26 @@ public class ShortcutTests extends TestCase {
 		assertEquals(rob.getSpouse(), sally);
 	}
 
-	public void testInnerBeanConfigured() throws Exception {
-		XmlBeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("shortcutTests.xml", getClass()));
+	@Test
+	public void innerBeanConfigured() throws Exception {
+		XmlBeanFactory beanFactory =
+				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
 		TestBean sally = (TestBean) beanFactory.getBean("sally2");
-		ITestBean rob = (TestBean) sally.getSpouse();
+		ITestBean rob = sally.getSpouse();
 		assertEquals("Rob Harrop", rob.getName());
 		assertEquals(24, rob.getAge());
 		assertEquals(rob.getSpouse(), sally);
 	}
 
-	public void testWithPropertyDefinedTwice() throws Exception {
-		try {
-			new XmlBeanFactory(new ClassPathResource("shortcutTestsWithErrors.xml", getClass()));
-			fail("Should not be able to load a file with property specified twice.");
-		}
-		catch (BeanDefinitionStoreException e) {
-			// success
-		}
+	@Test(expected = BeanDefinitionStoreException.class)
+	public void withPropertyDefinedTwice() throws Exception {
+		new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTestsWithErrors.xml", getClass()));
 	}
 
-	public void testPropertyWithNameEndingInRef() throws Exception {
-		XmlBeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("shortcutTests.xml", getClass()));
+	@Test
+	public void propertyWithNameEndingInRef() throws Exception {
+		XmlBeanFactory beanFactory =
+				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
 		ITestBean sally = (TestBean) beanFactory.getBean("derivedSally");
 		assertEquals("r", sally.getSpouse().getName());
 	}
