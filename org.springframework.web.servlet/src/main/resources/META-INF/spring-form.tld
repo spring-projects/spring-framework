@@ -971,9 +971,9 @@
     </attribute>
 		<attribute>
 			<name>items</name>
-			<required>true</required>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>The Collection, Map or array of objects used to generate the inner 'option' tags</description>
+			<description>The Collection, Map or array of objects used to generate the inner 'option' tags.  This attribute is required unless the containing select's property for data binding is an Enum, in which case the enum's values are used.</description>
 		</attribute>
 		<attribute>
 			<name>itemValue</name>
@@ -1433,9 +1433,9 @@
 		<!-- radiobuttons specific attributes -->
 		<attribute>
 			<name>items</name>
-			<required>true</required>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>The Collection, Map or array of objects used to generate the 'input' tags with type 'radio'</description>
+			<description>The Collection, Map or array of objects used to generate the 'input' tags with type 'radio'.  This attribute is required unless the property for data binding is an Enum, in which case the enum's values are used.</description>
 		</attribute>
 		<attribute>
 			<name>itemValue</name>

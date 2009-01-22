@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * of '<code>checkbox</code>' or '<code>radio</code>'.
  *
  * @author Juergen Hoeller
+ * @author Scott Andrews
  * @since 2.5.2
  */
 public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElementTag {
@@ -191,6 +192,11 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		String labelProperty =
 				(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
 
+		Class<?> boundType = getBindStatus().getValueType();
+		if (itemsObject == null && boundType != null && boundType.isEnum()) {
+			itemsObject = boundType.getEnumConstants();
+		}
+		
 		if (itemsObject == null) {
 			throw new IllegalArgumentException("Attribute 'items' is required and must be a Collection, an Array or a Map");
 		}
@@ -229,7 +235,16 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 			String labelProperty, Object item, int itemIndex) throws JspException {
 
 		BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
-		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
+		Object renderValue;
+		if (valueProperty != null) {
+			renderValue = wrapper.getPropertyValue(valueProperty);
+		} 
+		else if (item instanceof Enum) {
+			renderValue = ((Enum<?>) item).name();
+		} 
+		else {
+			renderValue = item;
+		}
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
 		writeElementTag(tagWriter, item, renderValue, renderLabel, itemIndex);
 	}

@@ -33,6 +33,7 @@ import org.springframework.web.util.TagUtils;
  * 
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Scott Andrews
  * @since 2.0
  */
 public class OptionsTag extends AbstractHtmlElementTag {
@@ -146,7 +147,16 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		assertUnderSelectTag();
 		Object items = getItems();
-		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+		Object itemsObject = null;
+		if (items != null) {
+			itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+		} else {
+			Class<?> selectTagBoundType = ((SelectTag) findAncestorWithClass(this, SelectTag.class))
+				.getBindStatus().getValueType();
+			if (selectTagBoundType != null && selectTagBoundType.isEnum()) {
+				itemsObject = selectTagBoundType.getEnumConstants();
+			}
+		}
 		if (itemsObject != null) {
 			String itemValue = getItemValue();
 			String itemLabel = getItemLabel();
