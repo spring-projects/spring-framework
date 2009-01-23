@@ -34,6 +34,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Scott Andrews
  */
 public class ServletRequestDataBinderTests {
 
@@ -88,6 +89,59 @@ public class ServletRequestDataBinderTests {
 		request.removeParameter("postProcessed");
 		binder.bind(request);
 		assertFalse(target.isPostProcessed());
+	}
+
+	@Test
+	public void testFieldDefault() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("!postProcessed", "off");
+		request.addParameter("postProcessed", "on");
+		binder.bind(request);
+		assertTrue(target.isPostProcessed());
+
+		request.removeParameter("postProcessed");
+		binder.bind(request);
+		assertFalse(target.isPostProcessed());
+	}
+
+	@Test
+	public void testFieldDefaultPreemptsFieldMarker() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("!postProcessed", "on");
+		request.addParameter("_postProcessed", "visible");
+		request.addParameter("postProcessed", "on");
+		binder.bind(request);
+		assertTrue(target.isPostProcessed());
+
+		request.removeParameter("postProcessed");
+		binder.bind(request);
+		assertTrue(target.isPostProcessed());
+
+		request.removeParameter("!postProcessed");
+		binder.bind(request);
+		assertFalse(target.isPostProcessed());
+	}
+
+	@Test
+	public void testFieldDefaultNonBoolean() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("!name", "anonymous");
+		request.addParameter("name", "Scott");
+		binder.bind(request);
+		assertEquals("Scott", target.getName());
+
+		request.removeParameter("name");
+		binder.bind(request);
+		assertEquals("anonymous", target.getName());
 	}
 
 	@Test
