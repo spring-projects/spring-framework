@@ -34,14 +34,17 @@ import org.springframework.web.multipart.MultipartFile;
  * HTML checkboxes and select options: detecting that a field was part of
  * the form, but did not generate a request parameter because it was empty.
  * A field marker allows to detect that state and reset the corresponding
- * bean property accordingly.
+ * bean property accordingly. Default values, for parameters that are otherwise 
+ * not present, can specify a value for the field other then empty.
  *
  * @author Juergen Hoeller
+ * @author Scott Andrews
  * @since 1.2
  * @see #registerCustomEditor
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
+ * @see #setFieldDefaultPrefix
  * @see ServletRequestDataBinder
  */
 public class WebDataBinder extends DataBinder {
@@ -58,8 +61,18 @@ public class WebDataBinder extends DataBinder {
 	 */
 	public static final String DEFAULT_FIELD_MARKER_PREFIX = "_";
 
+	/**
+	 * Default prefix that field default parameters start with, followed by the field
+	 * name: e.g. "!subscribeToNewsletter" for a field "subscribeToNewsletter".
+	 * <p>Default parameters differ from field markers in that they provide a default 
+	 * value instead of an empty value.
+	 * @see #setFieldDefaultPrefix
+	 */
+	public static final String DEFAULT_FIELD_DEFAULT_PREFIX = "!";
 
 	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
+
+	private String fieldDefaultPrefix = DEFAULT_FIELD_DEFAULT_PREFIX;
 
 	private boolean bindEmptyMultipartFiles = true;
 
@@ -119,6 +132,32 @@ public class WebDataBinder extends DataBinder {
 	}
 
 	/**
+	 * Specify a prefix that can be used for parameters that indicate default
+	 * value fields, having "prefix + field" as name. The value of the default 
+	 * field is used when the field is not provided.
+	 * <p>Default is "!", for "!FIELD" parameters (e.g. "!subscribeToNewsletter").
+	 * Set this to null if you want to turn off the field defaults completely.
+	 * <p>HTML checkboxes only send a value when they're checked, so it is not
+	 * possible to detect that a formerly checked box has just been unchecked,
+	 * at least not with standard HTML means.  A default field is especially 
+	 * useful when a checkbox represents a non-boolean value.
+	 * <p>The presence of a default parameter preempts the behavior of a field 
+	 * marker for the given field.
+	 * @see #DEFAULT_FIELD_DEFAULT_PREFIX
+	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
+	 */
+	public void setFieldDefaultPrefix(String fieldDefaultPrefix) {
+		this.fieldDefaultPrefix = fieldDefaultPrefix;
+	}
+
+	/**
+	 * Return the prefix for parameters that mark default fields.
+	 */
+	public String getFieldDefaultPrefix() {
+		return this.fieldDefaultPrefix;
+	}
+
+	/**
 	 * Set whether to bind empty MultipartFile parameters. Default is "true".
 	 * <p>Turn this off if you want to keep an already bound MultipartFile
 	 * when the user resubmits the form without choosing a different file.
@@ -139,14 +178,40 @@ public class WebDataBinder extends DataBinder {
 
 
 	/**
-	 * This implementation performs a field marker check
+	 * This implementation performs a field default and marker check
 	 * before delegating to the superclass binding process.
+	 * @see #checkFieldDefaults
 	 * @see #checkFieldMarkers
 	 */
 	@Override
 	protected void doBind(MutablePropertyValues mpvs) {
+		checkFieldDefaults(mpvs);
 		checkFieldMarkers(mpvs);
 		super.doBind(mpvs);
+	}
+
+	/**
+	 * Check the given property values for field defaults,
+	 * i.e. for fields that start with the field default prefix.
+	 * <p>The existence of a field defaults indicates that the specified
+	 * value should be used if the field is otherwise not present.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @see #getFieldDefaultPrefix
+	 */
+	protected void checkFieldDefaults(MutablePropertyValues mpvs) {
+		if (getFieldDefaultPrefix() != null) {
+			String fieldDefaultPrefix = getFieldDefaultPrefix();
+			PropertyValue[] pvArray = mpvs.getPropertyValues();
+			for (PropertyValue pv : pvArray) {
+				if (pv.getName().startsWith(fieldDefaultPrefix)) {
+					String field = pv.getName().substring(fieldDefaultPrefix.length());
+					if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
+						mpvs.addPropertyValue(field, pv.getValue());
+					} 
+					mpvs.removePropertyValue(pv);
+				}
+			}
+		}
 	}
 
 	/**
