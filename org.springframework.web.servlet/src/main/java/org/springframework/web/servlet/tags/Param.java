@@ -20,6 +20,9 @@ package org.springframework.web.servlet.tags;
  * Bean used to pass name-value pair parameters from a {@link ParamTag} to a
  * {@link ParamAware} tag.
  * 
+ * <p>Attributes are the raw values passed to the spring:param tag and have not 
+ * been encoded or escaped. 
+ * 
  * @author Scott Andrews
  * @since 3.0
  * @see ParamTag
@@ -31,28 +34,28 @@ public class Param {
 	private String value;
 
 	/**
-	 * @return the non-encoded parameter name
+	 * @return the raw parameter name
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Set the non-encoded name of the parameter
+	 * Set the raw name of the parameter
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * @return the non-encoded parameter value
+	 * @return the raw parameter value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Set the non-encoded value of the parameter
+	 * Set the raw value of the parameter
 	 */
 	public void setValue(String value) {
 		this.value = value;
