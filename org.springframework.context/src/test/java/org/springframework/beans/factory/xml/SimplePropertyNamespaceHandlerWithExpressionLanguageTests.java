@@ -18,8 +18,8 @@ package org.springframework.beans.factory.xml;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import test.beans.ITestBean;
 
+import org.springframework.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
