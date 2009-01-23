@@ -20,13 +20,17 @@
 	<context:property-placeholder location="classpath:jdbc.properties"/>
 
 	<!--
-		Uses Apache Commons DBCP for connection pooling. See Commons DBCP documentation
-		for the required JAR files. Alternatively you can use another connection pool
-		such as C3P0, similarly configured using Spring.
+		Spring FactoryBean that creates a DataSource using Apache Commons DBCP for connection 
+		pooling. See Commons DBCP documentation for the required JAR files.  This factory bean
+		can populate the data source with a schema and data scripts if configured to do so.
+		
+		An alternate factory bean can be created for different connection pool implementations,
+		C3P0 for example.
 	-->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
-			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"
-			p:password="${jdbc.password}"/>
+	<bean id="dataSource" class="org.springframework.samples.petclinic.config.DbcpDataSourceFactory"
+			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" 
+			p:username="${jdbc.username}" p:password="${jdbc.password}" p:populate="${jdbc.populate}"
+			p:schemaLocation="${jdbc.schemaLocation}" p:dataLocation="${jdbc.dataLocation}"/>
 
 	<!-- JNDI DataSource for JEE environments -->
 	<!--
