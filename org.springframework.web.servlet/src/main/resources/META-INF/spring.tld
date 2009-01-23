@@ -385,7 +385,7 @@
 			<description>Escape XML special characters in the resulting URL.  'true' and 
 			'false' are supported.  Defaults to 'false' to maintain compatibility with 
 			the JSTL c:url tag.  Strongly recommended to set as 'true' when rendering 
-			directly to the JspWriter in an XML or HTML based file.</description>
+			directly to the JspWriter in an XML or HTML based document.</description>
 		</attribute>
 	</tag>
 

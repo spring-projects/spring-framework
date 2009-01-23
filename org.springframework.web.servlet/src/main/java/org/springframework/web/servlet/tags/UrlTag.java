@@ -37,25 +37,32 @@ import org.springframework.web.util.TagUtils;
  * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
  * compatibility in mind.
  * 
- * <p>
- * Enhancements to the JSTL functionality include:
+ * <p>Enhancements to the JSTL functionality include:
  * <ul>
  * <li>URL encoded template URI variables</li>
- * <li>Server and servlet relative URLs in addition to the standard context
- * relative.</li>
  * <li>XML escaping of URLs</li>
  * </ul>
  * 
- * <p>
- * Template URI variables are indicated in the {@link #setValue(String) 'value'}
- * attribute and marked by braces '{}'. The braces and attribute name are
- * replaced by the URL encoded value of a parameter. If no parameter is
- * available the literal value is passed through. Params matched to template
- * variables will not be added to the query string.
+ * <p>Template URI variables are indicated in the {@link #setValue(String) 'value'}
+ * attribute and marked by braces '{variableName}'. The braces and attribute name are
+ * replaced by the URL encoded value of a parameter defined with the spring:param tag 
+ * in the body of the url tag. If no parameter is available the literal value is 
+ * passed through. Params matched to template variables will not be added to the query 
+ * string.
  * 
- * <p>
- * URLs can be XML escaped by setting the {@link #setEscapeXml(String) 
+ * <p>Use of the spring:param tag for URI template variables is strongly recommended 
+ * over direct EL substitution as the values are URL encoded.  Failure to properly 
+ * encode URL can leave an application vulnerable to XSS and other injection attacks.
+ * 
+ * <p>URLs can be XML escaped by setting the {@link #setEscapeXml(String) 
  * 'escapeXml'} attribute to 'true', the default is 'false'.
+ * 
+ * <p>Example usage:
+ * <pre>&lt;spring:url value="/url/path/{variableName}"&gt;
+ *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
+ * &lt;/spring:url&gt;</pre>
+ * Results in:
+ * <code>/currentApplicationContext/url/path/more+than+JSTL+c%3Aurl</code>
  * 
  * @author Scott Andrews
  * @since 3.0

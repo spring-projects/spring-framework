@@ -23,8 +23,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
  * JSP tag for collecting name-value parameters and passing them to a
  * {@link ParamAware} ancestor in the tag hierarchy.
  * 
- * <p>
- * This tag must be nested under a param aware tag.
+ * <p>This tag must be nested under a param aware tag.
  * 
  * @author Scott Andrews
  * @since 3.0
