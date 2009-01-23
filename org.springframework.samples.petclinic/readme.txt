@@ -64,11 +64,6 @@ included in this sample application.
 By default, an embedded HSQL instance in configured.  No other steps are 
 necessary to get the data source up and running.
 
-To use HSQL as a remote database, open "src/jdbc.properties", comment out all 
-properties in the "HSQL Embedded Settings" section, uncomment all properties in 
-the "HSQL Settings" section.  Start the remote HSQLDB instance in the 
-"db/hsqldb" directory, for example using "server.bat".
-
 For MySQL, you'll need to use the corresponding schema and SQL scripts in the
 "db/mysql" subdirectory. Follow the steps outlined in
 "db/mysql/petclinic_db_setup_mysql.txt" for explicit details.
