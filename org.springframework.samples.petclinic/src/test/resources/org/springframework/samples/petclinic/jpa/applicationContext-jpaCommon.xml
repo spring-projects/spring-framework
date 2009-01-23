@@ -11,10 +11,12 @@
 
 	<tx:annotation-driven />
 
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"
-		p:password="${jdbc.password}" />
-
+	<bean id="dataSource" class="org.springframework.samples.petclinic.config.DbcpDataSourceFactory"
+			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" 
+			p:username="${jdbc.username}" p:password="${jdbc.password}" p:populate="${jdbc.populate}"
+			p:schemaLocation="${jdbc.schemaLocation}" p:dataLocation="${jdbc.dataLocation}"
+			p:dropLocation="${jdbc.dropLocation}"/>
+	
 	<!-- Note: the specific "jpaAdapter" bean sits in adapter context file -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 		p:dataSource-ref="dataSource" p:jpaVendorAdapter-ref="jpaAdapter">

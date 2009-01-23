@@ -62,6 +62,8 @@ public class DbcpDataSourceFactory implements FactoryBean<DataSource>, Disposabl
 
     private Resource dataLocation;
 
+    private Resource dropLocation;
+
     /**
      * The object created by this factory.
      */
@@ -115,6 +117,14 @@ public class DbcpDataSourceFactory implements FactoryBean<DataSource>, Disposabl
         this.dataLocation = testDataLocation;
     }
 
+    /**
+     * Sets the location of the file containing the drop scripts for the database.
+     * @param testDataLocation the location of the data file
+     */
+    public void setDropLocation(Resource testDropLocation) {
+        this.dropLocation = testDropLocation;
+    }
+
     // implementing FactoryBean
 
     // this method is called by Spring to expose the DataSource as a bean
@@ -163,6 +173,14 @@ public class DbcpDataSourceFactory implements FactoryBean<DataSource>, Disposabl
 
     private void populateDataSource() {
         DatabasePopulator populator = new DatabasePopulator(dataSource);
+        if (dropLocation != null) {
+            try {
+        		populator.populate(this.dropLocation);
+            } 
+            catch (Exception e) {
+               	// ignore
+            }
+        }
         populator.populate(this.schemaLocation);
         populator.populate(this.dataLocation);
     }
