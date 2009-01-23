@@ -1,0 +1,7 @@
+DROP TABLE visits;
+DROP TABLE pets;
+DROP TABLE owners;
+DROP TABLE types;
+DROP TABLE vet_specialties;
+DROP TABLE specialties;
+DROP TABLE vets;

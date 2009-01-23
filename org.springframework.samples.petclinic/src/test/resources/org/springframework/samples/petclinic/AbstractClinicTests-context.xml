@@ -13,8 +13,10 @@
 
 	<tx:annotation-driven/>
 
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
-			p:username="${jdbc.username}" p:password="${jdbc.password}" />
-
+	<bean id="dataSource" class="org.springframework.samples.petclinic.config.DbcpDataSourceFactory"
+			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" 
+			p:username="${jdbc.username}" p:password="${jdbc.password}" p:populate="${jdbc.populate}"
+			p:schemaLocation="${jdbc.schemaLocation}" p:dataLocation="${jdbc.dataLocation}"
+			p:dropLocation="${jdbc.dropLocation}"/>
+	
 </beans>
