@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,22 +50,23 @@ import org.springframework.util.Assert;
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
-public class SharedEntityManagerBean extends EntityManagerFactoryAccessor implements FactoryBean, InitializingBean {
+public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
+		implements FactoryBean<EntityManager>, InitializingBean {
 
-	private Class entityManagerInterface;
+	private Class<? extends EntityManager> entityManagerInterface;
 
 	private EntityManager shared;
 
 
 	/**
 	 * Specify the EntityManager interface to expose.
-	 * <p>Default is the the EntityManager interface as defined by the
+	 * <p>Default is the EntityManager interface as defined by the
 	 * EntityManagerFactoryInfo, if available. Else, the standard
 	 * <code>javax.persistence.EntityManager</code> interface will be used.
 	 * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
 	 * @see javax.persistence.EntityManager
 	 */
-	public void setEntityManagerInterface(Class entityManagerInterface) {
+	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
 		Assert.notNull(entityManagerInterface, "entityManagerInterface must not be null");
 		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
@@ -108,8 +109,8 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor implem
 		return this.shared;
 	}
 
-	public Class getObjectType() {
-		return this.entityManagerInterface;
+	public Class<? extends EntityManager> getObjectType() {
+		return (this.entityManagerInterface != null ? this.entityManagerInterface : EntityManager.class);
 	}
 
 	public boolean isSingleton() {

@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -41,6 +40,8 @@ import org.springframework.beans.TestBean;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
+import org.springframework.orm.jdo.support.SpringPersistenceManagerProxyBean;
+import org.springframework.orm.jdo.support.StandardPersistenceManagerProxyBean;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.MockJtaTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -93,13 +94,15 @@ public class JdoTransactionManagerTests extends TestCase {
 
 	public void testTransactionCommit() {
 		pmf.getConnectionFactory();
-		pmfControl.setReturnValue(null, 2);
+		pmfControl.setReturnValue(null, 3);
 		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 1);
+		pmf.getPersistenceManagerProxy();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
 		pm.flush();
-		pmControl.setVoidCallable(2);
+		pmControl.setVoidCallable(4);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.begin();
@@ -126,10 +129,23 @@ public class JdoTransactionManagerTests extends TestCase {
 				TransactionAwarePersistenceManagerFactoryProxy proxyFactory =
 						new TransactionAwarePersistenceManagerFactoryProxy();
 				proxyFactory.setTargetPersistenceManagerFactory(pmf);
-				PersistenceManagerFactory proxy = (PersistenceManagerFactory) proxyFactory.getObject();
-				assertEquals(pm.toString(), proxy.getPersistenceManager().toString());
-				proxy.getPersistenceManager().flush();
-				proxy.getPersistenceManager().close();
+				PersistenceManagerFactory pmfProxy = proxyFactory.getObject();
+				assertEquals(pm.toString(), pmfProxy.getPersistenceManager().toString());
+				pmfProxy.getPersistenceManager().flush();
+				pmfProxy.getPersistenceManager().close();
+
+				SpringPersistenceManagerProxyBean proxyBean = new SpringPersistenceManagerProxyBean();
+				proxyBean.setPersistenceManagerFactory(pmf);
+				proxyBean.afterPropertiesSet();
+				PersistenceManager pmProxy = proxyBean.getObject();
+				assertSame(pmf, pmProxy.getPersistenceManagerFactory());
+				pmProxy.flush();
+				pmProxy.close();
+
+				StandardPersistenceManagerProxyBean stdProxyBean = new StandardPersistenceManagerProxyBean();
+				stdProxyBean.setPersistenceManagerFactory(pmf);
+				PersistenceManager stdPmProxy = stdProxyBean.getObject();
+				stdPmProxy.flush();
 
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {

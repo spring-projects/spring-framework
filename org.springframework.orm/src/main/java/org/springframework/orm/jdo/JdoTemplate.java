@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Map;
-
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -77,6 +76,8 @@ import org.springframework.util.ClassUtils;
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
  * <p><b>NOTE: This class requires JDO 2.0 or higher, as of Spring 2.5.</b>
+ * As of Spring 3.0, it follows JDO 2.1 conventions in terms of generic
+ * parameter and return types, which still remaining compatible with JDO 2.0.
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
@@ -170,11 +171,11 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 
-	public Object execute(JdoCallback action) throws DataAccessException {
+	public <T> T execute(JdoCallback<T> action) throws DataAccessException {
 		return execute(action, isExposeNativePersistenceManager());
 	}
 
-	public Collection executeFind(JdoCallback action) throws DataAccessException {
+	public Collection executeFind(JdoCallback<?> action) throws DataAccessException {
 		Object result = execute(action, isExposeNativePersistenceManager());
 		if (result != null && !(result instanceof Collection)) {
 			throw new InvalidDataAccessApiUsageException(
@@ -192,7 +193,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
-	public Object execute(JdoCallback action, boolean exposeNativePersistenceManager) throws DataAccessException {
+	public <T> T execute(JdoCallback<T> action, boolean exposeNativePersistenceManager) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(
@@ -201,7 +202,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		    TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
 		try {
 			PersistenceManager pmToExpose = (exposeNativePersistenceManager ? pm : createPersistenceManagerProxy(pm));
-			Object result = action.doInJdo(pmToExpose);
+			T result = action.doInJdo(pmToExpose);
 			flushIfNecessary(pm, existingTransaction);
 			return postProcessResult(result, pm, existingTransaction);
 		}
@@ -248,7 +249,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @return the post-processed result object (can be simply be the passed-in object)
 	 * @see #execute(JdoCallback, boolean)
 	 */
-	protected Object postProcessResult(Object result, PersistenceManager pm, boolean existingTransaction) {
+	protected <T> T postProcessResult(T result, PersistenceManager pm, boolean existingTransaction) {
 		return result;
 	}
 
@@ -258,23 +259,23 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	//-------------------------------------------------------------------------
 
 	public Object getObjectById(final Object objectId) throws DataAccessException {
-		return execute(new JdoCallback() {
+		return execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.getObjectById(objectId, true);
 			}
 		}, true);
 	}
 
-	public Object getObjectById(final Class entityClass, final Object idValue) throws DataAccessException {
-		return execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+	public <T> T getObjectById(final Class<T> entityClass, final Object idValue) throws DataAccessException {
+		return execute(new JdoCallback<T>() {
+			public T doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.getObjectById(entityClass, idValue);
 			}
 		}, true);
 	}
 
 	public void evict(final Object entity) throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.evict(entity);
 				return null;
@@ -283,7 +284,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public void evictAll(final Collection entities) throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.evictAll(entities);
 				return null;
@@ -292,7 +293,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public void evictAll() throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.evictAll();
 				return null;
@@ -301,7 +302,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public void refresh(final Object entity) throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.refresh(entity);
 				return null;
@@ -310,7 +311,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public void refreshAll(final Collection entities) throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.refreshAll(entities);
 				return null;
@@ -319,7 +320,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public void refreshAll() throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.refreshAll();
 				return null;
@@ -327,24 +328,24 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public Object makePersistent(final Object entity) throws DataAccessException {
-		return execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+	public <T> T makePersistent(final T entity) throws DataAccessException {
+		return execute(new JdoCallback<T>() {
+			public T doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.makePersistent(entity);
 			}
 		}, true);
 	}
 
-	public Collection makePersistentAll(final Collection entities) throws DataAccessException {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+	public <T> Collection<T> makePersistentAll(final Collection<T> entities) throws DataAccessException {
+		return execute(new JdoCallback<Collection<T>>() {
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.makePersistentAll(entities);
 			}
 		}, true);
 	}
 
 	public void deletePersistent(final Object entity) throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.deletePersistent(entity);
 				return null;
@@ -353,7 +354,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public void deletePersistentAll(final Collection entities) throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.deletePersistentAll(entities);
 				return null;
@@ -361,26 +362,26 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public Object detachCopy(final Object entity) {
-		return execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+	public <T> T detachCopy(final T entity) {
+		return execute(new JdoCallback<T>() {
+			public T doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.detachCopy(entity);
 			}
 		}, true);
 	}
 
-	public Collection detachCopyAll(final Collection entities) {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+	public <T> Collection<T> detachCopyAll(final Collection<T> entities) {
+		return execute(new JdoCallback<Collection<T>>() {
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.detachCopyAll(entities);
 			}
 		}, true);
 	}
 
 	public void flush() throws DataAccessException {
-		execute(new JdoCallback() {
+		execute(new JdoCallback<Object>() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				getJdoDialect().flush(pm);
+				pm.flush();
 				return null;
 			}
 		}, true);
@@ -391,145 +392,154 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	// Convenience finder methods
 	//-------------------------------------------------------------------------
 
-	public Collection find(Class entityClass) throws DataAccessException {
+	public <T> Collection<T> find(Class<T> entityClass) throws DataAccessException {
 		return find(entityClass, null, null);
 	}
 
-	public Collection find(Class entityClass, String filter) throws DataAccessException {
+	public <T> Collection<T> find(Class<T> entityClass, String filter) throws DataAccessException {
 		return find(entityClass, filter, null);
 	}
 
-	public Collection find(final Class entityClass, final String filter, final String ordering)
+	public <T> Collection<T> find(final Class<T> entityClass, final String filter, final String ordering)
 			throws DataAccessException {
 
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection<T>>() {
+			@SuppressWarnings("unchecked")
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = (filter != null ? pm.newQuery(entityClass, filter) : pm.newQuery(entityClass));
 				prepareQuery(query);
 				if (ordering != null) {
 					query.setOrdering(ordering);
 				}
-				return query.execute();
+				return (Collection<T>) query.execute();
 			}
 		}, true);
 	}
 
-	public Collection find(Class entityClass, String filter, String parameters, Object[] values)
+	public <T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Object... values)
 			throws DataAccessException {
 
 		return find(entityClass, filter, parameters, values, null);
 	}
 
-	public Collection find(
-			final Class entityClass, final String filter, final String parameters, final Object[] values,
+	public <T> Collection<T> find(
+			final Class<T> entityClass, final String filter, final String parameters, final Object[] values,
 			final String ordering) throws DataAccessException {
 
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection<T>>() {
+			@SuppressWarnings("unchecked")
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				prepareQuery(query);
 				query.declareParameters(parameters);
 				if (ordering != null) {
 					query.setOrdering(ordering);
 				}
-				return query.executeWithArray(values);
+				return (Collection<T>) query.executeWithArray(values);
 			}
 		}, true);
 	}
 
-	public Collection find(Class entityClass, String filter, String parameters, Map values)
+	public <T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Map values)
 			throws DataAccessException {
 
 		return find(entityClass, filter, parameters, values, null);
 	}
 
-	public Collection find(
-			final Class entityClass, final String filter, final String parameters, final Map values,
+	public <T> Collection<T> find(
+			final Class<T> entityClass, final String filter, final String parameters, final Map values,
 			final String ordering) throws DataAccessException {
 
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection<T>>() {
+			@SuppressWarnings("unchecked")
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				prepareQuery(query);
 				query.declareParameters(parameters);
 				if (ordering != null) {
 					query.setOrdering(ordering);
 				}
-				return query.executeWithMap(values);
+				return (Collection<T>) query.executeWithMap(values);
 			}
 		}, true);
 	}
 
 	public Collection find(final String language, final Object queryObject) throws DataAccessException {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection>() {
+			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(language, queryObject);
 				prepareQuery(query);
-				return query.execute();
+				return (Collection) query.execute();
 			}
 		}, true);
 	}
 
 	public Collection find(final String queryString) throws DataAccessException {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection>() {
+			@SuppressWarnings("unchecked")
+			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
 				prepareQuery(query);
-				return query.execute();
+				return (Collection) query.execute();
 			}
 		}, true);
 	}
 
 	public Collection find(final String queryString, final Object[] values) throws DataAccessException {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection>() {
+			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
 				prepareQuery(query);
-				return query.executeWithArray(values);
+				return (Collection) query.executeWithArray(values);
 			}
 		}, true);
 	}
 
 	public Collection find(final String queryString, final Map values) throws DataAccessException {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection>() {
+			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
 				prepareQuery(query);
-				return query.executeWithMap(values);
+				return (Collection) query.executeWithMap(values);
 			}
 		}, true);
 	}
 
-	public Collection findByNamedQuery(final Class entityClass, final String queryName) throws DataAccessException {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newNamedQuery(entityClass, queryName);
-				prepareQuery(query);
-				return query.execute();
-			}
-		}, true);
-	}
-
-	public Collection findByNamedQuery(final Class entityClass, final String queryName, final Object[] values)
+	public <T> Collection<T> findByNamedQuery(final Class<T> entityClass, final String queryName)
 			throws DataAccessException {
 
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection<T>>() {
+			@SuppressWarnings("unchecked")
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newNamedQuery(entityClass, queryName);
 				prepareQuery(query);
-				return query.executeWithArray(values);
+				return (Collection<T>) query.execute();
 			}
 		}, true);
 	}
 
-	public Collection findByNamedQuery(final Class entityClass, final String queryName, final Map values)
+	public <T> Collection<T> findByNamedQuery(final Class<T> entityClass, final String queryName, final Object[] values)
 			throws DataAccessException {
 
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
+		return execute(new JdoCallback<Collection<T>>() {
+			@SuppressWarnings("unchecked")
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newNamedQuery(entityClass, queryName);
 				prepareQuery(query);
-				return query.executeWithMap(values);
+				return (Collection<T>) query.executeWithArray(values);
+			}
+		}, true);
+	}
+
+	public <T> Collection<T> findByNamedQuery(final Class<T> entityClass, final String queryName, final Map values)
+			throws DataAccessException {
+
+		return execute(new JdoCallback<Collection<T>>() {
+			@SuppressWarnings("unchecked")
+			public Collection<T> doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newNamedQuery(entityClass, queryName);
+				prepareQuery(query);
+				return (Collection<T>) query.executeWithMap(values);
 			}
 		}, true);
 	}
@@ -537,7 +547,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	/**
 	 * Prepare the given JDO query object. To be used within a JdoCallback.
-	 * Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
 	 * the call is a no-op.
 	 * <p>In general, prefer a proxied PersistenceManager instead, which will
 	 * automatically apply the transaction timeout (through the use of a special
@@ -588,12 +598,10 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			// Invoke method on target PersistenceManager.
 			try {
 				Object retVal = method.invoke(this.target, args);
-
 				// If return value is a JDO Query object, apply transaction timeout.
 				if (retVal instanceof Query) {
 					prepareQuery(((Query) retVal));
 				}
-
 				return retVal;
 			}
 			catch (InvocationTargetException ex) {

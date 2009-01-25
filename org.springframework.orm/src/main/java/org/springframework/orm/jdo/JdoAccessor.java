@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 * PersistenceManagers.
 	 */
 	public PersistenceManagerFactory getPersistenceManagerFactory() {
-		return persistenceManagerFactory;
+		return this.persistenceManagerFactory;
 	}
 
 	/**
@@ -120,7 +120,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 * Return if this accessor should flush changes to the database eagerly.
 	 */
 	public boolean isFlushEager() {
-		return flushEager;
+		return this.flushEager;
 	}
 
 	/**
@@ -129,7 +129,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 */
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
-			throw new IllegalArgumentException("persistenceManagerFactory is required");
+			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
 		}
 		// Build default JdoDialect if none explicitly specified.
 		if (this.jdoDialect == null) {
@@ -148,7 +148,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	protected void flushIfNecessary(PersistenceManager pm, boolean existingTransaction) throws JDOException {
 		if (isFlushEager()) {
 			logger.debug("Eagerly flushing JDO persistence manager");
-			getJdoDialect().flush(pm);
+			pm.flush();
 		}
 	}
 

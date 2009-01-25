@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
@@ -151,6 +150,26 @@ public abstract class SharedEntityManagerCreator {
 				// Deliver toString without touching a target EntityManager.
 				return "Shared EntityManager proxy for target factory [" + this.targetFactory + "]";
 			}
+			else if (method.getName().equals("getEntityManagerFactory")) {
+				// JPA 2.0: return EntityManagerFactory without creating an EntityManager.
+				return this.targetFactory;
+			}
+			else if (method.getName().equals("getQueryBuilder")) {
+				// JPA 2.0: return EntityManagerFactory's QueryBuilder (avoid creation of EntityManager).
+				try {
+					return EntityManagerFactory.class.getMethod("getQueryBuilder").invoke(this.targetFactory);
+				}
+				catch (InvocationTargetException ex) {
+					throw ex.getTargetException();
+				}
+			}
+			else if (method.getName().equals("unwrap")) {
+				// JPA 2.0: handle unwrap method - could be a proxy match.
+				Class targetClass = (Class) args[0];
+				if (targetClass == null || targetClass.isInstance(proxy)) {
+					return proxy;
+				}
+			}
 			else if (method.getName().equals("isOpen")) {
 				// Handle isOpen method: always return true.
 				return true;
@@ -175,12 +194,23 @@ public abstract class SharedEntityManagerCreator {
 			EntityManager target =
 					EntityManagerFactoryUtils.doGetTransactionalEntityManager(this.targetFactory, this.properties);
 
-			// Handle EntityManagerProxy interface.
 			if (method.getName().equals("getTargetEntityManager")) {
+				// Handle EntityManagerProxy interface.
 				if (target == null) {
 					throw new IllegalStateException("No transactional EntityManager available");
 				}
 				return target;
+			}
+			else if (method.getName().equals("unwrap")) {
+				// Handle JPA 2.0 unwrap method - could be a proxy match.
+				Class targetClass = (Class) args[0];
+				if (targetClass == null || targetClass.isInstance(proxy)) {
+					return proxy;
+				}
+				// We need a transactional target now.
+				if (target == null) {
+					throw new IllegalStateException("No transactional EntityManager available");
+				}
 			}
 
 			// Regular EntityManager operations.
@@ -196,10 +226,16 @@ public abstract class SharedEntityManagerCreator {
 			// Invoke method on current EntityManager.
 			try {
 				Object result = method.invoke(target, args);
-				if (isNewEm && result instanceof Query) {
-					result = Proxy.newProxyInstance(Query.class.getClassLoader(), new Class[] {Query.class},
-							new DeferredQueryInvocationHandler((Query) result, target));
-					isNewEm = false;
+				if (result instanceof Query) {
+					Query query = (Query) result;
+					if (isNewEm) {
+						result = Proxy.newProxyInstance(Query.class.getClassLoader(), new Class[] {Query.class},
+								new DeferredQueryInvocationHandler(query, target));
+						isNewEm = false;
+					}
+					else {
+						EntityManagerFactoryUtils.applyTransactionTimeout(query, this.targetFactory);
+					}
 				}
 				return result;
 			}
@@ -240,6 +276,13 @@ public abstract class SharedEntityManagerCreator {
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of EntityManager proxy.
 				return hashCode();
+			}
+			else if (method.getName().equals("unwrap")) {
+				// Handle JPA 2.0 unwrap method - could be a proxy match.
+				Class targetClass = (Class) args[0];
+				if (targetClass == null || targetClass.isInstance(proxy)) {
+					return proxy;
+				}
 			}
 
 			// Invoke method on actual Query object.

@@ -360,7 +360,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
 			String beanName = (String) this.entityInterceptor;
-			return (Interceptor) this.beanFactory.getBean(beanName, Interceptor.class);
+			return this.beanFactory.getBean(beanName, Interceptor.class);
 		}
 		else {
 			return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import com.ibatis.common.xml.NodeletException;
@@ -68,7 +67,7 @@ import org.springframework.util.ObjectUtils;
  * @see SqlMapClientTemplate#setSqlMapClient
  * @see SqlMapClientTemplate#setDataSource
  */
-public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
+public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, InitializingBean {
 
 	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
 
@@ -333,24 +332,24 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 
 		SqlMapClient client = null;
 		SqlMapConfigParser configParser = new SqlMapConfigParser();
-		for (int i = 0; i < configLocations.length; i++) {
-			InputStream is = configLocations[i].getInputStream();
+		for (Resource configLocation : configLocations) {
+			InputStream is = configLocation.getInputStream();
 			try {
 				client = configParser.parse(is, properties);
 			}
 			catch (RuntimeException ex) {
-				throw new NestedIOException("Failed to parse config resource: " + configLocations[i], ex.getCause());
+				throw new NestedIOException("Failed to parse config resource: " + configLocation, ex.getCause());
 			}
 		}
 
 		if (mappingLocations != null) {
 			SqlMapParser mapParser = SqlMapParserFactory.createSqlMapParser(configParser);
-			for (int i = 0; i < mappingLocations.length; i++) {
+			for (Resource mappingLocation : mappingLocations) {
 				try {
-					mapParser.parse(mappingLocations[i].getInputStream());
+					mapParser.parse(mappingLocation.getInputStream());
 				}
 				catch (NodeletException ex) {
-					throw new NestedIOException("Failed to parse mapping resource: " + mappingLocations[i], ex);
+					throw new NestedIOException("Failed to parse mapping resource: " + mappingLocation, ex);
 				}
 			}
 		}
@@ -381,11 +380,11 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 
-	public Object getObject() {
+	public SqlMapClient getObject() {
 		return this.sqlMapClient;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends SqlMapClient> getObjectType() {
 		return (this.sqlMapClient != null ? this.sqlMapClient.getClass() : SqlMapClient.class);
 	}
 

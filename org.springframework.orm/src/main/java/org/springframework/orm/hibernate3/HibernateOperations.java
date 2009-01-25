@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public interface HibernateOperations {
 	 * @see org.springframework.transaction
 	 * @see org.hibernate.Session
 	 */
-	Object execute(HibernateCallback action) throws DataAccessException;
+	<T> T execute(HibernateCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute the specified action assuming that the result object is a
@@ -96,7 +96,7 @@ public interface HibernateOperations {
 	 * @return a List result returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
-	List executeFind(HibernateCallback action) throws DataAccessException;
+	List executeFind(HibernateCallback<?> action) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -530,7 +530,7 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#merge(String, Object)
 	 * @see #saveOrUpdate
 	 */
-	Object merge(String entityName, Object entity) throws DataAccessException;
+	<T> T merge(String entityName, T entity) throws DataAccessException;
 
 	/**
 	 * Delete the given persistent instance.

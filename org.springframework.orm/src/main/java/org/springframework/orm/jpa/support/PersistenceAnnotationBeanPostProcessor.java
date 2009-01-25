@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -405,7 +404,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			}
 			if (jndiName != null) {
 				try {
-					return (EntityManagerFactory) lookup(jndiName, EntityManagerFactory.class);
+					return lookup(jndiName, EntityManagerFactory.class);
 				}
 				catch (NamingException ex) {
 					throw new IllegalStateException("Could not obtain EntityManagerFactory [" + jndiName + "] from JNDI", ex);
@@ -437,7 +436,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			}
 			if (jndiName != null) {
 				try {
-					return (EntityManager) lookup(jndiName, EntityManager.class);
+					return lookup(jndiName, EntityManager.class);
 				}
 				catch (NamingException ex) {
 					throw new IllegalStateException("Could not obtain EntityManager [" + jndiName + "] from JNDI", ex);

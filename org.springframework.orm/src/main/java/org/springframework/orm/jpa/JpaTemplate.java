@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -143,11 +142,11 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 
-	public Object execute(JpaCallback action) throws DataAccessException {
+	public <T> T execute(JpaCallback<T> action) throws DataAccessException {
 		return execute(action, isExposeNativeEntityManager());
 	}
 
-	public List executeFind(JpaCallback action) throws DataAccessException {
+	public List executeFind(JpaCallback<?> action) throws DataAccessException {
 		Object result = execute(action, isExposeNativeEntityManager());
 		if (!(result instanceof List)) {
 			throw new InvalidDataAccessApiUsageException(
@@ -165,7 +164,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JPA errors
 	 */
-	public Object execute(JpaCallback action, boolean exposeNativeEntityManager) throws DataAccessException {
+	public <T> T execute(JpaCallback<T> action, boolean exposeNativeEntityManager) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
 		EntityManager em = getEntityManager();
@@ -181,7 +180,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
 		try {
 			EntityManager emToExpose = (exposeNativeEntityManager ? em : createEntityManagerProxy(em));
-			Object result = action.doInJpa(emToExpose);
+			T result = action.doInJpa(emToExpose);
 			flushIfNecessary(em, !isNewEm);
 			return result;
 		}
@@ -226,35 +225,32 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	// Convenience methods for load, save, delete
 	//-------------------------------------------------------------------------
 
-	@SuppressWarnings("unchecked")
 	public <T> T find(final Class<T> entityClass, final Object id) throws DataAccessException {
-		return (T) execute(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<T>() {
+			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.find(entityClass, id);
 			}
 		}, true);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T getReference(final Class<T> entityClass, final Object id) throws DataAccessException {
-		return (T) execute(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<T>() {
+			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.getReference(entityClass, id);
 			}
 		}, true);
 	}
 
 	public boolean contains(final Object entity) throws DataAccessException {
-		Boolean result = (Boolean) execute(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<Boolean>() {
+			public Boolean doInJpa(EntityManager em) throws PersistenceException {
 				return em.contains(entity);
 			}
 		}, true);
-		return result;
 	}
 
 	public void refresh(final Object entity) throws DataAccessException {
-		execute(new JpaCallback() {
+		execute(new JpaCallback<Object>() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.refresh(entity);
 				return null;
@@ -263,7 +259,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 	public void persist(final Object entity) throws DataAccessException {
-		execute(new JpaCallback() {
+		execute(new JpaCallback<Object>() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.persist(entity);
 				return null;
@@ -271,17 +267,16 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T merge(final T entity) throws DataAccessException {
-		return (T) execute(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<T>() {
+			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.merge(entity);
 			}
 		}, true);
 	}
 
 	public void remove(final Object entity) throws DataAccessException {
-		execute(new JpaCallback() {
+		execute(new JpaCallback<Object>() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.remove(entity);
 				return null;
@@ -290,7 +285,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 	public void flush() throws DataAccessException {
-		execute(new JpaCallback() {
+		execute(new JpaCallback<Object>() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.flush();
 				return null;
@@ -308,9 +303,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 	public List find(final String queryString, final Object... values) throws DataAccessException {
-		return executeFind(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<List>() {
+			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
+				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
 						queryObject.setParameter(i + 1, values[i]);
@@ -322,9 +318,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 	public List findByNamedParams(final String queryString, final Map<String, ?> params) throws DataAccessException {
-		return executeFind(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<List>() {
+			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
+				prepareQuery(queryObject);
 				if (params != null) {
 					for (Map.Entry<String, ?> entry : params.entrySet()) {
 						queryObject.setParameter(entry.getKey(), entry.getValue());
@@ -340,9 +337,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 	public List findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
-		return executeFind(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<List>() {
+			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
+				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
 						queryObject.setParameter(i + 1, values[i]);
@@ -356,9 +354,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	public List findByNamedQueryAndNamedParams(final String queryName, final Map<String, ?> params)
 			throws DataAccessException {
 
-		return executeFind(new JpaCallback() {
-			public Object doInJpa(EntityManager em) throws PersistenceException {
+		return execute(new JpaCallback<List>() {
+			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
+				prepareQuery(queryObject);
 				if (params != null) {
 					for (Map.Entry<String, ?> entry : params.entrySet()) {
 						queryObject.setParameter(entry.getKey(), entry.getValue());
@@ -371,9 +370,31 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
 
 	/**
+	 * Prepare the given JPA query object. To be used within a JpaCallback.
+	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * the call is a no-op.
+	 * <p>In general, prefer a proxied EntityManager instead, which will
+	 * automatically apply the transaction timeout (through the use of a special
+	 * EntityManager proxy). You need to set the "exposeNativeEntityManager"
+	 * property to "false" to activate this. Note that you won't be able to cast
+	 * to a provider-specific JPA EntityManager class anymore then.
+	 * @param query the JPA query object
+	 * @see JpaCallback#doInJpa
+	 * @see EntityManagerFactoryUtils#applyTransactionTimeout
+	 * @see #setExposeNativeEntityManager
+	 */
+	public void prepareQuery(Query query) {
+		EntityManagerFactory emf = getEntityManagerFactory();
+		if (emf != null) {
+			EntityManagerFactoryUtils.applyTransactionTimeout(query, getEntityManagerFactory());
+		}
+	}
+
+
+	/**
 	 * Invocation handler that suppresses close calls on JPA EntityManagers.
-	 * Also prepares returned Query and Criteria objects.
-	 * @see javax.persistence.EntityManager#close
+	 * Also prepares returned Query objects.
+	 * @see javax.persistence.EntityManager#close()
 	 */
 	private class CloseSuppressingInvocationHandler implements InvocationHandler {
 
@@ -401,7 +422,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
 			// Invoke method on target EntityManager.
 			try {
-				return method.invoke(this.target, args);
+				Object retVal = method.invoke(this.target, args);
+				// If return value is a JPA Query object, apply transaction timeout.
+				if (retVal instanceof Query) {
+					prepareQuery(((Query) retVal));
+				}
+				return retVal;
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();

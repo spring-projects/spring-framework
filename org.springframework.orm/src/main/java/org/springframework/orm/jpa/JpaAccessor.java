@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public abstract class JpaAccessor extends EntityManagerFactoryAccessor implement
 	public void afterPropertiesSet() {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		if (emf == null && getEntityManager() == null) {
-			throw new IllegalArgumentException("entityManagerFactory or entityManager is required");
+			throw new IllegalArgumentException("'entityManagerFactory' or 'entityManager' is required");
 		}
 		if (emf instanceof EntityManagerFactoryInfo) {
 			JpaDialect jpaDialect = ((EntityManagerFactoryInfo) emf).getJpaDialect();

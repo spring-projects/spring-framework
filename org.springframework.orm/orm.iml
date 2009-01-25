@@ -162,11 +162,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/javax.jdo/com.springsource.javax.jdo/2.0.0/com.springsource.javax.jdo-2.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.jdo/com.springsource.javax.jdo/2.1.0/com.springsource.javax.jdo-2.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/javax.jdo/com.springsource.javax.jdo/2.0.0/com.springsource.javax.jdo-sources-2.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.jdo/com.springsource.javax.jdo/2.1.0/com.springsource.javax.jdo-sources-2.1.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

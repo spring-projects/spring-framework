@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalDataStoreException;
@@ -125,17 +124,12 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	public void testTemplateExecuteWithThreadBoundAndFlushEager() {
-		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
-		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
-
-		dialect.flush(pm);
-		dialectControl.setVoidCallable(1);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pmfControl.replay();
 		pmControl.replay();
-		dialectControl.replay();
 
 		JdoTemplate jt = new JdoTemplate(pmf);
-		jt.setJdoDialect(dialect);
 		jt.setFlushEager(true);
 		jt.setAllowCreate(false);
 		TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
@@ -148,7 +142,6 @@ public class JdoTemplateTests extends TestCase {
 		});
 		assertTrue("Correct result list", result == l);
 		TransactionSynchronizationManager.unbindResource(pmf);
-		dialectControl.verify();
 	}
 
 	public void testGetObjectById() {
@@ -373,23 +366,17 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	public void testFlushWithDialect() {
-		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
-		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
-
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
-		dialect.flush(pm);
-		dialectControl.setVoidCallable(1);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		pmfControl.replay();
 		pmControl.replay();
-		dialectControl.replay();
 
 		JdoTemplate jt = new JdoTemplate(pmf);
-		jt.setJdoDialect(dialect);
 		jt.flush();
-		dialectControl.verify();
 	}
 
 	public void testFind() {

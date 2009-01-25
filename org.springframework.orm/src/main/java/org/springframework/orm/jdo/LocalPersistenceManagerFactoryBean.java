@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
@@ -46,14 +45,18 @@ import org.springframework.util.CollectionUtils;
  * dependency injection. Note that switching to a JNDI lookup or to a bean-style
  * PersistenceManagerFactory instance is just a matter of configuration!
  *
+ * <p><b>NOTE: This class requires JDO 2.0 or higher, as of Spring 2.5.</b>
+ * Since JDO 2.1, it will also expose the JPA {@link javax.persistence.EntityManagerFactory}
+ * as long as the JDO provider creates a {@link javax.jdo.JDOEntityManagerFactory} reference
+ * underneath, which means that this class can be used as a replacement for
+ * {@link org.springframework.orm.jpa.LocalEntityManagerFactoryBean} in such a scenario.
+ *
  * <p>Configuration settings can either be read from a properties file,
  * specified as "configLocation", or locally specified. Properties
  * specified as "jdoProperties" here will override any settings in a file.
  * On JDO 2.1, you may alternatively specify a "persistenceManagerFactoryName",
  * referring to a PMF definition in "META-INF/jdoconfig.xml"
  * (see {@link #setPersistenceManagerFactoryName}).
- *
- * <p><b>NOTE: This class requires JDO 2.0 or higher, as of Spring 2.5.</b>
  *
  * <p>This class also implements the
  * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
@@ -105,8 +108,8 @@ import org.springframework.util.CollectionUtils;
  * @see javax.jdo.PersistenceManagerFactory#close()
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-public class LocalPersistenceManagerFactoryBean
-		implements FactoryBean, BeanClassLoaderAware, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
+public class LocalPersistenceManagerFactoryBean implements FactoryBean<PersistenceManagerFactory>,
+		BeanClassLoaderAware, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -272,11 +275,11 @@ public class LocalPersistenceManagerFactoryBean
 	/**
 	 * Return the singleton PersistenceManagerFactory.
 	 */
-	public Object getObject() {
+	public PersistenceManagerFactory getObject() {
 		return this.persistenceManagerFactory;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends PersistenceManagerFactory> getObjectType() {
 		return (this.persistenceManagerFactory != null ?
 		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
 	}
