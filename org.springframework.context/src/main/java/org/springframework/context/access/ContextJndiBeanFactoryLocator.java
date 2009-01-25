@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 	 */
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		try {
-			String beanFactoryPath = (String) lookup(factoryKey, String.class);
+			String beanFactoryPath = lookup(factoryKey, String.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Bean factory path from JNDI environment variable [" + factoryKey +
 						"] is: " + beanFactoryPath);
