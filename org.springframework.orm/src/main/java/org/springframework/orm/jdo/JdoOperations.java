@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public interface JdoOperations {
 	 * @see org.springframework.transaction
 	 * @see javax.jdo.PersistenceManager
 	 */
-	Object execute(JdoCallback action) throws DataAccessException;
+	<T> T execute(JdoCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute the specified action assuming that the result object is a
@@ -77,7 +77,7 @@ public interface JdoOperations {
 	 * @return a Collection result returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
-	Collection executeFind(JdoCallback action) throws DataAccessException;
+	Collection executeFind(JdoCallback<?> action) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -113,7 +113,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.PersistenceManager#getObjectById(Object, boolean)
 	 * @see javax.jdo.PersistenceManager#getObjectById(Class, Object)
 	 */
-	Object getObjectById(Class entityClass, Object idValue) throws DataAccessException;
+	<T> T getObjectById(Class<T> entityClass, Object idValue) throws DataAccessException;
 
 	/**
 	 * Remove the given object from the PersistenceManager cache.
@@ -169,7 +169,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
 	 */
-	Object makePersistent(Object entity) throws DataAccessException;
+	<T> T makePersistent(T entity) throws DataAccessException;
 
 	/**
 	 * Make the given transient instances persistent.
@@ -179,7 +179,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
 	 */
-	Collection makePersistentAll(Collection entities) throws DataAccessException;
+	<T> Collection<T> makePersistentAll(Collection<T> entities) throws DataAccessException;
 
 	/**
 	 * Delete the given persistent instance.
@@ -206,7 +206,7 @@ public interface JdoOperations {
 	 * @return the corresponding detached instance
 	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
 	 */
-	Object detachCopy(Object entity);
+	<T> T detachCopy(T entity);
 
 	/**
 	 * Detach copies of the given persistent instances from the current JDO transaction,
@@ -215,7 +215,7 @@ public interface JdoOperations {
 	 * @return the corresponding detached instances
 	 * @see javax.jdo.PersistenceManager#detachCopyAll(Collection)
 	 */
-	Collection detachCopyAll(Collection entities);
+	<T> Collection<T> detachCopyAll(Collection<T> entities);
 
 	/**
 	 * Flush all transactional modifications to the database.
@@ -240,7 +240,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class)
 	 */
-	Collection find(Class entityClass) throws DataAccessException;
+	<T> Collection<T> find(Class<T> entityClass) throws DataAccessException;
 
 	/**
 	 * Find all persistent instances of the given class that match the given
@@ -251,7 +251,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
 	 */
-	Collection find(Class entityClass, String filter) throws DataAccessException;
+	<T> Collection<T> find(Class<T> entityClass, String filter) throws DataAccessException;
 
 	/**
 	 * Find all persistent instances of the given class that match the given
@@ -264,7 +264,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(Class entityClass, String filter, String ordering) throws DataAccessException;
+	<T> Collection<T> find(Class<T> entityClass, String filter, String ordering) throws DataAccessException;
 
 	/**
 	 * Find all persistent instances of the given class that match the given
@@ -279,7 +279,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#declareParameters
 	 * @see javax.jdo.Query#executeWithArray
 	 */
-	Collection find(Class entityClass, String filter, String parameters, Object[] values)
+	<T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Object[] values)
 			throws DataAccessException;
 
 	/**
@@ -298,7 +298,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#executeWithArray
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(Class entityClass, String filter, String parameters, Object[] values, String ordering)
+	<T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Object[] values, String ordering)
 			throws DataAccessException;
 
 	/**
@@ -314,7 +314,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#declareParameters
 	 * @see javax.jdo.Query#executeWithMap
 	 */
-	Collection find(Class entityClass, String filter, String parameters, Map values)
+	<T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Map values)
 			throws DataAccessException;
 
 	/**
@@ -333,7 +333,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#executeWithMap
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(Class entityClass, String filter, String parameters, Map values, String ordering)
+	<T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Map values, String ordering)
 			throws DataAccessException;
 
 	/**
@@ -387,7 +387,8 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
 	 */
-	Collection findByNamedQuery(Class entityClass, String queryName) throws DataAccessException;
+	<T> Collection<T> findByNamedQuery(Class<T> entityClass, String queryName)
+			throws DataAccessException;
 
 	/**
 	 * Find persistent instances through the given named query.
@@ -398,7 +399,8 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
 	 */
-	Collection findByNamedQuery(Class entityClass, String queryName, Object[] values) throws DataAccessException;
+	<T> Collection<T> findByNamedQuery(Class<T> entityClass, String queryName, Object[] values)
+			throws DataAccessException;
 
 	/**
 	 * Find persistent instances through the given named query.
@@ -409,6 +411,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
 	 */
-	Collection findByNamedQuery(Class entityClass, String queryName, Map values) throws DataAccessException;
+	<T> Collection<T> findByNamedQuery(Class<T> entityClass, String queryName, Map values)
+			throws DataAccessException;
 
 }

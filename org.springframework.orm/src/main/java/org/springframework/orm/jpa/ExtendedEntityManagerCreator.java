@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.lang.reflect.Proxy;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -294,7 +293,7 @@ public abstract class ExtendedEntityManagerCreator {
 			this.target = target;
 			this.plusOperations = plusOperations;
 			this.exceptionTranslator = exceptionTranslator;
-			this.jta = (jta != null ? jta.booleanValue() : isJtaEntityManager());
+			this.jta = (jta != null ? jta : isJtaEntityManager());
 			this.containerManaged = containerManaged;
 		}
 
@@ -321,7 +320,15 @@ public abstract class ExtendedEntityManagerCreator {
 				return hashCode();
 			}
 			else if (method.getName().equals("getTargetEntityManager")) {
+				// Handle EntityManagerProxy interface.
 				return this.target;
+			}
+			else if (method.getName().equals("unwrap")) {
+				// Handle JPA 2.0 unwrap method - could be a proxy match.
+				Class targetClass = (Class) args[0];
+				if (targetClass == null || targetClass.isInstance(proxy)) {
+					return proxy;
+				}
 			}
 			else if (method.getName().equals("isOpen")) {
 				if (this.containerManaged) {

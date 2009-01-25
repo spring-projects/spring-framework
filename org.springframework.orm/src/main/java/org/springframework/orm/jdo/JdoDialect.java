@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.jdo;
 
 import java.sql.SQLException;
-
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -146,21 +145,10 @@ public interface JdoDialect {
 			throws JDOException, SQLException;
 
 	/**
-	 * Flush the given PersistenceManager, i.e. flush all changes (that have been
-	 * applied to persistent objects) to the underlying database. This method will
-	 * just get invoked when eager flushing is actually necessary, for example when
-	 * JDBC access code needs to see changes within the same transaction.
-	 * @param pm the current JDO PersistenceManager
-	 * @throws JDOException in case of errors
-	 * @see JdoAccessor#setFlushEager
-	 */
-	void flush(PersistenceManager pm) throws JDOException;
-
-	/**
 	 * Apply the given timeout to the given JDO query object.
 	 * <p>Invoked with the remaining time of a specified transaction timeout, if any.
 	 * @param query the JDO query object to apply the timeout to
-	 * @param timeout the timeout value to apply
+	 * @param timeout the timeout value (seconds) to apply
 	 * @throws JDOException if thrown by JDO methods
 	 * @see JdoTemplate#prepareQuery
 	 */

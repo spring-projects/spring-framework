@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jdo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -182,20 +181,13 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	}
 
 	/**
-	 * This implementation delegates to JDO 2.0's <code>flush</code> method.
-	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
-	 * vendor-specific mechanism there.
-	 * @see javax.jdo.PersistenceManager#flush()
-	 */
-	public void flush(PersistenceManager pm) throws JDOException {
-		pm.flush();
-	}
-
-	/**
-	 * This implementation logs a warning that it cannot apply a query timeout.
+	 * This implementation sets the JPA 2.0 query hints "javax.persistence.lock.timeout"
+	 * and "javax.persistence.query.timeout", assuming that JDO 2.1 providers are often
+	 * JPA providers as well.
 	 */
 	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
-		logger.info("DefaultJdoDialect does not support query timeouts: ignoring remaining transaction time");
+		query.addExtension("javax.persistence.lock.timeout", remainingTimeInSeconds);
+		query.addExtension("javax.persistence.query.timeout", remainingTimeInSeconds);
 	}
 
 

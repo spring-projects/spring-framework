@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,10 +139,8 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 			logger.debug("Using PersistenceManagerFactory '" + getPersistenceManagerFactoryBeanName() +
 					"' for OpenPersistenceManagerInViewFilter");
 		}
-		WebApplicationContext wac =
-				WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return (PersistenceManagerFactory)
-				wac.getBean(getPersistenceManagerFactoryBeanName(), PersistenceManagerFactory.class);
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+		return wac.getBean(getPersistenceManagerFactoryBeanName(), PersistenceManagerFactory.class);
 	}
 
 }

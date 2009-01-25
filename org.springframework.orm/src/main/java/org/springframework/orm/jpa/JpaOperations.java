@@ -49,9 +49,9 @@ import org.springframework.dao.DataAccessException;
  */
 public interface JpaOperations {
 
-	Object execute(JpaCallback action) throws DataAccessException;
+	<T> T execute(JpaCallback<T> action) throws DataAccessException;
 
-	List executeFind(JpaCallback action) throws DataAccessException;
+	List executeFind(JpaCallback<?> action) throws DataAccessException;
 
 	<T> T find(Class<T> entityClass, Object id) throws DataAccessException;
 

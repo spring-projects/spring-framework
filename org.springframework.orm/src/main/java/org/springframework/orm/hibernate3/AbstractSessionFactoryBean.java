@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
 public abstract class AbstractSessionFactoryBean
-		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
+		implements FactoryBean<SessionFactory>, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -256,11 +256,11 @@ public abstract class AbstractSessionFactoryBean
 	/**
 	 * Return the singleton SessionFactory.
 	 */
-	public Object getObject() {
+	public SessionFactory getObject() {
 		return this.sessionFactory;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends SessionFactory> getObjectType() {
 		return (this.sessionFactory != null) ? this.sessionFactory.getClass() : SessionFactory.class;
 	}
 

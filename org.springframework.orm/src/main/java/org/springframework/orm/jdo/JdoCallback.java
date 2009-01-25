@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import javax.jdo.PersistenceManager;
  * @see JdoTemplate
  * @see JdoTransactionManager
  */
-public interface JdoCallback {
+public interface JdoCallback<T> {
 
 	/**
 	 * Gets called by <code>JdoTemplate.execute</code> with an active JDO
@@ -64,6 +64,6 @@ public interface JdoCallback {
 	 * @see JdoTemplate#execute
 	 * @see JdoTemplate#executeFind
 	 */
-	Object doInJdo(PersistenceManager pm) throws JDOException;
+	T doInJdo(PersistenceManager pm) throws JDOException;
 
 }

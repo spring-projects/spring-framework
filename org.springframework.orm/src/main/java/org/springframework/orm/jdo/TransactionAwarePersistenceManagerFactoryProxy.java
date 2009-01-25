@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
@@ -31,7 +30,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Proxy for a target JDO {@link javax.jdo.PersistenceManagerFactory},
  * returning the current thread-bound PersistenceManager (the Spring-managed
- * transactional PersistenceManager or a the single OpenPersistenceManagerInView
+ * transactional PersistenceManager or the single OpenPersistenceManagerInView
  * PersistenceManager) on <code>getPersistenceManager()</code>, if any.
  *
  * <p>Essentially, <code>getPersistenceManager()</code> calls get seamlessly
@@ -68,7 +67,7 @@ import org.springframework.util.ClassUtils;
  * @see PersistenceManagerFactoryUtils#getPersistenceManager
  * @see PersistenceManagerFactoryUtils#releasePersistenceManager
  */
-public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBean {
+public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBean<PersistenceManagerFactory> {
 
 	private PersistenceManagerFactory target;
 
@@ -86,9 +85,9 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	public void setTargetPersistenceManagerFactory(PersistenceManagerFactory target) {
 		Assert.notNull(target, "Target PersistenceManagerFactory must not be null");
 		this.target = target;
-		Class[] ifcs = ClassUtils.getAllInterfacesForClass(target.getClass(), getClass().getClassLoader());
+		Class[] ifcs = ClassUtils.getAllInterfacesForClass(target.getClass(), target.getClass().getClassLoader());
 		this.proxy = (PersistenceManagerFactory) Proxy.newProxyInstance(
-				target.getClass().getClassLoader(), ifcs, new TransactionAwareFactoryInvocationHandler());
+				target.getClass().getClassLoader(), ifcs, new PersistenceManagerFactoryInvocationHandler());
 	}
 
 	/**
@@ -123,11 +122,11 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	}
 
 
-	public Object getObject() {
+	public PersistenceManagerFactory getObject() {
 		return this.proxy;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends PersistenceManagerFactory> getObjectType() {
 		return PersistenceManagerFactory.class;
 	}
 
@@ -141,7 +140,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 * PersistenceManagerFactory proxy to PersistenceManagerFactoryUtils
 	 * for being aware of thread-bound transactions.
 	 */
-	private class TransactionAwareFactoryInvocationHandler implements InvocationHandler {
+	private class PersistenceManagerFactoryInvocationHandler implements InvocationHandler {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on PersistenceManagerFactory interface coming in...
@@ -158,9 +157,9 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 				PersistenceManagerFactory target = getTargetPersistenceManagerFactory();
 				PersistenceManager pm =
 						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
-				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
+				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), pm.getClass().getClassLoader());
 				return Proxy.newProxyInstance(
-						pm.getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
+						pm.getClass().getClassLoader(), ifcs, new PersistenceManagerInvocationHandler(pm, target));
 			}
 
 			// Invoke method on target PersistenceManagerFactory.
@@ -178,13 +177,13 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 * Invocation handler that delegates close calls on PersistenceManagers to
 	 * PersistenceManagerFactoryUtils for being aware of thread-bound transactions.
 	 */
-	private static class TransactionAwareInvocationHandler implements InvocationHandler {
+	private static class PersistenceManagerInvocationHandler implements InvocationHandler {
 
 		private final PersistenceManager target;
 
 		private final PersistenceManagerFactory persistenceManagerFactory;
 
-		public TransactionAwareInvocationHandler(PersistenceManager target, PersistenceManagerFactory pmf) {
+		public PersistenceManagerInvocationHandler(PersistenceManager target, PersistenceManagerFactory pmf) {
 			this.target = target;
 			this.persistenceManagerFactory = pmf;
 		}
@@ -202,10 +201,8 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
-				if (this.persistenceManagerFactory != null) {
-					PersistenceManagerFactoryUtils.doReleasePersistenceManager(
-							this.target, this.persistenceManagerFactory);
-				}
+				PersistenceManagerFactoryUtils.doReleasePersistenceManager(
+						this.target, this.persistenceManagerFactory);
 				return null;
 			}
 

@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa;
 
 import java.util.Map;
-
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -26,6 +25,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
@@ -245,6 +245,22 @@ public abstract class EntityManagerFactoryUtils {
 			if (jpaDialect != null) {
 				jpaDialect.cleanupTransaction(transactionData);
 			}
+		}
+	}
+
+	/**
+	 * Apply the current transaction timeout, if any, to the given JPA Query object.
+	 * <p>This method sets the JPA 2.0 query hints "javax.persistence.lock.timeout"
+	 * and "javax.persistence.query.timeout" accordingly.
+	 * @param query the JPA Query object
+	 * @param emf JPA EntityManagerFactory that the Query was created for
+	 */
+	public static void applyTransactionTimeout(Query query, EntityManagerFactory emf) {
+		EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
+		if (emHolder != null && emHolder.hasTimeout()) {
+			int timeoutValue = emHolder.getTimeToLiveInSeconds();
+			query.setHint("javax.persistence.lock.timeout", timeoutValue);
+			query.setHint("javax.persistence.query.timeout", timeoutValue);
 		}
 	}
 
