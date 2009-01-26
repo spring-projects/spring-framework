@@ -47,6 +47,8 @@
 		<!-- test dependencies -->
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->compile" />
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration" conf="test->compile"/>
+		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.3.1.ga" conf="test->compile"/>
 
 	</dependencies>
 
