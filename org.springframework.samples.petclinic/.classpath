@@ -18,5 +18,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence.jdbc/1.0.2/com.springsource.org.apache.openjpa.persistence.jdbc-1.0.2.jar" sourcepath="/IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence.jdbc/1.0.2/com.springsource.org.apache.openjpa.persistence.jdbc-sources-1.0.2.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar" sourcepath="/IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-sources-1.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.annotations/3.3.1.ga/com.springsource.org.hibernate.annotations-3.3.1.ga.jar" sourcepath="/IVY_CACHE/org.hibernate/com.springsource.org.hibernate.annotations/3.3.1.ga/com.springsource.org.hibernate.annotations-sources-3.3.1.ga.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/javax.servlet/com.springsource.javax.servlet/2.5.0/com.springsource.javax.servlet-2.5.0.jar" sourcepath="/IVY_CACHE/javax.servlet/com.springsource.javax.servlet/2.5.0/com.springsource.javax.servlet-sources-2.5.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
