@@ -17,6 +17,7 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -44,6 +45,7 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Adrian Colyer
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
@@ -132,19 +134,17 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	public JoinPoint.StaticPart getStaticPart() {
 		return this;
 	}
-	
 
 	public String toShortString() {
-		return "execution(" + this.methodInvocation.getMethod().getName() + ")";
+		return "execution(" + getSignature().toShortString() + ")";
 	}
 
 	public String toLongString() {
-		return getClass().getName() + ": execution: [" + this.methodInvocation + "]";
+		return "execution(" + getSignature().toLongString() + ")";
 	}
 
-	@Override
 	public String toString() {
-		return getClass().getName() + ": " + toShortString();
+		return "execution(" + getSignature().toString() + ")";
 	}
 
 
@@ -152,14 +152,6 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 * Lazily initialized MethodSignature.
 	 */
 	private class MethodSignatureImpl implements Signature, MethodSignature {
-
-		public String toShortString() {
-			return methodInvocation.getMethod().getName();
-		}
-
-		public String toLongString() {
-			return methodInvocation.getMethod().toString();
-		}
 
 		public String getName() {
 			return methodInvocation.getMethod().getName();
@@ -199,8 +191,75 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		public Class[] getExceptionTypes() {
 			return methodInvocation.getMethod().getExceptionTypes();
 		}
+
+		public String toShortString() {
+			return toString(false, false, false, false);
+		}
+
+		public String toLongString() {
+			return toString(true, true, true, true);
+		}
+
+		public String toString() {
+			return toString(false, true, false, true);
+		}
+
+		private String toString(boolean includeModifier,
+				boolean includeReturnTypeAndArgs,
+				boolean useLongReturnAndArgumentTypeName,
+				boolean useLongTypeName) {
+			StringBuilder sb = new StringBuilder();
+			if (includeModifier) {
+				sb.append(Modifier.toString(getModifiers()));
+				sb.append(" ");
+			}
+			if (includeReturnTypeAndArgs) {
+				appendType(sb, getReturnType(),
+						useLongReturnAndArgumentTypeName);
+				sb.append(" ");
+			}
+			appendType(sb, getDeclaringType(), useLongTypeName);
+			sb.append(".");
+			sb.append(getMethod().getName());
+			sb.append("(");
+
+			Class[] parametersTypes = getParameterTypes();
+			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs,
+					useLongReturnAndArgumentTypeName);
+			sb.append(")");
+			return sb.toString();
+		}
 	}
 
+	private void appendTypes(StringBuilder sb, Class<?>[] types,
+			boolean includeArgs, boolean useLongReturnAndArgumentTypeName) {
+		if (includeArgs) {
+			for (int size = types.length, i = 0; i < size; i++) {
+				appendType(sb, types[i], useLongReturnAndArgumentTypeName);
+				if (i < size - 1) {
+					sb.append(",");
+				}
+			}
+		} else {
+			if (types.length != 0) {
+				sb.append("..");
+			}
+		}
+	}
+
+	private void appendType(StringBuilder sb, Class<?> type,
+			boolean useLongTypeName) {
+		if (type.isArray()) {
+			appendType(sb, type.getComponentType(), useLongTypeName);
+			sb.append("[]");
+		} else {
+			if (type.getPackage() != null
+					&& type.getPackage().equals("java.lang")) {
+				useLongTypeName = false;
+			}
+			sb.append(useLongTypeName ? type.getName() : type.getSimpleName());
+		}
+	}
 
 	/**
 	 * Lazily initialized SourceLocation.
