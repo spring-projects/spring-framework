@@ -46,10 +46,10 @@ public abstract class RequestContextHolder  {
 	private static final boolean jsfPresent =
 			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
-	private static final ThreadLocal requestAttributesHolder = new NamedThreadLocal("Request attributes");
+	private static final ThreadLocal<RequestAttributes> requestAttributesHolder = new NamedThreadLocal<RequestAttributes>("Request attributes");
 
-	private static final ThreadLocal inheritableRequestAttributesHolder =
-			new NamedInheritableThreadLocal("Request context");
+	private static final ThreadLocal<RequestAttributes> inheritableRequestAttributesHolder =
+			new NamedInheritableThreadLocal<RequestAttributes>("Request context");
 
 
 	/**
@@ -93,9 +93,9 @@ public abstract class RequestContextHolder  {
 	 * or <code>null</code> if none bound
 	 */
 	public static RequestAttributes getRequestAttributes() {
-		RequestAttributes attributes = (RequestAttributes) requestAttributesHolder.get();
+		RequestAttributes attributes = requestAttributesHolder.get();
 		if (attributes == null) {
-			attributes = (RequestAttributes) inheritableRequestAttributesHolder.get();
+			attributes = inheritableRequestAttributesHolder.get();
 		}
 		return attributes;
 	}
