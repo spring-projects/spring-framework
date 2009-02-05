@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
-
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.TaskRejectedException;
 
 /**
  * Quartz ThreadPool adapter that delegates to a Spring-managed
@@ -37,7 +37,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private TaskExecutor taskExecutor;
+	private Executor taskExecutor;
 
 
 	public void initialize() throws SchedulerConfigException {
@@ -66,7 +66,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 			this.taskExecutor.execute(runnable);
 			return true;
 		}
-		catch (TaskRejectedException ex) {
+		catch (RejectedExecutionException ex) {
 			logger.error("Task has been rejected by TaskExecutor", ex);
 			return false;
 		}

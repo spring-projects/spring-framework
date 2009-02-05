@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.util.concurrent.Executor;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.handler.HandlerResolver;
-
-import org.springframework.core.task.TaskExecutor;
 
 /**
  * Factory for locally defined JAX-WS {@link javax.xml.ws.Service} references.
@@ -101,15 +99,6 @@ public class LocalJaxWsServiceFactory {
 	 * @see javax.xml.ws.Service#setExecutor
 	 */
 	public void setExecutor(Executor executor) {
-		this.executor = executor;
-	}
-
-	/**
-	 * Set the Spring TaskExecutor to use for asynchronous executions
-	 * that require callbacks.
-	 * @see javax.xml.ws.Service#setExecutor
-	 */
-	public void setTaskExecutor(TaskExecutor executor) {
 		this.executor = executor;
 	}
 

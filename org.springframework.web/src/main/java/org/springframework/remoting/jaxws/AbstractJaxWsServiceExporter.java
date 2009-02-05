@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.core.task.TaskExecutor;
 
 /**
  * Abstract exporter for JAX-WS services, autodetecting annotated service beans
@@ -71,15 +70,6 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @see javax.xml.ws.Endpoint#setExecutor
 	 */
 	public void setExecutor(Executor executor) {
-		this.executor = executor;
-	}
-
-	/**
-	 * Set the Spring TaskExecutor to use for dispatching incoming requests
-	 * to exported service instances.
-	 * @see javax.xml.ws.Endpoint#setExecutor
-	 */
-	public void setTaskExecutor(TaskExecutor executor) {
 		this.executor = executor;
 	}
 

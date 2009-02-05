@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.scheduling.quartz;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
+import java.util.concurrent.Executor;
 import javax.sql.DataSource;
 
 import org.quartz.Scheduler;
@@ -42,7 +42,6 @@ import org.springframework.context.Lifecycle;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.util.CollectionUtils;
 
@@ -88,7 +87,7 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean extends SchedulerAccessor
-	implements FactoryBean, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
+		implements FactoryBean, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -98,8 +97,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder =
 			new ThreadLocal<ResourceLoader>();
 
-	private static final ThreadLocal<TaskExecutor> configTimeTaskExecutorHolder =
-			new ThreadLocal<TaskExecutor>();
+	private static final ThreadLocal<Executor> configTimeTaskExecutorHolder =
+			new ThreadLocal<Executor>();
 
 	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
 			new ThreadLocal<DataSource>();
@@ -129,7 +128,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 * @see #setTaskExecutor
 	 * @see LocalTaskExecutorThreadPool
 	 */
-	public static TaskExecutor getConfigTimeTaskExecutor() {
+	public static Executor getConfigTimeTaskExecutor() {
 		return configTimeTaskExecutorHolder.get();
 	}
 
@@ -169,7 +168,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	private Properties quartzProperties;
 
 
-	private TaskExecutor taskExecutor;
+	private Executor taskExecutor;
 
 	private DataSource dataSource;
 
@@ -261,7 +260,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
-	public void setTaskExecutor(TaskExecutor taskExecutor) {
+	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
@@ -416,12 +415,12 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	//---------------------------------------------------------------------
 
 	public void afterPropertiesSet() throws Exception {
-		if (this.applicationContext != null && this.resourceLoader == null) {
-			this.resourceLoader = this.applicationContext;
-		}
-
 		if (this.dataSource == null && this.nonTransactionalDataSource != null) {
 			this.dataSource = this.nonTransactionalDataSource;
+		}
+
+		if (this.applicationContext != null && this.resourceLoader == null) {
+			this.resourceLoader = this.applicationContext;
 		}
 
 		// Create SchedulerFactory instance.

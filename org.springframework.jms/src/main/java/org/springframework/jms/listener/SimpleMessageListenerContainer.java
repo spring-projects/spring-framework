@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package org.springframework.jms.listener;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-
+import java.util.concurrent.Executor;
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
@@ -30,7 +29,6 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -70,7 +68,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private int concurrentConsumers = 1;
 
-	private TaskExecutor taskExecutor;
+	private Executor taskExecutor;
 
 	private Set<Session> sessions;
 
@@ -134,7 +132,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
-	public void setTaskExecutor(TaskExecutor taskExecutor) {
+	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
