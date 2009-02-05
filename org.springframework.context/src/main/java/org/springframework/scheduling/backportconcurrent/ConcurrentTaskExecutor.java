@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.scheduling.backportconcurrent;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
 import edu.emory.mathcs.backport.java.util.concurrent.Executor;
 import edu.emory.mathcs.backport.java.util.concurrent.Executors;
 import edu.emory.mathcs.backport.java.util.concurrent.RejectedExecutionException;
@@ -29,11 +33,12 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
  *
  * <p><b>NOTE:</b> This class implements Spring's
- * {@link org.springframework.core.task.TaskExecutor} interface as well as
+ * {@link org.springframework.core.task.TaskExecutor} interface (and hence implicitly
+ * the standard Java 5 {@link java.util.concurrent.Executor} interface) as well as
  * the JSR-166 {@link edu.emory.mathcs.backport.java.util.concurrent.Executor}
  * interface, with the former being the primary interface, the other just
  * serving as secondary convenience. For this reason, the exception handling
- * follows the TaskExecutor contract rather than the Executor contract, in
+ * follows the TaskExecutor contract rather than the backport Executor contract, in
  * particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskExecutor} that allows for
@@ -73,10 +78,11 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 		setConcurrentExecutor(concurrentExecutor);
 	}
 
+
 	/**
 	 * Specify the JSR-166 backport concurrent executor to delegate to.
 	 */
-	public void setConcurrentExecutor(Executor concurrentExecutor) {
+	public final void setConcurrentExecutor(Executor concurrentExecutor) {
 		this.concurrentExecutor =
 				(concurrentExecutor != null ? concurrentExecutor : Executors.newSingleThreadExecutor());
 	}
@@ -85,7 +91,7 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 	 * Return the JSR-166 backport concurrent executor that this adapter
 	 * delegates to.
 	 */
-	public Executor getConcurrentExecutor() {
+	public final Executor getConcurrentExecutor() {
 		return this.concurrentExecutor;
 	}
 
@@ -102,6 +108,22 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 			throw new TaskRejectedException(
 					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	public void execute(Runnable task, long startTimeout) {
+		execute(task);
+	}
+
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future);
+		return future;
 	}
 
 	/**

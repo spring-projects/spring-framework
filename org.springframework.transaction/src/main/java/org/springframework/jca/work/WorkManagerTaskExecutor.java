@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.jca.work;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import javax.naming.NamingException;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.work.ExecutionContext;
@@ -161,7 +164,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	public void afterPropertiesSet() throws NamingException {
 		if (this.workManager == null) {
 			if (this.workManagerName != null) {
-				this.workManager = (WorkManager) lookup(this.workManagerName, WorkManager.class);
+				this.workManager = lookup(this.workManagerName, WorkManager.class);
 			}
 			else {
 				this.workManager = getDefaultWorkManager();
@@ -228,6 +231,18 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		catch (WorkException ex) {
 			throw new SchedulingException("Could not schedule task on JCA WorkManager", ex);
 		}
+	}
+
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
 	}
 
 	/**

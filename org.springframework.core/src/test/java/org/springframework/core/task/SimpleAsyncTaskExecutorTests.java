@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.core.task;
 
+import java.util.concurrent.ThreadFactory;
+
 import junit.framework.TestCase;
 
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
@@ -52,12 +53,16 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 		assertTrue(task.getThreadName().startsWith(customPrefix));
 	}
 
-	public void testThreadNameRevertsToDefaultIfSetToNull() throws Exception {
+	public void testThreadFactoryOverridesDefaults() throws Exception {
 		final Object monitor = new Object();
-		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(null);
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(new ThreadFactory() {
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "test");
+			}
+		});
 		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
 		executeAndWait(executor, task, monitor);
-		assertTrue(task.getThreadName().startsWith(ClassUtils.getShortName(SimpleAsyncTaskExecutor.class) + "-"));
+		assertTrue(task.getThreadName().equals("test"));
 	}
 
 	public void testThrowsExceptionWhenSuppliedWithNullRunnable() throws Exception {

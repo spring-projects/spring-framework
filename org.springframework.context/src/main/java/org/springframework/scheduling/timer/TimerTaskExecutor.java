@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.scheduling.timer;
 
 import java.util.Timer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +44,7 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 
 	private Timer timer;
 
-	private int delay = 0;
+	private long delay = 0;
 
 	private boolean timerInternal = false;
 
@@ -76,11 +79,13 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	}
 
 	/**
-	 * Set the delay to use for scheduling tasks passed into the
-	 * <code>execute</code> method. Default is 0.
+	 * Set the delay to use for scheduling tasks passed into the plain
+	 * {@link #execute(Runnable)} method. Default is 0.
+	 * <p>Note that calls to {@link #execute(Runnable, long)} will use the
+	 * given timeout as delay if it is lower than the general delay.
 	 * @param delay the delay in milliseconds before the task is to be executed
 	 */
-	public void setDelay(int delay) {
+	public void setDelay(long delay) {
 		this.delay = delay;
 	}
 
@@ -115,6 +120,24 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	public void execute(Runnable task) {
 		Assert.notNull(this.timer, "Timer is required");
 		this.timer.schedule(new DelegatingTimerTask(task), this.delay);
+	}
+
+	public void execute(Runnable task, long startTimeout) {
+		Assert.notNull(this.timer, "Timer is required");
+		long actualDelay = (startTimeout < this.delay ? startTimeout : this.delay);
+		this.timer.schedule(new DelegatingTimerTask(task), actualDelay);
+	}
+
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future);
+		return future;
 	}
 
 	/**

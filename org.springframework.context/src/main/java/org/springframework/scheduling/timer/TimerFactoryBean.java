@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,10 +103,7 @@ public class TimerFactoryBean implements FactoryBean, BeanNameAware, Initializin
 	/**
 	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>.
 	 * Can be overridden in subclasses to provide custom Timer subclasses.
-	 * <p>Uses the specified name as Timer thread name on JDK 1.5,
-	 * simply falling back to a default Timer thread on JDK 1.4.
 	 * @param name the desired name of the Timer's associated thread
-	 * (applied on JDK 1.5 and higher; ignored on JDK 1.4)
 	 * @param daemon whether to create a Timer that runs as daemon thread
 	 * @return a new Timer instance
 	 * @see #afterPropertiesSet()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.Serializable;
+
 /**
  * Simple customizable helper class for creating threads. Provides various
  * bean properties, such as thread name prefix, thread priority, etc.
@@ -27,7 +29,7 @@ package org.springframework.util;
  * @since 2.0.3
  * @see org.springframework.scheduling.concurrent.CustomizableThreadFactory
  */
-public class CustomizableThreadCreator {
+public class CustomizableThreadCreator implements Serializable {
 
 	private String threadNamePrefix;
 
@@ -39,7 +41,7 @@ public class CustomizableThreadCreator {
 
 	private int threadCount = 0;
 
-	private final Object threadCountMonitor = new Object();
+	private final Object threadCountMonitor = new SerializableMonitor();
 
 
 	/**
@@ -172,6 +174,13 @@ public class CustomizableThreadCreator {
 	 */
 	protected String getDefaultThreadNamePrefix() {
 		return ClassUtils.getShortName(getClass()) + "-";
+	}
+
+
+	/**
+	 * Empty class used for a serializable monitor object.
+	 */
+	private static class SerializableMonitor implements Serializable {
 	}
 
 }

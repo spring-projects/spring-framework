@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,13 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,8 +33,8 @@ import org.springframework.util.ObjectUtils;
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that sets up
  * a JDK 1.5 {@link java.util.concurrent.ScheduledExecutorService}
- * (by default: {@link java.util.concurrent.ScheduledThreadPoolExecutor}
- * as implementation) and exposes it for bean references.
+ * (by default: a {@link java.util.concurrent.ScheduledThreadPoolExecutor})
+ * and exposes it for bean references.
  *
  * <p>Allows for registration of {@link ScheduledExecutorTask ScheduledExecutorTasks},
  * automatically starting the {@link ScheduledExecutorService} on initialization and
@@ -66,29 +62,19 @@ import org.springframework.util.ObjectUtils;
  * @see ScheduledExecutorTask
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
- * @see org.springframework.scheduling.timer.TimerFactoryBean
  */
-public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware, InitializingBean, DisposableBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
+		implements FactoryBean<ScheduledExecutorService>, InitializingBean, DisposableBean {
 
 	private int poolSize = 1;
-
-	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
-
-	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
-
-	private boolean exposeUnconfigurableExecutor = false;
 
 	private ScheduledExecutorTask[] scheduledExecutorTasks;
 
 	private boolean continueScheduledExecutionAfterException = false;
 
-	private boolean waitForTasksToCompleteOnShutdown = false;
+	private boolean exposeUnconfigurableExecutor = false;
 
-	private String beanName;
-
-	private ScheduledExecutorService executor;
+	private ScheduledExecutorService exposedExecutor;
 
 
 	/**
@@ -98,37 +84,6 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	public void setPoolSize(int poolSize) {
 		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
 		this.poolSize = poolSize;
-	}
-
-	/**
-	 * Set the ThreadFactory to use for the ThreadPoolExecutor's thread pool.
-	 * Default is the ThreadPoolExecutor's default thread factory.
-	 * @see java.util.concurrent.Executors#defaultThreadFactory()
-	 */
-	public void setThreadFactory(ThreadFactory threadFactory) {
-		this.threadFactory = (threadFactory != null ? threadFactory : Executors.defaultThreadFactory());
-	}
-
-	/**
-	 * Set the RejectedExecutionHandler to use for the ThreadPoolExecutor.
-	 * Default is the ThreadPoolExecutor's default abort policy.
-	 * @see java.util.concurrent.ThreadPoolExecutor.AbortPolicy
-	 */
-	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
-		this.rejectedExecutionHandler =
-				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
-	}
-
-	/**
-	 * Specify whether this FactoryBean should expose an unconfigurable
-	 * decorator for the created executor.
-	 * <p>Default is "false", exposing the raw executor as bean reference.
-	 * Switch this flag to "true" to strictly prevent clients from
-	 * modifying the executor's configuration.
-	 * @see java.util.concurrent.Executors#unconfigurableScheduledExecutorService
-	 */
-	public void setExposeUnconfigurableExecutor(boolean exposeUnconfigurableExecutor) {
-		this.exposeUnconfigurableExecutor = exposeUnconfigurableExecutor;
 	}
 
 	/**
@@ -157,28 +112,23 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	}
 
 	/**
-	 * Set whether to wait for scheduled tasks to complete on shutdown.
-	 * <p>Default is "false". Switch this to "true" if you prefer
-	 * fully completed tasks at the expense of a longer shutdown phase.
-	 * @see java.util.concurrent.ScheduledExecutorService#shutdown()
-	 * @see java.util.concurrent.ScheduledExecutorService#shutdownNow()
+	 * Specify whether this FactoryBean should expose an unconfigurable
+	 * decorator for the created executor.
+	 * <p>Default is "false", exposing the raw executor as bean reference.
+	 * Switch this flag to "true" to strictly prevent clients from
+	 * modifying the executor's configuration.
+	 * @see java.util.concurrent.Executors#unconfigurableScheduledExecutorService
 	 */
-	public void setWaitForTasksToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
-		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
-	}
-
-	public void setBeanName(String name) {
-		this.beanName = name;
+	public void setExposeUnconfigurableExecutor(boolean exposeUnconfigurableExecutor) {
+		this.exposeUnconfigurableExecutor = exposeUnconfigurableExecutor;
 	}
 
 
-	public void afterPropertiesSet() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing ScheduledExecutorService" +
-					(this.beanName != null ? " '" + this.beanName + "'" : ""));
-		}
+	protected ExecutorService initializeExecutor(
+			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
+
 		ScheduledExecutorService executor =
-				createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
+				createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
 		// Register specified ScheduledExecutorTasks, if necessary.
 		if (!ObjectUtils.isEmpty(this.scheduledExecutorTasks)) {
@@ -186,8 +136,10 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 		}
 
 		// Wrap executor with an unconfigurable decorator.
-		this.executor = (this.exposeUnconfigurableExecutor ?
+		this.exposedExecutor = (this.exposeUnconfigurableExecutor ?
 				Executors.unconfigurableScheduledExecutorService(executor) : executor);
+
+		return executor;
 	}
 
 	/**
@@ -216,8 +168,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	 * @param executor the ScheduledExecutorService to register the tasks on.
 	 */
 	protected void registerTasks(ScheduledExecutorTask[] tasks, ScheduledExecutorService executor) {
-		for (int i = 0; i < tasks.length; i++) {
-			ScheduledExecutorTask task = tasks[i];
+		for (ScheduledExecutorTask task : tasks) {
 			Runnable runnable = getRunnableToSchedule(task);
 			if (task.isOneTimeTask()) {
 				executor.schedule(runnable, task.getDelay(), task.getTimeUnit());
@@ -249,35 +200,16 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	}
 
 
-	public Object getObject() {
-		return this.executor;
+	public ScheduledExecutorService getObject() {
+		return this.exposedExecutor;
 	}
 
-	public Class getObjectType() {
-		return (this.executor != null ? this.executor.getClass() : ScheduledExecutorService.class);
+	public Class<? extends ScheduledExecutorService> getObjectType() {
+		return (this.exposedExecutor != null ? this.exposedExecutor.getClass() : ScheduledExecutorService.class);
 	}
 
 	public boolean isSingleton() {
 		return true;
-	}
-
-
-	/**
-	 * Cancel the ScheduledExecutorService on bean factory shutdown,
-	 * stopping all scheduled tasks.
-	 * @see java.util.concurrent.ScheduledExecutorService#shutdown()
-	 */
-	public void destroy() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Shutting down ScheduledExecutorService" +
-					(this.beanName != null ? " '" + this.beanName + "'" : ""));
-		}
-		if (this.waitForTasksToCompleteOnShutdown) {
-			this.executor.shutdown();
-		}
-		else {
-			this.executor.shutdownNow();
-		}
 	}
 
 }
