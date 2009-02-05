@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 
 package org.springframework.scheduling.backportconcurrent;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.Executor;
@@ -52,11 +56,12 @@ import org.springframework.util.Assert;
  * simply wrap it with a {@link ConcurrentTaskExecutor} adapter.
  *
  * <p><b>NOTE:</b> This class implements Spring's
- * {@link org.springframework.core.task.TaskExecutor} interface as well as
+ * {@link org.springframework.core.task.TaskExecutor} interface (and hence implicitly
+ * the standard Java 5 {@link java.util.concurrent.Executor} interface) as well as
  * the JSR-166 {@link edu.emory.mathcs.backport.java.util.concurrent.Executor}
  * interface, with the former being the primary interface, the other just
  * serving as secondary convenience. For this reason, the exception handling
- * follows the TaskExecutor contract rather than the Executor contract, in
+ * follows the TaskExecutor contract rather than the backport Executor contract, in
  * particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
  *
  * @author Juergen Hoeller
@@ -306,6 +311,22 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	public void execute(Runnable task, long startTimeout) {
+		execute(task);
+	}
+
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future);
+		return future;
 	}
 
 	/**

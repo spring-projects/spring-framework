@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.scheduling.commonj;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.naming.NamingException;
 
 import commonj.timers.Timer;
@@ -141,7 +139,7 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 			if (this.timerManagerName == null) {
 				throw new IllegalArgumentException("Either 'timerManager' or 'timerManagerName' must be specified");
 			}
-			this.timerManager = (TimerManager) lookup(this.timerManagerName, TimerManager.class);
+			this.timerManager = lookup(this.timerManagerName, TimerManager.class);
 		}
 
 		if (this.scheduledTimerListeners != null) {

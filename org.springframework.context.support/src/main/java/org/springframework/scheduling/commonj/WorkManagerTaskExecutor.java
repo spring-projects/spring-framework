@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.scheduling.commonj;
 
 import java.util.Collection;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.Callable;
 
 import javax.naming.NamingException;
 
@@ -131,7 +134,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 			if (this.workManagerName == null) {
 				throw new IllegalArgumentException("Either 'workManager' or 'workManagerName' must be specified");
 			}
-			this.workManager = (WorkManager) lookup(this.workManagerName, WorkManager.class);
+			this.workManager = lookup(this.workManagerName, WorkManager.class);
 		}
 	}
 
@@ -157,6 +160,22 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		catch (WorkException ex) {
 			throw new SchedulingException("Could not schedule task on CommonJ WorkManager", ex);
 		}
+	}
+
+	public void execute(Runnable task, long startTimeout) {
+		execute(task);
+	}
+
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future);
+		return future;
 	}
 
 	/**

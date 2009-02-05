@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
 import org.quartz.SchedulerConfigException;
 import org.quartz.simpl.SimpleThreadPool;
 
@@ -27,11 +31,10 @@ import org.springframework.util.Assert;
 
 /**
  * Subclass of Quartz's SimpleThreadPool that implements Spring's
- * TaskExecutor interface and listens to Spring lifecycle callbacks.
+ * {@link org.springframework.core.task.TaskExecutor} interface
+ * and listens to Spring lifecycle callbacks.
  *
- * <p>Can be used as a thread-pooling TaskExecutor backend, in particular
- * on JDK <= 1.5 (where the JDK ThreadPoolExecutor isn't available yet).
- * Can be shared between a Quartz Scheduler (specified as "taskExecutor")
+ * <p>Can be shared between a Quartz Scheduler (specified as "taskExecutor")
  * and other TaskExecutor users, or even used completely independent of
  * a Quartz Scheduler (as plain TaskExecutor backend).
  *
@@ -66,6 +69,22 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		if (!runInThread(task)) {
 			throw new SchedulingException("Quartz SimpleThreadPool already shut down");
 		}
+	}
+
+	public void execute(Runnable task, long startTimeout) {
+		execute(task);
+	}
+
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future);
+		return future;
 	}
 
 	/**

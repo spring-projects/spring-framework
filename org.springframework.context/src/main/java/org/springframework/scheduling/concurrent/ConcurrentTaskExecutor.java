@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,23 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
  * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code> and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
- *
- * <p><b>NOTE:</b> This class implements Spring's
- * {@link org.springframework.core.task.TaskExecutor} interface as well as the JDK 1.5
- * {@link java.util.concurrent.Executor} interface, with the former being the primary
- * interface, the other just serving as secondary convenience. For this reason, the
- * exception handling follows the TaskExecutor contract rather than the Executor contract,
- * in particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
+ * Also detects an extended <code>java.util.concurrent.ExecutorService</code>, adapting
+ * the {@link org.springframework.core.task.AsyncTaskExecutor} interface accordingly.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskExecutor} that allows for
  * defining a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor} in bean style,
@@ -43,13 +43,16 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
  * @author Juergen Hoeller
  * @since 2.0
  * @see java.util.concurrent.Executor
+ * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see java.util.concurrent.Executors
  * @see ThreadPoolTaskExecutor
  */
-public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor {
+public class ConcurrentTaskExecutor implements SchedulingTaskExecutor {
 
 	private Executor concurrentExecutor;
+
+	private TaskExecutorAdapter adaptedExecutor;
 
 
 	/**
@@ -74,32 +77,34 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 	/**
 	 * Specify the JDK 1.5 concurrent executor to delegate to.
 	 */
-	public void setConcurrentExecutor(Executor concurrentExecutor) {
+	public final void setConcurrentExecutor(Executor concurrentExecutor) {
 		this.concurrentExecutor =
 				(concurrentExecutor != null ? concurrentExecutor : Executors.newSingleThreadExecutor());
+		this.adaptedExecutor = new TaskExecutorAdapter(this.concurrentExecutor);
 	}
 
 	/**
-	 * Return the JDK 1.5 concurrent executor that this adapter
-	 * delegates to.
+	 * Return the JDK 1.5 concurrent executor that this adapter delegates to.
 	 */
-	public Executor getConcurrentExecutor() {
+	public final Executor getConcurrentExecutor() {
 		return this.concurrentExecutor;
 	}
 
 
-	/**
-	 * Delegates to the specified JDK 1.5 concurrent executor.
-	 * @see java.util.concurrent.Executor#execute(Runnable)
-	 */
 	public void execute(Runnable task) {
-		try {
-			this.concurrentExecutor.execute(task);
-		}
-		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
-		}
+		this.adaptedExecutor.execute(task);
+	}
+
+	public void execute(Runnable task, long startTimeout) {
+		this.adaptedExecutor.execute(task, startTimeout);
+	}
+
+	public Future<?> submit(Runnable task) {
+		return this.adaptedExecutor.submit(task);
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		return this.adaptedExecutor.submit(task);
 	}
 
 	/**

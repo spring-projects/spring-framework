@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 package org.springframework.core.task;
 
 import java.io.Serializable;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrencyThrottleSupport;
@@ -54,10 +58,10 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	public static final int NO_CONCURRENCY = ConcurrencyThrottleSupport.NO_CONCURRENCY;
 
 
-	/**
-	 * Internal concurrency throttle used by this executor.
-	 */
+	/** Internal concurrency throttle used by this executor */
 	private final ConcurrencyThrottleAdapter concurrencyThrottle = new ConcurrencyThrottleAdapter();
+
+	private ThreadFactory threadFactory;
 
 
 	/**
@@ -75,6 +79,33 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 		super(threadNamePrefix);
 	}
 
+	/**
+	 * Create a new SimpleAsyncTaskExecutor with the given external thread factory.
+	 * @param threadFactory the factory to use for creating new Threads
+	 */
+	public SimpleAsyncTaskExecutor(ThreadFactory threadFactory) {
+		this.threadFactory = threadFactory;
+	}
+
+
+	/**
+	 * Specify an external factory to use for creating new Threads,
+	 * instead of relying on the local properties of this executor.
+	 * <p>You may specify an inner ThreadFactory bean or also a ThreadFactory reference
+	 * obtained from JNDI (on a Java EE 6 server) or some other lookup mechanism.
+	 * @see #setThreadNamePrefix
+	 * @see #setThreadPriority
+	 */
+	public void setThreadFactory(ThreadFactory threadFactory) {
+		this.threadFactory = threadFactory;
+	}
+
+	/**
+	 * Return the external factory to use for creating new Threads, if any.
+	 */
+	public final ThreadFactory getThreadFactory() {
+		return this.threadFactory;
+	}
 
 	/**
 	 * Set the maximum number of parallel accesses allowed.
@@ -93,7 +124,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	/**
 	 * Return the maximum number of parallel accesses allowed.
 	 */
-	public int getConcurrencyLimit() {
+	public final int getConcurrencyLimit() {
 		return this.concurrencyThrottle.getConcurrencyLimit();
 	}
 
@@ -103,7 +134,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * @see #getConcurrencyLimit()
 	 * @see #setConcurrencyLimit
 	 */
-	public boolean isThrottleActive() {
+	public final boolean isThrottleActive() {
 		return this.concurrencyThrottle.isThrottleActive();
 	}
 
@@ -137,15 +168,29 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 		}
 	}
 
+	public Future<?> submit(Runnable task) {
+		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
+	public <T> Future<T> submit(Callable<T> task) {
+		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
 	/**
 	 * Template method for the actual execution of a task.
 	 * <p>The default implementation creates a new Thread and starts it.
 	 * @param task the Runnable to execute
+	 * @see #setThreadFactory
 	 * @see #createThread
 	 * @see java.lang.Thread#start()
 	 */
 	protected void doExecute(Runnable task) {
-		createThread(task).start();
+		Thread thread = (this.threadFactory != null ? this.threadFactory.newThread(task) : createThread(task));
+		thread.start();
 	}
 
 
