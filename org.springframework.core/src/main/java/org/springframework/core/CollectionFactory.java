@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Factory for collections, being aware of Commons Collection 3.x's extended
- * collections as well as of JDK 1.5+ concurrent collections and backport-concurrent
- * collections. Mainly for internal use within the framework.
+ * collections as well as of JDK 1.5+ concurrent collections.
+ * Mainly for internal use within the framework.
  *
  * <p>The goal of this class is to avoid runtime dependencies on JDK 1.5+ and
  * Commons Collections 3.x, simply using the best collection implementation
@@ -209,6 +209,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
+	@SuppressWarnings("unchecked")
 	public static Collection createApproximateCollection(Object collection, int initialCapacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList();
@@ -272,6 +273,7 @@ public abstract class CollectionFactory {
 	/**
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
+	@Deprecated
 	private static class JdkConcurrentHashMap<K,V> extends ConcurrentHashMap<K,V> implements ConcurrentMap<K,V> {
 
 		private JdkConcurrentHashMap(int initialCapacity) {
