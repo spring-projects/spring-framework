@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  *
  * <p>The default scope is "singleton", and the default is to <i>not</i> create
  * scoped-proxies.
- * 
+ *
  * @author Mark Fisher
  * @since 2.5
  * @see ScopeMetadataResolver
@@ -38,35 +38,31 @@ public class ScopeMetadata {
 
 
 	/**
-	 * Get the name of the scope.
-	 * @return said scope name
-	 */
-	public String getScopeName() {
-		return scopeName;
-	}
-
-	/**
 	 * Set the name of the scope.
-	 * @param scopeName said scope name
 	 */
 	public void setScopeName(String scopeName) {
 		this.scopeName = scopeName;
 	}
 
 	/**
-	 * Get the proxy-mode to be applied to the scoped instance.
-	 * @return said scoped-proxy mode
+	 * Get the name of the scope.
 	 */
-	public ScopedProxyMode getScopedProxyMode() {
-		return scopedProxyMode;
+	public String getScopeName() {
+		return this.scopeName;
 	}
 
 	/**
 	 * Set the proxy-mode to be applied to the scoped instance.
-	 * @param scopedProxyMode said scoped-proxy mode
 	 */
 	public void setScopedProxyMode(ScopedProxyMode scopedProxyMode) {
 		this.scopedProxyMode = scopedProxyMode;
 	}
-	
+
+	/**
+	 * Get the proxy-mode to be applied to the scoped instance.
+	 */
+	public ScopedProxyMode getScopedProxyMode() {
+		return this.scopedProxyMode;
+	}
+
 }

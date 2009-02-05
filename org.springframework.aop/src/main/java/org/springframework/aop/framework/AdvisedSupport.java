@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,7 @@ import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for AOP proxy configuration managers.
@@ -309,12 +311,30 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Add all of the given advisors to this proxy configuration.
 	 * @param advisors the advisors to register
+	 * @deprecated as of Spring 3.0, in favor of {@link #addAdvisors}
 	 */
+	@Deprecated
 	public void addAllAdvisors(Advisor[] advisors) {
+		addAdvisors(Arrays.asList(advisors));
+	}
+
+	/**
+	 * Add all of the given advisors to this proxy configuration.
+	 * @param advisors the advisors to register
+	 */
+	public void addAdvisors(Advisor... advisors) {
+		addAdvisors(Arrays.asList(advisors));
+	}
+
+	/**
+	 * Add all of the given advisors to this proxy configuration.
+	 * @param advisors the advisors to register
+	 */
+	public void addAdvisors(Collection<Advisor> advisors) {
 		if (isFrozen()) {
 			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
 		}
-		if (!ObjectUtils.isEmpty(advisors)) {
+		if (!CollectionUtils.isEmpty(advisors)) {
 			for (Advisor advisor : advisors) {
 				if (advisor instanceof IntroductionAdvisor) {
 					validateIntroductionAdvisor((IntroductionAdvisor) advisor);

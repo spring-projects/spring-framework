@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,8 @@ public class UserCredentialsConnectionFactoryAdapter
 
 	private String password;
 
-	private final ThreadLocal threadBoundCredentials = new NamedThreadLocal("Current JMS user credentials");
+	private final ThreadLocal<JmsUserCredentials> threadBoundCredentials =
+			new NamedThreadLocal<JmsUserCredentials>("Current JMS user credentials");
 
 
 	/**
@@ -141,7 +142,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #doCreateConnection
 	 */
 	public final Connection createConnection() throws JMSException {
-		JmsUserCredentials threadCredentials = (JmsUserCredentials) this.threadBoundCredentials.get();
+		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
 			return doCreateConnection(threadCredentials.username, threadCredentials.password);
 		}
@@ -186,7 +187,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #doCreateQueueConnection
 	 */
 	public final QueueConnection createQueueConnection() throws JMSException {
-		JmsUserCredentials threadCredentials = (JmsUserCredentials) this.threadBoundCredentials.get();
+		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
 			return doCreateQueueConnection(threadCredentials.username, threadCredentials.password);
 		}
@@ -235,7 +236,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #doCreateTopicConnection
 	 */
 	public final TopicConnection createTopicConnection() throws JMSException {
-		JmsUserCredentials threadCredentials = (JmsUserCredentials) this.threadBoundCredentials.get();
+		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
 			return doCreateTopicConnection(threadCredentials.username, threadCredentials.password);
 		}

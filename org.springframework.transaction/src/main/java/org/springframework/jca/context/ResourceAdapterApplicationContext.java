@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public class ResourceAdapterApplicationContext extends GenericApplicationContext
 		beanFactory.registerResolvableDependency(BootstrapContext.class, this.bootstrapContext);
 
 		// JCA WorkManager resolved lazily - may not be available.
-		beanFactory.registerResolvableDependency(WorkManager.class, new ObjectFactory() {
-			public Object getObject() {
+		beanFactory.registerResolvableDependency(WorkManager.class, new ObjectFactory<WorkManager>() {
+			public WorkManager getObject() {
 				return bootstrapContext.getWorkManager();
 			}
 		});

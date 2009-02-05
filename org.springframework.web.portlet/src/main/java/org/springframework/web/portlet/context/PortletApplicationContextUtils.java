@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,8 +111,8 @@ public abstract class PortletApplicationContextUtils {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
 		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
 
-		beanFactory.registerResolvableDependency(PortletRequest.class, new ObjectFactory() {
-			public Object getObject() {
+		beanFactory.registerResolvableDependency(PortletRequest.class, new ObjectFactory<PortletRequest>() {
+			public PortletRequest getObject() {
 				RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
 				if (!(requestAttr instanceof PortletRequestAttributes)) {
 					throw new IllegalStateException("Current request is not a portlet request");
@@ -120,8 +120,8 @@ public abstract class PortletApplicationContextUtils {
 				return ((PortletRequestAttributes) requestAttr).getRequest();
 			}
 		});
-		beanFactory.registerResolvableDependency(PortletSession.class, new ObjectFactory() {
-			public Object getObject() {
+		beanFactory.registerResolvableDependency(PortletSession.class, new ObjectFactory<PortletSession>() {
+			public PortletSession getObject() {
 				RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
 				if (!(requestAttr instanceof PortletRequestAttributes)) {
 					throw new IllegalStateException("Current request is not a portlet request");

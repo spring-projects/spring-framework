@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,11 +123,9 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * @param proxiedInterfaces the interfaces to introspect
 	 */
 	private void findDefinedEqualsAndHashCodeMethods(Class[] proxiedInterfaces) {
-		for (int i = 0; i < proxiedInterfaces.length; i++) {
-			Class proxiedInterface = proxiedInterfaces[i];
+		for (Class proxiedInterface : proxiedInterfaces) {
 			Method[] methods = proxiedInterface.getDeclaredMethods();
-			for (int j = 0; j < methods.length; j++) {
-				Method method = methods[j];
+			for (Method method : methods) {
 				if (AopUtils.isEqualsMethod(method)) {
 					this.equalsDefined = true;
 				}
@@ -187,7 +185,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			// Get the interception chain for this method.
-			List chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
 			// Check whether we have any advice. If we don't, we can fallback on direct
 			// reflective invocation of the target, and avoid creating a MethodInvocation.
