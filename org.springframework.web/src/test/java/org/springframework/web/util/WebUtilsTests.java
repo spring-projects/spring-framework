@@ -19,14 +19,18 @@ package org.springframework.web.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
 
 /**
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  */
-public class WebUtilsTests extends TestCase {
+public class WebUtilsTests {
 
-	public void testFindParameterValue() {
+	@Test
+	public void findParameterValue() {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("myKey1", "myValue1");
 		params.put("myKey2_myValue2", "xxx");
@@ -40,13 +44,24 @@ public class WebUtilsTests extends TestCase {
 		assertEquals("myValue4", WebUtils.findParameterValue(params, "myKey4"));
 	}
 
-	public void testExtractFilenameFromUrlPath() {
+	@Test
+	public void extractFilenameFromUrlPath() {
 		assertEquals("index", WebUtils.extractFilenameFromUrlPath("index.html"));
 		assertEquals("index", WebUtils.extractFilenameFromUrlPath("/index.html"));
 		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html"));
 		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=a"));
 		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a"));
 		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
+	}
+
+	@Test
+	public void extractFullFilenameFromUrlPath() {
+		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("index.html"));
+		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("/index.html"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=a"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
 	}
 
 }
