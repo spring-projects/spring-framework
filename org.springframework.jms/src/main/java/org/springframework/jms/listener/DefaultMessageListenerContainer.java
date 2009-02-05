@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package org.springframework.jms.listener;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-
+import java.util.concurrent.Executor;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
@@ -165,7 +164,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
 
 
-	private TaskExecutor taskExecutor;
+	private Executor taskExecutor;
 
 	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
 
@@ -204,7 +203,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
-	public void setTaskExecutor(TaskExecutor taskExecutor) {
+	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
