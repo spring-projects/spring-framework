@@ -69,7 +69,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, InitializingBean {
 
-	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+	private static final ThreadLocal<LobHandler> configTimeLobHandlerHolder = new ThreadLocal<LobHandler>();
 
 	/**
 	 * Return the LobHandler for the currently configured iBATIS SqlMapClient,
@@ -83,7 +83,7 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	 * @see org.springframework.orm.ibatis.support.BlobSerializableTypeHandler
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
-		return (LobHandler) configTimeLobHandlerHolder.get();
+		return configTimeLobHandlerHolder.get();
 	}
 
 

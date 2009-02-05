@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.dao.annotation;
 import java.lang.annotation.Annotation;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -74,7 +75,7 @@ public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 
 	/**
 	 * Set the 'repository' annotation type.
-	 * The default required annotation type is the {@link Repository} annotation.
+	 * The default repository annotation type is the {@link Repository} annotation.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a class has a
 	 * repository role.
@@ -110,10 +111,14 @@ public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 	}
 
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		Class<?> targetClass =
-				(bean instanceof Advised ? ((Advised) bean).getTargetSource().getTargetClass() : bean.getClass());
+		if (bean instanceof AopInfrastructureBean) {
+			// Ignore AOP infrastructure such as scoped proxies.
+			return bean;
+		}
+
+		Class targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass == null) {
-			// Can't do much here
+			// Can't do much here.
 			return bean;
 		}
 		

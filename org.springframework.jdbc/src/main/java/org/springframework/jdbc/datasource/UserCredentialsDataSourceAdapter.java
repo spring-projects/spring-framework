@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 	private String password;
 
-	private final ThreadLocal threadBoundCredentials = new NamedThreadLocal("Current JDBC user credentials");
+	private final ThreadLocal<JdbcUserCredentials> threadBoundCredentials =
+			new NamedThreadLocal<JdbcUserCredentials>("Current JDBC user credentials");
 
 
 	/**
@@ -126,7 +127,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		JdbcUserCredentials threadCredentials = (JdbcUserCredentials) this.threadBoundCredentials.get();
+		JdbcUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
 			return doGetConnection(threadCredentials.username, threadCredentials.password);
 		}

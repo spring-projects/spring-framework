@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,8 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 
 	private ConnectionSpec connectionSpec;
 
-	private final ThreadLocal threadBoundSpec = new NamedThreadLocal("Current CCI ConnectionSpec");
+	private final ThreadLocal<ConnectionSpec> threadBoundSpec =
+			new NamedThreadLocal<ConnectionSpec>("Current CCI ConnectionSpec");
 
 
 	/**
@@ -107,7 +108,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	 */
 	@Override
 	public final Connection getConnection() throws ResourceException {
-		ConnectionSpec threadSpec = (ConnectionSpec) this.threadBoundSpec.get();
+		ConnectionSpec threadSpec = this.threadBoundSpec.get();
 		if (threadSpec != null) {
 			return doGetConnection(threadSpec);
 		}

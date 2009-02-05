@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,8 +72,8 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * (e.g. before and after advice) if the aspect involves more than a
 	 * single method (as will be the case for around advice).
 	 */
-	private static final ThreadLocal transactionInfoHolder =
-			new NamedThreadLocal("Current aspect-driven transaction");
+	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
+			new NamedThreadLocal<TransactionInfo>("Current aspect-driven transaction");
 
 
 	/**

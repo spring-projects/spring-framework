@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,13 @@ public class AspectJWeavingEnabler
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		LoadTimeWeaver weaverToUse = this.loadTimeWeaver;
-		if (weaverToUse == null && InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
-			weaverToUse = new InstrumentationLoadTimeWeaver(this.beanClassLoader);
+		if (weaverToUse == null) {
+			if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
+				weaverToUse = new InstrumentationLoadTimeWeaver(this.beanClassLoader);
+			}
+			else {
+				throw new IllegalStateException("No LoadTimeWeaver available");
+			}
 		}
 		weaverToUse.addTransformer(new AspectJClassBypassingClassFileTransformer(
 					new ClassPreProcessorAgentAdapter()));
