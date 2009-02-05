@@ -30,14 +30,14 @@ import java.util.Map;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public interface ConcurrentMap extends Map {
+public interface ConcurrentMap<K,V> extends Map<K,V> {
 
-	Object putIfAbsent(Object key, Object value);
+	V putIfAbsent(K key, V value);
 
 	boolean remove(Object key, Object value);
 
-	boolean replace(Object key, Object oldValue, Object newValue);
+	boolean replace(K key, V oldValue, V newValue);
 
-	Object replace(Object key, Object value);
+	V replace(K key, V value);
 
 }
