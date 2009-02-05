@@ -70,7 +70,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Map<String, Object> createColumnMap(int columnCount) {
-		return (Map<String, Object>) CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(columnCount);
+		return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(columnCount);
 	}
 
 	/**

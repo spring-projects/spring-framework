@@ -1170,7 +1170,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	@SuppressWarnings("unchecked")
 	protected Map<String, Object> createResultsMap() {
 		if (isResultsMapCaseInsensitive()) {
-			return (Map<String, Object>) CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(16);
+			return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(16);
 		}
 		else {
 			return new LinkedHashMap<String, Object>();
