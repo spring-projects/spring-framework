@@ -64,29 +64,25 @@
 				<entry key="atom" value="#{vets.contentType}"/>
 			</map>
 		</property>
-		<property name="viewResolvers">
-			<list>
-				<!--
-					- The BeanNameViewResolver is used to pick up the visits view name (below).
-					- It has the order property set to 2, which means that this will
-					- be the first view resolver to be used after the delegating content
-					- negotiating view resolver.
-				 -->
-				<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="1"/>
-				<!--
-				
-					- This bean configures the 'prefix' and 'suffix' properties of
-					- InternalResourceViewResolver, which resolves logical view names
-					- returned by Controllers. For example, a logical view name of "vets"
-					- will be mapped to "/WEB-INF/jsp/vets.jsp".
-				-->
-				<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/"
-						p:suffix=".jsp" p:order="2"/>
-			</list>
-
-		</property>
+		<property name="order" value="0"/>
 	</bean>
 	
+	<!--
+		- The BeanNameViewResolver is used to pick up the visits view name (below).
+		- It has the order property set to 2, which means that this will
+		- be the first view resolver to be used after the delegating content
+		- negotiating view resolver.
+	 -->
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="1"/>
+	<!--
+
+		- This bean configures the 'prefix' and 'suffix' properties of
+		- InternalResourceViewResolver, which resolves logical view names
+		- returned by Controllers. For example, a logical view name of "vets"
+		- will be mapped to "/WEB-INF/jsp/vets.jsp".
+	-->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/"
+			p:suffix=".jsp" p:order="2"/>
 
 	<!--
 		- The AtomView rendering a Atom feed of the visits
