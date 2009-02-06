@@ -42,6 +42,7 @@ import com.sun.syndication.feed.atom.Feed;
  * @since 3.0
  * @see #buildFeedMetadata(Map, WireFeed, HttpServletRequest)
  * @see #buildFeedEntries(Map, HttpServletRequest, HttpServletResponse)
+ * @see <a href="http://www.atomenabled.org/developers/syndication/">Atom Syndication Format</a>
  */
 public abstract class AbstractAtomFeedView extends AbstractFeedView<Feed> {
 
