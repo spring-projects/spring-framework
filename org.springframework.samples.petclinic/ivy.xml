@@ -19,6 +19,7 @@
 	</publications>
 
 	<dependencies>
+		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0" conf="compile->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided->runtime"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2" conf="compile->runtime"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->compile"/>

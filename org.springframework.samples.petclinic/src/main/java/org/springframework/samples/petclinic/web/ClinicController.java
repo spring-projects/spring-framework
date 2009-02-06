@@ -5,8 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -42,8 +43,8 @@ public class ClinicController {
 
 	/**
 	 * Custom handler for displaying vets.
-	 * <p>
-	 * Note that this handler returns a plain {@link ModelMap} object instead of
+	 *
+	 * <p>Note that this handler returns a plain {@link ModelMap} object instead of
 	 * a ModelAndView, thus leveraging convention-based model attribute names.
 	 * It relies on the RequestToViewNameTranslator to determine the logical
 	 * view name based on the request URL: "/vets.do" -&gt; "vets".
@@ -65,6 +66,19 @@ public class ClinicController {
 	public ModelAndView ownerHandler(@PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owner");
 		mav.addObject(this.clinic.loadOwner(ownerId));
+		return mav;
+	}
+
+	/**
+	 * Custom handler for displaying an list of visits.
+	 *
+	 * @param petId the ID of the pet whose visits to display
+	 * @return a ModelMap with the model attributes for the view
+	 */
+	@RequestMapping(value="/owners/*/pets/{petId}/visits", method=RequestMethod.GET)
+	public ModelAndView visitsHandler(@PathVariable int petId) {
+		ModelAndView mav = new ModelAndView("visits");
+		mav.addObject("visits", this.clinic.loadPet(petId).getVisits());
 		return mav;
 	}
 

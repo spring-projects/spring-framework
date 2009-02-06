@@ -58,6 +58,18 @@
 			p:suffix=".jsp"/>
 
 	<!--
+		- The BeanNameViewResolver is used to pick up the visits view name (below).
+		- It has the order property set to 1, which means that this will
+		- be the first view resolver to be used.
+	 -->
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="1"/>
+
+	<!--
+		- The AtomView rendering a Atom feed of the visits
+	 -->
+	<bean id="visits" class="org.springframework.samples.petclinic.web.VisitsAtomView"/>
+
+	<!--
 		- Message source for this context, loaded from localized "messages_xx" files.
 		- Could also reside in the root application context, as it is generic,
 		- but is currently just used within PetClinic's web tier.

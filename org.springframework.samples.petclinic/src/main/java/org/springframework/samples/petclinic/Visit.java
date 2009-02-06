@@ -63,7 +63,7 @@ public class Visit extends BaseEntity {
 	/** Setter for property pet.
 	 * @param pet New value of property pet.
 	 */
-	protected void setPet(Pet pet) {
+	public void setPet(Pet pet) {
 		this.pet = pet;
 	}
 

@@ -94,6 +94,14 @@
           </spring:url>
           <a href="${fn:escapeXml(visitUrl)}">Add Visit</a>
         </td>
+        <td></td>
+        <td>
+          <spring:url value="{ownerId}/pets/{petId}/visits" var="feedUrl">
+            <spring:param name="ownerId" value="${owner.id}"/>
+            <spring:param name="petId" value="${pet.id}"/>
+          </spring:url>
+          <a href="${fn:escapeXml(feedUrl)}" rel="alternate" type="application/atom+xml">Atom Feed</a>
+        </td>
       </tr>
     </table>
   </c:forEach>
