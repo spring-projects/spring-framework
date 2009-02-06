@@ -10,7 +10,7 @@
     <th>Specialties</th>
   </thead>
   </tr>
-  <c:forEach var="vet" items="${vetList}">
+  <c:forEach var="vet" items="${vets.vetList}">
     <tr>
       <td>${vet.firstName} ${vet.lastName}</td>
       <td>
@@ -21,6 +21,13 @@
       </td>
     </tr>
   </c:forEach>
+</table>
+<table class="table-buttons">
+  <tr>
+    <td>
+      <a href="<spring:url value="/clinic/vets.xml" escapeXml="true" />">View as XML</a>
+    </td>
+  </tr>
 </table>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

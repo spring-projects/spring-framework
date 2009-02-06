@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.Clinic;
+import org.springframework.samples.petclinic.Vets;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +54,9 @@ public class ClinicController {
 	 */
 	@RequestMapping("/vets")
 	public ModelMap vetsHandler() {
-		return new ModelMap(this.clinic.getVets());
+		Vets vets = new Vets();
+		vets.getVetList().addAll(this.clinic.getVets());
+		return new ModelMap(vets);
 	}
 
 	/**
