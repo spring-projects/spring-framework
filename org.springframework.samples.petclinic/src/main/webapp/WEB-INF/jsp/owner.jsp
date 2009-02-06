@@ -96,7 +96,7 @@
         </td>
         <td></td>
         <td>
-          <spring:url value="{ownerId}/pets/{petId}/visits" var="feedUrl">
+          <spring:url value="{ownerId}/pets/{petId}/visits.atom" var="feedUrl">
             <spring:param name="ownerId" value="${owner.id}"/>
             <spring:param name="petId" value="${pet.id}"/>
           </spring:url>
