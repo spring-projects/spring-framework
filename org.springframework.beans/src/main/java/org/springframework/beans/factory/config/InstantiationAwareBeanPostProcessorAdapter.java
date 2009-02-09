@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import org.springframework.beans.PropertyValues;
  */
 public abstract class InstantiationAwareBeanPostProcessorAdapter implements SmartInstantiationAwareBeanPostProcessor {
 
-	public Class predictBeanType(Class beanClass, String beanName) {
+	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
-	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
+	public Constructor<?>[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
