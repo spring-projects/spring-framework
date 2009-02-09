@@ -26,7 +26,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -94,7 +93,8 @@ import org.springframework.web.util.WebUtils;
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
-public abstract class FrameworkServlet extends HttpServletBean implements ApplicationListener {
+public abstract class FrameworkServlet extends HttpServletBean
+		implements ApplicationListener<ContextRefreshedEvent> {
 
 	/**
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
@@ -493,11 +493,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * triggering a refresh of this servlet's context-dependent state.
 	 * @param event the incoming ApplicationContext event
 	 */
-	public void onApplicationEvent(ApplicationEvent event) {
-		if (event instanceof ContextRefreshedEvent) {
-			this.refreshEventReceived = true;
-			onRefresh(((ContextRefreshedEvent) event).getApplicationContext());
-		}
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		this.refreshEventReceived = true;
+		onRefresh(event.getApplicationContext());
 	}
 
 	/**

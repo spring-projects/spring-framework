@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,18 @@ public abstract class GenericTypeResolver {
 		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);
 		Type rawType = getRawType(genericType, typeVariableMap);
 		return (rawType instanceof Class ? (Class) rawType : method.getReturnType());
+	}
+
+	/**
+	 * Resolve the given type variable against the given class.
+	 * @param tv the type variable to resolve
+	 * @param clazz the class that defines the type variable
+	 * somewhere in its inheritance hierarchy
+	 * @return the resolved type that the variable can get replaced with,
+	 * or <code>null</code> if none found
+	 */
+	public static Type resolveTypeVariable(TypeVariable tv, Class clazz) {
+		return getTypeVariableMap(clazz).get(tv);
 	}
 
 

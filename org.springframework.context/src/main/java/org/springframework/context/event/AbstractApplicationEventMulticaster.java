@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 package org.springframework.context.event;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.LinkedList;
+import java.util.Set;
 
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.OrderComparator;
 
 /**
  * Abstract implementation of the {@link ApplicationEventMulticaster} interface,
@@ -43,73 +47,47 @@ import org.springframework.context.ApplicationListener;
  * @see #getApplicationListeners()
  * @see SimpleApplicationEventMulticaster
  */
-public abstract class AbstractApplicationEventMulticaster implements ApplicationEventMulticaster {
+public abstract class AbstractApplicationEventMulticaster
+		implements ApplicationEventMulticaster, BeanFactoryAware {
 
-	/** Collection of ApplicationListeners */
-	private Collection<ApplicationListener> applicationListeners = new LinkedHashSet<ApplicationListener>();
+	private final Set<ApplicationListener> applicationListeners = new LinkedHashSet<ApplicationListener>();
 
+	private final Set<String> applicationListenerBeans = new LinkedHashSet<String>();
 
-	/**
-	 * Set whether this multicaster should expect concurrent updates at runtime
-	 * (i.e. after context startup finished). In case of concurrent updates,
-	 * a copy-on-write strategy is applied, keeping iteration (for multicasting)
-	 * without synchronization while still making listener updates thread-safe.
-	 */
-	public void setConcurrentUpdates(boolean concurrent) {
-		Collection<ApplicationListener> newColl = concurrent ?
-				new CopyOnWriteArraySet<ApplicationListener>() : new LinkedHashSet<ApplicationListener>();
-		// Add all previously registered listeners (usually none).
-		newColl.addAll(this.applicationListeners);
-		this.applicationListeners = newColl;
-	}
-
-	/**
-	 * Specify the collection class to use. Can be populated with a fully
-	 * qualified class name when defined in a Spring application context.
-	 * <p>Default is a linked HashSet, keeping the registration order.
-	 * Note that a Set class specified will not permit multiple instances
-	 * of the same listener, while a List class will allow for registering
-	 * the same listener multiple times.
-	 */
-	@SuppressWarnings("unchecked")
-	public void setCollectionClass(Class collectionClass) {
-		if (collectionClass == null) {
-			throw new IllegalArgumentException("'collectionClass' must not be null");
-		}
-		if (!Collection.class.isAssignableFrom(collectionClass)) {
-			throw new IllegalArgumentException("'collectionClass' must implement [java.util.Collection]");
-		}
-		// Create desired collection instance.
-		Collection<ApplicationListener> newColl =
-				(Collection<ApplicationListener>) BeanUtils.instantiateClass(collectionClass);
-		// Add all previously registered listeners (usually none).
-		newColl.addAll(this.applicationListeners);
-		this.applicationListeners = newColl;
-	}
+	private BeanFactory beanFactory;
 
 
 	public void addApplicationListener(ApplicationListener listener) {
 		this.applicationListeners.add(listener);
 	}
 
-	public void removeApplicationListener(ApplicationListener listener) {
-		this.applicationListeners.remove(listener);
+	public void addApplicationListenerBean(String listenerBeanName) {
+		this.applicationListenerBeans.add(listenerBeanName);
 	}
 
-	public void removeAllListeners() {
-		this.applicationListeners.clear();
+	public final void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
 	 * Return the current Collection of ApplicationListeners.
-	 * <p>Note that this is the raw Collection of ApplicationListeners,
-	 * potentially modified when new listeners get registered or
-	 * existing ones get removed. This Collection is not a snapshot copy.
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
 	 */
 	protected Collection<ApplicationListener> getApplicationListeners() {
-		return this.applicationListeners;
+		LinkedList<ApplicationListener> allListeners =
+				new LinkedList<ApplicationListener>(this.applicationListeners);
+		if (!this.applicationListenerBeans.isEmpty()) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("ApplicationEventMulticaster cannot retrieve listener beans " +
+						"because it is not associated with a BeanFactory: " + this.applicationListenerBeans);
+			}
+			for (String listenerBeanName : applicationListenerBeans) {
+				allListeners.add(this.beanFactory.getBean(listenerBeanName, ApplicationListener.class));
+			}
+		}
+		Collections.sort(allListeners, new OrderComparator());
+		return allListeners;
 	}
 
 }

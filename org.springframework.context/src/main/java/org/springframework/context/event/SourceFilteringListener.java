@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.context.event;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.Ordered;
 
 /**
  * {@link org.springframework.context.ApplicationListener} decorator that filters
@@ -30,11 +31,11 @@ import org.springframework.context.ApplicationListener;
  * @author Juergen Hoeller
  * @since 2.0.5
  */
-public class SourceFilteringListener implements ApplicationListener {
+public class SourceFilteringListener implements SmartApplicationListener {
 
 	private final Object source;
 
-	private ApplicationListener delegate;
+	private SmartApplicationListener delegate;
 
 
 	/**
@@ -46,7 +47,8 @@ public class SourceFilteringListener implements ApplicationListener {
 	 */
 	public SourceFilteringListener(Object source, ApplicationListener delegate) {
 		this.source = source;
-		this.delegate = delegate;
+		this.delegate = (delegate instanceof SmartApplicationListener ?
+				(SmartApplicationListener) delegate : new GenericApplicationListenerAdapter(delegate));
 	}
 
 	/**
@@ -67,12 +69,22 @@ public class SourceFilteringListener implements ApplicationListener {
 		}
 	}
 
+	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+		return (this.delegate == null || this.delegate.supportsEventType(eventType));
+	}
+
+	public int getOrder() {
+		return (this.delegate != null ? this.delegate.getOrder() : Ordered.LOWEST_PRECEDENCE);
+	}
+
+
 	/**
 	 * Actually process the event, after having filtered according to the
 	 * desired event source already.
 	 * <p>The default implementation invokes the specified delegate, if any.
 	 * @param event the event to process (matching the specified source)
 	 */
+	@SuppressWarnings("unchecked")
 	protected void onApplicationEventInternal(ApplicationEvent event) {
 		if (this.delegate == null) {
 			throw new IllegalStateException(

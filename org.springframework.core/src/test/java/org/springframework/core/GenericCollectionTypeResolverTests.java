@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -101,12 +102,22 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 				GenericCollectionTypeResolver.getCollectionReturnType(getter));
 	}
 
-
-	private abstract class CustomMap <T> extends AbstractMap<String, Integer> {
+	public void testClassResolution() {
+		assertEquals(String.class, GenericCollectionTypeResolver.getCollectionType(CustomSet.class));
+		assertEquals(String.class, GenericCollectionTypeResolver.getMapKeyType(CustomMap.class));
+		assertEquals(Integer.class, GenericCollectionTypeResolver.getMapValueType(CustomMap.class));
 	}
 
 
-	private abstract class OtherCustomMap <T> implements Map<String, Integer> {
+	private abstract class CustomSet<T> extends AbstractSet<String> {
+	}
+
+
+	private abstract class CustomMap<T> extends AbstractMap<String, Integer> {
+	}
+
+
+	private abstract class OtherCustomMap<T> implements Map<String, Integer> {
 	}
 
 

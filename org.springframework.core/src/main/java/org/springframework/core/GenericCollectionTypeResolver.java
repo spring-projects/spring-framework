@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param collectionClass the collection class to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public static Class getCollectionType(Class collectionClass) {
+	public static Class getCollectionType(Class<? extends Collection> collectionClass) {
 		return extractTypeFromClass(collectionClass, Collection.class, 0);
 	}
 
@@ -55,7 +55,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param mapClass the map class to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public static Class getMapKeyType(Class mapClass) {
+	public static Class getMapKeyType(Class<? extends Map> mapClass) {
 		return extractTypeFromClass(mapClass, Map.class, 0);
 	}
 
@@ -65,7 +65,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param mapClass the map class to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public static Class getMapValueType(Class mapClass) {
+	public static Class getMapValueType(Class<? extends Map> mapClass) {
 		return extractTypeFromClass(mapClass, Map.class, 1);
 	}
 
