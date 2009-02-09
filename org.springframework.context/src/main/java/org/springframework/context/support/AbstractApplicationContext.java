@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -657,7 +656,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
-			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
+			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
@@ -685,13 +684,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void registerListeners() {
 		// Register statically specified listeners first.
 		for (ApplicationListener listener : getApplicationListeners()) {
-			addListener(listener);
+			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
-		Collection<ApplicationListener> lisBeans = getBeansOfType(ApplicationListener.class, true, false).values();
-		for (ApplicationListener lisBean : lisBeans) {
-			addListener(lisBean);
+		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
+		for (final String lisName : listenerBeanNames) {
+			getApplicationEventMulticaster().addApplicationListenerBean(lisName);
 		}
 	}
 
@@ -924,18 +923,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeanNamesForType(type);
 	}
 
-	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean allowEagerInit) {
-		return getBeanFactory().getBeanNamesForType(type, includePrototypes, allowEagerInit);
+	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		return getBeanFactory().getBeansOfType(type);
 	}
 
-	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includePrototypes, boolean allowEagerInit)
+	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
-		return getBeanFactory().getBeansOfType(type, includePrototypes, allowEagerInit);
+		return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)

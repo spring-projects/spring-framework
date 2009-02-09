@@ -18,6 +18,7 @@ package org.springframework.context.event;
 
 import java.util.concurrent.Executor;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.task.SyncTaskExecutor;
@@ -38,11 +39,24 @@ import org.springframework.core.task.SyncTaskExecutor;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setTaskExecutor
- * @see #setConcurrentUpdates
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
 	private Executor taskExecutor = new SyncTaskExecutor();
+
+
+	/**
+	 * Create a new SimpleApplicationEventMulticaster.
+	 */
+	public SimpleApplicationEventMulticaster() {
+	}
+
+	/**
+	 * Create a new SimpleApplicationEventMulticaster for the given BeanFactory.
+	 */
+	public SimpleApplicationEventMulticaster(BeanFactory beanFactory) {
+		setBeanFactory(beanFactory);
+	}
 
 
 	/**
@@ -71,11 +85,16 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	public void multicastEvent(final ApplicationEvent event) {
 		for (final ApplicationListener listener : getApplicationListeners()) {
-			getTaskExecutor().execute(new Runnable() {
-				public void run() {
-					listener.onApplicationEvent(event);
-				}
-			});
+			SmartApplicationListener smartListener = (listener instanceof SmartApplicationListener ?
+					(SmartApplicationListener) listener : new GenericApplicationListenerAdapter(listener));
+			if (smartListener.supportsEventType(event.getClass())) {
+				getTaskExecutor().execute(new Runnable() {
+					@SuppressWarnings("unchecked")
+					public void run() {
+						listener.onApplicationEvent(event);
+					}
+				});
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,15 @@ import java.util.EventListener;
  * for the Observer design pattern.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.context.event.ApplicationEventMulticaster
  */
-public interface ApplicationListener extends EventListener {
+public interface ApplicationListener<E extends ApplicationEvent> extends EventListener {
 
 	/**
 	 * Handle an application event.
 	 * @param event the event to respond to
 	 */
-	void onApplicationEvent(ApplicationEvent event);
+	void onApplicationEvent(E event);
 
 }
