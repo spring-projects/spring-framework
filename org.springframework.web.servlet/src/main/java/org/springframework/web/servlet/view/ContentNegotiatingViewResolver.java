@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletContext;
@@ -59,15 +60,12 @@ import org.springframework.web.util.WebUtils;
  * property needs to be set to a higher precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}.)
  *
  * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable {@link View} for a
- * request. This media type is determined by using the following criteria:
- * <ol>
- * <li>If the requested path has a file extension and if the {@link #setFavorPathExtension(boolean)} property is
- * <code>true</code>, the {@link #setMediaTypes(Map)  mediaTypes} property is inspected for a matching media type.</li>
- * <li>If there is no match and if the Java Activation Framework (JAF) is present on the class path,
- * {@link FileTypeMap#getContentType(String)} is used.</li>
- * <li>If the previous steps did not result in a media type, the request {@code Accept} header is used.</li>
- * </ol>
- * Once the requested media type has been determined, this resolver queries each delegate view resolver for a
+ * request. This media type is determined by using the following criteria: <ol> <li>If the requested path has a file
+ * extension and if the {@link #setFavorPathExtension(boolean)} property is <code>true</code>, the {@link
+ * #setMediaTypes(Map)  mediaTypes} property is inspected for a matching media type.</li> <li>If there is no match and
+ * if the Java Activation Framework (JAF) is present on the class path, {@link FileTypeMap#getContentType(String)} is
+ * used.</li> <li>If the previous steps did not result in a media type, the request {@code Accept} header is used.</li>
+ * </ol> Once the requested media type has been determined, this resolver queries each delegate view resolver for a
  * {@link View} and determines if the requested media type is {@linkplain MediaType#includes(MediaType) compatible} with
  * the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
@@ -94,7 +92,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+	private ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
 
 	private List<ViewResolver> viewResolvers;
 
@@ -223,7 +221,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		if (mediaType == null && jafPresent) {
 			mediaType = ActivationMediaTypeFactory.getMediaType(filename);
 			if (mediaType != null) {
-				mediaTypes.put(extension, mediaType);
+				mediaTypes.putIfAbsent(extension, mediaType);
 			}
 		}
 		return mediaType;
