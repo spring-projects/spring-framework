@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,21 @@ public interface TransactionFactory {
 	 * @return the active Transaction object (never <code>null</code>)
 	 * @throws NotSupportedException if the transaction manager does not support
 	 * a transaction of the specified type
-	 * @throws SystemException if the transaction managed failed to create the
+	 * @throws SystemException if the transaction manager failed to create the
 	 * transaction
 	 */
 	Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException;
+
+	/**
+	 * Determine whether the underlying transaction manager supports XA transactions
+	 * managed by a resource adapter (i.e. without explicit XA resource enlistment).
+	 * <p>Typically <code>false</code>. Checked by
+	 * {@link org.springframework.jca.endpoint.AbstractMessageEndpointFactory}
+	 * in order to differentiate between invalid configuration and valid
+	 * ResourceAdapter-managed transactions.
+	 * @see javax.resource.spi.ResourceAdapter#endpointActivation
+	 * @see javax.resource.spi.endpoint.MessageEndpointFactory#isDeliveryTransacted
+	 */
+	boolean supportsResourceAdapterManagedTransactions();
 
 }
