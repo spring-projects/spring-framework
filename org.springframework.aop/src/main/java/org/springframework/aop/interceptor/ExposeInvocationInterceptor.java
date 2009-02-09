@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.Ordered;
 
 /**
  * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
@@ -39,7 +40,7 @@ import org.springframework.core.NamedThreadLocal;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class ExposeInvocationInterceptor implements MethodInterceptor, Serializable {
+public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, Serializable {
 
 	/** Singleton instance of this class */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
@@ -50,16 +51,13 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 */
 	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
 		@Override
-		public int getOrder() {
-			return Integer.MIN_VALUE;
-		}
-		@Override
 		public String toString() {
 			return ExposeInvocationInterceptor.class.getName() +".ADVISOR";
 		}
 	};
 
-	private static final ThreadLocal invocation = new NamedThreadLocal("Current AOP method invocation");
+	private static final ThreadLocal<MethodInvocation> invocation =
+			new NamedThreadLocal<MethodInvocation>("Current AOP method invocation");
 
 
 	/**
@@ -69,7 +67,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 * or if the ExposeInvocationInterceptor was not added to this interceptor chain
 	 */
 	public static MethodInvocation currentInvocation() throws IllegalStateException {
-		MethodInvocation mi = (MethodInvocation) invocation.get();
+		MethodInvocation mi = invocation.get();
 		if (mi == null)
 			throw new IllegalStateException(
 					"No MethodInvocation found: Check that an AOP invocation is in progress, " +
@@ -85,16 +83,20 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	}
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		Object old = invocation.get();
+		MethodInvocation oldInvocation = invocation.get();
 		invocation.set(mi);
 		try {
 			return mi.proceed();
 		}
 		finally {
-			invocation.set(old);
+			invocation.set(oldInvocation);
 		}
 	}
-	
+
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE + 1;
+	}
+
 	/**
 	 * Required to support serialization. Replaces with canonical instance
 	 * on deserialization, protecting Singleton pattern.
