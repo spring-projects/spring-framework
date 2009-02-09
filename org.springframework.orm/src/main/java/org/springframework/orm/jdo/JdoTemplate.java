@@ -440,15 +440,16 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public <T> Collection<T> find(Class<T> entityClass, String filter, String parameters, Map values)
+	public <T> Collection<T> find(
+			Class<T> entityClass, String filter, String parameters, Map<String, ?> values)
 			throws DataAccessException {
 
 		return find(entityClass, filter, parameters, values, null);
 	}
 
 	public <T> Collection<T> find(
-			final Class<T> entityClass, final String filter, final String parameters, final Map values,
-			final String ordering) throws DataAccessException {
+			final Class<T> entityClass, final String filter, final String parameters,
+			final Map<String, ?> values, final String ordering) throws DataAccessException {
 
 		return execute(new JdoCallback<Collection<T>>() {
 			@SuppressWarnings("unchecked")
@@ -485,7 +486,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public Collection find(final String queryString, final Object[] values) throws DataAccessException {
+	public Collection find(final String queryString, final Object... values) throws DataAccessException {
 		return execute(new JdoCallback<Collection>() {
 			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
@@ -495,7 +496,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public Collection find(final String queryString, final Map values) throws DataAccessException {
+	public Collection find(final String queryString, final Map<String, ?> values) throws DataAccessException {
 		return execute(new JdoCallback<Collection>() {
 			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
@@ -518,7 +519,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public <T> Collection<T> findByNamedQuery(final Class<T> entityClass, final String queryName, final Object[] values)
+	public <T> Collection<T> findByNamedQuery(final Class<T> entityClass, final String queryName, final Object... values)
 			throws DataAccessException {
 
 		return execute(new JdoCallback<Collection<T>>() {
@@ -531,7 +532,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public <T> Collection<T> findByNamedQuery(final Class<T> entityClass, final String queryName, final Map values)
+	public <T> Collection<T> findByNamedQuery(
+			final Class<T> entityClass, final String queryName, final Map<String, ?> values)
 			throws DataAccessException {
 
 		return execute(new JdoCallback<Collection<T>>() {
