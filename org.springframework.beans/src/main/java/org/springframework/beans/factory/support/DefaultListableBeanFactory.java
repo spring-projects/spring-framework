@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -393,14 +393,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (!containsBeanDefinition(beanName)) {
 			if (containsSingleton(beanName)) {
-				return true;
+				return isAutowireCandidate(beanName, new RootBeanDefinition(getType(beanName)), descriptor);
 			}
 			else if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
 				// No bean definition found in this factory -> delegate to parent.
 				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
 			}
 		}
-
 		return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanName), descriptor);
 	}
 
