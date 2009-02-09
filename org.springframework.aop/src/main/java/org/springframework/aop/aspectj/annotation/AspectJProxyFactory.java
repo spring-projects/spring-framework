@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.OrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -116,10 +118,11 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * @see #makeAdvisorChainAspectJCapableIfNecessary()
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
-		List advisors = this.aspectFactory.getAdvisors(instanceFactory);
+		List<Advisor> advisors = this.aspectFactory.getAdvisors(instanceFactory);
 		advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
-		addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));
-		makeAdvisorChainAspectJCapableIfNecessary();
+		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(advisors);
+		Collections.sort(advisors, new OrderComparator());
+		addAdvisors(advisors);
 	}
 
 	/**
@@ -152,18 +155,6 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 			instanceFactory = new SimpleMetadataAwareAspectInstanceFactory(aspectClass, aspectName);
 		}
 		return instanceFactory;
-	}
-
-	/**
-	 * Add any special-purpose {@link Advisor Advisors} needed for AspectJ support
-	 * to the chain. {@link #updateAdvisorArray() Updates} the {@link Advisor} array
-	 * and fires {@link #adviceChanged events}.
-	 */
-	private void makeAdvisorChainAspectJCapableIfNecessary() {
-		if (AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(getAdvisorsInternal())) {
-			updateAdvisorArray();
-			adviceChanged();
-		}
 	}
 
 	/**
