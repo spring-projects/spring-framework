@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	private Class<? extends Annotation> destroyAnnotationType;
 
-	private int order = Ordered.LOWEST_PRECEDENCE - 1;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
 			new ConcurrentHashMap<Class<?>, LifecycleMetadata>();

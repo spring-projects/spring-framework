@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,12 +120,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 
 	/**
-	 * Set the 'autowired' annotation type, to be used on constructors, fields,
+	 * Set the 'autowired' annotation types, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
 	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation.
+	 * {@link Autowired} annotation, as well as {@link Value} and raw
+	 * use of the {@link Qualifier} annotation.
 	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation type to indicate that a member is
+	 * (non-Spring-specific) annotation types to indicate that a member is
 	 * supposed to be autowired.
 	 */
 	public void setAutowiredAnnotationTypes(Class<? extends Annotation>[] autowiredAnnotationTypes) {
