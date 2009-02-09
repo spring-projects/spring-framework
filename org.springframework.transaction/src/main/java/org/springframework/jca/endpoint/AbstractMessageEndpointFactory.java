@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jca.endpoint;
 
 import java.lang.reflect.Method;
-
 import javax.resource.ResourceException;
 import javax.resource.spi.ApplicationServerInternalException;
 import javax.resource.spi.UnavailableException;
@@ -255,22 +254,24 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 */
 	private class TransactionDelegate {
 
-		private XAResource xaResource;
+		private final XAResource xaResource;
 
 		private Transaction transaction;
 
 		private boolean rollbackOnly;
 
 		public TransactionDelegate(XAResource xaResource) {
-			if (transactionFactory != null && xaResource == null) {
-				throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
-						"transaction management. Check your ResourceAdapter's configuration.");
+			if (xaResource == null) {
+				if (transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
+					throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
+							"transaction management. Check your ResourceAdapter's configuration.");
+				}
 			}
 			this.xaResource = xaResource;
 		}
 
 		public void beginTransaction() throws Exception {
-			if (transactionFactory != null) {
+			if (transactionFactory != null && this.xaResource != null) {
 				this.transaction = transactionFactory.createTransaction(transactionName, transactionTimeout);
 				this.transaction.enlistResource(this.xaResource);
 			}

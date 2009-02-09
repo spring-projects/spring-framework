@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieving WebSphere UOWManager from JNDI location [" + uowManagerName + "]");
 			}
-			return (UOWManager) getJndiTemplate().lookup(uowManagerName, UOWManager.class);
+			return getJndiTemplate().lookup(uowManagerName, UOWManager.class);
 		}
 		catch (NamingException ex) {
 			throw new TransactionSystemException(
@@ -174,6 +174,20 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	@Override
 	protected void doRegisterAfterCompletionWithJtaTransaction(JtaTransactionObject txObject, List synchronizations) {
 		this.uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
+	}
+
+	/**
+	 * Returns <code>true</code> since WebSphere ResourceAdapters (as exposed in JNDI)
+	 * implicitly perform transaction enlistment if the MessageEndpointFactory's
+	 * <code>isDeliveryTransacted</code> method returns <code>true</code>.
+	 * In that case we'll simply skip the {@link #createTransaction} call.
+	 * @see javax.resource.spi.endpoint.MessageEndpointFactory#isDeliveryTransacted
+	 * @see org.springframework.jca.endpoint.AbstractMessageEndpointFactory
+	 * @see TransactionFactory#createTransaction
+	 */
+	@Override
+	public boolean supportsResourceAdapterManagedTransactions() {
+		return true;
 	}
 
 
