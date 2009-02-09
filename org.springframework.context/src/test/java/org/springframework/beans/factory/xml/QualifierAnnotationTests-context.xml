@@ -41,4 +41,6 @@
 		</qualifier>
 	</bean>
 
+	<bean id="testProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean"/>
+
 </beans>
