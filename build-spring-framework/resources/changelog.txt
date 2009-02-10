@@ -3,15 +3,36 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.M2 (2009-01-23)
+Changes in version 3.0.0.M2 (2009-02-11)
 ----------------------------------------
 
+* "systemProperties" bean is not considered a default match for type Properties anymore
+* registered plain singletons will be fully matched according to their qualifiers
+* all "taskExecutor" bean properties now accept any "java.util.concurrent.Executor"
+* added "Future submit(Runnable)" and "Future submit(Callable)" to AsyncTaskExecutor
+* SimpleAsyncTaskExecutor supports a custom "java.util.concurrent.ThreadFactory"
+* SchedulingTaskExecutor interface extends AsyncTaskExecutor now
+* added ThreadPoolExecutorFactoryBean (exposing the native ExecutorService interface)
+* added ExecutorServiceAdapter class as a standard wrapper for a Spring TaskExecutor
+* reduced backport-concurrent support to TaskExecutor adapters
+* added @Async annotation and AsyncAnnotationAdvisor (namespace support coming in M3)
+* EJB 3.1's @Asynchronous annotation gets detected and supported by default as well
+* ApplicationListener beans get obtained on demand, supporting non-singletons as well
+* ApplicationListeners will be called in the order according to the Ordered contract
+* generified ApplicationListener interface, narrowing the event type to be received
+* generified Hibernate/Jdo/JpaCallback with generic "doInXxx" return type
+* HibernateOperations uses generic parameter/return types where possible
+* JdoOperations uses generic parameter/return types where possible (following JDO 2.1)
+* removed "flush" operation from JdoDialect (fully relying on JDO 2.0+ compliance now)
+* added JDO 2.1 compliant StandardPersistenceManagerProxy/SpringPersistenceManagerProxy
+* Spring-created EntityManagers support JPA 2.0 draft API ("unwrap", "getQueryBuilder")
+* Spring initiates JPA 2.0 query timeout with remaining Spring transaction timeout
+* added support for WebSphere's ResourceAdapter-managed messaging transactions
 * introduced OXM support package (originating from Spring Web Services)
 * introduced OXM-based MarshallingMessageConverter for JMS
 * introduced OXM-based MarshallingView for Spring MVC
-* refined @PathVariable handling
-* updated Spring Portlet mocks for Portlet API 2.0
-* updated Spring Portlet MVC infrastructure for Portlet API 2.0
+* refined @PathVariable handling in MVC handler methods
+* updated Spring Portlet MVC infrastructure and mocks for Portlet API 2.0
 * added resource and event methods to Portlet HandlerAdapter/HandlerInterceptor
 * added resolveException method for resource requests to HandlerExceptionResolver
 * introduced Resource/EventAwareController subinterfaces of Portlet Controller
@@ -34,6 +55,7 @@ Changes in version 3.0.0.M1 (2008-12-05)
 * removed ContextLoaderServlet and Log4jConfigServlet
 * deprecated form controller hierarchy in favor of @MVC form object handling
 * deprecated JUnit 3.8 test class hierarchy in favor of test context framework
+* revised TaskExecutor interface to extend "java.util.concurrent.Executor" now
 * introduced Spring EL parser in org.springframework.expression package
 * introduced #{...} expression support in bean definitions
 * introduced @Value annotation for embedded expression support

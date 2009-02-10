@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package example.scannable;
 
+import java.util.concurrent.Future;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class AutowiredQualifierFooService implements FooService {
 
@@ -42,6 +45,10 @@ public class AutowiredQualifierFooService implements FooService {
 
 	public String foo(int id) {
 		return this.fooDao.findFoo(id);
+	}
+
+	public Future<String> asyncFoo(int id) {
+		return new AsyncResult<String>(this.fooDao.findFoo(id));
 	}
 
 	public boolean isInitCalled() {

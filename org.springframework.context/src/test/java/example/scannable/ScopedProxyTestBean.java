@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package example.scannable;
 
+import java.util.concurrent.Future;
+
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 /**
  * @author Mark Fisher
@@ -27,6 +30,10 @@ public class ScopedProxyTestBean implements FooService {
 
 	public String foo(int id) {
 		return "bar";
+	}
+
+	public Future<String> asyncFoo(int id) {
+		return new AsyncResult<String>("bar");
 	}
 
 	public boolean isInitCalled() {
