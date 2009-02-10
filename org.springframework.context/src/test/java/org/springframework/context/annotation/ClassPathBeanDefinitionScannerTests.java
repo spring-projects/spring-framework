@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.springframework.context.annotation;
 
-import static org.junit.Assert.*;
-
+import example.scannable.CustomComponent;
+import example.scannable.FooService;
+import example.scannable.FooServiceImpl;
+import example.scannable.NamedStubDao;
+import example.scannable.StubFooDao;
 import org.aspectj.lang.annotation.Aspect;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.TestBean;
@@ -34,12 +38,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Component;
-
-import example.scannable.CustomComponent;
-import example.scannable.FooService;
-import example.scannable.FooServiceImpl;
-import example.scannable.NamedStubDao;
-import example.scannable.StubFooDao;
 
 /**
  * @author Mark Fisher
@@ -64,8 +62,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean("thoreau"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -119,8 +117,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		}
 		catch (IllegalStateException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("stubFooDao") != -1);
-			assertTrue(ex.getMessage().indexOf(StubFooDao.class.getName()) != -1);
+			assertTrue(ex.getMessage().contains("stubFooDao"));
+			assertTrue(ex.getMessage().contains(StubFooDao.class.getName()));
 		}
 	}
 
@@ -194,8 +192,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertEquals(4, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -212,8 +210,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertFalse(context.containsBean("myNamedComponent"));
 		assertFalse(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -230,8 +228,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -247,8 +245,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -264,8 +262,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -282,8 +280,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertFalse(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertFalse(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertFalse(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertFalse(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -300,8 +298,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -318,8 +316,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test

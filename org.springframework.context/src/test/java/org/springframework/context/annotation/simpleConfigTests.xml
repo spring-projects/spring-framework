@@ -8,13 +8,21 @@
 				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
 	<context:annotation-config/>
-	
+
 	<aop:aspectj-autoproxy/>
-	
+
+	<bean class="org.springframework.scheduling.annotation.AsyncAnnotationAdvisor">
+		<!--
+		<property name="taskExecutor">
+			<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"/>
+		</property>
+		-->
+	</bean>
+
 	<bean id="fooServiceImpl" class="example.scannable.FooServiceImpl"/>
-	
+
 	<bean id="serviceInvocationCounter" class="example.scannable.ServiceInvocationCounter"/>
-	
+
 	<bean class="example.scannable.StubFooDao"/>
-		
+
 </beans>

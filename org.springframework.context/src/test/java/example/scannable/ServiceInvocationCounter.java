@@ -31,16 +31,25 @@ public class ServiceInvocationCounter {
 
 	private int useCount;
 
+	private static final ThreadLocal<Integer> threadLocalCount = new ThreadLocal<Integer>();
+
+
 	@Pointcut("execution(* example.scannable.FooService+.*(..))")
 	public void serviceExecution() {}
 
 	@Before("serviceExecution()")
 	public void countUse() {
 		this.useCount++;
+		this.threadLocalCount.set(this.useCount);
+		System.out.println("");
 	}
 	
 	public int getCount() {
 		return this.useCount;
+	}
+
+	public static Integer getThreadLocalCount() {
+		return threadLocalCount.get();
 	}
 
 }
