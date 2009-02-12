@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * Parse the Number from the given text, using the specified NumberFormat.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			// Treat empty String as null value.
@@ -120,6 +121,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * Coerce a Number value into the required target class, if necessary.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if (value instanceof Number) {
 			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
