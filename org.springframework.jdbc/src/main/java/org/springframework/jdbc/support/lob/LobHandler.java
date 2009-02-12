@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,22 @@ import java.sql.SQLException;
  * <p>Provides accessor methods for BLOBs and CLOBs, and acts as factory for
  * LobCreator instances, to be used as sessions for creating BLOBs or CLOBs.
  * LobCreators are typically instantiated for each statement execution or for
- * each transaction. They are not thread-safe because they might track
- * allocated database resources to be able to free them after execution.
+ * each transaction; they are not thread-safe because they might track
+ * allocated database resources in order to free them after execution.
  *
  * <p>Most databases/drivers should be able to work with {@link DefaultLobHandler},
- * which by default delegates to JDBC's direct accessor methods, avoiding
- * <code>java.sql.Blob</code> and <code>java.sql.Clob</code> completely.
- * {@link DefaultLobHandler} can also be configured to populate LOBs using
- * <code>PreparedStatement.setBlob/setClob</code> (e.g. for PostgreSQL).
+ * which by default delegates to JDBC's direct accessor methods, avoiding the
+ * <code>java.sql.Blob</code> and <code>java.sql.Clob</code> API completely.
+ * {@link DefaultLobHandler} can also be configured to access LOBs using
+ * <code>PreparedStatement.setBlob/setClob</code> (e.g. for PostgreSQL), through
+ * setting the {@link DefaultLobHandler#setWrapAsLob "wrapAsLob"} property.
  *
  * <p>Unfortunately, Oracle 9i just accepts Blob/Clob instances created via its own
  * proprietary BLOB/CLOB API, and additionally doesn't accept large streams for
  * PreparedStatement's corresponding setter methods. Therefore, you need to use
- * {@link OracleLobHandler} there, which uses Oracle's BLOB/CLOB API for both all access.
- * The Oracle 10g JDBC driver should basically work with {@link DefaultLobHandler}
- * as well, with some limitations in terms of LOB sizes.
+ * {@link OracleLobHandler} there, which uses Oracle's BLOB/CLOB API for both types
+ * of access. The Oracle 10g JDBC driver should basically work with
+ * {@link DefaultLobHandler} as well, with some limitations in terms of LOB sizes.
  *
  * <p>Of course, you need to declare different field types for each database.
  * In Oracle, any binary content needs to go into a BLOB, and all character content

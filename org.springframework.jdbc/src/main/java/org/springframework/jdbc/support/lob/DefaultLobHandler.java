@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,27 +115,57 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as bytes");
-		return rs.getBytes(columnIndex);
+		if (this.wrapAsLob) {
+			Blob blob = rs.getBlob(columnIndex);
+			return blob.getBytes(1, (int) blob.length());
+		}
+		else {
+			return rs.getBytes(columnIndex);
+		}
 	}
 
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as binary stream");
-		return rs.getBinaryStream(columnIndex);
+		if (this.wrapAsLob) {
+			Blob blob = rs.getBlob(columnIndex);
+			return blob.getBinaryStream();
+		}
+		else {
+			return rs.getBinaryStream(columnIndex);
+		}
 	}
 
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as string");
-		return rs.getString(columnIndex);
+		if (this.wrapAsLob) {
+			Clob clob = rs.getClob(columnIndex);
+			return clob.getSubString(1, (int) clob.length());
+		}
+		else {
+			return rs.getString(columnIndex);
+		}
 	}
 
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as ASCII stream");
-		return rs.getAsciiStream(columnIndex);
+		if (this.wrapAsLob) {
+			Clob clob = rs.getClob(columnIndex);
+			return clob.getAsciiStream();
+		}
+		else {
+			return rs.getAsciiStream(columnIndex);
+		}
 	}
 
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as character stream");
-		return rs.getCharacterStream(columnIndex);
+		if (this.wrapAsLob) {
+			Clob clob = rs.getClob(columnIndex);
+			return clob.getCharacterStream();
+		}
+		else {
+			return rs.getCharacterStream(columnIndex);
+		}
 	}
 
 	public LobCreator getLobCreator() {
