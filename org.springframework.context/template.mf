@@ -12,7 +12,7 @@ Import-Template:
  com.sun.net.*;resolution:=optional,
  edu.emory.mathcs.backport.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  groovy.*;version="[1.5.1, 2.0.0)";resolution:=optional,
- javax.annotation.*;version="[1.0.0, 2.0.0)";resolution:=optional,
+ javax.annotation.*;version="[0.0.0, 2.0.0)";resolution:=optional,
  javax.ejb.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  javax.interceptor.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  javax.persistence.*;version="[1.0.0, 2.0.0)";resolution:=optional,
