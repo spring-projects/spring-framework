@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
@@ -20,6 +21,12 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
 
+/**
+ * Represents a NOT operation.
+ *
+ * @author Andy Clement
+ * @since 3.0
+ */
 public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do not extend BinaryOperator
 
 	public OperatorNot(Token payload) {
@@ -29,9 +36,10 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	@Override
 	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			boolean value = state.toBoolean(getChild(0).getValueInternal(state));
+			boolean value = state.convertValue(getChild(0).getValueInternal(state), Boolean.class);
 			return !value;
-		} catch (SpelException see) {
+		}
+		catch (SpelException see) {
 			see.setPosition(getChild(0).getCharPositionInLine());
 			throw see;
 		}
@@ -48,4 +56,5 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	public boolean isWritable(ExpressionState expressionState) throws SpelException {
 		return false;
 	}
+
 }

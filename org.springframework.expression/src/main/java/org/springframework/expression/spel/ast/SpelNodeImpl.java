@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import java.io.Serializable;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.common.ExpressionUtils;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.generated.SpringExpressionsParser;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * The common supertype of all AST nodes in a parsed Spring Expression Language format expression.
- * 
+ *
  * @author Andy Clement
- * 
+ * @since 3.0
  */
-public abstract class SpelNodeImpl extends CommonTree implements Serializable, SpelNode {
+public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Serializable {
 
 	/**
 	 * The Antlr parser uses this constructor to build SpelNodes.
-	 * 
 	 * @param payload the token for the node that has been parsed
 	 */
 	protected SpelNodeImpl(Token payload) {
@@ -46,38 +47,23 @@ public abstract class SpelNodeImpl extends CommonTree implements Serializable, S
 	}
 
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState==null) {
-			return getValue(new ExpressionState(new StandardEvaluationContext()));
-		} else {
+		if (expressionState != null) {
 			return getValueInternal(expressionState);
+		}
+		else {
+			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
 	}
 
-
-	
-	/* (non-Javadoc)
-	 * @see org.springframework.expression.spel.ast.ISpelNode#getValue(org.springframework.expression.spel.ExpressionState)
-	 */
-	public abstract Object getValueInternal(ExpressionState expressionState) throws EvaluationException;
-
-	/* (non-Javadoc)
-	 * @see org.springframework.expression.spel.ast.ISpelNode#isWritable(org.springframework.expression.spel.ExpressionState)
-	 */
 	public boolean isWritable(ExpressionState expressionState) throws EvaluationException {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.expression.spel.ast.ISpelNode#setValue(org.springframework.expression.spel.ExpressionState, java.lang.Object)
-	 */
 	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelException(getCharPositionInLine(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass(),
-				getTokenName());
+		throw new SpelException(
+				getCharPositionInLine(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass(), getTokenName());
 	}
 
-	/**
-	 * @return return the token this node represents
-	 */
 	protected String getTokenName() {
 		if (getToken() == null) {
 			return "UNKNOWN";
@@ -85,42 +71,39 @@ public abstract class SpelNodeImpl extends CommonTree implements Serializable, S
 		return SpringExpressionsParser.tokenNames[getToken().getType()];
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.expression.spel.ast.ISpelNode#toStringAST()
-	 */
-	public abstract String toStringAST();
-
-	/* (non-Javadoc)
-	 * @see org.springframework.expression.spel.ast.ISpelNode#getChild(int)
-	 */
 	@Override
 	public SpelNodeImpl getChild(int index) {
 		return (SpelNodeImpl) super.getChild(index);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.expression.spel.ast.ISpelNode#getObjectClass(java.lang.Object)
-	 */
-	public Class<?> getObjectClass(Object o) {
-		if (o == null)
+	public Class<?> getObjectClass(Object obj) {
+		if (obj == null) {
 			return null;
-		return (o instanceof Class) ? ((Class<?>) o) : o.getClass();
+		}
+		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
-	protected final Object getValue(ExpressionState state, Class<?> desiredReturnType) throws EvaluationException {
+	@SuppressWarnings("unchecked")
+	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
 		Object result = getValueInternal(state);
 		if (result != null && desiredReturnType != null) {
 			Class<?> resultType = result.getClass();
 			if (desiredReturnType.isAssignableFrom(resultType)) {
-				return result;
+				return (T) result;
 			}
 			// Attempt conversion to the requested type, may throw an exception
 			return ExpressionUtils.convert(state.getEvaluationContext(), result, desiredReturnType);
 		}
-		return result;
+		return (T) result;
 	}
 
 	public int getStartPosition() {
 		return getCharPositionInLine();
 	}
+
+
+	public abstract Object getValueInternal(ExpressionState expressionState) throws EvaluationException;
+
+	public abstract String toStringAST();
+
 }

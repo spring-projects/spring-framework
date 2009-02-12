@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ import org.springframework.expression.PropertyAccessor;
  */
 public class BeanFactoryAccessor implements PropertyAccessor {
 
-	public boolean canRead(EvaluationContext context, Object target, Object name) throws AccessException {
-		return (((BeanFactory) target).containsBean(name.toString()));
+	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		return (((BeanFactory) target).containsBean(name));
 	}
 
-	public Object read(EvaluationContext context, Object target, Object name) throws AccessException {
-		return ((BeanFactory) target).getBean(name.toString());
+	public Object read(EvaluationContext context, Object target, String name) throws AccessException {
+		return ((BeanFactory) target).getBean(name);
 	}
 
-	public boolean canWrite(EvaluationContext context, Object target, Object name) throws AccessException {
+	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 		return false;
 	}
 
-	public void write(EvaluationContext context, Object target, Object name, Object newValue) throws AccessException {
+	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		throw new AccessException("Beans in a BeanFactory are read-only");
 	}
 

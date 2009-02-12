@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
@@ -24,7 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
  * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
  * 
  * @author Andy Clement
- * 
+ * @since 3.0
  */
 public class CompoundExpression extends SpelNodeImpl {
 
@@ -35,7 +36,6 @@ public class CompoundExpression extends SpelNodeImpl {
 	/**
 	 * Evalutes a compound expression. This involves evaluating each piece in turn and the return value from each piece
 	 * is the active context object for the subsequent piece.
-	 * 
 	 * @param state the state in which the expression is being evaluated
 	 * @return the final value from the last piece of the compound expression
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,16 +24,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.expression.AccessException;
-import org.springframework.expression.CacheablePropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.PropertyReaderExecutor;
-import org.springframework.expression.PropertyWriterExecutor;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
-import org.springframework.expression.spel.standard.StandardIndividualTypeConverter;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Testcases showing the common scenarios/use-cases for picking up the expression language support.
@@ -63,7 +61,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	public void testScenario_UsingStandardInfrastructure() {
 		try {
 			// Create a parser
-			SpelExpressionParser parser = new SpelExpressionParser();
+			SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 			// Parse an expression
 			Expression expr = parser.parseExpression("new String('hello world')");
 			// Evaluate it using a 'standard' context
@@ -83,42 +81,11 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	}
 
 	/**
-	 * Scenario: using the standard context but adding a jar to the classpath and registering an import.
-	 */
-	public void testScenario_LoadingDifferentClassesAndUsingImports() {
-		try {
-			// Create a parser
-			SpelExpressionParser parser = new SpelExpressionParser();
-			// Use the standard evaluation context
-			StandardEvaluationContext ctx = new StandardEvaluationContext();
-			// Set the classpath (creates a new classloader with this classpath and uses it)
-			ctx.setClasspath("target/test-classes/testcode.jar");
-			// Register an import (so types in a.b.c can be referred to by their short name)
-			ctx.registerImport("a.b.c");
-
-			// Parse an expression (here, PackagedType is in package a.b.c)
-			Expression expr = parser.parseExpression("new PackagedType().sayHi('Andy')");
-
-			// Evaluate the expression in our context
-			Object value = expr.getValue(ctx);
-
-			assertEquals("Hi! Andy", value);
-			assertEquals(String.class, value.getClass());
-		} catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
-		}
-	}
-
-	/**
 	 * Scenario: using the standard context but adding your own variables
 	 */
 	public void testScenario_DefiningVariablesThatWillBeAccessibleInExpressions() throws Exception {
 		// Create a parser
-		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("favouriteColour","blue");
@@ -153,22 +120,21 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	 */
 	public void testScenario_UsingADifferentRootContextObject() throws Exception {
 		// Create a parser
-		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		TestClass tc = new TestClass();
 		tc.setProperty(42);
 		tc.str = "wibble";
-		
 		ctx.setRootObject(tc);
 		
 		// read it, set it, read it again
 		Expression expr = parser.parseExpression("str");
 		Object value = expr.getValue(ctx);
 		assertEquals("wibble", value);			
-		expr =  parser.parseExpression("str");
-		expr.setValue(ctx,"wobble");
+		expr = parser.parseExpression("str");
+		expr.setValue(ctx, "wobble");
 		expr = parser.parseExpression("str");
 		value = expr.getValue(ctx);
 		assertEquals("wobble", value);
@@ -200,7 +166,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	public void testScenario_RegisteringJavaMethodsAsFunctionsAndCallingThem() throws SecurityException, NoSuchMethodException {
 		try {
 			// Create a parser
-			SpelExpressionParser parser = new SpelExpressionParser();
+			SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 			// Use the standard evaluation context
 			StandardEvaluationContext ctx = new StandardEvaluationContext();
 			ctx.registerFunction("repeat",ExpressionLanguageScenarioTests.class.getDeclaredMethod("repeat",String.class));
@@ -221,40 +187,52 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	/**
 	 * Scenario: add a property resolver that will get called in the resolver chain, this one only supports reading.
 	 */
-	public void testScenario_AddingYourOwnPropertyResolvers_1() throws SecurityException, NoSuchMethodException {
-		try {
-			// Create a parser
-			SpelExpressionParser parser = new SpelExpressionParser();
-			// Use the standard evaluation context
-			StandardEvaluationContext ctx = new StandardEvaluationContext();
-			
-			ctx.addPropertyAccessor(new FruitColourAccessor());
-			Expression expr = parser.parseExpression("orange");
-			Object value = expr.getValue(ctx);
-			assertEquals(Color.orange,value);
-			
-			try {
-				expr.setValue(ctx,Color.blue);
-				fail("Should not be allowed to set oranges to be blue !");
-			} catch (EvaluationException ee) {
-				SpelException ele = (SpelException)ee;
-				assertEquals(ele.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
-			}
+	public void testScenario_AddingYourOwnPropertyResolvers_1() throws Exception {
+		// Create a parser
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		// Use the standard evaluation context
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
-		} catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		ctx.addPropertyAccessor(new FruitColourAccessor());
+		Expression expr = parser.parseExpression("orange");
+		Object value = expr.getValue(ctx);
+		assertEquals(Color.orange, value);
+
+		try {
+			expr.setValue(ctx, Color.blue);
+			fail("Should not be allowed to set oranges to be blue !");
+		}
+		catch (SpelException ee) {
+			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
 		}
 	}
+
+	public void testScenario_AddingYourOwnPropertyResolvers_2() throws Exception {
+		// Create a parser
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		// Use the standard evaluation context
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+
+		ctx.addPropertyAccessor(new VegetableColourAccessor());
+		Expression expr = parser.parseExpression("pea");
+		Object value = expr.getValue(ctx);
+		assertEquals(Color.green, value);
+
+		try {
+			expr.setValue(ctx, Color.blue);
+			fail("Should not be allowed to set peas to be blue !");
+		}
+		catch (SpelException ee) {
+			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
+		}
+	}
+
 
 	/**
 	 * Regardless of the current context object, or root context object, this resolver can tell you what colour a fruit is !
 	 * It only supports property reading, not writing.  To support writing it would need to override canWrite() and write()
 	 */
-	static class FruitColourAccessor implements PropertyAccessor {
+	private static class FruitColourAccessor implements PropertyAccessor {
 
 		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
 
@@ -270,69 +248,30 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
-		
-		public boolean canRead(EvaluationContext context, Object target, Object name) throws AccessException {
+
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return propertyMap.containsKey(name);
 		}
 
-
-		public Object read(EvaluationContext context, Object target, Object name) throws AccessException {
+		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
 			return propertyMap.get(name);
 		}
 
-		public boolean canWrite(EvaluationContext context, Object target, Object name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
-		public void write(EvaluationContext context, Object target, Object name, Object newValue)
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
-
 	}
 
 
-	/**
-	 * Scenario: add an optimized property resolver.  Property resolution can be thought of it two parts: resolving (finding the property you mean) and accessing (reading or writing that property).
-	 * In some cases the act of discovering which property is meant is expensive - and there is no benefit to rediscovering it every time the expression is evaluated as it will
-	 * always be the same property.  For example, with reflection it can be expensive to find out which field on an object maps to the property, but it will always be the same field
-	 * for each evaluation.  In these cases we use a Resolver/Executor based property accessor.  In this setup the property resolver does not immediately return the value of the property,
-	 * instead it returns an executor object that can be used to read the property.  The executor can be cached and reused by SPEL so it does not go back to the resolver every time the
-	 * expression is evaluated.  In this testcase we use this different accessor mechanism to return the colours of vegetables.
-	 */
-	public void testScenario_AddingYourOwnPropertyResolvers_2() throws SecurityException, NoSuchMethodException {
-		try {
-			// Create a parser
-			SpelExpressionParser parser = new SpelExpressionParser();
-			// Use the standard evaluation context
-			StandardEvaluationContext ctx = new StandardEvaluationContext();
-			
-			ctx.addPropertyAccessor(new VegetableColourAccessor());
-			Expression expr = parser.parseExpression("pea");
-			Object value = expr.getValue(ctx);
-			assertEquals(Color.green,value);
-
-			try {
-				expr.setValue(ctx,Color.blue);
-				fail("Should not be allowed to set peas to be blue !");
-			} catch (EvaluationException ee) {
-				SpelException ele = (SpelException)ee;
-				assertEquals(ele.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
-			}
-
-		} catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
-		}
-	}
-	
 	/**
 	 * Regardless of the current context object, or root context object, this resolver can tell you what colour a vegetable is !
 	 * It only supports property reading, not writing.
 	 */
-	static class VegetableColourAccessor extends CacheablePropertyAccessor {
+	private static class VegetableColourAccessor implements PropertyAccessor {
 
 		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
 
@@ -348,84 +287,20 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			return null;
 		}
 
-		/**
-		 * Work out if we can resolve the named property and if so return an executor that can be cached and reused to
-		 * discover the value.
-		 */
-		public PropertyReaderExecutor getReaderAccessor(EvaluationContext relatedContext, Object target, Object name) {
-			if (propertyMap.containsKey(name)) {
-				return new VegetableColourExecutor(propertyMap.get(name));
-			}
-			return null;
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+			return propertyMap.containsKey(name);
 		}
 
-		public PropertyWriterExecutor getWriterAccessor(EvaluationContext context, Object target, Object name) {
-			return null;
-		}
-		
-	}
-	
-	static class VegetableColourExecutor implements PropertyReaderExecutor {
-		private Color colour;
-		
-		public VegetableColourExecutor(Color colour) {
-			this.colour = colour;
+		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
+			return propertyMap.get(name);
 		}
 
-		public Object execute(EvaluationContext context, Object target) throws AccessException {
-			return colour;
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+			return false;
 		}
-		
-	}
-	
-	/**
-	 * Scenario: adding your own type converter
-	 */
-	public void testScenario_AddingYourOwnTypeConverter() throws SecurityException, NoSuchMethodException {
-		try {
-			SpelExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext ctx = new StandardEvaluationContext();
-			ctx.registerFunction("functionTakesColour",ExpressionLanguageScenarioTests.class.getDeclaredMethod("functionTakesColour",Color.class));
 
-			Expression expr = parser.parseExpression("#functionTakesColour('orange')");
-			try {
-				@SuppressWarnings("unused")
-				Object value = expr.getValue(ctx);
-				fail("Should have failed, no type converter registered");
-			} catch (EvaluationException ee) {}
-			
-			ctx.addTypeConverter(new StringToColorConverter());	
-			Object value = expr.getValue(ctx);
-			
-			assertEquals(Color.orange,value);
-		} catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		}
 	}
-	
-	public static Color functionTakesColour(Color c) {return c;}
-	
-	static class StringToColorConverter implements StandardIndividualTypeConverter {
 
-		public Object convert(Object value) throws EvaluationException {
-			String colourName = (String)value;
-			if (colourName.equals("orange")) return Color.orange;
-			else if (colourName.equals("red")) return Color.red;
-			else return Color.blue; // hmm, quite a simplification here
-		}
-
-		public Class<?>[] getFrom() {
-			return new Class[]{String.class};
-		}
-
-		public Class<?> getTo() {
-			return Color.class;
-		}
-		
-	}
-	
 }

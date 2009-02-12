@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,12 @@ public abstract class ClassUtils {
 	private static final Map<Class, Class> primitiveWrapperTypeMap = new HashMap<Class, Class>(8);
 
 	/**
+	 * Map with primitive type as key and corresponding wrapper
+	 * type as value, for example: int.class -> Integer.class.
+	 */
+	private static final Map<Class, Class> primitiveTypeToWrapperMap = new HashMap<Class, Class>(8);
+
+	/**
 	 * Map with primitive type name as key and corresponding primitive
 	 * type as value, for example: "int" -> "int.class".
 	 */
@@ -89,6 +95,10 @@ public abstract class ClassUtils {
 		primitiveWrapperTypeMap.put(Integer.class, int.class);
 		primitiveWrapperTypeMap.put(Long.class, long.class);
 		primitiveWrapperTypeMap.put(Short.class, short.class);
+
+		for (Map.Entry<Class, Class> entry : primitiveWrapperTypeMap.entrySet()) {
+			primitiveTypeToWrapperMap.put(entry.getValue(), entry.getKey());
+		}
 
 		Set<Class> primitiveTypes = new HashSet<Class>(16);
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
@@ -699,6 +709,17 @@ public abstract class ClassUtils {
 	public static boolean isPrimitiveWrapperArray(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+	}
+
+	/**
+	 * Resolve the given class if it is a primitive class,
+	 * returning the corresponding primitive wrapper type instead.
+	 * @param clazz the class to check
+	 * @return the original class, or a primitive wrapper for the original primitive type
+	 */
+	public static Class resolvePrimitiveIfNecessary(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return (clazz.isPrimitive() ? primitiveTypeToWrapperMap.get(clazz) : clazz);
 	}
 
 	/**

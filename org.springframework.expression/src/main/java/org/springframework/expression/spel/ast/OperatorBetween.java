@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import java.util.List;
@@ -30,6 +31,7 @@ import org.springframework.expression.spel.SpelMessages;
  * in the list. The definition of between being inclusive follows the SQL BETWEEN definition.
  * 
  * @author Andy Clement
+ * @since 3.0
  */
 public class OperatorBetween extends Operator {
 
@@ -45,7 +47,6 @@ public class OperatorBetween extends Operator {
 	/**
 	 * Returns a boolean based on whether a value is in the range expressed. The first operand is any value whilst the
 	 * second is a list of two values - those two values being the bounds allowed for the first operand (inclusive).
-	 * 
 	 * @param state the expression state
 	 * @return true if the left operand is in the range specified, false otherwise
 	 * @throws EvaluationException if there is a problem evaluating the expression

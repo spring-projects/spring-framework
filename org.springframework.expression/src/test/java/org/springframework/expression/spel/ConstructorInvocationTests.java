@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.expression.spel;
 
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+package org.springframework.expression.spel;
 
 /**
  * Tests invocation of constructors.
@@ -91,22 +90,6 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	public void testArgumentConversion01() {
 		// Closest ctor will be new String(String) and converter supports Double>String
 		evaluate("new String(3.0d)", "3.0", String.class);
-	}
-
-	public void testVarargsInvocation01() throws Exception {
-		// Calling 'public TestCode(String... strings)'
-		SpelExpressionParser parser = new SpelExpressionParser();
-		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setClasspath("target/test-classes/testcode.jar");
-
-		@SuppressWarnings("unused")
-		Object v = parser.parseExpression("new TestType('a','b','c')").getValue(ctx);
-		v = parser.parseExpression("new TestType('a')").getValue(ctx);
-		v = parser.parseExpression("new TestType()").getValue(ctx);
-		v = parser.parseExpression("new TestType(1,2,3)").getValue(ctx);
-		v = parser.parseExpression("new TestType(1)").getValue(ctx);
-		v = parser.parseExpression("new TestType(1,'a',3.0d)").getValue(ctx);
-		// v = parser.parseExpression("new TestType(new String[]{'a','b','c'})").getValue(ctx);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.expression;
 
-import org.springframework.expression.spel.standard.StandardTypeLocator;
-
 /**
- * Implementors of this interface are expected to be able to locate types. They may use custom classloaders or the
- * and deal with common package prefixes (java.lang, etc) however they wish. See
- * {@link StandardTypeLocator} for an example implementation.
+ * Implementors of this interface are expected to be able to locate types. They may use custom classloaders
+ * or the and deal with common package prefixes (java.lang, etc) however they wish. See
+ * {@link org.springframework.expression.spel.support.StandardTypeLocator} for an example implementation.
  *
  * @author Andy Clement
+ * @since 3.0
  */
 public interface TypeLocator {
 

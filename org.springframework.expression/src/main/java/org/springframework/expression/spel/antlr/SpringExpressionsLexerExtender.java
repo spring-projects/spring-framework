@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.antlr;
 
 import org.antlr.runtime.RecognitionException;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.WrappedELException;
+import org.springframework.expression.spel.WrappedSpelException;
 import org.springframework.expression.spel.generated.SpringExpressionsLexer;
 
-public class SpringExpressionsLexerExtender extends SpringExpressionsLexer {
-
-	public SpringExpressionsLexerExtender() {
-		super();
-	}
+/**
+ * @author Andy Clement
+ * @since 3.0
+ */
+class SpringExpressionsLexerExtender extends SpringExpressionsLexer {
 
 	/**
 	 * recover() attempts to provide better error messages once something has gone wrong. It then throws a
@@ -64,7 +65,7 @@ public class SpringExpressionsLexerExtender extends SpringExpressionsLexer {
 		// getCharErrorDisplay(mte.expecting), getCharErrorDisplay(mte.c));
 		// }
 		SpelException realException = new SpelException(re, SpelMessages.RECOGNITION_ERROR, re.toString());
-		throw new WrappedELException(realException);
+		throw new WrappedSpelException(realException);
 	}
 
 	@Override

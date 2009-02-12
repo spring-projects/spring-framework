@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.antlr;
 
 import org.antlr.runtime.BitSet;
@@ -22,11 +23,15 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.WrappedELException;
+import org.springframework.expression.spel.WrappedSpelException;
 import org.springframework.expression.spel.ast.SpelTreeAdaptor;
 import org.springframework.expression.spel.generated.SpringExpressionsParser;
 
-public class SpringExpressionsParserExtender extends SpringExpressionsParser {
+/**
+ * @author Andy Clement
+ * @since 3.0
+ */
+class SpringExpressionsParserExtender extends SpringExpressionsParser {
 
 	public SpringExpressionsParserExtender(TokenStream input) {
 		super(input);
@@ -53,7 +58,7 @@ public class SpringExpressionsParserExtender extends SpringExpressionsParser {
 		// message = "no more input data to process whilst constructing " + paraphrase.peek();
 		// }
 		SpelException parsingProblem = new SpelException(e.charPositionInLine, e, SpelMessages.PARSE_PROBLEM, message);
-		throw new WrappedELException(parsingProblem);
+		throw new WrappedSpelException(parsingProblem);
 	}
 
 	/**

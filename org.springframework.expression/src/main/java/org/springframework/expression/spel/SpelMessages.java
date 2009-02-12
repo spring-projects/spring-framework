@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.text.MessageFormat;
@@ -33,7 +34,7 @@ import java.text.MessageFormat;
  * message has had all relevant inserts applied to it.
  * 
  * @author Andy Clement
- * 
+ * @since 3.0
  */
 public enum SpelMessages {
 	// TODO put keys and messages into bundles for easy NLS
@@ -107,7 +108,7 @@ public enum SpelMessages {
 			Kind.ERROR, 1060, "Expected the type of the new array to be specified as a String but found ''{0}''"), PROBLEM_DURING_TYPE_CONVERSION(
 			Kind.ERROR, 1061, "Problem occurred during type conversion: {0}"), MULTIPLE_POSSIBLE_METHODS(Kind.ERROR,
 			1062, "Method call of ''{0}'' is ambiguous, supported type conversions allow multiple variants to match"), EXCEPTION_DURING_PROPERTY_WRITE(
-			Kind.ERROR, 1063, "A problem occurred whilst attempting to set the property ''{0}'': ''{1}''"), NOT_AN_INTEGER(
+			Kind.ERROR, 1063, "A problem occurred whilst attempting to set the property ''{0}'': {1}"), NOT_AN_INTEGER(
 			Kind.ERROR, 1064, "The value ''{0}'' cannot be parsed as an int"), NOT_A_LONG(Kind.ERROR, 1065,
 			"The value ''{0}'' cannot be parsed as a long"), PARSE_PROBLEM(Kind.ERROR, 1066,
 			"Error occurred during expression parse: {0}"), INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR(Kind.ERROR,
@@ -121,15 +122,13 @@ public enum SpelMessages {
 	private int code;
 	private String message;
 
-	public static enum Kind {
-		INFO, WARNING, ERROR
-	};
 
 	private SpelMessages(Kind kind, int code, String message) {
 		this.kind = kind;
 		this.code = code;
 		this.message = message;
 	}
+
 
 	/**
 	 * Produce a complete message including the prefix, the position (if known) and with the inserts applied to the
@@ -160,4 +159,10 @@ public enum SpelMessages {
 		formattedMessage.append(MessageFormat.format(message, inserts));
 		return formattedMessage.toString();
 	}
+
+
+	public static enum Kind {
+		INFO, WARNING, ERROR
+	}
+
 }

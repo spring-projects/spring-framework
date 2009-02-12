@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
@@ -20,9 +21,10 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
- * Implements greater than operator.
- * 
+ * Implements greater-than operator.
+ *
  * @author Andy Clement
+ * @since 3.0
  */
 public class OperatorGreaterThan extends Operator {
 
@@ -44,11 +46,14 @@ public class OperatorGreaterThan extends Operator {
 			Number op2 = (Number) right;
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return op1.doubleValue() > op2.doubleValue();
-			} else if (op1 instanceof Float || op2 instanceof Float) {
+			}
+			else if (op1 instanceof Float || op2 instanceof Float) {
 				return op1.floatValue() > op2.floatValue();
-			} else if (op1 instanceof Long || op2 instanceof Long) {
+			}
+			else if (op1 instanceof Long || op2 instanceof Long) {
 				return op1.longValue() > op2.longValue();
-			} else {
+			}
+			else {
 				return op1.intValue() > op2.intValue();
 			}
 		}

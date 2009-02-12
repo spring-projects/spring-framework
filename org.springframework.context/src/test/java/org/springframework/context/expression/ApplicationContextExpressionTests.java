@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.context.expression;
 
-import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.ObjectFactory;
@@ -25,16 +28,23 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
+ * @since 3.0
  */
-public class ApplicationContextExpressionTests extends TestCase {
+public class ApplicationContextExpressionTests {
 
-	public void testGenericApplicationContext() {
+	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
+
+	@Test
+	public void genericApplicationContext() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
@@ -76,7 +86,7 @@ public class ApplicationContextExpressionTests extends TestCase {
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
 		bd2.setBeanClass(TestBean.class);
 		bd2.setScope("myScope");
-		bd2.getPropertyValues().addPropertyValue("name", "XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ");
+		bd2.getPropertyValues().addPropertyValue("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().addPropertyValue("age", "#{mySpecialAttr}");
 		bd2.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("tb2", bd2);
@@ -107,7 +117,7 @@ public class ApplicationContextExpressionTests extends TestCase {
 			assertEquals(42, tb1.getAge());
 
 			TestBean tb2 = ac.getBean("tb2", TestBean.class);
-			assertEquals("XXXmyNameYYY42ZZZ", tb2.getName());
+			assertEquals("{ XXXmyNameYYY42ZZZ }", tb2.getName());
 			assertEquals(42, tb2.getAge());
 			assertEquals("UK", tb2.getCountry());
 
@@ -132,6 +142,37 @@ public class ApplicationContextExpressionTests extends TestCase {
 		finally {
 			System.getProperties().remove("country");
 		}
+	}
+
+	@Test
+	public void prototypeCreationIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		GenericApplicationContext ac = new GenericApplicationContext();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.getPropertyValues().addPropertyValue("name", "juergen");
+		rbd.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
+		ac.registerBeanDefinition("test", rbd);
+		ac.refresh();
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		System.getProperties().put("country", "UK");
+		try {
+			for (int i = 0; i < 100000; i++) {
+				TestBean tb = (TestBean) ac.getBean("test");
+				assertEquals("juergen", tb.getName());
+				assertEquals("UK", tb.getCountry());
+			}
+			sw.stop();
+		}
+		finally {
+			System.getProperties().remove("country");
+		}
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 6000);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2004-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression;
 
 /**
  * Input provided to an expression parser that can influence an expression parsing/compilation routine.
- * 
+ *
  * @author Keith Donald
  * @author Andy Clement
+ * @since 3.0
  */
 public interface ParserContext {
 
@@ -35,21 +37,22 @@ public interface ParserContext {
 	 * 
 	 * @return true if the expression is a template, false otherwise
 	 */
-	public boolean isTemplate();
+	boolean isTemplate();
 
 	/**
 	 * For template expressions, returns the prefix that identifies the start of an expression block within a string.
-	 * For example "${"
-	 * 
+	 * For example: "${"
+	 *
 	 * @return the prefix that identifies the start of an expression
 	 */
-	public String getExpressionPrefix();
+	String getExpressionPrefix();
 
 	/**
-	 * For template expressions, return the prefix that identifies the end of an expression block within a string. For
-	 * example "}$"
-	 * 
+	 * For template expressions, return the prefix that identifies the end of an expression block within a string.
+	 * For example: "}"
+	 *
 	 * @return the suffix that identifies the end of an expression
 	 */
-	public String getExpressionSuffix();
+	String getExpressionSuffix();
+
 }

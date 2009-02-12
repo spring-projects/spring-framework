@@ -22,9 +22,9 @@ package org.springframework.expression.spel;
  * 
  * @author Andy Clement
  */
-public class WrappedELException extends RuntimeException {
+public class WrappedSpelException extends RuntimeException {
 
-	public WrappedELException(SpelException e) {
+	public WrappedSpelException(SpelException e) {
 		super(e);
 	}
 

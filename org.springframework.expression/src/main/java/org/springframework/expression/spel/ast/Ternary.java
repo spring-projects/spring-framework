@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
@@ -22,8 +23,10 @@ import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
- * 
+ *
  * @author Andy Clement
+ * @author Juergen Hoeller
+ * @since 3.0
  */
 public class Ternary extends SpelNodeImpl {
 
@@ -33,21 +36,22 @@ public class Ternary extends SpelNodeImpl {
 
 	/**
 	 * Evaluate the condition and if true evaluate the first alternative, otherwise evaluate the second alternative.
-	 * 
 	 * @param state the expression state
 	 * @throws EvaluationException if the condition does not evaluate correctly to a boolean or there is a problem
 	 * executing the chosen alternative
 	 */
 	@Override
 	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Boolean b = (Boolean) getChild(0).getValue(state, Boolean.class);
+		Boolean b = getChild(0).getValue(state, Boolean.class);
 		try {
-			if (b) {
+			if (b != null && b.booleanValue()) {
 				return getChild(1).getValueInternal(state);
-			} else {
+			}
+			else {
 				return getChild(2).getValueInternal(state);
 			}
-		} catch (SpelException ex) {
+		}
+		catch (SpelException ex) {
 			ex.setPosition(getChild(0).getCharPositionInLine());
 			throw ex;
 		}
@@ -63,4 +67,5 @@ public class Ternary extends SpelNodeImpl {
 	public boolean isWritable(ExpressionState expressionState) throws SpelException {
 		return false;
 	}
+
 }

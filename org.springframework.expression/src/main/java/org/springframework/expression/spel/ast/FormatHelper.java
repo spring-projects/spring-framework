@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.expression.spel.internal;
+
+package org.springframework.expression.spel.ast;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.
  * 
  * @author Andy Clement
  */
-public class Utils {
+class FormatHelper {
 
 	/**
 	 * Produce a nice string for a given method name with specified arguments.
-	 * 
 	 * @param name the name of the method
 	 * @param argumentTypes the types of the arguments to the method
 	 * @return nicely formatted string, eg. foo(String,int)
@@ -35,8 +35,9 @@ public class Utils {
 		sb.append("(");
 		if (argumentTypes != null) {
 			for (int i = 0; i < argumentTypes.length; i++) {
-				if (i > 0)
+				if (i > 0) {
 					sb.append(",");
+				}
 				sb.append(argumentTypes[i].getName());
 			}
 		}
@@ -47,12 +48,11 @@ public class Utils {
 	/**
 	 * Produce a nice string for a given class object. For example a string array will have the formatted name
 	 * "java.lang.String[]".
-	 * 
 	 * @param clazz The class whose name is to be formatted
 	 * @return a formatted string suitable for message inclusion
 	 */
-	public static String formatClassnameForMessage(Class<?> clazz) {
-		if (clazz==null) { 
+	public static String formatClassNameForMessage(Class<?> clazz) {
+		if (clazz == null) { 
 			return "null";
 		}
 		StringBuilder fmtd = new StringBuilder();

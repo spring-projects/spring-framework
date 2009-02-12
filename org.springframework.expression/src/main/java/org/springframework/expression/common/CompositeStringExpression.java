@@ -1,78 +1,99 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.expression.common;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a template expression broken into pieces. Each piece will be an Expression but pure text parts to the
- * template will be represented as LiteralExpression objects. An example of a template expression might be: <code><pre>
- * &quot;Hello ${getName()}&quot;
- * </pre></code> which will be represented as a CompositeStringExpression of two parts. The first part being a
- * LiteralExpression representing 'Hello ' and the second part being a real expression that will call getName() when
- * invoked.
+ * template will be represented as LiteralExpression objects. An example of a template expression might be:
+ *
+ * <pre class="code">
+ * &quot;Hello ${getName()}&quot;</pre>
+ *
+ * which will be represented as a CompositeStringExpression of two parts. The first part being a
+ * LiteralExpression representing 'Hello ' and the second part being a real expression that will
+ * call <code>getName()</code> when invoked.
  * 
  * @author Andy Clement
+ * @author Juergen Hoeller
+ * @since 3.0
  */
 public class CompositeStringExpression implements Expression {
 
 	private final String expressionString;
 
-	/**
-	 * The array of expressions that make up the composite expression
-	 */
+	/** The array of expressions that make up the composite expression */
 	private final Expression[] expressions;
+
 
 	public CompositeStringExpression(String expressionString, Expression[] expressions) {
 		this.expressionString = expressionString;
 		this.expressions = expressions;
 	}
 
-	public String getExpressionString() {
-		return expressionString;
+
+	public final String getExpressionString() {
+		return this.expressionString;
 	}
 
 	public String getValue() throws EvaluationException {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < expressions.length; i++) {
-			// TODO is stringify ok for the non literal components? or should the converters be used? see another
-			// case below
-			sb.append(expressions[i].getValue());
+		for (Expression expression : this.expressions) {
+			sb.append(ObjectUtils.getDisplayString(expression.getValue()));
 		}
 		return sb.toString();
 	}
 
 	public String getValue(EvaluationContext context) throws EvaluationException {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < expressions.length; i++) {
-			sb.append(expressions[i].getValue(context));
+		for (Expression expression : this.expressions) {
+			sb.append(ObjectUtils.getDisplayString(expression.getValue(context)));
 		}
 		return sb.toString();
 	}
 
-	public Class getValueType(EvaluationContext context) throws EvaluationException {
+	public Class getValueType(EvaluationContext context) {
 		return String.class;
 	}
 
-	public Class getValueType() throws EvaluationException {
+	public Class getValueType() {
 		return String.class;
 	}
 
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
-		throw new EvaluationException(expressionString, "Cannot call setValue() on a composite expression");
+		throw new EvaluationException(this.expressionString, "Cannot call setValue on a composite expression");
 	}
 
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue(context);
-		return (T)ExpressionUtils.convert(context, value, expectedResultType);
+		return ExpressionUtils.convert(context, value, expectedResultType);
 	}
 
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
-		return (T)ExpressionUtils.convert(null, value, expectedResultType);
+		return ExpressionUtils.convert(null, value, expectedResultType);
 	}
 
-	public boolean isWritable(EvaluationContext context) throws EvaluationException {
+	public boolean isWritable(EvaluationContext context) {
 		return false;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.util.Arrays;
@@ -23,7 +24,8 @@ import junit.framework.TestCase;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Common superclass for expression tests.
@@ -37,7 +39,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	protected final static boolean SHOULD_BE_WRITABLE = true;
 	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
 
-	protected final static SpelExpressionParser parser = new SpelExpressionParser();
+	protected final static SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 	protected final static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	/**
@@ -49,7 +51,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
 		try {
-			SpelExpression expr = parser.parseExpression(expression);
+			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -97,7 +99,7 @@ public abstract class ExpressionTestCase extends TestCase {
 
 	public void evaluateAndAskForReturnType(String expression, Object expectedValue, Class<?> expectedResultType) {
 		try {
-			SpelExpression expr = parser.parseExpression(expression);
+			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
 				fail("Parser returned null for expression");
 			}
@@ -146,7 +148,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult,
 			boolean shouldBeWritable) {
 		try {
-			SpelExpression e = parser.parseExpression(expression);
+			Expression e = parser.parseExpression(expression);
 			if (e == null) {
 				fail("Parser returned null for expression");
 			}
@@ -288,7 +290,7 @@ public abstract class ExpressionTestCase extends TestCase {
 	 */
 	protected void parseAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
 		try {
-			SpelExpression expr = parser.parseExpression(expression);
+			Expression expr = parser.parseExpression(expression);
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			fail("Parsing should have failed!");
 		} catch (ParseException pe) {

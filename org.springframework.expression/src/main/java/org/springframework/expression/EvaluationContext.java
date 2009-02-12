@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,61 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression;
 
 import java.util.List;
 
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
-import org.springframework.expression.spel.standard.StandardTypeUtilities;
-
 /**
- * Expressions are executed in an evaluation context. It is in this context that references are resolved when
- * encountered during expression evaluation.
+ * Expressions are executed in an evaluation context. It is in this context that references
+ * are resolved when encountered during expression evaluation.
  * 
- * There is a default implementation of the EvaluationContext, {@link StandardEvaluationContext} that can be extended,
- * rather than having to implement everything.
+ * There is a default implementation of the EvaluationContext,
+ * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
+ * that can be extended, rather than having to implement everything.
  * 
  * @author Andy Clement
+ * @author Juergen Hoeller
+ * @since 3.0
  */
 public interface EvaluationContext {
 
 	/**
 	 * @return the root context object against which unqualified properties/methods/etc should be resolved
 	 */
-	Object getRootContextObject();
-
-	/**
-	 * @return a TypeUtilities implementation that can be used for looking up types, converting types, comparing types,
-	 * and overloading basic operators for types. A standard implementation is provided in {@link StandardTypeUtilities}
-	 */
-	TypeUtils getTypeUtils();
-
-	/**
-	 * Look up a named variable within this execution context.
-	 * 
-	 * @param name variable to lookup
-	 * @return the value of the variable
-	 */
-	Object lookupVariable(String name);
+	Object getRootObject();
 
 	/**
 	 * Set a named variable within this execution context to a specified value.
-	 * 
 	 * @param name variable to set
 	 * @param value value to be placed in the variable
 	 */
 	void setVariable(String name, Object value);
 
+	/**
+	 * Look up a named variable within this execution context.
+	 * @param name variable to lookup
+	 * @return the value of the variable
+	 */
+	Object lookupVariable(String name);
+
 	// TODO lookupReference() - is it too expensive to return all objects within a context?
 	/**
 	 * Look up an object reference in a particular context. If no contextName is specified (null), assume the default
-	 * context. If no objectName is specified (null), return all objects in the specified context (List<Object>).
-	 * 
-	 * @param contextName the context in which to perform the lookup (or null for default context)
-	 * @param objectName the object to lookup in the context (or null to get all objects)
-	 * @return a specific object or List<Object>
+	 * context. If no objectName is specified (null), return all objects in the specified context (List).
+	 * @param contextName the context in which to perform the lookup (or <code>null</code> for default context)
+	 * @param objectName the object to lookup in the context (or <code>null</code> to get all objects)
+	 * @return a specific object or List
 	 */
-	Object lookupReference(Object contextName, Object objectName) throws EvaluationException;
+	Object lookupReference(Object contextName, String objectName) throws EvaluationException;
 
 	/**
 	 * @return a list of resolvers that will be asked in turn to locate a constructor
@@ -83,5 +75,26 @@ public interface EvaluationContext {
 	 * @return a list of accessors that will be asked in turn to read/write a property
 	 */
 	List<PropertyAccessor> getPropertyAccessors();
+
+	/**
+	 * @return a type locator that can be used to find types, either by short or fully qualified name.
+	 */
+	TypeLocator getTypeLocator();
+
+	/**
+	 * @return a type comparator for comparing pairs of objects for equality.
+	 */
+	TypeComparator getTypeComparator();
+
+	/**
+	 * @return a type converter that can convert (or coerce) a value from one type to another.
+	 */
+	TypeConverter getTypeConverter();
+
+	/**
+	 * @return an operator overloader that may support mathematical operations between more than the standard set of
+	 * types
+	 */
+	OperatorOverloader getOperatorOverloader();
 
 }

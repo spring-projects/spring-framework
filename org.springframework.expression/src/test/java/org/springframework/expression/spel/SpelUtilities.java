@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.io.PrintStream;
+
+import org.springframework.expression.Expression;
 
 /**
  * Utilities for working with Spring Expressions.
  * 
  * @author Andy Clement
- * 
  */
 public class SpelUtilities {
 
 	/**
 	 * Output an indented representation of the expression syntax tree to the specified output stream.
-	 * 
 	 * @param printStream the output stream to print into
 	 * @param expression the expression to be displayed
 	 */
-	public static void printAbstractSyntaxTree(PrintStream printStream, SpelExpression expression) {
+	public static void printAbstractSyntaxTree(PrintStream printStream, Expression expression) {
 		printStream.println("===> Expression '" + expression.getExpressionString() + "' - AST start");
-		printAST(printStream, expression.getAST(), "");
+		printAST(printStream, ((SpelExpression) expression).getAST(), "");
 		printStream.println("===> Expression '" + expression.getExpressionString() + "' - AST end");
 	}
 
@@ -52,4 +53,5 @@ public class SpelUtilities {
 			}
 		}
 	}
+
 }
