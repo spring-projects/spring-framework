@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,13 @@ public class DefaultResourceLoader implements ResourceLoader {
 	}
 
 	/**
-	 * Return the ClassLoader to load class path resources with,
-	 * or <code>null</code> if using the thread context class loader on actual access
-	 * (applying to the thread that constructs the ClassPathResource object).
+	 * Return the ClassLoader to load class path resources with.
 	 * <p>Will get passed to ClassPathResource's constructor for all
 	 * ClassPathResource objects created by this resource loader.
 	 * @see ClassPathResource
 	 */
 	public ClassLoader getClassLoader() {
-		return this.classLoader;
+		return (this.classLoader != null ? this.classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 
