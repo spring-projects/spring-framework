@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.ejb.interceptor;
 
 import java.util.Map;
 import java.util.WeakHashMap;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.EJBException;
 import javax.ejb.PostActivate;
 import javax.ejb.PrePassivate;
 import javax.interceptor.InvocationContext;
@@ -93,9 +93,18 @@ public class SpringBeanAutowiringInterceptor {
 	 */
 	@PostConstruct
 	@PostActivate
-	public void autowireBean(InvocationContext invocationContext) throws Exception {
+	public void autowireBean(InvocationContext invocationContext) {
 		doAutowireBean(invocationContext.getTarget());
-		invocationContext.proceed();
+		try {
+			invocationContext.proceed();
+		}
+		catch (RuntimeException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			// Cannot declare a checked exception on WebSphere here - so we need to wrap.
+			throw new EJBException(ex);
+		}
 	}
 
 	/**
@@ -183,9 +192,18 @@ public class SpringBeanAutowiringInterceptor {
 	 */
 	@PreDestroy
 	@PrePassivate
-	public void releaseBean(InvocationContext invocationContext) throws Exception {
+	public void releaseBean(InvocationContext invocationContext) {
 		doReleaseBean(invocationContext.getTarget());
-		invocationContext.proceed();
+		try {
+			invocationContext.proceed();
+		}
+		catch (RuntimeException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			// Cannot declare a checked exception on WebSphere here - so we need to wrap.
+			throw new EJBException(ex);
+		}
 	}
 
 	/**
