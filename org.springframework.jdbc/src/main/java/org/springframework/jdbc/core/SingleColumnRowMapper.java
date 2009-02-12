@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * @return the converted value
 	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
 	 */
+	@SuppressWarnings("unchecked")
 	protected Object convertValueToRequiredType(Object value, Class requiredType) {
 		if (String.class.equals(requiredType)) {
 			return value.toString();
