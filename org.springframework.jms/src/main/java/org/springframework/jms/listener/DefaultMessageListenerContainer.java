@@ -712,7 +712,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Handle the given exception that arose during setup of a listener.
 	 * Called for every such exception in every concurrent listener.
-	 * <p>The default implementation logs the exception at error level
+	 * <p>The default implementation logs the exception at info level
 	 * if not recovered yet, and at debug level if already recovered.
 	 * Can be overridden in subclasses.
 	 * @param ex the exception to handle
