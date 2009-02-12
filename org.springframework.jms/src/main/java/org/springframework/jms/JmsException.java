@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,12 @@ public abstract class JmsException extends NestedRuntimeException {
 		Throwable cause = getCause();
 		if (cause instanceof JMSException) {
 			Exception linkedEx = ((JMSException) cause).getLinkedException();
-			if (linkedEx != null && cause.getMessage().indexOf(linkedEx.getMessage()) == -1) {
-				message = message + "; nested exception is " + linkedEx;
+			if (linkedEx != null) {
+				String linkedMessage = linkedEx.getMessage();
+				String causeMessage = cause.getMessage();
+				if (linkedMessage != null && (causeMessage == null || !causeMessage.contains(linkedMessage))) {
+					message = message + "; nested exception is " + linkedEx;
+				}
 			}
 		}
 		return message;

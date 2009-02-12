@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,8 +256,11 @@ public abstract class JmsUtils {
 			if (message == null) {
 				message = linkedEx.toString();
 			}
-			else if (!message.contains(linkedEx.getMessage())) {
-				message = message + "; nested exception is " + linkedEx;
+			else {
+				String linkedMessage = linkedEx.getMessage();
+				if (linkedMessage != null && !message.contains(linkedMessage)) {
+					message = message + "; nested exception is " + linkedEx;
+				}
 			}
 		}
 		return message;
