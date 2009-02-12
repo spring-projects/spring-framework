@@ -36,9 +36,12 @@ import org.springframework.core.NamedThreadLocal;
  * <p>For a implementation of a thread-based <code>Scope</code> with support for destruction callbacks, refer to <a
  * href="http://www.springbyexample.org/twiki/bin/view/Example/CustomThreadScopeModule">this module</a>.
  *
- * @author Eugene Kuleshov
+ * <p>Thanks to Eugene Kuleshov for submitting the original prototype for a thread scope!
+ *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
+ * @see org.springframework.web.context.request.RequestScope
  */
 public class SimpleThreadScope implements Scope {
 
@@ -69,7 +72,7 @@ public class SimpleThreadScope implements Scope {
 
 	public void registerDestructionCallback(String name, Runnable callback) {
 		logger.warn("SimpleThreadScope does not support descruction callbacks. " +
-				"Consider using a RequestScope in a Web environment");
+				"Consider using a RequestScope in a Web environment.");
 	}
 
 	public Object resolveContextualObject(String key) {
@@ -79,4 +82,5 @@ public class SimpleThreadScope implements Scope {
 	public String getConversationId() {
 		return Thread.currentThread().getName();
 	}
+
 }

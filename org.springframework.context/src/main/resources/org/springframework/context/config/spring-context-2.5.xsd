@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/context" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			xmlns:beans="http://www.springframework.org/schema/beans"
-			xmlns:tool="http://www.springframework.org/schema/tool"
-			targetNamespace="http://www.springframework.org/schema/context" elementFormDefault="qualified"
-			attributeFormDefault="unqualified">
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/context" elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
@@ -313,7 +313,7 @@
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports type="org.springframework.jmx.export.annotation.MBeanExporter"/>
+					<tool:exports type="org.springframework.jmx.export.annotation.AnnotationMBeanExporter"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
