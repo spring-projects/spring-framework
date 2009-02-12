@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,18 @@
 
 package org.springframework.context.expression;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.SpelExpressionParser;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.ParserContext;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
 /**
@@ -32,13 +38,61 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.expression.ExpressionParser
- * @see org.springframework.expression.spel.SpelExpressionParser
- * @see org.springframework.expression.spel.standard.StandardEvaluationContext
+ * @see org.springframework.expression.spel.antlr.SpelAntlrExpressionParser
+ * @see org.springframework.expression.spel.support.StandardEvaluationContext
  */
-public class StandardBeanExpressionResolver extends AbstractBeanExpressionResolver {
+public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
-	private ExpressionParser expressionParser = new SpelExpressionParser();
+	/** Default expression prefix: "#{" */
+	public static final String DEFAULT_EXPRESSION_PREFIX = "#{";
 
+	/** Default expression suffix: "}" */
+	public static final String DEFAULT_EXPRESSION_SUFFIX = "}";
+
+
+	private String expressionPrefix = DEFAULT_EXPRESSION_PREFIX;
+
+	private String expressionSuffix = DEFAULT_EXPRESSION_SUFFIX;
+
+	private ExpressionParser expressionParser = new SpelAntlrExpressionParser();
+
+	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<String, Expression>();
+
+	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache =
+			new ConcurrentHashMap<BeanExpressionContext, StandardEvaluationContext>();
+
+	private final ParserContext beanExpressionParserContext = new ParserContext() {
+		public boolean isTemplate() {
+			return true;
+		}
+		public String getExpressionPrefix() {
+			return expressionPrefix;
+		}
+		public String getExpressionSuffix() {
+			return expressionSuffix;
+		}
+	};
+
+
+	/**
+	 * Set the prefix that an expression string starts with.
+	 * The default is "#{".
+	 * @see #DEFAULT_EXPRESSION_PREFIX
+	 */
+	public void setExpressionPrefix(String expressionPrefix) {
+		Assert.hasText(expressionPrefix, "Expression prefix must not be empty");
+		this.expressionPrefix = expressionPrefix;
+	}
+
+	/**
+	 * Set the suffix that an expression string ends with.
+	 * The default is "}".
+	 * @see #DEFAULT_EXPRESSION_SUFFIX
+	 */
+	public void setExpressionSuffix(String expressionSuffix) {
+		Assert.hasText(expressionSuffix, "Expression suffix must not be empty");
+		this.expressionSuffix = expressionSuffix;
+	}
 
 	/**
 	 * Specify the EL parser to use for expression parsing.
@@ -51,14 +105,24 @@ public class StandardBeanExpressionResolver extends AbstractBeanExpressionResolv
 	}
 
 
-	protected Object evaluateExpression(String exprString, BeanExpressionContext evalContext) {
+	public Object evaluate(String value, BeanExpressionContext evalContext) throws BeansException {
 		try {
-			Expression expr = this.expressionParser.parseExpression(exprString);
-			StandardEvaluationContext ec = new StandardEvaluationContext(evalContext);
-			ec.addPropertyAccessor(new BeanExpressionContextAccessor());
-			ec.addPropertyAccessor(new BeanFactoryAccessor());
-			ec.addPropertyAccessor(new MapAccessor());
-			return expr.getValue(ec);
+			Expression expr = this.expressionCache.get(value);
+			if (expr == null) {
+				expr = this.expressionParser.parseExpression(value, this.beanExpressionParserContext);
+				this.expressionCache.put(value, expr);
+			}
+			StandardEvaluationContext sec = this.evaluationCache.get(evalContext);
+			if (sec == null) {
+				sec = new StandardEvaluationContext();
+				sec.setRootObject(evalContext);
+				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
+				sec.addPropertyAccessor(new BeanFactoryAccessor());
+				sec.addPropertyAccessor(new MapAccessor());
+				customizeEvaluationContext(sec);
+				this.evaluationCache.put(evalContext, sec);
+			}
+			return expr.getValue(sec);
 		}
 		catch (Exception ex) {
 			throw new BeanExpressionException("Expression parsing failed", ex);

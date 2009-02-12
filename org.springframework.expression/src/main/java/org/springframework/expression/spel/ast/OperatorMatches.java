@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import java.util.regex.Matcher;
@@ -28,8 +29,9 @@ import org.springframework.expression.spel.SpelMessages;
 /**
  * Implements the matches operator. Matches takes two operands. The first is a string and the second is a java regex. It
  * will return true when getValue() is called if the first operand matches the regex.
- * 
+ *
  * @author Andy Clement
+ * @since 3.0
  */
 public class OperatorMatches extends Operator {
 
@@ -44,7 +46,6 @@ public class OperatorMatches extends Operator {
 
 	/**
 	 * Check the first operand matches the regex specified as the second operand.
-	 * 
 	 * @param state the expression state
 	 * @return true if the first operand matches the regex specified as the second operand, otherwise false
 	 * @throws EvaluationException if there is a problem evaluating the expression (e.g. the regex is invalid)
@@ -67,7 +68,8 @@ public class OperatorMatches extends Operator {
 			Pattern pattern = Pattern.compile((String) right);
 			Matcher matcher = pattern.matcher((String) left);
 			return matcher.matches();
-		} catch (PatternSyntaxException pse) {
+		}
+		catch (PatternSyntaxException pse) {
 			throw new SpelException(rightOp.getCharPositionInLine(), pse, SpelMessages.INVALID_PATTERN, right);
 		}
 	}

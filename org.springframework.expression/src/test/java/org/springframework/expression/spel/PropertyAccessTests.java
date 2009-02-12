@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import org.springframework.expression.AccessException;
@@ -20,7 +21,8 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests accessing of properties.
@@ -45,49 +47,9 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		evaluateAndCheckError("name.foobar", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 5);
 	}
 
-	// This can resolve the property 'flibbles' on any String (very useful...)
-	static class StringyPropertyAccessor implements PropertyAccessor {
-
-		int flibbles = 7;
-
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { String.class };
-		}
-
-		public boolean canRead(EvaluationContext context, Object target, Object name) throws AccessException {
-			if (!(target instanceof String))
-				throw new RuntimeException("Assertion Failed! target should be String");
-			return (name.equals("flibbles"));
-		}
-
-		public boolean canWrite(EvaluationContext context, Object target, Object name) throws AccessException {
-			if (!(target instanceof String))
-				throw new RuntimeException("Assertion Failed! target should be String");
-			return (name.equals("flibbles"));
-		}
-
-		public Object read(EvaluationContext context, Object target, Object name) throws AccessException {
-			if (!name.equals("flibbles"))
-				throw new RuntimeException("Assertion Failed! name should be flibbles");
-			return flibbles;
-		}
-
-		public void write(EvaluationContext context, Object target, Object name, Object newValue)
-				throws AccessException {
-			if (!name.equals("flibbles"))
-				throw new RuntimeException("Assertion Failed! name should be flibbles");
-			try {
-				flibbles = (Integer) context.getTypeUtils().getTypeConverter().convertValue(newValue, Integer.class);
-			} catch (EvaluationException e) {
-				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
-			}
-		}
-
-	}
-
 	// Adding a new property accessor just for a particular type
 	public void testAddingSpecificPropertyAccessor() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		// Even though this property accessor is added after the reflection one, it specifically
@@ -116,6 +78,46 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			// success - message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
 			// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
 			System.out.println(e.getMessage());
+		}
+	}
+
+
+	// This can resolve the property 'flibbles' on any String (very useful...)
+	private static class StringyPropertyAccessor implements PropertyAccessor {
+
+		int flibbles = 7;
+
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[] { String.class };
+		}
+
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+			if (!(target instanceof String))
+				throw new RuntimeException("Assertion Failed! target should be String");
+			return (name.equals("flibbles"));
+		}
+
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+			if (!(target instanceof String))
+				throw new RuntimeException("Assertion Failed! target should be String");
+			return (name.equals("flibbles"));
+		}
+
+		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
+			if (!name.equals("flibbles"))
+				throw new RuntimeException("Assertion Failed! name should be flibbles");
+			return flibbles;
+		}
+
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
+				throws AccessException {
+			if (!name.equals("flibbles"))
+				throw new RuntimeException("Assertion Failed! name should be flibbles");
+			try {
+				flibbles = context.getTypeConverter().convertValue(newValue, Integer.class);
+			} catch (EvaluationException e) {
+				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
+			}
 		}
 	}
 

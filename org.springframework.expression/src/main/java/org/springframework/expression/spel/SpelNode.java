@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationException;
 
 /**
  * Represents a node in the Ast for a parsed expression.
- * 
+ *
  * @author Andy Clement
+ * @since 3.0
  */
 public interface SpelNode {
 
 	/**
 	 * Evaluate the expression node in the context of the supplied expression state and return the value.
-	 * 
 	 * @param expressionState the current expression state (includes the context)
 	 * @return the value of this node evaluated against the specified state
 	 */
@@ -44,7 +45,6 @@ public interface SpelNode {
 	/**
 	 * Evaluate the expression to a node and then set the new value on that node. For example, if the expression
 	 * evaluates to a property reference then the property will be set to the new value.
-	 * 
 	 * @param expressionState the current expression state (includes the context)
 	 * @param newValue the new value
 	 * @throws EvaluationException if any problem occurs evaluating the expression or setting the new value
@@ -60,26 +60,23 @@ public interface SpelNode {
 	 * @return the number of children under this node
 	 */
 	int getChildCount();
-	
+
 	/**
 	 * Helper method that returns a SpelNode rather than an Antlr Tree node.
-	 * 
 	 * @return the child node cast to a SpelNode
 	 */
 	SpelNode getChild(int index);
 
 	/**
 	 * Determine the class of the object passed in, unless it is already a class object.
-	 * 
 	 * @param o the object that the caller wants the class of
 	 * @return the class of the object if it is not already a class object, or null if the object is null
 	 */
-	Class<?> getObjectClass(Object o);
-	
-	
+	Class<?> getObjectClass(Object obj);
+
 	/**
 	 * @return the start position of this Ast node in the expression string
 	 */
-	public int getStartPosition();
+	int getStartPosition();
 
 }

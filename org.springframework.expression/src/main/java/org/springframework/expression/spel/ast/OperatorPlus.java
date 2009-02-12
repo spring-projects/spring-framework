@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.spel.ExpressionState;
 
+/**
+ * @author Andy Clement
+ * @since 3.0
+ */
 public class OperatorPlus extends Operator {
 
 	public OperatorPlus(Token payload) {
@@ -33,41 +39,40 @@ public class OperatorPlus extends Operator {
 		if (rightOp == null) { // If only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state);
 			if (operandOne instanceof Number) {
-				return new Integer(((Number) operandOne).intValue());
+				return ((Number) operandOne).intValue();
 			}
 			return state.operate(Operation.ADD, operandOne, null);
-		} else {
+		}
+		else {
 			Object operandOne = leftOp.getValueInternal(state);
 			Object operandTwo = rightOp.getValueInternal(state);
 			if (operandOne instanceof Number && operandTwo instanceof Number) {
 				Number op1 = (Number) operandOne;
 				Number op2 = (Number) operandTwo;
 				if (op1 instanceof Double || op2 instanceof Double) {
-					Double result = op1.doubleValue() + op2.doubleValue();
-					return result;
-				} else if (op1 instanceof Float || op2 instanceof Float) {
-					Float result = op1.floatValue() + op2.floatValue();
-					return result;
-				} else if (op1 instanceof Long || op2 instanceof Long) {
-					Long result = op1.longValue() + op2.longValue();
-					return result;
-				} else { // TODO what about overflow?
-					Integer result = op1.intValue() + op2.intValue();
-					return result;
+					return op1.doubleValue() + op2.doubleValue();
 				}
-			} else if (operandOne instanceof String && operandTwo instanceof String) {
+				else if (op1 instanceof Float || op2 instanceof Float) {
+					return op1.floatValue() + op2.floatValue();
+				}
+				else if (op1 instanceof Long || op2 instanceof Long) {
+					return op1.longValue() + op2.longValue();
+				}
+				else { // TODO what about overflow?
+					return op1.intValue() + op2.intValue();
+				}
+			}
+			else if (operandOne instanceof String && operandTwo instanceof String) {
 				return new StringBuilder((String) operandOne).append((String) operandTwo).toString();
-			} else if (operandOne instanceof String && operandTwo instanceof Integer) {
+			}
+			else if (operandOne instanceof String && operandTwo instanceof Integer) {
 				String l = (String) operandOne;
 				Integer i = (Integer) operandTwo;
-
 				// implements character + int (ie. a + 1 = b)
 				if (l.length() == 1) {
-					Character c = new Character((char) (new Character(l.charAt(0)) + i));
-					return c.toString();
+					return Character.toString((char) (l.charAt(0) + i));
 				}
-
-				return new StringBuilder((String) operandOne).append(((Integer) operandTwo).toString()).toString();
+				return new StringBuilder(l).append(i).toString();
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}
@@ -80,9 +85,10 @@ public class OperatorPlus extends Operator {
 
 	@Override
 	public String toStringAST() {
-		if (getRightOperand() == null) { // unary plus
+		if (getRightOperand() == null) {  // unary plus
 			return new StringBuilder().append("+").append(getLeftOperand()).toString();
 		}
 		return super.toStringAST();
 	}
+
 }

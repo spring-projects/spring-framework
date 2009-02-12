@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
-import org.springframework.expression.TypeConverter;
-import org.springframework.expression.TypeUtils;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
@@ -38,203 +36,158 @@ import org.springframework.expression.TypeUtils;
  * It also acts as a place for to define common utility routines that the various Ast nodes might need.
  * 
  * @author Andy Clement
+ * @since 3.0
  */
 public class ExpressionState {
 
-	private EvaluationContext relatedContext;
+	private final EvaluationContext relatedContext;
 
 	private final Stack<VariableScope> variableScopes = new Stack<VariableScope>();
 
 	private final Stack<Object> contextObjects = new Stack<Object>();
 
-	public ExpressionState(EvaluationContext context) {
-		relatedContext = context;
-		createVariableScope();
-	}
 
 	public ExpressionState() {
+		this(null);
+	}
+
+	public ExpressionState(EvaluationContext context) {
+		this.relatedContext = context;
 		createVariableScope();
 	}
 
+
 	private void createVariableScope() {
-		variableScopes.add(new VariableScope()); // create an empty top level VariableScope
+		this.variableScopes.add(new VariableScope()); // create an empty top level VariableScope
 	}
 
 	/**
 	 * The active context object is what unqualified references to properties/etc are resolved against.
 	 */
 	public Object getActiveContextObject() {
-		if (contextObjects.isEmpty()) {
-			return relatedContext.getRootContextObject();
+		if (this.contextObjects.isEmpty()) {
+			return this.relatedContext.getRootObject();
 		}
-		return contextObjects.peek();
+		return this.contextObjects.peek();
 	}
 
 	public void pushActiveContextObject(Object obj) {
-		contextObjects.push(obj);
+		this.contextObjects.push(obj);
 	}
 
 	public void popActiveContextObject() {
-		contextObjects.pop();
+		this.contextObjects.pop();
 	}
 
 	public Object getRootContextObject() {
-		return relatedContext.getRootContextObject();
-	}
-
-	public Object lookupReference(Object contextName, Object objectName) throws EvaluationException {
-		return relatedContext.lookupReference(contextName, objectName);
-	}
-
-	public TypeUtils getTypeUtilities() {
-		return relatedContext.getTypeUtils();
-	}
-
-	public TypeComparator getTypeComparator() {
-		return relatedContext.getTypeUtils().getTypeComparator();
-	}
-
-	public Class<?> findType(String type) throws EvaluationException {
-		return getTypeUtilities().getTypeLocator().findType(type);
-	}
-
-	// TODO all these methods that grab the type converter will fail badly if there isn't one...
-	public boolean toBoolean(Object value) throws EvaluationException {
-		return ((Boolean) getTypeConverter().convertValue(value, Boolean.TYPE)).booleanValue();
-	}
-
-	public char toCharacter(Object value) throws EvaluationException {
-		return ((Character) getTypeConverter().convertValue(value, Character.TYPE)).charValue();
-	}
-
-	public short toShort(Object value) throws EvaluationException {
-		return ((Short) getTypeConverter().convertValue(value, Short.TYPE)).shortValue();
-	}
-
-	public int toInteger(Object value) throws EvaluationException {
-		return ((Integer) getTypeConverter().convertValue(value, Integer.TYPE)).intValue();
-	}
-
-	public double toDouble(Object value) throws EvaluationException {
-		return ((Double) getTypeConverter().convertValue(value, Double.TYPE)).doubleValue();
-	}
-
-	public float toFloat(Object value) throws EvaluationException {
-		return ((Float) getTypeConverter().convertValue(value, Float.TYPE)).floatValue();
-	}
-
-	public long toLong(Object value) throws EvaluationException {
-		return ((Long) getTypeConverter().convertValue(value, Long.TYPE)).longValue();
-	}
-
-	public byte toByte(Object value) throws EvaluationException {
-		return ((Byte) getTypeConverter().convertValue(value, Byte.TYPE)).byteValue();
-	}
-
-	public TypeConverter getTypeConverter() {
-		// TODO cache TypeConverter when it is set/changed?
-		return getTypeUtilities().getTypeConverter();
+		return this.relatedContext.getRootObject();
 	}
 
 	public void setVariable(String name, Object value) {
-		relatedContext.setVariable(name, value);
+		this.relatedContext.setVariable(name, value);
 	}
 
 	public Object lookupVariable(String name) {
-		return relatedContext.lookupVariable(name);
+		return this.relatedContext.lookupVariable(name);
+	}
+
+	public Object lookupReference(Object contextName, String objectName) throws EvaluationException {
+		return this.relatedContext.lookupReference(contextName, objectName);
+	}
+
+	public TypeComparator getTypeComparator() {
+		return this.relatedContext.getTypeComparator();
+	}
+
+	public Class<?> findType(String type) throws EvaluationException {
+		return this.relatedContext.getTypeLocator().findType(type);
+	}
+
+	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
+		return this.relatedContext.getTypeConverter().convertValue(value, targetType);
 	}
 
 	/**
 	 * A new scope is entered when a function is invoked
 	 */
 	public void enterScope(Map<String, Object> argMap) {
-		variableScopes.push(new VariableScope(argMap));
+		this.variableScopes.push(new VariableScope(argMap));
 	}
 
 	public void enterScope(String name, Object value) {
-		variableScopes.push(new VariableScope(name, value));
+		this.variableScopes.push(new VariableScope(name, value));
 	}
 
 	public void exitScope() {
-		variableScopes.pop();
+		this.variableScopes.pop();
 	}
 
 	public void setLocalVariable(String name, Object value) {
-		variableScopes.peek().setVariable(name, value);
+		this.variableScopes.peek().setVariable(name, value);
 	}
 
 	public Object lookupLocalVariable(String name) {
-		int scopeNumber = variableScopes.size() - 1;
+		int scopeNumber = this.variableScopes.size() - 1;
 		for (int i = scopeNumber; i >= 0; i--) {
-			if (variableScopes.get(i).definesVariable(name)) {
-				return variableScopes.get(i).lookupVariable(name);
+			if (this.variableScopes.get(i).definesVariable(name)) {
+				return this.variableScopes.get(i).lookupVariable(name);
 			}
 		}
 		return null;
 	}
 
-	public Object operate(Operation op, Object left, Object right) throws SpelException {
-		OperatorOverloader overloader = relatedContext.getTypeUtils().getOperatorOverloader();
-		try {
-			if (overloader != null && overloader.overridesOperation(op, left, right)) {
-				return overloader.operate(op, left, right);
-			} else {
-				throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, left, right);
-			}
-		} catch (EvaluationException e) {
-			if (e instanceof SpelException) {
-				throw (SpelException) e;
-			} else {
-				throw new SpelException(e, SpelMessages.UNEXPECTED_PROBLEM_INVOKING_OPERATOR, op, left, right, e
-						.getMessage());
-			}
+	public Object operate(Operation op, Object left, Object right) throws EvaluationException {
+		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
+		if (overloader.overridesOperation(op, left, right)) {
+			return overloader.operate(op, left, right);
+		}
+		else {
+			throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, left, right);
 		}
 	}
 
 	public List<PropertyAccessor> getPropertyAccessors() {
-		return relatedContext.getPropertyAccessors();
+		return this.relatedContext.getPropertyAccessors();
 	}
 
 	public EvaluationContext getEvaluationContext() {
-		return relatedContext;
+		return this.relatedContext;
 	}
+
 
 	/**
 	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
 	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
 	 * the function is executing.  When the function returns the scope is exited.
-	 * 
-	 * @author Andy Clement
 	 *
 	 */
-	static class VariableScope {
+	private static class VariableScope {
 
 		private final Map<String, Object> vars = new HashMap<String, Object>();
 
 		public VariableScope() { }
 
 		public VariableScope(Map<String, Object> arguments) {
-			if (arguments!=null) {
-				vars.putAll(arguments);
+			if (arguments != null) {
+				this.vars.putAll(arguments);
 			}
 		}
 		
-		public VariableScope(String name,Object value) {
-			vars.put(name,value);
+		public VariableScope(String name, Object value) {
+			this.vars.put(name,value);
 		}
 
 		public Object lookupVariable(String name) {
-			return vars.get(name);
+			return this.vars.get(name);
 		}
 
 		public void setVariable(String name, Object value) {
-			vars.put(name,value);
+			this.vars.put(name,value);
 		}
 
 		public boolean definesVariable(String name) {
-			return vars.containsKey(name);
+			return this.vars.containsKey(name);
 		}
-
 	}
 
 }

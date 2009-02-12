@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,20 @@ import org.springframework.expression.PropertyAccessor;
  */
 public class MapAccessor implements PropertyAccessor {
 
-	public boolean canRead(EvaluationContext context, Object target, Object name) throws AccessException {
+	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 		return (((Map) target).containsKey(name));
 	}
 
-	public Object read(EvaluationContext context, Object target, Object name) throws AccessException {
+	public Object read(EvaluationContext context, Object target, String name) throws AccessException {
 		return ((Map) target).get(name);
 	}
 
-	public boolean canWrite(EvaluationContext context, Object target, Object name) throws AccessException {
+	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 		return true;
 	}
 
-	public void write(EvaluationContext context, Object target, Object name, Object newValue) throws AccessException {
+	@SuppressWarnings("unchecked")
+	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		((Map) target).put(name, newValue);
 	}
 

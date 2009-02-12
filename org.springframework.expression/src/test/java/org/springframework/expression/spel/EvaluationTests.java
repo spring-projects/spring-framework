@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 /**
@@ -323,12 +324,6 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	public void testTernaryOperator03() {
 		evaluateAndCheckError("'hello'?1:2", SpelMessages.TYPE_CONVERSION_ERROR); // cannot convert String to boolean
-	}
-
-	public void testTernaryOperator04() {
-		// an int becomes TRUE if not 0, otherwise FALSE
-		evaluate("12?1:2", 1, Integer.class); // int to boolean
-		evaluate("1L?1:2", 1, Integer.class); // long to boolean
 	}
 
 	// Indexer

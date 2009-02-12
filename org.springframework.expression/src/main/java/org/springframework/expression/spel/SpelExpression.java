@@ -26,18 +26,17 @@ import org.springframework.expression.common.ExpressionUtils;
  * asked to resolve references to types, beans, properties, methods.
  * 
  * @author Andy Clement
- * 
+ * @since 3.0
  */
 public class SpelExpression implements Expression {
 	
 	private final String expression;
+
 	public final SpelNode ast;
+
 
 	/**
 	 * Construct an expression, only used by the parser.
-	 * 
-	 * @param expression
-	 * @param ast
 	 */
 	public SpelExpression(String expression, SpelNode ast) {
 		this.expression = expression;
@@ -48,26 +47,27 @@ public class SpelExpression implements Expression {
 	 * @return the expression string that was parsed to create this expression instance
 	 */
 	public String getExpressionString() {
-		return expression;
+		return this.expression;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Object getValue() throws EvaluationException {
-		return ast.getValue(null);
+		return this.ast.getValue(null);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Object getValue(EvaluationContext context) throws EvaluationException {
-		return ast.getValue(new ExpressionState(context));
+		return this.ast.getValue(new ExpressionState(context));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Object result = ast.getValue(new ExpressionState(context));
 
@@ -75,31 +75,31 @@ public class SpelExpression implements Expression {
 			Class<?> resultType = result.getClass();
 			if (!expectedResultType.isAssignableFrom(resultType)) {
 				// Attempt conversion to the requested type, may throw an exception
-				result = context.getTypeUtils().getTypeConverter().convertValue(result, expectedResultType);
+				result = context.getTypeConverter().convertValue(result, expectedResultType);
 			}
 		}
-		return (T)result;
+		return (T) result;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
-		ast.setValue(new ExpressionState(context), value);
+		this.ast.setValue(new ExpressionState(context), value);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isWritable(EvaluationContext context) throws EvaluationException {
-		return ast.isWritable(new ExpressionState(context));
+		return this.ast.isWritable(new ExpressionState(context));
 	}
 
 	/**
 	 * @return return the Abstract Syntax Tree for the expression
 	 */
 	public SpelNode getAST() {
-		return ast;
+		return this.ast;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class SpelExpression implements Expression {
 	 * @return the string representation of the AST
 	 */
 	public String toStringAST() {
-		return ast.toStringAST();
+		return this.ast.toStringAST();
 	}
 
 	/**
@@ -120,11 +120,7 @@ public class SpelExpression implements Expression {
 		// TODO is this a legal implementation? The null return value could be very unhelpful. See other getValueType()
 		// also.
 		Object value = getValue(context);
-		if (value == null) {
-			return null;
-		} else {
-			return value.getClass();
-		}
+		return (value != null ? value.getClass() : null);
 	}
 
 	/**
@@ -132,20 +128,17 @@ public class SpelExpression implements Expression {
 	 */
 	public Class getValueType() throws EvaluationException {
 		Object value = getValue();
-		if (value == null) {
-			return null;
-		} else {
-			return value.getClass();
-		}
+		return (value != null ? value.getClass() : null);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		Object result = getValue();
 		// TODO propagate generic-ness into convert
-		return (T)ExpressionUtils.convert(null, result, expectedResultType);
+		return (T) ExpressionUtils.convert(null, result, expectedResultType);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.WrappedELException;
+import org.springframework.expression.spel.WrappedSpelException;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).
@@ -84,7 +85,7 @@ public abstract class Literal extends SpelNodeImpl {
 				long value = Long.parseLong(numberString, radix);
 				return new LongLiteral(numberToken, value);
 			} catch (NumberFormatException nfe) {
-				throw new WrappedELException(new SpelException(numberToken.getCharPositionInLine(), nfe,
+				throw new WrappedSpelException(new SpelException(numberToken.getCharPositionInLine(), nfe,
 						SpelMessages.NOT_A_LONG, numberToken.getText()));
 			}
 		} else {
@@ -92,7 +93,7 @@ public abstract class Literal extends SpelNodeImpl {
 				int value = Integer.parseInt(numberString, radix);
 				return new IntLiteral(numberToken, value);
 			} catch (NumberFormatException nfe) {
-				throw new WrappedELException(new SpelException(numberToken.getCharPositionInLine(), nfe,
+				throw new WrappedSpelException(new SpelException(numberToken.getCharPositionInLine(), nfe,
 						SpelMessages.NOT_AN_INTEGER, numberToken.getText()));
 			}
 		}

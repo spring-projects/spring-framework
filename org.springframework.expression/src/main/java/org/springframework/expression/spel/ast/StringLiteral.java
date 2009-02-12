@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 
+/**
+ * @author Andy Clement
+ * @author Juergen Hoeller
+ * @since 3.0
+ */
 public class StringLiteral extends Literal {
 
-	private String value;
+	private final String value;
 
 	public StringLiteral(Token payload) {
 		super(payload);
-		value = payload.getText();
+		String val = payload.getText();
 		// TODO should these have been skipped being created by the parser rules? or not?
-		value = value.substring(1, value.length() - 1);
-		value = value.replaceAll("''", "'");
+		val = val.substring(1, val.length() - 1);
+		this.value = val.replaceAll("''", "'");
 	}
 
 	@Override
 	public String getLiteralValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder("'").append(getLiteralValue()).append("'").toString();
+		return "'" + getLiteralValue() + "'";
 	}
 
 }

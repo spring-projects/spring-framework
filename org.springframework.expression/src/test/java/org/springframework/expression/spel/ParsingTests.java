@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import junit.framework.TestCase;
 
 import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
@@ -27,12 +29,7 @@ import org.springframework.expression.ParseException;
  */
 public class ParsingTests extends TestCase {
 
-	private SpelExpressionParser parser;
-
-	@Override
-	public void setUp() {
-		parser = new SpelExpressionParser();
-	}
+	private SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 
 	// literals
 	public void testLiteralBoolean01() {
@@ -393,7 +390,7 @@ public class ParsingTests extends TestCase {
 	 */
 	public void parseCheck(String expression, String expectedStringFormOfAST) {
 		try {
-			SpelExpression e = parser.parseExpression(expression);
+			SpelExpression e = (SpelExpression) parser.parseExpression(expression);
 			if (e != null && !e.toStringAST().equals(expectedStringFormOfAST)) {
 				SpelUtilities.printAbstractSyntaxTree(System.err, e);
 			}

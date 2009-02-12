@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.util.Map;
@@ -21,7 +22,8 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Testing variations on map access.
@@ -29,31 +31,6 @@ import org.springframework.expression.spel.standard.StandardEvaluationContext;
  * @author Andy Clement
  */
 public class MapAccessTests extends ExpressionTestCase {
-
-	static class MapAccessor implements PropertyAccessor {
-
-		public boolean canRead(EvaluationContext context, Object target, Object name) throws AccessException {
-			return (((Map) target).containsKey(name));
-		}
-
-		public Object read(EvaluationContext context, Object target, Object name) throws AccessException {
-			return ((Map) target).get(name);
-		}
-
-		public boolean canWrite(EvaluationContext context, Object target, Object name) throws AccessException {
-			return true;
-		}
-
-		public void write(EvaluationContext context, Object target, Object name, Object newValue)
-				throws AccessException {
-			((Map) target).put(name, newValue);
-		}
-
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { Map.class };
-		}
-
-	}
 
 	public void testSimpleMapAccess01() {
 		evaluate("testMap.get('monday')", "montag", String.class);
@@ -64,7 +41,7 @@ public class MapAccessTests extends ExpressionTestCase {
 	}
 
 	public void testCustomMapAccessor() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		StandardEvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		ctx.addPropertyAccessor(new MapAccessor());
 
@@ -74,7 +51,7 @@ public class MapAccessTests extends ExpressionTestCase {
 	}
 
 	public void testVariableMapAccess() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		StandardEvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		ctx.setVariable("day", "saturday");
 
@@ -83,7 +60,29 @@ public class MapAccessTests extends ExpressionTestCase {
 		assertEquals("samstag", value);
 	}
 
-	// public void testMapAccess04() {
-	// evaluate("testMap[monday]", "montag", String.class);
-	// }
+
+	private static class MapAccessor implements PropertyAccessor {
+
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+			return (((Map) target).containsKey(name));
+		}
+
+		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
+			return ((Map) target).get(name);
+		}
+
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+			return true;
+		}
+
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
+				throws AccessException {
+			((Map) target).put(name, newValue);
+		}
+
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[] { Map.class };
+		}
+	}
+
 }

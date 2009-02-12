@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
-import org.springframework.expression.spel.standard.StandardComparator;
+import org.springframework.expression.spel.support.StandardTypeComparator;
 
 /**
  * Unit tests for type comparison
@@ -29,7 +29,7 @@ import org.springframework.expression.spel.standard.StandardComparator;
 public class DefaultComparatorUnitTests extends TestCase {
 
 	public void testPrimitives() throws EvaluationException {
-		TypeComparator comparator = new StandardComparator();
+		TypeComparator comparator = new StandardTypeComparator();
 		// primitive int
 		assertTrue(comparator.compare(1, 2) < 0);
 		assertTrue(comparator.compare(1, 1) == 0);

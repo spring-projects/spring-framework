@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.expression.common;
+
+package org.springframework.expression.spel;
 
 import junit.framework.TestCase;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.common.LiteralExpression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Test LiteralExpression
- * 
  * @author Andy Clement
  */
 public class LiteralExpressionTests extends TestCase {
@@ -44,7 +44,8 @@ public class LiteralExpressionTests extends TestCase {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
 			lEx.setValue(new StandardEvaluationContext(), "flibble");
 			fail("Should have got an exception that the value cannot be set");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
 			assertEquals(ee.getExpressionString(), "somevalue");
 		}
@@ -64,4 +65,5 @@ public class LiteralExpressionTests extends TestCase {
 			fail("Did not get expected result.  Should have been '" + expectedString + "' but was '" + value + "'");
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import java.util.Collection;
@@ -31,6 +32,7 @@ import org.springframework.expression.spel.SpelMessages;
  * strings/collections (lists/sets)/arrays
  * 
  * @author Andy Clement
+ * @since 3.0
  */
 public class Indexer extends SpelNodeImpl {
 
@@ -48,7 +50,7 @@ public class Indexer extends SpelNodeImpl {
 			return ((Map<?, ?>) ctx).get(index);
 		}
 
-		int idx = state.toInteger(index);
+		int idx = state.convertValue(index, Integer.class);
 
 		if (ctx.getClass().isArray()) {
 			return accessArrayElement(ctx, idx);

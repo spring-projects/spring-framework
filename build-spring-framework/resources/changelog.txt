@@ -3,9 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.M2 (2009-02-11)
+Changes in version 3.0.0.M2 (2009-02-16)
 ----------------------------------------
 
+* revised expression parser API design
+* added SimpleThreadScope implementation
 * "systemProperties" bean is not considered a default match for type Properties anymore
 * registered plain singletons will be fully matched according to their qualifiers
 * all "taskExecutor" bean properties now accept any "java.util.concurrent.Executor"
@@ -28,6 +30,8 @@ Changes in version 3.0.0.M2 (2009-02-11)
 * Spring-created EntityManagers support JPA 2.0 draft API ("unwrap", "getQueryBuilder")
 * Spring initiates JPA 2.0 query timeout with remaining Spring transaction timeout
 * added support for WebSphere's ResourceAdapter-managed messaging transactions
+* made SpringBeanAutowiringInterceptor callback signature compatible with WebSphere
+* fixed JmsException/JmsUtils to fully avoid NPEs in case of cause messages being null
 * introduced OXM support package (originating from Spring Web Services)
 * introduced OXM-based MarshallingMessageConverter for JMS
 * introduced OXM-based MarshallingView for Spring MVC

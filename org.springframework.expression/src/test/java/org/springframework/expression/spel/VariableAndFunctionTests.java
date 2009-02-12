@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
@@ -53,13 +55,8 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		evaluate("#varargsFunctionReverseStringsAndMerge2(5,25)", "525", String.class);
 	}
 
-	public void testCallingFunctionsIncorrectly() {
-		evaluateAndCheckError("#varargsFunctionReverseStringsAndMerge(new StringBuilder())",
-				SpelMessages.TYPE_CONVERSION_ERROR);
-	}
-
 	public void testCallingIllegalFunctions() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
 		try {

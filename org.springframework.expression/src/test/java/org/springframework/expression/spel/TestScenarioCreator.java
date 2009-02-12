@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
-import java.awt.Color;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.awt.*;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.expression.spel.standard.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Fruit;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.Person;
@@ -43,7 +40,6 @@ public class TestScenarioCreator {
 		StandardEvaluationContext testContext = new StandardEvaluationContext();
 		setupRootContextObject(testContext);
 		populateContextMap(testContext);
-		createTestClassloader(testContext);
 		populateVariables(testContext);
 		populateFunctions(testContext);
 		return testContext;
@@ -79,20 +75,6 @@ public class TestScenarioCreator {
 	 */
 	private static void populateVariables(StandardEvaluationContext testContext) {
 		testContext.setVariable("answer", 42);
-	}
-
-	/**
-	 * Include a testcode jar on the default context classpath so that tests can lookup entries in it.
-	 * @param testContext the test evaluation context
-	 */
-	private static void createTestClassloader(StandardEvaluationContext testContext) {
-		try {
-			ClassLoader cl = new URLClassLoader(new URL[] { new File("target/test-classes/testcode.jar").toURI()
-					.toURL() }, Thread.currentThread().getContextClassLoader());
-			testContext.setClassLoader(cl);
-		} catch (MalformedURLException mue) {
-			mue.printStackTrace();
-		}
 	}
 
 	/**

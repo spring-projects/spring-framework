@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,13 +21,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.antlr.runtime.Token;
-import org.springframework.expression.EvaluationContext;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.reflection.ReflectionUtils;
+import org.springframework.expression.spel.support.ReflectionHelper;
 
 /**
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in the context prior to the
@@ -38,15 +39,18 @@ import org.springframework.expression.spel.reflection.ReflectionUtils;
  * Functions are very simplistic, the arguments are not part of the definition (right now), so the names must be unique.
  * 
  * @author Andy Clement
+ * @since 3.0
  */
 public class FunctionReference extends SpelNodeImpl {
 
 	private final String name;
 
+
 	public FunctionReference(Token payload) {
 		super(payload);
-		name = payload.getText();
+		this.name = payload.getText();
 	}
+
 
 	@Override
 	public Object getValueInternal(ExpressionState state) throws EvaluationException {
@@ -87,15 +91,11 @@ public class FunctionReference extends SpelNodeImpl {
 
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
-			EvaluationContext ctx = state.getEvaluationContext();
-			TypeConverter converter = null;
-			if (ctx.getTypeUtils() != null) {
-				converter = ctx.getTypeUtils().getTypeConverter();
-			}
-			ReflectionUtils.convertArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
+			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
+			ReflectionHelper.convertArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
 		}
 		if (m.isVarArgs()) {
-			functionArgs = ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(), functionArgs);
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(), functionArgs);
 		}
 
 		try {

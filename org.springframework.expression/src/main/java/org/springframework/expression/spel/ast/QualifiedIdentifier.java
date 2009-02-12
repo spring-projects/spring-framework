@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Represents a dot separated sequence of strings that indicate a package qualified type reference.
- * <p>
- * Example: "java.lang.String" as in the expression "new java.lang.String('hello')"
- * 
+ *
+ * <p>Example: "java.lang.String" as in the expression "new java.lang.String('hello')"
+ *
  * @author Andy Clement
- * 
+ * @since 3.0
  */
 public class QualifiedIdentifier extends SpelNodeImpl {
 
@@ -39,27 +41,30 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 	@Override
 	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		// Cache the concatenation of child identifiers
-		if (value == null) {
+		if (this.value == null) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < getChildCount(); i++) {
-				if (i > 0)
+				if (i > 0) {
 					sb.append(".");
+				}
 				sb.append(getChild(i).getValueInternal(state));
 			}
-			value = sb.toString();
+			this.value = sb.toString();
 		}
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
-		if (value != null) {
-			sb.append(value);
-		} else {
+		if (this.value != null) {
+			sb.append(this.value);
+		}
+		else {
 			for (int i = 0; i < getChildCount(); i++) {
-				if (i > 0)
+				if (i > 0) {
 					sb.append(".");
+				}
 				sb.append(getChild(i).toStringAST());
 			}
 		}

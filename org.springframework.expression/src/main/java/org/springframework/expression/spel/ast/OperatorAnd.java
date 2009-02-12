@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
@@ -22,8 +23,9 @@ import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Represents the boolean AND operation.
- * 
+ *
  * @author Andy Clement
+ * @since 3.0
  */
 public class OperatorAnd extends Operator {
 
@@ -42,8 +44,9 @@ public class OperatorAnd extends Operator {
 		boolean rightValue;
 
 		try {
-			leftValue = state.toBoolean(getLeftOperand().getValueInternal(state));
-		} catch (SpelException ee) {
+			leftValue = state.convertValue(getLeftOperand().getValueInternal(state), Boolean.class);
+		}
+		catch (SpelException ee) {
 			ee.setPosition(getLeftOperand().getCharPositionInLine());
 			throw ee;
 		}
@@ -53,8 +56,9 @@ public class OperatorAnd extends Operator {
 		}
 
 		try {
-			rightValue = state.toBoolean(getRightOperand().getValueInternal(state));
-		} catch (SpelException ee) {
+			rightValue = state.convertValue(getRightOperand().getValueInternal(state), Boolean.class);
+		}
+		catch (SpelException ee) {
 			ee.setPosition(getRightOperand().getCharPositionInLine());
 			throw ee;
 		}

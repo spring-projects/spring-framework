@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.expression.spel.internal;
 
-public enum TypeCode {
+package org.springframework.expression.spel.ast;
+
+enum TypeCode {
 
 	OBJECT(0, Object.class), BOOLEAN(1, Boolean.TYPE), BYTE(1, Byte.TYPE), CHAR(1, Character.TYPE), SHORT(2, Short.TYPE), INT(
 			3, Integer.TYPE), LONG(4, Long.TYPE), FLOAT(5, Float.TYPE), DOUBLE(6, Double.TYPE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
@@ -24,8 +25,9 @@ import org.springframework.expression.spel.SpelMessages;
 
 /**
  * Implements the minus operator. If there is only one operand it is a unary minus.
- * 
+ *
  * @author Andy Clement
+ * @since 3.0
  */
 public class OperatorMinus extends Operator {
 
@@ -55,41 +57,41 @@ public class OperatorMinus extends Operator {
 			if (left instanceof Number) {
 				Number n = (Number) left;
 				if (left instanceof Double) {
-					Double result = 0 - n.doubleValue();
-					return result;
-				} else if (left instanceof Float) {
-					Float result = 0 - n.floatValue();
-					return result;
-				} else if (left instanceof Long) {
-					Long result = 0 - n.longValue();
-					return result;
-				} else {
-					Integer result = 0 - n.intValue();
-					return result;
+					return 0 - n.doubleValue();
+				}
+				else if (left instanceof Float) {
+					return 0 - n.floatValue();
+				}
+				else if (left instanceof Long) {
+					return 0 - n.longValue();
+				}
+				else {
+					return 0 - n.intValue();
 				}
 			}
 			throw new SpelException(SpelMessages.CANNOT_NEGATE_TYPE, left.getClass().getName());
-		} else {
+		}
+		else {
 			Object left = leftOp.getValueInternal(state);
 			Object right = rightOp.getValueInternal(state);
 			if (left instanceof Number && right instanceof Number) {
 				Number op1 = (Number) left;
 				Number op2 = (Number) right;
 				if (op1 instanceof Double || op2 instanceof Double) {
-					Double result = op1.doubleValue() - op2.doubleValue();
-					return result;
-				} else if (op1 instanceof Float || op2 instanceof Float) {
-					Float result = op1.floatValue() - op2.floatValue();
-					return result;
-				} else if (op1 instanceof Long || op2 instanceof Long) {
-					Long result = op1.longValue() - op2.longValue();
-					return result;
-				} else {
-					Integer result = op1.intValue() - op2.intValue();
-					return result;
+					return op1.doubleValue() - op2.doubleValue();
+				}
+				else if (op1 instanceof Float || op2 instanceof Float) {
+					return op1.floatValue() - op2.floatValue();
+				}
+				else if (op1 instanceof Long || op2 instanceof Long) {
+					return op1.longValue() - op2.longValue();
+				}
+				else {
+					return op1.intValue() - op2.intValue();
 				}
 			}
 			return state.operate(Operation.SUBTRACT, left, right);
 		}
 	}
+
 }

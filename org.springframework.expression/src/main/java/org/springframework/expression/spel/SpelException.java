@@ -23,7 +23,7 @@ import org.springframework.expression.EvaluationException;
  * that can occur.
  * 
  * @author Andy Clement
- * 
+ * @since 3.0
  */
 public class SpelException extends EvaluationException {
 
