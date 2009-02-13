@@ -131,6 +131,28 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void optionalParamPresent() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(OptionalParamController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("id", "val");
+		request.addParameter("flag", "true");
+		request.addHeader("header", "otherVal");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("val-true-otherVal", response.getContentAsString());
+	}
+
+	@Test
 	public void optionalParamMissing() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -146,7 +168,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("null-null", response.getContentAsString());
+		assertEquals("null-false-null", response.getContentAsString());
 	}
 
 	@Test
@@ -1318,10 +1340,10 @@ public class ServletAnnotationControllerTests {
 	public static class OptionalParamController {
 
 		@RequestMapping("/myPath.do")
-		public void myHandle(@RequestParam(required = false) String id,
+		public void myHandle(@RequestParam(required = false) String id, @RequestParam(required = false) boolean flag,
 				@RequestHeader(value = "header", required = false) String header, HttpServletResponse response)
 				throws IOException {
-			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header));
+			response.getWriter().write(String.valueOf(id) + "-" + flag + "-" + String.valueOf(header));
 		}
 	}
 
