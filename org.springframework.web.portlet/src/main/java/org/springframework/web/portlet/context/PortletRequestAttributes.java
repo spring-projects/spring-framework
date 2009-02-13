@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,10 +278,12 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	/**
 	 * Register the given callback as to be executed after session termination.
+	 * <p>Note: The callback object should be serializable in order to survive
+	 * web app restarts.
 	 * @param name the name of the attribute to register the callback for
 	 * @param callback the callback to be executed for destruction
 	 */
-	private void registerSessionDestructionCallback(String name, Runnable callback) {
+	protected void registerSessionDestructionCallback(String name, Runnable callback) {
 		PortletSession session = getSession(true);
 		session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
 				new DestructionCallbackBindingListener(callback));

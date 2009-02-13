@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,17 @@ public interface RequestAttributes {
 	int SCOPE_GLOBAL_SESSION = 2;
 
 
+	/**
+	 * Name of the standard reference to the request object: "request".
+	 * @see #resolveReference
+	 */
 	String REFERENCE_REQUEST = "request";
 
+	/**
+	 * Name of the standard reference to the session object: "session".
+	 * @see #resolveReference
+	 */
 	String REFERENCE_SESSION = "session";
-
 
 
 	/**
@@ -108,6 +115,9 @@ public interface RequestAttributes {
 	 * facade's {@link #removeAttribute(String, int)} method, any registered
 	 * destruction callback should be disabled as well, assuming that the
 	 * removed object will be reused or manually destroyed.
+	 * <p><b>NOTE:</b> Callback objects should generally be serializable if
+	 * they are being registered for a session scope. Otherwise the callback
+	 * (or even the entire session) might not survive web app restarts.
 	 * @param name the name of the attribute to register the callback for
 	 * @param callback the destruction callback to be executed
 	 * @param scope the scope identifier
