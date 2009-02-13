@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,8 +30,6 @@ import org.junit.Test;
 import org.springframework.beans.TestBean;
 
 /**
- * <p> JUnit 4 based unit tests for {@link ReflectionUtils}. </p>
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -206,27 +203,8 @@ public class ReflectionUtilsTests {
 		assertEquals(src.getDoctor(), dest.getDoctor());
 	}
 
-	static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
-
-		private List<String> methodNames = new LinkedList<String>();
-
-		private List<Method> methods = new LinkedList<Method>();
-
-		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
-			this.methodNames.add(m.getName());
-			this.methods.add(m);
-		}
-
-		public List getMethodNames() {
-			return this.methodNames;
-		}
-
-		public List getMethods() {
-			return this.methods;
-		}
-	}
-
-	public void testDoWithProtectedMethods() {
+	@Test
+	public void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestBean.class, mc, new ReflectionUtils.MethodFilter() {
 			public boolean matches(Method m) {
@@ -240,20 +218,12 @@ public class ReflectionUtilsTests {
 		assertFalse("Public, not protected", mc.getMethodNames().contains("absquatulate"));
 	}
 
-	public static class TestBeanSubclass extends TestBean {
-
-		@Override
-		public void absquatulate() {
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	public void testDuplicatesFound() {
+	@Test
+	public void duplicatesFound() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestBeanSubclass.class, mc);
 		int absquatulateCount = 0;
-		for (Iterator it = mc.getMethodNames().iterator(); it.hasNext();) {
-			String name = (String) it.next();
+		for (String name : mc.getMethodNames()) {
 			if (name.equals("absquatulate")) {
 				++absquatulateCount;
 			}
@@ -261,33 +231,70 @@ public class ReflectionUtilsTests {
 		assertEquals("Found 2 absquatulates", 2, absquatulateCount);
 	}
 
-	public void testFindMethod() throws Exception {
-		assertNotNull(ReflectionUtils.findMethod(B.class, "bar", new Class[]{String.class}));
-		assertNotNull(ReflectionUtils.findMethod(B.class, "foo", new Class[]{Integer.class}));
+	@Test
+	public void findMethod() throws Exception {
+		assertNotNull(ReflectionUtils.findMethod(B.class, "bar", String.class));
+		assertNotNull(ReflectionUtils.findMethod(B.class, "foo", Integer.class));
+		assertNotNull(ReflectionUtils.findMethod(B.class, "getClass"));
 	}
 
-	public static class TestBeanSubclassWithPublicField extends TestBean {
+
+	private static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
+
+		private List<String> methodNames = new LinkedList<String>();
+
+		private List<Method> methods = new LinkedList<Method>();
+
+		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
+			this.methodNames.add(m.getName());
+			this.methods.add(m);
+		}
+
+		public List<String> getMethodNames() {
+			return this.methodNames;
+		}
+
+		public List<Method> getMethods() {
+			return this.methods;
+		}
+	}
+
+
+	private static class TestBeanSubclass extends TestBean {
+
+		@Override
+		public void absquatulate() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+
+	private static class TestBeanSubclassWithPublicField extends TestBean {
 
 		public String publicField = "foo";
 	}
 
-	public static class TestBeanSubclassWithNewField extends TestBean {
+
+	private static class TestBeanSubclassWithNewField extends TestBean {
 
 		private int magic;
 
 		protected String prot = "foo";
 	}
 
-	public static class TestBeanSubclassWithFinalField extends TestBean {
+
+	private static class TestBeanSubclassWithFinalField extends TestBean {
 
 		private final String foo = "will break naive copy that doesn't exclude statics";
 	}
+
 
 	private static class A {
 
 		private void foo(Integer i) throws RemoteException {
 		}
 	}
+
 
 	private static class B extends A {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,11 +145,11 @@ public abstract class ReflectionUtils {
 	 * (may be <code>null</code> to indicate any signature)
 	 * @return the Method object, or <code>null</code> if none found
 	 */
-	public static Method findMethod(Class clazz, String name, Class[] paramTypes) {
+	public static Method findMethod(Class clazz, String name, Class... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(name, "Method name must not be null");
 		Class searchType = clazz;
-		while (!Object.class.equals(searchType) && searchType != null) {
+		while (searchType != null) {
 			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
 			for (Method method : methods) {
 				if (name.equals(method.getName()) &&
@@ -173,7 +173,7 @@ public abstract class ReflectionUtils {
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target) {
-		return invokeMethod(method, target, null);
+		return invokeMethod(method, target, new Object[0]);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public abstract class ReflectionUtils {
 	 * @param args the invocation arguments (may be <code>null</code>)
 	 * @return the invocation result, if any
 	 */
-	public static Object invokeMethod(Method method, Object target, Object[] args) {
+	public static Object invokeMethod(Method method, Object target, Object... args) {
 		try {
 			return method.invoke(target, args);
 		}
@@ -206,7 +206,7 @@ public abstract class ReflectionUtils {
 	 * @see #invokeJdbcMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeJdbcMethod(Method method, Object target) throws SQLException {
-		return invokeJdbcMethod(method, target, null);
+		return invokeJdbcMethod(method, target, new Object[0]);
 	}
 
 	/**
@@ -219,7 +219,7 @@ public abstract class ReflectionUtils {
 	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
-	public static Object invokeJdbcMethod(Method method, Object target, Object[] args) throws SQLException {
+	public static Object invokeJdbcMethod(Method method, Object target, Object... args) throws SQLException {
 		try {
 			return method.invoke(target, args);
 		}
