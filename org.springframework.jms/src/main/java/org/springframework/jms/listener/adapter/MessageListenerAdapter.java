@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jms.listener.adapter;
 
 import java.lang.reflect.InvocationTargetException;
-
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -366,11 +365,12 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	}
 
 	public String getSubscriptionName() {
-		if (this.delegate instanceof SubscriptionNameProvider) {
-			return ((SubscriptionNameProvider) this.delegate).getSubscriptionName();
+		Object delegate = getDelegate();
+		if (delegate != this && delegate instanceof SubscriptionNameProvider) {
+			return ((SubscriptionNameProvider) delegate).getSubscriptionName();
 		}
 		else {
-			return this.delegate.getClass().getName();
+			return delegate.getClass().getName();
 		}
 	}
 
