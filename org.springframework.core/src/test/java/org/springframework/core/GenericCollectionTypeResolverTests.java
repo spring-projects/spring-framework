@@ -40,7 +40,7 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 		this.targetClass = Foo.class;
 		this.methods = new String[] {"a", "b", "b2", "b3", "c", "d", "d2", "d3", "e", "e2", "e3"};
 		this.expectedResults = new Class[] {
-			Integer.class, null, null, Set.class, null, Integer.class,
+			Integer.class, null, Set.class, Set.class, null, Integer.class,
 			Integer.class, Integer.class, Integer.class, Integer.class, Integer.class};
 	}
 

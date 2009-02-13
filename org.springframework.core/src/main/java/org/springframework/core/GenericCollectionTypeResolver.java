@@ -341,9 +341,16 @@ public abstract class GenericCollectionTypeResolver {
 			}
 		}
 		if (paramType instanceof WildcardType) {
-			Type[] lowerBounds = ((WildcardType) paramType).getLowerBounds();
-			if (lowerBounds != null && lowerBounds.length > 0) {
-				paramType = lowerBounds[0];
+			WildcardType wildcardType = (WildcardType) paramType;
+			Type[] upperBounds = wildcardType.getUpperBounds();
+			if (upperBounds != null && upperBounds.length > 0 && !Object.class.equals(upperBounds[0])) {
+				paramType = upperBounds[0];
+			}
+			else {
+				Type[] lowerBounds = wildcardType.getLowerBounds();
+				if (lowerBounds != null && lowerBounds.length > 0 && !Object.class.equals(lowerBounds[0])) {
+					paramType = lowerBounds[0];
+				}
 			}
 		}
 		if (paramType instanceof ParameterizedType) {

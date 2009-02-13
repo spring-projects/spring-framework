@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
-
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,17 +29,17 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Assert;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-
 import test.beans.GenericBean;
 import test.beans.GenericIntegerBean;
 import test.beans.GenericSetOfIntegerBean;
 import test.beans.TestBean;
+
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 /**
  * @author Juergen Hoeller
@@ -60,6 +58,19 @@ public final class BeanWrapperGenericsTests {
 		bw.setPropertyValue("integerSet", input);
 		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
+	}
+
+	@Test
+	public void testGenericLowerBoundedSet() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, true));
+		Set<String> input = new HashSet<String>();
+		input.add("4");
+		input.add("5");
+		bw.setPropertyValue("numberSet", input);
+		assertTrue(gb.getNumberSet().contains(new Integer(4)));
+		assertTrue(gb.getNumberSet().contains(new Integer(5)));
 	}
 
 	@Test
