@@ -343,6 +343,9 @@ public class AntPathMatcherTests {
 
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
 		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
+
+		assertEquals(-1, comparator.compare("/hotels/*","/hotels/*/**"));
+		assertEquals(1, comparator.compare("/hotels/*/**", "/hotels/*"));
 	}
 
 	@Test
