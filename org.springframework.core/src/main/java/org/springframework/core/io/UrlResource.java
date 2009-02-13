@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -120,7 +121,16 @@ public class UrlResource extends AbstractResource {
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
 		con.setUseCaches(false);
-		return con.getInputStream();
+		try {
+			return con.getInputStream();
+		}
+		catch (IOException ex) {
+			// Close the HTTP connection (if applicable).
+			if (con instanceof HttpURLConnection) {
+				((HttpURLConnection) con).disconnect();
+			}
+			throw ex;
+		}
 	}
 
 	/**
