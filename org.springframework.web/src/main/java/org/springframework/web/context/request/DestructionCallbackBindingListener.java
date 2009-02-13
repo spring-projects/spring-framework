@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,22 @@ import javax.servlet.http.HttpSessionBindingListener;
 /**
  * Adapter that implements the Servlet 2.3 HttpSessionBindingListener
  * interface, wrapping a session destruction callback.
+ *
+ * @author Juergen Hoeller
+ * @since 3.0
+ * @see RequestAttributes#registerDestructionCallback
+ * @see ServletRequestAttributes#registerSessionDestructionCallback
  */
 public class DestructionCallbackBindingListener implements HttpSessionBindingListener, Serializable {
 
 	private final Runnable destructionCallback;
 
 
+	/**
+	 * Create a new DestructionCallbackBindingListener for the given callback.
+	 * @param destructionCallback the Runnable to execute when this listener
+	 * object gets unbound from the session
+	 */
 	public DestructionCallbackBindingListener(Runnable destructionCallback) {
 		this.destructionCallback = destructionCallback;
 	}
