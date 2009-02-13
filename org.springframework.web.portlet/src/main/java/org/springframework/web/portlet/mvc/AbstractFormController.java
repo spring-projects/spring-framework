@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -910,12 +910,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * resetting the form (prepopulating it with the current values if "bindOnNewForm"
 	 * is true). In this case, the form object in the session serves as transaction token.
 	 * <pre class="code">
-	 * protected ModelAndView handleInvalidSubmit(RenderRequest request, RenderResponse response) throws Exception {
+	 * protected ModelAndView renderInvalidSubmit(RenderRequest request, RenderResponse response) throws Exception {
 	 *   return showNewForm(request, response);
 	 * }</pre>
 	 * You can also show a new form but with special errors registered on it:
 	 * <pre class="code">
-	 * protected ModelAndView handleInvalidSubmit(RenderRequest request, RenderResponse response) throws Exception {
+	 * protected ModelAndView renderInvalidSubmit(RenderRequest request, RenderResponse response) throws Exception {
 	 *   BindException errors = getErrorsForNewForm(request);
 	 *   errors.reject("duplicateFormSubmission", "Duplicate form submission");
 	 *   return showForm(request, response, errors);
