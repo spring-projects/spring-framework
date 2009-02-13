@@ -384,7 +384,7 @@ public class HandlerMethodInvoker {
 			else if (required) {
 				raiseMissingParameterException(paramName, paramType);
 			}
-			checkValue(paramName, paramValue, paramType);
+			paramValue = checkValue(paramName, paramValue, paramType);
 		}
 		WebDataBinder binder = createBinder(webRequest, null, paramName);
 		initBinder(handlerForInitBinderCall, paramName, binder, webRequest);
@@ -411,7 +411,7 @@ public class HandlerMethodInvoker {
 			else if (required) {
 				raiseMissingHeaderException(headerName, paramType);
 			}
-			checkValue(headerName, headerValue, paramType);
+			headerValue = checkValue(headerName, headerValue, paramType);
 		}
 		WebDataBinder binder = createBinder(webRequest, null, headerName);
 		initBinder(handlerForInitBinderCall, headerName, binder, webRequest);
@@ -434,7 +434,7 @@ public class HandlerMethodInvoker {
 			else if (required) {
 				raiseMissingCookieException(cookieName, paramType);
 			}
-			checkValue(cookieName, cookieValue, paramType);
+			cookieValue = checkValue(cookieName, cookieValue, paramType);
 		}
 		WebDataBinder binder = createBinder(webRequest, null, cookieName);
 		initBinder(handlerForInitBinderCall, cookieName, binder, webRequest);
@@ -484,12 +484,18 @@ public class HandlerMethodInvoker {
 		return name;
 	}
 
-	private void checkValue(String name, Object value, Class paramType) {
-		if (value == null && paramType.isPrimitive()) {
-			throw new IllegalStateException("Optional " + paramType + " parameter '" + name +
-					"' is not present but cannot be translated into a null value due to being declared as a " +
-					"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
+	private Object checkValue(String name, Object value, Class paramType) {
+		if (value == null) {
+			if (boolean.class.equals(paramType)) {
+				return Boolean.FALSE;
+			}
+			else if (paramType.isPrimitive()) {
+				throw new IllegalStateException("Optional " + paramType + " parameter '" + name +
+						"' is not present but cannot be translated into a null value due to being declared as a " +
+						"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
+			}
 		}
+		return value;
 	}
 
 	private WebDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
