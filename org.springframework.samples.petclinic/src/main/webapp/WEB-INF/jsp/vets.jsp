@@ -4,12 +4,10 @@
 <h2>Veterinarians:</h2>
 
 <table>
-  <tr>
   <thead>
     <th>Name</th>
     <th>Specialties</th>
   </thead>
-  </tr>
   <c:forEach var="vet" items="${vets.vetList}">
     <tr>
       <td>${vet.firstName} ${vet.lastName}</td>

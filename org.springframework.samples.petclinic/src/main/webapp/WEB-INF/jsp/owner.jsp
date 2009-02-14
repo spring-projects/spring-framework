@@ -61,12 +61,10 @@
         </td>
         <td valign="top">
           <table>
-            <tr>
             <thead>
               <th>Visit Date</th>
               <th>Description</th>
             </thead>
-            </tr>
             <c:forEach var="visit" items="${pet.visits}">
               <tr>
                 <td><fmt:formatDate value="${visit.date}" pattern="yyyy-MM-dd"/></td>

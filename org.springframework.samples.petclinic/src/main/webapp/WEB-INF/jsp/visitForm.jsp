@@ -6,14 +6,12 @@
 <form:form modelAttribute="visit">
   <b>Pet:</b>
   <table width="333">
-    <tr>
     <thead>
       <th>Name</th>
       <th>Birth Date</th>
       <th>Type</th>
       <th>Owner</th>
     </thead>
-    </tr>
     <tr>
       <td>${visit.pet.name}</td>
       <td><fmt:formatDate value="${visit.pet.birthDate}" pattern="yyyy-MM-dd"/></td>
