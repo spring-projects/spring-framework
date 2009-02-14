@@ -24,7 +24,7 @@
 		- DefaultAnnotationHandlerMapping is driven by these annotations and is 
 		- enabled by default with Java 5+.
 	-->
-
+	
 	<!--
 		- This bean processes annotated handler methods, applying PetClinic-specific PropertyEditors
 		- for request parameter binding. It overrides the default AnnotationMethodHandlerAdapter.
@@ -44,6 +44,7 @@
 	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
 		<property name="exceptionMappings">
 			<props>
+				<prop key="org.springframework.web.servlet.PageNotFound">pageNotFound</prop>
 				<prop key="org.springframework.dao.DataAccessException">dataAccessFailure</prop>
 				<prop key="org.springframework.transaction.TransactionException">dataAccessFailure</prop>
 			</props>

@@ -1,9 +1,12 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
+<c:choose>
+	<c:when test="${owner.new}"><c:set var="method" value="post"/></c:when>
+	<c:otherwise><c:set var="method" value="put"/></c:otherwise>
+</c:choose>
 
 <h2><c:if test="${owner.new}">New </c:if>Owner:</h2>
-
-<form:form modelAttribute="owner">
+<form:form modelAttribute="owner" method="${method}">
   <table>
     <tr>
       <th>

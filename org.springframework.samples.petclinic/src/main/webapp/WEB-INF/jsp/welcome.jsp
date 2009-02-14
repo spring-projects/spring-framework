@@ -5,8 +5,8 @@
 <h2><fmt:message key="welcome"/></h2>
 
 <ul>
-  <li><a href="<spring:url value="/clinic/owners/form" escapeXml="true" />">Find owner</a></li>
-  <li><a href="<spring:url value="/clinic/vets" escapeXml="true" />">Display all veterinarians</a></li>
+  <li><a href="<spring:url value="/owners/search" escapeXml="true" />">Find owner</a></li>
+  <li><a href="<spring:url value="/vets" escapeXml="true" />">Display all veterinarians</a></li>
   <li><a href="<spring:url value="/html/petclinic.html" escapeXml="true" />">Tutorial</a></li>
 </ul>
 

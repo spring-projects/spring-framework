@@ -1,12 +1,15 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
+<c:choose>
+	<c:when test="${pet.new}"><c:set var="method" value="post"/></c:when>
+	<c:otherwise><c:set var="method" value="put"/></c:otherwise>
+</c:choose>
 
 <h2><c:if test="${pet.new}">New </c:if>Pet</h2>
 
 <b>Owner:</b> ${pet.owner.firstName} ${pet.owner.lastName}
 <br/>
-
-<form:form modelAttribute="pet">
+<form:form modelAttribute="pet" method="${method}">
   <table>
     <tr>
       <th>

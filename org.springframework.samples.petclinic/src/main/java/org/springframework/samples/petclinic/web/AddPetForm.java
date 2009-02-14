@@ -56,19 +56,19 @@ public class AddPetForm {
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.addAttribute("pet", pet);
-		return "petForm";
+		return "pets/form";
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, SessionStatus status) {
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
-			return "petForm";
+			return "pets/form";
 		}
 		else {
 			this.clinic.storePet(pet);
 			status.setComplete();
-			return "redirect:/clinic/owners/" + pet.getOwner().getId();
+			return "redirect:/owners/" + pet.getOwner().getId();
 		}
 	}
 

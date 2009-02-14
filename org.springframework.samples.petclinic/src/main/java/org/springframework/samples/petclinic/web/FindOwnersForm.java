@@ -36,30 +36,36 @@ public class FindOwnersForm {
 		dataBinder.setDisallowedFields(new String[] {"id"});
 	}
 
-	@RequestMapping(value = "/owners/form", method = RequestMethod.GET)
+	@RequestMapping(value = "/owners/search", method = RequestMethod.GET)
 	public  String setupForm(Model model) {
 		model.addAttribute("owner", new Owner());
-		return "findOwners";
+		return "owners/search";
 	}
 
 	@RequestMapping(value = "/owners", method = RequestMethod.GET)
 	public  String processSubmit(Owner owner, BindingResult result, Model model) {
+		
+		// allow parameterless GET request for /owners to return all records
+		if(owner.getLastName() == null) {
+			owner.setLastName(""); // empty string signifies broadest possible search
+		}
+		
 		// find owners by last name
 		Collection<Owner> results = this.clinic.findOwners(owner.getLastName());
 		if (results.size() < 1) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
-			return "findOwners";
+			return "owners/search";
 		}
 		if (results.size() > 1) {
 			// multiple owners found
 			model.addAttribute("selections", results);
-			return "owners";
+			return "owners/list";
 		}
 		else {
 			// 1 owner found
 			owner = results.iterator().next();
-			return "redirect:/clinic/owners/" + owner.getId();
+			return "redirect:/owners/" + owner.getId();
 		}
 	}
 

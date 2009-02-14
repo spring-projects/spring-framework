@@ -48,19 +48,19 @@ public class AddVisitForm {
 		Visit visit = new Visit();
 		pet.addVisit(visit);
 		model.addAttribute("visit", visit);
-		return "visitForm";
+		return "pets/visitForm";
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(@ModelAttribute("visit") Visit visit, BindingResult result, SessionStatus status) {
 		new VisitValidator().validate(visit, result);
 		if (result.hasErrors()) {
-			return "visitForm";
+			return "pets/visitForm";
 		}
 		else {
 			this.clinic.storeVisit(visit);
 			status.setComplete();
-			return "redirect:/clinic/owners/" + visit.getPet().getOwner().getId();
+			return "redirect:/owners/" + visit.getPet().getOwner().getId();
 		}
 	}
 
