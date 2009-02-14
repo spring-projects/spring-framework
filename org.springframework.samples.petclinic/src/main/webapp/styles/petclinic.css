@@ -111,7 +111,7 @@ li {
 }
 
 li ul {
-	list-style: square url(images/sub-bullet.gif);
+	list-style: square url(../images/bullet-arrow.png);
 }
 
 li ul li ul {

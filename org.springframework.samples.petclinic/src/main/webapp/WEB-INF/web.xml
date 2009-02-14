@@ -14,6 +14,8 @@
 		<param-name>webAppRootKey</param-name>
 		<param-value>petclinic.root</param-value>
 	</context-param>
+	
+	
 
 	<!--
 		Location of the Log4J config file, for initialization and refresh checks.
@@ -88,26 +90,14 @@
 	<!--
 	 - Map static resources to the default servlet
 	 - examples:
-	 -     http://localhost:8080/images/pets.png
-	 -     http://localhost:8080/styles/petclinic.css
+	 -     http://localhost:8080/static/images/pets.png
+	 -     http://localhost:8080/static/styles/petclinic.css
 	-->
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
-		<url-pattern>*.png</url-pattern>
+		<url-pattern>/static/*</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>default</servlet-name>
-		<url-pattern>*.gif</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>default</servlet-name>
-		<url-pattern>*.css</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>default</servlet-name>
-		<url-pattern>*.html</url-pattern>
-	</servlet-mapping>
-
+	
 	<!--
 		- Servlet that dispatches request to registered handlers (Controller implementations).
 		- Has its own application context, by default defined in "{servlet-name}-servlet.xml",
@@ -168,6 +158,4 @@
 	</resource-ref>
 	-->
 	
-	
-
 </web-app>
