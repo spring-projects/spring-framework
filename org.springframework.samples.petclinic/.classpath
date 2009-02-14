@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.test"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-4.5.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-sources-4.5.0.jar"/>
@@ -36,5 +35,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web.servlet"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.springsource.server.ide.server.core.runtime.classpath/SpringSource dm Server (Runtime) v1.0"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/JVM 1.6.0"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

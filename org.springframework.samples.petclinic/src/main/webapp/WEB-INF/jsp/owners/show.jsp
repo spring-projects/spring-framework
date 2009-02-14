@@ -78,7 +78,7 @@
     <table class="table-buttons">
       <tr>
         <td>
-          <spring:url value="{ownerId}/pets/{petId}" var="petUrl">
+          <spring:url value="{ownerId}/pets/{petId}/edit" var="petUrl">
             <spring:param name="ownerId" value="${owner.id}"/>
             <spring:param name="petId" value="${pet.id}"/>
           </spring:url>

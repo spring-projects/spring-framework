@@ -44,19 +44,19 @@ public class AddOwnerForm {
 	public String setupForm(Model model) {
 		Owner owner = new Owner();
 		model.addAttribute(owner);
-		return "ownerForm";
+		return "owners/form";
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(@ModelAttribute Owner owner, BindingResult result, SessionStatus status) {
 		new OwnerValidator().validate(owner, result);
 		if (result.hasErrors()) {
-			return "ownerForm";
+			return "owners/form";
 		}
 		else {
 			this.clinic.storeOwner(owner);
 			status.setComplete();
-			return "redirect:/clinic/owners/" + owner.getId();
+			return "redirect:/owners/" + owner.getId();
 		}
 	}
 

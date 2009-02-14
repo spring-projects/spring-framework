@@ -4,7 +4,6 @@
 <h2>Owners:</h2>
 
 <table>
-  <tr>
   <thead>
     <th>Name</th>
     <th>Address</th>
@@ -12,7 +11,6 @@
     <th>Telephone</th>
     <th>Pets</th>
   </thead>
-  </tr>
   <c:forEach var="owner" items="${selections}">
     <tr>
       <td>

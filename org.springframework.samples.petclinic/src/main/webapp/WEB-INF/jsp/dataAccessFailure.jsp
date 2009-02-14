@@ -14,6 +14,6 @@ ex.printStackTrace(new java.io.PrintWriter(out));
 
 <p/>
 <br/>
-<a href="<spring:url value="/welcome" escapeXml="true" />">Home</a>
+<a href="<spring:url value="/" escapeXml="true" />">Home</a>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

@@ -27,7 +27,7 @@ import org.springframework.web.bind.WebDataBinder;
  * @author Arjen Poutsma
  */
 @Controller
-@RequestMapping("/owners/*/pets/{petId}")
+@RequestMapping("/owners/*/pets/{petId}/edit")
 @SessionAttributes("pet")
 public class EditPetForm {
 
@@ -52,19 +52,19 @@ public class EditPetForm {
 	public String setupForm(@PathVariable("petId") int petId, Model model) {
 		Pet pet = this.clinic.loadPet(petId);
 		model.addAttribute("pet", pet);
-		return "petForm";
+		return "pets/form";
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(method = {RequestMethod.PUT, RequestMethod.POST})
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, SessionStatus status) {
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
-			return "petForm";
+			return "pets/form";
 		}
 		else {
 			this.clinic.storePet(pet);
 			status.setComplete();
-			return "redirect:/clinic/owners/" + pet.getOwner().getId();
+			return "redirect:/owners/" + pet.getOwner().getId();
 		}
 	}
 
@@ -72,7 +72,7 @@ public class EditPetForm {
 	public String deletePet(@PathVariable int petId) {
 		Pet pet = this.clinic.loadPet(petId);
 		this.clinic.deletePet(petId);
-		return "redirect:/clinic/owners/" + pet.getOwner().getId();
+		return "redirect:/owners/" + pet.getOwner().getId();
 	}
 
 }
