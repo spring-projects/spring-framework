@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package org.springframework.core.type;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
 
@@ -56,21 +60,38 @@ public class AnnotationMetadataTests extends TestCase {
 
 		assertTrue(metadata.hasAnnotation(Component.class.getName()));
 		assertTrue(metadata.hasAnnotation(Scope.class.getName()));
-		assertEquals(2, metadata.getAnnotationTypes().size());
+		assertTrue(metadata.hasAnnotation(SpecialAttr.class.getName()));
+		assertEquals(3, metadata.getAnnotationTypes().size());
 		assertTrue(metadata.getAnnotationTypes().contains(Component.class.getName()));
 		assertTrue(metadata.getAnnotationTypes().contains(Scope.class.getName()));
+		assertTrue(metadata.getAnnotationTypes().contains(SpecialAttr.class.getName()));
 
-		Map<String, Object> cattrs = metadata.getAnnotationAttributes(Component.class.getName());
-		assertEquals(1, cattrs.size());
-		assertEquals("myName", cattrs.get("value"));
-		Map<String, Object> sattrs = metadata.getAnnotationAttributes(Scope.class.getName());
-		assertEquals(1, sattrs.size());
-		assertEquals("myScope", sattrs.get("value"));
+		Map<String, Object> compAttrs = metadata.getAnnotationAttributes(Component.class.getName());
+		assertEquals(1, compAttrs.size());
+		assertEquals("myName", compAttrs.get("value"));
+		Map<String, Object> scopeAttrs = metadata.getAnnotationAttributes(Scope.class.getName());
+		assertEquals(1, scopeAttrs.size());
+		assertEquals("myScope", scopeAttrs.get("value"));
+		Map<String, Object> specialAttrs = metadata.getAnnotationAttributes(SpecialAttr.class.getName());
+		assertEquals(2, specialAttrs.size());
+		assertEquals(String.class, specialAttrs.get("clazz"));
+		assertEquals(Thread.State.NEW, specialAttrs.get("state"));
+	}
+
+
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface SpecialAttr {
+
+		Class clazz();
+
+		Thread.State state();
 	}
 
 
 	@Component("myName")
 	@Scope("myScope")
+	@SpecialAttr(clazz = String.class, state = Thread.State.NEW)
 	private static class AnnotatedComponent implements Serializable {
 	}
 

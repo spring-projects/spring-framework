@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * ASM class visitor which looks for the class name and implemented types as
@@ -62,7 +64,31 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 			@Override
 			public void visit(String name, Object value) {
 				// Explicitly defined annotation attribute value.
-				attributes.put(name, value);
+				Object valueToUse = value;
+				if (value instanceof Type) {
+					try {
+						valueToUse = classLoader.loadClass(((Type) value).getClassName());
+					}
+					catch (ClassNotFoundException ex) {
+						// Class not found - can't resolve class reference in annotation attribute.
+					}
+				}
+				attributes.put(name, valueToUse);
+			}
+			@Override
+			public void visitEnum(String name, String desc, String value) {
+				Object valueToUse = value;
+				try {
+					Class enumType = classLoader.loadClass(Type.getType(desc).getClassName());
+					Field enumConstant = ReflectionUtils.findField(enumType, value);
+					if (enumConstant != null) {
+						valueToUse = enumConstant.get(null);
+					}
+				}
+				catch (Exception ex) {
+					// Class not found - can't resolve class reference in annotation attribute.
+				}
+				attributes.put(name, valueToUse);
 			}
 			@Override
 			public void visitEnd() {
@@ -70,8 +96,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 					Class annotationClass = classLoader.loadClass(className);
 					// Check declared default values of attributes in the annotation type.
 					Method[] annotationAttributes = annotationClass.getMethods();
-					for (int i = 0; i < annotationAttributes.length; i++) {
-						Method annotationAttribute = annotationAttributes[i];
+					for (Method annotationAttribute : annotationAttributes) {
 						String attributeName = annotationAttribute.getName();
 						Object defaultValue = annotationAttribute.getDefaultValue();
 						if (defaultValue != null && !attributes.containsKey(attributeName)) {
