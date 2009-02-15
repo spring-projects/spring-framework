@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.ApplicationContext;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping;
@@ -172,9 +172,11 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 */
 	@Override
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
-		RequestMapping mapping = this.cachedMappings.get(handler.getClass());
+		Class handlerClass = (handler instanceof String ?
+				getApplicationContext().getType((String) handler) : handler.getClass());
+		RequestMapping mapping = this.cachedMappings.get(handlerClass);
 		if (mapping == null) {
-			mapping = AnnotationUtils.findAnnotation(handler.getClass(), RequestMapping.class);
+			mapping = AnnotationUtils.findAnnotation(handlerClass, RequestMapping.class);
 		}
 		if (mapping != null) {
 			validateMapping(mapping, request);
@@ -200,12 +202,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 
 		String[] mappedParams = mapping.params();
 		if (!ServletAnnotationMappingUtils.checkParameters(mappedParams, request)) {
-			throw new ServletException("Parameter conditions {" +
-					StringUtils.arrayToDelimitedString(mappedParams, ", ") +
-					"} not met for request parameters: " + request.getParameterMap());
+			throw new UnsatisfiedServletRequestParameterException(mappedParams, request.getParameterMap());
 		}
 	}
-
-	
 
 }

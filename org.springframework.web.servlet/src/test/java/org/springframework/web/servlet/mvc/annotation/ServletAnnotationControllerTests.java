@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -582,6 +582,66 @@ public class ServletAnnotationControllerTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
+	@Test
+	public void constrainedParameterDispatchingController() throws Exception {
+		final MockServletContext servletContext = new MockServletContext();
+		final MockServletConfig servletConfig = new MockServletConfig(servletContext);
+
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.setServletContext(servletContext);
+				RootBeanDefinition bd = new RootBeanDefinition(MyConstrainedParameterDispatchingController.class);
+				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller", bd);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(servletConfig);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
+		request.addParameter("view", "other");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			servlet.service(request, response);
+			fail("Should have failed because of type-level parameter constraint not met");
+		}
+		catch (ServletException ex) {
+			// expected
+			ex.printStackTrace();
+		}
+
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
+		request.addParameter("active", "true");
+		request.addParameter("view", "other");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
+		request.addParameter("view", "my");
+		request.addParameter("lang", "de");
+		response = new MockHttpServletResponse();
+		try {
+			servlet.service(request, response);
+			fail("Should have failed because of type-level parameter constraint not met");
+		}
+		catch (ServletException ex) {
+			// expected
+			ex.printStackTrace();
+		}
+
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
+		request.addParameter("view", "my");
+		request.addParameter("lang", "de");
+		request.addParameter("active", "true");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myLangView", response.getContentAsString());
 	}
 
 	@Test
@@ -1185,6 +1245,22 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping(method = {RequestMethod.POST, RequestMethod.GET}, params = "surprise")
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
+		}
+	}
+
+
+	@Controller
+	@RequestMapping(value = "/myPath.do", params = {"active"})
+	private static class MyConstrainedParameterDispatchingController {
+
+		@RequestMapping(params = {"view", "!lang"})
+		public void myOtherHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myOtherView");
+		}
+
+		@RequestMapping(method = RequestMethod.GET, params = {"view=my", "lang=de"})
+		public void myLangHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myLangView");
 		}
 	}
 
