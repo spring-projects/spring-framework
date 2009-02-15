@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionStatus;
  * @see TransactionTemplate
  * @see CallbackPreferringPlatformTransactionManager
  */
-public interface TransactionCallback {
+public interface TransactionCallback<T> {
 
 	/**
 	 * Gets called by {@link TransactionTemplate#execute} within a transactional context.
@@ -50,6 +50,6 @@ public interface TransactionCallback {
 	 * @see TransactionTemplate#execute
 	 * @see CallbackPreferringPlatformTransactionManager#execute
 	 */
-	Object doInTransaction(TransactionStatus status);
+	T doInTransaction(TransactionStatus status);
 
 }

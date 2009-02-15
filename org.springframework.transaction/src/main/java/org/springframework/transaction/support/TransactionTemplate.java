@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,13 +117,13 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	}
 
 
-	public Object execute(TransactionCallback action) throws TransactionException {
+	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
 		else {
 			TransactionStatus status = this.transactionManager.getTransaction(this);
-			Object result = null;
+			T result = null;
 			try {
 				result = action.doInTransaction(status);
 			}

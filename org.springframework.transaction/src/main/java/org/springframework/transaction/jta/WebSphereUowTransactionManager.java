@@ -36,6 +36,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * WebSphere-specific PlatformTransactionManager implementation that delegates
@@ -62,11 +63,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * despite the official WebSphere recommendations). Use the {@link #execute} style
  * for any code that might require transaction suspension.
  *
- * <p>This transaction manager is compatible with WebSphere 7.0 as well as recent
- * WebSphere 6.0.x and 6.1.x versions. Check the documentation for your specific
- * WebSphere version to find out whether UOWManager support is available.
- *
- * <p>The default JNDI location for the UOWManager is "java:comp/websphere/UOWManager".
+ * <p>This transaction manager is compatible with WebSphere 6.1.0.9 and above.
+ * The default JNDI location for the UOWManager is "java:comp/websphere/UOWManager".
  * If the location happens to differ according to your WebSphere documentation,
  * simply specify the actual location through this transaction manager's
  * "uowManagerName" bean property.
@@ -191,7 +189,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	}
 
 
-	public Object execute(TransactionDefinition definition, TransactionCallback callback) throws TransactionException {
+	public <T> T execute(TransactionDefinition definition, TransactionCallback<T> callback) throws TransactionException {
 		if (definition == null) {
 			// Use defaults if no transaction definition given.
 			definition = new DefaultTransactionDefinition();
@@ -257,7 +255,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			if (debug) {
 				logger.debug("Invoking WebSphere UOW action: type=" + uowType + ", join=" + joinTx);
 			}
-			UOWActionAdapter action = new UOWActionAdapter(
+			UOWActionAdapter<T> action = new UOWActionAdapter<T>(
 					definition, callback, (uowType == UOWManager.UOW_TYPE_GLOBAL_TRANSACTION), !joinTx, newSynch, debug);
 			this.uowManager.runUnderUOW(uowType, joinTx, action);
 			if (debug) {
@@ -282,11 +280,11 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	/**
 	 * Adapter that executes the given Spring transaction within the WebSphere UOWAction shape.
 	 */
-	private class UOWActionAdapter implements UOWAction {
+	private class UOWActionAdapter<T> implements UOWAction {
 
 		private final TransactionDefinition definition;
 
-		private final TransactionCallback callback;
+		private final TransactionCallback<T> callback;
 
 		private final boolean actualTransaction;
 
@@ -296,9 +294,11 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 		private boolean debug;
 
-		private Object result;
+		private T result;
 
-		public UOWActionAdapter(TransactionDefinition definition, TransactionCallback callback,
+		private Throwable exception;
+
+		public UOWActionAdapter(TransactionDefinition definition, TransactionCallback<T> callback,
 				boolean actualTransaction, boolean newTransaction, boolean newSynchronization, boolean debug) {
 			this.definition = definition;
 			this.callback = callback;
@@ -316,6 +316,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				this.result = this.callback.doInTransaction(status);
 				triggerBeforeCommit(status);
 			}
+			catch (Throwable ex) {
+				this.exception = ex;
+			}
 			finally {
 				if (status.isLocalRollbackOnly()) {
 					if (status.isDebug()) {
@@ -332,7 +335,10 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			}
 		}
 
-		public Object getResult() {
+		public T getResult() {
+			if (this.exception != null) {
+				ReflectionUtils.rethrowRuntimeException(this.exception);
+			}
 			return this.result;
 		}
 	}
