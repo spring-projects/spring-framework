@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 package org.springframework.web.portlet.bind;
 
 /**
- * PortletRequestBindingException subclass that indicates a missing parameter.
+ * {@link PortletRequestBindingException} subclass that indicates a missing parameter.
  *
  * @author Juergen Hoeller
  * @since 2.0.2
  */
 public class MissingPortletRequestParameterException extends PortletRequestBindingException {
 
-	private String parameterName;
+	private final String parameterName;
 
-	private String parameterType;
+	private final String parameterType;
 
 
 	/**
@@ -49,14 +49,14 @@ public class MissingPortletRequestParameterException extends PortletRequestBindi
 	/**
 	 * Return the name of the offending parameter.
 	 */
-	public String getParameterName() {
+	public final String getParameterName() {
 		return this.parameterName;
 	}
 
 	/**
 	 * Return the expected type of the offending parameter.
 	 */
-	public String getParameterType() {
+	public final String getParameterType() {
 		return this.parameterType;
 	}
 
