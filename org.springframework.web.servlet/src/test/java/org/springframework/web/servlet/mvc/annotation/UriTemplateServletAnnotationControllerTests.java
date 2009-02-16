@@ -167,13 +167,11 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write("specific");
 		}
 
-/*
 		@RequestMapping("/hotels/{hotel}")
 		public void handleVars(@PathVariable("hotel") String hotel, Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			writer.write("variables");
 		}
-*/
 
 		@RequestMapping("/hotels/*")
 		public void handleWildCard(Writer writer) throws IOException {
