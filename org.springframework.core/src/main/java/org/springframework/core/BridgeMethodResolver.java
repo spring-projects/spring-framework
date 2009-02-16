@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -41,13 +42,9 @@ import org.springframework.util.ReflectionUtils;
  * <p>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
  * The Java Language Specification</a> for more details on the use of bridge methods.
  *
- * <p>Only usable on JDK 1.5 and higher. Use an appropriate {@link JdkVersion}
- * check before calling this class if a fallback for JDK 1.4 is desirable.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
- * @see JdkVersion
  */
 public abstract class BridgeMethodResolver {
 
@@ -62,7 +59,6 @@ public abstract class BridgeMethodResolver {
 		if (bridgeMethod == null || !bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
-
 		// Gather all methods with matching name and parameter size.
 		List<Method> candidateMethods = new ArrayList<Method>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
@@ -71,16 +67,12 @@ public abstract class BridgeMethodResolver {
 				candidateMethods.add(candidateMethod);
 			}
 		}
-
-		Method result;
-		// Now perform simple quick checks.
+		// Now perform simple quick check.
 		if (candidateMethods.size() == 1) {
-			result = candidateMethods.get(0);
+			return candidateMethods.get(0);
 		}
-		else {
-			result = searchCandidates(candidateMethods, bridgeMethod);
-		}
-
+		// Search for candidate match.
+		Method result = searchCandidates(candidateMethods, bridgeMethod);
 		if (result == null) {
 			throw new IllegalStateException(
 					"Unable to locate bridged method for bridge method '" + bridgeMethod + "'");
@@ -95,13 +87,23 @@ public abstract class BridgeMethodResolver {
 	 * @return the bridged method, or <code>null</code> if none found
 	 */
 	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
+		if (candidateMethods.isEmpty()) {
+			return null;
+		}
 		Map<TypeVariable, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(bridgeMethod.getDeclaringClass());
+		Method previousMethod = null;
+		boolean sameSig = true;
 		for (Method candidateMethod : candidateMethods) {
 			if (isBridgeMethodFor(bridgeMethod, candidateMethod, typeParameterMap)) {
 				return candidateMethod;
 			}
+			else if (previousMethod != null) {
+				sameSig = sameSig &&
+						Arrays.equals(candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
+			}
+			previousMethod = candidateMethod;
 		}
-		return null;
+		return (sameSig ? candidateMethods.get(0) : null);
 	}
 
 	/**
@@ -185,7 +187,8 @@ public abstract class BridgeMethodResolver {
 				}
 			}
 			// A non-array type: compare the type itself.
-			if (!candidateParameter.equals(GenericTypeResolver.resolveType(genericParameter, typeVariableMap))) {
+			Class resolvedParameter = GenericTypeResolver.resolveType(genericParameter, typeVariableMap);
+			if (!candidateParameter.equals(resolvedParameter)) {
 				return false;
 			}
 		}
