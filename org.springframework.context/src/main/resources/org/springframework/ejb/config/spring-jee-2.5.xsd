@@ -13,8 +13,8 @@
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Defines the elements used to configure various Java EE (J2EE) related
-	technologies such as JNDI lookups and EJBs.
+	Defines configuration elements for access to traditional Java EE components
+	such as JNDI resources and EJB session beans.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
@@ -178,7 +178,7 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	The JNDI name to look up. This may be a fully-qualified JNDI path
-	or a local J2EE environment naming context path in which case the
+	or a local Java EE environment naming context path in which case the
 	prefix "java:comp/env/" will be prepended if applicable.
 						]]></xsd:documentation>
 					</xsd:annotation>
@@ -186,7 +186,7 @@
 				<xsd:attribute name="resource-ref" type="xsd:boolean" default="true">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	Controls whether the lookup occurs in a J2EE container, i.e. if the
+	Controls whether the lookup occurs in a Java EE container, i.e. if the
 	prefix "java:comp/env/" needs to be added if the JNDI name doesn't
 	already contain it. Default is "true" (since Spring 2.5).
 						]]></xsd:documentation>
@@ -195,7 +195,13 @@
 				<xsd:attribute name="expose-access-context" type="xsd:boolean" default="false">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	TODO
+	Set whether to expose the JNDI environment context for all access to the target
+	EJB, i.e. for all method invocations on the exposed object reference.
+	Default is "false", i.e. to only expose the JNDI context for object lookup.
+
+	Switch this flag to "true" in order to expose the JNDI environment (including
+	the authorization context) for each EJB invocation, as needed by WebLogic
+	for EJBs with authorization requirements.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>

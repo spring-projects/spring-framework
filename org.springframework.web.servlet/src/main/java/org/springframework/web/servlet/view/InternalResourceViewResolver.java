@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * @see InternalResourceView#setExposeContextBeansAsAttributes
 	 */
 	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
-		this.exposeContextBeansAsAttributes = Boolean.valueOf(exposeContextBeansAsAttributes);
+		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
 	}
 
 	/**
@@ -117,10 +117,10 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		InternalResourceView view = (InternalResourceView) super.buildView(viewName);
 		if (this.alwaysInclude != null) {
-			view.setAlwaysInclude(this.alwaysInclude.booleanValue());
+			view.setAlwaysInclude(this.alwaysInclude);
 		}
 		if (this.exposeContextBeansAsAttributes != null) {
-			view.setExposeContextBeansAsAttributes(this.exposeContextBeansAsAttributes.booleanValue());
+			view.setExposeContextBeansAsAttributes(this.exposeContextBeansAsAttributes);
 		}
 		if (this.exposedContextBeanNames != null) {
 			view.setExposedContextBeanNames(this.exposedContextBeanNames);

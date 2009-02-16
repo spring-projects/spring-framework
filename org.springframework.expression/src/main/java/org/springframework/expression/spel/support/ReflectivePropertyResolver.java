@@ -28,6 +28,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Simple PropertyResolver that uses reflection to access properties for reading and writing. A property can be accessed
@@ -225,21 +226,17 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method[] ms = clazz.getMethods();
 		// Try "get*" method...
-		StringBuilder sb = new StringBuilder(propertyName.length() + 3);
-		sb.append("get").append(propertyName.substring(0, 1).toUpperCase()).append(propertyName.substring(1));
-		String expectedGetterName = sb.toString();
+		String getterName = "get" + StringUtils.capitalize(propertyName);
 		for (Method method : ms) {
-			if (method.getName().equals(expectedGetterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
 		}
 		// Try "is*" method...
-		sb = new StringBuilder(propertyName.length() + 2);
-		sb.append("is").append(propertyName.substring(0, 1).toUpperCase()).append(propertyName.substring(1));
-		expectedGetterName = sb.toString();
+		getterName = "is" + StringUtils.capitalize(propertyName);
 		for (Method method : ms) {
-			if (method.getName().equals(expectedGetterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					boolean.class.equals(method.getReturnType()) &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
@@ -252,14 +249,11 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 	 * Find a setter method for the specified property.
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] ms = clazz.getMethods();
-		StringBuilder sb = new StringBuilder(propertyName.length() + 3);
-		sb.append("set").append(propertyName.substring(0, 1).toUpperCase()).append(propertyName.substring(1));
-		String setterName = sb.toString();
-		for (Method method : ms) {
-			if (method.getParameterTypes().length == 1 &&
-					(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
-					method.getName().equals(setterName)) {
+		Method[] methods = clazz.getMethods();
+		String setterName = "set" + StringUtils.capitalize(propertyName);
+		for (Method method : methods) {
+			if (method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
+					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
 		}
@@ -270,7 +264,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 	 * Find a field of a certain name on a specified class
 	 */
 	protected Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
-		Field[] fields = clazz.getFields(); // TODO use getDeclaredFields() and search up hierarchy?
+		Field[] fields = clazz.getFields();
 		for (Field field : fields) {
 			if (field.getName().equals(name) && (!mustBeStatic || Modifier.isStatic(field.getModifiers()))) {
 				return field;
