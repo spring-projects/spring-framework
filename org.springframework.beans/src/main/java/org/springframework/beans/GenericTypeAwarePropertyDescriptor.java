@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 			// method due to lack of bridge method resolution, in case of the getter using a
 			// covariant return type whereas the setter is defined for the concrete property type.
 			writeMethodToUse = ClassUtils.getMethodIfAvailable(this.beanClass,
-					"set" + StringUtils.capitalize(getName()), new Class[] {readMethodToUse.getReturnType()});
+					"set" + StringUtils.capitalize(getName()), readMethodToUse.getReturnType());
 		}
 		this.readMethod = readMethodToUse;
 		this.writeMethod = writeMethodToUse;
