@@ -183,6 +183,8 @@
       <entry name="?*.bsh" />
       <entry name="?*.rb" />
       <entry name="?*.groovy" />
+      <entry name="*.handlers" />
+      <entry name="*.schemas" />
     </wildcardResourcePatterns>
   </component>
   <component name="DependenciesAnalyzeManager">
@@ -235,17 +237,136 @@
               <file url="file://$PROJECT_DIR$/org.springframework.web/src/test/resources/org/springframework/web/context/request/sessionScopeTests.xml" />
             </files>
           </module>
+          <module name="aop">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/AopNamespaceHandlerEventTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/AopNamespaceHandlerEventTests-directPointcutEvents.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/AopNamespaceHandlerEventTests-pointcutEvents.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/AopNamespaceHandlerEventTests-pointcutRefEvents.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/AopNamespaceHandlerPointcutErrorTests-pointcutDuplication.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/AopNamespaceHandlerPointcutErrorTests-pointcutMissing.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/aopNamespaceHandlerAdvisorWithDirectPointcutEventTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/aopNamespaceHandlerAdvisorWithPointcutRefEventTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/aopNamespaceHandlerAspectEventTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/aopNamespaceHandlerPointcutDuplicationTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/aopNamespaceHandlerPointcutEventTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/config/aopNamespaceHandlerPointcutMissingTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/framework/PrototypeTargetTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/framework/prototypeTarget.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/interceptor/ExposeInvocationInterceptorTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/interceptor/exposeInvocation.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/scope/ScopedProxyAutowireTests-scopedAutowireFalse.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/scope/ScopedProxyAutowireTests-scopedAutowireTrue.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/scope/scopedAutowireFalse.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/scope/scopedAutowireTrue.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/support/RegexpMethodPointcutAdvisorIntegrationTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/support/regexpSetterTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/CommonsPoolTargetSourceProxyTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/HotSwappableTargetSourceTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/LazyInitTargetSourceTests-customTarget.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/LazyInitTargetSourceTests-factoryBean.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/LazyInitTargetSourceTests-singleton.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/PrototypeTargetSourceTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/ThreadLocalTargetSourceTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/commonsPoolProxyTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/customLazyInitTarget.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/hotSwapTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/lazyInitFactoryBean.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/lazyInitSingletonTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/prototypeTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/threadLocalTests.xml" />
+            </files>
+          </module>
+          <module name="test">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/XmlBasedSpr3350SingleSpringContextTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/annotation/ProfileValueAnnotationAwareTransactionalTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit38/ConcreteTransactionalJUnit38SpringContextTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit38/FailingBeforeAndAfterMethodsTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/BeforeAndAfterTransactionAnnotationTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/ClassLevelTransactionalSpringRunnerTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/ConcreteTransactionalJUnit4SpringContextTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/DefaultRollbackFalseTransactionalSpringRunnerTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/DefaultRollbackTrueTransactionalSpringRunnerTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/FailingBeforeAndAfterMethodsTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MethodLevelTransactionalSpringRunnerTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context1.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context2.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context3.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/ParameterizedDependencyInjectionTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/spr3896/BeanOverridingDefaultLocationsInheritedTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/spr3896/DefaultLocationsBaseTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/spr3896/DefaultLocationsInheritedTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/transactionalTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/support/CustomizedGenericXmlContextLoaderTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/testng/ConcreteTransactionalTestNGSpringContextTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/testng/DirtiesContextTransactionalTestNGSpringContextTests-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/testng/FailingBeforeAndAfterMethodsTests-context.xml" />
+            </files>
+          </module>
+          <module name="transaction">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.transaction/src/test/java/org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.transaction/src/test/java/org/springframework/transaction/config/annotationDrivenProxyTargetClassTests.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.transaction/src/test/java/org/springframework/transaction/interceptor/noTransactionAttributeSource.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.transaction/src/test/java/org/springframework/transaction/interceptor/transactionalBeanFactory.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.transaction/src/test/java/org/springframework/transaction/txNamespaceHandlerTests.xml" />
+            </files>
+          </module>
+          <module name="web-portlet">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/context/WEB-INF/applicationContext.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/context/WEB-INF/empty-portlet.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/context/WEB-INF/resources/messageSource.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/context/WEB-INF/resources/themeSource.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/context/WEB-INF/test-portlet.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/context/WEB-INF/test-servlet.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/handler/parameterMapping.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/handler/portletModeMapping.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.web.portlet/src/test/java/org/springframework/web/portlet/handler/portletModeParameterMapping.xml" />
+            </files>
+          </module>
+          <module name="oxm">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.oxm/src/test/resources/org/springframework/oxm/config/oxmNamespaceHandlerTest.xml" />
+            </files>
+          </module>
         </modules>
       </facet-type>
       <facet-type id="web">
         <modules>
           <module name="org.springframework.integration-tests" />
           <module name="integration-tests" />
+          <module name="web-servlet">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.web.servlet/src/test/java/org/springframework/web/context/WEB-INF/web.xml" />
+            </files>
+          </module>
         </modules>
       </facet-type>
       <facet-type id="jpa">
         <modules>
           <module name="integration-tests" />
+          <module name="orm">
+            <files>
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/META-INF/persistence.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/domain/persistence-context.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/domain/persistence-multi.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/domain/persistence.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-complex.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-example1.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-example2.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-example3.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-example4.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-example5.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-example6.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-invalid.xml" />
+              <file url="file://$PROJECT_DIR$/org.springframework.orm/src/test/java/org/springframework/orm/jpa/persistence-no-schema.xml" />
+            </files>
+          </module>
         </modules>
       </facet-type>
       <facet-type id="Grails" />
@@ -529,11 +650,12 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.core/core.iml" filepath="$PROJECT_DIR$/org.springframework.core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.expression/expression.iml" filepath="$PROJECT_DIR$/org.springframework.expression/expression.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.instrument/instrument.iml" filepath="$PROJECT_DIR$/org.springframework.instrument/instrument.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.integration-tests/integration-tests.iml" filepath="$PROJECT_DIR$/org.springframework.integration-tests/integration-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" filepath="$PROJECT_DIR$/org.springframework.jdbc/jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.orm/orm.iml" filepath="$PROJECT_DIR$/org.springframework.orm/orm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.springframework.oxm/oxm.iml" filepath="$PROJECT_DIR$/org.springframework.oxm/oxm.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.test/test.iml" filepath="$PROJECT_DIR$/org.springframework.test/test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.springframework.integration-tests/integration-tests.iml" filepath="$PROJECT_DIR$/org.springframework.integration-tests/integration-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.transaction/transaction.iml" filepath="$PROJECT_DIR$/org.springframework.transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web/web.iml" filepath="$PROJECT_DIR$/org.springframework.web/web.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web.portlet/web-portlet.iml" filepath="$PROJECT_DIR$/org.springframework.web.portlet/web-portlet.iml" />

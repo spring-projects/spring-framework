@@ -6,10 +6,19 @@ http://www.springsource.org
 Changes in version 3.0.0.M2 (2009-02-16)
 ----------------------------------------
 
+* refined OSGi version constraints for "javax.annotation" and "junit.framework"
 * revised expression parser API design
 * added SimpleThreadScope implementation
 * "systemProperties" bean is not considered a default match for type Properties anymore
 * registered plain singletons will be fully matched according to their qualifiers
+* pre-converted property values are preserved more eagerly for re-created beans
+* ASM-based AnnotationMetadata fully resolves class arguments and enums into Java types
+* bridge method resolution works with Hibernate-generated CGLIB proxies as well
+* generic collection type resolution respects upper bound (e.g. ? extends Number) as well
+* TypeUtils detects variations of ParameterizedType/GenericArrayType assignability as well
+* ReflectionUtils findMethod detects methods on "java.lang.Object" as well
+* UrlResource eagerly closes HTTP connections in case of "getInputStream()" failure
+* PathMatchingResourcePatternResolver avoids NPE when initialized with null ClassLoader
 * all "taskExecutor" bean properties now accept any "java.util.concurrent.Executor"
 * added "Future submit(Runnable)" and "Future submit(Callable)" to AsyncTaskExecutor
 * SimpleAsyncTaskExecutor supports a custom "java.util.concurrent.ThreadFactory"
@@ -22,7 +31,7 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * ApplicationListener beans get obtained on demand, supporting non-singletons as well
 * ApplicationListeners will be called in the order according to the Ordered contract
 * generified ApplicationListener interface, narrowing the event type to be received
-* generified Hibernate/Jdo/JpaCallback with generic "doInXxx" return type
+* generified Transaction/Hibernate/Jdo/JpaCallback with generic "doInXxx" return type
 * HibernateOperations uses generic parameter/return types where possible
 * JdoOperations uses generic parameter/return types where possible (following JDO 2.1)
 * removed "flush" operation from JdoDialect (fully relying on JDO 2.0+ compliance now)
@@ -31,7 +40,10 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * Spring initiates JPA 2.0 query timeout with remaining Spring transaction timeout
 * added support for WebSphere's ResourceAdapter-managed messaging transactions
 * made SpringBeanAutowiringInterceptor callback signature compatible with WebSphere
+* WebSphereUowTransactionManager preserves original exception in case of rollback
+* DefaultLobHandler uses explicit Blob/Clob access for reading when "wrapAsLob"=true
 * fixed JmsException/JmsUtils to fully avoid NPEs in case of cause messages being null
+* fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well
 * introduced OXM support package (originating from Spring Web Services)
 * introduced OXM-based MarshallingMessageConverter for JMS
 * introduced OXM-based MarshallingView for Spring MVC
@@ -43,6 +55,8 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * introduced @Action/@Render/@Resource/@EventMapping annotations for Portlet MVC
 * added @RequestHeader support for Portlet MVC
 * introduced @CookieValue annotation for Servlet and Portlet MVC handler methods
+* @RequestMapping type-level param constraints taken into account consistently
+* optional boolean parameters in MVC handler methods resolve to "false" if not present
 
 
 Changes in version 3.0.0.M1 (2008-12-05)
