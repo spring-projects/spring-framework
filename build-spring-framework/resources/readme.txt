@@ -1,12 +1,13 @@
-SPRING FRAMEWORK 3.0 M1 (December 2008)
+SPRING FRAMEWORK 3.0 M2 (February 2009)
 ---------------------------------------
 http://www.springframework.org
 
 1. INTRODUCTION
 ---------------
 
-This is the first milestone of Spring 3.0 which is scheduled for final release in Q2 2009.
-This release updates the entire codebase for Java 5+ and introduces EL and REST support.
+This is the second milestone of Spring 3.0 which is scheduled for final release in Q2 2009.
+This release features a codebase that has been fully updated for Java 5+, introduces
+Portlet 2.0 and early JPA 2.0 support, and provides even more comprehensive REST support.
 
 2. RELEASE NOTES
 ----------------
@@ -24,5 +25,5 @@ names follow bundle repository conventions now.
 4. GETTING STARTED
 ------------------
 
-Check out the provided PetClinic sample application. It has been partially updated
-for Spring 3.0 already.
+Check out the provided PetClinic sample application. It has been fully updated for
+Spring 3.0 already.
