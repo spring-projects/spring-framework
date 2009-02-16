@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		this.name = original.getName();
 		this.value = original.getValue();
 		this.source = original.getSource();
+		this.converted = original.converted;
+		this.convertedValue = original.convertedValue;
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
 		this.resolvedDescriptor = original.resolvedDescriptor;
