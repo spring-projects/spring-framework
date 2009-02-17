@@ -73,6 +73,10 @@ public class SourceFilteringListener implements SmartApplicationListener {
 		return (this.delegate == null || this.delegate.supportsEventType(eventType));
 	}
 
+	public boolean supportsSourceType(Class<?> sourceType) {
+		return sourceType.isInstance(this.source);
+	}
+
 	public int getOrder() {
 		return (this.delegate != null ? this.delegate.getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}

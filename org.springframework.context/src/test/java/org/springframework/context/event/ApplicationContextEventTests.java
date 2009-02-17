@@ -22,8 +22,7 @@ import java.util.Set;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.EasyMock;
 import static org.easymock.EasyMock.*;
-import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -90,6 +89,30 @@ public class ApplicationContextEventTests {
 	}
 
 	@Test
+	public void listenersInApplicationContext() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBeanDefinition("listener1", new RootBeanDefinition(MyOrderedListener1.class));
+		RootBeanDefinition listener2 = new RootBeanDefinition(MyOrderedListener2.class);
+		listener2.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("listener1"));
+		context.registerBeanDefinition("listener2", listener2);
+		context.refresh();
+
+		MyOrderedListener1 listener1 = context.getBean("listener1", MyOrderedListener1.class);
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		MyOtherEvent event2 = new MyOtherEvent(context);
+		context.publishEvent(event2);
+		MyEvent event3 = new MyEvent(context);
+		context.publishEvent(event3);
+		MyOtherEvent event4 = new MyOtherEvent(context);
+		context.publishEvent(event4);
+		assertTrue(listener1.seenEvents.contains(event1));
+		assertTrue(listener1.seenEvents.contains(event2));
+		assertTrue(listener1.seenEvents.contains(event3));
+		assertTrue(listener1.seenEvents.contains(event4));
+	}
+
+	@Test
 	public void listenerAndBroadcasterWithCircularReference() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("broadcaster", new RootBeanDefinition(BeanThatBroadcasts.class));
@@ -98,9 +121,9 @@ public class ApplicationContextEventTests {
 		context.registerBeanDefinition("listener", listenerDef);
 		context.refresh();
 
-		BeanThatBroadcasts broadcaster = (BeanThatBroadcasts) context.getBean("broadcaster");
+		BeanThatBroadcasts broadcaster = context.getBean("broadcaster", BeanThatBroadcasts.class);
 		context.publishEvent(new MyEvent(context));
-		Assert.assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
+		assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
 	}
 
 
