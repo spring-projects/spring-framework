@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Integer[] someIntegerArray;
 
+	private Integer[][] nestedIntegerArray;
+
+	private int[] someIntArray;
+
+	private int[][] nestedIntArray;
+
 	private Date date = new Date();
 
 	private Float myFloat = new Float(0.0);
@@ -97,7 +103,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	private List otherColours;
 
 	private List pets;
-
 
 	public TestBean() {
 	}
@@ -244,6 +249,30 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public void setSomeIntegerArray(Integer[] someIntegerArray) {
 		this.someIntegerArray = someIntegerArray;
+	}
+
+	public Integer[][] getNestedIntegerArray() {
+		return nestedIntegerArray;
+	}
+
+	public void setNestedIntegerArray(Integer[][] nestedIntegerArray) {
+		this.nestedIntegerArray = nestedIntegerArray;
+	}
+
+	public int[] getSomeIntArray() {
+		return someIntArray;
+	}
+
+	public void setSomeIntArray(int[] someIntArray) {
+		this.someIntArray = someIntArray;
+	}
+
+	public int[][] getNestedIntArray() {
+		return nestedIntArray;
+	}
+
+	public void setNestedIntArray(int[][] nestedIntArray) {
+		this.nestedIntArray = nestedIntArray;
 	}
 
 	public Date getDate() {

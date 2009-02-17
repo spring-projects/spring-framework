@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,22 @@ public interface ITestBean {
 	String[] getStringArray();
 
 	void setStringArray(String[] stringArray);
+
+	Integer[][] getNestedIntegerArray();
+
+	Integer[] getSomeIntegerArray();
+
+	void setSomeIntegerArray(Integer[] someIntegerArray);
+
+	void setNestedIntegerArray(Integer[][] nestedIntegerArray);
+
+	int[] getSomeIntArray();
+
+	void setSomeIntArray(int[] someIntArray);
+
+	int[][] getNestedIntArray();
+
+	void setNestedIntArray(int[][] someNestedArray);
 
 	/**
 	 * Throws a given (non-null) exception.
