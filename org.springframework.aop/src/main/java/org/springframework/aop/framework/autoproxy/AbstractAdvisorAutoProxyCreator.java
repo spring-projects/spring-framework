@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.aop.Advisor;
@@ -141,7 +140,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see org.springframework.core.OrderComparator
 	 */
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
-		Collections.sort(advisors, new OrderComparator());
+		OrderComparator.sort(advisors);
 		return advisors;
 	}
 

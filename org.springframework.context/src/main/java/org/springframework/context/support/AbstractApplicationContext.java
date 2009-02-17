@@ -19,7 +19,6 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -515,7 +514,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// First, invoke the BeanFactoryPostProcessors that implement PriorityOrdered.
-		Collections.sort(priorityOrderedPostProcessors, new OrderComparator());
+		OrderComparator.sort(priorityOrderedPostProcessors);
 		invokeBeanFactoryPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, invoke the BeanFactoryPostProcessors that implement Ordered.
@@ -523,7 +522,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		for (String postProcessorName : orderedPostProcessorNames) {
 			orderedPostProcessors.add(getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
-		Collections.sort(orderedPostProcessors, new OrderComparator());
+		OrderComparator.sort(orderedPostProcessors);
 		invokeBeanFactoryPostProcessors(beanFactory, orderedPostProcessors);
 
 		// Finally, invoke all other BeanFactoryPostProcessors.
@@ -577,7 +576,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// First, register the BeanPostProcessors that implement PriorityOrdered.
-		Collections.sort(priorityOrderedPostProcessors, new OrderComparator());
+		OrderComparator.sort(priorityOrderedPostProcessors);
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, register the BeanPostProcessors that implement Ordered.
@@ -585,7 +584,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		for (String postProcessorName : orderedPostProcessorNames) {
 			orderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
 		}
-		Collections.sort(orderedPostProcessors, new OrderComparator());
+		OrderComparator.sort(orderedPostProcessors);
 		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
 		// Finally, register all other BeanPostProcessors.

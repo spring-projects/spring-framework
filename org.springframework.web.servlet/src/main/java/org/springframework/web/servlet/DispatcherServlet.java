@@ -471,7 +471,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
-				Collections.sort(this.handlerMappings, new OrderComparator());
+				OrderComparator.sort(this.handlerMappings);
 			}
 		}
 		else {
@@ -509,7 +509,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerAdapters = new ArrayList<HandlerAdapter>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
-				Collections.sort(this.handlerAdapters, new OrderComparator());
+				OrderComparator.sort(this.handlerAdapters);
 			}
 		}
 		else {
@@ -547,7 +547,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
-				Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
+				OrderComparator.sort(this.handlerExceptionResolvers);
 			}
 		}
 		else {
@@ -609,7 +609,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
-				Collections.sort(this.viewResolvers, new OrderComparator());
+				OrderComparator.sort(this.viewResolvers);
 			}
 		}
 		else {

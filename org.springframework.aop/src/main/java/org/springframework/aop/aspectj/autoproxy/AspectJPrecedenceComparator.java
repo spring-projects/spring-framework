@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,14 @@ class AspectJPrecedenceComparator implements Comparator {
 	private static final int LOWER_PRECEDENCE = 1;
 	private static final int NOT_COMPARABLE = 0;
 
-	private final Comparator advisorComparator;
+	private final Comparator<? super Advisor> advisorComparator;
 
 
 	/**
 	 * Create a default AspectJPrecedenceComparator.
 	 */
 	public AspectJPrecedenceComparator() {
-		this.advisorComparator = new OrderComparator();
+		this.advisorComparator = OrderComparator.INSTANCE;
 	}
 
 	/**
@@ -70,7 +70,7 @@ class AspectJPrecedenceComparator implements Comparator {
 	 * for comparing {@link org.springframework.aop.Advisor} instances.
 	 * @param advisorComparator the Comparator to use for Advisors
 	 */
-	public AspectJPrecedenceComparator(Comparator advisorComparator) {
+	public AspectJPrecedenceComparator(Comparator<? super Advisor> advisorComparator) {
 		Assert.notNull(advisorComparator, "Advisor comparator must not be null");
 		this.advisorComparator = advisorComparator;
 	}
@@ -138,12 +138,8 @@ class AspectJPrecedenceComparator implements Comparator {
 	}
 
 	private boolean declaredInSameAspect(Advisor advisor1, Advisor advisor2) {
-		if (!(hasAspectName(advisor1) && hasAspectName(advisor2))) {
-			return false;
-		}
-		else {
-			return getAspectName(advisor1).equals(getAspectName(advisor2));
-		}
+		return (hasAspectName(advisor1) && hasAspectName(advisor2) &&
+				getAspectName(advisor1).equals(getAspectName(advisor2)));
 	}
 
 	private boolean hasAspectName(Advisor anAdvisor) {
