@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.core;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * {@link Comparator} implementation for {@link Ordered} objects,
@@ -33,6 +36,12 @@ import java.util.Comparator;
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
 public class OrderComparator implements Comparator<Object> {
+
+	/**
+	 * Shared default instance of OrderComparator.
+	 */
+	public static OrderComparator INSTANCE = new OrderComparator();
+
 
 	public int compare(Object o1, Object o2) {
 		boolean p1 = (o1 instanceof PriorityOrdered);
@@ -59,6 +68,33 @@ public class OrderComparator implements Comparator<Object> {
 	 */
 	protected int getOrder(Object obj) {
 		return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : Ordered.LOWEST_PRECEDENCE);
+	}
+
+
+	/**
+	 * Sort the given List with a default OrderComparator.
+	 * <p>Optimized to skip sorting for lists with size 0 or 1,
+	 * in order to avoid unnecessary array extraction.
+	 * @param list the List to sort
+	 * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+	 */
+	public static void sort(List<?> list) {
+		if (list.size() > 1) {
+			Collections.sort(list, INSTANCE);
+		}
+	}
+
+	/**
+	 * Sort the given array with a default OrderComparator.
+	 * <p>Optimized to skip sorting for lists with size 0 or 1,
+	 * in order to avoid unnecessary array extraction.
+	 * @param array the array to sort
+	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
+	 */
+	public static void sort(Object[] array) {
+		if (array.length > 1) {
+			Arrays.sort(array, INSTANCE);
+		}
 	}
 
 }

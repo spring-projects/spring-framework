@@ -57,6 +57,10 @@ public class GenericApplicationListenerAdapter implements SmartApplicationListen
 		return getGenericEventType(this.delegate.getClass()).isAssignableFrom(eventType);
 	}
 
+	public boolean supportsSourceType(Class<?> sourceType) {
+		return true;
+	}
+
 	public int getOrder() {
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}

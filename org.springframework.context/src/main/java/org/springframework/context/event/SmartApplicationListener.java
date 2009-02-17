@@ -34,4 +34,9 @@ public interface SmartApplicationListener extends ApplicationListener, Ordered {
 	 */
 	boolean supportsEventType(Class<? extends ApplicationEvent> eventType);
 
+	/**
+	 * Determine whether this listener actually supports the given source type.
+	 */
+	boolean supportsSourceType(Class<?> sourceType);
+
 }
