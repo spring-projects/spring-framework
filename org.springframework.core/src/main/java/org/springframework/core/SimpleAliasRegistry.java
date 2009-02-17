@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,16 +79,27 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	}
 
 	public String[] getAliases(String name) {
-		List<String> aliases = new ArrayList<String>();
+		List<String> result = new ArrayList<String>();
 		synchronized (this.aliasMap) {
-			for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
-				String registeredName = entry.getValue();
-				if (registeredName.equals(name)) {
-					aliases.add(entry.getKey());
-				}
+			retrieveAliases(name, result);
+		}
+		return StringUtils.toStringArray(result);
+	}
+
+	/**
+	 * Transitively retrieve all aliases for the given name.
+	 * @param name the target name to find aliases for
+	 * @param result the resulting aliases list
+	 */
+	private void retrieveAliases(String name, List<String> result) {
+		for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
+			String registeredName = entry.getValue();
+			if (registeredName.equals(name)) {
+				String alias = entry.getKey();
+				result.add(alias);
+				retrieveAliases(alias, result);
 			}
 		}
-		return StringUtils.toStringArray(aliases);
 	}
 
 	/**

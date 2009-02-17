@@ -11,7 +11,9 @@
 		<property name="name" value="LarryBean"/>
 	</bean>
 
-	<alias name="larryBean" alias="stooge"/>
+	<alias name="larryBean" alias="someAlias"/>
+
+	<alias name="someAlias" alias="stooge"/>
 
 	<bean class="org.springframework.beans.factory.xml.QualifierAnnotationTests$Person">
 		<property name="name" value="Larry"/>
