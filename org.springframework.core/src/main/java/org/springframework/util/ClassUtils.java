@@ -39,9 +39,9 @@ import java.util.Set;
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
  * of class utilities.
  *
+ * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rob Harrop
- * @author Juergen Hoeller
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -51,8 +51,11 @@ public abstract class ClassUtils {
 	/** Suffix for array class names: "[]" */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/** Prefix for internal array class names: "[L" */
-	private static final String INTERNAL_ARRAY_PREFIX = "[L";
+	/** Prefix for internal array class names: "[" */
+	private static final String INTERNAL_ARRAY_PREFIX = "[";
+
+	/** Prefix for internal non-primitive array class names: "[L" */
+	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
@@ -85,6 +88,12 @@ public abstract class ClassUtils {
 	 */
 	private static final Map<String, Class> primitiveTypeNameMap = new HashMap<String, Class>(16);
 
+	/**
+	 * Map with common "java.lang" class name as key and corresponding Class as value.
+	 * Primarily for efficient deserialization of remote invocations.
+	 */
+	private static final Map<String, Class> commonClassCache = new HashMap<String, Class>(32);
+
 
 	static {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
@@ -98,6 +107,7 @@ public abstract class ClassUtils {
 
 		for (Map.Entry<Class, Class> entry : primitiveWrapperTypeMap.entrySet()) {
 			primitiveTypeToWrapperMap.put(entry.getValue(), entry.getKey());
+			registerCommonClasses(entry.getKey());
 		}
 
 		Set<Class> primitiveTypes = new HashSet<Class>(16);
@@ -108,8 +118,24 @@ public abstract class ClassUtils {
 		for (Class primitiveType : primitiveTypes) {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
 		}
+
+		registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class,
+				Float[].class, Integer[].class, Long[].class, Short[].class);
+		registerCommonClasses(Number.class, Number[].class, String.class, String[].class,
+				Object.class, Object[].class, Class.class, Class[].class);
+		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
+				Error.class, StackTraceElement.class, StackTraceElement[].class);
 	}
 
+
+	/**
+	 * Register the given common classes with the ClassUtils cache.
+	 */
+	private static void registerCommonClasses(Class... commonClasses) {
+		for (Class clazz : commonClasses) {
+			commonClassCache.put(clazz.getName(), clazz);
+		}
+	}
 
 	/**
 	 * Return the default ClassLoader to use: typically the thread context
@@ -188,6 +214,9 @@ public abstract class ClassUtils {
 		Assert.notNull(name, "Name must not be null");
 
 		Class clazz = resolvePrimitiveClassName(name);
+		if (clazz == null) {
+			clazz = commonClassCache.get(name);
+		}
 		if (clazz != null) {
 			return clazz;
 		}
@@ -200,16 +229,16 @@ public abstract class ClassUtils {
 		}
 
 		// "[Ljava.lang.String;" style arrays
-		int internalArrayMarker = name.indexOf(INTERNAL_ARRAY_PREFIX);
-		if (internalArrayMarker != -1 && name.endsWith(";")) {
-			String elementClassName = null;
-			if (internalArrayMarker == 0) {
-				elementClassName = name.substring(INTERNAL_ARRAY_PREFIX.length(), name.length() - 1);
-			}
-			else if (name.startsWith("[")) {
-				elementClassName = name.substring(1);
-			}
-			Class elementClass = forName(elementClassName, classLoader);
+		if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
+			String elementName = name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(), name.length() - 1);
+			Class elementClass = forName(elementName, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
+		// "[[I" or "[[Ljava.lang.String;" style arrays
+		if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
+			String elementName = name.substring(INTERNAL_ARRAY_PREFIX.length());
+			Class elementClass = forName(elementName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 

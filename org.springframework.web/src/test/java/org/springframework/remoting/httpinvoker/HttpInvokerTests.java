@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +96,18 @@ public class HttpInvokerTests extends TestCase {
 		assertEquals(50, proxy.getAge());
 		proxy.setStringArray(new String[] {"str1", "str2"});
 		assertTrue(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray()));
+		proxy.setSomeIntegerArray(new Integer[] {1, 2, 3});
+		assertTrue(Arrays.equals(new Integer[] {1, 2, 3}, proxy.getSomeIntegerArray()));
+		proxy.setNestedIntegerArray(new Integer[][] {{1, 2, 3}, {4, 5, 6}});
+		Integer[][] integerArray = proxy.getNestedIntegerArray();
+		assertTrue(Arrays.equals(new Integer[] {1, 2, 3}, integerArray[0]));
+		assertTrue(Arrays.equals(new Integer[] {4, 5, 6}, integerArray[1]));
+		proxy.setSomeIntArray(new int[] {1, 2, 3});
+		assertTrue(Arrays.equals(new int[] {1, 2, 3}, proxy.getSomeIntArray()));
+		proxy.setNestedIntArray(new int[][] {{1, 2, 3}, {4, 5, 6}});
+		int[][] intArray = proxy.getNestedIntArray();
+		assertTrue(Arrays.equals(new int[] {1, 2, 3}, intArray[0]));
+		assertTrue(Arrays.equals(new int[] {4, 5, 6}, intArray[1]));
 
 		try {
 			proxy.exceptional(new IllegalStateException());
