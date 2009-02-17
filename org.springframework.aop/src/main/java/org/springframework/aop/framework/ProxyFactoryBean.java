@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -474,7 +472,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * We need to do this every time a new prototype instance is returned,
 	 * to return distinct instances of prototype Advisors and Advices.
 	 */
-	private List freshAdvisorChain() {		
+	private List<Advisor> freshAdvisorChain() {
 		Advisor[] advisors = getAdvisors();
 		List<Advisor> freshAdvisors = new ArrayList<Advisor>(advisors.length);
 		for (Advisor advisor : advisors) {
@@ -521,7 +519,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			beans.add(bean);
 			names.put(bean, name);
 		}
-		Collections.sort(beans, new OrderComparator());
+		OrderComparator.sort(beans);
 		for (Object bean : beans) {
 			String name = names.get(bean);
 			if (name.startsWith(prefix)) {

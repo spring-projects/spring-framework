@@ -16,7 +16,6 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +120,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 		List<Advisor> advisors = this.aspectFactory.getAdvisors(instanceFactory);
 		advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(advisors);
-		Collections.sort(advisors, new OrderComparator());
+		OrderComparator.sort(advisors);
 		addAdvisors(advisors);
 	}
 

@@ -156,7 +156,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			logger.warn("Did not find any ViewResolvers to delegate to; please configure them using the " +
 					"'viewResolvers' property on the ContentNegotiatingViewResolver");
 		}
-		Collections.sort(this.viewResolvers, new OrderComparator());
+		OrderComparator.sort(this.viewResolvers);
 	}
 
 	/**
