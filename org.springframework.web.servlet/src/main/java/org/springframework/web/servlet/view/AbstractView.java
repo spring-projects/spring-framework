@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 		// Expose RequestContext?
 		if (this.requestContextAttribute != null) {
-			mergedModel.put(this.requestContextAttribute, createRequestContext(request, mergedModel));
+			mergedModel.put(this.requestContextAttribute, createRequestContext(request, response, mergedModel));
 		}
 
 		prepareResponse(request, response);
@@ -261,8 +261,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @see #setRequestContextAttribute
 	 * @see org.springframework.web.servlet.support.RequestContext
 	 */
-	protected RequestContext createRequestContext(HttpServletRequest request, Map<String, Object> model) {
-		return new RequestContext(request, getServletContext(), model);
+	protected RequestContext createRequestContext(
+			HttpServletRequest request, HttpServletResponse response, Map<String, Object> model) {
+
+		return new RequestContext(request, response, getServletContext(), model);
 	}
 
 	/**

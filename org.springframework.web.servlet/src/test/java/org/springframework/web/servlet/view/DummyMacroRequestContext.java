@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package org.springframework.web.servlet.view;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.TestBean;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 
@@ -127,6 +125,13 @@ public class DummyMacroRequestContext {
 	 */
 	public String getContextPath() {
 		return this.contextPath;
+	}
+
+	/**
+	 * @see org.springframework.web.servlet.support.RequestContext#getContextUrl(String)
+	 */
+	public String getContextUrl(String relativeUrl) {
+		return getContextPath() + relativeUrl;
 	}
 
 	/**
