@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 
@@ -86,10 +86,12 @@ public class RequestContext {
 
 
 	protected static final boolean jstlPresent = ClassUtils.isPresent(
-			"javax.servlet.jsp.jstl.core.Config", JspAwareRequestContext.class.getClassLoader());
+			"javax.servlet.jsp.jstl.core.Config", RequestContext.class.getClassLoader());
 
 
 	private HttpServletRequest request;
+
+	private HttpServletResponse response;
 
 	private Map<String, Object> model;
 
@@ -119,7 +121,7 @@ public class RequestContext {
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext)
 	 */
 	public RequestContext(HttpServletRequest request) {
-		initContext(request, null, null);
+		initContext(request, null, null, null);
 	}
 
 	/**
@@ -137,7 +139,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
 	public RequestContext(HttpServletRequest request, ServletContext servletContext) {
-		initContext(request, servletContext, null);
+		initContext(request, null, servletContext, null);
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class RequestContext {
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext, Map)
 	 */
 	public RequestContext(HttpServletRequest request, Map<String, Object> model) {
-		initContext(request, null, model);
+		initContext(request, null, null, model);
 	}
 
 	/**
@@ -165,6 +167,7 @@ public class RequestContext {
 	 * <p>If a ServletContext is specified, the RequestContext will also
 	 * work with a root WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
+	 * @param response current HTTP response
 	 * @param servletContext the servlet context of the web application
 	 * (can be <code>null</code>; necessary for fallback to root WebApplicationContext)
 	 * @param model the model attributes for the current view
@@ -172,8 +175,10 @@ public class RequestContext {
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
-	public RequestContext(HttpServletRequest request, ServletContext servletContext, Map<String, Object> model) {
-		initContext(request, servletContext, model);
+	public RequestContext(HttpServletRequest request, HttpServletResponse response,
+			ServletContext servletContext, Map<String, Object> model) {
+
+		initContext(request, response, servletContext, model);
 	}
 
 	/**
@@ -199,8 +204,11 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE
 	 * @see org.springframework.web.servlet.DispatcherServlet#THEME_RESOLVER_ATTRIBUTE
 	 */
-	protected void initContext(HttpServletRequest request, ServletContext servletContext, Map<String, Object> model) {
+	protected void initContext(HttpServletRequest request, HttpServletResponse response,
+			ServletContext servletContext, Map<String, Object> model) {
+
 		this.request = request;
+		this.response = response;
 		this.model = model;
 
 		// Fetch WebApplicationContext, either from DispatcherServlet or the root context.
@@ -376,6 +384,20 @@ public class RequestContext {
 	 */
 	public String getContextPath() {
 		return this.urlPathHelper.getOriginatingContextPath(this.request);
+	}
+
+	/**
+	 * Return a context-aware URl for the given relative URL.
+	 * @param relativeUrl the relative URL part
+	 * @return a URL that points back to the server with an absolute path
+	 * (also URL-encoded accordingly)
+	 */
+	public String getContextUrl(String relativeUrl) {
+		String url = getContextPath() + relativeUrl;
+		if (this.response != null) {
+			url = this.response.encodeURL(url);
+		}
+		return url;
 	}
 
 	/**

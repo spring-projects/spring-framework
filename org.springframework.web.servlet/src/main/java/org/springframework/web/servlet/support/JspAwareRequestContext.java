@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.jstl.core.Config;
 
@@ -70,7 +71,8 @@ public class JspAwareRequestContext extends RequestContext {
 			throw new IllegalArgumentException("RequestContext only supports HTTP requests");
 		}
 		this.pageContext = pageContext;
-		initContext((HttpServletRequest) pageContext.getRequest(), pageContext.getServletContext(), model);
+		initContext((HttpServletRequest) pageContext.getRequest(), (HttpServletResponse) pageContext.getResponse(),
+				pageContext.getServletContext(), model);
 	}
 
 
