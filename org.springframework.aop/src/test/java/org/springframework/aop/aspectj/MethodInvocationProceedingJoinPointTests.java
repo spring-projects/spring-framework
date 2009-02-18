@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -28,16 +26,16 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.reflect.Factory;
+import static org.junit.Assert.*;
 import org.junit.Test;
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
-
-import test.beans.ITestBean;
-import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -83,7 +81,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 			
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
-				assertTrue("Method named in toString", jp.toString().indexOf(method.getName()) != -1);
+				assertTrue("Method named in toString", jp.toString().contains(method.getName()));
 				// Ensure that these don't cause problems
 				jp.toShortString();
 				jp.toLongString();
@@ -108,7 +106,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 					thisProxy.setAge(newAge);
 					assertEquals(newAge, thisProxy.getAge());
 				}
-				
+
 				assertSame(AopContext.currentProxy(), thisProxy);
 				assertSame(target, raw);
 				
@@ -122,13 +120,6 @@ public final class MethodInvocationProceedingJoinPointTests {
 				assertTrue(Arrays.equals(method.getParameterTypes(), msig.getParameterTypes()));
 				assertEquals(method.getReturnType(), msig.getReturnType());
 				assertTrue(Arrays.equals(method.getExceptionTypes(), msig.getExceptionTypes()));
-				try {
-					msig.getParameterNames();
-					fail("Can't determine parameter names");
-				}
-				catch (UnsupportedOperationException ex) {
-					// Expected
-				}
 				msig.toLongString();
 				msig.toShortString();
 			}
@@ -223,4 +214,5 @@ public final class MethodInvocationProceedingJoinPointTests {
 			// we don't realy care...
 		}
 	}
+
 }

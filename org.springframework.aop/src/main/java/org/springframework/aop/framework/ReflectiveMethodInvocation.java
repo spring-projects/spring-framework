@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.BridgeMethodResolver;
 
 /**
  * Spring's implementation of the AOP Alliance
@@ -107,7 +108,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.proxy = proxy;
 		this.target = target;
 		this.targetClass = targetClass;
-		this.method = method;
+		this.method = BridgeMethodResolver.findBridgedMethod(method);
 		this.arguments = arguments;
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
 	}
