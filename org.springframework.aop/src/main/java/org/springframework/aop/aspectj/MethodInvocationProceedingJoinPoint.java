@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
 
 import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
 /**
@@ -151,7 +152,9 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	/**
 	 * Lazily initialized MethodSignature.
 	 */
-	private class MethodSignatureImpl implements Signature, MethodSignature {
+	private class MethodSignatureImpl implements MethodSignature {
+
+		private volatile String[] parameterNames;
 
 		public String getName() {
 			return methodInvocation.getMethod().getName();
@@ -182,10 +185,10 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		}
 
 		public String[] getParameterNames() {
-			// TODO consider allowing use of ParameterNameDiscoverer, or tying into
-			// parameter names exposed for argument binding...
-			throw new UnsupportedOperationException(
-					"Parameter names cannot be determined unless compiled by AspectJ compiler");
+			if (this.parameterNames == null) {
+				this.parameterNames = (new LocalVariableTableParameterNameDiscoverer()).getParameterNames(getMethod());
+			}
+			return this.parameterNames;
 		}
 
 		public Class[] getExceptionTypes() {
@@ -204,62 +207,55 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return toString(false, true, false, true);
 		}
 
-		private String toString(boolean includeModifier,
-				boolean includeReturnTypeAndArgs,
-				boolean useLongReturnAndArgumentTypeName,
-				boolean useLongTypeName) {
+		private String toString(boolean includeModifier, boolean includeReturnTypeAndArgs,
+				boolean useLongReturnAndArgumentTypeName, boolean useLongTypeName) {
 			StringBuilder sb = new StringBuilder();
 			if (includeModifier) {
 				sb.append(Modifier.toString(getModifiers()));
 				sb.append(" ");
 			}
 			if (includeReturnTypeAndArgs) {
-				appendType(sb, getReturnType(),
-						useLongReturnAndArgumentTypeName);
+				appendType(sb, getReturnType(), useLongReturnAndArgumentTypeName);
 				sb.append(" ");
 			}
 			appendType(sb, getDeclaringType(), useLongTypeName);
 			sb.append(".");
 			sb.append(getMethod().getName());
 			sb.append("(");
-
 			Class[] parametersTypes = getParameterTypes();
-			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs,
-					useLongReturnAndArgumentTypeName);
+			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs, useLongReturnAndArgumentTypeName);
 			sb.append(")");
 			return sb.toString();
 		}
-	}
 
-	private void appendTypes(StringBuilder sb, Class<?>[] types,
-			boolean includeArgs, boolean useLongReturnAndArgumentTypeName) {
-		if (includeArgs) {
-			for (int size = types.length, i = 0; i < size; i++) {
-				appendType(sb, types[i], useLongReturnAndArgumentTypeName);
-				if (i < size - 1) {
-					sb.append(",");
+		private void appendTypes(StringBuilder sb, Class<?>[] types,
+				boolean includeArgs, boolean useLongReturnAndArgumentTypeName) {
+			if (includeArgs) {
+				for (int size = types.length, i = 0; i < size; i++) {
+					appendType(sb, types[i], useLongReturnAndArgumentTypeName);
+					if (i < size - 1) {
+						sb.append(",");
+					}
 				}
 			}
-		} else {
-			if (types.length != 0) {
-				sb.append("..");
+			else {
+				if (types.length != 0) {
+					sb.append("..");
+				}
+			}
+		}
+
+		private void appendType(StringBuilder sb, Class<?> type, boolean useLongTypeName) {
+			if (type.isArray()) {
+				appendType(sb, type.getComponentType(), useLongTypeName);
+				sb.append("[]");
+			}
+			else {
+				sb.append(useLongTypeName ? type.getName() : type.getSimpleName());
 			}
 		}
 	}
 
-	private void appendType(StringBuilder sb, Class<?> type,
-			boolean useLongTypeName) {
-		if (type.isArray()) {
-			appendType(sb, type.getComponentType(), useLongTypeName);
-			sb.append("[]");
-		} else {
-			if (type.getPackage() != null
-					&& type.getPackage().equals("java.lang")) {
-				useLongTypeName = false;
-			}
-			sb.append(useLongTypeName ? type.getName() : type.getSimpleName());
-		}
-	}
 
 	/**
 	 * Lazily initialized SourceLocation.

@@ -177,7 +177,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				setProxyContext = true;
 			}
 
-			// May be <code>null</code>. Get as late as possible to minimize the time we "own" the target,
+			// May be null. Get as late as possible to minimize the time we "own" the target,
 			// in case it comes from a pool.
 			target = targetSource.getTarget();
 			if (target != null) {
@@ -255,7 +255,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			return false;
 		}
 
-		// If we get here, aopr2 is the other AopProxy.
+		// If we get here, otherProxy is the other AopProxy.
 		return AopProxyUtils.equalsInProxy(this.advised, otherProxy.advised);
 	}
 
