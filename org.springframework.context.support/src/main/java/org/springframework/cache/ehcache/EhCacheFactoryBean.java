@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * FactoryBean that creates a named EHCache {@link net.sf.ehcache.Cache} instance
+ * {@link FactoryBean} that creates a named EHCache {@link net.sf.ehcache.Cache} instance
  * (or a decorator that implements the {@link net.sf.ehcache.Ehcache} interface),
  * representing a cache region within an EHCache {@link net.sf.ehcache.CacheManager}.
  *
@@ -56,7 +56,7 @@ import org.springframework.util.Assert;
  * @see EhCacheManagerFactoryBean
  * @see net.sf.ehcache.Cache
  */
-public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, InitializingBean {
+public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -298,11 +298,11 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 
-	public Object getObject() {
+	public Ehcache getObject() {
 		return this.cache;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends Ehcache> getObjectType() {
 		return (this.cache != null ? this.cache.getClass() : Ehcache.class);
 	}
 

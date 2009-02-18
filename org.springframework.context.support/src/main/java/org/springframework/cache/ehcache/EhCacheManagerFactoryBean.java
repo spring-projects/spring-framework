@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 
 /**
- * FactoryBean that exposes an EHCache {@link net.sf.ehcache.CacheManager} instance
- * (independent or shared), configured from a specified config location.
+ * {@link FactoryBean} that exposes an EHCache {@link net.sf.ehcache.CacheManager}
+ * instance (independent or shared), configured from a specified config location.
  *
  * <p>If no config location is specified, a CacheManager will be configured from
  * "ehcache.xml" in the root of the class path (that is, default EHCache initialization
@@ -52,7 +52,7 @@ import org.springframework.core.io.Resource;
  * @see EhCacheFactoryBean
  * @see net.sf.ehcache.CacheManager
  */
-public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -122,11 +122,11 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 	}
 
 
-	public Object getObject() {
+	public CacheManager getObject() {
 		return this.cacheManager;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends CacheManager> getObjectType() {
 		return (this.cacheManager != null ? this.cacheManager.getClass() : CacheManager.class);
 	}
 
