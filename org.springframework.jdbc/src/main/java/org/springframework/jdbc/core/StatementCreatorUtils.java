@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -122,8 +121,8 @@ public abstract class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
 	public static void setParameterValue(
-	    PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
-	    throws SQLException {
+			PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
+			throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
 	}
@@ -139,8 +138,8 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	public static void setParameterValue(
-	    PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
-	    throws SQLException {
+			PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
+			throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
 	}
@@ -158,8 +157,8 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	public static void setParameterValue(
-	    PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
-	    throws SQLException {
+			PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
+			throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, typeName, null, inValue);
 	}
@@ -179,8 +178,8 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	private static void setParameterValueInternal(
-	    PreparedStatement ps, int paramIndex, int sqlType, String typeName, Integer scale, Object inValue)
-	    throws SQLException {
+			PreparedStatement ps, int paramIndex, int sqlType, String typeName, Integer scale, Object inValue)
+			throws SQLException {
 
 		String typeNameToUse = typeName;
 		int sqlTypeToUse = sqlType;
@@ -218,7 +217,13 @@ public abstract class StatementCreatorUtils {
 		}
 	}
 
-	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
+	/**
+	 * Set the specified PreparedStatement parameter to null,
+	 * respecting database-specific peculiarities.
+	 */
+	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
+			throws SQLException {
+
 		if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 			boolean useSetObject = false;
 			sqlType = Types.NULL;
@@ -356,7 +361,7 @@ public abstract class StatementCreatorUtils {
 	 * Check whether the given value can be treated as a String value.
 	 */
 	private static boolean isStringValue(Class inValueType) {
-		// Consider any CharSequence (including JDK 1.5's StringBuilder) as String.
+		// Consider any CharSequence (including StringBuffer and StringBuilder) as a String.
 		return (CharSequence.class.isAssignableFrom(inValueType) ||
 				StringWriter.class.isAssignableFrom(inValueType));
 	}

@@ -1078,8 +1078,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to start
 	 */
-	private void doStart(Map lifecycleBeans, String beanName) {
-		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
+	private void doStart(Map<String, Lifecycle> lifecycleBeans, String beanName) {
+		Lifecycle bean = lifecycleBeans.get(beanName);
 		if (bean != null) {
 			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
 			for (String dependency : dependenciesForBean) {
