@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,15 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import junit.framework.TestCase;
+import test.beans.CustomEnum;
+import test.beans.TestBean;
 
+import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.core.io.ClassPathResource;
-
-import test.beans.TestBean;
 
 /**
  * @author Rob Harrop
@@ -163,19 +162,19 @@ public class UtilNamespaceHandlerTests extends TestCase {
 
 	public void testNestedInCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
-		Integer min = new Integer(Integer.MIN_VALUE);
 
 		List list = bean.getSomeList();
 		assertEquals(1, list.size());
-		assertEquals(min, list.get(0));
+		assertEquals(Integer.MIN_VALUE, list.get(0));
 
 		Set set = bean.getSomeSet();
-		assertEquals(1, set.size());
-		assertTrue(set.contains(min));
+		assertEquals(2, set.size());
+		assertTrue(set.contains(Thread.State.NEW));
+		assertTrue(set.contains(Thread.State.RUNNABLE));
 
 		Map map = bean.getSomeMap();
 		assertEquals(1, map.size());
-		assertEquals(min, map.get("min"));
+		assertEquals(CustomEnum.VALUE_1, map.get("min"));
 	}
 
 	public void testCircularCollections() throws Exception {

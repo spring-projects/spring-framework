@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,26 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
-import static test.util.TestResourceUtils.qualifiedResource;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import test.beans.IndexedTestBean;
+import test.beans.TestBean;
+import static test.util.TestResourceUtils.*;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
@@ -40,9 +43,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
-
-import test.beans.IndexedTestBean;
-import test.beans.TestBean;
 
 /**
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:
@@ -296,7 +296,7 @@ public final class PropertyResourceConfigurerTests {
 				poc.postProcessBeanFactory(factory);
 			} catch (BeanInitializationException ex) {
 				// prove that the processor chokes on the invalid key
-				assertTrue(ex.getMessage().toLowerCase().indexOf("argh") != -1);
+				assertTrue(ex.getMessage().toLowerCase().contains("argh"));
 			}
 		}
 	}
@@ -345,13 +345,14 @@ public final class PropertyResourceConfigurerTests {
 	}
 
 	private void doTestPropertyPlaceholderConfigurer(boolean parentChildSeparation) {
+		Map singletonMap = Collections.singletonMap("myKey", "myValue");
 		if (parentChildSeparation) {
 			MutablePropertyValues pvs1 = new MutablePropertyValues();
 			pvs1.addPropertyValue("age", "${age}");
 			MutablePropertyValues pvs2 = new MutablePropertyValues();
 			pvs2.addPropertyValue("name", "name${var}${var}${");
 			pvs2.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
-
+			pvs2.addPropertyValue("someMap", singletonMap);
 			RootBeanDefinition parent = new RootBeanDefinition(TestBean.class, pvs1);
 			ChildBeanDefinition bd = new ChildBeanDefinition("${parent}", pvs2);
 			factory.registerBeanDefinition("parent1", parent);
@@ -362,6 +363,7 @@ public final class PropertyResourceConfigurerTests {
 			pvs.addPropertyValue("age", "${age}");
 			pvs.addPropertyValue("name", "name${var}${var}${");
 			pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+			pvs.addPropertyValue("someMap", singletonMap);
 			RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
 			factory.registerBeanDefinition("tb1", bd);
 		}
@@ -415,6 +417,8 @@ public final class PropertyResourceConfigurerTests {
 		assertEquals("namemyvarmyvar${", tb1.getName());
 		assertEquals("myvarname98", tb2.getName());
 		assertEquals(tb2, tb1.getSpouse());
+		assertEquals(1, tb1.getSomeMap().size());
+		assertEquals("myValue", tb1.getSomeMap().get("myKey"));
 		assertEquals(2, tb2.getFriends().size());
 		assertEquals("na98me", tb2.getFriends().iterator().next());
 		assertEquals(tb2, tb2.getFriends().toArray()[1]);
@@ -498,7 +502,7 @@ public final class PropertyResourceConfigurerTests {
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("user.dir") != -1);
+			assertTrue(ex.getMessage().contains("user.dir"));
 		}
 	}
 
@@ -516,7 +520,7 @@ public final class PropertyResourceConfigurerTests {
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("ref") != -1);
+			assertTrue(ex.getMessage().contains("ref"));
 		}
 	}
 
@@ -580,6 +584,39 @@ public final class PropertyResourceConfigurerTests {
 
 		TestBean tb = (TestBean) factory.getBean("tb");
 		assertEquals("myname", tb.getName());
+	}
+
+	@Test
+	public void testPropertyPlaceholderConfigurerWithPlaceholderInAlias() {
+		factory.registerBeanDefinition("tb",
+			genericBeanDefinition(TestBean.class).getBeanDefinition());
+		factory.registerAlias("tb", "${alias}");
+
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.put("alias", "tb2");
+		ppc.setProperties(props);
+		ppc.postProcessBeanFactory(factory);
+
+		TestBean tb = (TestBean) factory.getBean("tb");
+		TestBean tb2 = (TestBean) factory.getBean("tb2");
+		assertSame(tb, tb2);
+	}
+
+	@Test
+	public void testPropertyPlaceholderConfigurerWithSelfReferencingPlaceholderInAlias() {
+		factory.registerBeanDefinition("tb",
+			genericBeanDefinition(TestBean.class).getBeanDefinition());
+		factory.registerAlias("tb", "${alias}");
+
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.put("alias", "tb");
+		ppc.setProperties(props);
+		ppc.postProcessBeanFactory(factory);
+
+		TestBean tb = (TestBean) factory.getBean("tb");
+		assertEquals(0, factory.getAliases("tb").length);
 	}
 
 	@Test
@@ -760,6 +797,7 @@ public final class PropertyResourceConfigurerTests {
 
 
 	private static class ConvertingOverrideConfigurer extends PropertyOverrideConfigurer {
+
 		protected String convertPropertyValue(String originalValue) {
 			return "X" + originalValue;
 		}

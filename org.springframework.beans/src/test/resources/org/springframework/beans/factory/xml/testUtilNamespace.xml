@@ -97,14 +97,15 @@
 		</property>
 		<property name="someSet">
 			<set>
-				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+				<util:constant static-field="java.lang.Thread$State.NEW"/>
+				<util:constant static-field="java.lang.Thread.State.RUNNABLE"/>
 			</set>
 		</property>
 	  <property name="someMap">
 			<map>
 				<entry>
 					<key><value>min</value></key>
-					<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+					<util:constant static-field="test.beans.CustomEnum.VALUE_1"/>
 				</entry>
 			</map>
 	  </property>

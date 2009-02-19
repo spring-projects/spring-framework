@@ -117,7 +117,10 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				String registeredName = aliasCopy.get(alias);
 				String resolvedAlias = valueResolver.resolveStringValue(alias);
 				String resolvedName = valueResolver.resolveStringValue(registeredName);
-				if (!resolvedAlias.equals(alias)) {
+				if (resolvedAlias.equals(resolvedName)) {
+					this.aliasMap.remove(alias);
+				}
+				else if (!resolvedAlias.equals(alias)) {
 					String existingName = this.aliasMap.get(resolvedAlias);
 					if (existingName != null && !existingName.equals(resolvedName)) {
 						throw new IllegalStateException(
@@ -125,8 +128,8 @@ public class SimpleAliasRegistry implements AliasRegistry {
 								"') for name '" + resolvedName + "': It is already registered for name '" +
 								registeredName + "'.");
 					}
-					this.aliasMap.put(resolvedAlias, resolvedName);
 					this.aliasMap.remove(alias);
+					this.aliasMap.put(resolvedAlias, resolvedName);
 				}
 				else if (!registeredName.equals(resolvedName)) {
 					this.aliasMap.put(alias, resolvedName);
