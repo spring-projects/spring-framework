@@ -201,7 +201,9 @@ public abstract class ClassUtils {
 
 	/**
 	 * Replacement for <code>Class.forName()</code> that also returns Class instances
-	 * for primitives (like "int") and array class names (like "String[]").
+	 * for primitives (e.g."int") and array class names (e.g. "String[]").
+	 * Furthermore, it is also capable of resolving inner class names in Java source
+	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (may be <code>null</code>, which indicates the default class loader)
@@ -246,7 +248,22 @@ public abstract class ClassUtils {
 		if (classLoaderToUse == null) {
 			classLoaderToUse = getDefaultClassLoader();
 		}
-		return classLoaderToUse.loadClass(name);
+		try {
+			return classLoaderToUse.loadClass(name);
+		}
+		catch (ClassNotFoundException ex) {
+			int lastDotIndex = name.lastIndexOf('.');
+			if (lastDotIndex != -1) {
+				String innerClassName = name.substring(0, lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
+				try {
+					return classLoaderToUse.loadClass(innerClassName);
+				}
+				catch (ClassNotFoundException ex2) {
+					// swallow - let original exception get through
+				}
+			}
+			throw ex;
+		}
 	}
 
 	/**
