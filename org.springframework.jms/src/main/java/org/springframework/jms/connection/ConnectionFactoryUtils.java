@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import javax.jms.TopicSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.transaction.support.ResourceHolder;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -387,7 +386,7 @@ public abstract class ConnectionFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class JmsResourceSynchronization extends ResourceHolderSynchronization {
+	private static class JmsResourceSynchronization extends ResourceHolderSynchronization<JmsResourceHolder, Object> {
 
 		private final boolean transacted;
 
@@ -400,17 +399,17 @@ public abstract class ConnectionFactoryUtils {
 			return !this.transacted;
 		}
 
-		protected void processResourceAfterCommit(ResourceHolder resourceHolder) {
+		protected void processResourceAfterCommit(JmsResourceHolder resourceHolder) {
 			try {
-				((JmsResourceHolder) resourceHolder).commitAll();
+				resourceHolder.commitAll();
 			}
 			catch (JMSException ex) {
 				throw new SynchedLocalTransactionFailedException("Local JMS transaction failed to commit", ex);
 			}
 		}
 
-		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
-			((JmsResourceHolder) resourceHolder).closeAll();
+		protected void releaseResource(JmsResourceHolder resourceHolder, Object resourceKey) {
+			resourceHolder.closeAll();
 		}
 	}
 

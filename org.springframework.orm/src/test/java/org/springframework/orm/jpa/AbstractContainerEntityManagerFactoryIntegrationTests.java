@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.FlushModeType;
@@ -95,9 +94,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Person notThere = sharedEntityManager.getReference(Person.class, 666);
 		
 		// We may get here (as with Hibernate). 
-		// Either behaviour is
-		// valid--throw exception on first access
-		// or on getReference itself
+		// Either behaviour is valid: throw exception on first access
+		// or on getReference itself.
 		notThere.getFirstName();
 	}
 
@@ -175,8 +173,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	protected void testInstantiateAndSave(EntityManager em) {
-		assertEquals("Should be no people from previous transactions",
-				0, countRowsInTable("person"));
+		assertEquals("Should be no people from previous transactions", 0, countRowsInTable("person"));
 		Person p = new Person();
 		p.setFirstName("Tony");
 		p.setLastName("Blair");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	/**
 	 * Determine the rollback-only flag via checking both the transaction object,
-	 * provided that the latter implements the SmartTransactionObject interface.
+	 * provided that the latter implements the {@link SmartTransactionObject} interface.
 	 * <p>Will return "true" if the transaction itself has been marked rollback-only
 	 * by the transaction coordinator, for example in case of a timeout.
 	 * @see SmartTransactionObject#isRollbackOnly
@@ -154,6 +154,16 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	public boolean isGlobalRollbackOnly() {
 		return ((this.transaction instanceof SmartTransactionObject) &&
 				((SmartTransactionObject) this.transaction).isRollbackOnly());
+	}
+
+	/**
+	 * Delegate the flushing to the transaction object,
+	 * provided that the latter implements the {@link SmartTransactionObject} interface.
+	 */
+	public void flush() {
+		if (this.transaction instanceof SmartTransactionObject) {
+			((SmartTransactionObject) this.transaction).flush();
+		}
 	}
 
 	/**

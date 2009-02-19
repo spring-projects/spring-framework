@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,15 +335,15 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (rollbackAnnotation != null) {
 			boolean rollbackOverride = rollbackAnnotation.value();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Method-level @Rollback(" + rollbackOverride + ") overrides default rollback [" + rollback
-						+ "] for test context [" + testContext + "]");
+				logger.debug("Method-level @Rollback(" + rollbackOverride + ") overrides default rollback [" +
+						rollback + "] for test context [" + testContext + "]");
 			}
 			rollback = rollbackOverride;
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No method-level @Rollback override: using default rollback [" + rollback
-						+ "] for test context [" + testContext + "]");
+				logger.debug("No method-level @Rollback override: using default rollback [" +
+						rollback + "] for test context [" + testContext + "]");
 			}
 		}
 		return rollback;
@@ -498,6 +498,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		public void endTransaction(boolean rollback) {
 			if (rollback) {
+				this.transactionStatus.flush();
 				this.transactionManager.rollback(this.transactionStatus);
 			}
 			else {

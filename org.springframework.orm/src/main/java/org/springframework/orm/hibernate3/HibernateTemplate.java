@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1160,21 +1160,20 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	/**
 	 * Check whether write operations are allowed on the given Session.
 	 * <p>Default implementation throws an InvalidDataAccessApiUsageException in
-	 * case of <code>FlushMode.NEVER/MANUAL</code>. Can be overridden in subclasses.
+	 * case of <code>FlushMode.MANUAL</code>. Can be overridden in subclasses.
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
 	 * @see #setCheckWriteOperations
 	 * @see #getFlushMode()
 	 * @see #FLUSH_EAGER
 	 * @see org.hibernate.Session#getFlushMode()
-	 * @see org.hibernate.FlushMode#NEVER
 	 * @see org.hibernate.FlushMode#MANUAL
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
 		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
 				session.getFlushMode().lessThan(FlushMode.COMMIT)) {
 			throw new InvalidDataAccessApiUsageException(
-					"Write operations are not allowed in read-only mode (FlushMode.NEVER/MANUAL): "+
+					"Write operations are not allowed in read-only mode (FlushMode.MANUAL): "+
 					"Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.");
 		}
 	}

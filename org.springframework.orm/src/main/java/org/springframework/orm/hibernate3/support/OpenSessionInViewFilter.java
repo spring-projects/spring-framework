@@ -144,10 +144,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * {@link org.hibernate.Session}. Only applied in single session mode.
 	 * <p>Can be populated with the corresponding constant name in XML bean
 	 * definitions: e.g. "AUTO".
-	 * <p>The default is "NEVER". Specify "AUTO" if you intend to use
+	 * <p>The default is "MANUAL". Specify "AUTO" if you intend to use
 	 * this filter without service layer transactions.
 	 * @see org.hibernate.Session#setFlushMode
-	 * @see org.hibernate.FlushMode#NEVER
+	 * @see org.hibernate.FlushMode#MANUAL
 	 * @see org.hibernate.FlushMode#AUTO
 	 */
 	public void setFlushMode(FlushMode flushMode) {
@@ -247,14 +247,14 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * Note that this just applies in single session mode!
 	 * <p>The default implementation delegates to the
 	 * <code>SessionFactoryUtils.getSession</code> method and
-	 * sets the <code>Session</code>'s flush mode to "NEVER".
+	 * sets the <code>Session</code>'s flush mode to "MANUAL".
 	 * <p>Can be overridden in subclasses for creating a Session with a
 	 * custom entity interceptor or JDBC exception translator.
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
-	 * @see org.hibernate.FlushMode#NEVER
+	 * @see org.hibernate.FlushMode#MANUAL
 	 */
 	protected Session getSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		Session session = SessionFactoryUtils.getSession(sessionFactory, true);

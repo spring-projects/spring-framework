@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 
 
 	/**
-	 * Creates a new instance of the {@link SimpleTransactionStatus} class,
+	 * Create a new instance of the {@link SimpleTransactionStatus} class,
 	 * indicating a new transaction.
 	 */
 	public SimpleTransactionStatus() {
@@ -49,7 +49,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 	}
 
 	/**
-	 * Creates a new instance of the {@link SimpleTransactionStatus} class.
+	 * Create a new instance of the {@link SimpleTransactionStatus} class.
 	 * @param newTransaction whether to indicate a new transaction
 	 */
 	public SimpleTransactionStatus(boolean newTransaction) {
@@ -58,7 +58,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 
 
 	public boolean isNewTransaction() {
-		return newTransaction;
+		return this.newTransaction;
 	}
 
 }

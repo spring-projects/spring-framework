@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -503,7 +503,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
-	 * <p>Default implementation delegates to the JdoDialect.
+	 * <p>The default implementation delegates to the JdoDialect.
 	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
@@ -518,7 +518,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	 * JDO transaction object, representing a PersistenceManagerHolder.
 	 * Used as transaction object by JdoTransactionManager.
 	 */
-	private static class JdoTransactionObject extends JdbcTransactionObjectSupport {
+	private class JdoTransactionObject extends JdbcTransactionObjectSupport {
 
 		private PersistenceManagerHolder persistenceManagerHolder;
 
@@ -533,11 +533,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		public PersistenceManagerHolder getPersistenceManagerHolder() {
-			return persistenceManagerHolder;
+			return this.persistenceManagerHolder;
 		}
 
 		public boolean isNewPersistenceManagerHolder() {
-			return newPersistenceManagerHolder;
+			return this.newPersistenceManagerHolder;
 		}
 
 		public boolean hasTransaction() {
@@ -550,7 +550,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		public Object getTransactionData() {
-			return transactionData;
+			return this.transactionData;
 		}
 
 		public void setRollbackOnly() {
@@ -566,6 +566,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		public boolean isRollbackOnly() {
 			Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
 			return tx.getRollbackOnly();
+		}
+
+		public void flush() {
+			try {
+				this.persistenceManagerHolder.getPersistenceManager().flush();
+			}
+			catch (JDOException ex) {
+				throw convertJdoAccessException(ex);
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ package org.springframework.transaction.support;
  * @author Juergen Hoeller
  * @since 2.5.5
  */
-public class ResourceHolderSynchronization implements TransactionSynchronization {
+public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
+		implements TransactionSynchronization {
 
-	private final ResourceHolder resourceHolder;
+	private final H resourceHolder;
 
-	private final Object resourceKey;
+	private final K resourceKey;
 
 	private volatile boolean holderActive = true;
 
@@ -38,7 +39,7 @@ public class ResourceHolderSynchronization implements TransactionSynchronization
 	 * @param resourceKey the key to bind the ResourceHolder for
 	 * @see TransactionSynchronizationManager#bindResource
 	 */
-	public ResourceHolderSynchronization(ResourceHolder resourceHolder, Object resourceKey) {
+	public ResourceHolderSynchronization(H resourceHolder, K resourceKey) {
 		this.resourceHolder = resourceHolder;
 		this.resourceKey = resourceKey;
 	}
@@ -54,6 +55,10 @@ public class ResourceHolderSynchronization implements TransactionSynchronization
 		if (this.holderActive) {
 			TransactionSynchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
 		}
+	}
+
+	public void flush() {
+		flushResource(this.resourceHolder);
 	}
 
 	public void beforeCommit(boolean readOnly) {
@@ -124,12 +129,19 @@ public class ResourceHolderSynchronization implements TransactionSynchronization
 	}
 
 	/**
+	 * Flush callback for the given resource holder.
+	 * @param resourceHolder the resource holder to flush
+	 */
+	protected void flushResource(H resourceHolder) {
+	}
+
+	/**
 	 * After-commit callback for the given resource holder.
 	 * Only called when the resource hasn't been released yet
 	 * ({@link #shouldReleaseBeforeCompletion()}).
 	 * @param resourceHolder the resource holder to process
 	 */
-	protected void processResourceAfterCommit(ResourceHolder resourceHolder) {
+	protected void processResourceAfterCommit(H resourceHolder) {
 	}
 
 	/**
@@ -137,7 +149,7 @@ public class ResourceHolderSynchronization implements TransactionSynchronization
 	 * @param resourceHolder the resource holder to process
 	 * @param resourceKey the key that the ResourceHolder was bound for
 	 */
-	protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
+	protected void releaseResource(H resourceHolder, K resourceKey) {
 	}
 
 	/**
@@ -147,7 +159,7 @@ public class ResourceHolderSynchronization implements TransactionSynchronization
 	 * @param committed whether the transaction has committed (<code>true</code>)
 	 * or rolled back (<code>false</code>)
 	 */
-	protected void cleanupResource(ResourceHolder resourceHolder, Object resourceKey, boolean committed) {
+	protected void cleanupResource(H resourceHolder, K resourceKey, boolean committed) {
 	}
 
 }

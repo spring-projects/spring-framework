@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class EntityManagerFactoryUtils {
 		}
 		// No matching persistence unit found - simply take the EntityManagerFactory
 		// with the persistence unit name as bean name (by convention).
-		return (EntityManagerFactory) beanFactory.getBean(unitName, EntityManagerFactory.class);
+		return beanFactory.getBean(unitName, EntityManagerFactory.class);
 	}
 
 	/**
@@ -345,21 +345,42 @@ public abstract class EntityManagerFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class EntityManagerSynchronization extends ResourceHolderSynchronization implements Ordered {
+	private static class EntityManagerSynchronization
+			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
+			implements Ordered {
 
 		private final Object transactionData;
+
+		private final JpaDialect jpaDialect;
 
 		private final boolean newEntityManager;
 
 		public EntityManagerSynchronization(
-				EntityManagerHolder emHolder, EntityManagerFactory emf, Object transactionData, boolean newEntityManager) {
+				EntityManagerHolder emHolder, EntityManagerFactory emf, Object txData, boolean newEm) {
 			super(emHolder, emf);
-			this.transactionData = transactionData;
-			this.newEntityManager = newEntityManager;
+			this.transactionData = txData;
+			this.jpaDialect = (emf instanceof EntityManagerFactoryInfo ?
+					((EntityManagerFactoryInfo) emf).getJpaDialect() : null);
+			this.newEntityManager = newEm;
 		}
 
 		public int getOrder() {
 			return ENTITY_MANAGER_SYNCHRONIZATION_ORDER;
+		}
+
+		@Override
+		protected void flushResource(EntityManagerHolder resourceHolder) {
+			try {
+				resourceHolder.getEntityManager().flush();
+			}
+			catch (RuntimeException ex) {
+				if (this.jpaDialect != null) {
+					throw this.jpaDialect.translateExceptionIfPossible(ex);
+				}
+				else {
+					throw convertJpaAccessExceptionIfPossible(ex);
+				}
+			}
 		}
 
 		@Override
@@ -368,18 +389,18 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		@Override
-		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
-			closeEntityManager(((EntityManagerHolder) resourceHolder).getEntityManager());
+		protected void releaseResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey) {
+			closeEntityManager(resourceHolder.getEntityManager());
 		}
 
 		@Override
-		protected void cleanupResource(ResourceHolder resourceHolder, Object resourceKey, boolean committed) {
+		protected void cleanupResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey, boolean committed) {
 			if (!committed) {
 				// Clear all pending inserts/updates/deletes in the EntityManager.
 				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
-				((EntityManagerHolder) resourceHolder).getEntityManager().clear();
+				resourceHolder.getEntityManager().clear();
 			}
-			cleanupTransaction(this.transactionData, (EntityManagerFactory) resourceKey);
+			cleanupTransaction(this.transactionData, resourceKey);
 		}
 	}
 

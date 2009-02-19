@@ -436,7 +436,8 @@ public abstract class ExtendedEntityManagerCreator {
 	 * TransactionSynchronization enlisting an extended EntityManager
 	 * with a current Spring transaction.
 	 */
-	private static class ExtendedEntityManagerSynchronization extends ResourceHolderSynchronization
+	private static class ExtendedEntityManagerSynchronization
+			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManager>
 			implements Ordered {
 
 		private final EntityManager entityManager;
@@ -455,6 +456,16 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 
 		@Override
+		protected void flushResource(EntityManagerHolder resourceHolder) {
+			try {
+				this.entityManager.flush();
+			}
+			catch (RuntimeException ex) {
+				throw convertException(ex);
+			}
+		}
+
+		@Override
 		protected boolean shouldReleaseBeforeCompletion() {
 			return false;
 		}
@@ -467,7 +478,7 @@ public abstract class ExtendedEntityManagerCreator {
 				this.entityManager.getTransaction().commit();
 			}
 			catch (RuntimeException ex) {
-				throw convertCompletionException(ex);
+				throw convertException(ex);
 			}
 		}
 
@@ -480,12 +491,12 @@ public abstract class ExtendedEntityManagerCreator {
 					this.entityManager.getTransaction().rollback();
 				}
 				catch (RuntimeException ex) {
-					throw convertCompletionException(ex);
+					throw convertException(ex);
 				}
 			}
 		}
 
-		private RuntimeException convertCompletionException(RuntimeException ex) {
+		private RuntimeException convertException(RuntimeException ex) {
 			DataAccessException daex = (this.exceptionTranslator != null) ?
 					this.exceptionTranslator.translateExceptionIfPossible(ex) :
 					EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);

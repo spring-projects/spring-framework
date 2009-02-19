@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,13 @@ public interface TransactionSynchronization {
 	 * @see TransactionSynchronizationManager#bindResource
 	 */
 	void resume();
+
+	/**
+	 * Flush the underlying session to the datastore, if applicable:
+	 * for example, a Hibernate/JPA session.
+	 * @see org.springframework.transaction.TransactionStatus#flush()
+	 */
+	void flush();
 
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").

@@ -38,7 +38,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.transaction.support.ResourceHolder;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -293,7 +292,8 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class PersistenceManagerSynchronization extends ResourceHolderSynchronization
+	private static class PersistenceManagerSynchronization
+			extends ResourceHolderSynchronization<PersistenceManagerHolder, PersistenceManagerFactory>
 			implements Ordered {
 
 		private final boolean newPersistenceManager;
@@ -309,14 +309,23 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 
 		@Override
+		public void flushResource(PersistenceManagerHolder resourceHolder) {
+			try {
+				resourceHolder.getPersistenceManager().flush();
+			}
+			catch (JDOException ex) {
+				throw convertJdoAccessException(ex);
+			}
+		}
+
+		@Override
 		protected boolean shouldUnbindAtCompletion() {
 			return this.newPersistenceManager;
 		}
 
 		@Override
-		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
-			releasePersistenceManager(((PersistenceManagerHolder) resourceHolder).getPersistenceManager(),
-					(PersistenceManagerFactory) resourceKey);
+		protected void releaseResource(PersistenceManagerHolder resourceHolder, PersistenceManagerFactory resourceKey) {
+			releasePersistenceManager(resourceHolder.getPersistenceManager(), resourceKey);
 		}
 	}
 

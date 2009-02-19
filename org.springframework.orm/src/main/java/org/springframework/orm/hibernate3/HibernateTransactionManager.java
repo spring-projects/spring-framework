@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -828,7 +828,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Hibernate transaction object, representing a SessionHolder.
 	 * Used as transaction object by HibernateTransactionManager.
 	 */
-	private static class HibernateTransactionObject extends JdbcTransactionObjectSupport {
+	private class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
 		private SessionHolder sessionHolder;
 
@@ -875,15 +875,24 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		public void setRollbackOnly() {
-			getSessionHolder().setRollbackOnly();
+			this.sessionHolder.setRollbackOnly();
 			if (hasConnectionHolder()) {
 				getConnectionHolder().setRollbackOnly();
 			}
 		}
 
 		public boolean isRollbackOnly() {
-			return getSessionHolder().isRollbackOnly() ||
+			return this.sessionHolder.isRollbackOnly() ||
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());
+		}
+
+		public void flush() {
+			try {
+			    this.sessionHolder.getSession().flush();
+			}
+			catch (HibernateException ex) {
+				throw convertHibernateAccessException(ex);
+			}
 		}
 	}
 

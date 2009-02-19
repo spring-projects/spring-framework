@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1777,6 +1777,51 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+	}
+
+	public void testTransactionFlush() throws Exception {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+
+		sfControl.replay();
+		sessionControl.replay();
+		txControl.replay();
+
+		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
+		tm.setPrepareConnection(false);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			public void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+				status.flush();
+			}
+		});
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		sfControl.verify();
+		sessionControl.verify();
+		txControl.verify();
 	}
 
 	protected void tearDown() {
