@@ -170,20 +170,22 @@
       <entry name=".+\.(gif|png|jpeg|jpg)" />
     </resourceExtensions>
     <wildcardResourcePatterns>
-      <entry name="?*.properties" />
-      <entry name="?*.xml" />
-      <entry name="?*.gif" />
-      <entry name="?*.png" />
-      <entry name="?*.jpeg" />
-      <entry name="?*.jpg" />
-      <entry name="?*.html" />
-      <entry name="?*.dtd" />
-      <entry name="?*.tld" />
-      <entry name="?*.xsd" />
-      <entry name="?*.types" />
-      <entry name="?*.bsh" />
-      <entry name="?*.rb" />
-      <entry name="?*.groovy" />
+      <entry name="*.properties" />
+      <entry name="*.xml" />
+      <entry name="*.gif" />
+      <entry name="*.png" />
+      <entry name="*.jpeg" />
+      <entry name="*.jpg" />
+      <entry name="*.html" />
+      <entry name="*.dtd" />
+      <entry name="*.xsd" />
+      <entry name="*.tld" />
+      <entry name="*.ftl" />
+      <entry name="*.sql" />
+      <entry name="*.types" />
+      <entry name="*.bsh" />
+      <entry name="*.rb" />
+      <entry name="*.groovy" />
       <entry name="*.handlers" />
       <entry name="*.schemas" />
     </wildcardResourcePatterns>
