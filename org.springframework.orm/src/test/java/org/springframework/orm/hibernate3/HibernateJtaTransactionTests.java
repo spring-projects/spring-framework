@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate3;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -108,7 +107,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		if (readOnly) {
-			session.setFlushMode(FlushMode.NEVER);
+			session.setFlushMode(FlushMode.MANUAL);
 			sessionControl.setVoidCallable(1);
 		}
 		query.list();
@@ -370,6 +369,14 @@ public class HibernateJtaTransactionTests extends TestCase {
 	}
 
 	public void testJtaTransactionRollback() throws Exception {
+		doTestJtaTransactionRollback(false);
+	}
+
+	public void testJtaTransactionRollbackWithFlush() throws Exception {
+		doTestJtaTransactionRollback(true);
+	}
+
+	private void doTestJtaTransactionRollback(final boolean flush) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
@@ -390,6 +397,10 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		if (flush) {
+			session.flush();
+			sessionControl.setVoidCallable(1);
+		}
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -409,6 +420,9 @@ public class HibernateJtaTransactionTests extends TestCase {
 							return l;
 						}
 					});
+					if (flush) {
+						status.flush();
+					}
 					status.setRollbackOnly();
 					sessionControl.verify();
 					sessionControl.reset();
@@ -495,7 +509,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.setReturnValue(true, 5);
 		session.getFlushMode();
 		if (flushNever) {
-			sessionControl.setReturnValue(FlushMode.NEVER, 1);
+			sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 			if (!readOnly) {
 				session.setFlushMode(FlushMode.AUTO);
 				sessionControl.setVoidCallable(1);
@@ -546,7 +560,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 							session.flush();
 							sessionControl.setVoidCallable(1);
 							if (flushNever) {
-								session.setFlushMode(FlushMode.NEVER);
+								session.setFlushMode(FlushMode.MANUAL);
 								sessionControl.setVoidCallable(1);
 							}
 						}
@@ -1064,15 +1078,15 @@ public class HibernateJtaTransactionTests extends TestCase {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 		session.setFlushMode(FlushMode.AUTO);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
@@ -1306,7 +1320,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.setReturnValue(tm, 7);
 		session.isOpen();
 		sessionControl.setReturnValue(true, 8);
-		session.setFlushMode(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.MANUAL);
 		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 2);
@@ -1667,7 +1681,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.setReturnValue(true, 5);
 		session.getFlushMode();
 		if (flushNever) {
-			sessionControl.setReturnValue(FlushMode.NEVER, 1);
+			sessionControl.setReturnValue(FlushMode.MANUAL, 1);
 			session.setFlushMode(FlushMode.AUTO);
 			sessionControl.setVoidCallable(1);
 		}
@@ -1702,7 +1716,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 			session.flush();
 			sessionControl.setVoidCallable(1);
 			if (flushNever) {
-				session.setFlushMode(FlushMode.NEVER);
+				session.setFlushMode(FlushMode.MANUAL);
 				sessionControl.setVoidCallable(1);
 			}
 			session.disconnect();

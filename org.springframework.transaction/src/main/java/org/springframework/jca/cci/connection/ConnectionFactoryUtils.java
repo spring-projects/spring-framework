@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jca.cci.CannotGetCciConnectionException;
-import org.springframework.transaction.support.ResourceHolder;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -199,15 +198,16 @@ public abstract class ConnectionFactoryUtils {
 	 * Callback for resource cleanup at the end of a non-native CCI transaction
 	 * (e.g. when participating in a JTA transaction).
 	 */
-	private static class ConnectionSynchronization extends ResourceHolderSynchronization {
+	private static class ConnectionSynchronization
+			extends ResourceHolderSynchronization<ConnectionHolder, ConnectionFactory> {
 
 		public ConnectionSynchronization(ConnectionHolder connectionHolder, ConnectionFactory connectionFactory) {
 			super(connectionHolder, connectionFactory);
 		}
 
 		@Override
-		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
-			releaseConnection(((ConnectionHolder) resourceHolder).getConnection(), (ConnectionFactory) resourceKey);
+		protected void releaseResource(ConnectionHolder resourceHolder, ConnectionFactory resourceKey) {
+			releaseConnection(resourceHolder.getConnection(), resourceKey);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,17 @@ public abstract class TransactionSynchronizationUtils {
 		return (resource instanceof InfrastructureProxy ? ((InfrastructureProxy) resource).getWrappedObject() : resource);
 	}
 
+
+	/**
+	 * Trigger <code>flush</code> callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a <code>flush</code> callback
+	 * @see TransactionSynchronization#flush()
+	 */
+	public static void triggerFlush() {
+		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+			synchronization.flush();
+		}
+	}
 
 	/**
 	 * Trigger <code>beforeCommit</code> callbacks on all currently registered synchronizations.
@@ -121,7 +132,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
 	public static void triggerAfterCompletion(int completionStatus) {
-		List synchronizations = TransactionSynchronizationManager.getSynchronizations();
+		List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
 		invokeAfterCompletion(synchronizations, completionStatus);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,16 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	public void flush() {
+		try {
+			SessionFactoryUtils.logger.debug("Flushing Hibernate Session on explicit request");
+			getCurrentSession().flush();
+		}
+		catch (HibernateException ex) {
+			throw translateException(ex);
+		}
+	}
+
 	public void beforeCommit(boolean readOnly) throws DataAccessException {
 		if (!readOnly) {
 			Session session = getCurrentSession();
@@ -135,15 +145,19 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 					session.flush();
 				}
 				catch (HibernateException ex) {
-					if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
-						JDBCException jdbcEx = (JDBCException) ex;
-						throw this.jdbcExceptionTranslator.translate(
-								"Hibernate flushing: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
-					}
-					throw SessionFactoryUtils.convertHibernateAccessException(ex);
+					throw translateException(ex);
 				}
 			}
 		}
+	}
+
+	private DataAccessException translateException(HibernateException ex) {
+		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
+			JDBCException jdbcEx = (JDBCException) ex;
+			return this.jdbcExceptionTranslator.translate(
+					"Hibernate flushing: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+		}
+		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 	public void beforeCompletion() {

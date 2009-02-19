@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1220,6 +1220,43 @@ public class JdoTransactionManagerTests extends TestCase {
 
 		dialectControl.verify();
 		queryControl.verify();
+	}
+
+	public void testTransactionFlush() {
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 1);
+		pm.currentTransaction();
+		pmControl.setReturnValue(tx, 3);
+		pm.flush();
+		pmControl.setVoidCallable(1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		tx.begin();
+		txControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
+
+		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			public void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
+				status.flush();
+			}
+		});
+
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }

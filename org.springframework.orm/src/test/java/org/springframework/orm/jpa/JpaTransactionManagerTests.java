@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1065,6 +1065,35 @@ public class JpaTransactionManagerTests extends TestCase {
 		catch (InvalidIsolationLevelException ex) {
 			// expected
 		}
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionFlush() {
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		tx.commit();
+		manager.flush();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			public void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
+				status.flush();
+			}
+		});
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();

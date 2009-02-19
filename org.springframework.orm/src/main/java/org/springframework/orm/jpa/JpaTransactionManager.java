@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.jpa;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -553,7 +552,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * JPA transaction object, representing a EntityManagerHolder.
 	 * Used as transaction object by JpaTransactionManager.
 	 */
-	private static class JpaTransactionObject extends JdbcTransactionObjectSupport {
+	private class JpaTransactionObject extends JdbcTransactionObjectSupport {
 
 		private EntityManagerHolder entityManagerHolder;
 
@@ -604,6 +603,15 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		public boolean isRollbackOnly() {
 			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
+		}
+
+		public void flush() {
+			try {
+			    this.entityManagerHolder.getEntityManager().flush();
+			}
+			catch (RuntimeException ex) {
+				throw DataAccessUtils.translateIfNecessary(ex, getJpaDialect());
+			}
 		}
 
 		@Override
