@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.M2 (2009-02-16)
+Changes in version 3.0.0.M2 (2009-02-20)
 ----------------------------------------
 
 * refined OSGi version constraints for "javax.annotation" and "junit.framework"
@@ -11,8 +11,12 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * added SimpleThreadScope implementation
 * "systemProperties" bean is not considered a default match for type Properties anymore
 * registered plain singletons will be fully matched according to their qualifiers
+* @Qualifier value matching takes chained aliases of target beans into account as well
+* SimpleAliasRegistry's "getAliases" method returns transitive aliases now
 * pre-converted property values are preserved more eagerly for re-created beans
 * ASM-based AnnotationMetadata fully resolves class arguments and enums into Java types
+* ProceedingJoinPoint resolves parameter names using ASM-based parameter name discovery
+* MethodInvocations and ProceedingJoinPoints always expose original method (not bridge)
 * bridge method resolution works with Hibernate-generated CGLIB proxies as well
 * generic collection type resolution respects upper bound (e.g. ? extends Number) as well
 * TypeUtils detects variations of ParameterizedType/GenericArrayType assignability as well
@@ -31,6 +35,7 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * ApplicationListener beans get obtained on demand, supporting non-singletons as well
 * ApplicationListeners will be called in the order according to the Ordered contract
 * generified ApplicationListener interface, narrowing the event type to be received
+* introduced SmartApplicationListener interface for supported event/source types
 * generified Transaction/Hibernate/Jdo/JpaCallback with generic "doInXxx" return type
 * HibernateOperations uses generic parameter/return types where possible
 * JdoOperations uses generic parameter/return types where possible (following JDO 2.1)
@@ -41,9 +46,12 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * added support for WebSphere's ResourceAdapter-managed messaging transactions
 * made SpringBeanAutowiringInterceptor callback signature compatible with WebSphere
 * WebSphereUowTransactionManager preserves original exception in case of rollback
+* added "flush()" method to TransactionStatus and TransactionSynchronization interfaces
+* test context manager automatically flushes transactions before rolling back
 * DefaultLobHandler uses explicit Blob/Clob access for reading when "wrapAsLob"=true
 * fixed JmsException/JmsUtils to fully avoid NPEs in case of cause messages being null
 * fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well
+* fixed HTTP invoker to support resolution of multi-level primitive array classes again
 * introduced OXM support package (originating from Spring Web Services)
 * introduced OXM-based MarshallingMessageConverter for JMS
 * introduced OXM-based MarshallingView for Spring MVC
@@ -57,6 +65,7 @@ Changes in version 3.0.0.M2 (2009-02-16)
 * introduced @CookieValue annotation for Servlet and Portlet MVC handler methods
 * @RequestMapping type-level param constraints taken into account consistently
 * optional boolean parameters in MVC handler methods resolve to "false" if not present
+* "url" macro in "spring.ftl" performs standard Servlet URL encoding automatically
 
 
 Changes in version 3.0.0.M1 (2008-12-05)
