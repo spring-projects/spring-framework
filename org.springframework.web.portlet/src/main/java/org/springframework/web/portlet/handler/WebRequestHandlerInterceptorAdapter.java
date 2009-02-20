@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 
 		this.requestInterceptor.postHandle(new PortletWebRequest(request),
-				(modelAndView != null ? modelAndView.getModelMap() : null));
+				(modelAndView != null && !modelAndView.wasCleared() ? modelAndView.getModelMap() : null));
 	}
 
 	public void afterRenderCompletion(

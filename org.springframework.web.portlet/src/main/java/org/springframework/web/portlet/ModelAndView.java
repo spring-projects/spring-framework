@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.portlet;
 import java.util.Map;
 
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Holder for both Model and View in the web MVC framework.
@@ -50,7 +51,7 @@ public class ModelAndView {
 	/**
 	 * Indicates whether or not this instance has been cleared with a call to {@link #clear()}.
 	 */
-	private boolean cleared;
+	private boolean cleared = false;
 
 
 	/**
@@ -266,11 +267,11 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return whether this ModelAndView object is empty
+	 * Return whether this ModelAndView object is empty,
 	 * i.e. whether it does not hold any view and does not contain a model.
 	 */
 	public boolean isEmpty() {
-		return (this.view == null && this.model == null);
+		return (this.view == null && CollectionUtils.isEmpty(this.model));
 	}
 
 	/**
