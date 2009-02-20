@@ -38,6 +38,8 @@ public class GenericBean<T> {
 
 	private List<Resource> resourceList;
 
+	private List<TestBean> testBeanList;
+
 	private List<List<Integer>> listOfLists;
 
 	private ArrayList<String[]> listOfArrays;
@@ -121,6 +123,14 @@ public class GenericBean<T> {
 
 	public void setResourceList(List<Resource> resourceList) {
 		this.resourceList = resourceList;
+	}
+
+	public List<TestBean> getTestBeanList() {
+		return testBeanList;
+	}
+
+	public void setTestBeanList(List<TestBean> testBeanList) {
+		this.testBeanList = testBeanList;
 	}
 
 	public List<List<Integer>> getListOfLists() {

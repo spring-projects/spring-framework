@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import static org.junit.Assert.*;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -30,17 +28,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+import test.beans.GenericBean;
+import test.beans.GenericIntegerBean;
+import test.beans.GenericSetOfIntegerBean;
+import test.beans.TestBean;
+
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
-
-import test.beans.GenericBean;
-import test.beans.GenericIntegerBean;
-import test.beans.GenericSetOfIntegerBean;
 
 /**
  * @author Juergen Hoeller
@@ -95,6 +96,26 @@ public class BeanFactoryGenericsTests {
 
 		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
+	}
+
+	@Test
+	public void testGenericListPropertyWithInvalidElementType() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
+
+		List input = new ArrayList();
+		input.add(1);
+		rbd.getPropertyValues().addPropertyValue("testBeanList", input);
+
+		bf.registerBeanDefinition("genericBean", rbd);
+		try {
+			bf.getBean("genericBean");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("genericBean") && ex.getMessage().contains("testBeanList[0]"));
+			assertTrue(ex.getMessage().contains(TestBean.class.getName()) && ex.getMessage().contains("Integer"));
+		}
 	}
 
 	@Test
