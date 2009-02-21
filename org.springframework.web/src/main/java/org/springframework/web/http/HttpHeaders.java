@@ -17,12 +17,15 @@
 package org.springframework.web.http;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +51,8 @@ public final class HttpHeaders implements Map<String, List<String>> {
 
 	private static String ACCEPT = "Accept";
 
+	private static String ACCEPT_CHARSET = "Accept-Charset";
+
 	private static String ALLOW = "Allow";
 
 	private static String CONTENT_LENGTH = "Content-Length";
@@ -59,8 +64,9 @@ public final class HttpHeaders implements Map<String, List<String>> {
 	private Map<String, List<String>> headers = CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(5);
 
 	/**
-	 * Returns the list of acceptable {@link MediaType media types}, as specified by the <code>Accept</code> header. <p/>
-	 * Returns an empty list when the acceptable media types are unspecified.
+	 * Returns the list of acceptable {@linkplain MediaType media types}, as specified by the <code>Accept</code> header.
+	 *
+	 * <p>Returns an empty list when the acceptable media types are unspecified.
 	 *
 	 * @return the acceptable media types
 	 */
@@ -70,12 +76,53 @@ public final class HttpHeaders implements Map<String, List<String>> {
 	}
 
 	/**
-	 * Sets the list of acceptable {@link MediaType media types}, as specified by the <code>Accept</code> header.
+	 * Sets the list of acceptable {@linkplain MediaType media types}, as specified by the <code>Accept</code> header.
 	 *
 	 * @param acceptableMediaTypes the acceptable media types
 	 */
 	public void setAccept(List<MediaType> acceptableMediaTypes) {
 		set(ACCEPT, MediaType.toString(acceptableMediaTypes));
+	}
+
+	/**
+	 * Returns the list of acceptable {@linkplain Charset charsets}, as specified by the <code>Accept-Charset</code>
+	 * header.
+	 *
+	 * @return the acceptable charsets
+	 */
+	public List<Charset> getAcceptCharset() {
+		List<Charset> result = new ArrayList<Charset>();
+		String value = getFirst(ACCEPT_CHARSET);
+		if (value != null) {
+			String[] tokens = value.split(",\\s*");
+			for (String token : tokens) {
+				int paramIdx = token.indexOf(';');
+				if (paramIdx == -1) {
+					result.add(Charset.forName(token));
+				}
+				else {
+					result.add(Charset.forName(token.substring(0, paramIdx)));
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Sets the list of acceptable {@linkplain Charset charsets}, as specified by the <code>Accept-Charset</code> header.
+	 *
+	 * @param acceptableCharsets the acceptable charsets
+	 */
+	public void setAcceptCharset(List<Charset> acceptableCharsets) {
+		StringBuilder builder = new StringBuilder();
+		for (Iterator<Charset> iterator = acceptableCharsets.iterator(); iterator.hasNext();) {
+			Charset charset = iterator.next();
+			builder.append(charset.name().toLowerCase(Locale.ENGLISH));
+			if (iterator.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		set(ACCEPT_CHARSET, builder.toString());
 	}
 
 	/**
