@@ -50,7 +50,19 @@ public class HttpHeadersTests {
 		mediaTypes.add(mediaType2);
 		headers.setAccept(mediaTypes);
 		assertEquals("Invalid Accept header", mediaTypes, headers.getAccept());
-		assertEquals("Invalid Accept header", "text/html,text/plain", headers.getFirst("Accept"));
+		assertEquals("Invalid Accept header", "text/html, text/plain", headers.getFirst("Accept"));
+	}
+
+	@Test
+	public void acceptCharsets() {
+		Charset charset1 = Charset.forName("UTF-8");
+		Charset charset2 = Charset.forName("ISO-8859-1");
+		List<Charset> charsets = new ArrayList<Charset>(2);
+		charsets.add(charset1);
+		charsets.add(charset2);
+		headers.setAcceptCharset(charsets);
+		assertEquals("Invalid Accept header", charsets, headers.getAcceptCharset());
+		assertEquals("Invalid Accept header", "utf-8, iso-8859-1", headers.getFirst("Accept-Charset"));
 	}
 
 	@Test
