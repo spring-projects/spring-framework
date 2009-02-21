@@ -67,7 +67,7 @@
 		<value>Rob Harrop</value>
 	</util:set>
 
-	<bean id="nestedCollectionsBean" class="test.beans.TestBean">
+	<bean id="nestedCollectionsBean" class="test.beans.TestBean" scope="prototype">
 		<property name="someList">
 			<util:list>
 				<value>foo</value>
@@ -87,6 +87,12 @@
 				</entry>
 			</util:map>
 		</property>
+	</bean>
+
+	<bean id="nestedShortcutCollections" class="test.beans.TestBean" scope="prototype">
+		<property name="stringArray" value="fooStr"/>
+		<property name="someList" value="foo"/>
+		<property name="someSet" value="bar"/>
 	</bean>
 
 	<bean id="nestedCustomTagBean" class="test.beans.TestBean" scope="prototype">

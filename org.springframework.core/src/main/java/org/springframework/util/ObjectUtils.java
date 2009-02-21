@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,10 +82,18 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return whether the given array is empty: that is, <code>null</code>
-	 * or of zero length.
+	 * Determine whether the given object is an array:
+	 * either an Object array or a primitive array.
+	 * @param obj the object to check
+	 */
+	public static boolean isArray(Object obj) {
+		return (obj != null && obj.getClass().isArray());
+	}
+
+	/**
+	 * Determine whether the given array is empty:
+	 * i.e. <code>null</code> or of zero length.
 	 * @param array the array to check
-	 * @return whether the given array is empty
 	 */
 	public static boolean isEmpty(Object[] array) {
 		return (array == null || array.length == 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1249,7 +1250,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 					deepCopy.add(pv);
 				}
-				else if (originalValue instanceof TypedStringValue && convertible) {
+				else if (originalValue instanceof TypedStringValue && convertible &&
+						!(convertedValue instanceof Collection || ObjectUtils.isArray(convertedValue))) {
 					pv.setConvertedValue(convertedValue);
 					deepCopy.add(pv);
 				}
