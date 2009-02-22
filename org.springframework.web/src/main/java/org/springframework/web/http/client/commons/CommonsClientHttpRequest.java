@@ -16,9 +16,7 @@
 
 package org.springframework.web.http.client.commons;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -28,10 +26,9 @@ import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 
-import org.springframework.util.Assert;
 import org.springframework.web.http.HttpHeaders;
 import org.springframework.web.http.HttpMethod;
-import org.springframework.web.http.client.ClientHttpRequest;
+import org.springframework.web.http.client.AbstractClientHttpRequest;
 import org.springframework.web.http.client.ClientHttpResponse;
 
 /**
@@ -41,59 +38,36 @@ import org.springframework.web.http.client.ClientHttpResponse;
  * @author Arjen Poutsma
  * @see CommonsClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  */
-final class CommonsClientHttpRequest implements ClientHttpRequest {
+final class CommonsClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final HttpClient httpClient;
 
 	private final HttpMethodBase httpMethod;
-
-	private final HttpHeaders headers = new HttpHeaders();
-
-	private boolean headersWritten = false;
-
-	private ByteArrayOutputStream bufferedOutput;
 
 	CommonsClientHttpRequest(HttpClient httpClient, HttpMethodBase httpMethod) {
 		this.httpClient = httpClient;
 		this.httpMethod = httpMethod;
 	}
 
-	public HttpHeaders getHeaders() {
-		return headers;
-	}
-
-	public OutputStream getBody() throws IOException {
-		writeHeaders();
-		Assert.isInstanceOf(EntityEnclosingMethod.class, httpMethod);
-		this.bufferedOutput = new ByteArrayOutputStream();
-		return bufferedOutput;
-	}
-
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(httpMethod.getName());
 	}
 
-	public ClientHttpResponse execute() throws IOException {
-		writeHeaders();
+	@Override
+	public ClientHttpResponse executeInternal(HttpHeaders headers, byte[] output) throws IOException {
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				httpMethod.addRequestHeader(headerName, headerValue);
+			}
+		}
 		if (httpMethod instanceof EntityEnclosingMethod) {
 			EntityEnclosingMethod entityEnclosingMethod = (EntityEnclosingMethod) httpMethod;
-			RequestEntity requestEntity = new ByteArrayRequestEntity(bufferedOutput.toByteArray());
+			RequestEntity requestEntity = new ByteArrayRequestEntity(output);
 			entityEnclosingMethod.setRequestEntity(requestEntity);
 		}
 		httpClient.executeMethod(httpMethod);
 		return new CommonsClientHttpResponse(httpMethod);
-	}
-
-	private void writeHeaders() {
-		if (!headersWritten) {
-			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-				String headerName = entry.getKey();
-				for (String headerValue : entry.getValue()) {
-					httpMethod.addRequestHeader(headerName, headerValue);
-				}
-			}
-			headersWritten = true;
-		}
 	}
 
 }

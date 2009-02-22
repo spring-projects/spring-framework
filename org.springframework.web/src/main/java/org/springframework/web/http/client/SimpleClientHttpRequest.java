@@ -17,11 +17,11 @@
 package org.springframework.web.http.client;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.http.HttpHeaders;
 import org.springframework.web.http.HttpMethod;
 
@@ -33,13 +33,9 @@ import org.springframework.web.http.HttpMethod;
  * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  * @since 3.0
  */
-final class SimpleClientHttpRequest implements ClientHttpRequest {
+final class SimpleClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final HttpURLConnection connection;
-
-	private final HttpHeaders headers = new HttpHeaders();
-
-	private boolean headersWritten = false;
 
 	SimpleClientHttpRequest(HttpURLConnection connection) {
 		this.connection = connection;
@@ -49,30 +45,17 @@ final class SimpleClientHttpRequest implements ClientHttpRequest {
 		return HttpMethod.valueOf(connection.getRequestMethod());
 	}
 
-	public HttpHeaders getHeaders() {
-		return headers;
-	}
-
-	public OutputStream getBody() throws IOException {
-		writeHeaders();
-		return connection.getOutputStream();
-	}
-
-	public ClientHttpResponse execute() throws IOException {
-		writeHeaders();
+	@Override
+	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				connection.addRequestProperty(headerName, headerValue);
+			}
+		}
 		connection.connect();
+		FileCopyUtils.copy(bufferedOutput, connection.getOutputStream());
 		return new SimpleClientHttpResponse(connection);
 	}
 
-	private void writeHeaders() {
-		if (!headersWritten) {
-			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-				String headerName = entry.getKey();
-				for (String headerValue : entry.getValue()) {
-					connection.addRequestProperty(headerName, headerValue);
-				}
-			}
-			headersWritten = true;
-		}
-	}
 }
