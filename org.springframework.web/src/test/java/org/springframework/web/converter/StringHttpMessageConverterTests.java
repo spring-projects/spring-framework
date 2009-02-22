@@ -51,16 +51,31 @@ public class StringHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
-		Charset charset = Charset.forName("UTF-8");
-		converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text", "plain", charset)));
+	public void writeDefaultCharset() throws IOException {
+		Charset iso88591 = Charset.forName("ISO-8859-1");
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		String body = "Hello World";
+		String body = "H\u00e9llo W\u00f6rld";
 		converter.write(body, outputMessage);
-		assertEquals("Invalid result", body, outputMessage.getBodyAsString(charset));
-		assertEquals("Invalid content-type", new MediaType("text", "plain", charset),
+		assertEquals("Invalid result", body, outputMessage.getBodyAsString(iso88591));
+		assertEquals("Invalid content-type", new MediaType("text", "plain", iso88591),
 				outputMessage.getHeaders().getContentType());
-		assertEquals("Invalid content-length", 11, outputMessage.getHeaders().getContentLength());
+		assertEquals("Invalid content-length", body.getBytes(iso88591).length,
+				outputMessage.getHeaders().getContentLength());
+		assertFalse("Invalid accept-charset", outputMessage.getHeaders().getAcceptCharset().isEmpty());
+	}
+
+	@Test
+	public void writeUTF8() throws IOException {
+		Charset utf8 = Charset.forName("UTF-8");
+		converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text", "plain", utf8)));
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		String body = "H\u00e9llo W\u00f6rld";
+		converter.write(body, outputMessage);
+		assertEquals("Invalid result", body, outputMessage.getBodyAsString(utf8));
+		assertEquals("Invalid content-type", new MediaType("text", "plain", utf8),
+				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-length", body.getBytes(utf8).length,
+				outputMessage.getHeaders().getContentLength());
 		assertFalse("Invalid accept-charset", outputMessage.getHeaders().getAcceptCharset().isEmpty());
 	}
 }
