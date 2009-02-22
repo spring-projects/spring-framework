@@ -99,6 +99,25 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		assertTrue("Invalid body", Arrays.equals(body, result));
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void multipleWrites() throws Exception {
+		ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/echo"), HttpMethod.POST);
+		byte[] body = "Hello World".getBytes("UTF-8");
+		FileCopyUtils.copy(body, request.getBody());
+		request.execute();
+		FileCopyUtils.copy(body, request.getBody());
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void headersAfterExecute() throws Exception {
+		ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/echo"), HttpMethod.POST);
+		request.getHeaders().add("MyHeader", "value");
+		byte[] body = "Hello World".getBytes("UTF-8");
+		FileCopyUtils.copy(body, request.getBody());
+		request.execute();
+		request.getHeaders().add("MyHeader", "value");
+	}
+
 	/**
 	 * Servlet that returns and error message for a given status code.
 	 */
