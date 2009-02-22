@@ -30,13 +30,13 @@ import org.springframework.core.CollectionFactory;
 /**
  * Represents an Internet Media Type, as defined in the HTTP specification.
  *
- * <p>Consists of a {@linkplain #getType() type}
- * and a {@linkplain #getSubtype() subtype}. Also has functionality to parse media types from a string using
- * {@link #parseMediaType(String)}, or multiple comma-separated media types using {@link #parseMediaTypes(String)}.
+ * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}. Also has functionality to
+ * parse media types from a string using {@link #parseMediaType(String)}, or multiple comma-separated media types using
+ * {@link #parseMediaTypes(String)}.
  *
  * @author Arjen Poutsma
- * @since 3.0
  * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7">HTTP 1.1</a>
+ * @since 3.0
  */
 public final class MediaType implements Comparable<MediaType> {
 
@@ -150,8 +150,8 @@ public final class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Parses the given, comma-seperated string into a list of {@link MediaType} objects. This method can be used to
-	 * parse an Accept or Content-Type header.
+	 * Parses the given, comma-seperated string into a list of {@link MediaType} objects. This method can be used to parse
+	 * an Accept or Content-Type header.
 	 *
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
@@ -234,8 +234,8 @@ public final class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicates whether this {@link MediaType} includes the given media type. For instance, <code>text/*</code>
-	 * includes <code>text/plain</code>, <code>text/html</code>, etc.
+	 * Indicates whether this {@link MediaType} includes the given media type. For instance, <code>text/*</code> includes
+	 * <code>text/plain</code>, <code>text/html</code>, etc.
 	 *
 	 * @param other the reference media type with which to compare
 	 * @return <code>true</code> if this media type includes the given media type; <code>false</code> otherwise
@@ -254,13 +254,13 @@ public final class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Compares this {@link MediaType} to another. Sorting with this comparator follows the general rule: <blockquote>
-	 * audio/basic &lt; audio/* &lt; *&#047;* </blockquote>. That is, an explicit media type is sorted before an
-	 * unspecific media type. Quality parameters are also considered, so that <blockquote> audio/* &lt; audio/*;q=0.7;
+	 * audio/basic &lt; audio/* &lt; *&#047;* </blockquote>. That is, an explicit media type is sorted before an unspecific
+	 * media type. Quality parameters are also considered, so that <blockquote> audio/* &lt; audio/*;q=0.7;
 	 * audio/*;q=0.3</blockquote>.
 	 *
 	 * @param other the media type to compare to
-	 * @return a negative integer, zero, or a positive integer as this media type is less than, equal to, or greater
-	 *         than the specified media type
+	 * @return a negative integer, zero, or a positive integer as this media type is less than, equal to, or greater than
+	 *         the specified media type
 	 */
 	public int compareTo(MediaType other) {
 		double qVal1 = this.getQualityValue();
@@ -339,7 +339,7 @@ public final class MediaType implements Comparable<MediaType> {
 			MediaType mediaType = iterator.next();
 			mediaType.appendTo(builder);
 			if (iterator.hasNext()) {
-				builder.append(',');
+				builder.append(", ");
 			}
 		}
 		return builder.toString();
