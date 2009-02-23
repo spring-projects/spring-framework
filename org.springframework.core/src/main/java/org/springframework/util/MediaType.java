@@ -106,7 +106,7 @@ public final class MediaType implements Comparable<MediaType> {
 		Assert.hasText(subtype, "'subtype' must not be empty");
 		this.type = type.toLowerCase(Locale.ENGLISH);
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
-		if (parameters != null) {
+		if (!CollectionUtils.isEmpty(parameters)) {
 			this.parameters = CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(parameters.size());
 			this.parameters.putAll(parameters);
 		}
@@ -124,28 +124,33 @@ public final class MediaType implements Comparable<MediaType> {
 	 */
 	public static MediaType parseMediaType(String mediaType) {
 		Assert.hasLength(mediaType, "'mediaType' must not be empty");
-		mediaType = mediaType.trim();
-		int subTypeIdx = mediaType.indexOf('/');
-		if (subTypeIdx == -1) {
-			throw new IllegalArgumentException("mediaType " + mediaType + " contains no /");
-		}
-		String type = mediaType.substring(0, subTypeIdx);
-		String subtype;
+		String[] parts = StringUtils.tokenizeToStringArray(mediaType, ";");
+
 		Map<String, String> parameters;
-		int paramIdx = mediaType.indexOf(';', subTypeIdx + 1);
-		if (paramIdx == -1) {
-			subtype = mediaType.substring(subTypeIdx + 1).trim();
+		if (parts.length <= 1) {
 			parameters = null;
 		}
 		else {
-			subtype = mediaType.substring(subTypeIdx + 1, paramIdx).trim();
-			String[] tokens = StringUtils.tokenizeToStringArray(mediaType.substring(paramIdx), "; ");
-			parameters = new LinkedHashMap<String, String>(tokens.length);
-			for (String token : tokens) {
-				int eqPos = token.indexOf('=');
-				parameters.put(token.substring(0, eqPos), token.substring(eqPos + 1));
+			parameters = new LinkedHashMap<String, String>(parts.length - 1);
+		}
+		for (int i = 1; i < parts.length; i++) {
+			String part = parts[i];
+			int idx = part.indexOf('=');
+			if (idx != -1) {
+				String name = part.substring(0, idx);
+				String value = part.substring(idx + 1, part.length());
+				parameters.put(name, value);
 			}
 		}
+		String fullType = parts[0].trim();
+
+		// java.net.HttpURLConnection returns a *; q=.2 Accept header
+		if (WILDCARD_TYPE.equals(fullType)) {
+			fullType = "*/*";
+		}
+		int idx = fullType.indexOf('/');
+		String type = fullType.substring(0, idx);
+		String subtype = fullType.substring(idx + 1, fullType.length());
 		return new MediaType(type, subtype, parameters);
 	}
 

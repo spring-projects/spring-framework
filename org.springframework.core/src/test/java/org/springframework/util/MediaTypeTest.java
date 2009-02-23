@@ -28,85 +28,94 @@ import org.junit.Test;
  */
 public class MediaTypeTest {
 
-    @Test
-    public void includes() throws Exception {
-        MediaType type1 = new MediaType("text", "plain");
-        MediaType type2 = new MediaType("text", "plain");
-        assertTrue("Equal types is not inclusive", type1.includes(type2));
-        type1 = new MediaType("text");
-        assertTrue("All subtypes is not inclusive", type1.includes(type2));
-        type1 = MediaType.ALL;
-        assertTrue("All types is not inclusive", type1.includes(type2));
-    }
+	@Test
+	public void includes() throws Exception {
+		MediaType type1 = new MediaType("text", "plain");
+		MediaType type2 = new MediaType("text", "plain");
+		assertTrue("Equal types is not inclusive", type1.includes(type2));
+		type1 = new MediaType("text");
+		assertTrue("All subtypes is not inclusive", type1.includes(type2));
+		type1 = MediaType.ALL;
+		assertTrue("All types is not inclusive", type1.includes(type2));
+	}
 
-    @Test
-    public void testToString() throws Exception {
-        MediaType mediaType = new MediaType("text", "plain", Collections.singletonMap("q", "0.7"));
-        String result = mediaType.toString();
-        assertEquals("Invalid toString() returned", "text/plain;q=0.7", result);
-    }
+	@Test
+	public void testToString() throws Exception {
+		MediaType mediaType = new MediaType("text", "plain", Collections.singletonMap("q", "0.7"));
+		String result = mediaType.toString();
+		assertEquals("Invalid toString() returned", "text/plain;q=0.7", result);
+	}
 
-    @Test
-    public void parseMediaType() throws Exception {
-        String s = "audio/*; q=0.2";
-        MediaType mediaType = MediaType.parseMediaType(s);
-        assertEquals("Invalid type", "audio", mediaType.getType());
-        assertEquals("Invalid subtype", "*", mediaType.getSubtype());
-        assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
-    }
+	@Test
+	public void parseMediaType() throws Exception {
+		String s = "audio/*; q=0.2";
+		MediaType mediaType = MediaType.parseMediaType(s);
+		assertEquals("Invalid type", "audio", mediaType.getType());
+		assertEquals("Invalid subtype", "*", mediaType.getSubtype());
+		assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
+	}
 
-    @Test
-    public void parseMediaTypes() throws Exception {
-        String s = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c";
-        List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
-        assertNotNull("No media types returned", mediaTypes);
-        assertEquals("Invalid amount of media types", 4, mediaTypes.size());
-    }
+	@Test
+	public void parseURLConnectionMediaType() throws Exception {
+		String s = "*; q=.2";
+		MediaType mediaType = MediaType.parseMediaType(s);
+		assertEquals("Invalid type", "*", mediaType.getType());
+		assertEquals("Invalid subtype", "*", mediaType.getSubtype());
+		assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
+	}
 
-    @Test
-    public void compareTo() throws Exception {
-        MediaType audioBasic = new MediaType("audio", "basic");
-        MediaType audio = new MediaType("audio");
-        MediaType audio03 = new MediaType("audio", "*", Collections.singletonMap("q", "0.3"));
-        MediaType audio07 = new MediaType("audio", "*", Collections.singletonMap("q", "0.7"));
-        MediaType all = MediaType.ALL;
+	@Test
+	public void parseMediaTypes() throws Exception {
+		String s = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertNotNull("No media types returned", mediaTypes);
+		assertEquals("Invalid amount of media types", 4, mediaTypes.size());
+	}
 
-        // equal
-        assertEquals("Invalid comparison result", 0, audioBasic.compareTo(audioBasic));
-        assertEquals("Invalid comparison result", 0, audio.compareTo(audio));
-        assertEquals("Invalid comparison result", 0, audio07.compareTo(audio07));
+	@Test
+	public void compareTo() throws Exception {
+		MediaType audioBasic = new MediaType("audio", "basic");
+		MediaType audio = new MediaType("audio");
+		MediaType audio03 = new MediaType("audio", "*", Collections.singletonMap("q", "0.3"));
+		MediaType audio07 = new MediaType("audio", "*", Collections.singletonMap("q", "0.7"));
+		MediaType all = MediaType.ALL;
 
-        // specific to unspecific
-        assertTrue("Invalid comparison result", audioBasic.compareTo(audio) < 0);
-        assertTrue("Invalid comparison result", audioBasic.compareTo(all) < 0);
-        assertTrue("Invalid comparison result", audio.compareTo(all) < 0);
+		// equal
+		assertEquals("Invalid comparison result", 0, audioBasic.compareTo(audioBasic));
+		assertEquals("Invalid comparison result", 0, audio.compareTo(audio));
+		assertEquals("Invalid comparison result", 0, audio07.compareTo(audio07));
 
-        // unspecific to specific
-        assertTrue("Invalid comparison result", audio.compareTo(audioBasic) > 0);
-        assertTrue("Invalid comparison result", all.compareTo(audioBasic) > 0);
-        assertTrue("Invalid comparison result", all.compareTo(audio) > 0);
+		// specific to unspecific
+		assertTrue("Invalid comparison result", audioBasic.compareTo(audio) < 0);
+		assertTrue("Invalid comparison result", audioBasic.compareTo(all) < 0);
+		assertTrue("Invalid comparison result", audio.compareTo(all) < 0);
 
-        // qualifiers
-        assertTrue("Invalid comparison result", audio.compareTo(audio07) < 0);
-        assertTrue("Invalid comparison result", audio07.compareTo(audio03) < 0);
-        assertTrue("Invalid comparison result", audio03.compareTo(all) > 0);
+		// unspecific to specific
+		assertTrue("Invalid comparison result", audio.compareTo(audioBasic) > 0);
+		assertTrue("Invalid comparison result", all.compareTo(audioBasic) > 0);
+		assertTrue("Invalid comparison result", all.compareTo(audio) > 0);
 
-        // sort
-        List<MediaType> expected = new ArrayList<MediaType>();
-        expected.add(audioBasic);
-        expected.add(audio);
-        expected.add(all);
-        expected.add(audio07);
-        expected.add(audio03);
+		// qualifiers
+		assertTrue("Invalid comparison result", audio.compareTo(audio07) < 0);
+		assertTrue("Invalid comparison result", audio07.compareTo(audio03) < 0);
+		assertTrue("Invalid comparison result", audio03.compareTo(all) > 0);
 
-        List<MediaType> result = new ArrayList<MediaType>(expected);
-        for (int i = 0; i < 10; i++) {
-            Collections.shuffle(result);
-            Collections.sort(result);
+		// sort
+		List<MediaType> expected = new ArrayList<MediaType>();
+		expected.add(audioBasic);
+		expected.add(audio);
+		expected.add(all);
+		expected.add(audio07);
+		expected.add(audio03);
 
-            for (int j = 0; j < result.size(); j++) {
-                assertEquals("Invalid media type at " + j, expected.get(j), result.get(j));
-            }
-        }
-    }
+		List<MediaType> result = new ArrayList<MediaType>(expected);
+		for (int i = 0; i < 10; i++) {
+			Collections.shuffle(result);
+			Collections.sort(result);
+
+			for (int j = 0; j < result.size(); j++) {
+				assertEquals("Invalid media type at " + j, expected.get(j), result.get(j));
+			}
+		}
+	}
 }
