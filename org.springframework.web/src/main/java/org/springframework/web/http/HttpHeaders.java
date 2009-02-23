@@ -32,6 +32,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.MediaType;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -47,7 +48,7 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public final class HttpHeaders implements Map<String, List<String>> {
+public final class HttpHeaders implements MultiValueMap<String, String> {
 
 	private static String ACCEPT = "Accept";
 
