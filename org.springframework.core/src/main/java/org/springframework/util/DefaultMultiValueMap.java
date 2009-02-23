@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,18 @@ public class DefaultMultiValueMap<K, V> implements MultiValueMap<K, V> {
 
 	private final Map<K, List<V>> wrappee;
 
+	/**
+	 * Constructs a new intance of the {@code DefaultMultiValueMap} wrapping a plain {@link LinkedHashMap}.
+	 */
+	public DefaultMultiValueMap() {
+		this(new LinkedHashMap<K, List<V>>());
+	}
+
+	/**
+	 * Constructs a new intance of the {@code DefaultMultiValueMap} wrapping the given map.
+	 *
+	 * @param wrappee the map to be wrapped
+	 */
 	public DefaultMultiValueMap(Map<K, List<V>> wrappee) {
 		Assert.notNull(wrappee, "'wrappee' must not be null");
 		this.wrappee = wrappee;
@@ -112,4 +125,20 @@ public class DefaultMultiValueMap<K, V> implements MultiValueMap<K, V> {
 	public Set<Entry<K, List<V>>> entrySet() {
 		return wrappee.entrySet();
 	}
+
+	@Override
+	public int hashCode() {
+		return wrappee.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.wrappee.equals(obj);
+	}
+
+	@Override
+	public String toString() {
+		return wrappee.toString();
+	}
+
 }
