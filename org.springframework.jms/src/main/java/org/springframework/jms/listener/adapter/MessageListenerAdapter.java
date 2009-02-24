@@ -46,16 +46,11 @@ import org.springframework.util.ObjectUtils;
  * Allows listener methods to operate on message content types, completely
  * independent from the JMS API.
  *
- * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider, because it builds
- * on the domain-independent API. <b>Use the {@link MessageListenerAdapter102
- * MessageListenerAdapter102} subclass for JMS 1.0.2 providers.</b>
- *
  * <p>By default, the content of incoming JMS messages gets extracted before
  * being passed into the target listener method, to let the target method
  * operate on message content types such as String or byte array instead of
  * the raw {@link Message}. Message type conversion is delegated to a Spring
  * JMS {@link MessageConverter}. By default, a {@link SimpleMessageConverter}
- * {@link org.springframework.jms.support.converter.SimpleMessageConverter102 (102)}
  * will be used. (If you do not want such automatic message conversion taking
  * place, then be sure to set the {@link #setMessageConverter MessageConverter}
  * to <code>null</code>.)

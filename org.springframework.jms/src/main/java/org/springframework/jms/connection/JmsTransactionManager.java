@@ -40,10 +40,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Connection/Session pair from the specified ConnectionFactory to the thread,
  * potentially allowing for one thread-bound Session per ConnectionFactory.
  *
- * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider because it builds on
- * the domain-independent API. <b>Use the {@link JmsTransactionManager102} subclass
- * for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
- *
  * <p>This local strategy is an alternative to executing JMS operations within
  * JTA transactions. Its advantage is that it is able to work in any environment,
  * for example a standalone application or a test suite, with any message broker

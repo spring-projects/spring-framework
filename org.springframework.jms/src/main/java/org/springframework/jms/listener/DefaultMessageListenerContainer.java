@@ -43,10 +43,6 @@ import org.springframework.util.ClassUtils;
  * Designed to work in a native JMS environment as well as in a J2EE environment,
  * with only minimal differences in configuration.
  *
- * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider, because it builds on
- * the domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
- * subclass for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
- *
  * <p>This is a simple but nevertheless powerful form of message listener container.
  * On startup, it obtains a fixed number of JMS Sessions to invoke the listener,
  * and optionally allows for dynamic adaptation at runtime (up until a maximum number).

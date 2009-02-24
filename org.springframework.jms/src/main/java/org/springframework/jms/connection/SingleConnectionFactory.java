@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
@@ -49,8 +48,7 @@ import org.springframework.util.Assert;
  *
  * <p>You can either pass in a specific JMS Connection directly or let this
  * factory lazily create a Connection via a given target ConnectionFactory.
- * This factory generally works with JMS 1.1 as well as JMS 1.0.2; use
- * {@link SingleConnectionFactory102} for strict JMS 1.0.2 only usage.
+ * This factory generally works with JMS 1.1 as well as the JMS 1.0.2 API.
  *
  * <p>Note that when using the JMS 1.0.2 API, this ConnectionFactory will switch
  * into queue/topic mode according to the JMS API methods used at runtime:

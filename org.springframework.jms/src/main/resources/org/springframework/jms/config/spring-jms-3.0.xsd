@@ -39,15 +39,12 @@
 					<xsd:documentation><![CDATA[
 	The type of this listener container: "default" or "simple", choosing
 	between DefaultMessageListenerContainer and SimpleMessageListenerContainer.
-	The "102" suffix adapts to a JMS provider that implements JMS 1.0.2 only.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:NMTOKEN">
 						<xsd:enumeration value="default"/>
-						<xsd:enumeration value="default102"/>
 						<xsd:enumeration value="simple"/>
-						<xsd:enumeration value="simple102"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>

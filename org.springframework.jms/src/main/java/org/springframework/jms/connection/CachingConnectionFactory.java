@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * Checks for a cached Session for the given mode.
 	 */
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
-		LinkedList<Session> sessionList = null;
+		LinkedList<Session> sessionList;
 		synchronized (this.cachedSessions) {
 			sessionList = this.cachedSessions.get(mode);
 			if (sessionList == null) {
@@ -429,7 +429,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	/**
 	 * Simple wrapper class around a Destination and other consumer attributes.
-	 * Used as the key when caching consumers.
+	 * Used as the cache key when caching MessageConsumer objects.
 	 */
 	private static class ConsumerCacheKey {
 

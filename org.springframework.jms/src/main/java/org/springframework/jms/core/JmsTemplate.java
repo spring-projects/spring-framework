@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,14 +41,10 @@ import org.springframework.util.Assert;
 /**
  * Helper class that simplifies synchronous JMS access code.
  *
- * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider because it builds
- * on the domain-independent API. <b>Use the {@link JmsTemplate102} subclass
- * for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
- *
  * <p>If you want to use dynamic destination creation, you must specify
  * the type of JMS destination to create, using the "pubSubDomain" property.
  * For other operations, this is not necessary, in contrast to when working
- * with JmsTemplate102. Point-to-Point (Queues) is the default domain.
+ * with {@link JmsTemplate102}. Point-to-Point (Queues) is the default domain.
  *
  * <p>Default settings for JMS Sessions are "not transacted" and "auto-acknowledge".
  * As defined by the J2EE specification, the transaction and acknowledgement
@@ -83,7 +79,6 @@ import org.springframework.util.Assert;
  * @see #setPubSubDomain
  * @see #setDestinationResolver
  * @see #setMessageConverter
- * @see JmsTemplate102
  * @see javax.jms.MessageProducer
  * @see javax.jms.MessageConsumer
  */
@@ -536,7 +531,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	public void send(final Destination destination, final MessageCreator messageCreator) throws JmsException {
-		execute(new SessionCallback() {
+		execute(new SessionCallback<Object>() {
 			public Object doInJms(Session session) throws JMSException {
 				doSend(session, destination, messageCreator);
 				return null;
@@ -545,7 +540,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	public void send(final String destinationName, final MessageCreator messageCreator) throws JmsException {
-		execute(new SessionCallback() {
+		execute(new SessionCallback<Object>() {
 			public Object doInJms(Session session) throws JMSException {
 				Destination destination = resolveDestinationName(session, destinationName);
 				doSend(session, destination, messageCreator);
@@ -697,16 +692,16 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	public Message receiveSelected(final Destination destination, final String messageSelector) throws JmsException {
-		return (Message) execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
+		return execute(new SessionCallback<Message>() {
+			public Message doInJms(Session session) throws JMSException {
 				return doReceive(session, destination, messageSelector);
 			}
 		}, true);
 	}
 
 	public Message receiveSelected(final String destinationName, final String messageSelector) throws JmsException {
-		return (Message) execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
+		return execute(new SessionCallback<Message>() {
+			public Message doInJms(Session session) throws JMSException {
 				Destination destination = resolveDestinationName(session, destinationName);
 				return doReceive(session, destination, messageSelector);
 			}
@@ -730,7 +725,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Actually receive a JMS message.
 	 * @param session the JMS Session to operate on
-	 * @param consumer the JMS MessageConsumer to send with
+	 * @param consumer the JMS MessageConsumer to receive with
 	 * @return the JMS Message received, or <code>null</code> if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
@@ -743,18 +738,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (resourceHolder != null && resourceHolder.hasTimeout()) {
 				timeout = resourceHolder.getTimeToLiveInMillis();
 			}
-			
-			Message message = null;
-			if (timeout == RECEIVE_TIMEOUT_NO_WAIT) {
-				message = consumer.receiveNoWait();
-			}
-			else if (timeout > 0) {
-				message = consumer.receive(timeout);
-			}
-			else {
-				message = consumer.receive();
-			}
-
+			Message message = doReceive(consumer, timeout);
 			if (session.getTransacted()) {
 				// Commit necessary - but avoid commit call within a JTA transaction.
 				if (isSessionLocallyTransacted(session)) {
@@ -772,6 +756,25 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 		finally {
 			JmsUtils.closeMessageConsumer(consumer);
+		}
+	}
+
+	/**
+	 * Actually receive a message from the given consumer.
+	 * @param consumer the JMS MessageConsumer to receive with
+	 * @param timeout the receive timeout
+	 * @return the JMS Message received, or <code>null</code> if none
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	private Message doReceive(MessageConsumer consumer, long timeout) throws JMSException {
+		if (timeout == RECEIVE_TIMEOUT_NO_WAIT) {
+			return consumer.receiveNoWait();
+		}
+		else if (timeout > 0) {
+			return consumer.receive(timeout);
+		}
+		else {
+			return consumer.receive();
 		}
 	}
 
