@@ -51,7 +51,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see #setPort
  * @see #setContexts
  */
-public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -167,11 +167,11 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 		this.server.start();
 	}
 
-	public Object getObject() {
+	public HttpServer getObject() {
 		return this.server;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends HttpServer> getObjectType() {
 		return (this.server != null ? this.server.getClass() : HttpServer.class);
 	}
 
