@@ -17,7 +17,6 @@
 package org.springframework.web.client;
 
 import java.net.URI;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,24 +39,22 @@ public interface RestOperations {
 	/**
 	 * Retrieve a representation by doing a GET on the specified URL.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 */
-	<T> T getForObject(String uri, Class<T> responseType, String... uriVariables)
-			throws RestClientException;
+	<T> T getForObject(String uri, Class<T> responseType, String... uriVariables) throws RestClientException;
 
 	/**
 	 * Retrieve a representation by doing a GET on the URI template.
 	 * <p>URI Template variables are expanded using the given map.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param responseType the type of the return value
 	 * @param uriVariables the map containing variables for the URI template
 	 * @return the converted object
 	 */
-	<T> T getForObject(String uri, Class<T> responseType, Map<String, String> uriVariables)
-			throws RestClientException;
+	<T> T getForObject(String uri, Class<T> responseType, Map<String, String> uriVariables) throws RestClientException;
 
 
 	// HEAD
@@ -65,7 +62,7 @@ public interface RestOperations {
 	/**
 	 * Retrieve all headers of the resource specified by the URI template.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param uriVariables the variables to expand the template
 	 * @return all HTTP headers of that resource
 	 */
@@ -74,7 +71,7 @@ public interface RestOperations {
 	/**
 	 * Retrieve all headers of the resource specified by the URI template.
 	 * <p>URI Template variables are expanded using the given map.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param uriVariables the map containing variables for the URI template
 	 * @return all HTTP headers of that resource
 	 */
@@ -84,27 +81,25 @@ public interface RestOperations {
 	// POST
 
 	/**
-	 * Create a new resource by POSTing the given object to the URI template. The value of the <code>Location</code>,
-	 * indicating where the new resource is stored, is returned.
+	 * Create a new resource by POSTing the given object to the URI template. The value of the <code>Location</code>
+	 * header, indicating where the new resource is stored, is returned.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
-	 * @param request the Object to be POSTED
+	 * @param uri	 the URI
+	 * @param request the Object to be POSTed, may be <code>null</code>
 	 * @return the value for the <code>Location</code> header
 	 */
-	URI postForLocation(String uri, Object request, String... uriVariables)
-			throws RestClientException;
+	URI postForLocation(String uri, Object request, String... uriVariables) throws RestClientException;
 
 	/**
-	 * Create a new resource by POSTing the given object to URI template. The value of the <code>Location</code>,
+	 * Create a new resource by POSTing the given object to URI template. The value of the <code>Location</code> header,
 	 * indicating where the new resource is stored, is returned.
 	 * <p>URI Template variables are expanded using the given map.
-	 * @param uri the URI
-	 * @param request the Object to be POSTed
+	 * @param uri		  the URI
+	 * @param request	  the Object to be POSTed, may be <code>null</code>
 	 * @param uriVariables the variables to expand the template
 	 * @return the value for the <code>Location</code> header
 	 */
-	URI postForLocation(String uri, Object request, Map<String, String> uriVariables)
-			throws RestClientException;
+	URI postForLocation(String uri, Object request, Map<String, String> uriVariables) throws RestClientException;
 
 
 	// PUT
@@ -112,8 +107,8 @@ public interface RestOperations {
 	/**
 	 * Create or update a resource by PUTting the given object to the URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
-	 * @param request the Object to be POSTed
+	 * @param uri		  the URI
+	 * @param request	  the Object to be PUT, may be <code>null</code>
 	 * @param uriVariables the variables to expand the template
 	 */
 	void put(String uri, Object request, String... uriVariables) throws RestClientException;
@@ -121,8 +116,8 @@ public interface RestOperations {
 	/**
 	 * Creates a new resource by PUTting the given object to URI template.
 	 * <p>URI Template variables are expanded using the given map.
-	 * @param uri the URI
-	 * @param request the Object to be POSTed
+	 * @param uri		  the URI
+	 * @param request	  the Object to be PUT, may be <code>null</code>
 	 * @param uriVariables the variables to expand the template
 	 */
 	void put(String uri, Object request, Map<String, String> uriVariables) throws RestClientException;
@@ -133,7 +128,7 @@ public interface RestOperations {
 	/**
 	 * Delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param uriVariables the variables to expand in the template
 	 */
 	void delete(String uri, String... uriVariables) throws RestClientException;
@@ -141,7 +136,7 @@ public interface RestOperations {
 	/**
 	 * Delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given map.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param uriVariables the variables to expand the template
 	 */
 	void delete(String uri, Map<String, String> uriVariables) throws RestClientException;
@@ -152,22 +147,20 @@ public interface RestOperations {
 	/**
 	 * Return the value of the Allow header for the given URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param uriVariables the variables to expand in the template
 	 * @return the value of the allow header
 	 */
-	Set<HttpMethod> optionsForAllow(String uri, String... uriVariables)
-			throws RestClientException;
+	Set<HttpMethod> optionsForAllow(String uri, String... uriVariables) throws RestClientException;
 
 	/**
 	 * Return the value of the Allow header for the given URI.
 	 * <p>URI Template variables are expanded using the given map.
-	 * @param uri the URI
+	 * @param uri		  the URI
 	 * @param uriVariables the variables to expand in the template
 	 * @return the value of the allow header
 	 */
-	Set<HttpMethod> optionsForAllow(String uri, Map<String, String> uriVariables)
-			throws RestClientException;
+	Set<HttpMethod> optionsForAllow(String uri, Map<String, String> uriVariables) throws RestClientException;
 
 
 	// general execution
@@ -176,30 +169,34 @@ public interface RestOperations {
 	 * Execute the HTTP methods to the given URI, preparing the request with the {@link RequestCallback},
 	 * and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param uri the URI
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestCallback object that prepares the request
+	 * @param uri			   the URI
+	 * @param method			the HTTP method (GET, POST, etc)
+	 * @param requestCallback   object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
-	 * @param uriVariables the variables to expand in the template
+	 * @param uriVariables	  the variables to expand in the template
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	<T> T execute(String uri, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, String... uriVariables)
-			throws RestClientException;
+	<T> T execute(String uri,
+			HttpMethod method,
+			RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor,
+			String... uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP methods to the given URI, preparing the request with the {@link RequestCallback},
 	 * and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables map.
-	 * @param uri the URI
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestCallback object that prepares the request
+	 * @param uri			   the URI
+	 * @param method			the HTTP method (GET, POST, etc)
+	 * @param requestCallback   object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
-	 * @param uriVariablesthe variables to expand in the template
+	 * @param uriVariables	  the variables to expand in the template
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	<T> T execute(String uri, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Map<String, String> uriVariables)
-			throws RestClientException;
+	<T> T execute(String uri,
+			HttpMethod method,
+			RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor,
+			Map<String, String> uriVariables) throws RestClientException;
 
 }
