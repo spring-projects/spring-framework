@@ -29,7 +29,6 @@ import java.util.Set;
  *
  * <p>This Map implementation is generally not thread-safe. It is primarily designed
  * for data structures exposed from request objects, for use in a single thread only.
- *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
@@ -38,10 +37,8 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 
 	private final Map<K, List<V>> targetMap;
 
-
 	/**
-	 * Create a new SimpleMultiValueMap that wraps the given target Map.
-	 * @param wrappee the target Map to wrap
+	 * Create a new SimpleMultiValueMap that wraps a newly created {@link LinkedHashMap}.
 	 */
 	public LinkedMultiValueMap() {
 		this.targetMap = new LinkedHashMap<K, List<V>>();
@@ -80,7 +77,6 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 		values.add(value);
 		this.targetMap.put(key, values);
 	}
-
 
 	// Map implementation
 
