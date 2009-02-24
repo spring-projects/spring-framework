@@ -16,32 +16,31 @@
 
 package org.springframework.web.client;
 
-import org.springframework.http.HttpStatus;
+import java.io.IOException;
 
 /**
- * Exception thrown when a HTTP 5xx is received.
+ * Exception thrown when an I/O error occurs.
  *
  * @author Arjen Poutsma
  * @since 3.0
- * @see DefaultResponseErrorHandler
  */
-public class HttpServerErrorException extends HttpStatusCodeException {
+public class ResourceAccessException extends RestClientException {
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link HttpStatus}.
-	 * @param statusCode the status code
+	 * Construct a new {@code HttpIOException} with the given message.
+	 * @param msg the message
 	 */
-	public HttpServerErrorException(HttpStatus statusCode) {
-		super(statusCode);
+	public ResourceAccessException(String msg) {
+		super(msg);
 	}
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link HttpStatus} and status text.
-	 * @param statusCode the status code
-	 * @param statusText the status text
+	 * Construct a new {@code HttpIOException} with the given message and {@link IOException}.
+	 * @param msg the message
+	 * @param ex the {@code IOException}
 	 */
-	public HttpServerErrorException(HttpStatus statusCode, String statusText) {
-		super(statusCode, statusText);
+	public ResourceAccessException(String msg, IOException ex) {
+		super(msg, ex);
 	}
 
 }

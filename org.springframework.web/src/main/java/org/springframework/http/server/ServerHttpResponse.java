@@ -14,34 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client;
+package org.springframework.http.server;
 
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception thrown when a HTTP 5xx is received.
+ * Represents a server-side HTTP response.
  *
  * @author Arjen Poutsma
  * @since 3.0
- * @see DefaultResponseErrorHandler
  */
-public class HttpServerErrorException extends HttpStatusCodeException {
+public interface ServerHttpResponse extends HttpOutputMessage {
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link HttpStatus}.
-	 * @param statusCode the status code
+	 * Set the HTTP status code of the response.
+	 * @param status the HTTP status as an HttpStatus enum value
 	 */
-	public HttpServerErrorException(HttpStatus statusCode) {
-		super(statusCode);
-	}
+	void setStatusCode(HttpStatus status);
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link HttpStatus} and status text.
-	 * @param statusCode the status code
-	 * @param statusText the status text
+	 * Close this response, freeing any resources created.
 	 */
-	public HttpServerErrorException(HttpStatus statusCode, String statusText) {
-		super(statusCode, statusText);
-	}
+	void close();
 
 }

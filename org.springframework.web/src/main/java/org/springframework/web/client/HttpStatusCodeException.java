@@ -16,23 +16,23 @@
 
 package org.springframework.web.client;
 
-import org.springframework.web.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
 /**
- * Abstract base class for exceptions based on a {@link HttpStatus}.
+ * Abstract base class for exceptions based on an {@link HttpStatus}.
  *
  * @author Arjen Poutsma
  * @since 3.0
  */
-public abstract class HttpStatusCodeException extends HttpClientException {
+public abstract class HttpStatusCodeException extends RestClientException {
 
 	private final HttpStatus statusCode;
 
 	private final String statusText;
 
+
 	/**
-	 * Constructs a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus}.
-	 *
+	 * Construct a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus}.
 	 * @param statusCode the status code
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode) {
@@ -42,8 +42,7 @@ public abstract class HttpStatusCodeException extends HttpClientException {
 	}
 
 	/**
-	 * Constructs a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus} and status text.
-	 *
+	 * Construct a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus} and status text.
 	 * @param statusCode the status code
 	 * @param statusText the status text
 	 */
@@ -53,17 +52,19 @@ public abstract class HttpStatusCodeException extends HttpClientException {
 		this.statusText = statusText;
 	}
 
+
 	/**
 	 * Returns the HTTP status code.
 	 */
 	public HttpStatus getStatusCode() {
-		return statusCode;
+		return this.statusCode;
 	}
 
 	/**
 	 * Returns the HTTP status text.
 	 */
 	public String getStatusText() {
-		return statusText;
+		return this.statusText;
 	}
+
 }
