@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,6 @@ import org.springframework.util.ObjectUtils;
  * <p>Converts a String to a {@link javax.jms.TextMessage}, a byte array to a
  * {@link javax.jms.BytesMessage}, a Map to a {@link javax.jms.MapMessage}, and
  * a Serializable object to a {@link javax.jms.ObjectMessage} (or vice versa).
- *
- * <p>This converter implementation works for both JMS 1.1 and JMS 1.0.2,
- * except when extracting a byte array from a BytesMessage. So for converting
- * BytesMessages with a JMS 1.0.2 provider, use {@link SimpleMessageConverter102}.
- * (As you would expect, {@link org.springframework.jms.core.JmsTemplate102}
- * uses SimpleMessageConverter102 as default.)
  *
  * @author Juergen Hoeller
  * @since 1.1

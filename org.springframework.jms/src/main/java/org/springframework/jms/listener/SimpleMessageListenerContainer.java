@@ -38,10 +38,6 @@ import org.springframework.util.Assert;
  * <code>MessageConsumer.setMessageListener()</code> method to
  * create concurrent MessageConsumers for the specified listeners.
  *
- * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider, because it builds on
- * the domain-independent API. <b>Use the {@link SimpleMessageListenerContainer102}
- * subclass for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
- *
  * <p>This is the simplest form of a message listener container.
  * It creates a fixed number of JMS Sessions to invoke the listener,
  * not allowing for dynamic adaptation to runtime demands. Its main

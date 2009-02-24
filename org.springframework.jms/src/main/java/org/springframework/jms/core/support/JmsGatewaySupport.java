@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2009 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,8 +31,8 @@ import org.springframework.jms.core.JmsTemplate;
  * <p>Requires a ConnectionFactory or a JmsTemplate instance to be set.
  * It will create its own JmsTemplate if a ConnectionFactory is passed in.
  * A custom JmsTemplate instance can be created for a given ConnectionFactory
- * through overriding the <code>createJmsTemplate</code> method.
- * 
+ * through overriding the {@link #createJmsTemplate} method.
+ *
  * @author Mark Pollack
  * @since 1.1.1
  * @see #setConnectionFactory
@@ -42,6 +42,7 @@ import org.springframework.jms.core.JmsTemplate;
  */
 public abstract class JmsGatewaySupport implements InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 	
 	private JmsTemplate jmsTemplate;
@@ -92,12 +93,12 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Return the JmsTemplate for the gateway.
 	 */
 	public final JmsTemplate getJmsTemplate() {
-		return jmsTemplate;
+		return this.jmsTemplate;
 	}
 	
 	public final void afterPropertiesSet() throws IllegalArgumentException, BeanInitializationException {
 		if (this.jmsTemplate == null) {
-			throw new IllegalArgumentException("connectionFactory or jmsTemplate is required");
+			throw new IllegalArgumentException("'connectionFactory' or 'jmsTemplate' is required");
 		}
 		try {
 			initGateway();

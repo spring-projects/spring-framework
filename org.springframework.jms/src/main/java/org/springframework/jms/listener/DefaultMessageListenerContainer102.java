@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ import org.springframework.jms.connection.JmsResourceHolder;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of the JMS 1.1 based {@link DefaultMessageListenerContainer}
  */
+@Deprecated
 public class DefaultMessageListenerContainer102 extends DefaultMessageListenerContainer {
 
 	/**
@@ -49,7 +51,7 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	 * a QueueConnection or a TopicConnection, depending on the domain.
 	 */
 	protected Connection getConnection(JmsResourceHolder holder) {
-		return holder.getConnection(isPubSubDomain() ? (Class) TopicConnection.class : QueueConnection.class);
+		return holder.getConnection(isPubSubDomain() ? TopicConnection.class : QueueConnection.class);
 	}
 
 	/**
@@ -57,7 +59,7 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	 * a QueueSession or a TopicSession, depending on the domain.
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
-		return holder.getSession(isPubSubDomain() ? (Class) TopicSession.class : QueueSession.class);
+		return holder.getSession(isPubSubDomain() ? TopicSession.class : QueueSession.class);
 	}
 
 	/**

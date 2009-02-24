@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,18 +41,20 @@ import org.springframework.jms.support.converter.SimpleMessageConverter102;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of the JMS 1.1 based {@link MessageListenerAdapter}
  */
+@Deprecated
 public class MessageListenerAdapter102 extends MessageListenerAdapter {
 
 	/**
-	 * Create a new instance of the {@link MessageListenerAdapter102} class
+	 * Create a new instance of the MessageListenerAdapter102 class
 	 * with the default settings.
 	 */
 	public MessageListenerAdapter102() {
 	}
 
 	/**
-	 * Create a new instance of the {@link MessageListenerAdapter102} class
+	 * Create a new instance of the MessageListenerAdapter102 class
 	 * for the given delegate.
 	 * @param delegate the target object to delegate message listening to
 	 */
