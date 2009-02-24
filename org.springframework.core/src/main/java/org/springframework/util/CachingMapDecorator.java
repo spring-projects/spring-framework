@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public CachingMapDecorator(Map<K, V> targetMap, boolean synchronize, boolean weak) {
-		Assert.notNull(targetMap, "Target Map is required");
+		Assert.notNull(targetMap, "'targetMap' must not be null");
 		this.targetMap = (Map<K, Object>) (synchronize ? Collections.synchronizedMap(targetMap) : targetMap);
 		this.synchronize = synchronize;
 		this.weak = weak;
