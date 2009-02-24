@@ -45,6 +45,14 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 	}
 
 	/**
+	 * Create a new SimpleMultiValueMap that wraps a newly created {@link LinkedHashMap} with the given initial capacity.
+	 * @param initialCapacity the initial capacity
+	 */
+	public LinkedMultiValueMap(int initialCapacity) {
+		this.targetMap = new LinkedHashMap<K, List<V>>(initialCapacity);
+	}
+
+	/**
 	 * Create a new SimpleMultiValueMap that wraps the given target Map.
 	 * <p>Note: The given Map will be used as active underlying Map.
 	 * Any changes in the underlying map will be reflected in the
