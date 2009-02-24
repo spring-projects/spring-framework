@@ -32,6 +32,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.HttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Assert;
@@ -91,7 +92,8 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
 
 	private HttpMessageConverter<?>[] messageConverters =
-			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter()};
+			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
+					new FormHttpMessageConverter()};
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
