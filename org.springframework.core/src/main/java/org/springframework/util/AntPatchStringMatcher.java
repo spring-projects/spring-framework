@@ -1,11 +1,29 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.util;
 
 import java.util.Map;
 
 /**
- * Package-protected helper class for {@link AntPathMatcher}. Tests whether or not a string matches against a pattern.
- * The pattern may contain special characters:<br> '*' means zero or more characters<br> '?' means one and only one
- * character, '{' and '}' indicate a uri template pattern
+ * Package-protected helper class for {@link AntPathMatcher}.
+ * Tests whether or not a string matches against a pattern.
+ *
+ * <p>The pattern may contain special characters: '*' means zero or more characters;
+ * '?' means one and only one character; '{' and '}' indicate a URI template pattern.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -28,29 +46,24 @@ class AntPatchStringMatcher {
 
 	private final Map<String, String> uriTemplateVariables;
 
-	/** Constructs a new instance of the <code>AntPatchStringMatcher</code>. */
-	AntPatchStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
-		patArr = pattern.toCharArray();
-		strArr = str.toCharArray();
+
+	/**
+	 * Construct a new instance of the <code>AntPatchStringMatcher</code>.
+	 */
+	public AntPatchStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
+		this.patArr = pattern.toCharArray();
+		this.strArr = str.toCharArray();
+		this.patIdxEnd = this.patArr.length - 1;
+		this.strIdxEnd = this.strArr.length - 1;
 		this.uriTemplateVariables = uriTemplateVariables;
-		patIdxEnd = patArr.length - 1;
-		strIdxEnd = strArr.length - 1;
 	}
 
-	private void addTemplateVariable(int curlyIdxStart, int curlyIdxEnd, int valIdxStart, int valIdxEnd) {
-		if (uriTemplateVariables != null) {
-			String varName = new String(patArr, curlyIdxStart + 1, curlyIdxEnd - curlyIdxStart - 1);
-			String varValue = new String(strArr, valIdxStart, valIdxEnd - valIdxStart + 1);
-			uriTemplateVariables.put(varName, varValue);
-		}
-	}
 
 	/**
 	 * Main entry point.
-	 *
 	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
 	 */
-	boolean matchStrings() {
+	public boolean matchStrings() {
 		if (shortcutPossible()) {
 			return doShortcut();
 		}
@@ -117,6 +130,14 @@ class AntPatchStringMatcher {
 		}
 
 		return onlyStarsLeft();
+	}
+
+	private void addTemplateVariable(int curlyIdxStart, int curlyIdxEnd, int valIdxStart, int valIdxEnd) {
+		if (uriTemplateVariables != null) {
+			String varName = new String(patArr, curlyIdxStart + 1, curlyIdxEnd - curlyIdxStart - 1);
+			String varValue = new String(strArr, valIdxStart, valIdxEnd - valIdxStart + 1);
+			uriTemplateVariables.put(varName, varValue);
+		}
 	}
 
 	private boolean consecutiveStars(int patIdxTmp) {
