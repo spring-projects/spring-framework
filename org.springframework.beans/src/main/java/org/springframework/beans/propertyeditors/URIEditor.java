@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,10 +105,19 @@ public class URIEditor extends PropertyEditorSupport {
 	 * constructor, replacing spaces with "%20" quotes first.
 	 * @param value the value to convert into a URI instance
 	 * @return the URI instance
-	 * @throws URISyntaxException if URI conversion failed
+	 * @throws java.net.URISyntaxException if URI conversion failed
 	 */
 	protected URI createURI(String value) throws URISyntaxException {
-		return new URI(StringUtils.replace(value, " ", "%20"));
+		int idx = value.indexOf(':');
+		if (idx != -1) {
+			String scheme = value.substring(0, idx);
+			String ssp = value.substring(idx + 1);
+			return new URI(scheme, ssp, null);
+		}
+		else {
+			// value contains no scheme, fallback to default
+			return new URI(value);
+		}
 	}
 
 
