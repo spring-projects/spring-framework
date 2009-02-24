@@ -14,38 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.http.converter;
 
-import java.util.List;
-import java.util.Map;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * Extension of the {@code Map} interface that stores multiple values.
+ * Thrown by {@link HttpMessageConverter} implementations when the conversion fails.
  *
  * @author Arjen Poutsma
  * @since 3.0
  */
-public interface MultiValueMap<K, V> extends Map<K, List<V>> {
+public class HttpMessageConversionException extends NestedRuntimeException {
 
 	/**
-	 * Return the first value for the given key.
-	 * @param key the key
-	 * @return the first value for the specified key, or <code>null</code>
+	 * Create a new MessageConversionException.
+	 * @param msg the detail message
 	 */
-	V getFirst(K key);
+	public HttpMessageConversionException(String msg) {
+		super(msg);
+	}
 
 	/**
-	 * Add the given single value to the current list of values for the given key.
-	 * @param key the key
-	 * @param value the value to be added
+	 * Create a new MessageConversionException.
+	 * @param msg the detail message
+	 * @param cause the root cause (if any)
 	 */
-	void add(K key, V value);
-
-	/**
-	 * Set the given single value under the given key.
-	 * @param key the key
-	 * @param value the value to set
-	 */
-	void set(K key, V value);
+	public HttpMessageConversionException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 
 }

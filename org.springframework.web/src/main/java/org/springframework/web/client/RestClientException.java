@@ -16,32 +16,31 @@
 
 package org.springframework.web.client;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * Exception thrown when a HTTP 5xx is received.
+ * Base class for exceptions thrown by {@link RestTemplate} whenever it encounters client-side HTTP errors.
  *
  * @author Arjen Poutsma
  * @since 3.0
- * @see DefaultResponseErrorHandler
  */
-public class HttpServerErrorException extends HttpStatusCodeException {
+public class RestClientException extends NestedRuntimeException {
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link HttpStatus}.
-	 * @param statusCode the status code
+	 * Construct a new instance of {@code HttpClientException} with the given message.
+	 * @param msg the message
 	 */
-	public HttpServerErrorException(HttpStatus statusCode) {
-		super(statusCode);
+	public RestClientException(String msg) {
+		super(msg);
 	}
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link HttpStatus} and status text.
-	 * @param statusCode the status code
-	 * @param statusText the status text
+	 * Construct a new instance of {@code HttpClientException} with the given message and exception.
+	 * @param msg the message
+	 * @param ex the exception
 	 */
-	public HttpServerErrorException(HttpStatus statusCode, String statusText) {
-		super(statusCode, statusText);
+	public RestClientException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }

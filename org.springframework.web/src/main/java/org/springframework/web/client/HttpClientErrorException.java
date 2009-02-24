@@ -16,20 +16,19 @@
 
 package org.springframework.web.client;
 
-import org.springframework.web.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
 /**
  * Exception thrown when a HTTP 4xx is received.
  *
  * @author Arjen Poutsma
- * @see org.springframework.web.client.core.SimpleHttpErrorHandler
  * @since 3.0
+ * @see DefaultResponseErrorHandler
  */
 public class HttpClientErrorException extends HttpStatusCodeException {
 
 	/**
-	 * Constructs a new instance of {@code HttpClientErrorException} based on a {@link HttpStatus}.
-	 *
+	 * Construct a new instance of {@code HttpClientErrorException} based on a {@link HttpStatus}.
 	 * @param statusCode the status code
 	 */
 	public HttpClientErrorException(HttpStatus statusCode) {
@@ -37,12 +36,12 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * Constructs a new instance of {@code HttpClientErrorException} based on a {@link HttpStatus} and status text.
-	 *
+	 * Construct a new instance of {@code HttpClientErrorException} based on a {@link HttpStatus} and status text.
 	 * @param statusCode the status code
 	 * @param statusText the status text
 	 */
 	public HttpClientErrorException(HttpStatus statusCode, String statusText) {
 		super(statusCode, statusText);
 	}
+
 }
