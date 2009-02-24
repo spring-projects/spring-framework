@@ -33,9 +33,9 @@ import org.springframework.util.Assert;
  * (<code>{</code>, <code>}</code>), which can be expanded to produce a URI.
  * <p/>
  * See {@link #expand(Map)}, {@link #expand(String[])}, and {@link #match(String)} for example usages.
- *
  * @author Arjen Poutsma
  * @see <a href="http://bitworking.org/projects/URI-Templates/">URI Templates</a>
+ * @since 3.0
  */
 public final class UriTemplate {
 
@@ -57,7 +57,6 @@ public final class UriTemplate {
 
 	/**
 	 * Constructs a new {@link UriTemplate} with the given string.
-	 *
 	 * @param uriTemplate the uri template string
 	 */
 	public UriTemplate(String uriTemplate) {
@@ -69,7 +68,6 @@ public final class UriTemplate {
 
 	/**
 	 * Returns the names of the variables in the template, in order.
-	 *
 	 * @return the template variable names
 	 */
 	public List<String> getVariableNames() {
@@ -89,7 +87,6 @@ public final class UriTemplate {
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
 	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
-	 *
 	 * @param uriVariables the map of uri variables
 	 * @return the expanded uri
 	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>; or if it does not contain
@@ -116,7 +113,6 @@ public final class UriTemplate {
 	 * System.out.println(template.expand("1", "42));
 	 * </pre>
 	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
-	 *
 	 * @param uriVariableValues the array of uri variables
 	 * @return the expanded uri
 	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>; or if it does not contain
@@ -137,12 +133,11 @@ public final class UriTemplate {
 			m.appendReplacement(buffer, uriVariable);
 		}
 		m.appendTail(buffer);
-		return URI.create(buffer.toString());
+		return encodeUri(buffer.toString());
 	}
 
 	/**
 	 * Indicates whether the given URI matches this template.
-	 *
 	 * @param uri the URI to match to
 	 * @return <code>true</code> if it matches; <code>false</code> otherwise
 	 */
@@ -164,7 +159,6 @@ public final class UriTemplate {
 	 * System.out.println(template.match("http://example.com/hotels/1/bookings/42"));
 	 * </pre>
 	 * will print: <blockquote><code>{hotel=1, booking=42}</code></blockquote>
-	 *
 	 * @param uri the URI to match to
 	 * @return a map of variable values
 	 */
@@ -181,6 +175,26 @@ public final class UriTemplate {
 		}
 		return result;
 	}
+
+	private static URI encodeUri(String uri) {
+		try {
+			int idx = uri.indexOf(':');
+			URI result;
+			if (idx != -1) {
+				String scheme = uri.substring(0, idx);
+				String ssp = uri.substring(idx + 1);
+				result = new URI(scheme, ssp, null);
+			}
+			else {
+				result = new URI(null, null, uri, null);
+			}
+			return result;
+		}
+		catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Could not create URI from [" + uri + "]");
+		}
+	}
+
 
 	@Override
 	public String toString() {
@@ -218,16 +232,10 @@ public final class UriTemplate {
 			if (start == end) {
 				return "";
 			}
-			String result = fullPath.substring(start, end);
-			try {
-				URI uri = new URI(null, null, result, null);
-				result = uri.toASCIIString();
-			}
-			catch (URISyntaxException e) {
-				throw new IllegalArgumentException("Could not create URI from [" + fullPath + "]");
-			}
+			String result = encodeUri(fullPath.substring(start, end)).toASCIIString();
 			return Pattern.quote(result);
 		}
+
 
 		private List<String> getVariableNames() {
 			return Collections.unmodifiableList(variableNames);

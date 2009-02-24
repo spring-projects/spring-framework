@@ -87,6 +87,16 @@ public class UriTemplateTests {
 	}
 
 	@Test
+	public void expandEncoded() throws Exception {
+		template = new UriTemplate("http://example.com/hotel list/{hotel}");
+		URI result = template.expand(Collections.singletonMap("hotel", "foo bar \u20AC"));
+		assertEquals("Invalid expanded template", new URI("http", "//example.com/hotel list/foo bar \u20AC", null),
+				result);
+		assertEquals("Invalid expanded template", "http://example.com/hotel%20list/foo%20bar%20%E2%82%AC",
+				result.toASCIIString());
+	}
+
+	@Test
 	public void matches() throws Exception {
 		assertTrue("UriTemplate does not match", template.matches("http://example.com/hotels/1/bookings/42"));
 		assertFalse("UriTemplate matches", template.matches("http://example.com/hotels/bookings"));
