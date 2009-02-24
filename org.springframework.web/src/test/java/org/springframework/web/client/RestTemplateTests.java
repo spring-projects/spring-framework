@@ -264,6 +264,24 @@ public class RestTemplateTests {
 	}
 
 	@Test
+	public void postNull() throws Exception {
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		expect(response.getHeaders()).andReturn(responseHeaders);
+		response.close();
+
+		replayMocks();
+		template.postForLocation("http://example.com", null);
+		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+
+		verifyMocks();
+	}
+
+	@Test
 	public void put() throws Exception {
 		expect(converter.supports(String.class)).andReturn(true).times(2);
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.PUT)).andReturn(request);
@@ -276,6 +294,22 @@ public class RestTemplateTests {
 		replayMocks();
 
 		template.put("http://example.com", helloWorld);
+
+		verifyMocks();
+	}
+
+	@Test
+	public void putNull() throws Exception {
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.PUT)).andReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		response.close();
+
+		replayMocks();
+		template.put("http://example.com", null);
+		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
 
 		verifyMocks();
 	}

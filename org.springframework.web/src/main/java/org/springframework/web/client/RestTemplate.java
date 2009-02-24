@@ -91,14 +91,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
 
 	private HttpMessageConverter<?>[] messageConverters =
-			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter()};
+			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter()};
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
 
 	/**
 	 * Create a new instance of the {@link RestTemplate} using default settings.
-	 * @see #initDefaultStrategies()
 	 */
 	public RestTemplate() {
 	}
@@ -166,8 +165,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	// GET
 
-	public <T> T getForObject(String url, Class<T> responseType, String... urlVariables)
-			throws RestClientException {
+	public <T> T getForObject(String url, Class<T> responseType, String... urlVariables) throws RestClientException {
 
 		checkForSupportedMessageConverter(responseType);
 		return execute(url, HttpMethod.GET, new GetCallback<T>(responseType),
@@ -196,10 +194,10 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	// POST
 
-	public URI postForLocation(String url, Object request, String... urlVariables)
-			throws RestClientException {
-
-		checkForSupportedMessageConverter(request.getClass());
+	public URI postForLocation(String url, Object request, String... urlVariables) throws RestClientException {
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
 		HttpHeaders headers =
 				execute(url, HttpMethod.POST, new PostPutCallback(request), this.headersExtractor, urlVariables);
 		return headers.getLocation();
@@ -207,8 +205,9 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	public URI postForLocation(String url, Object request, Map<String, String> urlVariables)
 			throws RestClientException {
-
-		checkForSupportedMessageConverter(request.getClass());
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
 		HttpHeaders headers =
 				execute(url, HttpMethod.POST, new PostPutCallback(request), this.headersExtractor, urlVariables);
 		return headers.getLocation();
@@ -218,12 +217,16 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	// PUT
 
 	public void put(String url, Object request, String... urlVariables) throws RestClientException {
-		checkForSupportedMessageConverter(request.getClass());
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
 		execute(url, HttpMethod.PUT, new PostPutCallback(request), null, urlVariables);
 	}
 
 	public void put(String url, Object request, Map<String, String> urlVariables) throws RestClientException {
-		checkForSupportedMessageConverter(request.getClass());
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
 		execute(url, HttpMethod.PUT, new PostPutCallback(request), null, urlVariables);
 	}
 
@@ -241,15 +244,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	// OPTIONS
 
-	public Set<HttpMethod> optionsForAllow(String url, String... urlVariables)
-			throws RestClientException {
+	public Set<HttpMethod> optionsForAllow(String url, String... urlVariables) throws RestClientException {
 
 		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, this.headersExtractor, urlVariables);
 		return headers.getAllow();
 	}
 
-	public Set<HttpMethod> optionsForAllow(String url, Map<String, String> urlVariables)
-			throws RestClientException {
+	public Set<HttpMethod> optionsForAllow(String url, Map<String, String> urlVariables) throws RestClientException {
 
 		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, this.headersExtractor, urlVariables);
 		return headers.getAllow();
@@ -258,18 +259,22 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	// general execution
 
-	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, String... urlVariables)
-			throws RestClientException {
+	public <T> T execute(String url,
+			HttpMethod method,
+			RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor,
+			String... urlVariables) throws RestClientException {
 
 		UriTemplate uriTemplate = new UriTemplate(url);
 		URI expanded = uriTemplate.expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
-	public <T> T execute(String url,HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Map<String, String> urlVariables)
-			throws RestClientException {
+	public <T> T execute(String url,
+			HttpMethod method,
+			RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor,
+			Map<String, String> urlVariables) throws RestClientException {
 
 		UriTemplate uriTemplate = new UriTemplate(url);
 		URI expanded = uriTemplate.expand(urlVariables);
@@ -279,13 +284,15 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	/**
 	 * Execute the given method on the provided URI. The {@link ClientHttpRequest} is processed using the {@link
 	 * RequestCallback}; the response with the {@link ResponseExtractor}.
-	 * @param url the fully-expanded URL to connect to
-	 * @param method the HTTP method to execute (GET, POST, etc.)
-	 * @param requestCallback object that prepares the request (can be <code>null</code>)
+	 * @param url			   the fully-expanded URL to connect to
+	 * @param method			the HTTP method to execute (GET, POST, etc.)
+	 * @param requestCallback   object that prepares the request (can be <code>null</code>)
 	 * @param responseExtractor object that extracts the return value from the response (can be <code>null</code>)
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,
+	protected <T> T doExecute(URI url,
+			HttpMethod method,
+			RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		Assert.notNull(url, "'url' must not be null");
@@ -376,11 +383,15 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		@SuppressWarnings("unchecked")
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
-			HttpMessageConverter entityConverter = getSupportedMessageConverters(this.request.getClass()).get(0);
-			entityConverter.write(this.request, httpRequest);
+			if (request != null) {
+				HttpMessageConverter entityConverter = getSupportedMessageConverters(this.request.getClass()).get(0);
+				entityConverter.write(this.request, httpRequest);
+			}
+			else {
+				httpRequest.getHeaders().setContentLength(0L);
+			}
 		}
 	}
-
 
 	/**
 	 * Response extractor that uses the registered {@linkplain HttpMessageConverter entity converters}
