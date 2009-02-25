@@ -61,8 +61,8 @@
 	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<property name="mediaTypes">
 			<map>
-				<entry key="xml" value="application/vnd.springsource.samples.petclinic+xml"/>
-				<entry key="atom" value="#{vets.contentType}"/>
+				<entry key="xml" value="#{vets.contentType}"/>
+				<entry key="atom" value="#{visits.contentType}"/>
 			</map>
 		</property>
 		<property name="order" value="0"/>

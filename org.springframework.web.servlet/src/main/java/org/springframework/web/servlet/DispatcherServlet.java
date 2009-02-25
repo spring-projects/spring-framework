@@ -741,7 +741,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (logger.isDebugEnabled()) {
 			String requestUri = new UrlPathHelper().getRequestUri(request);
 			logger.debug("DispatcherServlet with name '" + getServletName() +
-					"' processing request for [" + requestUri + "]");
+					"' processing " + request.getMethod() + " request for [" + requestUri + "]");
 		}
 
 		// Keep a snapshot of the request attributes in case of an include,

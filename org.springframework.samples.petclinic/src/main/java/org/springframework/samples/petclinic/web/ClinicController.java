@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Vets;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,11 +54,10 @@ public class ClinicController {
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@RequestMapping("/vets")
-	public String vetsHandler(Model model) {
+	public ModelMap vetsHandler() {
 		Vets vets = new Vets();
 		vets.getVetList().addAll(this.clinic.getVets());
-		model.addAttribute(vets);
-		return "vets/list";
+		return new ModelMap(vets);
 	}
 
 	/**
