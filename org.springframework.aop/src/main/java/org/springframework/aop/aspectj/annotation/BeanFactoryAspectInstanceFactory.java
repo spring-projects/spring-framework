@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.util.ClassUtils;
 
 /**
- * AspectInstanceFactory backed by a Spring
- * {@link org.springframework.beans.factory.BeanFactory}.
+ * {@link org.springframework.aop.aspectj.AspectInstanceFactory} implementation
+ * backed by a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Note that this may instantiate multiple times if using a prototype,
  * which probably won't give the semantics you expect. 
@@ -100,12 +100,12 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @see org.springframework.core.annotation.Order
 	 */
 	public int getOrder() {
-		Class type = this.beanFactory.getType(this.name);
+		Class<?> type = this.beanFactory.getType(this.name);
 		if (type != null) {
 			if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
 				return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
 			}
-			Order order = (Order) type.getAnnotation(Order.class);
+			Order order = type.getAnnotation(Order.class);
 			if (order != null) {
 				return order.value();
 			}
