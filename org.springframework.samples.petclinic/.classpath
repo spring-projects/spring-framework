@@ -32,10 +32,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web.servlet"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web.servlet"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.springsource.server.ide.server.core.runtime.classpath/SpringSource dm Server (Runtime) v1.0"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/JVM 1.6.0"/>
+	<classpathentry kind="lib" path="/Users/cbeams/Work/springsource/products/opensource/portfolio/spring-framework/org.springframework.web.servlet/target/artifacts/org.springframework.web.servlet.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
