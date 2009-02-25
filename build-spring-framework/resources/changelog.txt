@@ -3,17 +3,22 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.M2 (2009-02-20)
+Changes in version 3.0.0.M2 (2009-02-25)
 ----------------------------------------
 
-* refined OSGi version constraints for "javax.annotation" and "junit.framework"
 * revised expression parser API design
 * added SimpleThreadScope implementation
+* refined OSGi version constraints for "javax.annotation" and "junit.framework"
 * "systemProperties" bean is not considered a default match for type Properties anymore
+* SimpleAliasRegistry's "getAliases" method returns transitive aliases now
+* SimpleAliasRegistry detects resolved aliases that loop back to the original name
+* PropertyPlaceholderConfigurer does not modify Map in case of equal String keys
+* improved NoClassDefFoundError handling during constructor resolution
+* inner class names in Java source style ("java.lang.Thread.State") supported as well
+* pre-converted property values are preserved more eagerly for re-created beans
+* prototype beans receive independent collection/array even when based on single value
 * registered plain singletons will be fully matched according to their qualifiers
 * @Qualifier value matching takes chained aliases of target beans into account as well
-* SimpleAliasRegistry's "getAliases" method returns transitive aliases now
-* pre-converted property values are preserved more eagerly for re-created beans
 * ASM-based AnnotationMetadata fully resolves class arguments and enums into Java types
 * ProceedingJoinPoint resolves parameter names using ASM-based parameter name discovery
 * MethodInvocations and ProceedingJoinPoints always expose original method (not bridge)
@@ -52,8 +57,11 @@ Changes in version 3.0.0.M2 (2009-02-20)
 * fixed JmsException/JmsUtils to fully avoid NPEs in case of cause messages being null
 * fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well
 * fixed HTTP invoker to support resolution of multi-level primitive array classes again
+* deprecated support for JMS 1.0.2 providers (JmsTemplate102 etc)
+* introduced top-level HTTP support package "org.springframework.http"
+* introduced RestTemplate facility in package "org.springframework.web.client"
 * introduced OXM support package (originating from Spring Web Services)
-* introduced OXM-based MarshallingMessageConverter for JMS
+* introduced OXM-based MarshallingMessageConverter for Spring JMS
 * introduced OXM-based MarshallingView for Spring MVC
 * refined @PathVariable handling in MVC handler methods
 * updated Spring Portlet MVC infrastructure and mocks for Portlet API 2.0
@@ -61,7 +69,7 @@ Changes in version 3.0.0.M2 (2009-02-20)
 * added resolveException method for resource requests to HandlerExceptionResolver
 * introduced Resource/EventAwareController subinterfaces of Portlet Controller
 * introduced @Action/@Render/@Resource/@EventMapping annotations for Portlet MVC
-* added @RequestHeader support for Portlet MVC
+* added @RequestHeader support for Portlet MVC (based on Portlet request properties)
 * introduced @CookieValue annotation for Servlet and Portlet MVC handler methods
 * @RequestMapping type-level param constraints taken into account consistently
 * optional boolean parameters in MVC handler methods resolve to "false" if not present
