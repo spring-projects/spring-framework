@@ -45,7 +45,7 @@ import org.springframework.web.util.UriTemplate;
  *
  * <p>The main entry points of this template are the methods named after the five main HTTP methods:
  * <table>
- * <tr><th>HTTP method<th><th>RestTemplate methods</th></tr>
+ * <tr><th>HTTP method</th><th>RestTemplate methods</th></tr>
  * <tr><td>DELETE</td><td>{@link #delete}</td></tr>
  * <tr><td>GET</td><td>{@link #getForObject}</td></tr>
  * <tr><td>HEAD</td><td>{@link #headForHeaders}</td></tr>

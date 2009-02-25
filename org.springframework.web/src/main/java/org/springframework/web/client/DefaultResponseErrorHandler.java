@@ -18,9 +18,6 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 
@@ -28,7 +25,8 @@ import org.springframework.http.client.ClientHttpResponse;
  * Default implementation of the {@link ResponseErrorHandler} interface.
  *
  * <p>This error handler checks for the status code on the {@link ClientHttpResponse}: any code with series
- * {@link HttpStatus.Series#CLIENT_ERROR} or {@link HttpStatus.Series#SERVER_ERROR} is considered to be an error.
+ * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
+ * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR} is considered to be an error.
  * This behavior can be changed by overriding the {@link #hasError(HttpStatus)} method.
  *
  * @author Arjen Poutsma
@@ -46,18 +44,24 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
 	 * Template method called from {@link #hasError(ClientHttpResponse)}.
-	 * <p>The default implementation checks if the given status code is {@link HttpStatus.Series#CLIENT_ERROR}
-	 * or {@link HttpStatus.Series#SERVER_ERROR}. Can be overridden in subclasses.
+	 * <p>The default implementation checks if the given status code is
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR}
+	 * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}. Can be overridden in subclasses.
 	 * @param statusCode the HTTP status code
 	 * @return <code>true</code> if the response has an error; <code>false</code> otherwise
-	 * @see HttpStatus.Series#CLIENT_ERROR
-	 * @see HttpStatus.Series#SERVER_ERROR
 	 */
 	protected boolean hasError(HttpStatus statusCode) {
 		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||
 				statusCode.series() == HttpStatus.Series.SERVER_ERROR);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>The default implementation throws a {@link HttpClientErrorException} if the response status code is
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException} if it is
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}, and a {@link RestClientException} in other
+	 * cases.
+	 */
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = response.getStatusCode();
 		switch (statusCode.series()) {
