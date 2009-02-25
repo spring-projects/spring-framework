@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 
 /**
- * FactoryBean that obtains a WebSphere {@link javax.management.MBeanServer}
+ * {@link FactoryBean} that obtains a WebSphere {@link javax.management.MBeanServer}
  * reference through WebSphere's proprietary <code>AdminServiceFactory</code> API,
  * available on WebSphere 5.1 and higher.
  *
@@ -42,7 +42,7 @@ import org.springframework.jmx.MBeanServerNotFoundException;
  * @see javax.management.MBeanServer
  * @see MBeanServerFactoryBean
  */
-public class WebSphereMBeanServerFactoryBean implements FactoryBean, InitializingBean {
+public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>, InitializingBean {
 
 	private static final String ADMIN_SERVICE_FACTORY_CLASS = "com.ibm.websphere.management.AdminServiceFactory";
 
@@ -60,10 +60,10 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean, Initializin
 			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
 			 */
 			Class adminServiceClass = getClass().getClassLoader().loadClass(ADMIN_SERVICE_FACTORY_CLASS);
-			Method getMBeanFactoryMethod = adminServiceClass.getMethod(GET_MBEAN_FACTORY_METHOD, new Class[0]);
-			Object mbeanFactory = getMBeanFactoryMethod.invoke(null, new Object[0]);
-			Method getMBeanServerMethod = mbeanFactory.getClass().getMethod(GET_MBEAN_SERVER_METHOD, new Class[0]);
-			this.mbeanServer = (MBeanServer) getMBeanServerMethod.invoke(mbeanFactory, new Object[0]);
+			Method getMBeanFactoryMethod = adminServiceClass.getMethod(GET_MBEAN_FACTORY_METHOD);
+			Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
+			Method getMBeanServerMethod = mbeanFactory.getClass().getMethod(GET_MBEAN_SERVER_METHOD);
+			this.mbeanServer = (MBeanServer) getMBeanServerMethod.invoke(mbeanFactory);
 		}
 		catch (ClassNotFoundException ex) {
 			throw new MBeanServerNotFoundException("Could not find WebSphere's AdminServiceFactory class", ex);
@@ -79,11 +79,11 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean, Initializin
 	}
 
 
-	public Object getObject() {
+	public MBeanServer getObject() {
 		return this.mbeanServer;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends MBeanServer> getObjectType() {
 		return (this.mbeanServer != null ? this.mbeanServer.getClass() : MBeanServer.class);
 	}
 

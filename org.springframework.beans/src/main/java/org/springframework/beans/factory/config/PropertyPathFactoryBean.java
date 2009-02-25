@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ import org.springframework.util.StringUtils;
  * @see #setTargetBeanName
  * @see #setPropertyPath
  */
-public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, BeanFactoryAware {
+public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware {
 
 	private static final Log logger = LogFactory.getLog(PropertyPathFactoryBean.class);
 
@@ -207,7 +207,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 		return target.getPropertyValue(this.propertyPath);
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return this.resultType;
 	}
 

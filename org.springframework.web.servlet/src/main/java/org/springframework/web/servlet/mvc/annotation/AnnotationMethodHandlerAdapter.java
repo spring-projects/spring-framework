@@ -375,19 +375,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	/**
 	 * Handle the case where no request handler method was found for the particular HTTP request method.
-	 *
-	 * <p/>The default implementation logs a warning, sends an HTTP 405 error and sets the "Allow" header. Alternatively, a
-	 * fallback view could be chosen, or the HttpRequestMethodNotSupportedException could be rethrown as-is.
-	 *
-	 * @param ex	   the HttpRequestMethodNotSupportedException to be handled
-	 * @param request  current HTTP request
+	 * <p>The default implementation logs a warning, sends an HTTP 405 error and sets the "Allow" header.
+	 * Alternatively, a fallback view could be chosen, or the HttpRequestMethodNotSupportedException
+	 * could be rethrown as-is.
+	 * @param ex the HttpRequestMethodNotSupportedException to be handled
+	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render, or <code>null</code> if handled directly
 	 * @throws Exception an Exception that should be thrown as result of the servlet request
 	 */
-	protected ModelAndView handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex,
-																		HttpServletRequest request,
-																		HttpServletResponse response) throws Exception {
+	protected ModelAndView handleHttpRequestMethodNotSupportedException(
+			HttpRequestMethodNotSupportedException ex, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
 		pageNotFoundLogger.warn(ex.getMessage());
 		response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		response.addHeader("Allow", StringUtils.arrayToDelimitedString(ex.getSupportedMethods(), ", "));

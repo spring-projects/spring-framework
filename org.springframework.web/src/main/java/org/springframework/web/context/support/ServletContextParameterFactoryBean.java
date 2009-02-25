@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * FactoryBean that retrieves a specific ServletContext init parameter
+ * {@link FactoryBean} that retrieves a specific ServletContext init parameter
  * (that is, a "context-param" defined in <code>web.xml</code>).
  * Exposes that ServletContext init parameter when used as bean reference,
  * effectively making it available as named Spring bean instance.
@@ -31,7 +31,7 @@ import org.springframework.web.context.ServletContextAware;
  * @since 1.2.4
  * @see ServletContextAttributeFactoryBean
  */
-public class ServletContextParameterFactoryBean implements FactoryBean, ServletContextAware {
+public class ServletContextParameterFactoryBean implements FactoryBean<String>, ServletContextAware {
 
 	private String initParamName;
 
@@ -56,11 +56,11 @@ public class ServletContextParameterFactoryBean implements FactoryBean, ServletC
 	}
 
 
-	public Object getObject() throws Exception {
+	public String getObject() {
 		return this.paramValue;
 	}
 
-	public Class getObjectType() {
+	public Class<String> getObjectType() {
 		return String.class;
 	}
 

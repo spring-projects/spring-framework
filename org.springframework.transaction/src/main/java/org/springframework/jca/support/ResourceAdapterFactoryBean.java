@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * @see javax.resource.spi.ResourceAdapter#start(javax.resource.spi.BootstrapContext)
  * @see javax.resource.spi.ResourceAdapter#stop()
  */
-public class ResourceAdapterFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>, InitializingBean, DisposableBean {
 
 	private ResourceAdapter resourceAdapter;
 
@@ -124,11 +124,11 @@ public class ResourceAdapterFactoryBean implements FactoryBean, InitializingBean
 	}
 
 
-	public Object getObject() {
+	public ResourceAdapter getObject() {
 		return this.resourceAdapter;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends ResourceAdapter> getObjectType() {
 		return (this.resourceAdapter != null ? this.resourceAdapter.getClass() : ResourceAdapter.class);
 	}
 

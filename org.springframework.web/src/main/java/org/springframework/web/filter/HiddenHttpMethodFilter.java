@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,28 +28,29 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Servlet 2.3/2.4 {@link javax.servlet.Filter} that converts posted method parameters into HTTP methods, retrievable
- * via {@link HttpServletRequest#getMethod()}. Since browsers currently only support GET and POST, a common technique -
- * used by the Prototype library, for instance - is to use a normal POST with an additional hidden form field
- * (<code>_method</code>) to pass the "real" HTTP method. This filter reads that parameter, and changes of {@link
- * HttpServletRequestWrapper#getMethod()} accordingly.
+ * {@link javax.servlet.Filter} that converts posted method parameters into HTTP methods,
+ * retrievable via {@link HttpServletRequest#getMethod()}. Since browsers currently only
+ * support GET and POST, a common technique - used by the Prototype library, for instance -
+ * is to use a normal POST with an additional hidden form field (<code>_method</code>)
+ * to pass the "real" HTTP method. This filter reads that parameter, and changes of
+ * {@link HttpServletRequestWrapper#getMethod()} accordingly.
  *
- * <p/>The name of the request parameter defaults to <code>_method</code>, but can be changed via the {@link
- * #setMethodParam(String) methodParam} property.
+ * <p>The name of the request parameter defaults to <code>_method</code>, but can be
+ * changed via the {@link #setMethodParam(String) methodParam} property.
  *
  * @author Arjen Poutsma
  * @since 3.0
  */
 public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 
-	/** Default method parameter, i.e. <code>_method</code>. */
+	/** Default method parameter: <code>_method</code> */
 	public static final String DEFAULT_METHOD_PARAM = "_method";
 
 	private String methodParam = DEFAULT_METHOD_PARAM;
 
+
 	/**
 	 * Set the parameter name to look for HTTP methods.
-	 *
 	 * @see #DEFAULT_METHOD_PARAM
 	 */
 	public void setMethodParam(String methodParam) {
@@ -59,8 +60,10 @@ public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		if ("POST".equals(request.getMethod()) && StringUtils.hasLength(request.getParameter(methodParam))) {
-			String method = request.getParameter(methodParam).toUpperCase(Locale.ENGLISH);
+
+		String paramValue = request.getParameter(this.methodParam);
+		if ("POST".equals(request.getMethod()) && StringUtils.hasLength(paramValue)) {
+			String method = paramValue.toUpperCase(Locale.ENGLISH);
 			HttpServletRequest wrapper = new HttpMethodRequestWrapper(method, request);
 			filterChain.doFilter(wrapper, response);
 		}
@@ -69,21 +72,23 @@ public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 		}
 	}
 
+
 	/**
-	 * Simple {@link HttpServletRequest} wrapper that returns the supplied method for {@link
-	 * HttpServletRequest#getMethod()}.
+	 * Simple {@link HttpServletRequest} wrapper that returns the supplied method for
+	 * {@link HttpServletRequest#getMethod()}.
 	 */
 	private static class HttpMethodRequestWrapper extends HttpServletRequestWrapper {
 
 		private final String method;
 
-		private HttpMethodRequestWrapper(String method, HttpServletRequest request) {
+		public HttpMethodRequestWrapper(String method, HttpServletRequest request) {
 			super(request);
 			this.method = method;
 		}
 
 		public String getMethod() {
-			return method;
+			return this.method;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  */
 public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBean
-		implements FactoryBean, BeanFactoryAware {
+		implements BeanFactoryAware {
 
 	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 
@@ -174,8 +174,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 		if (this.transactionInterceptor.getTransactionManager() == null &&
 				beanFactory instanceof ListableBeanFactory) {
 			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
-			PlatformTransactionManager ptm = (PlatformTransactionManager)
-					BeanFactoryUtils.beanOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
+			PlatformTransactionManager ptm = BeanFactoryUtils.beanOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
 			this.transactionInterceptor.setTransactionManager(ptm);
 		}
 	}

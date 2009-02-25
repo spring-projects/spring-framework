@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import org.springframework.beans.factory.InitializingBean;
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see JaxWsPortProxyFactoryBean
  */
-public class LocalJaxWsServiceFactoryBean extends LocalJaxWsServiceFactory implements FactoryBean, InitializingBean {
+public class LocalJaxWsServiceFactoryBean extends LocalJaxWsServiceFactory
+		implements FactoryBean<Service>, InitializingBean {
 
 	private Service service;
 
@@ -44,11 +45,11 @@ public class LocalJaxWsServiceFactoryBean extends LocalJaxWsServiceFactory imple
 		this.service = createJaxWsService();
 	}
 
-	public Object getObject() throws Exception {
+	public Service getObject() {
 		return this.service;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends Service> getObjectType() {
 		return (this.service != null ? this.service.getClass() : Service.class);
 	}
 

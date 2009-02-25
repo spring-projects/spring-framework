@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.jms.remoting.JmsInvokerServiceExporter
  */
 public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
-		implements FactoryBean, BeanClassLoaderAware {
+		implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	private Class serviceInterface;
 
@@ -81,7 +81,7 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 		return this.serviceProxy;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return this.serviceInterface;
 	}
 

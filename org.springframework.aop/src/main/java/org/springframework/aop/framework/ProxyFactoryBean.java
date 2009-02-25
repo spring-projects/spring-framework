@@ -89,7 +89,7 @@ import org.springframework.util.ObjectUtils;
  * @see Advised
  */
 public class ProxyFactoryBean extends ProxyCreatorSupport
-		implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware {
+		implements FactoryBean<Object>, BeanClassLoaderAware, BeanFactoryAware {
 
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
@@ -256,7 +256,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * a single one), the target bean type, or the TargetSource's target class.
 	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		synchronized (this) {
 			if (this.singletonInstance != null) {
 				return this.singletonInstance.getClass();
@@ -448,7 +448,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				else {
 					// If we get here, we need to add a named interceptor.
 					// We must check if it's a singleton or prototype.
-					Object advice = null;
+					Object advice;
 					if (this.singleton || this.beanFactory.isSingleton(name)) {
 						// Add the real Advisor/Advice to the chain.
 						advice = this.beanFactory.getBean(name);

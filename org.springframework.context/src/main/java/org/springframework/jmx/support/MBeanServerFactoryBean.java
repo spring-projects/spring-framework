@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 
 /**
- * FactoryBean that obtains an {@link javax.management.MBeanServer} reference
+ * {@link FactoryBean} that obtains an {@link javax.management.MBeanServer} reference
  * through the standard JMX 1.2 {@link javax.management.MBeanServerFactory}
  * API (which is available on JDK 1.5 or as part of a JMX 1.2 provider).
  * Exposes the <code>MBeanServer</code> for bean references.
@@ -51,7 +51,7 @@ import org.springframework.jmx.MBeanServerNotFoundException;
  * @see MBeanServerConnectionFactoryBean
  * @see ConnectorServerFactoryBean
  */
-public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -178,11 +178,11 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	}
 
 
-	public Object getObject() {
+	public MBeanServer getObject() {
 		return this.server;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends MBeanServer> getObjectType() {
 		return (this.server != null ? this.server.getClass() : MBeanServer.class);
 	}
 

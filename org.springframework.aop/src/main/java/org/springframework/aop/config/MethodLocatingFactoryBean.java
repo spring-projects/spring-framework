@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 2.0
  */
-public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware {
+public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFactoryAware {
 
 	private String targetBeanName;
 
@@ -78,11 +78,11 @@ public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware 
 	}
 
 
-	public Object getObject() throws Exception {
+	public Method getObject() throws Exception {
 		return this.method;
 	}
 
-	public Class getObjectType() {
+	public Class<Method> getObjectType() {
 		return Method.class;
 	}
 

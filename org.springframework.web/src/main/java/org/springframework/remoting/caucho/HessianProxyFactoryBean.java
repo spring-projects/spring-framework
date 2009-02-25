@@ -20,8 +20,8 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * FactoryBean for Hessian proxies. Exposes the proxied service for
- * use as a bean reference, using the specified service interface.
+ * {@link FactoryBean} for Hessian proxies. Exposes the proxied service
+ * for use as a bean reference, using the specified service interface.
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
@@ -40,7 +40,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  */
-public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean {
+public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean<Object> {
 
 	private Object serviceProxy;
 
@@ -56,7 +56,7 @@ public class HessianProxyFactoryBean extends HessianClientInterceptor implements
 		return this.serviceProxy;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return getServiceInterface();
 	}
 

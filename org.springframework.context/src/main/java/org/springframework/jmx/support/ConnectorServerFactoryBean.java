@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.jmx.support;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -32,10 +32,11 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.JmxException;
+import org.springframework.util.CollectionUtils;
 
 /**
- * <code>FactoryBean</code> that creates a JSR-160 <code>JMXConnectorServer</code>,
- * optionally registers it with the <code>MBeanServer</code> and then starts it.
+ * {@link FactoryBean} that creates a JSR-160 {@link JMXConnectorServer},
+ * optionally registers it with the {@link MBeanServer} and then starts it.
  *
  * <p>The <code>JMXConnectorServer</code> can be started in a separate thread by setting the
  * <code>threaded</code> property to <code>true</code>. You can configure this thread to be a
@@ -52,7 +53,7 @@ import org.springframework.jmx.JmxException;
  * @see MBeanServer
  */
 public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
-		implements FactoryBean, InitializingBean, DisposableBean {
+		implements FactoryBean<JMXConnectorServer>, InitializingBean, DisposableBean {
 
 	/** The default service URL */
 	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9875";
@@ -60,7 +61,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
-	private Map environment;
+	private Map<String, Object> environment = new HashMap<String, Object>();
 
 	private ObjectName objectName;
 
@@ -83,15 +84,17 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 * as <code>java.util.Properties</code> (String key/value pairs).
 	 */
 	public void setEnvironment(Properties environment) {
-		this.environment = environment;
+		CollectionUtils.mergePropertiesIntoMap(environment, this.environment);
 	}
 
 	/**
 	 * Set the environment properties used to construct the <code>JMXConnector</code>
 	 * as a <code>Map</code> of String keys and arbitrary Object values.
 	 */
-	public void setEnvironmentMap(Map environment) {
-		this.environment = environment;
+	public void setEnvironmentMap(Map<String, ?> environment) {
+		if (environment != null) {
+			this.environment.putAll(environment);
+		}
 	}
 
 	/**
@@ -182,11 +185,11 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	}
 
 
-	public Object getObject() {
+	public JMXConnectorServer getObject() {
 		return this.connectorServer;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends JMXConnectorServer> getObjectType() {
 		return (this.connectorServer != null ? this.connectorServer.getClass() : JMXConnectorServer.class);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * FactoryBean that fetches a specific, existing ServletContext attribute.
+ * {@link FactoryBean} that fetches a specific, existing ServletContext attribute.
  * Exposes that ServletContext attribute when used as bean reference,
  * effectively making it available as named Spring bean instance.
  *
@@ -36,7 +36,7 @@ import org.springframework.web.context.ServletContextAware;
  * @since 1.1.4
  * @see ServletContextParameterFactoryBean
  */
-public class ServletContextAttributeFactoryBean implements FactoryBean, ServletContextAware {
+public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, ServletContextAware {
 
 	private String attributeName;
 
@@ -65,7 +65,7 @@ public class ServletContextAttributeFactoryBean implements FactoryBean, ServletC
 		return this.attribute;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return (this.attribute != null ? this.attribute.getClass() : null);
 	}
 
