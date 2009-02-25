@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ import javax.servlet.ServletException;
 import javax.xml.transform.stream.StreamResult;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,7 +30,10 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.oxm.Marshaller;
 
-public class MarshallingViewTest {
+/**
+ * @author Arjen Poutsma
+ */
+public class MarshallingViewTests {
 
 	private MarshallingView view;
 
@@ -135,4 +137,5 @@ public class MarshallingViewTest {
 		}
 		verify(marshallerMock);
 	}
+
 }
