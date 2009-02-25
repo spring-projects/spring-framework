@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.springframework.beans.factory.FactoryBean} for a specific port of a
- * JAX-RPC service. Exposes a proxy for the port, to be used for bean references.
+ * {@link FactoryBean} for a specific port of a JAX-RPC service.
+ * Exposes a proxy for the port, to be used for bean references.
  * Inherits configuration properties from {@link JaxRpcPortClientInterceptor}.
  *
  * <p>This factory is typically used with an RMI service interface. Alternatively,
@@ -45,7 +45,7 @@ import org.springframework.util.ClassUtils;
  * @see LocalJaxRpcServiceFactoryBean
  */
 public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
-		implements FactoryBean, BeanClassLoaderAware {
+		implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -77,7 +77,7 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
 		return this.serviceProxy;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return getServiceInterface();
 	}
 

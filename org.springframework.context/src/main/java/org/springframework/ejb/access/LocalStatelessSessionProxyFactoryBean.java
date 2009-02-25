@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * Convenient factory for local Stateless Session Bean (SLSB) proxies.
+ * Convenient {@link FactoryBean} for local Stateless Session Bean (SLSB) proxies.
  * Designed for EJB 2.x, but works for EJB 3 Session Beans as well.
  *
  * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
  * @see AbstractSlsbInvokerInterceptor#setCacheHome
  */
 public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInterceptor
-		implements FactoryBean, BeanClassLoaderAware {
+		implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	/** The business interface of the EJB we're proxying */
 	private Class businessInterface;
@@ -95,7 +95,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 		return this.proxy;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return this.businessInterface;
 	}
 

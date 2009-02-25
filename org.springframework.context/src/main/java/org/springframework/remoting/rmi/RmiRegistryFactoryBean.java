@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * FactoryBean that locates a {@link java.rmi.registry.Registry} and
+ * {@link FactoryBean} that locates a {@link java.rmi.registry.Registry} and
  * exposes it for bean references. Can also create a local RMI registry
  * on the fly if none exists already.
  *
@@ -60,7 +60,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.rmi.registry.Registry
  * @see java.rmi.registry.LocateRegistry
  */
-public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class RmiRegistryFactoryBean implements FactoryBean<Registry>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -278,11 +278,11 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 	}
 
 
-	public Object getObject() throws Exception {
+	public Registry getObject() throws Exception {
 		return this.registry;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends Registry> getObjectType() {
 		return (this.registry != null ? this.registry.getClass() : Registry.class);
 	}
 

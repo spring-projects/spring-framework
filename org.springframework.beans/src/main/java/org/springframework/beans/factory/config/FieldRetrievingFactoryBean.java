@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * FactoryBean which retrieves a static or non-static field value.
+ * {@link FactoryBean} which retrieves a static or non-static field value.
  * 
  * <p>Typically used for retrieving public static final constants. Usage example:
  *
@@ -52,7 +52,8 @@ import org.springframework.util.StringUtils;
  * @since 1.1
  * @see #setStaticField
  */
-public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, BeanClassLoaderAware, InitializingBean {
+public class FieldRetrievingFactoryBean
+		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
 	private Class targetClass;
 
@@ -205,7 +206,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 		}
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return (this.fieldObject != null ? this.fieldObject.getType() : null);
 	}
 

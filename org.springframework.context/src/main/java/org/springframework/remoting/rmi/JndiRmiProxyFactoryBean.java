@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * Factory bean for RMI proxies from JNDI.
+ * {@link FactoryBean} for RMI proxies from JNDI.
  * 
  * <p>Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
@@ -61,7 +61,8 @@ import org.springframework.util.ClassUtils;
  * @see java.rmi.Remote
  * @see javax.rmi.PortableRemoteObject#narrow
  */
-public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements FactoryBean, BeanClassLoaderAware {
+public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor
+		implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -86,7 +87,7 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements
 		return this.serviceProxy;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return getServiceInterface();
 	}
 

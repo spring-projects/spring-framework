@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2009 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,18 +22,13 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.scheduling.support.MethodInvokingRunnable;
 
 /**
- * FactoryBean that exposes a TimerTask object that delegates
- * job execution to a specified (static or non-static) method.
- * Avoids the need to implement a one-line TimerTask that just
- * invokes an existing business method.
+ * {@link FactoryBean} that exposes a {@link TimerTask} object which
+ * delegates job execution to a specified (static or non-static) method.
+ * Avoids the need to implement a one-line TimerTask that just invokes
+ * an existing business method.
  *
- * <p>Derives from MethodInvokingRunnable to share common properties
+ * <p>Derives from {@link MethodInvokingRunnable} to share common properties
  * and behavior, effectively providing a TimerTask adapter for it.
- *
- * <p>Often used to populate a ScheduledTimerTask object with a specific
- * reflective method invocation. Note that you can alternatively populate
- * a ScheduledTimerTask object with a plain MethodInvokingRunnable instance
- * as well (as of Spring 1.2.4), without the need for this special FactoryBean.
  *
  * @author Juergen Hoeller
  * @since 19.02.2004
@@ -43,7 +38,7 @@ import org.springframework.scheduling.support.MethodInvokingRunnable;
  * @see org.springframework.scheduling.support.MethodInvokingRunnable
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
-public class MethodInvokingTimerTaskFactoryBean extends MethodInvokingRunnable implements FactoryBean {
+public class MethodInvokingTimerTaskFactoryBean extends MethodInvokingRunnable implements FactoryBean<TimerTask> {
 
 	private TimerTask timerTask;
 
@@ -55,11 +50,11 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvokingRunnable i
 	}
 
 
-	public Object getObject() {
+	public TimerTask getObject() {
 		return this.timerTask;
 	}
 
-	public Class getObjectType() {
+	public Class<TimerTask> getObjectType() {
 		return TimerTask.class;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.Md5HashUtils;
 
 /**
- * Servlet 2.3/2.4 {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content on the
- * response. This ETag is compared to the <code>If-None-Match</code> header of the request. If these headers are equal,
- * the resonse content is not sent, but rather a 304 "Not Modified" status.
- * <p/>
- * <p/>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
- * is still rendered. As such, this filter only saves bandwith, not performance.
+ * {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content
+ * on the response. This ETag is compared to the <code>If-None-Match</code> header of the request.
+ * If these headers are equal, the resonse content is not sent, but rather a 304 "Not Modified" status.
+ *
+ * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
+ * is still rendered. As such, this filter only saves bandwidth, not server performance.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -48,13 +48,15 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 	private static String HEADER_IF_NONE_MATCH = "If-None-Match";
 
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		ShallowEtagResponseWrapper wrapper = new ShallowEtagResponseWrapper(response);
-		filterChain.doFilter(request, wrapper);
 
-		byte[] body = wrapper.toByteArray();
+		ShallowEtagResponseWrapper responseWrapper = new ShallowEtagResponseWrapper(response);
+		filterChain.doFilter(request, responseWrapper);
+
+		byte[] body = responseWrapper.toByteArray();
 		String responseETag = generateETagHeaderValue(body);
 		response.setHeader(HEADER_ETAG, responseETag);
 
@@ -76,11 +78,9 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Generates the ETag header value from the given response body bytes array.
-	 * <p/>
-	 * <p/>Default implementation generates an MD5 hash.
-	 *
-	 * @param bytes the
+	 * Generate the ETag header value from the given response body byte array.
+	 * <p>The default implementation generates an MD5 hash.
+	 * @param bytes the response bdoy as byte array
 	 * @return the ETag header value
 	 * @see Md5HashUtils
 	 */
@@ -91,10 +91,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		return builder.toString();
 	}
 
+
 	/**
-	 * {@link HttpServletRequest} wrapper that buffers all content written to the {@linkplain #getOutputStream() output
-	 * stream} and {@linkplain #getWriter() writer}, and allows this content to be retrieved via a {@link #toByteArray()
-	 * byte array}.
+	 * {@link HttpServletRequest} wrapper that buffers all content written to the
+	 * {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
+	 * and allows this content to be retrieved via a {@link #toByteArray() byte array}.
 	 */
 	private static class ShallowEtagResponseWrapper extends HttpServletResponseWrapper {
 
@@ -109,24 +110,25 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		public ServletOutputStream getOutputStream() throws IOException {
-			return outputStream;
+		public ServletOutputStream getOutputStream() {
+			return this.outputStream;
 		}
 
 		@Override
 		public PrintWriter getWriter() throws IOException {
-			if (writer == null) {
+			if (this.writer == null) {
 				String characterEncoding = getCharacterEncoding();
 				Writer targetWriter = (characterEncoding != null ?
-						new OutputStreamWriter(outputStream, characterEncoding) : new OutputStreamWriter(outputStream));
-				writer = new PrintWriter(targetWriter);
+						new OutputStreamWriter(this.outputStream, characterEncoding) :
+						new OutputStreamWriter(this.outputStream));
+				this.writer = new PrintWriter(targetWriter);
 			}
-			return writer;
+			return this.writer;
 		}
 
 		@Override
 		public void resetBuffer() {
-			content.reset();
+			this.content.reset();
 		}
 
 		@Override
@@ -136,8 +138,9 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		}
 
 		private byte[] toByteArray() {
-			return content.toByteArray();
+			return this.content.toByteArray();
 		}
+
 
 		private class ResponseServletOutputStream extends ServletOutputStream {
 
@@ -145,7 +148,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			public void write(int b) throws IOException {
 				content.write(b);
 			}
-
 		}
 	}
 

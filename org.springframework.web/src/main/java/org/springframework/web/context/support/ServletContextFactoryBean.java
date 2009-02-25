@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * Simple FactoryBean that exposes the ServletContext for bean references.
+ * {@link FactoryBean} that exposes the ServletContext for bean references.
  * Can be used as alternative to implementing the ServletContextAware
  * callback interface. Allows for passing the ServletContext reference
  * to a constructor argument or any custom bean property.
@@ -40,7 +40,7 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.web.context.ServletContextAware
  * @see ServletContextAttributeFactoryBean
  */
-public class ServletContextFactoryBean implements FactoryBean, ServletContextAware {
+public class ServletContextFactoryBean implements FactoryBean<ServletContext>, ServletContextAware {
 
 	private ServletContext servletContext;
 
@@ -50,11 +50,11 @@ public class ServletContextFactoryBean implements FactoryBean, ServletContextAwa
 	}
 
 
-	public Object getObject() {
+	public ServletContext getObject() {
 		return this.servletContext;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends ServletContext> getObjectType() {
 		return (this.servletContext != null ? this.servletContext.getClass() : ServletContext.class);
 	}
 

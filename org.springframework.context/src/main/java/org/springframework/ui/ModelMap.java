@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.ui;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -81,7 +80,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	/**
 	 * Add the supplied attribute to this <code>Map</code> using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
-	 * <p/><emphasis>Note: Empty {@link Collection Collections} are not added to
+	 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
 	 * the model when using this method because we cannot correctly determine
 	 * the true convention name. View code should check for <code>null</code> rather
 	 * than for empty collections as is already done by JSTL tags.</emphasis>
@@ -102,8 +101,8 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 */
 	public ModelMap addAllAttributes(Collection<?> attributeValues) {
 		if (attributeValues != null) {
-			for (Iterator it = attributeValues.iterator(); it.hasNext();) {
-				addAttribute(it.next());
+			for (Object attributeValue : attributeValues) {
+				addAttribute(attributeValue);
 			}
 		}
 		return this;

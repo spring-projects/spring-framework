@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.jmx.support;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -34,9 +34,10 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
- * <code>FactoryBean</code> that creates a JMX 1.2 <code>MBeanServerConnection</code>
+ * {@link FactoryBean} that creates a JMX 1.2 <code>MBeanServerConnection</code>
  * to a remote <code>MBeanServer</code> exposed via a <code>JMXServerConnector</code>.
  * Exposes the <code>MBeanServer</code> for bean references.
  *
@@ -49,11 +50,11 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.jmx.access.NotificationListenerRegistrar#setServer
  */
 public class MBeanServerConnectionFactoryBean
-		implements FactoryBean, BeanClassLoaderAware, InitializingBean, DisposableBean {
+		implements FactoryBean<MBeanServerConnection>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
 	private JMXServiceURL serviceUrl;
 
-	private Map environment;
+	private Map<String, Object> environment = new HashMap<String, Object>();
 
 	private boolean connectOnStartup = true;
 
@@ -78,15 +79,17 @@ public class MBeanServerConnectionFactoryBean
 	 * as <code>java.util.Properties</code> (String key/value pairs).
 	 */
 	public void setEnvironment(Properties environment) {
-		this.environment = environment;
+		CollectionUtils.mergePropertiesIntoMap(environment, this.environment);
 	}
 
 	/**
 	 * Set the environment properties used to construct the <code>JMXConnector</code>
 	 * as a <code>Map</code> of String keys and arbitrary Object values.
 	 */
-	public void setEnvironmentMap(Map environment) {
-		this.environment = environment;
+	public void setEnvironmentMap(Map<String, ?> environment) {
+		if (environment != null) {
+			this.environment.putAll(environment);
+		}
 	}
 
 	/**
@@ -143,11 +146,11 @@ public class MBeanServerConnectionFactoryBean
 	}
 
 
-	public Object getObject() {
+	public MBeanServerConnection getObject() {
 		return this.connection;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends MBeanServerConnection> getObjectType() {
 		return (this.connection != null ? this.connection.getClass() : MBeanServerConnection.class);
 	}
 

@@ -53,7 +53,7 @@ import org.springframework.jndi.JndiLocatorSupport;
  * @see commonj.timers.TimerListener
  */
 public class TimerManagerFactoryBean extends JndiLocatorSupport
-		implements FactoryBean, InitializingBean, DisposableBean, Lifecycle {
+		implements FactoryBean<TimerManager>, InitializingBean, DisposableBean, Lifecycle {
 
 	private TimerManager timerManager;
 
@@ -169,11 +169,11 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 	// Implementation of FactoryBean interface
 	//---------------------------------------------------------------------
 
-	public Object getObject() {
+	public TimerManager getObject() {
 		return this.timerManager;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends TimerManager> getObjectType() {
 		return (this.timerManager != null ? this.timerManager.getClass() : TimerManager.class);
 	}
 

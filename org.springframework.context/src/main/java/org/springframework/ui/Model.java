@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface Model {
 	/**
 	 * Add the supplied attribute to this <code>Map</code> using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
-	 * <p/><emphasis>Note: Empty {@link java.util.Collection Collections} are not added to
+	 * <p><emphasis>Note: Empty {@link java.util.Collection Collections} are not added to
 	 * the model when using this method because we cannot correctly determine
 	 * the true convention name. View code should check for <code>null</code> rather
 	 * than for empty collections as is already done by JSTL tags.</emphasis>

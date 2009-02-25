@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.ClassUtils;
 
 /**
- * FactoryBean which returns a value which is the result of a static or instance
+ * {@link FactoryBean} which returns a value which is the result of a static or instance
  * method invocation. For most use cases it is better to just use the container's 
  * built-in factory method support for the same purpose, since that is smarter at
  * converting arguments. This factory bean is still useful though when you need to
@@ -88,7 +88,7 @@ import org.springframework.util.ClassUtils;
  * @since 21.11.2003
  */
 public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
-		implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
+		implements FactoryBean<Object>, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
 	private boolean singleton = true;
 
@@ -196,7 +196,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * Return the type of object that this FactoryBean creates,
 	 * or <code>null</code> if not known in advance.
 	 */
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		if (!isPrepared()) {
 			// Not fully initialized yet -> return null to indicate "not known yet".
 			return null;

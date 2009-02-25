@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import com.sun.syndication.feed.rss.Item;
  * <p>Application-specific view classes will extend this class.
  * The view will be held in the subclass itself, not in a template.
  *
- * <p/>Main entry points are the {@link #buildFeedMetadata(Map, WireFeed , HttpServletRequest)}
+ * <p>Main entry points are the {@link #buildFeedMetadata(Map, WireFeed , HttpServletRequest)}
  * and {@link #buildFeedItems(Map, HttpServletRequest, HttpServletResponse)}.
  *
  * <p>Thanks to Jettro Coenradie and Sergio Bossa for the original feed view prototype!

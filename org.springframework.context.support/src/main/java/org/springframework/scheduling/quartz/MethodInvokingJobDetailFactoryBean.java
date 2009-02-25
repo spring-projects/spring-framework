@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ import org.springframework.util.MethodInvoker;
  * @see #setConcurrent
  */
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
-	implements FactoryBean, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
+	implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
 	private String name;
 
@@ -171,7 +171,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		String name = (this.name != null ? this.name : this.beanName);
 
 		// Consider the concurrent flag to choose between stateful and stateless job.
-		Class jobClass = (this.concurrent ? (Class) MethodInvokingJob.class : StatefulMethodInvokingJob.class);
+		Class jobClass = (this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
 
 		// Build JobDetail instance.
 		this.jobDetail = new JobDetail(name, this.group, jobClass);
@@ -181,8 +181,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 		// Register job listener names.
 		if (this.jobListenerNames != null) {
-			for (int i = 0; i < this.jobListenerNames.length; i++) {
-				this.jobDetail.addJobListener(this.jobListenerNames[i]);
+			for (String jobListenerName : this.jobListenerNames) {
+				this.jobDetail.addJobListener(jobListenerName);
 			}
 		}
 
@@ -229,7 +229,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		return this.jobDetail;
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return JobDetail.class;
 	}
 

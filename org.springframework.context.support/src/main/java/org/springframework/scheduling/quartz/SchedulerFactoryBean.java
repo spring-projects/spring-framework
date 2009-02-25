@@ -87,7 +87,7 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean extends SchedulerAccessor
-		implements FactoryBean, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
+		implements FactoryBean<Scheduler>, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -665,11 +665,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 		return this.scheduler;
 	}
 
-	public Object getObject() {
+	public Scheduler getObject() {
 		return this.scheduler;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends Scheduler> getObjectType() {
 		return (this.scheduler != null) ? this.scheduler.getClass() : Scheduler.class;
 	}
 

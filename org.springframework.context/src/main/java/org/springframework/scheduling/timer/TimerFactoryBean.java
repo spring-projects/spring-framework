@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  * @see java.util.Timer
  * @see java.util.TimerTask
  */
-public class TimerFactoryBean implements FactoryBean, BeanNameAware, InitializingBean, DisposableBean {
+public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -141,11 +141,11 @@ public class TimerFactoryBean implements FactoryBean, BeanNameAware, Initializin
 	}
 
 
-	public Object getObject() {
+	public Timer getObject() {
 		return this.timer;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends Timer> getObjectType() {
 		return Timer.class;
 	}
 

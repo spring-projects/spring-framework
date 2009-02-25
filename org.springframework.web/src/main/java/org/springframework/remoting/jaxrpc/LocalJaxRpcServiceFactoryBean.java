@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see JaxRpcPortProxyFactoryBean
  */
 public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory
-		implements FactoryBean, InitializingBean {
+		implements FactoryBean<Service>, InitializingBean {
 
 	private Service service;
 
@@ -47,11 +47,11 @@ public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory
 	}
 
 
-	public Object getObject() throws Exception {
+	public Service getObject() throws Exception {
 		return this.service;
 	}
 
-	public Class getObjectType() {
+	public Class<? extends Service> getObjectType() {
 		return (this.service != null ? this.service.getClass() : Service.class);
 	}
 

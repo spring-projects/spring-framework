@@ -29,15 +29,16 @@ import java.util.regex.Pattern;
 import org.springframework.util.Assert;
 
 /**
- * Represents a URI template. An URI template is a URI-like string that contained variables marked of in braces
- * (<code>{</code>, <code>}</code>), which can be expanded to produce a URI.
- * <p/>
- * See {@link #expand(Map)}, {@link #expand(String[])}, and {@link #match(String)} for example usages.
+ * Represents a URI template. An URI template is a URI-like String that contained variables
+ * marked of in braces (<code>{</code>, <code>}</code>), which can be expanded to produce a URI.
+ * <p>See {@link #expand(Map)}, {@link #expand(String[])}, and {@link #match(String)} for example usages.
+ *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see <a href="http://bitworking.org/projects/URI-Templates/">URI Templates</a>
  * @since 3.0
  */
-public final class UriTemplate {
+public class UriTemplate {
 
 	/**
 	 * Captures URI template variable names.
@@ -49,15 +50,17 @@ public final class UriTemplate {
 	 */
 	private static final String VALUE_REGEX = "(.*)";
 
+
 	private final List<String> variableNames;
 
 	private final Pattern matchPattern;
 
 	private final String uriTemplate;
 
+
 	/**
-	 * Constructs a new {@link UriTemplate} with the given string.
-	 * @param uriTemplate the uri template string
+	 * Construct a new {@link UriTemplate} with the given URI String.
+	 * @param uriTemplate the URI template string
 	 */
 	public UriTemplate(String uriTemplate) {
 		Parser parser = new Parser(uriTemplate);
@@ -66,19 +69,20 @@ public final class UriTemplate {
 		this.matchPattern = parser.getMatchPattern();
 	}
 
+
 	/**
-	 * Returns the names of the variables in the template, in order.
+	 * Return the names of the variables in the template, in order.
 	 * @return the template variable names
 	 */
-	public List<String> getVariableNames() {
-		return variableNames;
+	public final List<String> getVariableNames() {
+		return this.variableNames;
 	}
 
 	/**
-	 * Given the map of variables, expands this template into a URI string. The map keys represent variable names, the
-	 * map values variable values. The order of variables is not significant.
-	 * <p/>
-	 * Example:
+	 * Given the Map of variables, expands this template into a URI.
+	 * The Map keys represent variable names, the Map values variable values.
+	 * The order of variables is not significant.
+	 * <p>Example:
 	 * <pre>
 	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
@@ -87,57 +91,58 @@ public final class UriTemplate {
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
 	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
-	 * @param uriVariables the map of uri variables
-	 * @return the expanded uri
-	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>; or if it does not contain
-	 *                                  values for all the variable names
+	 * @param uriVariables the map of URI variables
+	 * @return the expanded URI
+	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>;
+	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, String> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
-		String[] values = new String[variableNames.size()];
-		for (int i = 0; i < variableNames.size(); i++) {
-			String name = variableNames.get(i);
-			Assert.isTrue(uriVariables.containsKey(name), "'uriVariables' has no value for [" + name + "]");
+		String[] values = new String[this.variableNames.size()];
+		for (int i = 0; i < this.variableNames.size(); i++) {
+			String name = this.variableNames.get(i);
+			if (!uriVariables.containsKey(name)) {
+				throw new IllegalArgumentException("'uriVariables' Map has no value for '" + name + "'");
+			}
 			values[i] = uriVariables.get(name);
 		}
 		return expand(values);
 	}
 
 	/**
-	 * Given an array of variables, expands this template into a URI string. The array represent variable values. The
-	 * order of variables is significant.
-	 * <p/>
-	 * Example:
-	 * <pre>
+	 * Given an array of variables, expand this template into a full URI.
+	 * The array represent variable values. The order of variables is significant.
+	 * <p>Example:
+	 * <pre class="code>
 	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 	 * System.out.println(template.expand("1", "42));
 	 * </pre>
 	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
-	 * @param uriVariableValues the array of uri variables
-	 * @return the expanded uri
-	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>; or if it does not contain
-	 *                                  sufficient variables
+	 * @param uriVariableValues the array of URI variables
+	 * @return the expanded URI
+	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>;
+	 * or if it does not contain sufficient variables
 	 */
 	public URI expand(String... uriVariableValues) {
 		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
-		if (uriVariableValues.length != variableNames.size()) {
-			throw new IllegalArgumentException(
-					"Invalid amount of variables values in [" + uriTemplate + "]: expected " + variableNames.size() +
-							"; got " + uriVariableValues.length);
+		if (uriVariableValues.length != this.variableNames.size()) {
+			throw new IllegalArgumentException("Invalid amount of variables values in [" +
+					this.uriTemplate + "]: expected " + this.variableNames.size() +
+					"; got " + uriVariableValues.length);
 		}
-		Matcher m = NAMES_PATTERN.matcher(uriTemplate);
+		Matcher matcher = NAMES_PATTERN.matcher(this.uriTemplate);
 		StringBuffer buffer = new StringBuffer();
 		int i = 0;
-		while (m.find()) {
+		while (matcher.find()) {
 			String uriVariable = uriVariableValues[i++];
-			m.appendReplacement(buffer, uriVariable);
+			matcher.appendReplacement(buffer, uriVariable);
 		}
-		m.appendTail(buffer);
+		matcher.appendTail(buffer);
 		return encodeUri(buffer.toString());
 	}
 
 	/**
-	 * Indicates whether the given URI matches this template.
+	 * Indicate whether the given URI matches this template.
 	 * @param uri the URI to match to
 	 * @return <code>true</code> if it matches; <code>false</code> otherwise
 	 */
@@ -145,16 +150,15 @@ public final class UriTemplate {
 		if (uri == null) {
 			return false;
 		}
-		Matcher m = matchPattern.matcher(uri);
-		return m.matches();
+		Matcher matcher = this.matchPattern.matcher(uri);
+		return matcher.matches();
 	}
 
 	/**
-	 * Matches the given URI to a map of variable values. Keys in the returned map are variable names, values are
-	 * variable values, as occurred in the given URI.
-	 * <p/>
-	 * Example:
-	 * <pre>
+	 * Match the given URI to a map of variable values. Keys in the returned map are
+	 * variable names, values are variable values, as occurred in the given URI.
+	 * <p>Example:
+	 * <pre class="code">
 	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 	 * System.out.println(template.match("http://example.com/hotels/1/bookings/42"));
 	 * </pre>
@@ -164,17 +168,23 @@ public final class UriTemplate {
 	 */
 	public Map<String, String> match(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Map<String, String> result = new LinkedHashMap<String, String>(variableNames.size());
-		Matcher m = matchPattern.matcher(uri);
-		if (m.find()) {
-			for (int i = 1; i <= m.groupCount(); i++) {
-				String name = variableNames.get(i - 1);
-				String value = m.group(i);
+		Map<String, String> result = new LinkedHashMap<String, String>(this.variableNames.size());
+		Matcher matcher = this.matchPattern.matcher(uri);
+		if (matcher.find()) {
+			for (int i = 1; i <= matcher.groupCount(); i++) {
+				String name = this.variableNames.get(i - 1);
+				String value = matcher.group(i);
 				result.put(name, value);
 			}
 		}
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return this.uriTemplate;
+	}
+
 
 	private static URI encodeUri(String uri) {
 		try {
@@ -190,41 +200,35 @@ public final class UriTemplate {
 			}
 			return result;
 		}
-		catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Could not create URI from [" + uri + "]");
+		catch (URISyntaxException ex) {
+			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex);
 		}
 	}
 
-
-	@Override
-	public String toString() {
-		return uriTemplate;
-	}
 
 	/**
 	 * Static inner class to parse uri template strings into a matching regular expression.
 	 */
 	private static class Parser {
 
-		private List<String> variableNames = new LinkedList<String>();
+		private final List<String> variableNames = new LinkedList<String>();
 
-		private StringBuilder patternBuilder = new StringBuilder();
+		private final StringBuilder patternBuilder = new StringBuilder();
 
 		private Parser(String uriTemplate) {
 			Assert.hasText(uriTemplate, "'uriTemplate' must not be null");
 			Matcher m = NAMES_PATTERN.matcher(uriTemplate);
 			int end = 0;
 			while (m.find()) {
-				patternBuilder.append(encodeAndQuote(uriTemplate, end, m.start()));
-				patternBuilder.append(VALUE_REGEX);
-				variableNames.add(m.group(1));
+				this.patternBuilder.append(encodeAndQuote(uriTemplate, end, m.start()));
+				this.patternBuilder.append(VALUE_REGEX);
+				this.variableNames.add(m.group(1));
 				end = m.end();
 			}
-			patternBuilder.append(encodeAndQuote(uriTemplate, end, uriTemplate.length()));
-
-			int lastIdx = patternBuilder.length() - 1;
-			if (lastIdx >= 0 && patternBuilder.charAt(lastIdx) == '/') {
-				patternBuilder.deleteCharAt(lastIdx);
+			this.patternBuilder.append(encodeAndQuote(uriTemplate, end, uriTemplate.length()));
+			int lastIdx = this.patternBuilder.length() - 1;
+			if (lastIdx >= 0 && this.patternBuilder.charAt(lastIdx) == '/') {
+				this.patternBuilder.deleteCharAt(lastIdx);
 			}
 		}
 
@@ -238,13 +242,12 @@ public final class UriTemplate {
 
 
 		private List<String> getVariableNames() {
-			return Collections.unmodifiableList(variableNames);
+			return Collections.unmodifiableList(this.variableNames);
 		}
 
 		private Pattern getMatchPattern() {
-			return Pattern.compile(patternBuilder.toString());
+			return Pattern.compile(this.patternBuilder.toString());
 		}
-
 	}
 
 }
