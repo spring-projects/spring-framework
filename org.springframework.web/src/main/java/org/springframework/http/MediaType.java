@@ -73,7 +73,7 @@ public class MediaType implements Comparable<MediaType> {
 	/**
 	 * Create a new {@link MediaType} for the given primary type and subtype.
 	 * <p>The parameters are empty.
-	 * @param typethe primary type
+	 * @param type the primary type
 	 * @param subtype the subtype
 	 */
 	public MediaType(String type, String subtype) {

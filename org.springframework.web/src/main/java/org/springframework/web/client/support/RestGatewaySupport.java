@@ -19,9 +19,9 @@ package org.springframework.web.client.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.client.ClientHttpRequestFactory;
 
 /**
  * Convenient super class for application classes that need REST access.
@@ -50,7 +50,7 @@ public class RestGatewaySupport {
 
 	/**
 	 * Construct a new instance of the {@link RestGatewaySupport}, with the given {@link ClientHttpRequestFactory}.
-	 * @see RestTemplate#RestTemplate(ClientHttpRequestFactory
+	 * @see RestTemplate#RestTemplate(ClientHttpRequestFactory)
 	 */
 	public RestGatewaySupport(ClientHttpRequestFactory requestFactory) {
 		Assert.notNull(requestFactory, "'requestFactory' must not be null");
