@@ -28,13 +28,13 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.xmlbeans.XMLStreamValidationException;
 import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
 import org.apache.xmlbeans.XmlSaxHandler;
 import org.apache.xmlbeans.XmlValidationError;
-import org.apache.xmlbeans.XMLStreamValidationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -47,11 +47,11 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.MarshallingFailureException;
+import org.springframework.oxm.UncategorizedMappingException;
+import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.XmlMappingException;
-import org.springframework.oxm.MarshallingFailureException;
-import org.springframework.oxm.UnmarshallingFailureException;
-import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.util.xml.StaxUtils;
 
@@ -63,7 +63,7 @@ import org.springframework.util.xml.StaxUtils;
  *
  * <p>Unmarshalled objects can be validated by setting the <code>validating</code> property,
  * or by calling the {@link #validate(XmlObject)} method directly. Invalid objects will
- * result in an {@link XmlBeansValidationFailureException}.
+ * result in an {@link ValidationFailureException}.
  *
  * <p><b>NOTE:</b> Due to the nature of XMLBeans, this marshaller requires
  * all passed objects to be of type {@link XmlObject}.
@@ -257,7 +257,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	/**
 	 * Validate the given <code>XmlObject</code>.
 	 * @param object the xml object to validate
-	 * @throws XmlBeansValidationFailureException if the given object is not valid
+	 * @throws ValidationFailureException if the given object is not valid
 	 */
 	protected void validate(XmlObject object) throws ValidationFailureException {
 		if (isValidating() && object != null) {

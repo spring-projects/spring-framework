@@ -95,7 +95,7 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setUnmarshallerProperties(Map)
  * @see #setSchema(Resource)
  * @see #setSchemas(Resource[])
- * @see #setMarshallerListener(Marshaller.Listener)
+ * @see #setMarshallerListener(javax.xml.bind.Marshaller.Listener)
  * @see #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener)
  * @see #setAdapters(XmlAdapter[])
  * @since 3.0
@@ -178,11 +178,11 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	 * Set the JAXB <code>Marshaller</code> properties. These properties will be set on the
 	 * underlying JAXB <code>Marshaller</code>, and allow for features such as indentation.
 	 * @param properties the properties
-	 * @see Marshaller#setProperty(String,Object)
-	 * @see Marshaller#JAXB_ENCODING
-	 * @see Marshaller#JAXB_FORMATTED_OUTPUT
-	 * @see Marshaller#JAXB_NO_NAMESPACE_SCHEMA_LOCATION
-	 * @see Marshaller#JAXB_SCHEMA_LOCATION
+	 * @see javax.xml.bind.Marshaller#setProperty(String,Object)
+	 * @see javax.xml.bind.Marshaller#JAXB_ENCODING
+	 * @see javax.xml.bind.Marshaller#JAXB_FORMATTED_OUTPUT
+	 * @see javax.xml.bind.Marshaller#JAXB_NO_NAMESPACE_SCHEMA_LOCATION
+	 * @see javax.xml.bind.Marshaller#JAXB_SCHEMA_LOCATION
 	 */
 	public void setMarshallerProperties(Map<String, Object> properties) {
 		this.marshallerProperties = properties;
@@ -424,8 +424,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	 * Gets called after creation of JAXB <code>Marshaller</code>, and after the respective properties have been set.
 	 * <p>The default implementation sets the {@link #setMarshallerProperties(Map) defined properties}, the {@link
 	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
-	 * schemas}, {@link #setMarshallerListener(Marshaller.Listener) listener}, and {@link #setAdapters(XmlAdapter[])
-	 * adapters}.
+	 * schemas}, {@link #setMarshallerListener(javax.xml.bind.Marshaller.Listener) listener}, and
+	 * {@link #setAdapters(XmlAdapter[]) adapters}.
 	 */
 	protected void initJaxbMarshaller(Marshaller marshaller) throws JAXBException {
 		if (this.marshallerProperties != null) {
@@ -509,8 +509,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	 * Gets called after creation of JAXB <code>Marshaller</code>, and after the respective properties have been set.
 	 * <p>The default implementation sets the {@link #setUnmarshallerProperties(Map) defined properties}, the {@link
 	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
-	 * schemas}, {@link #setUnmarshallerListener(Unmarshaller.Listener) listener}, and {@link #setAdapters(XmlAdapter[])
-	 * adapters}.
+	 * schemas}, {@link #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener) listener}, and
+	 * {@link #setAdapters(XmlAdapter[]) adapters}.
 	 */
 	protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
 		if (this.unmarshallerProperties != null) {
