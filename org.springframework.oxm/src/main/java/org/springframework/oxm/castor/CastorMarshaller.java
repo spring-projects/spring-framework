@@ -30,14 +30,14 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.exolab.castor.mapping.Mapping;
 import org.exolab.castor.mapping.MappingException;
+import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.ResolverException;
 import org.exolab.castor.xml.UnmarshalHandler;
 import org.exolab.castor.xml.Unmarshaller;
+import org.exolab.castor.xml.ValidationException;
 import org.exolab.castor.xml.XMLContext;
 import org.exolab.castor.xml.XMLException;
-import org.exolab.castor.xml.ValidationException;
-import org.exolab.castor.xml.MarshalException;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -47,11 +47,11 @@ import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
-import org.springframework.oxm.UnmarshallingFailureException;
-import org.springframework.oxm.XmlMappingException;
-import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
+import org.springframework.oxm.UnmarshallingFailureException;
+import org.springframework.oxm.ValidationFailureException;
+import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.oxm.support.SaxResourceUtils;
 import org.springframework.util.ObjectUtils;
@@ -296,7 +296,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * Template method that allows for customizing of the given Castor {@link Marshaller}.
 	 * <p>The default implementation invokes {@link Marshaller#setValidation(boolean)}
 	 * with the property set on this marshaller, and calls {@link Marshaller#setNamespaceMapping(String, String)}
-	 * with the {@linkplain #setNamespaceMappings(java.util.Properties) namespace mappings}.
+	 * with the {@linkplain #setNamespaceMappings(java.util.Map) namespace mappings}.
 	 */
 	protected void customizeMarshaller(Marshaller marshaller) {
 		marshaller.setValidation(this.validating);
@@ -410,7 +410,6 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
 	 * or unmarshalling (<code>false</code>)
 	 * @return the corresponding <code>XmlMappingException</code>
-	 * @see CastorUtils#convertCastorException
 	 */
 	protected XmlMappingException convertCastorException(XMLException ex, boolean marshalling) {
 		if (ex instanceof ValidationException) {
