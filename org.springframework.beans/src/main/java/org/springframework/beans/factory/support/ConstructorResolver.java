@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class ConstructorResolver {
 	 * or <code>null</code> if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	protected BeanWrapper autowireConstructor(
+	public BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, Constructor[] chosenCtors, Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
@@ -148,7 +148,7 @@ class ConstructorResolver {
 					mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 			ConstructorArgumentValues resolvedValues = null;
 
-			int minNrOfArgs = 0;
+			int minNrOfArgs;
 			if (explicitArgs != null) {
 				minNrOfArgs = explicitArgs.length;
 			}
@@ -159,8 +159,18 @@ class ConstructorResolver {
 			}
 
 			// Take specified constructors, if any.
-			Constructor[] candidates =
-					(chosenCtors != null ? chosenCtors : mbd.getBeanClass().getDeclaredConstructors());
+			Constructor[] candidates = chosenCtors;
+			if (candidates == null) {
+				Class beanClass = mbd.getBeanClass();
+				try {
+					candidates = beanClass.getDeclaredConstructors();
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							"Resolution of declared constructors on bean Class [" + beanClass.getName() +
+									"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
+				}
+			}
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 
@@ -180,7 +190,7 @@ class ConstructorResolver {
 							"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
 				}
 
-				ArgumentsHolder args = null;
+				ArgumentsHolder args;
 				List<Exception> causes = null;
 
 				if (resolvedValues != null) {
@@ -270,9 +280,9 @@ class ConstructorResolver {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
-		Class factoryClass = null;
-		Object factoryBean = null;
-		boolean isStatic = true;
+		Object factoryBean;
+		Class factoryClass;
+		boolean isStatic;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
 		if (factoryBeanName != null) {
@@ -290,7 +300,9 @@ class ConstructorResolver {
 		}
 		else {
 			// It's a static factory method on the bean class.
+			factoryBean = null;
 			factoryClass = mbd.getBeanClass();
+			isStatic = true;
 		}
 
 		Method factoryMethodToUse = null;
@@ -335,7 +347,7 @@ class ConstructorResolver {
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			ConstructorArgumentValues resolvedValues = null;
 
-			int minNrOfArgs = 0;
+			int minNrOfArgs;
 			if (explicitArgs != null) {
 				minNrOfArgs = explicitArgs.length;
 			}
@@ -357,7 +369,7 @@ class ConstructorResolver {
 						candidate.getName().equals(mbd.getFactoryMethodName()) &&
 						paramTypes.length >= minNrOfArgs) {
 
-					ArgumentsHolder args = null;
+					ArgumentsHolder args;
 
 					if (resolvedValues != null) {
 						// Resolved contructor arguments: type conversion and/or autowiring necessary.
