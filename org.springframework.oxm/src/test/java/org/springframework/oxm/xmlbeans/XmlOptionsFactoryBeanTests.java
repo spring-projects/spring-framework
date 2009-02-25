@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,24 @@ package org.springframework.oxm.xmlbeans;
 
 import java.util.Collections;
 
-import junit.framework.TestCase;
 import org.apache.xmlbeans.XmlOptions;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class XmlOptionsFactoryBeanTest extends TestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class XmlOptionsFactoryBeanTests {
 
-    private XmlOptionsFactoryBean factoryBean;
+    private XmlOptionsFactoryBean factoryBean = new XmlOptionsFactoryBean();
 
-    protected void setUp() throws Exception {
-        factoryBean = new XmlOptionsFactoryBean();
-    }
-
-    public void testXmlOptionsFactoryBean() throws Exception {
+    @Test
+	public void xmlOptionsFactoryBean() throws Exception {
         factoryBean.setOptions(Collections.singletonMap(XmlOptions.SAVE_PRETTY_PRINT, Boolean.TRUE));
-        factoryBean.afterPropertiesSet();
-        XmlOptions xmlOptions = (XmlOptions) factoryBean.getObject();
+        XmlOptions xmlOptions = factoryBean.getObject();
         assertNotNull("No XmlOptions returned", xmlOptions);
         assertTrue("Option not set", xmlOptions.hasOption(XmlOptions.SAVE_PRETTY_PRINT));
         assertFalse("Invalid option set", xmlOptions.hasOption(XmlOptions.LOAD_LINE_NUMBERS));
     }
+
 }

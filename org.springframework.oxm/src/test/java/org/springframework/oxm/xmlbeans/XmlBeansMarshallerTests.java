@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm.xmlbeans;
 
 import java.io.ByteArrayOutputStream;
@@ -23,12 +24,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-import org.springframework.oxm.AbstractMarshallerTestCase;
+import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
 import org.springframework.samples.flight.FlightType;
 import org.springframework.samples.flight.FlightsDocument;
 
-public class XmlBeansMarshallerTest extends AbstractMarshallerTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class XmlBeansMarshallerTests extends AbstractMarshallerTests {
 
 	@Override
 	protected Marshaller createMarshaller() throws Exception {
@@ -57,4 +61,5 @@ public class XmlBeansMarshallerTest extends AbstractMarshallerTestCase {
 		assertTrue("XmlBeansMarshaller does not support Flights", marshaller.supports(FlightsDocument.Flights.class));
 		assertTrue("XmlBeansMarshaller does not support FlightType", marshaller.supports(FlightType.class));
 	}
+
 }

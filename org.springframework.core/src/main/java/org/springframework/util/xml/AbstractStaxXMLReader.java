@@ -34,11 +34,11 @@ import org.springframework.util.StringUtils;
  * Abstract base class for SAX <code>XMLReader</code> implementations that use StAX as a basis.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see #setContentHandler(org.xml.sax.ContentHandler)
  * @see #setDTDHandler(org.xml.sax.DTDHandler)
  * @see #setEntityResolver(org.xml.sax.EntityResolver)
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
- * @since 3.0
  */
 abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
@@ -48,23 +48,25 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	private static final String IS_STANDALONE_FEATURE_NAME = "http://xml.org/sax/features/is-standalone";
 
+
 	private boolean namespacesFeature = true;
 
 	private boolean namespacePrefixesFeature = false;
 
 	private Boolean isStandalone;
 
+
 	@Override
 	public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
 		if (NAMESPACES_FEATURE_NAME.equals(name)) {
-			return namespacesFeature;
+			return this.namespacesFeature;
 		}
 		else if (NAMESPACE_PREFIXES_FEATURE_NAME.equals(name)) {
-			return namespacePrefixesFeature;
+			return this.namespacePrefixesFeature;
 		}
 		else if (IS_STANDALONE_FEATURE_NAME.equals(name)) {
-			if (isStandalone != null) {
-				return isStandalone;
+			if (this.isStandalone != null) {
+				return this.isStandalone;
 			}
 			else {
 				throw new SAXNotSupportedException("startDocument() callback not completed yet");
@@ -88,35 +90,66 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 		}
 	}
 
-	/** Indicates whether the SAX feature <code>http://xml.org/sax/features/namespaces</code> is turned on. */
-	protected boolean hasNamespacesFeature() {
-		return namespacesFeature;
-	}
-
-	/** Indicates whether the SAX feature <code>http://xml.org/sax/features/namespaces-prefixes</code> is turned on. */
-	protected boolean hasNamespacePrefixesFeature() {
-		return namespacePrefixesFeature;
-	}
-
 	protected void setStandalone(boolean standalone) {
-		isStandalone = (standalone) ? Boolean.TRUE : Boolean.FALSE;
+		this.isStandalone = standalone;
 	}
 
 	/**
-	 * Parses the StAX XML reader passed at construction-time. <p/> <strong>Note</strong> that the given
-	 * <code>InputSource</code> is not read, but ignored.
-	 *
+	 * Indicates whether the SAX feature <code>http://xml.org/sax/features/namespaces</code> is turned on.
+	 */
+	protected boolean hasNamespacesFeature() {
+		return this.namespacesFeature;
+	}
+
+	/**
+	 * Indicates whether the SAX feature <code>http://xml.org/sax/features/namespaces-prefixes</code> is turned on.
+	 */
+	protected boolean hasNamespacePrefixesFeature() {
+		return this.namespacePrefixesFeature;
+	}
+
+	/**
+	 * Sett the SAX <code>Locator</code> based on the given StAX <code>Location</code>.
+	 * @param location the location
+	 * @see ContentHandler#setDocumentLocator(org.xml.sax.Locator)
+	 */
+	protected void setLocator(Location location) {
+		if (getContentHandler() != null) {
+			getContentHandler().setDocumentLocator(new StaxLocator(location));
+		}
+	}
+
+	/**
+	 * Convert a <code>QName</code> to a qualified name, as used by DOM and SAX.
+	 * The returned string has a format of <code>prefix:localName</code> if the
+	 * prefix is set, or just <code>localName</code> if not.
+	 * @param qName the <code>QName</code>
+	 * @return the qualified name
+	 */
+	protected String toQualifiedName(QName qName) {
+		String prefix = qName.getPrefix();
+		if (!StringUtils.hasLength(prefix)) {
+			return qName.getLocalPart();
+		}
+		else {
+			return prefix + ":" + qName.getLocalPart();
+		}
+	}
+
+
+	/**
+	 * Parse the StAX XML reader passed at construction-time.
+	 * <p><b>NOTE:</b>: The given <code>InputSource</code> is not read, but ignored.
 	 * @param ignored is ignored
-	 * @throws SAXException A SAX exception, possibly wrapping a <code>XMLStreamException</code>
+	 * @throws SAXException a SAX exception, possibly wrapping a <code>XMLStreamException</code>
 	 */
 	public final void parse(InputSource ignored) throws SAXException {
 		parse();
 	}
 
 	/**
-	 * Parses the StAX XML reader passed at construction-time. <p/> <strong>Note</strong> that the given system identifier
-	 * is not read, but ignored.
-	 *
+	 * Parse the StAX XML reader passed at construction-time.
+	 * <p><b>NOTE:</b>: The given system identifier is not read, but ignored.
 	 * @param ignored is ignored
 	 * @throws SAXException A SAX exception, possibly wrapping a <code>XMLStreamException</code>
 	 */
@@ -144,40 +177,13 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	}
 
 	/**
-	 * Sets the SAX <code>Locator</code> based on the given StAX <code>Location</code>.
-	 *
-	 * @param location the location
-	 * @see ContentHandler#setDocumentLocator(org.xml.sax.Locator)
+	 * Template-method that parses the StAX reader passed at construction-time.
 	 */
-	protected void setLocator(Location location) {
-		if (getContentHandler() != null) {
-			getContentHandler().setDocumentLocator(new StaxLocator(location));
-		}
-	}
-
-	/** Template-method that parses the StAX reader passed at construction-time. */
 	protected abstract void parseInternal() throws SAXException, XMLStreamException;
 
-	/**
-	 * Convert a <code>QName</code> to a qualified name, as used by DOM and SAX. The returned string has a format of
-	 * <code>prefix:localName</code> if the prefix is set, or just <code>localName</code> if not.
-	 *
-	 * @param qName the <code>QName</code>
-	 * @return the qualified name
-	 */
-	protected String toQualifiedName(QName qName) {
-		String prefix = qName.getPrefix();
-		if (!StringUtils.hasLength(prefix)) {
-			return qName.getLocalPart();
-		}
-		else {
-			return prefix + ":" + qName.getLocalPart();
-		}
-	}
 
 	/**
 	 * Implementation of the <code>Locator</code> interface that is based on a StAX <code>Location</code>.
-	 *
 	 * @see Locator
 	 * @see Location
 	 */
@@ -205,4 +211,5 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 			return location.getColumnNumber();
 		}
 	}
+
 }

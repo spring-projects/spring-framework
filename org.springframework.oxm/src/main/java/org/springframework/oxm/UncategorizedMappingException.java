@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.oxm.jaxb;
 
-import javax.xml.bind.MarshalException;
-
-import org.springframework.oxm.MarshallingFailureException;
+package org.springframework.oxm;
 
 /**
- * JAXB-specific subclass of <code>MarshallingFailureException</code>.
+ * Exception that indicates that the cause cannot be distinguished further.
  *
  * @author Arjen Poutsma
- * @see JaxbUtils#convertJaxbException
  * @since 3.0
  */
-public class JaxbMarshallingFailureException extends MarshallingFailureException {
+public class UncategorizedMappingException extends XmlMappingException {
 
-	public JaxbMarshallingFailureException(MarshalException ex) {
-		super("JAXB marshalling exception: " + ex.getMessage(), ex);
+	/**
+	 * Construct an <code>UncategorizedMappingException</code> with the specified detail message
+	 * and nested exception.
+	 * @param msg the detail message
+	 * @param cause the nested exception
+	 */
+	public UncategorizedMappingException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

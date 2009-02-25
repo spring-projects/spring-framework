@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import javax.xml.bind.JAXBException;
 import javax.xml.transform.Result;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -34,13 +35,13 @@ import org.xml.sax.Locator;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.oxm.AbstractMarshallerTestCase;
+import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.FileCopyUtils;
 
-public class Jaxb2MarshallerTest extends AbstractMarshallerTestCase {
+public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb";
 
@@ -106,7 +107,7 @@ public class Jaxb2MarshallerTest extends AbstractMarshallerTestCase {
 		marshaller.afterPropertiesSet();
 	}
 
-	@Test(expected = XmlMappingException.class)
+	@Test(expected = JAXBException.class)
 	public void testInvalidContextPath() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath("ab");

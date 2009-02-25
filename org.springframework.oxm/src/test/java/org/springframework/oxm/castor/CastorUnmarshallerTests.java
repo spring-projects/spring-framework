@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm.castor;
 
 import java.io.ByteArrayInputStream;
@@ -24,10 +25,13 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.AbstractUnmarshallerTestCase;
+import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
 
-public class CastorUnmarshallerTest extends AbstractUnmarshallerTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Override
 	protected void testFlights(Object o) {

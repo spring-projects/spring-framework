@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm.castor;
 
 import java.io.IOException;
@@ -21,8 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Iterator;
-import java.util.Properties;
+import java.util.Map;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
@@ -30,13 +30,14 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.exolab.castor.mapping.Mapping;
 import org.exolab.castor.mapping.MappingException;
-import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.ResolverException;
 import org.exolab.castor.xml.UnmarshalHandler;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.XMLContext;
 import org.exolab.castor.xml.XMLException;
+import org.exolab.castor.xml.ValidationException;
+import org.exolab.castor.xml.MarshalException;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -46,12 +47,16 @@ import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
-import org.springframework.oxm.AbstractMarshaller;
+import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.ValidationFailureException;
+import org.springframework.oxm.MarshallingFailureException;
+import org.springframework.oxm.UncategorizedMappingException;
+import org.springframework.oxm.support.AbstractMarshaller;
+import org.springframework.oxm.support.SaxResourceUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.util.xml.SaxUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
@@ -76,17 +81,16 @@ import org.springframework.util.xml.StaxUtils;
 public class CastorMarshaller extends AbstractMarshaller implements InitializingBean {
 
 	/**
-	 * The default encoding used for stream access.
+	 * The default encoding used for stream access: UTF-8.
 	 */
 	public static final String DEFAULT_ENCODING = "UTF-8";
+
 
 	private Resource[] mappingLocations;
 
 	private String encoding = DEFAULT_ENCODING;
 
 	private Class targetClass;
-
-	private XMLContext xmlContext;
 
 	private boolean validating = false;
 
@@ -96,93 +100,13 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private boolean ignoreExtraElements = false;
 
-	private Properties namespaceMappings;
+	private Map<String, String> namespaceMappings;
+
+	private XMLContext xmlContext;
+
 
 	/**
-	 * Returns whether the Castor  {@link Unmarshaller} should ignore attributes that do not match a specific field.
-	 */
-	public boolean getIgnoreExtraAttributes() {
-		return ignoreExtraAttributes;
-	}
-
-	/**
-	 * Sets whether the Castor  {@link Unmarshaller} should ignore attributes that do not match a specific field. Default
-	 * is <code>true</code>: extra attributes are ignored.
-	 *
-	 * @see org.exolab.castor.xml.Unmarshaller#setIgnoreExtraAttributes(boolean)
-	 */
-	public void setIgnoreExtraAttributes(boolean ignoreExtraAttributes) {
-		this.ignoreExtraAttributes = ignoreExtraAttributes;
-	}
-
-	/**
-	 * Returns whether the Castor  {@link Unmarshaller} should ignore elements that do not match a specific field.
-	 */
-	public boolean getIgnoreExtraElements() {
-		return ignoreExtraElements;
-	}
-
-	/**
-	 * Sets whether the Castor  {@link Unmarshaller} should ignore elements that do not match a specific field. Default is
-	 * <code>false</code>, extra attributes are flagged as an error.
-	 *
-	 * @see org.exolab.castor.xml.Unmarshaller#setIgnoreExtraElements(boolean)
-	 */
-	public void setIgnoreExtraElements(boolean ignoreExtraElements) {
-		this.ignoreExtraElements = ignoreExtraElements;
-	}
-
-	/**
-	 * Returns whether the Castor {@link Unmarshaller} should preserve "ignorable" whitespace.
-	 */
-	public boolean getWhitespacePreserve() {
-		return whitespacePreserve;
-	}
-
-	/**
-	 * Sets whether the Castor {@link Unmarshaller} should preserve "ignorable" whitespace. Default is <code>false</code>.
-	 *
-	 * @see org.exolab.castor.xml.Unmarshaller#setWhitespacePreserve(boolean)
-	 */
-	public void setWhitespacePreserve(boolean whitespacePreserve) {
-		this.whitespacePreserve = whitespacePreserve;
-	}
-
-	/**
-	 * Returns whether this marshaller should validate in- and outgoing documents.
-	 */
-	public boolean isValidating() {
-		return validating;
-	}
-
-	/**
-	 * Sets whether this marshaller should validate in- and outgoing documents. Default is <code>false</code>.
-	 *
-	 * @see Marshaller#setValidation(boolean)
-	 */
-	public void setValidating(boolean validating) {
-		this.validating = validating;
-	}
-
-	/**
-	 * Returns the namespace mappings. Property names are interpreted as namespace prefixes; values are namespace URIs.
-	 */
-	public Properties getNamespaceMappings() {
-		return namespaceMappings;
-	}
-
-	/**
-	 * Sets the namespace mappings. Property names are interpreted as namespace prefixes; values are namespace URIs.
-	 *
-	 * @see org.exolab.castor.xml.Marshaller#setNamespaceMapping(String, String)
-	 */
-	public void setNamespaceMappings(Properties namespaceMappings) {
-		this.namespaceMappings = namespaceMappings;
-	}
-
-	/**
-	 * Sets the encoding to be used for stream access. If this property is not set, the default encoding is used.
-	 *
+	 * Set the encoding to be used for stream access.
 	 * @see #DEFAULT_ENCODING
 	 */
 	public void setEncoding(String encoding) {
@@ -190,79 +114,118 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Sets the locations of the Castor XML Mapping files.
+	 * Set the locations of the Castor XML Mapping files.
 	 */
 	public void setMappingLocation(Resource mappingLocation) {
-		mappingLocations = new Resource[]{mappingLocation};
+		this.mappingLocations = new Resource[] {mappingLocation};
 	}
 
 	/**
-	 * Sets the locations of the Castor XML Mapping files.
+	 * Set the locations of the Castor XML Mapping files.
 	 */
 	public void setMappingLocations(Resource[] mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
 	/**
-	 * Sets the Castor target class. If this property is set, this <code>CastorMarshaller</code> is tied to this one
-	 * specific class. Use a mapping file for unmarshalling multiple classes. <p/> You cannot set both this property and
-	 * the mapping (location).
+	 * Set the Castor target class. If this property is set, this <code>CastorMarshaller</code>
+	 * is tied to this one specific class. Use a mapping file for unmarshalling multiple classes.
+	 * <p>You cannot set both this property and the mapping (location).
 	 */
 	public void setTargetClass(Class targetClass) {
 		this.targetClass = targetClass;
 	}
 
-	public final void afterPropertiesSet() throws IOException {
-		if (mappingLocations != null && targetClass != null) {
+	/**
+	 * Set whether this marshaller should validate in- and outgoing documents.
+	 * <p>Default is <code>false</code>.
+	 * @see Marshaller#setValidation(boolean)
+	 */
+	public void setValidating(boolean validating) {
+		this.validating = validating;
+	}
+
+	/**
+	 * Set whether the Castor {@link Unmarshaller} should preserve "ignorable" whitespace.
+	 * <p>Default is <code>false</code>.
+	 * @see org.exolab.castor.xml.Unmarshaller#setWhitespacePreserve(boolean)
+	 */
+	public void setWhitespacePreserve(boolean whitespacePreserve) {
+		this.whitespacePreserve = whitespacePreserve;
+	}
+
+	/**
+	 * Set whether the Castor {@link Unmarshaller} should ignore attributes that do not match a specific field.
+	 * <p>Default is <code>true</code>: extra attributes are ignored.
+	 * @see org.exolab.castor.xml.Unmarshaller#setIgnoreExtraAttributes(boolean)
+	 */
+	public void setIgnoreExtraAttributes(boolean ignoreExtraAttributes) {
+		this.ignoreExtraAttributes = ignoreExtraAttributes;
+	}
+
+	/**
+	 * Set whether the Castor {@link Unmarshaller} should ignore elements that do not match a specific field.
+	 * <p>Default is <code>false</code>, extra attributes are flagged as an error.
+	 * @see org.exolab.castor.xml.Unmarshaller#setIgnoreExtraElements(boolean)
+	 */
+	public void setIgnoreExtraElements(boolean ignoreExtraElements) {
+		this.ignoreExtraElements = ignoreExtraElements;
+	}
+
+	/**
+	 * Set the namespace mappings. Property names are interpreted as namespace prefixes; values are namespace URIs.
+	 * @see org.exolab.castor.xml.Marshaller#setNamespaceMapping(String, String)
+	 */
+	public void setNamespaceMappings(Map<String, String> namespaceMappings) {
+		this.namespaceMappings = namespaceMappings;
+	}
+
+
+
+	public final void afterPropertiesSet() throws CastorMappingException, IOException {
+		if (this.mappingLocations != null && this.targetClass != null) {
 			throw new IllegalArgumentException("Cannot set both the 'mappingLocations' and 'targetClass' property. " +
-					"Set targetClass for unmarshalling a single class, and 'mappingLocations' for multiple classes'");
+					"Set 'targetClass' for unmarshalling a single class, and 'mappingLocations' for multiple classes.");
 		}
 		if (logger.isInfoEnabled()) {
-			if (mappingLocations != null) {
-				logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(mappingLocations));
+			if (this.mappingLocations != null) {
+				logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(this.mappingLocations));
 			}
-			else if (targetClass != null) {
-				logger.info("Configured for target class [" + targetClass.getName() + "]");
+			else if (this.targetClass != null) {
+				logger.info("Configured for target class [" + this.targetClass.getName() + "]");
 			}
 			else {
 				logger.info("Using default configuration");
 			}
 		}
 		try {
-			xmlContext = createXMLContext(mappingLocations, targetClass);
+			this.xmlContext = createXMLContext(this.mappingLocations, this.targetClass);
 		}
 		catch (MappingException ex) {
-			throw new CastorSystemException("Could not load Castor mapping: " + ex.getMessage(), ex);
+			throw new CastorMappingException("Could not load Castor mapping", ex);
 		}
-		catch (ResolverException rex) {
-			throw new CastorSystemException("Could not load Castor mapping: " + rex.getMessage(), rex);
+		catch (ResolverException ex) {
+			throw new CastorMappingException("Could not resolve Castor mapping", ex);
 		}
 	}
 
 	/**
-	 * Returns <code>true</code> for all classes, i.e. Castor supports arbitrary classes.
-	 */
-	public boolean supports(Class<?> clazz) {
-		return true;
-	}
-
-	/**
-	 * Creates the Castor <code>XMLContext</code>. Subclasses can override this to create a custom context. <p/> The
-	 * default implementation loads mapping files if defined, and the target class if not defined.
-	 *
+	 * Create the Castor <code>XMLContext</code>. Subclasses can override this to create a custom context.
+	 * <p>The default implementation loads mapping files if defined, and the target class if not defined.
 	 * @return the created resolver
 	 * @throws MappingException when the mapping file cannot be loaded
-	 * @throws IOException	  in case of I/O errors
+	 * @throws IOException in case of I/O errors
 	 * @see XMLContext#addMapping(org.exolab.castor.mapping.Mapping)
 	 * @see XMLContext#addClass(Class)
 	 */
 	protected XMLContext createXMLContext(Resource[] mappingLocations, Class targetClass)
-			throws MappingException, IOException, ResolverException {
+			throws MappingException, ResolverException, IOException {
+
 		XMLContext context = new XMLContext();
 		if (!ObjectUtils.isEmpty(mappingLocations)) {
 			Mapping mapping = new Mapping();
 			for (Resource mappingLocation : mappingLocations) {
-				mapping.loadMapping(SaxUtils.createInputSource(mappingLocation));
+				mapping.loadMapping(SaxResourceUtils.createInputSource(mappingLocation));
 			}
 			context.addMapping(mapping);
 		}
@@ -272,9 +235,16 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		return context;
 	}
 
-	//
+
+	/**
+	 * Returns <code>true</code> for all classes, i.e. Castor supports arbitrary classes.
+	 */
+	public boolean supports(Class<?> clazz) {
+		return true;
+	}
+
+
 	// Marshalling
-	//
 
 	@Override
 	protected final void marshalDomNode(Object graph, Node node) throws XmlMappingException {
@@ -323,26 +293,22 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Template method that allows for customizing of the given Castor {@link Marshaller}. <p/> Default implementation
-	 * invokes {@link Marshaller#setValidation(boolean)} with the property set on this marshaller, and calls {@link
-	 * Marshaller#setNamespaceMapping(String, String)} with the {@linkplain #setNamespaceMappings(java.util.Properties)
-	 * namespace mappings}.
+	 * Template method that allows for customizing of the given Castor {@link Marshaller}.
+	 * <p>The default implementation invokes {@link Marshaller#setValidation(boolean)}
+	 * with the property set on this marshaller, and calls {@link Marshaller#setNamespaceMapping(String, String)}
+	 * with the {@linkplain #setNamespaceMappings(java.util.Properties) namespace mappings}.
 	 */
 	protected void customizeMarshaller(Marshaller marshaller) {
-		marshaller.setValidation(isValidating());
-		Properties namespaceMappings = getNamespaceMappings();
-		if (namespaceMappings != null) {
-			for (Iterator iterator = namespaceMappings.keySet().iterator(); iterator.hasNext();) {
-				String prefix = (String) iterator.next();
-				String uri = namespaceMappings.getProperty(prefix);
-				marshaller.setNamespaceMapping(prefix, uri);
+		marshaller.setValidation(this.validating);
+		if (this.namespaceMappings != null) {
+			for (Map.Entry<String, String> entry : namespaceMappings.entrySet()) {
+				marshaller.setNamespaceMapping(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	//
+
 	// Unmarshalling
-	//
 
 	@Override
 	protected final Object unmarshalDomNode(Node node) throws XmlMappingException {
@@ -381,13 +347,14 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 			return unmarshalSaxReader(reader, new InputSource());
 		}
 		catch (IOException ex) {
-			throw new CastorUnmarshallingFailureException(new MarshalException(ex));
+			throw new UnmarshallingFailureException("Failed to read XML stream",  ex);
 		}
 	}
 
 	@Override
 	protected final Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
 			throws XmlMappingException, IOException {
+
 		UnmarshalHandler unmarshalHandler = createUnmarshaller().createHandler();
 		try {
 			ContentHandler contentHandler = Unmarshaller.getContentHandler(unmarshalHandler);
@@ -396,7 +363,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 			return unmarshalHandler.getObject();
 		}
 		catch (SAXException ex) {
-			throw new CastorUnmarshallingFailureException(ex);
+			throw new UnmarshallingFailureException("SAX reader exception", ex);
 		}
 	}
 
@@ -407,47 +374,60 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 			return unmarshalSaxReader(reader, new InputSource());
 		}
 		catch (IOException ex) {
-			throw new CastorUnmarshallingFailureException(new MarshalException(ex));
+			throw new UnmarshallingFailureException("Failed to read XML stream", ex);
 		}
 	}
 
 	private Unmarshaller createUnmarshaller() {
-		Unmarshaller unmarshaller = xmlContext.createUnmarshaller();
-		if (targetClass != null) {
-			unmarshaller.setClass(targetClass);
-			unmarshaller.setClassLoader(targetClass.getClassLoader());
+		Unmarshaller unmarshaller = this.xmlContext.createUnmarshaller();
+		if (this.targetClass != null) {
+			unmarshaller.setClass(this.targetClass);
+			unmarshaller.setClassLoader(this.targetClass.getClassLoader());
 		}
 		customizeUnmarshaller(unmarshaller);
 		return unmarshaller;
 	}
 
 	/**
-	 * Template method that allows for customizing of the given Castor {@link Unmarshaller}. <p/> Default implementation
-	 * invokes {@link Unmarshaller#setValidation(boolean)}, {@link Unmarshaller#setWhitespacePreserve(boolean)}, {@link
-	 * Unmarshaller#setIgnoreExtraAttributes(boolean)}, and {@link Unmarshaller#setIgnoreExtraElements(boolean)} with the
-	 * properties set on this marshaller.
+	 * Template method that allows for customizing of the given Castor {@link Unmarshaller}.
+	 * <p>The default implementation invokes {@link Unmarshaller#setValidation(boolean)},
+	 * {@link Unmarshaller#setWhitespacePreserve(boolean)}, {@link Unmarshaller#setIgnoreExtraAttributes(boolean)},
+	 * and {@link Unmarshaller#setIgnoreExtraElements(boolean)} with the properties set on this marshaller.
 	 */
 	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
-		unmarshaller.setValidation(isValidating());
-		unmarshaller.setWhitespacePreserve(getWhitespacePreserve());
-		unmarshaller.setIgnoreExtraAttributes(getIgnoreExtraAttributes());
-		unmarshaller.setIgnoreExtraElements(getIgnoreExtraElements());
+		unmarshaller.setValidation(this.validating);
+		unmarshaller.setWhitespacePreserve(this.whitespacePreserve);
+		unmarshaller.setIgnoreExtraAttributes(this.ignoreExtraAttributes);
+		unmarshaller.setIgnoreExtraElements(this.ignoreExtraElements);
 	}
 
 	/**
-	 * Converts the given <code>CastorException</code> to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy. <p/> The default implementation delegates to
-	 * <code>CastorUtils</code>. Can be overridden in subclasses. <p/> A boolean flag is used to indicate whether this
-	 * exception occurs during marshalling or unmarshalling, since Castor itself does not make this distinction in its
-	 * exception hierarchy.
-	 *
-	 * @param ex		  Castor <code>XMLException</code> that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>), or unmarshalling
-	 *                    (<code>false</code>)
+	 * Convert the given <code>XMLException</code> to an appropriate exception from the
+	 * <code>org.springframework.oxm</code> hierarchy.
+	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
+	 * unmarshalling, since Castor itself does not make this distinction in its exception hierarchy.
+	 * @param ex Castor <code>XMLException</code> that occured
+	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
+	 * or unmarshalling (<code>false</code>)
 	 * @return the corresponding <code>XmlMappingException</code>
-	 * @see CastorUtils#convertXmlException
+	 * @see CastorUtils#convertCastorException
 	 */
-	public XmlMappingException convertCastorException(XMLException ex, boolean marshalling) {
-		return CastorUtils.convertXmlException(ex, marshalling);
+	protected XmlMappingException convertCastorException(XMLException ex, boolean marshalling) {
+		if (ex instanceof ValidationException) {
+			return new ValidationFailureException("Castor validation exception", ex);
+		}
+		else if (ex instanceof MarshalException) {
+			if (marshalling) {
+				return new MarshallingFailureException("Castor marshalling exception",  ex);
+			}
+			else {
+				return new UnmarshallingFailureException("Castor unmarshalling exception", ex);
+			}
+		}
+		else {
+			// fallback
+			return new UncategorizedMappingException("Unknown Castor exception", ex);
+		}
 	}
+
 }
