@@ -28,7 +28,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
@@ -37,8 +36,8 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 
 /**
- * {@link Source} implementation that uses a {@link Marshaller}.Can be constructed with a <code>Marshaller</code> and an
- * object to be marshalled.
+ * {@link Source} implementation that uses a {@link Marshaller}.Can be constructed with a
+ * <code>Marshaller</code> and an object to be marshalled.
  *
  * <p>Even though <code>MarshallingSource</code> extends from <code>SAXSource</code>, calling the methods of
  * <code>SAXSource</code> is <strong>not supported</strong>. In general, the only supported operation on this class is
@@ -47,8 +46,8 @@ import org.springframework.util.Assert;
  * <code>UnsupportedOperationException</code>s.
  *
  * @author Arjen Poutsma
- * @see javax.xml.transform.Transformer
  * @since 3.0
+ * @see javax.xml.transform.Transformer
  */
 public class MarshallingSource extends SAXSource {
 
@@ -56,11 +55,11 @@ public class MarshallingSource extends SAXSource {
 
 	private final Object content;
 
+
 	/**
-	 * Creates a new <code>MarshallingSource</code> with the given marshaller and content.
-	 *
+	 * Create a new <code>MarshallingSource</code> with the given marshaller and content.
 	 * @param marshaller the marshaller to use
-	 * @param content	the object to be marshalled
+	 * @param content the object to be marshalled
 	 */
 	public MarshallingSource(Marshaller marshaller, Object content) {
 		super(new MarshallingXMLReader(marshaller, content), new InputSource());
@@ -70,20 +69,23 @@ public class MarshallingSource extends SAXSource {
 		this.content = content;
 	}
 
-	/** Returns the <code>Marshaller</code> used by this <code>MarshallingSource</code>. */
+
+	/**
+	 * Return the <code>Marshaller</code> used by this <code>MarshallingSource</code>.
+	 */
 	public Marshaller getMarshaller() {
-		return marshaller;
+		return this.marshaller;
 	}
 
-	/** Returns the object to be marshalled. */
+	/**
+	 * Return the object to be marshalled.
+	 */
 	public Object getContent() {
-		return content;
+		return this.content;
 	}
 
 	/**
 	 * Throws a <code>UnsupportedOperationException</code>.
-	 *
-	 * @throws UnsupportedOperationException always
 	 */
 	@Override
 	public void setInputSource(InputSource inputSource) {
@@ -92,13 +94,12 @@ public class MarshallingSource extends SAXSource {
 
 	/**
 	 * Throws a <code>UnsupportedOperationException</code>.
-	 *
-	 * @throws UnsupportedOperationException always
 	 */
 	@Override
 	public void setXMLReader(XMLReader reader) {
 		throw new UnsupportedOperationException("setXMLReader is not supported");
 	}
+
 
 	private static class MarshallingXMLReader implements XMLReader {
 
@@ -123,12 +124,12 @@ public class MarshallingSource extends SAXSource {
 			this.content = content;
 		}
 
-		public ContentHandler getContentHandler() {
-			return contentHandler;
-		}
-
 		public void setContentHandler(ContentHandler contentHandler) {
 			this.contentHandler = contentHandler;
+		}
+
+		public ContentHandler getContentHandler() {
+			return this.contentHandler;
 		}
 
 		public void setDTDHandler(DTDHandler dtdHandler) {
@@ -136,38 +137,38 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		public DTDHandler getDTDHandler() {
-			return dtdHandler;
-		}
-
-		public EntityResolver getEntityResolver() {
-			return entityResolver;
+			return this.dtdHandler;
 		}
 
 		public void setEntityResolver(EntityResolver entityResolver) {
 			this.entityResolver = entityResolver;
 		}
 
-		public ErrorHandler getErrorHandler() {
-			return errorHandler;
+		public EntityResolver getEntityResolver() {
+			return this.entityResolver;
 		}
 
 		public void setErrorHandler(ErrorHandler errorHandler) {
 			this.errorHandler = errorHandler;
 		}
 
+		public ErrorHandler getErrorHandler() {
+			return this.errorHandler;
+		}
+
 		protected LexicalHandler getLexicalHandler() {
-			return lexicalHandler;
+			return this.lexicalHandler;
 		}
 
-		public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
+		public boolean getFeature(String name) throws SAXNotRecognizedException {
 			throw new SAXNotRecognizedException(name);
 		}
 
-		public void setFeature(String name, boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
+		public void setFeature(String name, boolean value) throws SAXNotRecognizedException {
 			throw new SAXNotRecognizedException(name);
 		}
 
-		public Object getProperty(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
+		public Object getProperty(String name) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 				return lexicalHandler;
 			}
@@ -176,20 +177,20 @@ public class MarshallingSource extends SAXSource {
 			}
 		}
 
-		public void setProperty(String name, Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
+		public void setProperty(String name, Object value) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
-				lexicalHandler = (LexicalHandler) value;
+				this.lexicalHandler = (LexicalHandler) value;
 			}
 			else {
 				throw new SAXNotRecognizedException(name);
 			}
 		}
 
-		public void parse(InputSource input) throws IOException, SAXException {
+		public void parse(InputSource input) throws SAXException {
 			parse();
 		}
 
-		public void parse(String systemId) throws IOException, SAXException {
+		public void parse(String systemId) throws SAXException {
 			parse();
 		}
 
@@ -197,18 +198,19 @@ public class MarshallingSource extends SAXSource {
 			SAXResult result = new SAXResult(getContentHandler());
 			result.setLexicalHandler(getLexicalHandler());
 			try {
-				marshaller.marshal(content, result);
+				this.marshaller.marshal(this.content, result);
 			}
 			catch (IOException ex) {
 				SAXParseException saxException = new SAXParseException(ex.getMessage(), null, null, -1, -1, ex);
-				if (getErrorHandler() != null) {
-					getErrorHandler().fatalError(saxException);
+				ErrorHandler errorHandler = getErrorHandler();
+				if (errorHandler != null) {
+					errorHandler.fatalError(saxException);
 				}
 				else {
 					throw saxException;
 				}
 			}
 		}
-
 	}
+
 }

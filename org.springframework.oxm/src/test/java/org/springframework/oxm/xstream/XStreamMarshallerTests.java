@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -39,10 +39,11 @@ import javax.xml.transform.stream.StreamSource;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.custommonkey.xmlunit.XMLAssert.assertXpathNotExists;
+import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.easymock.MockControl;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -52,7 +53,10 @@ import org.xml.sax.ContentHandler;
 
 import org.springframework.util.xml.StaxUtils;
 
-public class XStreamMarshallerTest {
+/**
+ * @author Arjen Poutsma
+ */
+public class XStreamMarshallerTests {
 
 	private static final String EXPECTED_STRING = "<flight><flightNumber>42</flightNumber></flight>";
 
@@ -63,8 +67,8 @@ public class XStreamMarshallerTest {
 	@Before
 	public void createMarshaller() throws Exception {
 		marshaller = new XStreamMarshaller();
-		Properties aliases = new Properties();
-		aliases.setProperty("flight", AnnotatedFlight.class.getName());
+		Map<String, Class> aliases = new HashMap<String, Class>();
+		aliases.put("flight", AnnotatedFlight.class);
 		marshaller.setAliases(aliases);
 		flight = new AnnotatedFlight();
 		flight.setFlightNumber(42L);

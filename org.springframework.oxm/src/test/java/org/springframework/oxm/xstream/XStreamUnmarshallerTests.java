@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package org.springframework.oxm.xstream;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -35,7 +36,10 @@ import org.xml.sax.InputSource;
 
 import org.springframework.util.xml.StaxUtils;
 
-public class XStreamUnmarshallerTest {
+/**
+ * @author Arjen Poutsma
+ */
+public class XStreamUnmarshallerTests {
 
 	protected static final String INPUT_STRING = "<flight><flightNumber>42</flightNumber></flight>";
 
@@ -44,8 +48,8 @@ public class XStreamUnmarshallerTest {
 	@Before
 	public void creteUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
-		Properties aliases = new Properties();
-		aliases.setProperty("flight", AnnotatedFlight.class.getName());
+		Map<String, Class> aliases = new HashMap<String, Class>();
+		aliases.put("flight", AnnotatedFlight.class);
 		unmarshaller.setAliases(aliases);
 	}
 

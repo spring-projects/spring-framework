@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm.castor;
 
 import javax.xml.transform.sax.SAXResult;
@@ -24,10 +25,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.AbstractMarshallerTestCase;
+import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
 
-public class CastorMarshallerTest extends AbstractMarshallerTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Override
 	protected Marshaller createMarshaller() throws Exception {
@@ -76,6 +80,5 @@ public class CastorMarshallerTest extends AbstractMarshallerTestCase {
 		assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
 		assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
 	}
-
 
 }

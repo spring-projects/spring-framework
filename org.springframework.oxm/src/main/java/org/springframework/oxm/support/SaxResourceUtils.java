@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util.xml;
+package org.springframework.oxm.support;
 
 import java.io.IOException;
 
@@ -26,14 +26,14 @@ import org.springframework.core.io.Resource;
  * Convenient utility methods for dealing with SAX.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
-public abstract class SaxUtils {
+public abstract class SaxResourceUtils {
 
 	/**
-	 * Creates a SAX <code>InputSource</code> from the given resource. Sets the system identifier to the resource's
-	 * <code>URL</code>, if available.
-	 *
+	 * Create a SAX <code>InputSource</code> from the given resource.
+	 * <p>Sets the system identifier to the resource's <code>URL</code>, if available.
 	 * @param resource the resource
 	 * @return the input source created from the resource
 	 * @throws IOException if an I/O exception occurs
@@ -46,12 +46,15 @@ public abstract class SaxUtils {
 		return inputSource;
 	}
 
-	/** Retrieves the URL from the given resource as System ID. Returns <code>null</code> if it cannot be openened. */
+	/**
+	 * Retrieve the URL from the given resource as System ID.
+	 * <p>Returns <code>null</code> if it cannot be opened.
+	 */
 	private static String getSystemId(Resource resource) {
 		try {
 			return resource.getURI().toString();
 		}
-		catch (IOException e) {
+		catch (IOException ex) {
 			return null;
 		}
 	}

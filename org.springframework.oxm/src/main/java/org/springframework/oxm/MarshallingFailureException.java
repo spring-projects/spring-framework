@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm;
 
 /**
@@ -21,11 +22,10 @@ package org.springframework.oxm;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class MarshallingFailureException extends GenericMarshallingFailureException {
+public class MarshallingFailureException extends MarshallingException {
 
 	/**
 	 * Construct a <code>MarshallingFailureException</code> with the specified detail message.
-	 *
 	 * @param msg the detail message
 	 */
 	public MarshallingFailureException(String msg) {
@@ -33,12 +33,13 @@ public class MarshallingFailureException extends GenericMarshallingFailureExcept
 	}
 
 	/**
-	 * Construct a <code>MarshallingFailureException</code> with the specified detail message and nested exception.
-	 *
+	 * Construct a <code>MarshallingFailureException</code> with the specified detail message
+	 * and nested exception.
 	 * @param msg the detail message
-	 * @param ex  the nested exception
+	 * @param cause the nested exception
 	 */
-	public MarshallingFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	public MarshallingFailureException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
+
 }

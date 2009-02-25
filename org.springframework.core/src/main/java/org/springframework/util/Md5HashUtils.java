@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,7 @@ public abstract class Md5HashUtils {
 			{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 	/**
-	 * Calculates the MD5 hash of the given bytes.
-	 *
+	 * Calculate the MD5 hash of the given bytes.
 	 * @param bytes the bytes to calculate the hash over
 	 * @return the hash
 	 */
@@ -59,8 +58,7 @@ public abstract class Md5HashUtils {
 	}
 
 	/**
-	 * Returns a hex string representation of the MD5 hash of the given bytes.
-	 *
+	 * Return a hex string representation of the MD5 hash of the given bytes.
 	 * @param bytes the bytes to calculate the hash over
 	 * @return a hexadecimal hash string
 	 */
@@ -69,9 +67,8 @@ public abstract class Md5HashUtils {
 	}
 
 	/**
-	 * Appends a hex string representation of the MD5 hash of the given bytes to the given {@link StringBuilder}.
-	 *
-	 * @param bytes   the bytes to calculate the hash over
+	 * Append a hex string representation of the MD5 hash of the given bytes to the given {@link StringBuilder}.
+	 * @param bytes the bytes to calculate the hash over
 	 * @param builder the string builder to append the hash to
 	 * @return the given string builder
 	 */

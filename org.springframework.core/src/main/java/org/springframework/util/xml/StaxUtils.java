@@ -30,27 +30,32 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Convenience methods for working with the StAX API.
  *
- * In particular, methods for using StAX in combination with the TrAX API (<code>javax.xml.transform</code>), and
- * converting StAX readers/writers into SAX readers/handlers and vice-versa.
+ * <p>In particular, methods for using StAX in combination with the TrAX API
+ * (<code>javax.xml.transform</code>), and converting StAX readers/writers
+ * into SAX readers/handlers and vice-versa.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class StaxUtils {
 
+	private static boolean jaxp14Available =
+			ClassUtils.isPresent("javax.xml.transform.stax.StAXSource", StaxUtils.class.getClassLoader());
+
+
 	/**
-	 * Creates a StAX {@link Source} for the given {@link XMLStreamReader}. Returns a {@link StAXSource} under JAXP 1.4 or
-	 * higher, or a {@link StaxSource} otherwise.
-	 *
+	 * Create a StAX {@link Source} for the given {@link XMLStreamReader}.
 	 * @param streamReader the StAX stream reader
 	 * @return a source wrapping <code>streamReader</code>
 	 */
 	public static Source createStaxSource(XMLStreamReader streamReader) {
-		if (JaxpVersion.isAtLeastJaxp14()) {
+		if (jaxp14Available) {
 			return Jaxp14StaxHandler.createStaxSource(streamReader);
 		}
 		else {
@@ -59,15 +64,13 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a StAX {@link Source} for the given {@link XMLEventReader}. Returns a {@link StAXSource} under JAXP 1.4 or
-	 * higher, or a {@link StaxSource} otherwise.
-	 *
+	 * Create a StAX {@link Source} for the given {@link XMLEventReader}.
 	 * @param eventReader the StAX event reader
 	 * @return a source wrapping <code>streamReader</code>
 	 * @throws XMLStreamException in case of StAX errors
 	 */
 	public static Source createStaxSource(XMLEventReader eventReader) throws XMLStreamException {
-		if (JaxpVersion.isAtLeastJaxp14()) {
+		if (jaxp14Available) {
 			return Jaxp14StaxHandler.createStaxSource(eventReader);
 		}
 		else {
@@ -76,14 +79,21 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a StAX {@link Result} for the given {@link XMLStreamWriter}. Returns a {@link StAXResult} under JAXP 1.4 or
-	 * higher, or a {@link StaxResult} otherwise.
-	 *
+	 * Indicate whether the given {@link javax.xml.transform.Source} is a StAX Source.
+	 * @return <code>true</code> if <code>source</code> is a Spring StaxSource or JAXP
+	 * 1.4 {@link javax.xml.transform.stax.StAXSource}; <code>false</code> otherwise.
+	 */
+	public static boolean isStaxSource(Source source) {
+		return (source instanceof StaxSource || (jaxp14Available && Jaxp14StaxHandler.isStaxSource(source)));
+	}
+
+	/**
+	 * Create a StAX {@link Result} for the given {@link XMLStreamWriter}.
 	 * @param streamWriter the StAX stream writer
 	 * @return a result wrapping <code>streamWriter</code>
 	 */
 	public static Result createStaxResult(XMLStreamWriter streamWriter) {
-		if (JaxpVersion.isAtLeastJaxp14()) {
+		if (jaxp14Available) {
 			return Jaxp14StaxHandler.createStaxResult(streamWriter);
 		}
 		else {
@@ -92,15 +102,13 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a StAX {@link Result} for the given {@link XMLEventWriter}. Returns a {@link StAXResult} under JAXP 1.4 or
-	 * higher, or a {@link StaxResult} otherwise.
-	 *
+	 * Create a StAX {@link Result} for the given {@link XMLEventWriter}.
 	 * @param eventWriter the StAX event writer
 	 * @return a result wrapping <code>streamReader</code>
 	 * @throws XMLStreamException in case of StAX errors
 	 */
 	public static Result createStaxResult(XMLEventWriter eventWriter) throws XMLStreamException {
-		if (JaxpVersion.isAtLeastJaxp14()) {
+		if (jaxp14Available) {
 			return Jaxp14StaxHandler.createStaxResult(eventWriter);
 		}
 		else {
@@ -109,54 +117,26 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Indicates whether the given {@link javax.xml.transform.Source} is a StAX Source.
-	 *
-	 * @return <code>true</code> if <code>source</code> is a Spring {@link org.springframework.util.xml.StaxSource} or JAXP
-	 *         1.4 {@link javax.xml.transform.stax.StAXSource}; <code>false</code> otherwise.
-	 */
-	public static boolean isStaxSource(Source source) {
-		if (source instanceof StaxSource) {
-			return true;
-		}
-		else if (JaxpVersion.isAtLeastJaxp14()) {
-			return Jaxp14StaxHandler.isStaxSource(source);
-		}
-		else {
-			return false;
-		}
-	}
-
-	/**
-	 * Indicates whether the given {@link javax.xml.transform.Result} is a StAX Result.
-	 *
-	 * @return <code>true</code> if <code>result</code> is a Spring {@link org.springframework.util.xml.StaxResult} or JAXP
-	 *         1.4 {@link javax.xml.transform.stax.StAXResult}; <code>false</code> otherwise.
+	 * Indicate whether the given {@link javax.xml.transform.Result} is a StAX Result.
+	 * @return <code>true</code> if <code>result</code> is a Spring StaxResult or JAXP
+	 * 1.4 {@link javax.xml.transform.stax.StAXResult}; <code>false</code> otherwise.
 	 */
 	public static boolean isStaxResult(Result result) {
-		if (result instanceof StaxResult) {
-			return true;
-		}
-		else if (JaxpVersion.isAtLeastJaxp14()) {
-			return Jaxp14StaxHandler.isStaxResult(result);
-		}
-		else {
-			return false;
-		}
+		return (result instanceof StaxResult || (jaxp14Available && Jaxp14StaxHandler.isStaxResult(result)));
 	}
 
 	/**
-	 * Returns the {@link javax.xml.stream.XMLStreamReader} for the given StAX Source.
-	 *
-	 * @param source a Spring {@link org.springframework.util.xml.StaxSource} or {@link javax.xml.transform.stax.StAXSource}
+	 * Return the {@link javax.xml.stream.XMLStreamReader} for the given StAX Source.
+	 * @param source a Spring StaxSource or JAXP 1.4 {@link javax.xml.transform.stax.StAXSource}
 	 * @return the {@link javax.xml.stream.XMLStreamReader}
-	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring-WS {@link org.springframework.util.xml.StaxSource}
-	 *                                  or {@link javax.xml.transform.stax.StAXSource}
+	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring StaxSource
+	 * nor JAXP 1.4 {@link javax.xml.transform.stax.StAXSource}
 	 */
 	public static XMLStreamReader getXMLStreamReader(Source source) {
 		if (source instanceof StaxSource) {
 			return ((StaxSource) source).getXMLStreamReader();
 		}
-		else if (JaxpVersion.isAtLeastJaxp14()) {
+		else if (jaxp14Available) {
 			return Jaxp14StaxHandler.getXMLStreamReader(source);
 		}
 		else {
@@ -165,18 +145,17 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Returns the {@link javax.xml.stream.XMLEventReader} for the given StAX Source.
-	 *
-	 * @param source a Spring {@link org.springframework.util.xml.StaxSource} or {@link javax.xml.transform.stax.StAXSource}
+	 * Return the {@link javax.xml.stream.XMLEventReader} for the given StAX Source.
+	 * @param source a Spring StaxSource or JAXP 1.4  {@link javax.xml.transform.stax.StAXSource}
 	 * @return the {@link javax.xml.stream.XMLEventReader}
-	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring {@link org.springframework.util.xml.StaxSource}
-	 *                                  or {@link javax.xml.transform.stax.StAXSource}
+	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring StaxSource
+	 * nor a JAXP 1.4 {@link javax.xml.transform.stax.StAXSource}
 	 */
 	public static XMLEventReader getXMLEventReader(Source source) {
 		if (source instanceof StaxSource) {
 			return ((StaxSource) source).getXMLEventReader();
 		}
-		else if (JaxpVersion.isAtLeastJaxp14()) {
+		else if (jaxp14Available) {
 			return Jaxp14StaxHandler.getXMLEventReader(source);
 		}
 		else {
@@ -185,18 +164,17 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Returns the {@link javax.xml.stream.XMLStreamWriter} for the given StAX Result.
-	 *
-	 * @param result a Spring {@link org.springframework.util.xml.StaxResult} or {@link javax.xml.transform.stax.StAXResult}
+	 * Return the {@link javax.xml.stream.XMLStreamWriter} for the given StAX Result.
+	 * @param result a Spring StaxResult or JAXP 1.4 {@link javax.xml.transform.stax.StAXResult}
 	 * @return the {@link javax.xml.stream.XMLStreamReader}
-	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring {@link org.springframework.util.xml.StaxResult}
-	 *                                  or {@link javax.xml.transform.stax.StAXResult}
+	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring StaxResult
+	 * nor a JAXP 1.4 {@link javax.xml.transform.stax.StAXResult}
 	 */
 	public static XMLStreamWriter getXMLStreamWriter(Result result) {
 		if (result instanceof StaxResult) {
 			return ((StaxResult) result).getXMLStreamWriter();
 		}
-		else if (JaxpVersion.isAtLeastJaxp14()) {
+		else if (jaxp14Available) {
 			return Jaxp14StaxHandler.getXMLStreamWriter(result);
 		}
 		else {
@@ -205,18 +183,17 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Returns the {@link XMLEventWriter} for the given StAX Result.
-	 *
-	 * @param result a Spring {@link org.springframework.util.xml.StaxResult} or {@link javax.xml.transform.stax.StAXResult}
+	 * Return the {@link XMLEventWriter} for the given StAX Result.
+	 * @param result a Spring StaxResult or JAXP 1.4 {@link javax.xml.transform.stax.StAXResult}
 	 * @return the {@link javax.xml.stream.XMLStreamReader}
-	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring {@link org.springframework.util.xml.StaxResult}
-	 *                                  or {@link javax.xml.transform.stax.StAXResult}
+	 * @throws IllegalArgumentException if <code>source</code> is neither a Spring StaxResult
+	 * nor a JAXP 1.4 {@link javax.xml.transform.stax.StAXResult}
 	 */
 	public static XMLEventWriter getXMLEventWriter(Result result) {
 		if (result instanceof StaxResult) {
 			return ((StaxResult) result).getXMLEventWriter();
 		}
-		else if (JaxpVersion.isAtLeastJaxp14()) {
+		else if (jaxp14Available) {
 			return Jaxp14StaxHandler.getXMLEventWriter(result);
 		}
 		else {
@@ -225,8 +202,7 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a SAX {@link ContentHandler} that writes to the given StAX {@link XMLStreamWriter}.
-	 *
+	 * Create a SAX {@link ContentHandler} that writes to the given StAX {@link XMLStreamWriter}.
 	 * @param streamWriter the StAX stream writer
 	 * @return a content handler writing to the <code>streamWriter</code>
 	 */
@@ -235,8 +211,7 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a SAX {@link ContentHandler} that writes events to the given StAX {@link XMLEventWriter}.
-	 *
+	 * Create a SAX {@link ContentHandler} that writes events to the given StAX {@link XMLEventWriter}.
 	 * @param eventWriter the StAX event writer
 	 * @return a content handler writing to the <code>eventWriter</code>
 	 */
@@ -245,8 +220,7 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a SAX {@link XMLReader} that reads from the given StAX {@link XMLStreamReader}.
-	 *
+	 * Create a SAX {@link XMLReader} that reads from the given StAX {@link XMLStreamReader}.
 	 * @param streamReader the StAX stream reader
 	 * @return a XMLReader reading from the <code>streamWriter</code>
 	 */
@@ -255,8 +229,7 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Creates a SAX {@link XMLReader} that reads from the given StAX {@link XMLEventReader}.
-	 *
+	 * Create a SAX {@link XMLReader} that reads from the given StAX {@link XMLEventReader}.
 	 * @param eventReader the StAX event reader
 	 * @return a XMLReader reading from the <code>eventWriter</code>
 	 */
@@ -265,16 +238,18 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Returns a {@link XMLStreamReader} that reads from a {@link XMLEventReader}. Useful, because the StAX
+	 * Return a {@link XMLStreamReader} that reads from a {@link XMLEventReader}. Useful, because the StAX
 	 * <code>XMLInputFactory</code> allows one to create a event reader from a stream reader, but not vice-versa.
-	 *
 	 * @return a stream reader that reads from an event reader
 	 */
 	public static XMLStreamReader createEventStreamReader(XMLEventReader eventReader) throws XMLStreamException {
 		return new XMLEventStreamReader(eventReader);
 	}
 
-	/** Inner class to avoid a static JAXP 1.4 dependency. */
+
+	/**
+	 * Inner class to avoid a static JAXP 1.4 dependency.
+	 */
 	private static class Jaxp14StaxHandler {
 
 		private static Source createStaxSource(XMLStreamReader streamReader) {

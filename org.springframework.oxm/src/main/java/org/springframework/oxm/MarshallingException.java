@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm;
 
 /**
  * Base class for exception thrown when a marshalling or unmarshalling error occurs.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @since 3.0
  * @see MarshallingFailureException
  * @see UnmarshallingFailureException
- * @since 3.0
  */
-public abstract class GenericMarshallingFailureException extends XmlMappingException {
+public abstract class MarshallingException extends XmlMappingException {
 
-	/** Constructor for <code>GenericMarshallingFailureException</code>. */
-	public GenericMarshallingFailureException(String msg) {
+	/**
+	 * Construct a <code>MarshallingException</code> with the specified detail message.
+	 * @param msg the detail message
+	 */
+	protected MarshallingException(String msg) {
 		super(msg);
 	}
 
-	/** Constructor for <code>GenericMarshallingFailureException</code>. */
-	public GenericMarshallingFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	/**
+	 * Construct a <code>MarshallingException</code> with the specified detail message
+	 * and nested exception.
+	 * @param msg the detail message
+	 * @param cause the nested exception
+	 */
+	protected MarshallingException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.oxm.xmlbeans;
 
 import java.io.StringReader;
@@ -22,18 +23,21 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.oxm.AbstractUnmarshallerTestCase;
+import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.ValidationFailureException;
 import org.springframework.samples.flight.FlightDocument;
 import org.springframework.samples.flight.FlightType;
 import org.springframework.samples.flight.FlightsDocument;
 import org.springframework.util.xml.StaxUtils;
 
-public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class XmlBeansUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
@@ -78,7 +82,7 @@ public class XmlBeansUnmarshallerTest extends AbstractUnmarshallerTestCase {
 		testFlight(flight);
 	}
 
-	@Test(expected = XmlBeansValidationFailureException.class)
+	@Test(expected = ValidationFailureException.class)
 	public void testValidate() throws Exception {
 		((XmlBeansMarshaller) unmarshaller).setValidating(true);
 		String invalidInput = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
