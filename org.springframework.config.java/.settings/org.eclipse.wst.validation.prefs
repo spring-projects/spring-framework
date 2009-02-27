@@ -1,0 +1,6 @@
+#Fri Apr 13 18:31:13 EEST 2007
+DELEGATES_PREFERENCE=delegateValidatorListorg.eclipse.wst.xsd.core.internal.validation.eclipse.XSDDelegatingValidator\=org.eclipse.wst.xsd.core.internal.validation.eclipse.Validator;org.eclipse.wst.wsdl.validation.internal.eclipse.WSDLDelegatingValidator\=org.eclipse.wst.wsdl.validation.internal.eclipse.Validator;
+USER_BUILD_PREFERENCE=enabledBuildValidatorListorg.eclipse.wst.dtd.core.internal.validation.eclipse.Validator;org.eclipse.wst.wsi.ui.internal.WSIMessageValidator;org.eclipse.wst.html.internal.validation.HTMLValidator;org.eclipse.wst.xsd.core.internal.validation.eclipse.XSDDelegatingValidator;org.eclipse.wst.xml.core.internal.validation.eclipse.Validator;org.eclipse.wst.wsdl.validation.internal.eclipse.WSDLDelegatingValidator;
+USER_MANUAL_PREFERENCE=enabledManualValidatorListorg.eclipse.wst.dtd.core.internal.validation.eclipse.Validator;org.eclipse.wst.wsi.ui.internal.WSIMessageValidator;org.eclipse.wst.html.internal.validation.HTMLValidator;org.eclipse.wst.xsd.core.internal.validation.eclipse.XSDDelegatingValidator;org.eclipse.wst.xml.core.internal.validation.eclipse.Validator;org.eclipse.wst.wsdl.validation.internal.eclipse.WSDLDelegatingValidator;
+USER_PREFERENCE=overrideGlobalPreferencesfalse
+eclipse.preferences.version=1
