@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.annotation.Validator;
 
 
 /**

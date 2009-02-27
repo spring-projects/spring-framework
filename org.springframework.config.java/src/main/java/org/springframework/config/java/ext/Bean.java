@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.annotation;
+package org.springframework.config.java.ext;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,10 +26,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.config.java.annotation.Configuration;
 import org.springframework.config.java.model.ConfigurationClass;
 import org.springframework.config.java.model.ConfigurationModel;
+import org.springframework.config.java.model.Factory;
 import org.springframework.config.java.model.ModelMethod;
 import org.springframework.config.java.model.UsageError;
+import org.springframework.config.java.model.Validator;
 
 
 /**

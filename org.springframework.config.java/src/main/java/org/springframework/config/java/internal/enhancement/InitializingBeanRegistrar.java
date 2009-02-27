@@ -18,7 +18,7 @@ package org.springframework.config.java.internal.enhancement;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.config.java.annotation.BeanDefinitionRegistrar;
+import org.springframework.config.java.model.BeanDefinitionRegistrar;
 import org.springframework.config.java.model.ModelMethod;
 
 class InitializingBeanRegistrar implements BeanDefinitionRegistrar {

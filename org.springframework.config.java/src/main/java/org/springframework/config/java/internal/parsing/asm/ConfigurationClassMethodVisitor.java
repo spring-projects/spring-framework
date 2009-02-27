@@ -29,8 +29,8 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.annotation.Factory;
 import org.springframework.config.java.model.ConfigurationClass;
+import org.springframework.config.java.model.Factory;
 import org.springframework.config.java.model.ModelClass;
 import org.springframework.config.java.model.ModelMethod;
 
