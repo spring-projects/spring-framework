@@ -28,9 +28,6 @@ import java.util.Set;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.NoOp;
 
-import org.springframework.config.java.annotation.BeanDefinitionRegistrar;
-import org.springframework.config.java.annotation.Factory;
-import org.springframework.config.java.annotation.Validator;
 import org.springframework.util.Assert;
 
 

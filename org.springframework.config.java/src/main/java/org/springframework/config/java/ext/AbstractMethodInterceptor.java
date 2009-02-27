@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.annotation;
+package org.springframework.config.java.ext;
 
 import java.lang.reflect.Method;
 
@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  *
  * @author Chris Beams
  */
-abstract class AbstractMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
+public abstract class AbstractMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
     protected final Log log = LogFactory.getLog(this.getClass());
     protected DefaultListableBeanFactory beanFactory;
 

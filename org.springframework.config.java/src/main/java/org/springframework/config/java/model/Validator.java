@@ -1,8 +1,7 @@
-package org.springframework.config.java.annotation;
+package org.springframework.config.java.model;
 
 import java.util.List;
 
-import org.springframework.config.java.model.UsageError;
 
 /** Marker interface */
 //TODO: SJC-242 document

@@ -1,9 +1,8 @@
-package org.springframework.config.java.annotation;
+package org.springframework.config.java.model;
 
 import java.lang.reflect.Method;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.config.java.model.ModelMethod;
 
 /**
  * Registers bean definition(s) for a particular method, usually based on its annotation metadata.
