@@ -19,7 +19,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.config.java.annotation.Configuration;
+import org.springframework.config.java.Configuration;
 import org.springframework.config.java.internal.process.InternalConfigurationPostProcessor;
 import org.springframework.core.Ordered;
 

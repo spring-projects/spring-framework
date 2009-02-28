@@ -29,9 +29,9 @@ import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.model.ConfigurationClass;
-import org.springframework.config.java.model.ConfigurationModel;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationClass;
+import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.plugin.Extension;
 import org.springframework.util.ClassUtils;
 

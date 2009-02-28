@@ -15,8 +15,8 @@
  */
 package org.springframework.config.java.internal.parsing;
 
-import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.model.ConfigurationModel;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationModel;
 
 
 /**
@@ -26,7 +26,7 @@ import org.springframework.config.java.model.ConfigurationModel;
  * from the process of registering bean definitions based on the content of that class.
  * 
  * @see org.springframework.config.java.internal.parsing.asm.AsmConfigurationParser
- * @see org.springframework.config.java.model.ConfigurationModel
+ * @see org.springframework.config.java.ConfigurationModel
  * @see org.springframework.config.java.internal.factory.support.ConfigurationModelBeanDefinitionReader
  * 
  * @author Chris Beams
@@ -39,7 +39,7 @@ public interface ConfigurationParser {
      * @param  configurationSource  representation of a Configuration class, may be java.lang.Class,
      *                              ASM representation or otherwise
      *
-     * @see    org.springframework.config.java.annotation.Configuration
+     * @see    org.springframework.config.java.Configuration
      */
     void parse(Object configurationSource);
 
@@ -52,7 +52,7 @@ public interface ConfigurationParser {
      * @param  configurationId      name of this configuration class, probably corresponding to a
      *                              bean id
      *
-     * @see    org.springframework.config.java.annotation.Configuration
+     * @see    org.springframework.config.java.Configuration
      * @see    org.springframework.config.java.process.ConfigurationPostProcessor
      */
     void parse(Object configurationSource, String configurationId);

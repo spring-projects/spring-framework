@@ -1,4 +1,4 @@
-package org.springframework.config.java.model;
+package org.springframework.config.java;
 
 import java.util.List;
 

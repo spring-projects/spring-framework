@@ -18,8 +18,8 @@ package org.springframework.config.java.internal.enhancement;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.config.java.model.BeanDefinitionRegistrar;
-import org.springframework.config.java.model.ModelMethod;
+import org.springframework.config.java.BeanDefinitionRegistrar;
+import org.springframework.config.java.ModelMethod;
 
 class InitializingBeanRegistrar implements BeanDefinitionRegistrar {
     public boolean accepts(Method method) {

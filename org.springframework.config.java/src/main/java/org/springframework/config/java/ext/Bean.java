@@ -26,13 +26,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.model.ConfigurationClass;
-import org.springframework.config.java.model.ConfigurationModel;
-import org.springframework.config.java.model.Factory;
-import org.springframework.config.java.model.ModelMethod;
-import org.springframework.config.java.model.UsageError;
-import org.springframework.config.java.model.Validator;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationClass;
+import org.springframework.config.java.ConfigurationModel;
+import org.springframework.config.java.Factory;
+import org.springframework.config.java.ModelMethod;
+import org.springframework.config.java.UsageError;
+import org.springframework.config.java.Validator;
 
 
 /**

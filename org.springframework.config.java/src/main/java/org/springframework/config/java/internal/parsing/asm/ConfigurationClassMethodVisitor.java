@@ -28,11 +28,11 @@ import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
-import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.model.ConfigurationClass;
-import org.springframework.config.java.model.Factory;
-import org.springframework.config.java.model.ModelClass;
-import org.springframework.config.java.model.ModelMethod;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationClass;
+import org.springframework.config.java.Factory;
+import org.springframework.config.java.ModelClass;
+import org.springframework.config.java.ModelMethod;
 
 /**
  * Visits a single method declared in a given {@link Configuration} class. Determines whether the
