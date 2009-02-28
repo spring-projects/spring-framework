@@ -16,7 +16,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.config.java.BeanDefinitionRegistrar;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.MalformedJavaConfigurationException;
+import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.UsageError;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -72,7 +72,7 @@ class BeanRegistrar implements BeanDefinitionRegistrar {
                 // ensure that overriding is ok
                 if (bean.allowOverriding() == false) {
                     UsageError error = configClass.new IllegalBeanOverrideError(null, method);
-                    throw new MalformedJavaConfigurationException(error);
+                    throw new MalformedConfigurationException(error);
                 }
 
                 // overriding is legal, return immediately

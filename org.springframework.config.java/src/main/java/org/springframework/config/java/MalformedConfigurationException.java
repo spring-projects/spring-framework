@@ -26,16 +26,16 @@ import java.util.List;
  * @author  Chris Beams
  */
 @SuppressWarnings("serial")
-public class MalformedJavaConfigurationException extends RuntimeException {
+public class MalformedConfigurationException extends RuntimeException {
 
     private final List<? extends UsageError> errors;
 
-    public MalformedJavaConfigurationException(String message) {
+    public MalformedConfigurationException(String message) {
         super(message);
         this.errors = new ArrayList<UsageError>();
     }
 
-    public MalformedJavaConfigurationException(UsageError... errors) {
+    public MalformedConfigurationException(UsageError... errors) {
         super(toString(errors));
         this.errors = Arrays.asList(errors);
     }

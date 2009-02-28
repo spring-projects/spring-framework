@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.util;
-
-import org.springframework.beans.factory.config.BeanDefinition;
+package org.springframework.config.java;
 
 
 /**
- * Constant class contains the names of the scopes supported out of the box in Spring 2.0.
+ * Enumerates the names of the scopes supported out of the box in Spring.
+ * <p>
+ * Not modeled as an actual java enum because annotations that accept a scope
+ * attribute must allow for user-defined scope names.  Given that java
+ * enums are not extensible, these must remain simple string constants.
  *
- * @author  Costin Leau
  * @author  Chris Beams
+ * @since 3.0
  */
-public abstract class DefaultScopes {
+public class Scopes {
+	
+	private Scopes() { }
 
-    public static final String SINGLETON = BeanDefinition.SCOPE_SINGLETON;
+    public static final String SINGLETON = "singleton"; // see BeanDefinition.SCOPE_SINGLETON;
 
-    public static final String PROTOTYPE = BeanDefinition.SCOPE_PROTOTYPE;
+    public static final String PROTOTYPE = "prototype"; // see BeanDefinition.SCOPE_PROTOTYPE;
 
     public static final String REQUEST = "request"; // see WebApplicationContext.SCOPE_REQUEST;
 
