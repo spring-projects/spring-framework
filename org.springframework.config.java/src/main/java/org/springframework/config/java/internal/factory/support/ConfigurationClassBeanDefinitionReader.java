@@ -15,23 +15,17 @@
  */
 package org.springframework.config.java.internal.factory.support;
 
-import static org.springframework.config.java.Util.*;
-
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.MalformedJavaConfigurationException;
 import org.springframework.config.java.UsageError;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
-import org.springframework.config.java.internal.parsing.asm.AsmConfigurationParser;
-import org.springframework.config.java.internal.parsing.asm.AsmUtils;
 import org.springframework.core.io.ClassPathResource;
 
 
@@ -44,17 +38,17 @@ import org.springframework.core.io.ClassPathResource;
  * 
  * @author  Chris Beams
  */
-public class AsmJavaConfigBeanDefinitionReader {
+public class ConfigurationClassBeanDefinitionReader {
 
     private final ConfigurationModelBeanDefinitionReader modelBeanDefinitionReader;
 
     /**
-     * Creates a new {@link AsmJavaConfigBeanDefinitionReader}.
+     * Creates a new {@link ConfigurationClassBeanDefinitionReader}.
      * 
-     * @param registry {@link BeanDefinitionRegistry} into which new bean definitions will be
+     * @param beanFactory {@link DefaultListableBeanFactory} into which new bean definitions will be
      *            registered as they are read from Configuration classes.
      */
-    public AsmJavaConfigBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
+    public ConfigurationClassBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
         this.modelBeanDefinitionReader = new ConfigurationModelBeanDefinitionReader(beanFactory);
     }
 
@@ -64,13 +58,10 @@ public class AsmJavaConfigBeanDefinitionReader {
      * supplied during construction.
      */
     public int loadBeanDefinitions(ConfigurationModel model, Map<String, ClassPathResource> configClassResources) throws BeanDefinitionStoreException {
-        ConfigurationParser parser = new AsmConfigurationParser(model);
+        ConfigurationParser parser = new ConfigurationParser(model);
         
-        for (String id : configClassResources.keySet()) {
-            String resourcePath = configClassResources.get(id).getPath();
-            ClassReader configClassReader = AsmUtils.newClassReader(getClassAsStream(resourcePath));
-            parser.parse(configClassReader, id);
-        }
+        for (String id : configClassResources.keySet())
+            parser.parse(configClassResources.get(id), id);
 
         ArrayList<UsageError> errors = new ArrayList<UsageError>();
         model.validate(errors);

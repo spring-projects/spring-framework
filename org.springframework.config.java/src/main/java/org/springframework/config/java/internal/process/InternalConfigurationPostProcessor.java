@@ -17,6 +17,7 @@ package org.springframework.config.java.internal.process;
 
 import static org.springframework.config.java.Util.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.logging.Log;
@@ -29,8 +30,12 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
+import org.springframework.config.java.MalformedJavaConfigurationException;
+import org.springframework.config.java.UsageError;
 import org.springframework.config.java.internal.enhancement.ConfigurationEnhancer;
-import org.springframework.config.java.internal.factory.support.AsmJavaConfigBeanDefinitionReader;
+import org.springframework.config.java.internal.factory.support.ConfigurationClassBeanDefinitionReader;
+import org.springframework.config.java.internal.factory.support.ConfigurationModelBeanDefinitionReader;
+import org.springframework.config.java.internal.parsing.ConfigurationParser;
 import org.springframework.config.java.process.ConfigurationPostProcessor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
@@ -46,19 +51,21 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
      * to parse and enhance them.  Also registers any {@link BeanPostProcessor} objects
      * necessary to fulfill JavaConfig requirements.
      */
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        if(!(beanFactory instanceof DefaultListableBeanFactory))
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory clBeanFactory) throws BeansException {
+        if(!(clBeanFactory instanceof DefaultListableBeanFactory))
             throw new IllegalStateException("beanFactory must be of type "
                     + DefaultListableBeanFactory.class.getSimpleName());
+        
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) clBeanFactory;
         
         ConfigurationModel model = new ConfigurationModel();
         
         parseAnyConfigurationClasses(beanFactory, model);
 
-        enhanceAnyConfigurationClasses((DefaultListableBeanFactory) beanFactory, model);
+        enhanceAnyConfigurationClasses(beanFactory, model);
     }
 
-    private void parseAnyConfigurationClasses(ConfigurableListableBeanFactory beanFactory, ConfigurationModel model) {
+    private void parseAnyConfigurationClasses(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
         
         // linked map is important for maintaining predictable ordering of configuration classes.
         // this is important in bean / value override situations.
@@ -75,7 +82,18 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
             }
         }
         
-        beanDefinitionReader(beanFactory).loadBeanDefinitions(model, configClassResources);
+        ConfigurationModelBeanDefinitionReader modelBeanDefinitionReader = new ConfigurationModelBeanDefinitionReader(beanFactory);
+        ConfigurationParser parser = new ConfigurationParser(model);
+        
+        for (String id : configClassResources.keySet())
+            parser.parse(configClassResources.get(id), id);
+
+        ArrayList<UsageError> errors = new ArrayList<UsageError>();
+        model.validate(errors);
+        if (errors.size() > 0)
+            throw new MalformedJavaConfigurationException(errors.toArray(new UsageError[] { }));
+
+        modelBeanDefinitionReader.loadBeanDefinitions(model);
     }
     
     /**
@@ -96,7 +114,6 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
         for (String beanName : beanFactory.getBeanDefinitionNames()) {
             BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 
-            // is the beanDef marked as representing a configuration class?
             if (!isConfigClass(beanDef))
                 continue;
 
@@ -117,15 +134,6 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
             logger.warn("Found no @Configuration class BeanDefinitions within " + beanFactory);
     }
 
-    private AsmJavaConfigBeanDefinitionReader beanDefinitionReader(ConfigurableListableBeanFactory beanFactory) {
-        // reader requires DefaultListableBeanFactory for it's registerBeanDefinition() method
-        if(!(beanFactory instanceof DefaultListableBeanFactory))
-            throw new IllegalStateException("beanFactory must be of type "
-                    + DefaultListableBeanFactory.class.getSimpleName());
-        
-        return new AsmJavaConfigBeanDefinitionReader((DefaultListableBeanFactory)beanFactory);
-    }
-
     /**
      * Determines whether the class for <var>beanDef</var> is a {@link Configuration}-annotated
      * class. Returns false if <var>beanDef</var> has no class specified.
@@ -133,7 +141,7 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
      * Note: the classloading used within should not be problematic or interfere with tooling in any
      * way. BeanFactoryPostProcessing happens only during actual runtime processing via
      * {@link JavaConfigApplicationContext} or via XML using {@link ConfigurationPostProcessor}. In
-     * any case, tooling (Spring IDE) will use {@link AsmJavaConfigBeanDefinitionReader}directly,
+     * any case, tooling (Spring IDE) will use {@link ConfigurationClassBeanDefinitionReader}directly,
      * thus never encountering this classloading. Should this become problematic, it would not be
      * too difficult to replace the following with ASM logic that traverses the class hierarchy in
      * order to find whether the class is directly or indirectly annotated with
