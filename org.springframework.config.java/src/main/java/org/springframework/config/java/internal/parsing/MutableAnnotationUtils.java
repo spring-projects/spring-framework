@@ -20,8 +20,7 @@ import java.lang.reflect.Proxy;
 
 
 /** TODO: JAVADOC */
-// TODO: SJC-242 made this public, revisit
-public class MutableAnnotationUtils {
+class MutableAnnotationUtils {
 
     /**
      * Creates a {@link MutableAnnotation} for {@code annoType}.

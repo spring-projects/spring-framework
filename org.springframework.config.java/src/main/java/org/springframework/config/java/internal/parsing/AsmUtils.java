@@ -28,7 +28,7 @@ import org.springframework.config.java.Util;
 /**
  * Various utility methods commonly used when interacting with ASM.
  */
-public class AsmUtils {
+class AsmUtils {
 
     public static final EmptyVisitor EMPTY_VISITOR = new EmptyVisitor();
 

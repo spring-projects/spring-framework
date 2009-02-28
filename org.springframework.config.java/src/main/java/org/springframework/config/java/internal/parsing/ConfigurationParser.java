@@ -36,7 +36,7 @@ import org.springframework.core.io.ClassPathResource;
  * that model.
  * 
  * @see org.springframework.config.java.ConfigurationModel
- * @see org.springframework.config.java.internal.factory.support.ConfigurationModelBeanDefinitionReader
+ * @see org.springframework.config.java.support.ConfigurationModelBeanDefinitionReader
  *
  * @author Chris Beams
  */

@@ -11,7 +11,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ext.Bean;
-import org.springframework.config.java.process.ConfigurationPostProcessor;
+import org.springframework.config.java.support.ConfigurationPostProcessor;
 import org.springframework.config.java.util.DefaultScopes;
 
 import test.beans.ITestBean;
