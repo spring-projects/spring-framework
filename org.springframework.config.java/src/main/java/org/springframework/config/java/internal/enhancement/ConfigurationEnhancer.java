@@ -29,7 +29,6 @@ import net.sf.cglib.core.DefaultGeneratorStrategy;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.NoOp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +43,7 @@ import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.ModelMethod;
+import org.springframework.config.java.NoOpInterceptor;
 
 
 /**
@@ -122,7 +122,7 @@ public class ConfigurationEnhancer {
 				// no-op
 			}
 		});
-		callbackInstances.add(NoOp.INSTANCE);
+		callbackInstances.add(NoOpInterceptor.INSTANCE);
 
 		for (Callback callback : callbackInstances)
 			callbackTypes.add(callback.getClass());

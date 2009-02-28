@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.NoOp;
 
 import org.springframework.util.Assert;
 
@@ -40,7 +39,7 @@ public final class ModelMethod implements Validatable {
 	private final List<Annotation> annotations = new ArrayList<Annotation>();
 	private transient ConfigurationClass declaringClass;
 	private transient int lineNumber;
-	private transient Factory factoryAnno;
+	private transient FactoryMethod factoryAnno;
 	private transient final List<Validator> validators = new ArrayList<Validator>();
 
 	public ModelMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
@@ -51,7 +50,7 @@ public final class ModelMethod implements Validatable {
 		for (Annotation annotation : annotations) {
 			this.annotations.add(annotation);
 			if (factoryAnno == null)
-				factoryAnno = annotation.annotationType().getAnnotation(Factory.class);
+				factoryAnno = annotation.annotationType().getAnnotation(FactoryMethod.class);
 		}
 
 		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative: " + modifiers);
@@ -144,23 +143,23 @@ public final class ModelMethod implements Validatable {
 	}
 
 	public BeanDefinitionRegistrar getRegistrar() {
-		return getInstance(factoryAnno.registrarType());
+		return getInstance(factoryAnno.registrar());
 	}
 
 	public Set<Validator> getValidators() {
 		HashSet<Validator> validator = new HashSet<Validator>();
 
-		for (Class<? extends Validator> validatorType : factoryAnno.validatorTypes())
+		for (Class<? extends Validator> validatorType : factoryAnno.validators())
 			validator.add(getInstance(validatorType));
 
 		return validator;
 	}
 
 	public Callback getCallback() {
-		Class<? extends Callback> callbackType = factoryAnno.callbackType();
+		Class<? extends Callback> callbackType = factoryAnno.interceptor();
 
-		if (callbackType.equals(NoOp.class))
-			return NoOp.INSTANCE;
+		if (callbackType.equals(NoOpInterceptor.class))
+			return NoOpInterceptor.INSTANCE;
 
 		return getInstance(callbackType);
 	}

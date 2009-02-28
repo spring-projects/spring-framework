@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.Factory;
+import org.springframework.config.java.FactoryMethod;
 import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.Scopes;
 import org.springframework.config.java.UsageError;
@@ -62,7 +62,6 @@ import org.springframework.config.java.Validator;
  * </p>
  * 
  * @see Configuration
- * @see BeanNamingStrategy
  * 
  * @author Rod Johnson
  * @author Costin Leau
@@ -72,8 +71,9 @@ import org.springframework.config.java.Validator;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@Factory(registrarType = BeanRegistrar.class, callbackType = BeanMethodInterceptor.class, validatorTypes = {
-        BeanValidator.class, IllegalBeanOverrideValidator.class })
+@FactoryMethod(registrar = BeanRegistrar.class,
+		interceptor = BeanMethodInterceptor.class,
+		validators = { BeanValidator.class, IllegalBeanOverrideValidator.class })
 public @interface Bean {
 
 	/**
