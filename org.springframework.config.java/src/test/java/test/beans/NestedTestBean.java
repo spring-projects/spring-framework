@@ -17,46 +17,47 @@ package test.beans;
 
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.
- *
- * @author  Trevor D. Cook
- * @since   30.09.2003
+ * 
+ * @author Trevor D. Cook
+ * @since 30.09.2003
  */
 public class NestedTestBean implements INestedTestBean {
 
-    private String company = "";
+	private String company = "";
 
-    public NestedTestBean() { }
+	public NestedTestBean() {
+	}
 
-    public NestedTestBean(String company) {
-        setCompany(company);
-    }
+	public NestedTestBean(String company) {
+		setCompany(company);
+	}
 
-    public void setCompany(String company) {
-        this.company = ((company != null) ? company : "");
-    }
+	public void setCompany(String company) {
+		this.company = ((company != null) ? company : "");
+	}
 
-    public String getCompany() {
-        return company;
-    }
+	public String getCompany() {
+		return company;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof NestedTestBean)) {
-            return false;
-        }
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof NestedTestBean)) {
+			return false;
+		}
 
-        NestedTestBean ntb = (NestedTestBean) obj;
-        return this.company.equals(ntb.company);
-    }
+		NestedTestBean ntb = (NestedTestBean) obj;
+		return this.company.equals(ntb.company);
+	}
 
-    @Override
-    public int hashCode() {
-        return this.company.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return this.company.hashCode();
+	}
 
-    @Override
-    public String toString() {
-        return "NestedTestBean: " + this.company;
-    }
+	@Override
+	public String toString() {
+		return "NestedTestBean: " + this.company;
+	}
 
 }

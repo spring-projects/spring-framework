@@ -24,9 +24,10 @@ import java.lang.annotation.Target;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.NoOp;
 
+
 /**
  * Meta-annotation used to identify annotations as producers of beans and/or values.
- *
+ * 
  * @author Chris Beams
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -34,22 +35,21 @@ import net.sf.cglib.proxy.NoOp;
 @Documented
 public @interface Factory {
 
-    /**
-     * Specifies which registrar (if any) should be used to register
-     * bean definitions for this {@link Factory} method.
-     */
-    Class<? extends BeanDefinitionRegistrar> registrarType();
+	/**
+	 * Specifies which registrar (if any) should be used to register bean definitions for
+	 * this {@link Factory} method.
+	 */
+	Class<? extends BeanDefinitionRegistrar> registrarType();
 
-    /**
-     * Specifies what (if any) callback should be used when processing this {@link Factory} method.
-     * Defaults to CGLIB's {@link NoOp}, which does nothing.
-     * TODO: rename (interceptorType)?  to keep with the -or|-ar nomenclature
-     */
-    Class<? extends Callback> callbackType() default NoOp.class;
+	/**
+	 * Specifies what (if any) callback should be used when processing this {@link Factory}
+	 * method. Defaults to CGLIB's {@link NoOp}, which does nothing. TODO: rename
+	 * (interceptorType)? to keep with the -or|-ar nomenclature
+	 */
+	Class<? extends Callback> callbackType() default NoOp.class;
 
-    /**
-     * TODO: document
-     * TODO: rename
-     */
-    Class<? extends Validator>[] validatorTypes() default {};
+	/**
+	 * TODO: document TODO: rename
+	 */
+	Class<? extends Validator>[] validatorTypes() default {};
 }

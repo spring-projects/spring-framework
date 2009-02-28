@@ -19,6 +19,6 @@ package test.beans;
 /** TODO: JAVADOC */
 public interface IOther {
 
-    void absquatulate();
+	void absquatulate();
 
 }

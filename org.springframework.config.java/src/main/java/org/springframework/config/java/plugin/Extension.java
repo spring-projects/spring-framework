@@ -31,18 +31,18 @@ import org.springframework.core.Ordered;
 @Target(ElementType.ANNOTATION_TYPE)
 @Inherited
 public @interface Extension {
-    /**
-     * The class that handles this plugin.
-     */
-    // TODO: SJC-242 rename to handlerType / handlerClass
-    Class<? extends ExtensionAnnotationBeanDefinitionRegistrar<?>> handler();
-    
-    /**
-     * The order in which this plugin will be processed
-     * relative to others.  Per the semantics of {@link Ordered},
-     * lower integer values will be treated as higher priority.
-     * 
-     * @see Ordered
-     */
-    int order() default 0;
+	/**
+	 * The class that handles this plugin.
+	 */
+	// TODO: SJC-242 rename to handlerType / handlerClass
+	Class<? extends ExtensionAnnotationBeanDefinitionRegistrar<?>> handler();
+
+	/**
+	 * The order in which this plugin will be processed relative to others. Per the
+	 * semantics of {@link Ordered}, lower integer values will be treated as higher
+	 * priority.
+	 * 
+	 * @see Ordered
+	 */
+	int order() default 0;
 }

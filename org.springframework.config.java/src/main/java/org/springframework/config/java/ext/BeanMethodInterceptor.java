@@ -23,6 +23,7 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
+
 /**
  * Intercepts the invocation of any {@link Bean}-annotated methods in order to ensure proper
  * handling of bean semantics such as scoping and AOP proxying.
@@ -34,51 +35,54 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  */
 class BeanMethodInterceptor extends AbstractMethodInterceptor {
 
-    /**
-     * Enhances a {@link Bean @Bean} method to check the supplied BeanFactory for the existence
-     * of this bean object.
-     */
-    public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-        String beanName = getBeanName(method);
-        
-        // TODO: re-enable for @ScopedProxy support
-//        boolean isScopedProxy = (AnnotationUtils.findAnnotation(method, ScopedProxy.class) != null);
-//
-//        String scopedBeanName = ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
-//        if (isScopedProxy && beanFactory.isCurrentlyInCreation(scopedBeanName))
-//            beanName = scopedBeanName;
+	/**
+	 * Enhances a {@link Bean @Bean} method to check the supplied BeanFactory for the
+	 * existence of this bean object.
+	 */
+	public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+		String beanName = getBeanName(method);
 
-        if (factoryContainsBean(beanName)) {
-            // we have an already existing cached instance of this bean -> retrieve it
-            Object cachedBean = beanFactory.getBean(beanName);
-            if (log.isInfoEnabled())
-                log.info(format("Returning cached singleton object [%s] for @Bean method %s.%s",
-                                cachedBean, method.getDeclaringClass().getSimpleName(), beanName));
+		// TODO: re-enable for @ScopedProxy support
+		// boolean isScopedProxy = (AnnotationUtils.findAnnotation(method,
+		// ScopedProxy.class) != null);
+		//
+		// String scopedBeanName =
+		// ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+		// if (isScopedProxy && beanFactory.isCurrentlyInCreation(scopedBeanName))
+		// beanName = scopedBeanName;
 
-            return cachedBean;
-        }
+		if (factoryContainsBean(beanName)) {
+			// we have an already existing cached instance of this bean -> retrieve it
+			Object cachedBean = beanFactory.getBean(beanName);
+			if (log.isInfoEnabled())
+				log.info(format("Returning cached singleton object [%s] for @Bean method %s.%s", cachedBean,
+				        method.getDeclaringClass().getSimpleName(), beanName));
 
-        return proxy.invokeSuper(obj, args);
-    }
+			return cachedBean;
+		}
 
-    /**
-     * Check the beanFactory to see whether the bean named <var>beanName</var> already exists.
-     * Accounts for the fact that the requested bean may be "in creation", i.e.: we're in the
-     * middle of servicing the initial request for this bean. From JavaConfig's perspective,
-     * this means that the bean does not actually yet exist, and that it is now our job to
-     * create it for the first time by executing the logic in the corresponding Bean method.
-     * <p>
-     * Said another way, this check repurposes {@link ConfigurableBeanFactory#isCurrentlyInCreation(String)}
-     * to determine whether the container is calling this method or the user is calling this method.
-     *
-     * @param   beanName  name of bean to check for
-     *
-     * @return  true if <var>beanName</var> already exists in beanFactory
-     */
-    private boolean factoryContainsBean(String beanName) {
-        return beanFactory.containsBean(beanName)
-                   && !beanFactory.isCurrentlyInCreation(beanName);
-    }
+		return proxy.invokeSuper(obj, args);
+	}
+
+	/**
+	 * Check the beanFactory to see whether the bean named <var>beanName</var> already
+	 * exists. Accounts for the fact that the requested bean may be "in creation", i.e.:
+	 * we're in the middle of servicing the initial request for this bean. From JavaConfig's
+	 * perspective, this means that the bean does not actually yet exist, and that it is now
+	 * our job to create it for the first time by executing the logic in the corresponding
+	 * Bean method.
+	 * <p>
+	 * Said another way, this check repurposes
+	 * {@link ConfigurableBeanFactory#isCurrentlyInCreation(String)} to determine whether
+	 * the container is calling this method or the user is calling this method.
+	 * 
+	 * @param beanName name of bean to check for
+	 * 
+	 * @return true if <var>beanName</var> already exists in beanFactory
+	 */
+	private boolean factoryContainsBean(String beanName) {
+		return beanFactory.containsBean(beanName) && !beanFactory.isCurrentlyInCreation(beanName);
+	}
 
 
 }

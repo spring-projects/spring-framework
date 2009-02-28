@@ -46,7 +46,6 @@ import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.ModelMethod;
 
 
-
 /**
  * Enhances {@link Configuration} classes by generating a CGLIB subclass capable of
  * interacting with the Spring container to respect bean semantics.
@@ -57,176 +56,173 @@ import org.springframework.config.java.ModelMethod;
  */
 public class ConfigurationEnhancer {
 
-    private static final Log log = LogFactory.getLog(ConfigurationEnhancer.class);
+	private static final Log log = LogFactory.getLog(ConfigurationEnhancer.class);
 
-    private final ArrayList<Class<? extends Callback>> callbackTypes =
-            new ArrayList<Class<? extends Callback>>();
-    
-    private final LinkedHashSet<BeanDefinitionRegistrar> registrars =
-            new LinkedHashSet<BeanDefinitionRegistrar>();
-        
-    private final ArrayList<Callback> callbackInstances =
-            new ArrayList<Callback>();
-    
-    private final CallbackFilter callbackFilter =
-        new CallbackFilter() {
-            public int accept(Method candidateMethod) {
-                Iterator<BeanDefinitionRegistrar> iter = registrars.iterator();
-                for(int i=0; iter.hasNext(); i++)
-                    if(iter.next().accepts(candidateMethod))
-                        return i;
-                
-                throw new IllegalStateException(format("No registrar is capable of " +
-                		"handling method [%s].  Perhaps you forgot to add a catch-all registrar?",
-                		candidateMethod.getName()));
-            }
-        };
-	        
+	private final ArrayList<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
 
-    /**
-     * Creates a new {@link ConfigurationEnhancer} instance.
-     */
-    public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
-        notNull(beanFactory, "beanFactory must be non-null");
-        notNull(model, "model must be non-null");
-        
-        populateRegistrarsAndCallbacks(beanFactory, model);
-    }
+	private final LinkedHashSet<BeanDefinitionRegistrar> registrars = new LinkedHashSet<BeanDefinitionRegistrar>();
+
+	private final ArrayList<Callback> callbackInstances = new ArrayList<Callback>();
+
+	private final CallbackFilter callbackFilter = new CallbackFilter() {
+		public int accept(Method candidateMethod) {
+			Iterator<BeanDefinitionRegistrar> iter = registrars.iterator();
+			for (int i = 0; iter.hasNext(); i++)
+				if (iter.next().accepts(candidateMethod))
+					return i;
+
+			throw new IllegalStateException(format("No registrar is capable of "
+			        + "handling method [%s].  Perhaps you forgot to add a catch-all registrar?",
+			        candidateMethod.getName()));
+		}
+	};
 
 
-    /**
-     * Reads the contents of {@code model} in order to populate {@link #registrars},
-     * {@link #callbackInstances} and {@link #callbackTypes} appropriately.
-     * 
-     * @see #callbackFilter
-     */
-    private void populateRegistrarsAndCallbacks(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
-        
-        for (ConfigurationClass configClass : model.getAllConfigurationClasses()) {
-            for (ModelMethod method : configClass.getMethods()) {
-                registrars.add(method.getRegistrar());
-                
-                Callback callback = method.getCallback();
-                
-                if(callback instanceof BeanFactoryAware)
-                    ((BeanFactoryAware)callback).setBeanFactory(beanFactory);
-                
-                callbackInstances.add(callback);
-            }
-        }
-        
-        // register a 'catch-all' registrar
-        registrars.add(new BeanDefinitionRegistrar() {
+	/**
+	 * Creates a new {@link ConfigurationEnhancer} instance.
+	 */
+	public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
+		notNull(beanFactory, "beanFactory must be non-null");
+		notNull(model, "model must be non-null");
 
-            public boolean accepts(Method method) {
-                return true;
-            }
+		populateRegistrarsAndCallbacks(beanFactory, model);
+	}
 
-            public void register(ModelMethod method, BeanDefinitionRegistry registry) {
-                // no-op
-            }
-        });
-        callbackInstances.add(NoOp.INSTANCE);
-            
-        for(Callback callback : callbackInstances)
-            callbackTypes.add(callback.getClass());
-    }
-    
 
-    /**
-     * Loads the specified class and generates a CGLIB subclass of it equipped with container-aware
-     * callbacks capable of respecting scoping and other bean semantics.
-     * 
-     * @return fully-qualified name of the enhanced subclass
-     */
-    public String enhance(String configClassName) {
-        if (log.isInfoEnabled())
-            log.info("Enhancing " + configClassName);
+	/**
+	 * Reads the contents of {@code model} in order to populate {@link #registrars},
+	 * {@link #callbackInstances} and {@link #callbackTypes} appropriately.
+	 * 
+	 * @see #callbackFilter
+	 */
+	private void populateRegistrarsAndCallbacks(DefaultListableBeanFactory beanFactory,
+	        ConfigurationModel model) {
 
-        Class<?> superclass = loadRequiredClass(configClassName);
+		for (ConfigurationClass configClass : model.getAllConfigurationClasses()) {
+			for (ModelMethod method : configClass.getMethods()) {
+				registrars.add(method.getRegistrar());
 
-        Class<?> subclass = createClass(newEnhancer(superclass), superclass);
-        
-        subclass = nestOneClassDeeperIfAspect(superclass, subclass);
+				Callback callback = method.getCallback();
 
-        if (log.isInfoEnabled())
-            log.info(format("Successfully enhanced %s; enhanced class name is: %s",
-                            configClassName, subclass.getName()));
+				if (callback instanceof BeanFactoryAware)
+					((BeanFactoryAware) callback).setBeanFactory(beanFactory);
 
-        return subclass.getName();
-    }
+				callbackInstances.add(callback);
+			}
+		}
 
-    /**
-     * Creates a new CGLIB {@link Enhancer} instance.
-     */
-    private Enhancer newEnhancer(Class<?> superclass) {
-        Enhancer enhancer = new Enhancer();
-        
-        // because callbackFilter and callbackTypes are dynamically populated
-        // there's no opportunity for caching. This does not appear to be causing
-        // any performance problem.
-        enhancer.setUseCache(false);
-        
-        enhancer.setSuperclass(superclass);
-        enhancer.setUseFactory(false);
-        enhancer.setCallbackFilter(callbackFilter);
-        enhancer.setCallbackTypes(callbackTypes.toArray(new Class<?>[]{}));
-        
-        return enhancer;
-    }
+		// register a 'catch-all' registrar
+		registrars.add(new BeanDefinitionRegistrar() {
 
-    /**
-     * Uses enhancer to generate a subclass of superclass, ensuring that
-     * {@link #callbackInstances} are registered for the new subclass.
-     */
-    private Class<?> createClass(Enhancer enhancer, Class<?> superclass) {
-        Class<?> subclass = enhancer.createClass();
-        
-        Enhancer.registerCallbacks(subclass, callbackInstances.toArray(new Callback[] {}));
-        
-        return subclass;
-    }
-    
-    /**
-     * Works around a constraint imposed by the AspectJ 5 annotation-style programming model. See
-     * comments inline for detail.
-     * 
-     * @return original subclass instance unless superclass is annnotated with @Aspect, in which
-     *          case a subclass of the subclass is returned
-     */
-    private Class<?> nestOneClassDeeperIfAspect(Class<?> superclass, Class<?> origSubclass) {
-        boolean superclassIsAnAspect = false;
-        
-        // check for @Aspect by name rather than by class literal to avoid
-        // requiring AspectJ as a runtime dependency.
-        for(Annotation anno : superclass.getAnnotations())
-            if(anno.annotationType().getName().equals("org.aspectj.lang.annotation.Aspect"))
-                superclassIsAnAspect = true;
-        
-        if(!superclassIsAnAspect)
-	        return origSubclass;
-        
-        // the superclass is annotated with AspectJ's @Aspect.
-        // this means that we must create a subclass of the subclass
-        // in order to avoid some guard logic in Spring core that disallows
-        // extending a concrete aspect class.
-        Enhancer enhancer = newEnhancer(origSubclass);
-        enhancer.setStrategy(new DefaultGeneratorStrategy() {
-            @Override
-            protected byte[] transform(byte[] b) throws Exception {
-                ClassWriter writer = new ClassWriter(false);
-                ClassAdapter adapter =
-                    new AddAnnotationAdapter(writer, "Lorg/aspectj/lang/annotation/Aspect;");
-                ClassReader reader = new ClassReader(b);
-                reader.accept(adapter, false);
-                return writer.toByteArray();
-            }
-        });
-        
-        // create a subclass of the original subclass
-        Class<?> newSubclass = createClass(enhancer, origSubclass);
-        
-        return newSubclass;
-    }
-    
+			public boolean accepts(Method method) {
+				return true;
+			}
+
+			public void register(ModelMethod method, BeanDefinitionRegistry registry) {
+				// no-op
+			}
+		});
+		callbackInstances.add(NoOp.INSTANCE);
+
+		for (Callback callback : callbackInstances)
+			callbackTypes.add(callback.getClass());
+	}
+
+
+	/**
+	 * Loads the specified class and generates a CGLIB subclass of it equipped with
+	 * container-aware callbacks capable of respecting scoping and other bean semantics.
+	 * 
+	 * @return fully-qualified name of the enhanced subclass
+	 */
+	public String enhance(String configClassName) {
+		if (log.isInfoEnabled())
+			log.info("Enhancing " + configClassName);
+
+		Class<?> superclass = loadRequiredClass(configClassName);
+
+		Class<?> subclass = createClass(newEnhancer(superclass), superclass);
+
+		subclass = nestOneClassDeeperIfAspect(superclass, subclass);
+
+		if (log.isInfoEnabled())
+			log.info(format("Successfully enhanced %s; enhanced class name is: %s", configClassName, subclass
+			        .getName()));
+
+		return subclass.getName();
+	}
+
+	/**
+	 * Creates a new CGLIB {@link Enhancer} instance.
+	 */
+	private Enhancer newEnhancer(Class<?> superclass) {
+		Enhancer enhancer = new Enhancer();
+
+		// because callbackFilter and callbackTypes are dynamically populated
+		// there's no opportunity for caching. This does not appear to be causing
+		// any performance problem.
+		enhancer.setUseCache(false);
+
+		enhancer.setSuperclass(superclass);
+		enhancer.setUseFactory(false);
+		enhancer.setCallbackFilter(callbackFilter);
+		enhancer.setCallbackTypes(callbackTypes.toArray(new Class<?>[] {}));
+
+		return enhancer;
+	}
+
+	/**
+	 * Uses enhancer to generate a subclass of superclass, ensuring that
+	 * {@link #callbackInstances} are registered for the new subclass.
+	 */
+	private Class<?> createClass(Enhancer enhancer, Class<?> superclass) {
+		Class<?> subclass = enhancer.createClass();
+
+		Enhancer.registerCallbacks(subclass, callbackInstances.toArray(new Callback[] {}));
+
+		return subclass;
+	}
+
+	/**
+	 * Works around a constraint imposed by the AspectJ 5 annotation-style programming
+	 * model. See comments inline for detail.
+	 * 
+	 * @return original subclass instance unless superclass is annnotated with @Aspect, in
+	 *         which case a subclass of the subclass is returned
+	 */
+	private Class<?> nestOneClassDeeperIfAspect(Class<?> superclass, Class<?> origSubclass) {
+		boolean superclassIsAnAspect = false;
+
+		// check for @Aspect by name rather than by class literal to avoid
+		// requiring AspectJ as a runtime dependency.
+		for (Annotation anno : superclass.getAnnotations())
+			if (anno.annotationType().getName().equals("org.aspectj.lang.annotation.Aspect"))
+				superclassIsAnAspect = true;
+
+		if (!superclassIsAnAspect)
+			return origSubclass;
+
+		// the superclass is annotated with AspectJ's @Aspect.
+		// this means that we must create a subclass of the subclass
+		// in order to avoid some guard logic in Spring core that disallows
+		// extending a concrete aspect class.
+		Enhancer enhancer = newEnhancer(origSubclass);
+		enhancer.setStrategy(new DefaultGeneratorStrategy() {
+			@Override
+			protected byte[] transform(byte[] b) throws Exception {
+				ClassWriter writer = new ClassWriter(false);
+				ClassAdapter adapter = new AddAnnotationAdapter(writer,
+				        "Lorg/aspectj/lang/annotation/Aspect;");
+				ClassReader reader = new ClassReader(b);
+				reader.accept(adapter, false);
+				return writer.toByteArray();
+			}
+		});
+
+		// create a subclass of the original subclass
+		Class<?> newSubclass = createClass(enhancer, origSubclass);
+
+		return newSubclass;
+	}
+
 }

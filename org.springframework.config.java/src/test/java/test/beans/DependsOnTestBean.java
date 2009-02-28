@@ -18,14 +18,20 @@ package test.beans;
 
 /** TODO: JAVADOC */
 public class DependsOnTestBean {
-    public TestBean tb;
+	public TestBean tb;
 
-    private int state;
+	private int state;
 
-    public void setTestBean(TestBean tb) { this.tb = tb; }
+	public void setTestBean(TestBean tb) {
+		this.tb = tb;
+	}
 
-    public int getState() { return state; }
+	public int getState() {
+		return state;
+	}
 
-    public TestBean getTestBean() { return tb; }
+	public TestBean getTestBean() {
+		return tb;
+	}
 
 }

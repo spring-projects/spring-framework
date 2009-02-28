@@ -29,43 +29,43 @@ import org.objectweb.asm.AnnotationVisitor;
 
 /** TODO: JAVADOC */
 class MutableAnnotationArrayVisitor extends AnnotationAdapter {
-    
-    private static final Log log = LogFactory.getLog(MutableAnnotationArrayVisitor.class);
-    
-    private final ArrayList<Object> values = new ArrayList<Object>();
-    private final MutableAnnotation mutableAnno;
-    private final String attribName;
 
-    public MutableAnnotationArrayVisitor(MutableAnnotation mutableAnno, String attribName) {
-        super(AsmUtils.EMPTY_VISITOR);
+	private static final Log log = LogFactory.getLog(MutableAnnotationArrayVisitor.class);
 
-        this.mutableAnno = mutableAnno;
-        this.attribName = attribName;
-    }
+	private final ArrayList<Object> values = new ArrayList<Object>();
+	private final MutableAnnotation mutableAnno;
+	private final String attribName;
 
-    @Override
-    public void visit(String na, Object value) {
-        values.add(value);
-    }
+	public MutableAnnotationArrayVisitor(MutableAnnotation mutableAnno, String attribName) {
+		super(AsmUtils.EMPTY_VISITOR);
 
-    @Override
-    public AnnotationVisitor visitAnnotation(String na, String annoTypeDesc) {
-        String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
-        Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
-        
-        if(annoType == null)
-	        return super.visitAnnotation(na, annoTypeDesc);
-        
-        Annotation anno = createMutableAnnotation(annoType);
-        values.add(anno);
-        return new MutableAnnotationVisitor(anno);
-    }
+		this.mutableAnno = mutableAnno;
+		this.attribName = attribName;
+	}
 
-    @Override
-    public void visitEnd() {
-        Class<?> arrayType = mutableAnno.getAttributeType(attribName);
-        Object[] array = (Object[])Array.newInstance(arrayType.getComponentType(), 0);
-        mutableAnno.setAttributeValue(attribName, values.toArray(array));
-    }
+	@Override
+	public void visit(String na, Object value) {
+		values.add(value);
+	}
+
+	@Override
+	public AnnotationVisitor visitAnnotation(String na, String annoTypeDesc) {
+		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
+
+		if (annoType == null)
+			return super.visitAnnotation(na, annoTypeDesc);
+
+		Annotation anno = createMutableAnnotation(annoType);
+		values.add(anno);
+		return new MutableAnnotationVisitor(anno);
+	}
+
+	@Override
+	public void visitEnd() {
+		Class<?> arrayType = mutableAnno.getAttributeType(attribName);
+		Object[] array = (Object[]) Array.newInstance(arrayType.getComponentType(), 0);
+		mutableAnno.setAttributeValue(attribName, values.toArray(array));
+	}
 
 }

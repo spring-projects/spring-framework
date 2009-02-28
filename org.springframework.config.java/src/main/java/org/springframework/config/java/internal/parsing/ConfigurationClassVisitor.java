@@ -37,198 +37,196 @@ import org.springframework.util.ClassUtils;
 
 
 /**
- * Visits a {@link Configuration} class, populating a {@link ConfigurationClass} instance with
- * information gleaned along the way.
+ * Visits a {@link Configuration} class, populating a {@link ConfigurationClass} instance
+ * with information gleaned along the way.
  * 
  * @author Chris Beams
  */
 class ConfigurationClassVisitor extends ClassAdapter {
 
-    private static final Log log = LogFactory.getLog(ConfigurationClassVisitor.class);
-    private static final String OBJECT_DESC = convertClassNameToResourcePath(Object.class.getName());
+	private static final Log log = LogFactory.getLog(ConfigurationClassVisitor.class);
+	private static final String OBJECT_DESC = convertClassNameToResourcePath(Object.class.getName());
 
-    private final ConfigurationClass configClass;
-    private final ConfigurationModel model;
-    private final HashMap<String, ConfigurationClass> innerClasses = new HashMap<String, ConfigurationClass>();
+	private final ConfigurationClass configClass;
+	private final ConfigurationModel model;
+	private final HashMap<String, ConfigurationClass> innerClasses = new HashMap<String, ConfigurationClass>();
 
-    private boolean processInnerClasses = true;
+	private boolean processInnerClasses = true;
 
-    public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model) {
-        super(AsmUtils.EMPTY_VISITOR);
-        this.configClass = configClass;
-        this.model = model;
-    }
+	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model) {
+		super(AsmUtils.EMPTY_VISITOR);
+		this.configClass = configClass;
+		this.model = model;
+	}
 
-    public void setProcessInnerClasses(boolean processInnerClasses) {
-        this.processInnerClasses = processInnerClasses;
-    }
+	public void setProcessInnerClasses(boolean processInnerClasses) {
+		this.processInnerClasses = processInnerClasses;
+	}
 
-    @Override
-    public void visitSource(String sourceFile, String debug) {
-        String resourcePath =
-            convertClassNameToResourcePath(configClass.getName())
-            .substring(0, configClass.getName().lastIndexOf('.')+1)
-            .concat(sourceFile);
+	@Override
+	public void visitSource(String sourceFile, String debug) {
+		String resourcePath = convertClassNameToResourcePath(configClass.getName()).substring(0,
+		        configClass.getName().lastIndexOf('.') + 1).concat(sourceFile);
 
-        configClass.setSource(resourcePath);
-    }
+		configClass.setSource(resourcePath);
+	}
 
-    @Override
-    public void visit(int classVersion, int modifiers, String classTypeDesc, String arg3,
-                      String superTypeDesc, String[] arg5) {
-        visitSuperType(superTypeDesc);
+	@Override
+	public void visit(int classVersion, int modifiers, String classTypeDesc, String arg3,
+	        String superTypeDesc, String[] arg5) {
+		visitSuperType(superTypeDesc);
 
-        configClass.setName(convertResourcePathToClassName(classTypeDesc));
+		configClass.setName(convertResourcePathToClassName(classTypeDesc));
 
-        // ASM always adds ACC_SUPER to the opcodes/modifiers for class definitions.
-        // Unknown as to why (JavaDoc is silent on the matter), but it should be
-        // eliminated in order to comply with java.lang.reflect.Modifier values.
-        configClass.setModifiers(modifiers - Opcodes.ACC_SUPER);
-    }
+		// ASM always adds ACC_SUPER to the opcodes/modifiers for class definitions.
+		// Unknown as to why (JavaDoc is silent on the matter), but it should be
+		// eliminated in order to comply with java.lang.reflect.Modifier values.
+		configClass.setModifiers(modifiers - Opcodes.ACC_SUPER);
+	}
 
-    private void visitSuperType(String superTypeDesc) {
-        // traverse up the type hierarchy unless the next ancestor is java.lang.Object
-        if(OBJECT_DESC.equals(superTypeDesc))
-            return;
+	private void visitSuperType(String superTypeDesc) {
+		// traverse up the type hierarchy unless the next ancestor is java.lang.Object
+		if (OBJECT_DESC.equals(superTypeDesc))
+			return;
 
-        ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model);
+		ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model);
 
-        ClassReader reader =  AsmUtils.newClassReader(superTypeDesc);
-        reader.accept(visitor, false);
-    }
+		ClassReader reader = AsmUtils.newClassReader(superTypeDesc);
+		reader.accept(visitor, false);
+	}
 
-    /**
-     * Visits a class level annotation on a {@link Configuration @Configuration} class.
-     * Accounts for all possible class-level annotations that are respected by JavaConfig
-     * including AspectJ's {@code @Aspect} annotation.
-     * <p>
-     * Upon encountering such an annotation, update the {@link #configClass} model object
-     * appropriately, and then return an {@link AnnotationVisitor} implementation that can
-     * populate the annotation appropriately with data.
-     *
-     * @see MutableAnnotation
-     */
-    @Override
-    public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
-        String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+	/**
+	 * Visits a class level annotation on a {@link Configuration @Configuration} class.
+	 * Accounts for all possible class-level annotations that are respected by JavaConfig
+	 * including AspectJ's {@code @Aspect} annotation.
+	 * <p>
+	 * Upon encountering such an annotation, update the {@link #configClass} model object
+	 * appropriately, and then return an {@link AnnotationVisitor} implementation that can
+	 * populate the annotation appropriately with data.
+	 * 
+	 * @see MutableAnnotation
+	 */
+	@Override
+	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
+		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
 
-        if (Configuration.class.getName().equals(annoTypeName)) {
-            Configuration mutableConfiguration = createMutableAnnotation(Configuration.class);
-            configClass.setMetadata(mutableConfiguration);
-            return new MutableAnnotationVisitor(mutableConfiguration);
-        }
+		if (Configuration.class.getName().equals(annoTypeName)) {
+			Configuration mutableConfiguration = createMutableAnnotation(Configuration.class);
+			configClass.setMetadata(mutableConfiguration);
+			return new MutableAnnotationVisitor(mutableConfiguration);
+		}
 
-        // TODO: re-enable for @Import support
-//        if (Import.class.getName().equals(annoTypeName)) {
-//            ImportStack importStack = ImportStackHolder.getImportStack();
-//
-//            if(importStack.contains(configClass))
-//                throw new CircularImportException(configClass, importStack);
-//
-//            importStack.push(configClass);
-//
-//            return new ImportAnnotationVisitor(model);
-//        }
+		// TODO: re-enable for @Import support
+		// if (Import.class.getName().equals(annoTypeName)) {
+		// ImportStack importStack = ImportStackHolder.getImportStack();
+		//
+		// if(importStack.contains(configClass))
+		// throw new CircularImportException(configClass, importStack);
+		//
+		// importStack.push(configClass);
+		//
+		// return new ImportAnnotationVisitor(model);
+		// }
 
-        // -------------------------------------
-        // Detect @Plugin annotations
-        // -------------------------------------
-        PluginAnnotationDetectingClassVisitor classVisitor = new PluginAnnotationDetectingClassVisitor();
+		// -------------------------------------
+		// Detect @Plugin annotations
+		// -------------------------------------
+		PluginAnnotationDetectingClassVisitor classVisitor = new PluginAnnotationDetectingClassVisitor();
 
-        String className = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
-        String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
-        ClassReader reader = AsmUtils.newClassReader(resourcePath);
-        reader.accept(classVisitor, false);
+		String className = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
+		ClassReader reader = AsmUtils.newClassReader(resourcePath);
+		reader.accept(classVisitor, false);
 
-        if(!classVisitor.hasPluginAnnotation())
-            return super.visitAnnotation(annoTypeDesc, visible);
-            
-        Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
-            
-        if(annoType == null)
-            return super.visitAnnotation(annoTypeDesc, visible);
-            
-        Annotation pluginAnno = createMutableAnnotation(annoType);
-        configClass.addPluginAnnotation(pluginAnno);
-        return new MutableAnnotationVisitor(pluginAnno);
-    }
+		if (!classVisitor.hasPluginAnnotation())
+			return super.visitAnnotation(annoTypeDesc, visible);
 
-    private static class PluginAnnotationDetectingClassVisitor extends ClassAdapter {
-        private boolean hasPluginAnnotation = false;
-        private final Extension pluginAnnotation = createMutableAnnotation(Extension.class);
+		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
 
-        public PluginAnnotationDetectingClassVisitor() {
-            super(AsmUtils.EMPTY_VISITOR);
-        }
+		if (annoType == null)
+			return super.visitAnnotation(annoTypeDesc, visible);
 
-        @Override
-        public AnnotationVisitor visitAnnotation(String typeDesc, boolean arg1) {
-            if(Extension.class.getName().equals(AsmUtils.convertTypeDescriptorToClassName(typeDesc))) {
-                hasPluginAnnotation = true;
-                return new MutableAnnotationVisitor(pluginAnnotation);
-            }
-            return super.visitAnnotation(typeDesc, arg1);
-        }
+		Annotation pluginAnno = createMutableAnnotation(annoType);
+		configClass.addPluginAnnotation(pluginAnno);
+		return new MutableAnnotationVisitor(pluginAnno);
+	}
 
-        public boolean hasPluginAnnotation() {
-            return hasPluginAnnotation;
-        }
+	private static class PluginAnnotationDetectingClassVisitor extends ClassAdapter {
+		private boolean hasPluginAnnotation = false;
+		private final Extension pluginAnnotation = createMutableAnnotation(Extension.class);
 
-        public Extension getPluginAnnotation() {
-            return pluginAnnotation;
-        }
-    }
+		public PluginAnnotationDetectingClassVisitor() {
+			super(AsmUtils.EMPTY_VISITOR);
+		}
 
-    /**
-     * Delegates all {@link Configuration @Configuration} class method parsing to
-     * {@link ConfigurationClassMethodVisitor}.
-     */
-    @Override
-    public MethodVisitor visitMethod(int modifiers, String methodName, String methodDescriptor,
-                                     String arg3, String[] arg4) {
+		@Override
+		public AnnotationVisitor visitAnnotation(String typeDesc, boolean arg1) {
+			if (Extension.class.getName().equals(AsmUtils.convertTypeDescriptorToClassName(typeDesc))) {
+				hasPluginAnnotation = true;
+				return new MutableAnnotationVisitor(pluginAnnotation);
+			}
+			return super.visitAnnotation(typeDesc, arg1);
+		}
 
-        return new ConfigurationClassMethodVisitor(configClass, methodName, methodDescriptor, modifiers);
-    }
+		public boolean hasPluginAnnotation() {
+			return hasPluginAnnotation;
+		}
 
-    /**
-     * Implementation deals with inner classes here even though it would have
-     * been more intuitive to deal with outer classes.  Due to limitations in ASM
-     * (resulting from limitations in the VM spec) we cannot directly look for outer classes
-     * in all cases, so instead build up a model of {@link #innerClasses} and process
-     * declaring class logic in a kind of inverted manner.
-     */
-    @Override
-    public void visitInnerClass(String name, String outerName, String innerName, int access) {
-        if(processInnerClasses == false)
-            return;
+		public Extension getPluginAnnotation() {
+			return pluginAnnotation;
+		}
+	}
 
-        String innerClassName = convertResourcePathToClassName(name);
-        String configClassName = configClass.getName();
+	/**
+	 * Delegates all {@link Configuration @Configuration} class method parsing to
+	 * {@link ConfigurationClassMethodVisitor}.
+	 */
+	@Override
+	public MethodVisitor visitMethod(int modifiers, String methodName, String methodDescriptor, String arg3,
+	        String[] arg4) {
 
-        // if the innerClassName is equal to configClassName, we just
-        // ran into the outermost inner class look up the outer class
-        // associated with this
-        if(innerClassName.equals(configClassName)) {
-            if(innerClasses.containsKey(outerName)) {
-                configClass.setDeclaringClass(innerClasses.get(outerName));
-            }
-            return;
-        }
+		return new ConfigurationClassMethodVisitor(configClass, methodName, methodDescriptor, modifiers);
+	}
 
-        ConfigurationClass innerConfigClass = new ConfigurationClass();
+	/**
+	 * Implementation deals with inner classes here even though it would have been more
+	 * intuitive to deal with outer classes. Due to limitations in ASM (resulting from
+	 * limitations in the VM spec) we cannot directly look for outer classes in all cases,
+	 * so instead build up a model of {@link #innerClasses} and process declaring class
+	 * logic in a kind of inverted manner.
+	 */
+	@Override
+	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+		if (processInnerClasses == false)
+			return;
 
-        ConfigurationClassVisitor ccVisitor =
-            new ConfigurationClassVisitor(innerConfigClass, new ConfigurationModel());
-        ccVisitor.setProcessInnerClasses(false);
+		String innerClassName = convertResourcePathToClassName(name);
+		String configClassName = configClass.getName();
 
-        ClassReader reader = AsmUtils.newClassReader(name);
-        reader.accept(ccVisitor, false);
+		// if the innerClassName is equal to configClassName, we just
+		// ran into the outermost inner class look up the outer class
+		// associated with this
+		if (innerClassName.equals(configClassName)) {
+			if (innerClasses.containsKey(outerName)) {
+				configClass.setDeclaringClass(innerClasses.get(outerName));
+			}
+			return;
+		}
 
-        if(innerClasses.containsKey(outerName))
-            innerConfigClass.setDeclaringClass(innerClasses.get(outerName));
+		ConfigurationClass innerConfigClass = new ConfigurationClass();
 
-        // is the inner class a @Configuration class?  If so, add it to the list
-        if(innerConfigClass.getMetadata() != null)
-            innerClasses.put(name, innerConfigClass);
-    }
+		ConfigurationClassVisitor ccVisitor = new ConfigurationClassVisitor(innerConfigClass,
+		        new ConfigurationModel());
+		ccVisitor.setProcessInnerClasses(false);
+
+		ClassReader reader = AsmUtils.newClassReader(name);
+		reader.accept(ccVisitor, false);
+
+		if (innerClasses.containsKey(outerName))
+			innerConfigClass.setDeclaringClass(innerClasses.get(outerName));
+
+		// is the inner class a @Configuration class? If so, add it to the list
+		if (innerConfigClass.getMetadata() != null)
+			innerClasses.put(name, innerConfigClass);
+	}
 }

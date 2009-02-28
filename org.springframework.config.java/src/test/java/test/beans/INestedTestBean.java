@@ -19,6 +19,6 @@ package test.beans;
 /** TODO: JAVADOC */
 public interface INestedTestBean {
 
-    String getCompany();
+	String getCompany();
 
 }

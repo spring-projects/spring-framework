@@ -34,113 +34,114 @@ import org.springframework.config.java.Factory;
 import org.springframework.config.java.ModelClass;
 import org.springframework.config.java.ModelMethod;
 
+
 /**
- * Visits a single method declared in a given {@link Configuration} class. Determines whether the
- * method is a {@link Factory} method and if so, adds it to the {@link ConfigurationClass}.
+ * Visits a single method declared in a given {@link Configuration} class. Determines
+ * whether the method is a {@link Factory} method and if so, adds it to the
+ * {@link ConfigurationClass}.
  * 
  * @author Chris Beams
  */
 class ConfigurationClassMethodVisitor extends MethodAdapter {
 
-    private final ConfigurationClass configClass;
-    private final String methodName;
-    private final int modifiers;
-    private final ModelClass returnType;
-    private final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
+	private final ConfigurationClass configClass;
+	private final String methodName;
+	private final int modifiers;
+	private final ModelClass returnType;
+	private final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
 
-    private boolean isModelMethod = false;
-    private int lineNumber;
+	private boolean isModelMethod = false;
+	private int lineNumber;
 
-    /**
-     * Creates a new {@link ConfigurationClassMethodVisitor} instance.
-     * 
-     * @param configClass model object to which this method will be added
-     * @param methodName name of the method declared in the {@link Configuration} class
-     * @param methodDescriptor ASM representation of the method signature
-     * @param modifiers modifiers for this method
-     */
-    public ConfigurationClassMethodVisitor(ConfigurationClass configClass, String methodName,
-                                           String methodDescriptor, int modifiers) {
-        super(AsmUtils.EMPTY_VISITOR);
+	/**
+	 * Creates a new {@link ConfigurationClassMethodVisitor} instance.
+	 * 
+	 * @param configClass model object to which this method will be added
+	 * @param methodName name of the method declared in the {@link Configuration} class
+	 * @param methodDescriptor ASM representation of the method signature
+	 * @param modifiers modifiers for this method
+	 */
+	public ConfigurationClassMethodVisitor(ConfigurationClass configClass, String methodName,
+	        String methodDescriptor, int modifiers) {
+		super(AsmUtils.EMPTY_VISITOR);
 
-        this.configClass = configClass;
-        this.methodName = methodName;
-        this.returnType = initReturnTypeFromMethodDescriptor(methodDescriptor);
-        this.modifiers = modifiers;
-    }
+		this.configClass = configClass;
+		this.methodName = methodName;
+		this.returnType = initReturnTypeFromMethodDescriptor(methodDescriptor);
+		this.modifiers = modifiers;
+	}
 
-    /**
-     * Visits a single annotation on this method.  Will be called once for each
-     * annotation present (regardless of its RetentionPolicy).
-     */
-    @Override
-    public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
-        String annoClassName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
-        
-        Class<? extends Annotation> annoClass = loadToolingSafeClass(annoClassName);
-        
-        if(annoClass == null)
-            return super.visitAnnotation(annoTypeDesc, visible);
-        
-        Annotation annotation = createMutableAnnotation(annoClass);
-        
-        annotations.add(annotation);
-        
-        return new MutableAnnotationVisitor(annotation);
-    }
+	/**
+	 * Visits a single annotation on this method. Will be called once for each annotation
+	 * present (regardless of its RetentionPolicy).
+	 */
+	@Override
+	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
+		String annoClassName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
 
-    /**
-     * Provides the line number of this method within its declaring class.  In reality,
-     * this number is always inaccurate - <var>lineNo</var> represents the line number
-     * of the first instruction in this method.  Method declaration line numbers are
-     * not in any way tracked in the bytecode.  Any tooling or output that reads this
-     * value will have to compensate and estimate where the actual method declaration
-     * is.
-     */
-    @Override
-    public void visitLineNumber(int lineNo, Label start) {
-        this.lineNumber = lineNo;
-    }
-    
-    /**
-     * Parses through all {@link #annotations} on this method in order to determine whether
-     * it is a {@link Factory} method or not and if so adds it to the
-     * enclosing {@link #configClass}.
-     */
-    @Override
-    public void visitEnd() {
-        for(Annotation anno : annotations) {
-            if(anno.annotationType().getAnnotation(Factory.class) != null) {
-	            isModelMethod = true;
-	            break;
-            }
-        }
-        
-        if(!isModelMethod)
-            return;
-        
-        Annotation[] annoArray = annotations.toArray(new Annotation[] { });
-        ModelMethod method = new ModelMethod(methodName, modifiers, returnType, annoArray);
-        method.setLineNumber(lineNumber);
-        configClass.addMethod(method);
-    }
-    
-    /**
-     * Determines return type from ASM <var>methodDescriptor</var> and determines whether
-     * that type is an interface.
-     */
-    private static ModelClass initReturnTypeFromMethodDescriptor(String methodDescriptor) {
-        final ModelClass returnType = new ModelClass(getReturnTypeFromMethodDescriptor(methodDescriptor));
+		Class<? extends Annotation> annoClass = loadToolingSafeClass(annoClassName);
 
-        // detect whether the return type is an interface
-        newClassReader(convertClassNameToResourcePath(returnType.getName())).accept(
-            new ClassAdapter(AsmUtils.EMPTY_VISITOR) {
-                @Override
-                public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
-                    returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
-                }
-            }, false);
-        
-        return returnType;
-    }
+		if (annoClass == null)
+			return super.visitAnnotation(annoTypeDesc, visible);
+
+		Annotation annotation = createMutableAnnotation(annoClass);
+
+		annotations.add(annotation);
+
+		return new MutableAnnotationVisitor(annotation);
+	}
+
+	/**
+	 * Provides the line number of this method within its declaring class. In reality, this
+	 * number is always inaccurate - <var>lineNo</var> represents the line number of the
+	 * first instruction in this method. Method declaration line numbers are not in any way
+	 * tracked in the bytecode. Any tooling or output that reads this value will have to
+	 * compensate and estimate where the actual method declaration is.
+	 */
+	@Override
+	public void visitLineNumber(int lineNo, Label start) {
+		this.lineNumber = lineNo;
+	}
+
+	/**
+	 * Parses through all {@link #annotations} on this method in order to determine whether
+	 * it is a {@link Factory} method or not and if so adds it to the enclosing
+	 * {@link #configClass}.
+	 */
+	@Override
+	public void visitEnd() {
+		for (Annotation anno : annotations) {
+			if (anno.annotationType().getAnnotation(Factory.class) != null) {
+				isModelMethod = true;
+				break;
+			}
+		}
+
+		if (!isModelMethod)
+			return;
+
+		Annotation[] annoArray = annotations.toArray(new Annotation[] {});
+		ModelMethod method = new ModelMethod(methodName, modifiers, returnType, annoArray);
+		method.setLineNumber(lineNumber);
+		configClass.addMethod(method);
+	}
+
+	/**
+	 * Determines return type from ASM <var>methodDescriptor</var> and determines whether
+	 * that type is an interface.
+	 */
+	private static ModelClass initReturnTypeFromMethodDescriptor(String methodDescriptor) {
+		final ModelClass returnType = new ModelClass(getReturnTypeFromMethodDescriptor(methodDescriptor));
+
+		// detect whether the return type is an interface
+		newClassReader(convertClassNameToResourcePath(returnType.getName())).accept(
+		        new ClassAdapter(AsmUtils.EMPTY_VISITOR) {
+			        @Override
+			        public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
+				        returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
+			        }
+		        }, false);
+
+		return returnType;
+	}
 }

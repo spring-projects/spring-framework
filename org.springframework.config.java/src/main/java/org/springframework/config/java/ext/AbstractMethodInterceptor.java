@@ -30,19 +30,19 @@ import org.springframework.util.Assert;
 
 /**
  * Base class for all {@link MethodInterceptor} implementations.
- *
+ * 
  * @author Chris Beams
  */
 public abstract class AbstractMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
-    protected final Log log = LogFactory.getLog(this.getClass());
-    protected DefaultListableBeanFactory beanFactory;
+	protected final Log log = LogFactory.getLog(this.getClass());
+	protected DefaultListableBeanFactory beanFactory;
 
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        Assert.isInstanceOf(DefaultListableBeanFactory.class, beanFactory);
-        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
-    }
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		Assert.isInstanceOf(DefaultListableBeanFactory.class, beanFactory);
+		this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+	}
 
-    protected String getBeanName(Method method) {
-        return method.getName();
-    }
+	protected String getBeanName(Method method) {
+		return method.getName();
+	}
 }

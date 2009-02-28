@@ -22,22 +22,22 @@ import java.lang.reflect.Proxy;
 /** TODO: JAVADOC */
 class MutableAnnotationUtils {
 
-    /**
-     * Creates a {@link MutableAnnotation} for {@code annoType}.
-     * JDK dynamic proxies are used, and the returned proxy implements
-     * both {@link MutableAnnotation} and annotation type {@code A}
-     *
-     * @param <A> annotation type that must be supplied and returned
-     * @param annoType type of annotation to create
-     */
-    public static <A extends Annotation> A createMutableAnnotation(Class<A> annoType) {
-        MutableAnnotationInvocationHandler handler = new MutableAnnotationInvocationHandler(annoType);
-        ClassLoader classLoader = MutableAnnotationUtils.class.getClassLoader();
-        Class<?>[] interfaces = new Class<?>[] {annoType, MutableAnnotation.class};
+	/**
+	 * Creates a {@link MutableAnnotation} for {@code annoType}. JDK dynamic proxies are
+	 * used, and the returned proxy implements both {@link MutableAnnotation} and annotation
+	 * type {@code A}
+	 * 
+	 * @param <A> annotation type that must be supplied and returned
+	 * @param annoType type of annotation to create
+	 */
+	public static <A extends Annotation> A createMutableAnnotation(Class<A> annoType) {
+		MutableAnnotationInvocationHandler handler = new MutableAnnotationInvocationHandler(annoType);
+		ClassLoader classLoader = MutableAnnotationUtils.class.getClassLoader();
+		Class<?>[] interfaces = new Class<?>[] { annoType, MutableAnnotation.class };
 
-        @SuppressWarnings("unchecked")
-        A mutableAnno = (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
-        return mutableAnno;
-    }
+		@SuppressWarnings("unchecked")
+		A mutableAnno = (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
+		return mutableAnno;
+	}
 
 }
