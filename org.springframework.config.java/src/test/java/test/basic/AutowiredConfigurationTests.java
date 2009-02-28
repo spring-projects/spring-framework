@@ -5,7 +5,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.config.java.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ext.Bean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -36,4 +37,26 @@ public class AutowiredConfigurationTests {
 		public @Bean Colour colour() { return Colour.RED; }
 	}
 	
+	
+	
+	public @Test void testValueInjection() {
+		System.setProperty("myProp", "foo");
+		
+		ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext(
+				"ValueInjectionTests.xml", AutowiredConfigurationTests.class);
+		
+		TestBean testBean = factory.getBean("testBean", TestBean.class);
+		assertThat(testBean.getName(), equalTo("foo"));
+	}
+	
+	@Configuration
+	static class ValueConfig {
+		
+		@Value("#{systemProperties.myProp}") 
+		private String name = "default";
+		
+		public @Bean TestBean testBean() {
+			return new TestBean(name);
+		}
+	}
 }

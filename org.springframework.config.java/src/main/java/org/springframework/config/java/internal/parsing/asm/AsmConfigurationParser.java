@@ -18,10 +18,10 @@ package org.springframework.config.java.internal.parsing.asm;
 
 
 import org.objectweb.asm.ClassReader;
-import org.springframework.config.java.annotation.Configuration;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationClass;
+import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
-import org.springframework.config.java.model.ConfigurationClass;
-import org.springframework.config.java.model.ConfigurationModel;
 import org.springframework.util.Assert;
 
 

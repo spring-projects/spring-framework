@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.model;
+package org.springframework.config.java;
 
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.config.java.annotation.Configuration;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 

@@ -27,11 +27,10 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.config.java.annotation.Configuration;
-import org.springframework.config.java.internal.enhancement.CglibConfigurationEnhancer;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.internal.enhancement.ConfigurationEnhancer;
 import org.springframework.config.java.internal.factory.support.AsmJavaConfigBeanDefinitionReader;
-import org.springframework.config.java.model.ConfigurationModel;
 import org.springframework.config.java.process.ConfigurationPostProcessor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
@@ -48,11 +47,15 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
      * necessary to fulfill JavaConfig requirements.
      */
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        if(!(beanFactory instanceof DefaultListableBeanFactory))
+            throw new IllegalStateException("beanFactory must be of type "
+                    + DefaultListableBeanFactory.class.getSimpleName());
+        
         ConfigurationModel model = new ConfigurationModel();
         
         parseAnyConfigurationClasses(beanFactory, model);
 
-        enhanceAnyConfigurationClasses(beanFactory, model);
+        enhanceAnyConfigurationClasses((DefaultListableBeanFactory) beanFactory, model);
     }
 
     private void parseAnyConfigurationClasses(ConfigurableListableBeanFactory beanFactory, ConfigurationModel model) {
@@ -84,14 +87,9 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
      * @see     ConfigurationEnhancer
      * @see     BeanFactoryPostProcessor
      */
-    private void enhanceAnyConfigurationClasses(ConfigurableListableBeanFactory clbf, ConfigurationModel model) {
-        if(!(clbf instanceof DefaultListableBeanFactory))
-            throw new IllegalStateException("beanFactory must be of type "
-                    + DefaultListableBeanFactory.class.getSimpleName());
+    private void enhanceAnyConfigurationClasses(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
         
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory)clbf;
-        
-        ConfigurationEnhancer enhancer = new CglibConfigurationEnhancer(beanFactory, model);
+        ConfigurationEnhancer enhancer = new ConfigurationEnhancer(beanFactory, model);
 
         int configClassesEnhanced = 0;
 

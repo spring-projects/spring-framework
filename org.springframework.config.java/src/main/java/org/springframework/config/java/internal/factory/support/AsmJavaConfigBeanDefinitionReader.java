@@ -25,13 +25,13 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.config.java.annotation.Configuration;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.ConfigurationModel;
+import org.springframework.config.java.MalformedJavaConfigurationException;
+import org.springframework.config.java.UsageError;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
 import org.springframework.config.java.internal.parsing.asm.AsmConfigurationParser;
 import org.springframework.config.java.internal.parsing.asm.AsmUtils;
-import org.springframework.config.java.model.ConfigurationModel;
-import org.springframework.config.java.model.MalformedJavaConfigurationException;
-import org.springframework.config.java.model.UsageError;
 import org.springframework.core.io.ClassPathResource;
 
 
