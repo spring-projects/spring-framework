@@ -34,7 +34,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.Factory;
+import org.springframework.config.java.FactoryMethod;
 import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.plugin.Extension;
 import org.springframework.config.java.plugin.ExtensionAnnotationBeanDefinitionRegistrar;
@@ -84,7 +84,7 @@ class ConfigurationModelBeanDefinitionReader {
 
 	/**
 	 * Reads a particular {@link ConfigurationClass}, registering bean definitions for the
-	 * class itself, all its {@link Factory} methods and all its {@link Extension}
+	 * class itself, all its {@link FactoryMethod} methods and all its {@link Extension}
 	 * annotations.
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
@@ -145,7 +145,7 @@ class ConfigurationModelBeanDefinitionReader {
 	 * Reads a particular {@link ModelMethod}, registering bean definitions with
 	 * {@link #beanFactory} based on its contents.
 	 * 
-	 * @see Factory
+	 * @see FactoryMethod
 	 */
 	private void loadBeanDefinitionsForModelMethod(ModelMethod method) {
 		method.getRegistrar().register(method, beanFactory);

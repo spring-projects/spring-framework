@@ -30,14 +30,14 @@ import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.Factory;
+import org.springframework.config.java.FactoryMethod;
 import org.springframework.config.java.ModelClass;
 import org.springframework.config.java.ModelMethod;
 
 
 /**
  * Visits a single method declared in a given {@link Configuration} class. Determines
- * whether the method is a {@link Factory} method and if so, adds it to the
+ * whether the method is a {@link FactoryMethod} method and if so, adds it to the
  * {@link ConfigurationClass}.
  * 
  * @author Chris Beams
@@ -105,13 +105,13 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 
 	/**
 	 * Parses through all {@link #annotations} on this method in order to determine whether
-	 * it is a {@link Factory} method or not and if so adds it to the enclosing
+	 * it is a {@link FactoryMethod} method or not and if so adds it to the enclosing
 	 * {@link #configClass}.
 	 */
 	@Override
 	public void visitEnd() {
 		for (Annotation anno : annotations) {
-			if (anno.annotationType().getAnnotation(Factory.class) != null) {
+			if (anno.annotationType().getAnnotation(FactoryMethod.class) != null) {
 				isModelMethod = true;
 				break;
 			}

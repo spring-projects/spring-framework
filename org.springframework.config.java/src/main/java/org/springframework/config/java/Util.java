@@ -106,7 +106,7 @@ public class Util {
 	 * <p>
 	 * ASM class reading is used throughout JavaConfig, but there are certain cases where
 	 * classloading cannot be avoided - specifically in cases where users define their own
-	 * {@link Extension} or {@link Factory} annotations. This method should therefore be
+	 * {@link Extension} or {@link FactoryMethod} annotations. This method should therefore be
 	 * used sparingly but consistently where required.
 	 * <p>
 	 * Because {@link ClassNotFoundException} is compensated for by returning null, callers
