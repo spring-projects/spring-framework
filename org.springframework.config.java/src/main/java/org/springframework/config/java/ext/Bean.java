@@ -67,8 +67,7 @@ import org.springframework.config.java.Validator;
 @Documented
 @Factory(registrarType=BeanRegistrar.class,
          callbackType=BeanMethodInterceptor.class,
-         validatorTypes={BeanValidator.class,
-                                  IllegalBeanOverrideValidator.class})
+         validatorTypes={BeanValidator.class, IllegalBeanOverrideValidator.class})
 public @interface Bean {
 
     /**
