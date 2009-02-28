@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.MalformedJavaConfigurationException;
+import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.UsageError;
 import org.springframework.config.java.internal.enhancement.ConfigurationEnhancer;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
@@ -102,7 +102,7 @@ public class ConfigurationPostProcessor implements Ordered, BeanFactoryPostProce
         ArrayList<UsageError> errors = new ArrayList<UsageError>();
         model.validate(errors);
         if (errors.size() > 0)
-            throw new MalformedJavaConfigurationException(errors.toArray(new UsageError[] { }));
+            throw new MalformedConfigurationException(errors.toArray(new UsageError[] { }));
 
         modelBeanDefinitionReader.loadBeanDefinitions(model);
     }

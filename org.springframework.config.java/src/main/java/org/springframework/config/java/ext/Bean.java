@@ -31,6 +31,7 @@ import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.Factory;
 import org.springframework.config.java.ModelMethod;
+import org.springframework.config.java.Scopes;
 import org.springframework.config.java.UsageError;
 import org.springframework.config.java.Validator;
 
@@ -90,7 +91,7 @@ public @interface Bean {
      * Scope: whether the bean is a singleton, prototype or custom scope.
      * Default is singleton.
      */
-    String scope() default BeanDefinition.SCOPE_SINGLETON;
+    String scope() default Scopes.SINGLETON;
 
     /**
      * Bean autowire strategy.

@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
+import org.springframework.config.java.Scopes;
 import org.springframework.config.java.ext.Bean;
 import org.springframework.config.java.support.ConfigurationPostProcessor;
-import org.springframework.config.java.util.DefaultScopes;
 
 import test.beans.ITestBean;
 import test.beans.TestBean;
@@ -89,7 +89,7 @@ public class BasicTests {
 			return bar;
 		}
 		
-		@Bean(scope=DefaultScopes.PROTOTYPE) 
+		@Bean(scope=Scopes.PROTOTYPE) 
 		public TestBean baz() {
 			return new TestBean("bar");
 		}

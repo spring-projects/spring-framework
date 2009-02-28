@@ -24,7 +24,7 @@ package org.springframework.config.java;
  * possible usage errors.
  *
  * @author  Chris Beams
- * @see     MalformedJavaConfigurationException
+ * @see     MalformedConfigurationException
  */
 public abstract class UsageError {
 
