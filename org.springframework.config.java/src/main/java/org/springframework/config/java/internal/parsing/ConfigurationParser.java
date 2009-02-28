@@ -15,8 +15,6 @@
  */
 package org.springframework.config.java.internal.parsing;
 
-
-
 import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.config.java.Configuration;
@@ -31,49 +29,50 @@ import org.springframework.core.io.ClassPathResource;
  * This ASM-based implementation avoids reflection and eager classloading in order to
  * interoperate effectively with tooling (Spring IDE) and OSGi environments.
  * <p>
- * This class helps separate the concern of parsing the structure of a Configuration class 
+ * This class helps separate the concern of parsing the structure of a Configuration class
  * from the concern of registering {@link BeanDefinition} objects based on the content of
  * that model.
  * 
  * @see org.springframework.config.java.ConfigurationModel
  * @see org.springframework.config.java.support.ConfigurationModelBeanDefinitionReader
- *
+ * 
  * @author Chris Beams
  */
 public class ConfigurationParser {
 
-    /**
-     * Model to be populated during calls to {@link #parse(Object, String)}
-     */
-    private final ConfigurationModel model;
+	/**
+	 * Model to be populated during calls to {@link #parse(Object, String)}
+	 */
+	private final ConfigurationModel model;
 
-    /**
-     * Creates a new parser instance that will be used to populate <var>model</var>.
-     *
-     * @param model   model to be populated by each successive call to {@link #parse(Object, String)}
-     */
-    public ConfigurationParser(ConfigurationModel model) {
-        this.model = model;
-    }
+	/**
+	 * Creates a new parser instance that will be used to populate <var>model</var>.
+	 * 
+	 * @param model model to be populated by each successive call to
+	 *        {@link #parse(Object, String)}
+	 */
+	public ConfigurationParser(ConfigurationModel model) {
+		this.model = model;
+	}
 
-    /**
-     * Parse the {@link Configuration @Configuration} class encapsulated by
-     * <var>configurationSource</var>.
-     *
-     * @param configurationSource reader for Configuration class being parsed
-     * @param configurationId may be null, but if populated represents the bean id
-     * (assumes that this configuration class was configured via XML)
-     */
-    public void parse(ClassPathResource resource, String configurationId) {
-    	
-        String resourcePath = resource.getPath();
-        ClassReader configClassReader = AsmUtils.newClassReader(Util.getClassAsStream(resourcePath));
-            
-        ConfigurationClass configClass = new ConfigurationClass();
-        configClass.setBeanName(configurationId);
+	/**
+	 * Parse the {@link Configuration @Configuration} class encapsulated by
+	 * <var>configurationSource</var>.
+	 * 
+	 * @param configurationSource reader for Configuration class being parsed
+	 * @param configurationId may be null, but if populated represents the bean id (assumes
+	 *        that this configuration class was configured via XML)
+	 */
+	public void parse(ClassPathResource resource, String configurationId) {
 
-        configClassReader.accept(new ConfigurationClassVisitor(configClass, model), false);
+		String resourcePath = resource.getPath();
+		ClassReader configClassReader = AsmUtils.newClassReader(Util.getClassAsStream(resourcePath));
+
+		ConfigurationClass configClass = new ConfigurationClass();
+		configClass.setBeanName(configurationId);
+
+		configClassReader.accept(new ConfigurationClassVisitor(configClass, model), false);
 		model.add(configClass);
-    }
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,24 @@
  */
 package org.springframework.config.java.internal.parsing;
 
-
 /**
  * Note: the visibility of this interface would be reduced to package-private
  * save for an obscure restriction of JDK dynamic proxies.
- * {@link MutableAnnotationUtils#createMutableAnnotation(Class)} creates a proxy based on two
- * interfaces: this one, and whatever annotation is currently being parsed.
- * The restriction is that both interfaces may not be package-private if they
- * are in separate packages.  In order to avoid unnecessarily restricting the
- * visibility options for user-defined annotations, this interface becomes public.
- * Because it is in the internal.* package, it won't pollute the public API, but
- * developers should take caution not to use this annotation outside the
- * internal.parsing.asm package.
- *
+ * {@link MutableAnnotationUtils#createMutableAnnotation(Class)} creates a proxy
+ * based on two interfaces: this one, and whatever annotation is currently being
+ * parsed. The restriction is that both interfaces may not be package-private if
+ * they are in separate packages. In order to avoid unnecessarily restricting
+ * the visibility options for user-defined annotations, this interface becomes
+ * public. Because it is in the internal.* package, it won't pollute the public
+ * API, but developers should take caution not to use this annotation outside
+ * the internal.parsing package.
+ * 
  * @author Chris Beams
  */
 public interface MutableAnnotation {
-    void setAttributeValue(String attribName, Object attribValue);
-    Class<?> getAttributeType(String attributeName);
+
+	void setAttributeValue(String attribName, Object attribValue);
+
+	Class<?> getAttributeType(String attributeName);
+
 }

@@ -37,7 +37,6 @@ import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.BeanDefinitionRegistrar;
@@ -91,7 +90,7 @@ public class ConfigurationEnhancer {
         notNull(beanFactory, "beanFactory must be non-null");
         notNull(model, "model must be non-null");
         
-        populateHandlersAndCallbacks(beanFactory, model);
+        populateRegistrarsAndCallbacks(beanFactory, model);
     }
 
 
@@ -101,7 +100,7 @@ public class ConfigurationEnhancer {
      * 
      * @see #callbackFilter
      */
-    private void populateHandlersAndCallbacks(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
+    private void populateRegistrarsAndCallbacks(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
         
         for (ConfigurationClass configClass : model.getAllConfigurationClasses()) {
             for (ModelMethod method : configClass.getMethods()) {
@@ -116,9 +115,6 @@ public class ConfigurationEnhancer {
             }
         }
         
-        registrars.add(new InitializingBeanRegistrar());
-        callbackInstances.add(new InitializingBeanCallback(beanFactory));
-            
         // register a 'catch-all' registrar
         registrars.add(new BeanDefinitionRegistrar() {
 
@@ -140,6 +136,8 @@ public class ConfigurationEnhancer {
     /**
      * Loads the specified class and generates a CGLIB subclass of it equipped with container-aware
      * callbacks capable of respecting scoping and other bean semantics.
+     * 
+     * @return fully-qualified name of the enhanced subclass
      */
     public String enhance(String configClassName) {
         if (log.isInfoEnabled())
@@ -170,7 +168,6 @@ public class ConfigurationEnhancer {
         enhancer.setUseCache(false);
         
         enhancer.setSuperclass(superclass);
-        enhancer.setInterfaces(new Class<?>[]{InitializingBean.class});
         enhancer.setUseFactory(false);
         enhancer.setCallbackFilter(callbackFilter);
         enhancer.setCallbackTypes(callbackTypes.toArray(new Class<?>[]{}));
@@ -185,9 +182,7 @@ public class ConfigurationEnhancer {
     private Class<?> createClass(Enhancer enhancer, Class<?> superclass) {
         Class<?> subclass = enhancer.createClass();
         
-        // see #registerThreadLocalCleanupBeanDefinition
         Enhancer.registerCallbacks(subclass, callbackInstances.toArray(new Callback[] {}));
-        //Enhancer.registerStaticCallbacks(subclass, callbackInstances.toArray(new Callback[] {}));
         
         return subclass;
     }
