@@ -24,9 +24,9 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * Registers bean definitions based on {@link Extension} metadata
  */
 public interface ExtensionAnnotationBeanDefinitionRegistrar<A extends Annotation> {
-    
-    /**
+
+	/**
      * 
      */
-    void handle(A annotation, BeanDefinitionRegistry registry);
+	void handle(A annotation, BeanDefinitionRegistry registry);
 }

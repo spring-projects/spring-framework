@@ -19,48 +19,47 @@ import org.objectweb.asm.AnnotationVisitor;
 
 
 /**
- * An empty AnnotationVisitor that delegates to another AnnotationVisitor.
- * This class can be used as a super class to quickly implement
- * useful annotation adapter classes, just by overriding the necessary
- * methods.  Note that for some reason, ASM doesn't provide this class
- * (it does provide MethodAdapter and ClassAdapter), thus we're following
- * the general pattern and adding our own here.
- *
+ * An empty AnnotationVisitor that delegates to another AnnotationVisitor. This class can be
+ * used as a super class to quickly implement useful annotation adapter classes, just by
+ * overriding the necessary methods. Note that for some reason, ASM doesn't provide this
+ * class (it does provide MethodAdapter and ClassAdapter), thus we're following the general
+ * pattern and adding our own here.
+ * 
  * @author Chris Beams
  */
 class AnnotationAdapter implements AnnotationVisitor {
 
-    private AnnotationVisitor delegate;
+	private AnnotationVisitor delegate;
 
-    /**
-     * Creates a new AnnotationAdapter instance that will delegate
-     * all its calls to <var>delegate</var>.
-     *
-     * @param delegate  In most cases, the delegate will simply be
-     * {@link AsmUtils#EMPTY_VISITOR}
-     */
-    public AnnotationAdapter(AnnotationVisitor delegate) {
-        this.delegate = delegate;
-    }
+	/**
+	 * Creates a new AnnotationAdapter instance that will delegate all its calls to
+	 * <var>delegate</var>.
+	 * 
+	 * @param delegate In most cases, the delegate will simply be
+	 *        {@link AsmUtils#EMPTY_VISITOR}
+	 */
+	public AnnotationAdapter(AnnotationVisitor delegate) {
+		this.delegate = delegate;
+	}
 
-    public void visit(String arg0, Object arg1) {
-        delegate.visit(arg0, arg1);
-    }
+	public void visit(String arg0, Object arg1) {
+		delegate.visit(arg0, arg1);
+	}
 
-    public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
-        return delegate.visitAnnotation(arg0, arg1);
-    }
+	public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
+		return delegate.visitAnnotation(arg0, arg1);
+	}
 
-    public AnnotationVisitor visitArray(String arg0) {
-        return delegate.visitArray(arg0);
-    }
+	public AnnotationVisitor visitArray(String arg0) {
+		return delegate.visitArray(arg0);
+	}
 
-    public void visitEnum(String arg0, String arg1, String arg2) {
-        delegate.visitEnum(arg0, arg1, arg2);
-    }
+	public void visitEnum(String arg0, String arg1, String arg2) {
+		delegate.visitEnum(arg0, arg1, arg2);
+	}
 
-    public void visitEnd() {
-        delegate.visitEnd();
-    }
+	public void visitEnd() {
+		delegate.visitEnd();
+	}
 
 }

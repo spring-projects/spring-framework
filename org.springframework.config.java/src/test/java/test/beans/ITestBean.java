@@ -19,44 +19,44 @@ import java.io.IOException;
 
 
 /**
- * Interface used for test beans. Two methods are the same as on Person, but if
- * this extends person it breaks quite a few tests
- *
- * @author  Rod Johnson
+ * Interface used for test beans. Two methods are the same as on Person, but if this extends
+ * person it breaks quite a few tests
+ * 
+ * @author Rod Johnson
  */
 public interface ITestBean {
 
-    int getAge();
+	int getAge();
 
-    void setAge(int age);
+	void setAge(int age);
 
-    String getName();
+	String getName();
 
-    void setName(String name);
+	void setName(String name);
 
-    ITestBean getSpouse();
+	ITestBean getSpouse();
 
-    void setSpouse(ITestBean spouse);
+	void setSpouse(ITestBean spouse);
 
-    /**
-     * t null no error.
-     */
-    void exceptional(Throwable t) throws Throwable;
+	/**
+	 * t null no error.
+	 */
+	void exceptional(Throwable t) throws Throwable;
 
-    Object returnsThis();
+	Object returnsThis();
 
-    INestedTestBean getDoctor();
+	INestedTestBean getDoctor();
 
-    INestedTestBean getLawyer();
+	INestedTestBean getLawyer();
 
-    IndexedTestBean getNestedIndexedBean();
+	IndexedTestBean getNestedIndexedBean();
 
-    /**
-     * Increment the age by one.
-     *
-     * @return  the previous age
-     */
-    int haveBirthday();
+	/**
+	 * Increment the age by one.
+	 * 
+	 * @return the previous age
+	 */
+	int haveBirthday();
 
-    void unreliableFileOperation() throws IOException;
+	void unreliableFileOperation() throws IOException;
 }

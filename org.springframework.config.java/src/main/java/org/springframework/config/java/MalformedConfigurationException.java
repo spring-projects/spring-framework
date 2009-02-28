@@ -22,54 +22,54 @@ import java.util.List;
 
 /**
  * TODO: rename to UsageException / move outside .internal?
- *
- * @author  Chris Beams
+ * 
+ * @author Chris Beams
  */
 @SuppressWarnings("serial")
 public class MalformedConfigurationException extends RuntimeException {
 
-    private final List<? extends UsageError> errors;
+	private final List<? extends UsageError> errors;
 
-    public MalformedConfigurationException(String message) {
-        super(message);
-        this.errors = new ArrayList<UsageError>();
-    }
+	public MalformedConfigurationException(String message) {
+		super(message);
+		this.errors = new ArrayList<UsageError>();
+	}
 
-    public MalformedConfigurationException(UsageError... errors) {
-        super(toString(errors));
-        this.errors = Arrays.asList(errors);
-    }
+	public MalformedConfigurationException(UsageError... errors) {
+		super(toString(errors));
+		this.errors = Arrays.asList(errors);
+	}
 
-    public boolean containsError(Class<? extends UsageError> errorType) {
-        for (UsageError error : errors)
-            if (error.getClass().isAssignableFrom(errorType))
-                return true;
+	public boolean containsError(Class<? extends UsageError> errorType) {
+		for (UsageError error : errors)
+			if (error.getClass().isAssignableFrom(errorType))
+				return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    /**
-     * Render a list of syntax errors as output suitable for diagnosis via System.err.
-     */
-    private static String toString(UsageError... errors) {
-        StringBuilder sb = new StringBuilder();
+	/**
+	 * Render a list of syntax errors as output suitable for diagnosis via System.err.
+	 */
+	private static String toString(UsageError... errors) {
+		StringBuilder sb = new StringBuilder();
 
-        sb.append("\n");
+		sb.append("\n");
 
-        if (errors.length == 1)
-            sb.append("A usage error has ");
-        else
-            sb.append(errors.length + " usage errors have ");
+		if (errors.length == 1)
+			sb.append("A usage error has ");
+		else
+			sb.append(errors.length + " usage errors have ");
 
-        sb.append("been detected:\n");
+		sb.append("been detected:\n");
 
-        for (int i = 0; i < errors.length; i++) {
-            sb.append(errors[i].toString());
-            if ((i + 1) < errors.length)
-                sb.append('\n');
-        }
+		for (int i = 0; i < errors.length; i++) {
+			sb.append(errors[i].toString());
+			if ((i + 1) < errors.length)
+				sb.append('\n');
+		}
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 
 }

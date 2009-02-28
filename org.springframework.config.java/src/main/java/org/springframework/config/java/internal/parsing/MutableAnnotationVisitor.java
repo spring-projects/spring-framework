@@ -32,84 +32,85 @@ import org.springframework.util.Assert;
  * Populates a given {@link MutableAnnotation} instance with its attributes.
  */
 class MutableAnnotationVisitor implements AnnotationVisitor {
-    
-    private static final Log log = LogFactory.getLog(MutableAnnotationVisitor.class);
 
-    protected final MutableAnnotation mutableAnno;
+	private static final Log log = LogFactory.getLog(MutableAnnotationVisitor.class);
 
-    /**
-     * Creates a new {@link MutableAnnotationVisitor} instance that will populate
-     * the the attributes of the given <var>mutableAnno</var>.  Accepts {@link Annotation}
-     * instead of {@link MutableAnnotation} to avoid the need for callers to typecast.
-     * 
-     * @param mutableAnno {@link MutableAnnotation} instance to visit and populate
-     * 
-     * @throws IllegalArgumentException if <var>mutableAnno</var> is not of type
-     *         {@link MutableAnnotation}
-     *         
-     * @see MutableAnnotationUtils#createMutableAnnotation(Class)
-     */
-    public MutableAnnotationVisitor(Annotation mutableAnno) {
-        Assert.isInstanceOf(MutableAnnotation.class, mutableAnno, "annotation must be mutable");
-        this.mutableAnno = (MutableAnnotation)mutableAnno;
-    }
+	protected final MutableAnnotation mutableAnno;
 
-    public AnnotationVisitor visitArray(final String attribName) {
-        return new MutableAnnotationArrayVisitor(mutableAnno, attribName);
-    }
+	/**
+	 * Creates a new {@link MutableAnnotationVisitor} instance that will populate the the
+	 * attributes of the given <var>mutableAnno</var>. Accepts {@link Annotation} instead of
+	 * {@link MutableAnnotation} to avoid the need for callers to typecast.
+	 * 
+	 * @param mutableAnno {@link MutableAnnotation} instance to visit and populate
+	 * 
+	 * @throws IllegalArgumentException if <var>mutableAnno</var> is not of type
+	 *         {@link MutableAnnotation}
+	 * 
+	 * @see MutableAnnotationUtils#createMutableAnnotation(Class)
+	 */
+	public MutableAnnotationVisitor(Annotation mutableAnno) {
+		Assert.isInstanceOf(MutableAnnotation.class, mutableAnno, "annotation must be mutable");
+		this.mutableAnno = (MutableAnnotation) mutableAnno;
+	}
 
-    public void visit(String attribName, Object attribValue) {
-        Class<?> attribReturnType = mutableAnno.getAttributeType(attribName);
+	public AnnotationVisitor visitArray(final String attribName) {
+		return new MutableAnnotationArrayVisitor(mutableAnno, attribName);
+	}
 
-        if (attribReturnType.equals(Class.class)) {
-            // the attribute type is Class -> load it and set it.
-            String fqClassName = ((Type) attribValue).getClassName();
-            
-            Class<?> classVal = loadToolingSafeClass(fqClassName);
-            
-            if(classVal == null)
-		        return;
-            
-            mutableAnno.setAttributeValue(attribName, classVal);
-            return;
-        }
+	public void visit(String attribName, Object attribValue) {
+		Class<?> attribReturnType = mutableAnno.getAttributeType(attribName);
 
-        // otherwise, assume the value can be set literally
-        mutableAnno.setAttributeValue(attribName, attribValue);
-    }
+		if (attribReturnType.equals(Class.class)) {
+			// the attribute type is Class -> load it and set it.
+			String fqClassName = ((Type) attribValue).getClassName();
 
-    @SuppressWarnings("unchecked")
-    public void visitEnum(String attribName, String enumTypeDescriptor, String strEnumValue) {
-        String enumClassName = AsmUtils.convertTypeDescriptorToClassName(enumTypeDescriptor);
+			Class<?> classVal = loadToolingSafeClass(fqClassName);
 
-        Class<? extends Enum> enumClass = loadToolingSafeClass(enumClassName);
-            
-        if(enumClass == null)
-            return;
+			if (classVal == null)
+				return;
 
-        Enum enumValue = Enum.valueOf(enumClass, strEnumValue);
-        mutableAnno.setAttributeValue(attribName, enumValue);
-    }
+			mutableAnno.setAttributeValue(attribName, classVal);
+			return;
+		}
 
-    public AnnotationVisitor visitAnnotation(String attribName, String attribAnnoTypeDesc) {
-        String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(attribAnnoTypeDesc);
-        Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
-        
-        if(annoType == null)
-	        return AsmUtils.EMPTY_VISITOR.visitAnnotation(attribName, attribAnnoTypeDesc);
-            
-        Annotation anno = createMutableAnnotation(annoType);
-        
-        try {
-            Field attribute = mutableAnno.getClass().getField(attribName);
-            attribute.set(mutableAnno, anno);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-        
-        return new MutableAnnotationVisitor(anno);
-    }
+		// otherwise, assume the value can be set literally
+		mutableAnno.setAttributeValue(attribName, attribValue);
+	}
 
-    public void visitEnd() { }
+	@SuppressWarnings("unchecked")
+	public void visitEnum(String attribName, String enumTypeDescriptor, String strEnumValue) {
+		String enumClassName = AsmUtils.convertTypeDescriptorToClassName(enumTypeDescriptor);
+
+		Class<? extends Enum> enumClass = loadToolingSafeClass(enumClassName);
+
+		if (enumClass == null)
+			return;
+
+		Enum enumValue = Enum.valueOf(enumClass, strEnumValue);
+		mutableAnno.setAttributeValue(attribName, enumValue);
+	}
+
+	public AnnotationVisitor visitAnnotation(String attribName, String attribAnnoTypeDesc) {
+		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(attribAnnoTypeDesc);
+		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
+
+		if (annoType == null)
+			return AsmUtils.EMPTY_VISITOR.visitAnnotation(attribName, attribAnnoTypeDesc);
+
+		Annotation anno = createMutableAnnotation(annoType);
+
+		try {
+			Field attribute = mutableAnno.getClass().getField(attribName);
+			attribute.set(mutableAnno, anno);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+
+		return new MutableAnnotationVisitor(anno);
+	}
+
+	public void visitEnd() {
+	}
 
 }

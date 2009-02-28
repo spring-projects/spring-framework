@@ -33,170 +33,173 @@ import org.springframework.util.StringUtils;
 /** TODO: JAVADOC */
 final class MutableAnnotationInvocationHandler implements InvocationHandler {
 
-    private final Class<? extends Annotation> annoType;
-    private final HashMap<String, Object> attributes = new HashMap<String, Object>();
-    private final HashMap<String, Class<?>> attributeTypes = new HashMap<String, Class<?>>();
+	private final Class<? extends Annotation> annoType;
+	private final HashMap<String, Object> attributes = new HashMap<String, Object>();
+	private final HashMap<String, Class<?>> attributeTypes = new HashMap<String, Class<?>>();
 
-    public MutableAnnotationInvocationHandler(Class<? extends Annotation> annoType) {
-        // pre-populate the attributes hash will all the names
-        // and default values of the attributes defined in 'annoType'
-        Method[] attribs = annoType.getDeclaredMethods();
-        for(Method attrib : attribs) {
-            this.attributes.put(attrib.getName(), getDefaultValue(annoType, attrib.getName()));
-            this.attributeTypes.put(attrib.getName(), getAttributeType(annoType, attrib.getName()));
-        }
+	public MutableAnnotationInvocationHandler(Class<? extends Annotation> annoType) {
+		// pre-populate the attributes hash will all the names
+		// and default values of the attributes defined in 'annoType'
+		Method[] attribs = annoType.getDeclaredMethods();
+		for (Method attrib : attribs) {
+			this.attributes.put(attrib.getName(), getDefaultValue(annoType, attrib.getName()));
+			this.attributeTypes.put(attrib.getName(), getAttributeType(annoType, attrib.getName()));
+		}
 
-        this.annoType = annoType;
-    }
+		this.annoType = annoType;
+	}
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Assert.isInstanceOf(Annotation.class, proxy);
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		Assert.isInstanceOf(Annotation.class, proxy);
 
-        String methodName = method.getName();
+		String methodName = method.getName();
 
-        // first -> check to see if this method is an attribute on our annotation
-        if(attributes.containsKey(methodName))
-            return attributes.get(methodName);
-
-
-        // second -> is it a method from java.lang.annotation.Annotation?
-        if(methodName.equals("annotationType"))
-            return annoType;
+		// first -> check to see if this method is an attribute on our annotation
+		if (attributes.containsKey(methodName))
+			return attributes.get(methodName);
 
 
-        // third -> is it a method from java.lang.Object?
-        if(methodName.equals("toString"))
-            return format("@%s(%s)", annoType.getName(), getAttribs());
-
-        if(methodName.equals("equals"))
-            return isEqualTo(proxy, args[0]);
-
-        if(methodName.equals("hashCode"))
-            return calculateHashCode(proxy);
+		// second -> is it a method from java.lang.annotation.Annotation?
+		if (methodName.equals("annotationType"))
+			return annoType;
 
 
-        // finally -> is it a method specified by MutableAnno?
-        if(methodName.equals("setAttributeValue")) {
-            attributes.put((String)args[0], args[1]);
-            return null; // setAttributeValue has a 'void' return type
-        }
+		// third -> is it a method from java.lang.Object?
+		if (methodName.equals("toString"))
+			return format("@%s(%s)", annoType.getName(), getAttribs());
 
-        if(methodName.equals("getAttributeType"))
-            return attributeTypes.get(args[0]);
+		if (methodName.equals("equals"))
+			return isEqualTo(proxy, args[0]);
 
-        throw new UnsupportedOperationException("this proxy does not support method: " + methodName);
-    }
+		if (methodName.equals("hashCode"))
+			return calculateHashCode(proxy);
 
-    /**
-     * Conforms to the hashCode() specification for Annotation.
-     *
-     * @see  Annotation#hashCode()
-     */
-    private Object calculateHashCode(Object proxy) {
-        int sum = 0;
 
-        for (String attribName : attributes.keySet()) {
-            Object attribValue = attributes.get(attribName);
+		// finally -> is it a method specified by MutableAnno?
+		if (methodName.equals("setAttributeValue")) {
+			attributes.put((String) args[0], args[1]);
+			return null; // setAttributeValue has a 'void' return type
+		}
 
-            final int attribNameHashCode = attribName.hashCode();
-            final int attribValueHashCode;
+		if (methodName.equals("getAttributeType"))
+			return attributeTypes.get(args[0]);
 
-            if (attribValue == null)
-                // memberValue may be null when a mutable annotation is being added to a collection
-                // and before it has actually been visited (and populated) by MutableAnnotationVisitor
-                attribValueHashCode = 0;
-            else if (attribValue.getClass().isArray())
-                attribValueHashCode = Arrays.hashCode((Object[]) attribValue);
-            else
-                attribValueHashCode = attribValue.hashCode();
+		throw new UnsupportedOperationException("this proxy does not support method: " + methodName);
+	}
 
-            sum += (127 * attribNameHashCode) ^ attribValueHashCode;
-        }
+	/**
+	 * Conforms to the hashCode() specification for Annotation.
+	 * 
+	 * @see Annotation#hashCode()
+	 */
+	private Object calculateHashCode(Object proxy) {
+		int sum = 0;
 
-        return sum;
-    }
+		for (String attribName : attributes.keySet()) {
+			Object attribValue = attributes.get(attribName);
 
-    /**
-     * Compares <var>proxy</var> object and <var>other</var> object by comparing the return values
-     * of the methods specified by their common {@link Annotation} ancestry.
-     * <p/>
-     * <var>other</var> must be the same type as or a subtype of <var>proxy</var>.
-     * Will return false otherwise.
-     * <p/>
-     * Eagerly returns true if {@code proxy} == <var>other</var></p>
-     * <p/>
-     * Conforms strictly to the equals() specification for Annotation</p>
-     *
-     * @see  Annotation#equals(Object)
-     */
-    private Object isEqualTo(Object proxy, Object other) {
-        if (proxy == other)
-            return true;
+			final int attribNameHashCode = attribName.hashCode();
+			final int attribValueHashCode;
 
-        if (other == null)
-            return false;
+			if (attribValue == null)
+				// memberValue may be null when a mutable annotation is being added to a
+				// collection
+				// and before it has actually been visited (and populated) by
+				// MutableAnnotationVisitor
+				attribValueHashCode = 0;
+			else if (attribValue.getClass().isArray())
+				attribValueHashCode = Arrays.hashCode((Object[]) attribValue);
+			else
+				attribValueHashCode = attribValue.hashCode();
 
-        if(!annoType.isAssignableFrom(other.getClass()))
-            return false;
+			sum += (127 * attribNameHashCode) ^ attribValueHashCode;
+		}
 
-        for (String attribName : attributes.keySet()) {
-            Object thisVal;
-            Object thatVal;
+		return sum;
+	}
 
-            try {
-                thisVal = attributes.get(attribName);
-                thatVal = other.getClass().getDeclaredMethod(attribName).invoke(other);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+	/**
+	 * Compares <var>proxy</var> object and <var>other</var> object by comparing the return
+	 * values of the methods specified by their common {@link Annotation} ancestry.
+	 * <p/>
+	 * <var>other</var> must be the same type as or a subtype of <var>proxy</var>. Will
+	 * return false otherwise.
+	 * <p/>
+	 * Eagerly returns true if {@code proxy} == <var>other</var>
+	 * </p>
+	 * <p/>
+	 * Conforms strictly to the equals() specification for Annotation
+	 * </p>
+	 * 
+	 * @see Annotation#equals(Object)
+	 */
+	private Object isEqualTo(Object proxy, Object other) {
+		if (proxy == other)
+			return true;
 
-            if ((thisVal == null) && (thatVal != null))
-                return false;
+		if (other == null)
+			return false;
 
-            if ((thatVal == null) && (thisVal != null))
-                return false;
+		if (!annoType.isAssignableFrom(other.getClass()))
+			return false;
 
-            if (thatVal.getClass().isArray()) {
-                if (!Arrays.equals((Object[]) thatVal, (Object[]) thisVal)) {
-                    return false;
-                }
-            } else if (thisVal instanceof Double) {
-                if (!Double.valueOf((Double) thisVal).equals(Double.valueOf((Double) thatVal)))
-                    return false;
-            } else if (thisVal instanceof Float) {
-                if (!Float.valueOf((Float) thisVal).equals(Float.valueOf((Float) thatVal)))
-                    return false;
-            } else if (!thisVal.equals(thatVal)) {
-                return false;
-            }
-        }
+		for (String attribName : attributes.keySet()) {
+			Object thisVal;
+			Object thatVal;
 
-        return true;
-    }
+			try {
+				thisVal = attributes.get(attribName);
+				thatVal = other.getClass().getDeclaredMethod(attribName).invoke(other);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
 
-    private String getAttribs() {
-        ArrayList<String> attribs = new ArrayList<String>();
+			if ((thisVal == null) && (thatVal != null))
+				return false;
 
-        for (String attribName : attributes.keySet())
-            attribs.add(format("%s=%s", attribName, attributes.get(attribName)));
+			if ((thatVal == null) && (thisVal != null))
+				return false;
 
-        return StringUtils.collectionToDelimitedString(attribs, ", ");
-    }
-    
-    /**
-     * Retrieve the type of the given annotation attribute.
-     */
-    private static Class<?> getAttributeType(Class<? extends Annotation> annotationType, String attributeName) {
-        Method method = null;
-        
-        try {
-            method = annotationType.getDeclaredMethod(attributeName);
-        }
-        catch (Exception ex) {
-            ReflectionUtils.handleReflectionException(ex);
-        }
-        
-        return method.getReturnType();
-    }
+			if (thatVal.getClass().isArray()) {
+				if (!Arrays.equals((Object[]) thatVal, (Object[]) thisVal)) {
+					return false;
+				}
+			} else if (thisVal instanceof Double) {
+				if (!Double.valueOf((Double) thisVal).equals(Double.valueOf((Double) thatVal)))
+					return false;
+			} else if (thisVal instanceof Float) {
+				if (!Float.valueOf((Float) thisVal).equals(Float.valueOf((Float) thatVal)))
+					return false;
+			} else if (!thisVal.equals(thatVal)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private String getAttribs() {
+		ArrayList<String> attribs = new ArrayList<String>();
+
+		for (String attribName : attributes.keySet())
+			attribs.add(format("%s=%s", attribName, attributes.get(attribName)));
+
+		return StringUtils.collectionToDelimitedString(attribs, ", ");
+	}
+
+	/**
+	 * Retrieve the type of the given annotation attribute.
+	 */
+	private static Class<?> getAttributeType(Class<? extends Annotation> annotationType, String attributeName) {
+		Method method = null;
+
+		try {
+			method = annotationType.getDeclaredMethod(attributeName);
+		} catch (Exception ex) {
+			ReflectionUtils.handleReflectionException(ex);
+		}
+
+		return method.getReturnType();
+	}
 
 }
