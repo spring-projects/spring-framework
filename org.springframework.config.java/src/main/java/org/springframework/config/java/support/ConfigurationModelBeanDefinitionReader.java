@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.factory.support;
+package org.springframework.config.java.support;
 
 
 import static java.lang.String.*;
@@ -55,8 +55,7 @@ import org.springframework.util.Assert;
  *
  * @author  Chris Beams
  */
-// TODO: Unit test
-public class ConfigurationModelBeanDefinitionReader {
+class ConfigurationModelBeanDefinitionReader {
 
     private static final Log log = LogFactory.getLog(ConfigurationModelBeanDefinitionReader.class);
 

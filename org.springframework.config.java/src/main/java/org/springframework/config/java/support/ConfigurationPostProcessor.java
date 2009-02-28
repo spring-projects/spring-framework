@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.process;
+package org.springframework.config.java.support;
 
 import static org.springframework.config.java.Util.*;
 
@@ -33,18 +33,29 @@ import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.MalformedJavaConfigurationException;
 import org.springframework.config.java.UsageError;
 import org.springframework.config.java.internal.enhancement.ConfigurationEnhancer;
-import org.springframework.config.java.internal.factory.support.ConfigurationClassBeanDefinitionReader;
-import org.springframework.config.java.internal.factory.support.ConfigurationModelBeanDefinitionReader;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
-import org.springframework.config.java.process.ConfigurationPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 
 
-/** TODO: JAVADOC */
-public class InternalConfigurationPostProcessor implements BeanFactoryPostProcessor {
+/**
+ * {@link BeanFactoryPostProcessor} used for bootstrapping {@link Configuration @Configuration}
+ * beans from Spring XML files.
+ */
+public class ConfigurationPostProcessor implements Ordered, BeanFactoryPostProcessor {
 
-    private static final Log logger = LogFactory.getLog(InternalConfigurationPostProcessor.class);
+    private static final Log logger = LogFactory.getLog(ConfigurationPostProcessor.class);
+    
+    
+    /**
+     * Returns the order in which this {@link BeanPostProcessor} will be executed.
+     * Returns {@link Ordered#HIGHEST_PRECEDENCE}.
+     */
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+
 
     /**
      * Searches <var>beanFactory</var> for any {@link Configuration} classes in order
@@ -141,8 +152,8 @@ public class InternalConfigurationPostProcessor implements BeanFactoryPostProces
      * Note: the classloading used within should not be problematic or interfere with tooling in any
      * way. BeanFactoryPostProcessing happens only during actual runtime processing via
      * {@link JavaConfigApplicationContext} or via XML using {@link ConfigurationPostProcessor}. In
-     * any case, tooling (Spring IDE) will use {@link ConfigurationClassBeanDefinitionReader}directly,
-     * thus never encountering this classloading. Should this become problematic, it would not be
+     * any case, tooling (Spring IDE) will hook in at a lower level than this class and
+     * thus never encounter this classloading. Should this become problematic, it would not be
      * too difficult to replace the following with ASM logic that traverses the class hierarchy in
      * order to find whether the class is directly or indirectly annotated with
      * {@link Configuration}.
