@@ -61,11 +61,11 @@ import org.springframework.web.util.UriTemplate;
  * <pre>
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42", "21");
  * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant is explands the template
+ * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template
  * based on variable name, and is therefore more useful when using many variables, or when a single variable is used
  * multiple times. For example:
  * <pre>
- * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", 42);
+ * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
  * </pre>
  * will perform a GET on {@code http://example.com/hotels/42/rooms/42}.
@@ -76,7 +76,7 @@ import org.springframework.web.util.UriTemplate;
  * bean property.
  *
  * <p>This template uses a {@link org.springframework.http.client.SimpleClientHttpRequestFactory} and a {@link
- * DefaultResponseErrorHandler} as default strategies for for creating HTTP connections or handling HTTP errors, respectively.
+ * DefaultResponseErrorHandler} as default strategies for creating HTTP connections or handling HTTP errors, respectively.
  * These defaults can be overridden through the {@link #setRequestFactory(ClientHttpRequestFactory) requestFactory} and
  * {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
