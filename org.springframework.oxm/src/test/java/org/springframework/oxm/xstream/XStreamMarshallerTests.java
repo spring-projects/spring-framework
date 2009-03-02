@@ -40,7 +40,7 @@ import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import static org.custommonkey.xmlunit.XMLAssert.*;
-import org.easymock.MockControl;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -49,6 +49,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
 import org.springframework.util.xml.StaxUtils;
@@ -62,15 +63,15 @@ public class XStreamMarshallerTests {
 
 	private XStreamMarshaller marshaller;
 
-	private AnnotatedFlight flight;
+	private Flight flight;
 
 	@Before
 	public void createMarshaller() throws Exception {
 		marshaller = new XStreamMarshaller();
 		Map<String, Class> aliases = new HashMap<String, Class>();
-		aliases.put("flight", AnnotatedFlight.class);
+		aliases.put("flight", Flight.class);
 		marshaller.setAliases(aliases);
-		flight = new AnnotatedFlight();
+		flight = new Flight();
 		flight.setFlightNumber(42L);
 	}
 
@@ -139,21 +140,19 @@ public class XStreamMarshallerTests {
 
 	@Test
 	public void marshalSaxResult() throws Exception {
-		MockControl handlerControl = MockControl.createStrictControl(ContentHandler.class);
-		handlerControl.setDefaultMatcher(MockControl.ALWAYS_MATCHER);
-		ContentHandler handlerMock = (ContentHandler) handlerControl.getMock();
+		ContentHandler handlerMock = createStrictMock(ContentHandler.class);
 		handlerMock.startDocument();
-		handlerMock.startElement("", "flight", "flight", null);
-		handlerMock.startElement("", "number", "number", null);
-		handlerMock.characters(new char[]{'4', '2'}, 0, 2);
-		handlerMock.endElement("", "number", "number");
+		handlerMock.startElement(eq(""), eq("flight"), eq("flight"), isA(Attributes.class));
+		handlerMock.startElement(eq(""), eq("flightNumber"), eq("flightNumber"), isA(Attributes.class));
+		handlerMock.characters(isA(char[].class), eq(0), eq(2));
+		handlerMock.endElement("", "flightNumber", "flightNumber");
 		handlerMock.endElement("", "flight", "flight");
 		handlerMock.endDocument();
 
-		handlerControl.replay();
+		replay(handlerMock);
 		SAXResult result = new SAXResult(handlerMock);
 		marshaller.marshal(flight, result);
-		handlerControl.verify();
+		verify(handlerMock);
 	}
 
 	@Test
@@ -208,28 +207,46 @@ public class XStreamMarshallerTests {
 
 	@Test
 	public void useAttributesForClassStringMap() throws Exception {
-		marshaller.setUseAttributeFor(Collections.singletonMap(AnnotatedFlight.class, "flightNumber"));
+		marshaller.setUseAttributeFor(Collections.singletonMap(Flight.class, "flightNumber"));
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
 		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
 
+
 	@Test
-	public void omitField() throws Exception {
-		marshaller.addOmittedField(AnnotatedFlight.class, "flightNumber");
+	@SuppressWarnings("unchecked")
+	public void omitFields() throws Exception {
+		Map omittedFieldsMap = Collections.singletonMap(Flight.class, "flightNumber");
+		marshaller.setOmittedFields(omittedFieldsMap);
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		assertXpathNotExists("/flight/flightNumber", writer.toString());
 	}
 
 	@Test
-	public void omitFields() throws Exception {
-		Map omittedFieldsMap = Collections.singletonMap(AnnotatedFlight.class, "flightNumber");
-		marshaller.setOmittedFields(omittedFieldsMap);
+	@SuppressWarnings("unchecked")
+	public void implicitCollections() throws Exception {
+		Flights flights = new Flights();
+		flights.getFlights().add(flight);
+		flights.getStrings().add("42");
+		
+		Map<String, Class> aliases = new HashMap<String, Class>();
+		aliases.put("flight", Flight.class);
+		aliases.put("flights", Flights.class);
+		marshaller.setAliases(aliases);
+
+		Map implicitCollections = Collections.singletonMap(Flights.class, "flights,strings");
+		marshaller.setImplicitCollections(implicitCollections);
+
 		Writer writer = new StringWriter();
-		marshaller.marshal(flight, new StreamResult(writer));
-		assertXpathNotExists("/flight/flightNumber", writer.toString());
+		marshaller.marshal(flights, new StreamResult(writer));
+		String result = writer.toString();
+		assertXpathNotExists("/flights/flights", result);
+		assertXpathExists("/flights/flight", result);
+		assertXpathNotExists("/flights/strings", result);
+		assertXpathExists("/flights/string", result);
 	}
 
 	@Test
@@ -239,18 +256,18 @@ public class XStreamMarshallerTests {
 		marshaller.marshal(flight, new StreamResult(writer));
 		assertEquals("Invalid result", "{\"flight\":{\"flightNumber\":42}}", writer.toString());
 		Object o = marshaller.unmarshal(new StreamSource(new StringReader(writer.toString())));
-		assertTrue("Unmarshalled object is not Flights", o instanceof AnnotatedFlight);
-		AnnotatedFlight unflight = (AnnotatedFlight) o;
+		assertTrue("Unmarshalled object is not Flights", o instanceof Flight);
+		Flight unflight = (Flight) o;
 		assertNotNull("Flight is null", unflight);
 		assertEquals("Number is invalid", 42L, unflight.getFlightNumber());
 	}
 
 	@Test
-	public void testMarshalStreamResultWriter() throws Exception {
-		marshaller.setAnnotatedClass(AnnotatedFlight.class);
+	public void testAnnotatedMarshalStreamResultWriter() throws Exception {
+		marshaller.setAnnotatedClass(Flight.class);
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
-		AnnotatedFlight flight = new AnnotatedFlight();
+		Flight flight = new Flight();
 		flight.setFlightNumber(42);
 		marshaller.marshal(flight, result);
 		String expected = "<flight><number>42</number></flight>";

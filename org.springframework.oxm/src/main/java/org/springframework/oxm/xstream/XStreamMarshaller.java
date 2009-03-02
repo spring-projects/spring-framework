@@ -103,12 +103,11 @@ public class XStreamMarshaller extends AbstractMarshaller {
 
 	private Class[] supportedClasses;
 
-
 	/**
 	 * Returns the XStream instance used by this marshaller.
 	 */
 	public final XStream getXStream() {
-		return this.xstream;
+		return xstream;
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 * @see XStream#NO_REFERENCES
 	 */
 	public void setMode(int mode) {
-		this.xstream.setMode(mode);
+		this.getXStream().setMode(mode);
 	}
 
 	/**
@@ -130,10 +129,10 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	public void setConverters(ConverterMatcher[] converters) {
 		for (int i = 0; i < converters.length; i++) {
 			if (converters[i] instanceof Converter) {
-				this.xstream.registerConverter((Converter) converters[i], i);
+				this.getXStream().registerConverter((Converter) converters[i], i);
 			}
 			else if (converters[i] instanceof SingleValueConverter) {
-				this.xstream.registerConverter((SingleValueConverter) converters[i], i);
+				this.getXStream().registerConverter((SingleValueConverter) converters[i], i);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid ConverterMatcher [" + converters[i] + "]");
@@ -146,17 +145,8 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 */
 	public void setAliases(Map<String, Class> aliases) {
 		for (Map.Entry<String, Class> entry : aliases.entrySet()) {
-			this.xstream.alias(entry.getKey(), entry.getValue());
+			this.getXStream().alias(entry.getKey(), entry.getValue());
 		}
-	}
-
-	/**
-	 * Add an alias for the given type.
-	 * @param name alias to be used for the type
-	 * @param type the type to be aliased
-	 */
-	public void addAlias(String name, Class type) {
-		this.xstream.alias(name, type);
 	}
 
 	/**
@@ -165,7 +155,7 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 */
 	public void setUseAttributeForTypes(Class[] types) {
 		for (Class type : types) {
-			this.xstream.useAttributeFor(type);
+			this.getXStream().useAttributeFor(type);
 		}
 	}
 
@@ -179,10 +169,10 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	public void setUseAttributeFor(Map<?, ?> attributes) {
 		for (Map.Entry<?, ?> entry : attributes.entrySet()) {
 			if (entry.getKey() instanceof String && entry.getValue() instanceof Class) {
-				this.xstream.useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+				this.getXStream().useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
 			}
 			else if (entry.getKey() instanceof Class && entry.getValue() instanceof String) {
-				this.xstream.useAttributeFor((Class) entry.getKey(), (String) entry.getValue());
+				this.getXStream().useAttributeFor((Class) entry.getKey(), (String) entry.getValue());
 			}
 			else {
 				throw new IllegalArgumentException("Invalid attribute key and value pair. " +
@@ -192,22 +182,17 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	}
 
 	/**
-	 * Set a implicit colletion/type map, consisting of implicit collection String keys
-	 * mapped to <code>Class</code> values.
-	 * @see XStream#addImplicitCollection(Class, String)
+	 * Specify implicit collection fields, as a Map consisting of <code>Class</code> instances
+	 * mapped to comma separated collection field names.
+	 *@see XStream#addImplicitCollection(Class, String)
 	 */
-	public void setImplicitCollection(Map<String, Class> implicitCollection) {
-		for (Map.Entry<String, Class> entry : implicitCollection.entrySet()) {
-			this.xstream.addImplicitCollection(entry.getValue(), entry.getKey());
+	public void setImplicitCollections(Map<Class<?>, String> implicitCollections) {
+		for (Map.Entry<Class<?>, String> entry : implicitCollections.entrySet()) {
+			String[] collectionFields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
+			for (String collectionField : collectionFields) {
+				this.getXStream().addImplicitCollection(entry.getKey(), collectionField);
+			}
 		}
-	}
-
-	/**
-	 * Add an implicit Collection for the given type.
-	 * @see XStream#addImplicitCollection(Class, String)
-	 */
-	public void addImplicitCollection(String name, Class type) {
-		this.xstream.addImplicitCollection(type, name);
 	}
 
 	/**
@@ -215,23 +200,13 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 * mapped to comma separated field names.
 	 * @see XStream#omitField(Class, String)
 	 */
-	public void setOmittedFields(Map<Class, String> omittedFields) {
-		for (Map.Entry<Class, String> entry : omittedFields.entrySet()) {
+	public void setOmittedFields(Map<Class<?>, String> omittedFields) {
+		for (Map.Entry<Class<?>, String> entry : omittedFields.entrySet()) {
 			String[] fields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
 			for (String field : fields) {
-				this.xstream.omitField(entry.getKey(), field);
+				this.getXStream().omitField(entry.getKey(), field);
 			}
 		}
-	}
-
-	/**
-	 * Add an omitted field for the given type.
-	 * @param type the type to be containing the field
-	 * @param fieldName field to omitt
-	 * @see XStream#omitField(Class, String)
-	 */
-	public void addOmittedField(Class type, String fieldName) {
-		this.xstream.omitField(type, fieldName);
 	}
 
 	/**
@@ -240,7 +215,7 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 */
 	public void setAnnotatedClass(Class<?> annotatedClass) {
 		Assert.notNull(annotatedClass, "'annotatedClass' must not be null");
-		this.xstream.processAnnotations(annotatedClass);
+		this.getXStream().processAnnotations(annotatedClass);
 	}
 
 	/**
@@ -249,7 +224,7 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 */
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "'annotatedClasses' must not be empty");
-		this.xstream.processAnnotations(annotatedClasses);
+		this.getXStream().processAnnotations(annotatedClasses);
 	}
 
 	/**
@@ -355,7 +330,7 @@ public class XStreamMarshaller extends AbstractMarshaller {
 	 */
 	private void marshal(Object graph, HierarchicalStreamWriter streamWriter) {
 		try {
-			this.xstream.marshal(graph, streamWriter);
+			this.getXStream().marshal(graph, streamWriter);
 		}
 		catch (Exception ex) {
 			throw convertXStreamException(ex, true);
@@ -421,7 +396,7 @@ public class XStreamMarshaller extends AbstractMarshaller {
 
 	private Object unmarshal(HierarchicalStreamReader streamReader) {
 		try {
-			return this.xstream.unmarshal(streamReader);
+			return this.getXStream().unmarshal(streamReader);
 		}
 		catch (Exception ex) {
 			throw convertXStreamException(ex, false);
@@ -454,5 +429,4 @@ public class XStreamMarshaller extends AbstractMarshaller {
 			return new UncategorizedMappingException("Unknown XStream exception", ex);
 		}
 	}
-
 }

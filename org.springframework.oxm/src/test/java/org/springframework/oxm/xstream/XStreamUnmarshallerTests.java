@@ -49,13 +49,13 @@ public class XStreamUnmarshallerTests {
 	public void creteUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
 		Map<String, Class> aliases = new HashMap<String, Class>();
-		aliases.put("flight", AnnotatedFlight.class);
+		aliases.put("flight", Flight.class);
 		unmarshaller.setAliases(aliases);
 	}
 
 	private void testFlight(Object o) {
-		assertTrue("Unmarshalled object is not Flights", o instanceof AnnotatedFlight);
-		AnnotatedFlight flight = (AnnotatedFlight) o;
+		assertTrue("Unmarshalled object is not Flights", o instanceof Flight);
+		Flight flight = (Flight) o;
 		assertNotNull("Flight is null", flight);
 		assertEquals("Number is invalid", 42L, flight.getFlightNumber());
 	}
