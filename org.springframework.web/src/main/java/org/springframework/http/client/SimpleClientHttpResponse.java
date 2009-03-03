@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-import org.springframework.util.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpResponse} implementation that uses standard J2SE facilities.
@@ -38,7 +38,7 @@ final class SimpleClientHttpResponse implements ClientHttpResponse {
 	private HttpHeaders headers;
 
 
-	public SimpleClientHttpResponse(HttpURLConnection connection) {
+	SimpleClientHttpResponse(HttpURLConnection connection) {
 		this.connection = connection;
 	}
 
