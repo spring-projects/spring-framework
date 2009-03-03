@@ -58,8 +58,9 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	private MessageType targetType = MessageType.BYTES;
 
 	/**
-	 * Construct a new <code>MarshallingMessageConverter</code> with no {@link Marshaller} set.
-	 * The marshaller must be set after construction by invoking {@link #setMarshaller(Marshaller)}.
+	 * Construct a new <code>MarshallingMessageConverter</code> with no {@link Marshaller} or {@link Unmarshaller} set.
+	 * The marshaller must be set after construction by invoking {@link #setMarshaller(Marshaller)} and
+	 * {@link #setUnmarshaller(Unmarshaller)} .
 	 */
 	public MarshallingMessageConverter() {
 	}
