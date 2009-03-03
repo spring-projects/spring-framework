@@ -35,6 +35,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriTemplate;
 
@@ -93,7 +94,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new FormHttpMessageConverter()};
+					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
