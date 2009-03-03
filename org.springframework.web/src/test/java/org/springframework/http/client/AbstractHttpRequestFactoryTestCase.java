@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Locale;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -37,9 +38,9 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
-import org.springframework.util.FileCopyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.FileCopyUtils;
 
 public abstract class AbstractHttpRequestFactoryTestCase {
 
@@ -53,6 +54,12 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		Context jettyContext = new Context(jettyServer, "/");
 		jettyContext.addServlet(new ServletHolder(new EchoServlet()), "/echo");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("GET")), "/methods/get");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("HEAD")), "/methods/head");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("POST")), "/methods/post");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
 		jettyServer.start();
 	}
 
@@ -104,8 +111,13 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/echo"), HttpMethod.POST);
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
-		request.execute();
-		FileCopyUtils.copy(body, request.getBody());
+		ClientHttpResponse response = request.execute();
+		try {
+			FileCopyUtils.copy(body, request.getBody());
+		}
+		finally {
+			response.close();
+		}
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -114,13 +126,40 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		request.getHeaders().add("MyHeader", "value");
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
-		request.execute();
-		request.getHeaders().add("MyHeader", "value");
+		ClientHttpResponse response = request.execute();
+		try {
+			request.getHeaders().add("MyHeader", "value");
+		}
+		finally {
+			response.close();
+		}
 	}
 
-	/**
-	 * Servlet that returns and error message for a given status code.
-	 */
+	@Test
+	public void httpMethods() throws Exception {
+		assertHttpMethod("get", HttpMethod.GET);
+		assertHttpMethod("head", HttpMethod.HEAD);
+		assertHttpMethod("post", HttpMethod.POST);
+		assertHttpMethod("put", HttpMethod.PUT);
+		assertHttpMethod("options", HttpMethod.OPTIONS);
+		assertHttpMethod("delete", HttpMethod.DELETE);
+	}
+
+	private void assertHttpMethod(String path, HttpMethod method) throws Exception {
+		ClientHttpResponse response = null;
+		try {
+			ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/methods/" + path), method);
+			response = request.execute();
+			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
+		}
+		finally {
+			if (response != null) {
+				response.close();
+			}
+		}
+	}
+
+	/** Servlet that returns and error message for a given status code. */
 	private static class ErrorServlet extends GenericServlet {
 
 		private final int sc;
@@ -132,6 +171,21 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		@Override
 		public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 			((HttpServletResponse) response).sendError(sc);
+		}
+	}
+
+	private static class MethodServlet extends GenericServlet {
+
+		private final String method;
+
+		private MethodServlet(String method) {
+			this.method = method;
+		}
+
+		@Override
+		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+			HttpServletRequest httpReq = (HttpServletRequest) req;
+			assertEquals("Invalid HTTP method", method, httpReq.getMethod());
 		}
 	}
 

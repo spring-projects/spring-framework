@@ -21,8 +21,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLConnection;
 
-import org.springframework.util.Assert;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
@@ -51,7 +51,11 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 */
 	protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
 		connection.setDoInput(true);
-		connection.setDoOutput(true);
+		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod)) {
+			connection.setDoOutput(true);
+		} else {
+			connection.setDoOutput(false);
+		}
 		connection.setRequestMethod(httpMethod);
 	}
 

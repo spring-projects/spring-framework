@@ -28,8 +28,6 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.AbstractClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
@@ -48,7 +46,7 @@ final class CommonsClientHttpRequest extends AbstractClientHttpRequest {
 	private final HttpMethodBase httpMethod;
 
 
-	public CommonsClientHttpRequest(HttpClient httpClient, HttpMethodBase httpMethod) {
+	CommonsClientHttpRequest(HttpClient httpClient, HttpMethodBase httpMethod) {
 		this.httpClient = httpClient;
 		this.httpMethod = httpMethod;
 	}

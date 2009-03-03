@@ -21,9 +21,9 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.util.FileCopyUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * {@link ClientHttpRequest} implementation that uses standard J2SE facilities to execute requests.
@@ -38,7 +38,7 @@ final class SimpleClientHttpRequest extends AbstractClientHttpRequest {
 	private final HttpURLConnection connection;
 
 
-	public SimpleClientHttpRequest(HttpURLConnection connection) {
+	SimpleClientHttpRequest(HttpURLConnection connection) {
 		this.connection = connection;
 	}
 
@@ -56,7 +56,9 @@ final class SimpleClientHttpRequest extends AbstractClientHttpRequest {
 			}
 		}
 		this.connection.connect();
-		FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
+		if (bufferedOutput.length > 0) {
+			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
+		}
 		return new SimpleClientHttpResponse(this.connection);
 	}
 
