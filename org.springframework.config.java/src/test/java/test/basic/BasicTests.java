@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
+import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.Scopes;
 import org.springframework.config.java.ext.Bean;
 import org.springframework.config.java.support.ConfigurationPostProcessor;
@@ -100,4 +101,63 @@ public class BasicTests {
 			return new TestBean("bar");
 		}
 	}
+
+
+	@Test
+	public void legalBeanOverriding() {
+		{
+			BeanFactory factory = initBeanFactory(ConfigWithBeanThatAllowsOverriding.class, ConfigWithBeanOverride.class);
+
+			TestBean testBean = factory.getBean("testBean", TestBean.class);
+
+			assertThat(testBean.getName(), equalTo("overridden"));
+		}
+
+		// now try it the other way around - order matters!
+
+		{
+			BeanFactory factory = initBeanFactory(ConfigWithBeanOverride.class, ConfigWithBeanThatAllowsOverriding.class);
+
+			TestBean testBean = factory.getBean("testBean", TestBean.class);
+
+			assertThat(testBean.getName(), equalTo("original"));
+		}
+
+	}
+	
+	@Test(expected=MalformedConfigurationException.class)
+	public void illegalBeanOverriding() {
+		initBeanFactory(ConfigWithBeanThatDisallowsOverriding.class, ConfigWithBeanOverride.class);
+	}
+	
+	@Test
+	public void illegalBeanOverriding2() {
+		// should be okay when the class that disallows overriding is the one doing the overriding
+		initBeanFactory(ConfigWithBeanOverride.class, ConfigWithBeanThatDisallowsOverriding.class);
+	}
+
+	@Configuration
+	static class ConfigWithBeanThatAllowsOverriding {
+		@Bean
+		public TestBean testBean() {
+			return new TestBean("original");
+		}
+	}
+	
+	@Configuration
+	static class ConfigWithBeanThatDisallowsOverriding {
+		@Bean(allowOverriding = false)
+		public TestBean testBean() {
+			return new TestBean("original");
+		}
+	}
+
+	@Configuration
+	static class ConfigWithBeanOverride {
+		@Bean
+		public TestBean testBean() {
+			return new TestBean("overridden");
+		}
+	}
+	
 }

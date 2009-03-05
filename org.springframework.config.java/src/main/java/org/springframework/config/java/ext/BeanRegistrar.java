@@ -14,18 +14,17 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.config.java.BeanDefinitionRegistrar;
+import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.MalformedConfigurationException;
-import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.UsageError;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.Assert;
 
 
 // TODO: SJC-242 document BeanHandler
 // TODO: SJC-242 make package-private
-class BeanRegistrar implements BeanDefinitionRegistrar {
+public class BeanRegistrar implements BeanDefinitionRegistrar {
 
 	private static final Log logger = LogFactory.getLog(BeanRegistrar.class);
 
@@ -38,7 +37,7 @@ class BeanRegistrar implements BeanDefinitionRegistrar {
 	}
 
 	// TODO: SJC-242 method too long
-	public void register(ModelMethod method, BeanDefinitionRegistry registry) {
+	public void register(BeanMethod method, BeanDefinitionRegistry registry) {
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition();
 
 		ConfigurationClass configClass = method.getDeclaringClass();
@@ -171,7 +170,10 @@ class BeanRegistrar implements BeanDefinitionRegistrar {
 	}
 
 	private BeanDefinition getBeanDefinitionIncludingAncestry(String beanName, BeanDefinitionRegistry registry) {
-		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, registry);
+		if(!(registry instanceof ConfigurableListableBeanFactory)) {
+			return registry.getBeanDefinition(beanName);
+		}
+		
 		ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) registry;
 
 		do {

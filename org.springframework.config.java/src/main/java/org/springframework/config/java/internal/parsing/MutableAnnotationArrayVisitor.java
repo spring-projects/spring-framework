@@ -36,11 +36,14 @@ class MutableAnnotationArrayVisitor extends AnnotationAdapter {
 	private final MutableAnnotation mutableAnno;
 	private final String attribName;
 
-	public MutableAnnotationArrayVisitor(MutableAnnotation mutableAnno, String attribName) {
+	private final ClassLoader classLoader;
+
+	public MutableAnnotationArrayVisitor(MutableAnnotation mutableAnno, String attribName, ClassLoader classLoader) {
 		super(AsmUtils.EMPTY_VISITOR);
 
 		this.mutableAnno = mutableAnno;
 		this.attribName = attribName;
+		this.classLoader = classLoader;
 	}
 
 	@Override
@@ -51,14 +54,14 @@ class MutableAnnotationArrayVisitor extends AnnotationAdapter {
 	@Override
 	public AnnotationVisitor visitAnnotation(String na, String annoTypeDesc) {
 		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
-		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
+		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
 
 		if (annoType == null)
 			return super.visitAnnotation(na, annoTypeDesc);
 
 		Annotation anno = createMutableAnnotation(annoType);
 		values.add(anno);
-		return new MutableAnnotationVisitor(anno);
+		return new MutableAnnotationVisitor(anno, classLoader);
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 
 
 /** TODO: JAVADOC */
-public final class ModelMethod implements Validatable {
+public final class BeanMethod implements Validatable {
 
 	private final String name;
 	private final int modifiers;
@@ -42,7 +42,7 @@ public final class ModelMethod implements Validatable {
 	private transient FactoryMethod factoryAnno;
 	private transient final List<Validator> validators = new ArrayList<Validator>();
 
-	public ModelMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
+	public BeanMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
 		Assert.hasText(name);
 		this.name = name;
 
@@ -109,7 +109,7 @@ public final class ModelMethod implements Validatable {
 	/**
 	 * Sets up bi-directional relationship between this method and its declaring class.
 	 * 
-	 * @see ConfigurationClass#addMethod(ModelMethod)
+	 * @see ConfigurationClass#addMethod(BeanMethod)
 	 */
 	public void setDeclaringClass(ConfigurationClass declaringClass) {
 		this.declaringClass = declaringClass;
@@ -132,8 +132,8 @@ public final class ModelMethod implements Validatable {
 	}
 
 	public void validate(List<UsageError> errors) {
-		for (Validator validator : validators)
-			validator.validate(this, errors);
+//		for (Validator validator : validators)
+//			validator.validate(this, errors);
 
 		if (Modifier.isPrivate(getModifiers()))
 			errors.add(new PrivateMethodError());
@@ -190,7 +190,7 @@ public final class ModelMethod implements Validatable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ModelMethod other = (ModelMethod) obj;
+		BeanMethod other = (BeanMethod) obj;
 		if (annotations == null) {
 			if (other.annotations != null)
 				return false;

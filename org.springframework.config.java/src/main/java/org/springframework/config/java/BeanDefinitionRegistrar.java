@@ -13,7 +13,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * declare a no-arg constructor.
  * 
  * @see FactoryMethod
- * @see ModelMethod
+ * @see BeanMethod
  * 
  * @author Chris Beams
  */
@@ -31,6 +31,6 @@ public interface BeanDefinitionRegistrar {
 	/**
 	 * Registers any bean definitions for <var>method</var> with <var>registry</var>.
 	 */
-	void register(ModelMethod method, BeanDefinitionRegistry registry);
+	void register(BeanMethod method, BeanDefinitionRegistry registry);
 
 }

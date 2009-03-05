@@ -52,11 +52,13 @@ class ConfigurationClassVisitor extends ClassAdapter {
 	private final HashMap<String, ConfigurationClass> innerClasses = new HashMap<String, ConfigurationClass>();
 
 	private boolean processInnerClasses = true;
+	private final ClassLoader classLoader;
 
-	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model) {
+	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model, ClassLoader classLoader) {
 		super(AsmUtils.EMPTY_VISITOR);
 		this.configClass = configClass;
 		this.model = model;
+		this.classLoader = classLoader;
 	}
 
 	public void setProcessInnerClasses(boolean processInnerClasses) {
@@ -89,9 +91,9 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		if (OBJECT_DESC.equals(superTypeDesc))
 			return;
 
-		ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model);
+		ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model, classLoader);
 
-		ClassReader reader = AsmUtils.newClassReader(superTypeDesc);
+		ClassReader reader = AsmUtils.newClassReader(superTypeDesc, classLoader);
 		reader.accept(visitor, false);
 	}
 
@@ -113,7 +115,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		if (Configuration.class.getName().equals(annoTypeName)) {
 			Configuration mutableConfiguration = createMutableAnnotation(Configuration.class);
 			configClass.setMetadata(mutableConfiguration);
-			return new MutableAnnotationVisitor(mutableConfiguration);
+			return new MutableAnnotationVisitor(mutableConfiguration, classLoader);
 		}
 
 		// TODO: re-enable for @Import support
@@ -131,39 +133,41 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		// -------------------------------------
 		// Detect @Plugin annotations
 		// -------------------------------------
-		PluginAnnotationDetectingClassVisitor classVisitor = new PluginAnnotationDetectingClassVisitor();
+		PluginAnnotationDetectingClassVisitor classVisitor = new PluginAnnotationDetectingClassVisitor(classLoader);
 
 		String className = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
-		ClassReader reader = AsmUtils.newClassReader(resourcePath);
+		ClassReader reader = AsmUtils.newClassReader(resourcePath, classLoader);
 		reader.accept(classVisitor, false);
 
 		if (!classVisitor.hasPluginAnnotation())
 			return super.visitAnnotation(annoTypeDesc, visible);
 
-		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
+		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
 
 		if (annoType == null)
 			return super.visitAnnotation(annoTypeDesc, visible);
 
 		Annotation pluginAnno = createMutableAnnotation(annoType);
 		configClass.addPluginAnnotation(pluginAnno);
-		return new MutableAnnotationVisitor(pluginAnno);
+		return new MutableAnnotationVisitor(pluginAnno, classLoader);
 	}
 
 	private static class PluginAnnotationDetectingClassVisitor extends ClassAdapter {
 		private boolean hasPluginAnnotation = false;
 		private final Extension pluginAnnotation = createMutableAnnotation(Extension.class);
+		private final ClassLoader classLoader;
 
-		public PluginAnnotationDetectingClassVisitor() {
+		public PluginAnnotationDetectingClassVisitor(ClassLoader classLoader) {
 			super(AsmUtils.EMPTY_VISITOR);
+			this.classLoader = classLoader;
 		}
 
 		@Override
 		public AnnotationVisitor visitAnnotation(String typeDesc, boolean arg1) {
 			if (Extension.class.getName().equals(AsmUtils.convertTypeDescriptorToClassName(typeDesc))) {
 				hasPluginAnnotation = true;
-				return new MutableAnnotationVisitor(pluginAnnotation);
+				return new MutableAnnotationVisitor(pluginAnnotation, classLoader);
 			}
 			return super.visitAnnotation(typeDesc, arg1);
 		}
@@ -185,7 +189,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 	public MethodVisitor visitMethod(int modifiers, String methodName, String methodDescriptor, String arg3,
 	        String[] arg4) {
 
-		return new ConfigurationClassMethodVisitor(configClass, methodName, methodDescriptor, modifiers);
+		return new ConfigurationClassMethodVisitor(configClass, methodName, methodDescriptor, modifiers, classLoader);
 	}
 
 	/**
@@ -215,11 +219,11 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 		ConfigurationClass innerConfigClass = new ConfigurationClass();
 
-		ConfigurationClassVisitor ccVisitor = new ConfigurationClassVisitor(innerConfigClass,
-		        new ConfigurationModel());
+		ConfigurationClassVisitor ccVisitor =
+			new ConfigurationClassVisitor(innerConfigClass, new ConfigurationModel(), classLoader);
 		ccVisitor.setProcessInnerClasses(false);
 
-		ClassReader reader = AsmUtils.newClassReader(name);
+		ClassReader reader = AsmUtils.newClassReader(name, classLoader);
 		reader.accept(ccVisitor, false);
 
 		if (innerClasses.containsKey(outerName))

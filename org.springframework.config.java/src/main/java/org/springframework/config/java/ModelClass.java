@@ -98,6 +98,7 @@ public class ModelClass implements BeanMetadataElement {
 	 * Returns a resource path-formatted representation of the .java file that declares this
 	 * class
 	 */
+	// TODO: return type should be Object here.  Spring IDE will return a JDT representation...
 	public String getSource() {
 		return source;
 	}

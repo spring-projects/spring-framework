@@ -94,7 +94,7 @@ public final class ConfigurationModel implements Validatable {
 	 * <var>errors</var>.
 	 * 
 	 * @see ConfigurationClass#validate(java.util.List)
-	 * @see ModelMethod#validate(java.util.List)
+	 * @see BeanMethod#validate(java.util.List)
 	 * @see Validator
 	 * @see UsageError
 	 */
@@ -107,7 +107,7 @@ public final class ConfigurationModel implements Validatable {
 		// depending on where they are registered (with the model, the class, or the method)
 		// they will be called directly or indirectly below
 		for (ConfigurationClass configClass : getAllConfigurationClasses()) {
-			for (ModelMethod method : configClass.getMethods()) {
+			for (BeanMethod method : configClass.getMethods()) {
 				for (Validator validator : method.getValidators()) {
 					if (validator.supports(method))
 						method.registerValidator(validator);

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.config.java.ext.Bean;
 import org.springframework.util.Assert;
 
 import sun.security.x509.Extension;
@@ -55,7 +56,7 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 
 	private Configuration metadata;
 
-	private HashSet<ModelMethod> methods = new HashSet<ModelMethod>();
+	private HashSet<BeanMethod> methods = new HashSet<BeanMethod>();
 
 	private HashSet<Annotation> pluginAnnotations = new HashSet<Annotation>();
 
@@ -112,7 +113,7 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 		setModifiers(modifiers);
 	}
 
-	public ConfigurationClass addMethod(ModelMethod method) {
+	public ConfigurationClass addMethod(BeanMethod method) {
 		method.setDeclaringClass(this);
 		methods.add(method);
 		return this;
@@ -127,7 +128,7 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 		return this;
 	}
 
-	public Set<ModelMethod> getMethods() {
+	public Set<BeanMethod> getMethods() {
 		return methods;
 	}
 
@@ -184,7 +185,7 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 		if (Modifier.isFinal(modifiers))
 			errors.add(new FinalConfigurationError());
 
-		for (ModelMethod method : methods)
+		for (BeanMethod method : methods)
 			method.validate(errors);
 	}
 
@@ -299,7 +300,7 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 	 */
 	public class IllegalBeanOverrideError extends UsageError {
 		private final ConfigurationClass authoritativeClass;
-		private final ModelMethod finalMethodInQuestion;
+		private final BeanMethod finalMethodInQuestion;
 
 		/**
 		 * Creates a new IllegalBeanOverrideError object.
@@ -310,7 +311,7 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 		 * @param finalMethodInQuestion the method that has been marked
 		 *        'allowOverriding=false'
 		 */
-		public IllegalBeanOverrideError(ConfigurationClass violatingClass, ModelMethod finalMethodInQuestion) {
+		public IllegalBeanOverrideError(ConfigurationClass violatingClass, BeanMethod finalMethodInQuestion) {
 			super(violatingClass, -1);
 			this.authoritativeClass = ConfigurationClass.this;
 			this.finalMethodInQuestion = finalMethodInQuestion;
@@ -329,9 +330,9 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 		return getMethod(methodName) != null;
 	}
 
-	public ModelMethod getMethod(String methodName) {
+	public BeanMethod getMethod(String methodName) {
 
-		for (ModelMethod method : methods)
+		for (BeanMethod method : methods)
 			if (methodName.equals(method.getName()))
 				return method;
 

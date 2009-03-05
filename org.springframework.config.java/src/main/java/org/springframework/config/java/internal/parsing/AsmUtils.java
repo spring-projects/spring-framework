@@ -97,8 +97,8 @@ class AsmUtils {
 	 *         classpath
 	 * @throws RuntimeException if an IOException occurs when creating the new ClassReader
 	 */
-	public static ClassReader newClassReader(String pathToClass) {
-		InputStream is = Util.getClassAsStream(pathToClass);
+	public static ClassReader newClassReader(String pathToClass, ClassLoader classLoader) {
+		InputStream is = Util.getClassAsStream(pathToClass, classLoader);
 		return newClassReader(is);
 	}
 

@@ -37,6 +37,8 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 
 	protected final MutableAnnotation mutableAnno;
 
+	private final ClassLoader classLoader;
+
 	/**
 	 * Creates a new {@link MutableAnnotationVisitor} instance that will populate the the
 	 * attributes of the given <var>mutableAnno</var>. Accepts {@link Annotation} instead of
@@ -49,13 +51,14 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 	 * 
 	 * @see MutableAnnotationUtils#createMutableAnnotation(Class)
 	 */
-	public MutableAnnotationVisitor(Annotation mutableAnno) {
+	public MutableAnnotationVisitor(Annotation mutableAnno, ClassLoader classLoader) {
 		Assert.isInstanceOf(MutableAnnotation.class, mutableAnno, "annotation must be mutable");
 		this.mutableAnno = (MutableAnnotation) mutableAnno;
+		this.classLoader = classLoader;
 	}
 
 	public AnnotationVisitor visitArray(final String attribName) {
-		return new MutableAnnotationArrayVisitor(mutableAnno, attribName);
+		return new MutableAnnotationArrayVisitor(mutableAnno, attribName, classLoader);
 	}
 
 	public void visit(String attribName, Object attribValue) {
@@ -65,7 +68,7 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 			// the attribute type is Class -> load it and set it.
 			String fqClassName = ((Type) attribValue).getClassName();
 
-			Class<?> classVal = loadToolingSafeClass(fqClassName);
+			Class<?> classVal = loadToolingSafeClass(fqClassName, classLoader);
 
 			if (classVal == null)
 				return;
@@ -82,7 +85,7 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 	public void visitEnum(String attribName, String enumTypeDescriptor, String strEnumValue) {
 		String enumClassName = AsmUtils.convertTypeDescriptorToClassName(enumTypeDescriptor);
 
-		Class<? extends Enum> enumClass = loadToolingSafeClass(enumClassName);
+		Class<? extends Enum> enumClass = loadToolingSafeClass(enumClassName, classLoader);
 
 		if (enumClass == null)
 			return;
@@ -93,7 +96,7 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 
 	public AnnotationVisitor visitAnnotation(String attribName, String attribAnnoTypeDesc) {
 		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(attribAnnoTypeDesc);
-		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName);
+		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
 
 		if (annoType == null)
 			return AsmUtils.EMPTY_VISITOR.visitAnnotation(attribName, attribAnnoTypeDesc);
@@ -107,7 +110,7 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 			throw new RuntimeException(ex);
 		}
 
-		return new MutableAnnotationVisitor(anno);
+		return new MutableAnnotationVisitor(anno, classLoader);
 	}
 
 	public void visitEnd() {
