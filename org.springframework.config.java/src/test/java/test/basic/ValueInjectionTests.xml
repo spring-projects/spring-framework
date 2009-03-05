@@ -10,4 +10,8 @@
 	<bean class="org.springframework.config.java.support.ConfigurationPostProcessor"/>
 	
 	<bean class="test.basic.AutowiredConfigurationTests$ValueConfig"/>
+	
+<!--
+	<context:component-scan  base-package="test.basic.value"/>
+-->
 </beans>

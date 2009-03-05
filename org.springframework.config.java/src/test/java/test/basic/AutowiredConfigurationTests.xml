@@ -11,4 +11,5 @@
 	
 	<bean class="test.basic.AutowiredConfigurationTests$AutowiredConfig"/>
 	<bean class="test.basic.AutowiredConfigurationTests$ColorConfig"/>
+	
 </beans>

@@ -28,11 +28,12 @@ import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
+import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.FactoryMethod;
 import org.springframework.config.java.ModelClass;
-import org.springframework.config.java.ModelMethod;
+import org.springframework.config.java.ext.Bean;
 
 
 /**
@@ -49,6 +50,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	private final int modifiers;
 	private final ModelClass returnType;
 	private final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
+	private final ClassLoader classLoader;
 
 	private boolean isModelMethod = false;
 	private int lineNumber;
@@ -62,13 +64,14 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	 * @param modifiers modifiers for this method
 	 */
 	public ConfigurationClassMethodVisitor(ConfigurationClass configClass, String methodName,
-	        String methodDescriptor, int modifiers) {
+	        String methodDescriptor, int modifiers, ClassLoader classLoader) {
 		super(AsmUtils.EMPTY_VISITOR);
 
 		this.configClass = configClass;
 		this.methodName = methodName;
-		this.returnType = initReturnTypeFromMethodDescriptor(methodDescriptor);
+		this.classLoader = classLoader;
 		this.modifiers = modifiers;
+		this.returnType = initReturnTypeFromMethodDescriptor(methodDescriptor);
 	}
 
 	/**
@@ -79,7 +82,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
 		String annoClassName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
 
-		Class<? extends Annotation> annoClass = loadToolingSafeClass(annoClassName);
+		Class<? extends Annotation> annoClass = loadToolingSafeClass(annoClassName, classLoader);
 
 		if (annoClass == null)
 			return super.visitAnnotation(annoTypeDesc, visible);
@@ -88,7 +91,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 
 		annotations.add(annotation);
 
-		return new MutableAnnotationVisitor(annotation);
+		return new MutableAnnotationVisitor(annotation, classLoader);
 	}
 
 	/**
@@ -111,7 +114,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	@Override
 	public void visitEnd() {
 		for (Annotation anno : annotations) {
-			if (anno.annotationType().getAnnotation(FactoryMethod.class) != null) {
+			if (anno.annotationType().equals(Bean.class)) {
 				isModelMethod = true;
 				break;
 			}
@@ -121,7 +124,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 			return;
 
 		Annotation[] annoArray = annotations.toArray(new Annotation[] {});
-		ModelMethod method = new ModelMethod(methodName, modifiers, returnType, annoArray);
+		BeanMethod method = new BeanMethod(methodName, modifiers, returnType, annoArray);
 		method.setLineNumber(lineNumber);
 		configClass.addMethod(method);
 	}
@@ -130,11 +133,11 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	 * Determines return type from ASM <var>methodDescriptor</var> and determines whether
 	 * that type is an interface.
 	 */
-	private static ModelClass initReturnTypeFromMethodDescriptor(String methodDescriptor) {
+	private ModelClass initReturnTypeFromMethodDescriptor(String methodDescriptor) {
 		final ModelClass returnType = new ModelClass(getReturnTypeFromMethodDescriptor(methodDescriptor));
 
 		// detect whether the return type is an interface
-		newClassReader(convertClassNameToResourcePath(returnType.getName())).accept(
+		newClassReader(convertClassNameToResourcePath(returnType.getName()), classLoader).accept(
 		        new ClassAdapter(AsmUtils.EMPTY_VISITOR) {
 			        @Override
 			        public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {

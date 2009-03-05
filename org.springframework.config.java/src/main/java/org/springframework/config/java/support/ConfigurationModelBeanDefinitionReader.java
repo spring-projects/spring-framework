@@ -16,11 +16,6 @@
 package org.springframework.config.java.support;
 
 import static java.lang.String.*;
-import static org.springframework.config.java.Util.*;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,19 +23,16 @@ import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostPr
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.FactoryMethod;
-import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.plugin.Extension;
-import org.springframework.config.java.plugin.ExtensionAnnotationBeanDefinitionRegistrar;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
 
 
 /**
@@ -57,29 +49,28 @@ class ConfigurationModelBeanDefinitionReader {
 
 	private static final Log log = LogFactory.getLog(ConfigurationModelBeanDefinitionReader.class);
 
-	private final DefaultListableBeanFactory beanFactory;
+	private BeanDefinitionRegistry registry;
 
 
 	/**
 	 * Creates a new {@link ConfigurationModelBeanDefinitionReader} instance.
 	 */
-	public ConfigurationModelBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
+	public ConfigurationModelBeanDefinitionReader() {
 	}
 
 	/**
-	 * Reads {@code model}, registering bean definitions with {@link #beanFactory} based on
+	 * Reads {@code model}, registering bean definitions with {@link #registry} based on
 	 * its contents.
 	 * 
 	 * @return number of bean definitions generated
 	 */
-	public int loadBeanDefinitions(ConfigurationModel model) {
-		int initialBeanDefCount = beanFactory.getBeanDefinitionCount();
-
+	public BeanDefinitionRegistry loadBeanDefinitions(ConfigurationModel model) {
+		registry = new SimpleBeanDefinitionRegistry();
+		
 		for (ConfigurationClass configClass : model.getAllConfigurationClasses())
 			loadBeanDefinitionsForConfigurationClass(configClass);
 
-		return beanFactory.getBeanDefinitionCount() - initialBeanDefCount;
+		return registry;
 	}
 
 	/**
@@ -90,21 +81,23 @@ class ConfigurationModelBeanDefinitionReader {
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClass(configClass);
 
-		for (ModelMethod method : configClass.getMethods())
+		for (BeanMethod method : configClass.getMethods())
 			loadBeanDefinitionsForModelMethod(method);
 
-		Annotation[] pluginAnnotations = configClass.getPluginAnnotations();
-		Arrays.sort(pluginAnnotations, new PluginComparator());
-		for (Annotation annotation : pluginAnnotations)
-			loadBeanDefinitionsForExtensionAnnotation(annotation);
+//		Annotation[] pluginAnnotations = configClass.getPluginAnnotations();
+//		Arrays.sort(pluginAnnotations, new PluginComparator());
+//		for (Annotation annotation : pluginAnnotations)
+//			loadBeanDefinitionsForExtensionAnnotation(beanDefs, annotation);
 	}
 
 	/**
 	 * Registers the {@link Configuration} class itself as a bean definition.
+	 * @param beanDefs 
 	 */
 	private void doLoadBeanDefinitionForConfigurationClass(ConfigurationClass configClass) {
 		Configuration metadata = configClass.getMetadata();
 
+		// TODO: think about implications with annotation-config
 		if (metadata.checkRequired() == true) {
 			RootBeanDefinition requiredAnnotationPostProcessor = new RootBeanDefinition();
 			Class<?> beanClass = RequiredAnnotationBeanPostProcessor.class;
@@ -112,7 +105,7 @@ class ConfigurationModelBeanDefinitionReader {
 			requiredAnnotationPostProcessor.setBeanClass(beanClass);
 			requiredAnnotationPostProcessor
 			        .setResourceDescription("ensures @Required methods have been invoked");
-			beanFactory.registerBeanDefinition(beanName, requiredAnnotationPostProcessor);
+			registry.registerBeanDefinition(beanName, requiredAnnotationPostProcessor);
 		}
 
 		GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
@@ -122,13 +115,13 @@ class ConfigurationModelBeanDefinitionReader {
 
 		// consider the case where it's already been defined (probably in XML)
 		// and potentially has PropertyValues and ConstructorArgs)
-		if (beanFactory.containsBeanDefinition(configBeanName)) {
+		if (registry.containsBeanDefinition(configBeanName)) {
 			if (log.isInfoEnabled())
 				log.info(format(
 				        "Copying property and constructor arg values from existing bean definition for "
 				                + "@Configuration class %s to new bean definition", configBeanName));
-			AbstractBeanDefinition existing = (AbstractBeanDefinition) beanFactory
-			        .getBeanDefinition(configBeanName);
+			AbstractBeanDefinition existing =
+				(AbstractBeanDefinition) registry.getBeanDefinition(configBeanName);
 			configBeanDef.setPropertyValues(existing.getPropertyValues());
 			configBeanDef.setConstructorArgumentValues(existing.getConstructorArgumentValues());
 			configBeanDef.setResource(existing.getResource());
@@ -137,52 +130,52 @@ class ConfigurationModelBeanDefinitionReader {
 		if (log.isInfoEnabled())
 			log.info(format("Registering bean definition for @Configuration class %s", configBeanName));
 
-		beanFactory.registerBeanDefinition(configBeanName, configBeanDef);
+		registry.registerBeanDefinition(configBeanName, configBeanDef);
 	}
 
 
 	/**
-	 * Reads a particular {@link ModelMethod}, registering bean definitions with
-	 * {@link #beanFactory} based on its contents.
+	 * Reads a particular {@link BeanMethod}, registering bean definitions with
+	 * {@link #registry} based on its contents.
 	 * 
 	 * @see FactoryMethod
 	 */
-	private void loadBeanDefinitionsForModelMethod(ModelMethod method) {
-		method.getRegistrar().register(method, beanFactory);
+	private void loadBeanDefinitionsForModelMethod(BeanMethod method) {
+		method.getRegistrar().register(method, registry);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void loadBeanDefinitionsForExtensionAnnotation(Annotation anno) {
-		// ExtensionAnnotationUtils.getRegistrarFor(anno).registerBeanDefinitionsWith(beanFactory);
-		// there is a fixed assumption that in order for this annotation to have
-		// been registered in the first place, it must be meta-annotated with @Plugin
-		// assert this as an invariant now
-		Class<?> annoClass = anno.getClass();
-		Extension extensionAnno = AnnotationUtils.findAnnotation(annoClass, Extension.class);
-		Assert.isTrue(extensionAnno != null, format("%s annotation is not annotated as a @%s", annoClass,
-		        Extension.class.getSimpleName()));
-
-		Class<? extends ExtensionAnnotationBeanDefinitionRegistrar> extHandlerClass = extensionAnno.handler();
-
-		ExtensionAnnotationBeanDefinitionRegistrar extHandler = getInstance(extHandlerClass);
-		extHandler.handle(anno, beanFactory);
-	}
-
-	private static class PluginComparator implements Comparator<Annotation> {
-		public int compare(Annotation a1, Annotation a2) {
-			Integer i1 = getOrder(a1);
-			Integer i2 = getOrder(a2);
-			return i1.compareTo(i2);
-		}
-
-		private Integer getOrder(Annotation a) {
-			Extension plugin = a.annotationType().getAnnotation(Extension.class);
-			if (plugin == null)
-				throw new IllegalArgumentException("annotation was not annotated with @Plugin: "
-				        + a.annotationType());
-			return plugin.order();
-		}
-	}
+//	@SuppressWarnings("unchecked")
+//	private void loadBeanDefinitionsForExtensionAnnotation(Map<String, BeanDefinition> beanDefs, Annotation anno) {
+//		// ExtensionAnnotationUtils.getRegistrarFor(anno).registerBeanDefinitionsWith(beanFactory);
+//		// there is a fixed assumption that in order for this annotation to have
+//		// been registered in the first place, it must be meta-annotated with @Plugin
+//		// assert this as an invariant now
+//		Class<?> annoClass = anno.getClass();
+//		Extension extensionAnno = AnnotationUtils.findAnnotation(annoClass, Extension.class);
+//		Assert.isTrue(extensionAnno != null, format("%s annotation is not annotated as a @%s", annoClass,
+//		        Extension.class.getSimpleName()));
+//
+//		Class<? extends ExtensionAnnotationBeanDefinitionRegistrar> extHandlerClass = extensionAnno.handler();
+//
+//		ExtensionAnnotationBeanDefinitionRegistrar extHandler = getInstance(extHandlerClass);
+//		extHandler.handle(anno, beanFactory);
+//	}
+//
+//	private static class PluginComparator implements Comparator<Annotation> {
+//		public int compare(Annotation a1, Annotation a2) {
+//			Integer i1 = getOrder(a1);
+//			Integer i2 = getOrder(a2);
+//			return i1.compareTo(i2);
+//		}
+//
+//		private Integer getOrder(Annotation a) {
+//			Extension plugin = a.annotationType().getAnnotation(Extension.class);
+//			if (plugin == null)
+//				throw new IllegalArgumentException("annotation was not annotated with @Plugin: "
+//				        + a.annotationType());
+//			return plugin.order();
+//		}
+//	}
 
 
 }

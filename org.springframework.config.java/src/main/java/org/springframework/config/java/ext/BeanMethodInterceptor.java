@@ -33,7 +33,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * 
  * @author Chris Beams
  */
-class BeanMethodInterceptor extends AbstractMethodInterceptor {
+public class BeanMethodInterceptor extends AbstractMethodInterceptor {
 
 	/**
 	 * Enhances a {@link Bean @Bean} method to check the supplied BeanFactory for the

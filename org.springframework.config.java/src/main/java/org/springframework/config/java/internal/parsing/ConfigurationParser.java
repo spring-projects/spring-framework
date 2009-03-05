@@ -21,7 +21,7 @@ import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.Util;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ClassUtils;
 
 
 /**
@@ -44,6 +44,7 @@ public class ConfigurationParser {
 	 * Model to be populated during calls to {@link #parse(Object, String)}
 	 */
 	private final ConfigurationModel model;
+	private final ClassLoader classLoader;
 
 	/**
 	 * Creates a new parser instance that will be used to populate <var>model</var>.
@@ -51,8 +52,9 @@ public class ConfigurationParser {
 	 * @param model model to be populated by each successive call to
 	 *        {@link #parse(Object, String)}
 	 */
-	public ConfigurationParser(ConfigurationModel model) {
-		this.model = model;
+	public ConfigurationParser(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+		this.model = new ConfigurationModel();
 	}
 
 	/**
@@ -63,16 +65,21 @@ public class ConfigurationParser {
 	 * @param configurationId may be null, but if populated represents the bean id (assumes
 	 *        that this configuration class was configured via XML)
 	 */
-	public void parse(ClassPathResource resource, String configurationId) {
+	public void parse(String className, String configurationId) {
+		
+		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
 
-		String resourcePath = resource.getPath();
-		ClassReader configClassReader = AsmUtils.newClassReader(Util.getClassAsStream(resourcePath));
+		ClassReader configClassReader = AsmUtils.newClassReader(Util.getClassAsStream(resourcePath, classLoader));
 
 		ConfigurationClass configClass = new ConfigurationClass();
 		configClass.setBeanName(configurationId);
 
-		configClassReader.accept(new ConfigurationClassVisitor(configClass, model), false);
+		configClassReader.accept(new ConfigurationClassVisitor(configClass, model, classLoader), false);
 		model.add(configClass);
 	}
+
+	public ConfigurationModel getConfigurationModel() {
+	    return model;
+    }
 
 }

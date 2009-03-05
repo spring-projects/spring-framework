@@ -131,9 +131,9 @@ public class Util {
 	 * @see ClassUtils#getDefaultClassLoader()
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Class<? extends T> loadToolingSafeClass(String fqClassName) {
+	public static <T> Class<? extends T> loadToolingSafeClass(String fqClassName, ClassLoader classLoader) {
 		try {
-			return (Class<? extends T>) ClassUtils.getDefaultClassLoader().loadClass(fqClassName);
+			return (Class<? extends T>) classLoader.loadClass(fqClassName);
 		} catch (ClassNotFoundException ex) {
 			log.warn(format("Unable to load class [%s], likely due to tooling-specific restrictions."
 			        + "Attempting to continue, but unexpected errors may occur", fqClassName), ex);
@@ -152,10 +152,10 @@ public class Util {
 	 * 
 	 * @throws RuntimeException if <var>pathToClass</var> does not exist
 	 */
-	public static InputStream getClassAsStream(String pathToClass) {
+	public static InputStream getClassAsStream(String pathToClass, ClassLoader classLoader) {
 		String classFileName = pathToClass + ClassUtils.CLASS_FILE_SUFFIX;
 
-		InputStream is = ClassUtils.getDefaultClassLoader().getResourceAsStream(classFileName);
+		InputStream is = classLoader.getResourceAsStream(classFileName);
 
 		if (is == null)
 			throw new RuntimeException(new FileNotFoundException("Class file [" + classFileName

@@ -39,11 +39,13 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.BeanDefinitionRegistrar;
+import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.NoOpInterceptor;
+import org.springframework.config.java.ext.BeanMethodInterceptor;
+import org.springframework.config.java.ext.BeanRegistrar;
 
 
 /**
@@ -81,11 +83,31 @@ public class ConfigurationEnhancer {
 	/**
 	 * Creates a new {@link ConfigurationEnhancer} instance.
 	 */
-	public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory, ConfigurationModel model) {
+	public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory) {
 		notNull(beanFactory, "beanFactory must be non-null");
-		notNull(model, "model must be non-null");
+		//notNull(model, "model must be non-null");
 
-		populateRegistrarsAndCallbacks(beanFactory, model);
+		//populateRegistrarsAndCallbacks(beanFactory, model);
+		
+		registrars.add(new BeanRegistrar());
+		BeanMethodInterceptor beanMethodInterceptor = new BeanMethodInterceptor();
+		beanMethodInterceptor.setBeanFactory(beanFactory);
+		callbackInstances.add(beanMethodInterceptor);
+		
+		registrars.add(new BeanDefinitionRegistrar() {
+
+			public boolean accepts(Method method) {
+				return true;
+			}
+
+			public void register(BeanMethod method, BeanDefinitionRegistry registry) {
+				// no-op
+			}
+		});
+		callbackInstances.add(NoOpInterceptor.INSTANCE);
+		
+		for (Callback callback : callbackInstances)
+			callbackTypes.add(callback.getClass());
 	}
 
 
@@ -97,9 +119,9 @@ public class ConfigurationEnhancer {
 	 */
 	private void populateRegistrarsAndCallbacks(DefaultListableBeanFactory beanFactory,
 	        ConfigurationModel model) {
-
+		
 		for (ConfigurationClass configClass : model.getAllConfigurationClasses()) {
-			for (ModelMethod method : configClass.getMethods()) {
+			for (BeanMethod method : configClass.getMethods()) {
 				registrars.add(method.getRegistrar());
 
 				Callback callback = method.getCallback();
@@ -118,7 +140,7 @@ public class ConfigurationEnhancer {
 				return true;
 			}
 
-			public void register(ModelMethod method, BeanDefinitionRegistry registry) {
+			public void register(BeanMethod method, BeanDefinitionRegistry registry) {
 				// no-op
 			}
 		});

@@ -26,11 +26,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.FactoryMethod;
-import org.springframework.config.java.ModelMethod;
 import org.springframework.config.java.Scopes;
 import org.springframework.config.java.UsageError;
 import org.springframework.config.java.Validator;
@@ -164,11 +164,11 @@ public @interface Bean {
 class BeanValidator implements Validator {
 
 	public boolean supports(Object object) {
-		return object instanceof ModelMethod;
+		return object instanceof BeanMethod;
 	}
 
 	public void validate(Object object, List<UsageError> errors) {
-		ModelMethod method = (ModelMethod) object;
+		BeanMethod method = (BeanMethod) object;
 
 		// TODO: re-enable for @ScopedProxy support
 		// if (method.getAnnotation(ScopedProxy.class) == null)
@@ -204,7 +204,7 @@ class IllegalBeanOverrideValidator implements Validator {
 		ConfigurationClass[] allClasses = model.getAllConfigurationClasses();
 
 		for (int i = 0; i < allClasses.length; i++) {
-			for (ModelMethod method : allClasses[i].getMethods()) {
+			for (BeanMethod method : allClasses[i].getMethods()) {
 				Bean bean = method.getAnnotation(Bean.class);
 
 				if (bean == null || bean.allowOverriding())
