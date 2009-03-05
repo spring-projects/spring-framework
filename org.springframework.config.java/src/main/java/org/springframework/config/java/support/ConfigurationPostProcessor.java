@@ -99,57 +99,6 @@ public class ConfigurationPostProcessor extends AbstractConfigurationClassProces
 	    return configBeanDefs;
     }
 	
-//	/**
-//	 * Searches <var>beanFactory</var> for any {@link Configuration} classes in order to
-//	 * parse and enhance them. Also registers any {@link BeanPostProcessor} objects
-//	 * necessary to fulfill JavaConfig requirements.
-//	 */
-//	public void postProcessBeanFactory2(ConfigurableListableBeanFactory clBeanFactory) throws BeansException {
-//		Assert.isInstanceOf(DefaultListableBeanFactory.class, clBeanFactory);
-//		DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) clBeanFactory;
-//
-//		ConfigurationModel model = parseAnyConfigurationClasses(beanFactory);
-//
-//		enhanceAnyConfigurationClasses(beanFactory, model);
-//	}
-//
-//	private ConfigurationModel parseAnyConfigurationClasses(DefaultListableBeanFactory beanFactory) {
-//
-//		// linked map is important for maintaining predictable ordering of configuration
-//		// classes.
-//		// this is important in bean / value override situations.
-//		LinkedHashMap<String, ClassPathResource> configClassResources = new LinkedHashMap<String, ClassPathResource>();
-//
-//		for (String beanName : beanFactory.getBeanDefinitionNames()) {
-//			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
-//			if (beanDef.isAbstract())
-//				continue;
-//
-//			if (isConfigClass(beanDef)) {
-//				String path = ClassUtils.convertClassNameToResourcePath(beanDef.getBeanClassName());
-//				configClassResources.put(beanName, new ClassPathResource(path));
-//			}
-//		}
-//
-//		ConfigurationModelBeanDefinitionReader modelBeanDefinitionReader = new ConfigurationModelBeanDefinitionReader(
-//		        beanFactory);
-//		ConfigurationParser parser = new ConfigurationParser(ClassUtils.getDefaultClassLoader());
-//
-//		for (String id : configClassResources.keySet())
-//			parser.parse(configClassResources.get(id).getPath(), id);
-//		
-//		ConfigurationModel model = parser.getConfigurationModel();
-//
-//		ArrayList<UsageError> errors = new ArrayList<UsageError>();
-//		model.validate(errors);
-//		if (errors.size() > 0)
-//			throw new MalformedConfigurationException(errors.toArray(new UsageError[] {}));
-//
-//		modelBeanDefinitionReader.loadBeanDefinitions(model);
-//		
-//		return model;
-//	}
-	
 	@Override
 	protected void validateModel(ConfigurationModel model) {
 		ArrayList<UsageError> errors = new ArrayList<UsageError>();
