@@ -24,8 +24,8 @@ import java.util.Vector;
 
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ext.Bean;
 import org.springframework.util.ClassUtils;
 
 

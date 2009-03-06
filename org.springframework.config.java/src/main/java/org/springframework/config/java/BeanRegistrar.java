@@ -1,4 +1,4 @@
-package org.springframework.config.java.ext;
+package org.springframework.config.java;
 
 import static java.lang.String.*;
 import static org.springframework.util.StringUtils.*;
@@ -13,12 +13,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.config.java.BeanDefinitionRegistrar;
-import org.springframework.config.java.BeanMethod;
-import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.MalformedConfigurationException;
-import org.springframework.config.java.UsageError;
 import org.springframework.core.annotation.AnnotationUtils;
 
 

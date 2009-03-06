@@ -26,12 +26,12 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.BeanMethod;
+import org.springframework.config.java.BeanRegistrar;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.ext.Bean;
-import org.springframework.config.java.ext.BeanRegistrar;
 import org.springframework.config.java.plugin.Extension;
 import org.springframework.core.io.Resource;
 

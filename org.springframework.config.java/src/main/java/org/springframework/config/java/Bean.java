@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.ext;
+package org.springframework.config.java;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -25,8 +25,6 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.config.java.Configuration;
-import org.springframework.config.java.StandardScopes;
 
 
 /**

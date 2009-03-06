@@ -28,11 +28,11 @@ import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ModelClass;
-import org.springframework.config.java.ext.Bean;
 
 
 /**

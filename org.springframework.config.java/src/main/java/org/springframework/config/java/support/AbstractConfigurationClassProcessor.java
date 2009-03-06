@@ -17,10 +17,10 @@ package org.springframework.config.java.support;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.MalformedConfigurationException;
-import org.springframework.config.java.ext.Bean;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
 
 

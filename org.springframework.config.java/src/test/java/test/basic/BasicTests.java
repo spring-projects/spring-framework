@@ -9,10 +9,10 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.StandardScopes;
-import org.springframework.config.java.ext.Bean;
 import org.springframework.config.java.support.ConfigurationClassPostProcessor;
 
 import test.beans.ITestBean;

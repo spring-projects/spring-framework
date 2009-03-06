@@ -22,7 +22,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.config.java.ext.Bean;
 import org.springframework.util.Assert;
 
 
