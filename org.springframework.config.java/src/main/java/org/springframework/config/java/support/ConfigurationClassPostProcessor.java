@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -33,6 +32,7 @@ import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
 import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.UsageError;
+import org.springframework.config.java.ext.Bean;
 import org.springframework.config.java.internal.enhancement.ConfigurationEnhancer;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
 import org.springframework.core.Ordered;
@@ -46,11 +46,23 @@ import org.springframework.util.StringUtils;
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
  * {@link Configuration @Configuration} classes.
+ * <p>
+ * Registered by default when using {@literal <context:annotation-config/>} or
+ * {@literal <context:component-scan/>}. Otherwise, may be declared manually as
+ * with any other BeanFactoryPostProcessor.
+ * <p>
+ * This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it's important
+ * that any {@link Bean} methods declared in Configuration classes have their
+ * respective bean definitions registered before any other BeanFactoryPostProcessor
+ * executes.
+ * 
+ * @author Chris Beams
+ * @since 3.0
  */
-public class ConfigurationPostProcessor extends AbstractConfigurationClassProcessor
-                                        implements Ordered, BeanFactoryPostProcessor {
+public class ConfigurationClassPostProcessor extends AbstractConfigurationClassProcessor
+                                             implements Ordered, BeanFactoryPostProcessor {
 
-	private static final Log logger = LogFactory.getLog(ConfigurationPostProcessor.class);
+	private static final Log logger = LogFactory.getLog(ConfigurationClassPostProcessor.class);
 
 	/**
 	 * A well-known class in the CGLIB API used when testing to see if CGLIB
@@ -68,8 +80,7 @@ public class ConfigurationPostProcessor extends AbstractConfigurationClassProces
 
 
 	/**
-	 * @return the order in which this {@link BeanPostProcessor} will be executed. Returns
-	 * {@link Ordered#HIGHEST_PRECEDENCE}.
+	 * @return {@link Ordered#HIGHEST_PRECEDENCE}.
 	 */
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE;
@@ -95,7 +106,7 @@ public class ConfigurationPostProcessor extends AbstractConfigurationClassProces
 
 	/**
 	 * @return a ConfigurationParser that uses the enclosing BeanFactory's
-	 * classLoader to load all Configuration class artifacts.
+	 * ClassLoader to load all Configuration class artifacts.
 	 */
 	@Override
 	protected ConfigurationParser createConfigurationParser() {
@@ -103,7 +114,8 @@ public class ConfigurationPostProcessor extends AbstractConfigurationClassProces
 	}
 
 	/**
-	 * @return map of all non-abstract {@link BeanDefinition}s in the enclosing {@link #beanFactory}
+	 * @return map of all non-abstract {@link BeanDefinition}s in the
+	 * enclosing {@link #beanFactory}
 	 */
 	@Override
 	protected BeanDefinitionRegistry getConfigurationBeanDefinitions(boolean includeAbstractBeanDefs) {

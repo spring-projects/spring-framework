@@ -7,7 +7,7 @@
 
 	<context:annotation-config/>
 	
-	<bean class="org.springframework.config.java.support.ConfigurationPostProcessor"/>
+	<bean class="org.springframework.config.java.support.ConfigurationClassPostProcessor"/>
 	
 	<bean class="test.basic.AutowiredConfigurationTests$ValueConfig"/>
 	

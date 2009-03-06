@@ -26,9 +26,9 @@ package org.springframework.config.java;
  * @author Chris Beams
  * @since 3.0
  */
-public class Scopes {
+public class StandardScopes {
 
-	private Scopes() {
+	private StandardScopes() {
 	}
 
 	public static final String SINGLETON = "singleton";
