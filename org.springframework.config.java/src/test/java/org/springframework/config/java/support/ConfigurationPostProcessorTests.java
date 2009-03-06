@@ -110,7 +110,7 @@ public class ConfigurationPostProcessorTests {
 	 * certain bean semantics, like singleton-scoping, scoped proxies, etc.
 	 * 
 	 * Technically, {@link ConfigurationClassPostProcessor} could fail to enhance the
-	 * registered Configuration classes, and many use cases would still work.
+	 * registered Configuration classes and many use cases would still work.
 	 * Certain cases, however, like inter-bean singleton references would not.
 	 * We test for such a case below, and in doing so prove that enhancement is
 	 * working.
@@ -142,5 +142,5 @@ public class ConfigurationPostProcessorTests {
 		final Foo foo;
 		public Bar(Foo foo) { this.foo = foo; }
 	}
-
+	
 }

@@ -25,7 +25,6 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 
-/** TODO: JAVADOC */
 public final class BeanMethod implements Validatable {
 
 	private final String name;
@@ -91,8 +90,8 @@ public final class BeanMethod implements Validatable {
 		T anno = getAnnotation(annoType);
 
 		if (anno == null)
-			throw new IllegalStateException(format("annotation %s not found on %s", annoType.getSimpleName(),
-			        this));
+			throw new IllegalStateException(
+				format("annotation %s not found on %s", annoType.getSimpleName(), this));
 
 		return anno;
 	}
@@ -123,8 +122,6 @@ public final class BeanMethod implements Validatable {
 	}
 
 	public void validate(List<UsageError> errors) {
-//		for (Validator validator : validators)
-//			validator.validate(this, errors);
 
 		if (Modifier.isPrivate(getModifiers()))
 			errors.add(new PrivateMethodError());
@@ -163,7 +160,7 @@ public final class BeanMethod implements Validatable {
 	public String toString() {
 		String returnTypeName = returnType == null ? "<unknown>" : returnType.getSimpleName();
 		return String.format("%s: name=%s; returnType=%s; modifiers=%d", getClass().getSimpleName(), name,
-		        returnTypeName, modifiers);
+		                     returnTypeName, modifiers);
 	}
 
 	@Override
@@ -246,15 +243,14 @@ class BeanValidator implements Validator {
 	public void validate(Object object, List<UsageError> errors) {
 		BeanMethod method = (BeanMethod) object;
 
-		// TODO: re-enable for @ScopedProxy support
-		// if (method.getAnnotation(ScopedProxy.class) == null)
-		// return;
-		//        
-		// Bean bean = method.getRequiredAnnotation(Bean.class);
-		//            
-		// if (bean.scope().equals(DefaultScopes.SINGLETON)
-		// || bean.scope().equals(DefaultScopes.PROTOTYPE))
-		// errors.add(new InvalidScopedProxyDeclarationError(method));
+		if (method.getAnnotation(ScopedProxy.class) == null)
+			return;
+
+		Bean bean = method.getRequiredAnnotation(Bean.class);
+
+		if (bean.scope().equals(StandardScopes.SINGLETON)
+				|| bean.scope().equals(StandardScopes.PROTOTYPE))
+			errors.add(new InvalidScopedProxyDeclarationError(method));
 	}
 
 }

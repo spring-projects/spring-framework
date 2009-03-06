@@ -57,6 +57,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * @author Rod Johnson
  * @author Costin Leau
  * @author Chris Beams
+ * @since 3.0
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

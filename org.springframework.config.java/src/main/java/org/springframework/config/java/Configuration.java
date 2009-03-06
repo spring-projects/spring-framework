@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
  * 
  * @author Rod Johnson
  * @author Chris Beams
+ * @since 3.0
  */
 @Component
 @Target( { ElementType.TYPE })
