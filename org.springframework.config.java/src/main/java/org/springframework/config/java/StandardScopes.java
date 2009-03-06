@@ -18,18 +18,17 @@ package org.springframework.config.java;
 
 /**
  * Enumerates the names of the scopes supported out of the box in Spring.
- * <p>
- * Not modeled as an actual java enum because annotations that accept a scope attribute must
- * allow for user-defined scope names. Given that java enums are not extensible, these must
- * remain simple string constants.
+ * 
+ * <p>Not modeled as an actual java enum because annotations that accept a scope attribute
+ * must allow for user-defined scope names. Given that java enums are not extensible, these
+ * must remain simple string constants.
  * 
  * @author Chris Beams
  * @since 3.0
  */
 public class StandardScopes {
 
-	private StandardScopes() {
-	}
+	private StandardScopes() { }
 
 	public static final String SINGLETON = "singleton";
 
