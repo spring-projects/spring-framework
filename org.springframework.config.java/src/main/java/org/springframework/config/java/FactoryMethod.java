@@ -56,7 +56,7 @@ public @interface FactoryMethod {
 	 * Specifies what interceptor should be used when processing this {@link FactoryMethod}.
 	 * Defaults to {@link NoOpInterceptor} which does nothing.
 	 */
-	Class<? extends MethodInterceptor> interceptor() default NoOpInterceptor.class;
+	Class<? extends MethodInterceptor> interceptor();
 
 	/**
 	 * Optionally specifies any {@link Validator} types capable of validating the syntax of
