@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,65 +40,93 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 
 /**
- * {@link BeanFactoryPostProcessor} used for bootstrapping {@link Configuration
- * @Configuration} beans. Usually used in conjunction with Spring XML files.
+ * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
+ * {@link Configuration @Configuration} classes.
  */
 public class ConfigurationPostProcessor extends AbstractConfigurationClassProcessor
                                         implements Ordered, BeanFactoryPostProcessor {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationPostProcessor.class);
+
+	/**
+	 * A well-known class in the CGLIB API used when testing to see if CGLIB
+	 * is present on the classpath. Package-private visibility allows for
+	 * manipulation by tests.
+	 * @see #assertCglibIsPresent(BeanDefinitionRegistry)
+	 */
+	static String CGLIB_TEST_CLASS = "net.sf.cglib.proxy.Callback";
+
+	/**
+	 * Holder for the calling BeanFactory
+	 * @see #postProcessBeanFactory(ConfigurableListableBeanFactory)
+	 */
 	private DefaultListableBeanFactory beanFactory;
 
 
 	/**
-	 * Returns the order in which this {@link BeanPostProcessor} will be executed. Returns
+	 * @return the order in which this {@link BeanPostProcessor} will be executed. Returns
 	 * {@link Ordered#HIGHEST_PRECEDENCE}.
 	 */
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE;
 	}
-	
+
+	/**
+	 * Finds {@link Configuration} bean definitions within <var>clBeanFactory</var>
+	 * and processes them in order to register bean definitions for each Bean method
+	 * found within; also prepares the the Configuration classes for servicing
+	 * bean requests at runtime by replacing them with CGLIB-enhanced subclasses.
+	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory clBeanFactory) throws BeansException {
 		Assert.isInstanceOf(DefaultListableBeanFactory.class, clBeanFactory);
 		beanFactory = (DefaultListableBeanFactory) clBeanFactory;
-		
+
 		BeanDefinitionRegistry factoryBeanDefs = processConfigBeanDefinitions();
-		
+
 		for(String beanName : factoryBeanDefs.getBeanDefinitionNames())
 			beanFactory.registerBeanDefinition(beanName, factoryBeanDefs.getBeanDefinition(beanName));
-		
+
 		enhanceConfigurationClasses();
 	}
-	
+
+	/**
+	 * @return a ConfigurationParser that uses the enclosing BeanFactory's
+	 * classLoader to load all Configuration class artifacts.
+	 */
 	@Override
-    protected ConfigurationParser createConfigurationParser() {
-	    return new ConfigurationParser(beanFactory.getBeanClassLoader());
-    }
+	protected ConfigurationParser createConfigurationParser() {
+		return new ConfigurationParser(beanFactory.getBeanClassLoader());
+	}
 
 	/**
 	 * @return map of all non-abstract {@link BeanDefinition}s in the enclosing {@link #beanFactory}
 	 */
 	@Override
-    protected BeanDefinitionRegistry getConfigurationBeanDefinitions(boolean includeAbstractBeanDefs) {
-		
+	protected BeanDefinitionRegistry getConfigurationBeanDefinitions(boolean includeAbstractBeanDefs) {
+
 		BeanDefinitionRegistry configBeanDefs = new DefaultListableBeanFactory();
-		
+
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
-			
+
 			if (beanDef.isAbstract() && !includeAbstractBeanDefs)
 				continue;
 
 			if (isConfigClass(beanDef))
 				configBeanDefs.registerBeanDefinition(beanName, beanDef);
 		}
-		
-	    return configBeanDefs;
-    }
-	
+
+		return configBeanDefs;
+	}
+
+	/**
+	 * Validates the given <var>model</var>.
+	 * @throws MalformedConfigurationException if any errors are detected
+	 */
 	@Override
 	protected void validateModel(ConfigurationModel model) {
 		ArrayList<UsageError> errors = new ArrayList<UsageError>();
@@ -118,10 +146,12 @@ public class ConfigurationPostProcessor extends AbstractConfigurationClassProces
 	 */
 	private void enhanceConfigurationClasses() {
 
-		ConfigurationEnhancer enhancer = new ConfigurationEnhancer(beanFactory);
-		
 		BeanDefinitionRegistry configBeanDefs = getConfigurationBeanDefinitions(true);
-		
+
+		assertCglibIsPresent(configBeanDefs);
+
+		ConfigurationEnhancer enhancer = new ConfigurationEnhancer(beanFactory);
+
 		for(String beanName : configBeanDefs.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			String configClassName = beanDef.getBeanClassName();
@@ -129,23 +159,38 @@ public class ConfigurationPostProcessor extends AbstractConfigurationClassProces
 
 			if (logger.isDebugEnabled())
 				logger.debug(format("Replacing bean definition '%s' existing class name '%s' with enhanced class name '%s'",
-			                        beanName, configClassName, enhancedClassName));
+				                    beanName, configClassName, enhancedClassName));
 
 			beanDef.setBeanClassName(enhancedClassName);
 		}
 	}
 
 	/**
-	 * Determines whether the class for <var>beanDef</var> is a {@link Configuration}
-	 * -annotated class. Returns false if <var>beanDef</var> has no class specified.
+	 * Tests for the presence of CGLIB on the classpath by trying to
+	 * classload {@link #CGLIB_TEST_CLASS}.
+	 */
+	private void assertCglibIsPresent(BeanDefinitionRegistry configBeanDefs) {
+		try {
+			Class.forName(CGLIB_TEST_CLASS);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("CGLIB is required to process @Configuration classes. " +
+					"Either add CGLIB v2.2.3 to the classpath or remove the following " +
+					"@Configuration bean definitions: ["
+					+ StringUtils.arrayToCommaDelimitedString(configBeanDefs.getBeanDefinitionNames()) + "]");
+		}
+	}
+
+	/**
+	 * @return whether the BeanDefinition's beanClass is Configuration-annotated,
+	 * false if no beanClass is specified.
 	 */
 	private static boolean isConfigClass(BeanDefinition beanDef) {
-		
+
 		String className = beanDef.getBeanClassName();
-		
+
 		if(className == null)
 			return false;
-		
+
 		try {
 			MetadataReader metadataReader = new SimpleMetadataReaderFactory().getMetadataReader(className);
 			AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();

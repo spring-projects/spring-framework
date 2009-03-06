@@ -20,6 +20,8 @@ import static java.lang.String.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.config.java.ext.Bean;
+
 
 /**
  * An abstract representation of a set of user-provided "Configuration classes", usually but
@@ -106,23 +108,24 @@ public final class ConfigurationModel implements Validatable {
 		// cascade through model and allow handlers to register validators
 		// depending on where they are registered (with the model, the class, or the method)
 		// they will be called directly or indirectly below
-		for (ConfigurationClass configClass : getAllConfigurationClasses()) {
-			for (BeanMethod method : configClass.getMethods()) {
-				for (Validator validator : method.getValidators()) {
-					if (validator.supports(method))
-						method.registerValidator(validator);
-					// TODO: support class-level validation
-					// if(validator.supports(configClass))
-					// configClass.registerValidator(validator);
-					if (validator.supports(this))
-						this.registerValidator(validator);
-				}
-			}
-		}
+//		for (ConfigurationClass configClass : getAllConfigurationClasses()) {
+//			for (BeanMethod method : configClass.getMethods()) {
+//				for (Validator validator : method.getValidators()) {
+//					if (validator.supports(method))
+//						method.registerValidator(validator);
+//					// TODO: support class-level validation
+//					// if(validator.supports(configClass))
+//					// configClass.registerValidator(validator);
+//					if (validator.supports(this))
+//						this.registerValidator(validator);
+//				}
+//			}
+//		}
 
 		// process any validators registered directly with this model object
-		for (Validator validator : validators)
-			validator.validate(this, errors);
+//		for (Validator validator : validators)
+//			validator.validate(this, errors);
+		new IllegalBeanOverrideValidator().validate(this, errors);
 
 		// each individual configuration class must be well-formed
 		// note that each configClass detects usage errors on its imports recursively
@@ -171,6 +174,41 @@ public final class ConfigurationModel implements Validatable {
 		public String getDescription() {
 			return format("Configuration model was empty. Make sure at least one "
 			        + "@%s class has been specified.", Configuration.class.getSimpleName());
+		}
+	}
+
+}
+
+/**
+ * Detects any illegally-overridden {@link Bean} definitions within a particular
+ * {@link ConfigurationModel}
+ * 
+ * @see Bean#allowOverriding()
+ * 
+ * @author Chris Beams
+ */
+class IllegalBeanOverrideValidator implements Validator {
+
+	public boolean supports(Object object) {
+		return object instanceof ConfigurationModel;
+	}
+
+	public void validate(Object object, List<UsageError> errors) {
+		ConfigurationModel model = (ConfigurationModel) object;
+
+		ConfigurationClass[] allClasses = model.getAllConfigurationClasses();
+
+		for (int i = 0; i < allClasses.length; i++) {
+			for (BeanMethod method : allClasses[i].getMethods()) {
+				Bean bean = method.getAnnotation(Bean.class);
+
+				if (bean == null || bean.allowOverriding())
+					continue;
+
+				for (int j = i + 1; j < allClasses.length; j++)
+					if (allClasses[j].hasMethod(method.getName()))
+						errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j], method));
+			}
 		}
 	}
 

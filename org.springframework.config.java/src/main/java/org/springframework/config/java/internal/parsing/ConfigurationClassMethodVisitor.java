@@ -31,14 +31,13 @@ import org.objectweb.asm.Opcodes;
 import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.FactoryMethod;
 import org.springframework.config.java.ModelClass;
 import org.springframework.config.java.ext.Bean;
 
 
 /**
  * Visits a single method declared in a given {@link Configuration} class. Determines
- * whether the method is a {@link FactoryMethod} method and if so, adds it to the
+ * whether the method is a {@link Bean} method and if so, adds it to the
  * {@link ConfigurationClass}.
  * 
  * @author Chris Beams
@@ -108,8 +107,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 
 	/**
 	 * Parses through all {@link #annotations} on this method in order to determine whether
-	 * it is a {@link FactoryMethod} method or not and if so adds it to the enclosing
-	 * {@link #configClass}.
+	 * it is a {@link Bean} method or not and if so adds it to the enclosing {@link #configClass}.
 	 */
 	@Override
 	public void visitEnd() {

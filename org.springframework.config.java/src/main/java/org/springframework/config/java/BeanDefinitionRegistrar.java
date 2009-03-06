@@ -12,7 +12,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * <h3>Constraints</h3> Implementations must have only a default constructor, or explicitly
  * declare a no-arg constructor.
  * 
- * @see FactoryMethod
  * @see BeanMethod
  * 
  * @author Chris Beams

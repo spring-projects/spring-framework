@@ -30,7 +30,8 @@ import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationClass;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.FactoryMethod;
+import org.springframework.config.java.ext.Bean;
+import org.springframework.config.java.ext.BeanRegistrar;
 import org.springframework.config.java.plugin.Extension;
 import org.springframework.core.io.Resource;
 
@@ -75,7 +76,7 @@ class ConfigurationModelBeanDefinitionReader {
 
 	/**
 	 * Reads a particular {@link ConfigurationClass}, registering bean definitions for the
-	 * class itself, all its {@link FactoryMethod} methods and all its {@link Extension}
+	 * class itself, all its {@link Bean} methods and all its {@link Extension}
 	 * annotations.
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
@@ -137,11 +138,10 @@ class ConfigurationModelBeanDefinitionReader {
 	/**
 	 * Reads a particular {@link BeanMethod}, registering bean definitions with
 	 * {@link #registry} based on its contents.
-	 * 
-	 * @see FactoryMethod
 	 */
 	private void loadBeanDefinitionsForModelMethod(BeanMethod method) {
-		method.getRegistrar().register(method, registry);
+		new BeanRegistrar().register(method, registry);
+		//method.getRegistrar().register(method, registry);
 	}
 
 //	@SuppressWarnings("unchecked")
