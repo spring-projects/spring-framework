@@ -42,7 +42,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.BeanDefinitionRegistrar;
 import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ext.BeanMethodInterceptor;
 import org.springframework.config.java.ext.BeanRegistrar;
 
 
