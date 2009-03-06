@@ -16,17 +16,13 @@
 package org.springframework.config.java;
 
 import static java.lang.String.*;
-import static org.springframework.config.java.Util.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import net.sf.cglib.proxy.Callback;
-
+import org.springframework.config.java.ext.Bean;
 import org.springframework.util.Assert;
 
 
@@ -39,7 +35,6 @@ public final class BeanMethod implements Validatable {
 	private final List<Annotation> annotations = new ArrayList<Annotation>();
 	private transient ConfigurationClass declaringClass;
 	private transient int lineNumber;
-	private transient FactoryMethod factoryAnno;
 	private transient final List<Validator> validators = new ArrayList<Validator>();
 
 	public BeanMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
@@ -47,11 +42,8 @@ public final class BeanMethod implements Validatable {
 		this.name = name;
 
 		Assert.notNull(annotations);
-		for (Annotation annotation : annotations) {
+		for (Annotation annotation : annotations)
 			this.annotations.add(annotation);
-			if (factoryAnno == null)
-				factoryAnno = annotation.annotationType().getAnnotation(FactoryMethod.class);
-		}
 
 		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative: " + modifiers);
 		this.modifiers = modifiers;
@@ -140,30 +132,34 @@ public final class BeanMethod implements Validatable {
 
 		if (Modifier.isFinal(getModifiers()))
 			errors.add(new FinalMethodError());
+		
+		new BeanValidator().validate(this, errors);
 	}
 
-	public BeanDefinitionRegistrar getRegistrar() {
-		return getInstance(factoryAnno.registrar());
-	}
+//	public BeanDefinitionRegistrar getRegistrar() {
+//		return getInstance(factoryAnno.registrar());
+//	}
 
-	public Set<Validator> getValidators() {
-		HashSet<Validator> validator = new HashSet<Validator>();
+//	public Set<Validator> getValidators() {
+//		HashSet<Validator> validators = new HashSet<Validator>();
+//
+////		for (Class<? extends Validator> validatorType : factoryAnno.validators())
+////			validator.add(getInstance(validatorType));
+//		
+//		validators.add(IllegalB)
+//
+//		return validators;
+//	}
 
-		for (Class<? extends Validator> validatorType : factoryAnno.validators())
-			validator.add(getInstance(validatorType));
-
-		return validator;
-	}
-
-	public Callback getCallback() {
-		Class<? extends Callback> callbackType = factoryAnno.interceptor();
-
-		if (callbackType.equals(NoOpInterceptor.class))
-			return NoOpInterceptor.INSTANCE;
-
-		return getInstance(callbackType);
-	}
-
+//	public Callback getCallback() {
+//		Class<? extends Callback> callbackType = factoryAnno.interceptor();
+//
+//		if (callbackType.equals(NoOpInterceptor.class))
+//			return NoOpInterceptor.INSTANCE;
+//
+//		return getInstance(callbackType);
+//	}
+//
 	@Override
 	public String toString() {
 		String returnTypeName = returnType == null ? "<unknown>" : returnType.getSimpleName();
@@ -236,3 +232,31 @@ public final class BeanMethod implements Validatable {
 	}
 
 }
+
+/**
+ * Detects any user errors when declaring {@link Bean}-annotated methods.
+ * 
+ * @author Chris Beams
+ */
+class BeanValidator implements Validator {
+
+	public boolean supports(Object object) {
+		return object instanceof BeanMethod;
+	}
+
+	public void validate(Object object, List<UsageError> errors) {
+		BeanMethod method = (BeanMethod) object;
+
+		// TODO: re-enable for @ScopedProxy support
+		// if (method.getAnnotation(ScopedProxy.class) == null)
+		// return;
+		//        
+		// Bean bean = method.getRequiredAnnotation(Bean.class);
+		//            
+		// if (bean.scope().equals(DefaultScopes.SINGLETON)
+		// || bean.scope().equals(DefaultScopes.PROTOTYPE))
+		// errors.add(new InvalidScopedProxyDeclarationError(method));
+	}
+
+}
+

@@ -21,19 +21,12 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.FactoryMethod;
 import org.springframework.config.java.Scopes;
-import org.springframework.config.java.UsageError;
-import org.springframework.config.java.Validator;
 
 
 /**
@@ -71,9 +64,6 @@ import org.springframework.config.java.Validator;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@FactoryMethod(registrar = BeanRegistrar.class,
-		interceptor = BeanMethodInterceptor.class,
-		validators = { BeanValidator.class, IllegalBeanOverrideValidator.class })
 public @interface Bean {
 
 	/**
@@ -155,66 +145,3 @@ public @interface Bean {
 
 }
 
-
-/**
- * Detects any user errors when declaring {@link Bean}-annotated methods.
- * 
- * @author Chris Beams
- */
-class BeanValidator implements Validator {
-
-	public boolean supports(Object object) {
-		return object instanceof BeanMethod;
-	}
-
-	public void validate(Object object, List<UsageError> errors) {
-		BeanMethod method = (BeanMethod) object;
-
-		// TODO: re-enable for @ScopedProxy support
-		// if (method.getAnnotation(ScopedProxy.class) == null)
-		// return;
-		//        
-		// Bean bean = method.getRequiredAnnotation(Bean.class);
-		//            
-		// if (bean.scope().equals(DefaultScopes.SINGLETON)
-		// || bean.scope().equals(DefaultScopes.PROTOTYPE))
-		// errors.add(new InvalidScopedProxyDeclarationError(method));
-	}
-
-}
-
-
-/**
- * Detects any illegally-overridden {@link Bean} definitions within a particular
- * {@link ConfigurationModel}
- * 
- * @see Bean#allowOverriding()
- * 
- * @author Chris Beams
- */
-class IllegalBeanOverrideValidator implements Validator {
-
-	public boolean supports(Object object) {
-		return object instanceof ConfigurationModel;
-	}
-
-	public void validate(Object object, List<UsageError> errors) {
-		ConfigurationModel model = (ConfigurationModel) object;
-
-		ConfigurationClass[] allClasses = model.getAllConfigurationClasses();
-
-		for (int i = 0; i < allClasses.length; i++) {
-			for (BeanMethod method : allClasses[i].getMethods()) {
-				Bean bean = method.getAnnotation(Bean.class);
-
-				if (bean == null || bean.allowOverriding())
-					continue;
-
-				for (int j = i + 1; j < allClasses.length; j++)
-					if (allClasses[j].hasMethod(method.getName()))
-						errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j], method));
-			}
-		}
-	}
-
-}

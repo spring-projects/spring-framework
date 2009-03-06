@@ -122,9 +122,9 @@ public class ConfigurationEnhancer {
 		
 		for (ConfigurationClass configClass : model.getAllConfigurationClasses()) {
 			for (BeanMethod method : configClass.getMethods()) {
-				registrars.add(method.getRegistrar());
+				registrars.add(new BeanRegistrar());
 
-				Callback callback = method.getCallback();
+				Callback callback = new BeanMethodInterceptor();
 
 				if (callback instanceof BeanFactoryAware)
 					((BeanFactoryAware) callback).setBeanFactory(beanFactory);
