@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.config.java.ext.Bean;
 import org.springframework.util.Assert;
 
 import sun.security.x509.Extension;

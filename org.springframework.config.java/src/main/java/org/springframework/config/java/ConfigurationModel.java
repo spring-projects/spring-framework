@@ -20,7 +20,6 @@ import static java.lang.String.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.config.java.ext.Bean;
 
 
 /**

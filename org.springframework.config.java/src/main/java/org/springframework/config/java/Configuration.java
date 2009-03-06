@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.config.java.ext.Bean;
 import org.springframework.stereotype.Component;
 
 

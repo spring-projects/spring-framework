@@ -22,8 +22,8 @@ import java.lang.reflect.Method;
 import net.sf.cglib.proxy.MethodProxy;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.config.java.ext.Bean;
-import org.springframework.config.java.ext.BeanRegistrar;
+import org.springframework.config.java.Bean;
+import org.springframework.config.java.BeanRegistrar;
 
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.config.java.ext.BeanRegistrar;
  * 
  * @author Chris Beams
  */
-public class BeanMethodInterceptor extends AbstractMethodInterceptor {
+class BeanMethodInterceptor extends AbstractMethodInterceptor {
 
 	/**
 	 * Enhances a {@link Bean @Bean} method to check the supplied BeanFactory for the

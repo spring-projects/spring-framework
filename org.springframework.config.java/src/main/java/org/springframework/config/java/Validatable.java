@@ -10,7 +10,7 @@ import java.util.List;
  * 
  * @author Chris Beams
  */
-public interface Validatable {
+interface Validatable {
 
 	/**
 	 * Validates this object, adding any errors to the supplied list of <var>errors</var>.
