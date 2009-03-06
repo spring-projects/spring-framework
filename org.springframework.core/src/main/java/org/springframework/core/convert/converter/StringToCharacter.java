@@ -23,7 +23,7 @@ package org.springframework.core.convert.converter;
 public class StringToCharacter implements Converter<String, Character> {
 
 	public Character convert(String source) throws Exception {
-		if (source.length() > 1) {
+		if (source.length() != 1) {
 			throw new IllegalArgumentException("To be a Character the String '" + source + "' must have a length of 1");
 		}
 		return new Character(source.charAt(0));
