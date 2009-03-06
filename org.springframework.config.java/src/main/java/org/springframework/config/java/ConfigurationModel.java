@@ -43,7 +43,6 @@ public final class ConfigurationModel implements Validatable {
 
 	/* list is used because order and collection equality matters. */
 	private final ArrayList<ConfigurationClass> configurationClasses = new ArrayList<ConfigurationClass>();
-	private final ArrayList<Validator> validators = new ArrayList<Validator>();
 
 	/**
 	 * Add a {@link Configuration @Configuration} class to the model. Classes may be added
@@ -55,10 +54,6 @@ public final class ConfigurationModel implements Validatable {
 	public ConfigurationModel add(ConfigurationClass configurationClass) {
 		configurationClasses.add(configurationClass);
 		return this;
-	}
-
-	public void registerValidator(Validator validator) {
-		validators.add(validator);
 	}
 
 	/**
@@ -96,7 +91,6 @@ public final class ConfigurationModel implements Validatable {
 	 * 
 	 * @see ConfigurationClass#validate(java.util.List)
 	 * @see BeanMethod#validate(java.util.List)
-	 * @see Validator
 	 * @see UsageError
 	 */
 	public void validate(List<UsageError> errors) {
@@ -104,27 +98,20 @@ public final class ConfigurationModel implements Validatable {
 		if (configurationClasses.isEmpty())
 			errors.add(new EmptyModelError());
 
-		// cascade through model and allow handlers to register validators
-		// depending on where they are registered (with the model, the class, or the method)
-		// they will be called directly or indirectly below
-//		for (ConfigurationClass configClass : getAllConfigurationClasses()) {
-//			for (BeanMethod method : configClass.getMethods()) {
-//				for (Validator validator : method.getValidators()) {
-//					if (validator.supports(method))
-//						method.registerValidator(validator);
-//					// TODO: support class-level validation
-//					// if(validator.supports(configClass))
-//					// configClass.registerValidator(validator);
-//					if (validator.supports(this))
-//						this.registerValidator(validator);
-//				}
-//			}
-//		}
-
-		// process any validators registered directly with this model object
-//		for (Validator validator : validators)
-//			validator.validate(this, errors);
-		new IllegalBeanOverrideValidator().validate(this, errors);
+		// check for any illegal @Bean overriding
+        ConfigurationClass[] allClasses = getAllConfigurationClasses();
+        for (int i = 0; i < allClasses.length; i++) {
+        	for (BeanMethod method : allClasses[i].getMethods()) {
+        		Bean bean = method.getAnnotation(Bean.class);
+        
+        		if (bean == null || bean.allowOverriding())
+        			continue;
+        
+        		for (int j = i + 1; j < allClasses.length; j++)
+        			if (allClasses[j].hasMethod(method.getName()))
+        				errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j], method));
+        	}
+        }
 
 		// each individual configuration class must be well-formed
 		// note that each configClass detects usage errors on its imports recursively
@@ -173,41 +160,6 @@ public final class ConfigurationModel implements Validatable {
 		public String getDescription() {
 			return format("Configuration model was empty. Make sure at least one "
 			        + "@%s class has been specified.", Configuration.class.getSimpleName());
-		}
-	}
-
-}
-
-/**
- * Detects any illegally-overridden {@link Bean} definitions within a particular
- * {@link ConfigurationModel}
- * 
- * @see Bean#allowOverriding()
- * 
- * @author Chris Beams
- */
-class IllegalBeanOverrideValidator implements Validator {
-
-	public boolean supports(Object object) {
-		return object instanceof ConfigurationModel;
-	}
-
-	public void validate(Object object, List<UsageError> errors) {
-		ConfigurationModel model = (ConfigurationModel) object;
-
-		ConfigurationClass[] allClasses = model.getAllConfigurationClasses();
-
-		for (int i = 0; i < allClasses.length; i++) {
-			for (BeanMethod method : allClasses[i].getMethods()) {
-				Bean bean = method.getAnnotation(Bean.class);
-
-				if (bean == null || bean.allowOverriding())
-					continue;
-
-				for (int j = i + 1; j < allClasses.length; j++)
-					if (allClasses[j].hasMethod(method.getName()))
-						errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j], method));
-			}
 		}
 	}
 

@@ -33,7 +33,6 @@ public final class BeanMethod implements Validatable {
 	private final List<Annotation> annotations = new ArrayList<Annotation>();
 	private transient ConfigurationClass declaringClass;
 	private transient int lineNumber;
-	private transient final List<Validator> validators = new ArrayList<Validator>();
 
 	public BeanMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
 		Assert.hasText(name);
@@ -117,10 +116,6 @@ public final class BeanMethod implements Validatable {
 		return lineNumber;
 	}
 
-	public void registerValidator(Validator validator) {
-		validators.add(validator);
-	}
-
 	public void validate(List<UsageError> errors) {
 
 		if (Modifier.isPrivate(getModifiers()))
@@ -129,33 +124,16 @@ public final class BeanMethod implements Validatable {
 		if (Modifier.isFinal(getModifiers()))
 			errors.add(new FinalMethodError());
 		
-		new BeanValidator().validate(this, errors);
+		if (this.getAnnotation(ScopedProxy.class) == null)
+			return;
+
+		Bean bean =this.getRequiredAnnotation(Bean.class);
+
+		if (bean.scope().equals(StandardScopes.SINGLETON)
+				|| bean.scope().equals(StandardScopes.PROTOTYPE))
+			errors.add(new InvalidScopedProxyDeclarationError(this));
 	}
 
-//	public BeanDefinitionRegistrar getRegistrar() {
-//		return getInstance(factoryAnno.registrar());
-//	}
-
-//	public Set<Validator> getValidators() {
-//		HashSet<Validator> validators = new HashSet<Validator>();
-//
-////		for (Class<? extends Validator> validatorType : factoryAnno.validators())
-////			validator.add(getInstance(validatorType));
-//		
-//		validators.add(IllegalB)
-//
-//		return validators;
-//	}
-
-//	public Callback getCallback() {
-//		Class<? extends Callback> callbackType = factoryAnno.interceptor();
-//
-//		if (callbackType.equals(NoOpInterceptor.class))
-//			return NoOpInterceptor.INSTANCE;
-//
-//		return getInstance(callbackType);
-//	}
-//
 	@Override
 	public String toString() {
 		String returnTypeName = returnType == null ? "<unknown>" : returnType.getSimpleName();
@@ -228,30 +206,3 @@ public final class BeanMethod implements Validatable {
 	}
 
 }
-
-/**
- * Detects any user errors when declaring {@link Bean}-annotated methods.
- * 
- * @author Chris Beams
- */
-class BeanValidator implements Validator {
-
-	public boolean supports(Object object) {
-		return object instanceof BeanMethod;
-	}
-
-	public void validate(Object object, List<UsageError> errors) {
-		BeanMethod method = (BeanMethod) object;
-
-		if (method.getAnnotation(ScopedProxy.class) == null)
-			return;
-
-		Bean bean = method.getRequiredAnnotation(Bean.class);
-
-		if (bean.scope().equals(StandardScopes.SINGLETON)
-				|| bean.scope().equals(StandardScopes.PROTOTYPE))
-			errors.add(new InvalidScopedProxyDeclarationError(method));
-	}
-
-}
-

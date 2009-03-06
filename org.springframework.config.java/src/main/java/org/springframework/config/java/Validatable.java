@@ -6,8 +6,6 @@ import java.util.List;
 /**
  * Indicates a type is able to be validated for errors.
  * 
- * @see Validator
- * 
  * @author Chris Beams
  */
 interface Validatable {
