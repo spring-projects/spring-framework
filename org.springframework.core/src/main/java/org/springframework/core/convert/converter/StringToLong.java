@@ -16,7 +16,7 @@
 package org.springframework.core.convert.converter;
 
 /**
- * Converts a String to an Long using {@link Long#valueOf(String)}.
+ * Converts a String to a Long using {@link Long#valueOf(String)}.
  * 
  * @author Keith Donald
  */

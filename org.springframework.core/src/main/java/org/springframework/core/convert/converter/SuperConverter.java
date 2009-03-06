@@ -20,7 +20,7 @@ import org.springframework.core.convert.ConversionService;
 
 /**
  * A super converter converts a source object of type S to a target type of type AT and back, where AT is equal to or a
- * subclass of T.
+ * subclass of T, T being the "super" target type.  This allows a single converter to convert to objects that are part of a common class hierarchy.
  * <p>
  * Implementations of this interface are thread-safe and can be shared. Converters are typically registered with and
  * accessed through a {@link ConversionService}.

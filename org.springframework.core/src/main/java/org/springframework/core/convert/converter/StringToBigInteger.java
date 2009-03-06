@@ -18,7 +18,7 @@ package org.springframework.core.convert.converter;
 import java.math.BigInteger;
 
 /**
- * Converts a String to a BigInteger and back.
+ * Converts a String to a BigInteger using {@link BigInteger#BigInteger(String)}.
  * 
  * @author Keith Donald
  */

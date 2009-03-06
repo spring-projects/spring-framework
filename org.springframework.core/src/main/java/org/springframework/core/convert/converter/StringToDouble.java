@@ -16,7 +16,7 @@
 package org.springframework.core.convert.converter;
 
 /**
- * Converts a String to a Double and back.
+ * Converts a String to a Double using {@link Double#valueOf(String)}.
  * 
  * @author Keith Donald
  */

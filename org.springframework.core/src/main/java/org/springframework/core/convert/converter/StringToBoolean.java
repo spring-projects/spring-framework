@@ -16,8 +16,9 @@
 package org.springframework.core.convert.converter;
 
 /**
- * Converts String to a Boolean and back.
+ * Converts String to a Boolean.  The trueString and falseStrings are configurable.
  * 
+ * @see #StringToBoolean(String, String)
  * @author Keith Donald
  */
 public class StringToBoolean implements Converter<String, Boolean> {
@@ -31,7 +32,7 @@ public class StringToBoolean implements Converter<String, Boolean> {
 	private String falseString;
 
 	/**
-	 * Create a StringToBoolean converter.
+	 * Create a StringToBoolean converter with the default 'true' and 'false' strings.
 	 */
 	public StringToBoolean() {
 	}

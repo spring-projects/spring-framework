@@ -16,7 +16,7 @@
 package org.springframework.core.convert.converter;
 
 /**
- * Converts a String to an Short using {@link Short#valueOf(String)}.
+ * Converts a String to a Short using {@link Short#valueOf(String)}.
  * 
  * @author Keith Donald
  */

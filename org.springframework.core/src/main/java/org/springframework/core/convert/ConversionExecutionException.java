@@ -89,8 +89,8 @@ public class ConversionExecutionException extends ConversionException {
 	}
 
 	private static String defaultMessage(Object value, Class<?> sourceClass, Class<?> targetClass, Throwable cause) {
-		return "Unable to convert value " + StylerUtils.style(value) + " from type '" + sourceClass.getName()
-				+ "' to type '" + targetClass.getName() + "'; reason = '" + cause.getMessage() + "'";
+		return "Unable to convert value " + StylerUtils.style(value) + " from type [" + sourceClass.getName()
+				+ "] to type [" + targetClass.getName() + "]; reason = '" + cause.getMessage() + "'";
 	}
 
 }
