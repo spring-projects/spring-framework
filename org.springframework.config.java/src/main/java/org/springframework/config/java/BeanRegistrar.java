@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
+import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -50,7 +52,7 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		if (bean.autowire() != AnnotationUtils.getDefaultValue(Bean.class, "autowire"))
 			beanDef.setAutowireMode(bean.autowire().value());
 		else if (defaults.defaultAutowire() != AnnotationUtils.getDefaultValue(Configuration.class,
-		        "defaultAutowire"))
+				"defaultAutowire"))
 			beanDef.setAutowireMode(defaults.defaultAutowire().value());
 
 		String beanName = method.getName();
@@ -70,9 +72,8 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 				}
 
 				// overriding is legal, return immediately
-				logger.info(format(
-				        "Skipping loading bean definition for %s: a definition for bean '%s' already exists. "
-				                + "This is likely due to an override in XML.", method, beanName));
+				logger.info(format("Skipping loading bean definition for %s: a definition for bean "
+					+ "'%s' already exists. This is likely due to an override in XML.", method, beanName));
 				return;
 			}
 		}
@@ -104,39 +105,33 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		if (hasText(destroyMethodName))
 			beanDef.setDestroyMethodName(destroyMethodName);
 
-		// TODO: re-enable for @ScopedProxy support
 		// is this method annotated with @ScopedProxy?
-		// ScopedProxy scopedProxy = method.getAnnotation(ScopedProxy.class);
-		// if (scopedProxy != null) {
-		// RootBeanDefinition targetDef = beanDef;
-		//
-		// // Create a scoped proxy definition for the original bean name,
-		// // "hiding" the target bean in an internal target definition.
-		// String targetBeanName =
-		// ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
-		// RootBeanDefinition scopedProxyDefinition = new
-		// RootBeanDefinition(ScopedProxyFactoryBean.class);
-		// scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName",
-		// targetBeanName);
-		//
-		// if (scopedProxy.proxyTargetClass())
-		// targetDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE,
-		// Boolean.TRUE);
-		// // ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we
-		// // don't need to set it explicitly here.
-		// else
-		// scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass",
-		// Boolean.FALSE);
-		//
-		// // The target bean should be ignored in favor of the scoped proxy.
-		// targetDef.setAutowireCandidate(false);
-		//
-		// // Register the target bean as separate bean in the factory
-		// registry.registerBeanDefinition(targetBeanName, targetDef);
-		//
-		// // replace the original bean definition with the target one
-		// beanDef = scopedProxyDefinition;
-		// }
+		ScopedProxy scopedProxy = method.getAnnotation(ScopedProxy.class);
+		if (scopedProxy != null) {
+			RootBeanDefinition targetDef = beanDef;
+			//
+			// Create a scoped proxy definition for the original bean name,
+			// "hiding" the target bean in an internal target definition.
+			String targetBeanName = ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+			RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
+			scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
+
+			if (scopedProxy.proxyTargetClass())
+				targetDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
+			// ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we
+			// don't need to set it explicitly here.
+			else
+				scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
+
+			// The target bean should be ignored in favor of the scoped proxy.
+			targetDef.setAutowireCandidate(false);
+
+			// Register the target bean as separate bean in the factory
+			registry.registerBeanDefinition(targetBeanName, targetDef);
+
+			// replace the original bean definition with the target one
+			beanDef = scopedProxyDefinition;
+		}
 
 		// TODO: re-enable for @Meta support
 		// does this bean method have any @Meta annotations?
@@ -147,8 +142,8 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		if (bean.dependsOn().length > 0)
 			beanDef.setDependsOn(bean.dependsOn());
 
-		logger.info(format("Registering bean definition for @Bean method %s.%s()", configClass.getName(),
-		        beanName));
+		logger.info(format("Registering bean definition for @Bean method %s.%s()",
+			configClass.getName(), beanName));
 
 		registry.registerBeanDefinition(beanName, beanDef);
 
@@ -188,7 +183,7 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		} while (clbf != null);
 
 		throw new NoSuchBeanDefinitionException(format("No bean definition matching name '%s' "
-		        + "could be found in %s or its ancestry", beanName, registry));
+			+ "could be found in %s or its ancestry", beanName, registry));
 	}
 
 }
