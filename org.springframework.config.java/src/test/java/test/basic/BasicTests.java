@@ -11,9 +11,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.MalformedConfigurationException;
-import org.springframework.config.java.Scopes;
+import org.springframework.config.java.StandardScopes;
 import org.springframework.config.java.ext.Bean;
-import org.springframework.config.java.support.ConfigurationPostProcessor;
+import org.springframework.config.java.support.ConfigurationClassPostProcessor;
 
 import test.beans.ITestBean;
 import test.beans.TestBean;
@@ -24,7 +24,7 @@ public class BasicTests {
 	/**
 	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition} for
 	 * each of the given {@link Configuration} <var>configClasses</var>, and then
-	 * post-processes the factory using JavaConfig's {@link ConfigurationPostProcessor}.
+	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
 	 * When complete, the factory is ready to service requests for any {@link Bean} methods
 	 * declared by <var>configClasses</var>.
 	 * 
@@ -42,7 +42,7 @@ public class BasicTests {
 			        .getBeanDefinition());
 		}
 
-		new ConfigurationPostProcessor().postProcessBeanFactory(factory);
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(factory);
 
 		factory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
 
@@ -96,7 +96,7 @@ public class BasicTests {
 			return bar;
 		}
 
-		@Bean(scope = Scopes.PROTOTYPE)
+		@Bean(scope = StandardScopes.PROTOTYPE)
 		public TestBean baz() {
 			return new TestBean("bar");
 		}

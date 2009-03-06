@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.Scopes;
+import org.springframework.config.java.StandardScopes;
 
 
 /**
@@ -87,7 +87,7 @@ public @interface Bean {
 	 * Scope: whether the bean is a singleton, prototype or custom scope. Default is
 	 * singleton.
 	 */
-	String scope() default Scopes.SINGLETON;
+	String scope() default StandardScopes.SINGLETON;
 
 	/**
 	 * Bean autowire strategy.

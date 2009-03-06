@@ -14,17 +14,17 @@ import org.springframework.config.java.ext.Bean;
 import org.springframework.util.ClassUtils;
 
 /**
- * Unit tests for {@link ConfigurationPostProcessor}
+ * Unit tests for {@link ConfigurationClassPostProcessor}
  *
  * @author Chris Beams
  */
 public class ConfigurationPostProcessorTests {
 
-	private static final String ORIG_CGLIB_TEST_CLASS = ConfigurationPostProcessor.CGLIB_TEST_CLASS;
+	private static final String ORIG_CGLIB_TEST_CLASS = ConfigurationClassPostProcessor.CGLIB_TEST_CLASS;
 	private static final String BOGUS_CGLIB_TEST_CLASS = "a.bogus.class";
 
 	/**
-	 * CGLIB is an optional dependency for Core Spring.  If users attempt
+	 * CGLIB is an optional dependency for Spring.  If users attempt
 	 * to use {@link Configuration} classes, they'll need it on the classpath;
 	 * if Configuration classes are present in the bean factory and CGLIB
 	 * is not present, an instructive exception should be thrown.
@@ -39,17 +39,17 @@ public class ConfigurationPostProcessorTests {
 
 		factory.registerBeanDefinition("config1", rootBeanDefinition(Config.class).getBeanDefinition());
 
-		ConfigurationPostProcessor cpp = new ConfigurationPostProcessor();
+		ConfigurationClassPostProcessor cpp = new ConfigurationClassPostProcessor();
 
 		// temporarily set the cglib test class to something bogus
-		ConfigurationPostProcessor.CGLIB_TEST_CLASS = BOGUS_CGLIB_TEST_CLASS;
+		ConfigurationClassPostProcessor.CGLIB_TEST_CLASS = BOGUS_CGLIB_TEST_CLASS;
 
 		try {
 			cpp.postProcessBeanFactory(factory);
 		} catch (RuntimeException ex) {
 			assertTrue(ex.getMessage().contains("CGLIB is required to process @Configuration classes"));
 		} finally {
-			ConfigurationPostProcessor.CGLIB_TEST_CLASS = ORIG_CGLIB_TEST_CLASS;
+			ConfigurationClassPostProcessor.CGLIB_TEST_CLASS = ORIG_CGLIB_TEST_CLASS;
 		}
 	}
 
@@ -59,7 +59,7 @@ public class ConfigurationPostProcessorTests {
 	 * of {@link Configuration} classes.
 	 * 
 	 * This test will fail if any CGLIB classes are classloaded before the call
-	 * to {@link ConfigurationPostProcessor#enhanceConfigurationClasses}
+	 * to {@link ConfigurationClassPostProcessor#enhanceConfigurationClasses}
 	 */
 	@Test
 	public void testCglibClassesAreLoadedJustInTimeForEnhancement() throws Exception {
@@ -93,7 +93,7 @@ public class ConfigurationPostProcessorTests {
 	 * Enhanced {@link Configuration} classes are only necessary for respecting
 	 * certain bean semantics, like singleton-scoping, scoped proxies, etc.
 	 * 
-	 * Technically, {@link ConfigurationPostProcessor} could fail to enhance the
+	 * Technically, {@link ConfigurationClassPostProcessor} could fail to enhance the
 	 * registered Configuration classes, and many use cases would still work.
 	 * Certain cases, however, like inter-bean singleton references would not.
 	 * We test for such a case below, and in doing so prove that enhancement is
@@ -104,7 +104,7 @@ public class ConfigurationPostProcessorTests {
 		DefaultListableBeanFactory beanFactory = new  DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config",
 				rootBeanDefinition(SingletonBeanConfig.class).getBeanDefinition());
-		new ConfigurationPostProcessor().postProcessBeanFactory(beanFactory);
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		Foo foo = (Foo) beanFactory.getBean("foo");
 		Bar bar = (Bar) beanFactory.getBean("bar");
 		assertThat(foo, sameInstance(bar.foo));
