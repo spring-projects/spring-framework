@@ -18,7 +18,7 @@ package org.springframework.core.convert.converter;
 import java.math.BigDecimal;
 
 /**
- * Converts a String to a BigDecimal and back.
+ * Converts a String to a BigDecimal using {@link BigDecimal#BigDecimal(String).
  * 
  * @author Keith Donald
  */

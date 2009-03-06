@@ -16,9 +16,9 @@
 package org.springframework.core.convert.converter;
 
 /**
- * Converts from a String to Enum and back.
+ * Converts from a String to Enum using {@link Enum#valueOf(Class, String)}.
  * 
- * @author Scott Andrews
+ * @author Keith Donald
  */
 @SuppressWarnings("unchecked")
 public class StringToEnum implements SuperConverter<String, Enum> {
