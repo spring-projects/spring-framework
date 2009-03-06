@@ -29,21 +29,19 @@ import net.sf.cglib.core.DefaultGeneratorStrategy;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.BeanDefinitionRegistrar;
 import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.NoOpInterceptor;
 import org.springframework.config.java.ext.BeanMethodInterceptor;
 import org.springframework.config.java.ext.BeanRegistrar;
 
@@ -85,15 +83,13 @@ public class ConfigurationEnhancer {
 	 */
 	public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory) {
 		notNull(beanFactory, "beanFactory must be non-null");
-		//notNull(model, "model must be non-null");
-
-		//populateRegistrarsAndCallbacks(beanFactory, model);
 		
 		registrars.add(new BeanRegistrar());
 		BeanMethodInterceptor beanMethodInterceptor = new BeanMethodInterceptor();
 		beanMethodInterceptor.setBeanFactory(beanFactory);
 		callbackInstances.add(beanMethodInterceptor);
 		
+		// add no-op default registrar and method interceptor
 		registrars.add(new BeanDefinitionRegistrar() {
 
 			public boolean accepts(Method method) {
@@ -104,48 +100,15 @@ public class ConfigurationEnhancer {
 				// no-op
 			}
 		});
-		callbackInstances.add(NoOpInterceptor.INSTANCE);
-		
-		for (Callback callback : callbackInstances)
-			callbackTypes.add(callback.getClass());
-	}
+		callbackInstances.add(new MethodInterceptor() {
 
-
-	/**
-	 * Reads the contents of {@code model} in order to populate {@link #registrars},
-	 * {@link #callbackInstances} and {@link #callbackTypes} appropriately.
-	 * 
-	 * @see #callbackFilter
-	 */
-	private void populateRegistrarsAndCallbacks(DefaultListableBeanFactory beanFactory,
-	        ConfigurationModel model) {
-		
-		for (ConfigurationClass configClass : model.getAllConfigurationClasses()) {
-			for (BeanMethod method : configClass.getMethods()) {
-				registrars.add(new BeanRegistrar());
-
-				Callback callback = new BeanMethodInterceptor();
-
-				if (callback instanceof BeanFactoryAware)
-					((BeanFactoryAware) callback).setBeanFactory(beanFactory);
-
-				callbackInstances.add(callback);
-			}
-		}
-
-		// register a 'catch-all' registrar
-		registrars.add(new BeanDefinitionRegistrar() {
-
-			public boolean accepts(Method method) {
-				return true;
-			}
-
-			public void register(BeanMethod method, BeanDefinitionRegistry registry) {
-				// no-op
-			}
+			public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy)
+                    throws Throwable {
+	            return null;
+            }
+			
 		});
-		callbackInstances.add(NoOpInterceptor.INSTANCE);
-
+		
 		for (Callback callback : callbackInstances)
 			callbackTypes.add(callback.getClass());
 	}
