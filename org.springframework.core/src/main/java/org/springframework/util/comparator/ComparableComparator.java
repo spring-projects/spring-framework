@@ -18,8 +18,6 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.springframework.util.Assert;
-
 /**
  * Comparator that adapts Comparables to the Comparator interface.
  * Mainly for internal use in other Comparators, when supposed
