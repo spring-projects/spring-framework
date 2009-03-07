@@ -23,9 +23,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
-
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -37,15 +40,18 @@ import org.springframework.stereotype.Component;
  */
 public class AnnotationMetadataTests extends TestCase {
 
+
 	public void testStandardAnnotationMetadata() throws IOException {
 		StandardAnnotationMetadata annInfo = new StandardAnnotationMetadata(AnnotatedComponent.class);
 		doTestAnnotationInfo(annInfo);
+		doTestMethodAnnotationInfo(annInfo);
 	}
 
 	public void testAsmAnnotationMetadata() throws IOException {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(AnnotatedComponent.class.getName());
 		doTestAnnotationInfo(metadataReader.getAnnotationMetadata());
+		doTestMethodAnnotationInfo(metadataReader.getAnnotationMetadata());
 	}
 
 	private void doTestAnnotationInfo(AnnotationMetadata metadata) {
@@ -77,6 +83,16 @@ public class AnnotationMetadataTests extends TestCase {
 		assertEquals(String.class, specialAttrs.get("clazz"));
 		assertEquals(Thread.State.NEW, specialAttrs.get("state"));
 	}
+	
+	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
+		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods("org.springframework.beans.factory.annotation.Autowired");
+		assertEquals(1, methods.size());
+		for (MethodMetadata methodMetadata : methods) {
+			Set<String> annotationTypes = methodMetadata.getAnnotationTypes();
+			assertEquals(1, annotationTypes.size());
+		}
+		
+	}
 
 
 	@Target(ElementType.TYPE)
@@ -93,6 +109,17 @@ public class AnnotationMetadataTests extends TestCase {
 	@Scope("myScope")
 	@SpecialAttr(clazz = String.class, state = Thread.State.NEW)
 	private static class AnnotatedComponent implements Serializable {
+		
+		@Autowired
+		public void doWork(@Qualifier("myColor") java.awt.Color color) {
+			
+		}
+		@Test
+		public void doSleep() 
+		{
+			
+		}
 	}
+
 
 }

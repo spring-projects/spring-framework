@@ -17,9 +17,11 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
+
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -27,13 +29,18 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -67,6 +74,9 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	protected static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
+	protected static final String QUALIFIER_CLASS_NAME = "org.springframework.beans.factory.annotation.Qualifier";
+	
+	protected static final String SCOPE_CLASS_NAME = "org.springframework.context.annotation.Scope";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -223,6 +233,94 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 		}
 		return candidates;
 	}
+	
+	public Set<BeanDefinition> findCandidateFactoryMethods(final BeanDefinitionHolder beanDefinitionHolder) {
+		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
+		AbstractBeanDefinition containingBeanDef = (AbstractBeanDefinition)beanDefinitionHolder.getBeanDefinition();
+		Resource resource = containingBeanDef.getResource();
+		boolean debugEnabled = logger.isDebugEnabled();
+		boolean traceEnabled = logger.isTraceEnabled();
+		
+		try {
+			if (resource.isReadable()) {
+				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+				Set<MethodMetadata> factoryMethodMetadataSet = metadataReader.getAnnotationMetadata().getAnnotatedMethods("org.springframework.beans.factory.annotation.FactoryMethod");
+				for (MethodMetadata methodMetadata : factoryMethodMetadataSet) {					
+					if (isCandidateFactoryMethod(methodMetadata)) {
+						ScannedGenericBeanDefinition factoryBeanDef = new ScannedGenericBeanDefinition(metadataReader);
+
+						if (!methodMetadata.isStatic())	{
+							factoryBeanDef.setFactoryBeanName(beanDefinitionHolder.getBeanName());
+						}						
+						factoryBeanDef.setFactoryMethodName(methodMetadata.getMethodName());	
+						
+						addQualifierToFactoryMethodBeanDefinition(methodMetadata, factoryBeanDef);						
+						addScopeToFactoryMethodBeanDefinition(containingBeanDef, methodMetadata, factoryBeanDef);
+						
+						factoryBeanDef.setResource(containingBeanDef.getResource());
+						factoryBeanDef.setSource(containingBeanDef.getSource());
+						if (debugEnabled) {
+							logger.debug("Identified candidate factory method in class: " + resource);
+						}
+						candidates.add(factoryBeanDef);
+					}
+					else {
+						if (traceEnabled) {
+							logger.trace("Ignored because not matching any filter: " + resource);
+						}
+					}
+				}
+				
+			}
+		} catch (IOException ex) {
+			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
+		}
+			
+		return candidates;
+	}
+
+
+	private void addScopeToFactoryMethodBeanDefinition(
+			AbstractBeanDefinition containingBeanDefinition,
+			MethodMetadata factoryMethodMetadata,
+			ScannedGenericBeanDefinition factoryBeanDefinition) {
+		if (factoryMethodMetadata.hasAnnotation(SCOPE_CLASS_NAME))	{
+			Map<String, Object> attributes = factoryMethodMetadata.getAnnotationAttributes(SCOPE_CLASS_NAME);
+			factoryBeanDefinition.setScope(attributes.get("value").toString());
+		} else {
+			factoryBeanDefinition.setScope(containingBeanDefinition.getScope());
+		}
+	}
+
+
+	protected void addQualifierToFactoryMethodBeanDefinition(MethodMetadata methodMetadata,
+			ScannedGenericBeanDefinition beanDef) {
+		//Add qualifiers to bean definition					
+		if (methodMetadata.hasAnnotation(QUALIFIER_CLASS_NAME))
+		{
+			Map<String, Object> attributes = methodMetadata.getAnnotationAttributes(QUALIFIER_CLASS_NAME);	
+			beanDef.addQualifier(new AutowireCandidateQualifier(Qualifier.class, attributes.get("value")));
+		}
+		
+		if (methodMetadata.hasMetaAnnotation(QUALIFIER_CLASS_NAME))
+		{
+			//Need the attribute that has a qualifier meta-annotation.
+			Set<String> annotationTypes  = methodMetadata.getAnnotationTypesWithMetaAnnotation(QUALIFIER_CLASS_NAME);							
+			if (annotationTypes.size() == 1)
+			{
+				String annotationType = annotationTypes.iterator().next();
+				Map<String, Object> attributes = methodMetadata.getAnnotationAttributes(annotationType);	
+				beanDef.addQualifier(new AutowireCandidateQualifier(annotationType, attributes.get("value")));													
+			}
+		}
+	}
+		
+	protected boolean isCandidateFactoryMethod(MethodMetadata methodMetadata) {
+		
+		//TODO decide if we can support generic wildcard return types, parameter-less method and put in appropriate checks		
+		return true;
+	}
+
 
 	/**
 	 * Resolve the specified base package into a pattern specification for

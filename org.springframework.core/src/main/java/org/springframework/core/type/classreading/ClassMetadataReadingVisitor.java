@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.EmptyVisitor;
 
@@ -33,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata {
+class ClassMetadataReadingVisitor extends ClassAdapter implements ClassMetadata {
 
 	private String className;
 
@@ -48,8 +49,12 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 	private String superClassName;
 
 	private String[] interfaces;
-
-
+	
+	public ClassMetadataReadingVisitor()
+	{
+		super(new EmptyVisitor());
+	}
+	
 	@Override
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);

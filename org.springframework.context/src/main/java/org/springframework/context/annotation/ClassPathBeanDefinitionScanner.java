@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,10 +211,32 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 					beanDefinitions.add(definitionHolder);
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
-			}
+			}						
 		}
+		
+	
+		postProcessComponentBeanDefinitions(beanDefinitions);
 		return beanDefinitions;
 	}
+
+	protected void postProcessComponentBeanDefinitions(Set<BeanDefinitionHolder> beanDefinitions) {
+		//TODO refactor increment index count as part of naming strategy.
+		int count = 0;
+		Set<BeanDefinitionHolder> factoryBeanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
+		for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitions) {
+			Set<BeanDefinition> candidates = findCandidateFactoryMethods(beanDefinitionHolder);			
+			for (BeanDefinition candidate : candidates ) {
+				//TODO refactor to introduce naming strategy and some sanity checks.
+				String beanName = beanDefinitionHolder.getBeanName() + "$" + candidate.getFactoryMethodName() + "#" + count++;												
+				BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+				factoryBeanDefinitions.add(definitionHolder);
+				registerBeanDefinition(definitionHolder, this.registry);
+			}			
+		}
+		beanDefinitions.addAll(factoryBeanDefinitions);
+	}
+
+
 
 	/**
 	 * Apply further settings to the given bean definition,
