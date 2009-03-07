@@ -18,7 +18,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.Assert;
 
 
 // TODO: SJC-242 document BeanHandler
@@ -26,6 +28,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 public class BeanRegistrar implements BeanDefinitionRegistrar {
 
 	private static final Log logger = LogFactory.getLog(BeanRegistrar.class);
+	
+	/** Prefix used when registering the target object for a scoped proxy. */
+	private static final String TARGET_NAME_PREFIX = "scopedTarget.";
 
 	/**
 	 * Ensures that <var>member</var> is a method and is annotated (directly or indirectly)
@@ -110,18 +115,17 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		if (hasText(destroyMethodName))
 			beanDef.setDestroyMethodName(destroyMethodName);
 
-		// is this method annotated with @ScopedProxy?
-		ScopedProxy scopedProxy = method.getAnnotation(ScopedProxy.class);
-		if (scopedProxy != null) {
+		// is this method annotated with @Scope(scopedProxy=...)?
+		if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 			RootBeanDefinition targetDef = beanDef;
 			//
 			// Create a scoped proxy definition for the original bean name,
 			// "hiding" the target bean in an internal target definition.
-			String targetBeanName = ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+			String targetBeanName = resolveHiddenScopedProxyBeanName(beanName);
 			RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
 			scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
 
-			if (scopedProxy.proxyTargetClass())
+			if (scope.proxyMode() == ScopedProxyMode.TARGET_CLASS)
 				targetDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
 			// ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we
 			// don't need to set it explicitly here.
@@ -189,6 +193,19 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 
 		throw new NoSuchBeanDefinitionException(format("No bean definition matching name '%s' "
 			+ "could be found in %s or its ancestry", beanName, registry));
+	}
+
+	/**
+	 * Return the <i>hidden</i> name based on a scoped proxy bean name.
+	 *
+	 * @param   originalBeanName  the scope proxy bean name as declared in the
+	 *                            Configuration-annotated class
+	 *
+	 * @return  the internally-used <i>hidden</i> bean name
+	 */
+	public static String resolveHiddenScopedProxyBeanName(String originalBeanName) {
+		Assert.hasText(originalBeanName);
+		return TARGET_NAME_PREFIX.concat(originalBeanName);
 	}
 
 }

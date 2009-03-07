@@ -44,5 +44,17 @@ public @interface Scope {
 	 * @return the desired scope
 	 */
 	String value() default BeanDefinition.SCOPE_SINGLETON;
+
+	/**
+	 * Specifies whether a component should be configured as a scoped proxy
+	 * and if so, whether the proxy should be interface-based or subclass-based.
+	 * 
+	 * <p>Defaults to {@link ScopedProxyMode#NO}, indicating no scoped proxy
+	 * should be created.
+	 * 
+	 * <p>Analogous to {@literal <aop:scoped-proxy/>} support in XML. Valid
+	 * only in conjunction with a non-singleton, non-prototype {@link #value()}.
+	 */
+	ScopedProxyMode proxyMode() default ScopedProxyMode.NO;
 	
 }

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
 
@@ -128,12 +129,11 @@ public final class BeanMethod {
 		if (Modifier.isFinal(getModifiers()))
 			problemReporter.error(new FinalMethodError());
 		
-		if (this.getAnnotation(ScopedProxy.class) == null)
-			return;
-
 		Scope scope = this.getAnnotation(Scope.class);
-		if(scope == null || scope.equals(SINGLETON) || scope.equals(PROTOTYPE))
-			problemReporter.error(new InvalidScopedProxyDeclarationError(this));
+		if(scope != null
+			&& scope.proxyMode() != ScopedProxyMode.NO
+			&& (scope.value().equals(SINGLETON) || scope.value().equals(PROTOTYPE)))
+				problemReporter.error(new InvalidScopedProxyDeclarationError(this));
 	}
 
 	@Override
@@ -195,6 +195,17 @@ public final class BeanMethod {
 		public FinalMethodError() {
 			super(format("method '%s' may not be final. remove the final modifier to continue", getName()), new Location(new FileSystemResource("/dev/null")));
 		}
+	}
+	
+	public class InvalidScopedProxyDeclarationError extends Problem {
+		public InvalidScopedProxyDeclarationError(BeanMethod method) {
+			super(
+					String.format("method %s contains an invalid annotation declaration: scoped proxies "
+					        + "cannot be created for singleton/prototype beans", method.getName()),
+			        new Location(new FileSystemResource("/dev/null"))
+				);
+		}
+
 	}
 
 }
