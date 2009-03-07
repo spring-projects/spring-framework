@@ -24,7 +24,8 @@ import net.sf.cglib.proxy.MethodProxy;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.BeanRegistrar;
-import org.springframework.config.java.ScopedProxy;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationUtils;
 
 
@@ -46,11 +47,11 @@ class BeanMethodInterceptor extends AbstractMethodInterceptor {
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 		String beanName = getBeanName(method);
 
-		 boolean isScopedProxy =
-			 (AnnotationUtils.findAnnotation(method, ScopedProxy.class) != null);
+		Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
+		boolean isScopedProxy = (scope != null && scope.proxyMode() != ScopedProxyMode.NO);
 		
 		 String scopedBeanName =
-			 ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+			 BeanRegistrar.resolveHiddenScopedProxyBeanName(beanName);
 		 if (isScopedProxy && beanFactory.isCurrentlyInCreation(scopedBeanName))
 		 beanName = scopedBeanName;
 
