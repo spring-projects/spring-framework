@@ -18,7 +18,11 @@ package org.springframework.config.java;
 import static java.lang.String.*;
 
 import java.util.ArrayList;
-import java.util.List;
+
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.core.io.FileSystemResource;
 
 
 
@@ -39,7 +43,7 @@ import java.util.List;
  * @author Chris Beams
  * @see org.springframework.config.java.internal.parsing.ConfigurationParser
  */
-public final class ConfigurationModel implements Validatable {
+public final class ConfigurationModel {
 
 	/* list is used because order and collection equality matters. */
 	private final ArrayList<ConfigurationClass> configurationClasses = new ArrayList<ConfigurationClass>();
@@ -89,35 +93,40 @@ public final class ConfigurationModel implements Validatable {
 	 * Recurses through the model validating each object along the way and aggregating any
 	 * <var>errors</var>.
 	 * 
-	 * @see ConfigurationClass#validate(java.util.List)
-	 * @see BeanMethod#validate(java.util.List)
-	 * @see UsageError
+	 * @see ConfigurationClass#validate
+	 * @see BeanMethod#validate
 	 */
-	public void validate(List<UsageError> errors) {
+	public void validate(ProblemReporter problemReporter) {
 		// user must specify at least one configuration
 		if (configurationClasses.isEmpty())
-			errors.add(new EmptyModelError());
+			problemReporter.error(new EmptyModelError());
 
-		// check for any illegal @Bean overriding
-        ConfigurationClass[] allClasses = getAllConfigurationClasses();
-        for (int i = 0; i < allClasses.length; i++) {
-        	for (BeanMethod method : allClasses[i].getMethods()) {
-        		Bean bean = method.getAnnotation(Bean.class);
-        
-        		if (bean == null || bean.allowOverriding())
-        			continue;
-        
-        		for (int j = i + 1; j < allClasses.length; j++)
-        			if (allClasses[j].hasMethod(method.getName()))
-        				errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j], method));
-        	}
-        }
+		// TODO: prune this
+//		// check for any illegal @Bean overriding
+//        ConfigurationClass[] allClasses = getAllConfigurationClasses();
+//        for (int i = 0; i < allClasses.length; i++) {
+//        	for (BeanMethod method : allClasses[i].getMethods()) {
+//        		Bean bean = method.getAnnotation(Bean.class);
+//        
+//        		if (bean == null || bean.allowOverriding())
+//        			continue;
+//        
+//        		for (int j = i + 1; j < allClasses.length; j++)
+//        			if (allClasses[j].hasMethod(method.getName()))
+//        				problemReporter.error(
+//        						new Problem(
+//        							allClasses[i].new IllegalBeanOverrideError(allClasses[j], method).getDescription(),
+//        							new Location(new ClassPathResource(allClasses[i].getName().replace('.', '/').concat(".class")))
+//    							)
+//    						);
+//        	}
+//        }
 
 		// each individual configuration class must be well-formed
 		// note that each configClass detects usage errors on its imports recursively
 		// note that each configClass will recursively process its respective methods
 		for (ConfigurationClass configClass : configurationClasses)
-			configClass.validate(errors);
+			configClass.validate(problemReporter);
 	}
 
 	@Override
@@ -151,15 +160,13 @@ public final class ConfigurationModel implements Validatable {
 	}
 
 
-	public class EmptyModelError extends UsageError {
+	public class EmptyModelError extends Problem {
 		public EmptyModelError() {
-			super(null, 0);
-		}
-
-		@Override
-		public String getDescription() {
-			return format("Configuration model was empty. Make sure at least one "
-			        + "@%s class has been specified.", Configuration.class.getSimpleName());
+			super(
+				format("Configuration model was empty. Make sure at least one "
+						+ "@%s class has been specified.", Configuration.class.getSimpleName()),
+						new Location(new FileSystemResource("/dev/null"))
+		        );
 		}
 	}
 

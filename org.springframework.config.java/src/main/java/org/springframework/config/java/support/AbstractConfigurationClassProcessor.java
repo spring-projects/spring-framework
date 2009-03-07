@@ -16,11 +16,13 @@
 package org.springframework.config.java.support;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.beans.factory.parsing.FailFastProblemReporter;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
 
 
@@ -45,6 +47,14 @@ import org.springframework.config.java.internal.parsing.ConfigurationParser;
 public abstract class AbstractConfigurationClassProcessor {
 	
 	/**
+	 * Used to register any problems detected with {@link Configuration} or {@link Bean}
+	 * declarations. For instance, a Bean method marked as {@literal final} is illegal
+	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter},
+	 * but is overridable with {@link #setProblemReporter}
+	 */
+	private ProblemReporter problemReporter = new FailFastProblemReporter();
+
+	/**
 	 * Populate and return a registry containing all {@link Configuration} bean definitions
 	 * to be processed.
 	 * 
@@ -65,11 +75,26 @@ public abstract class AbstractConfigurationClassProcessor {
 	
 	/**
 	 * Validate the given model and handle any errors.  Implementations may choose to throw
-	 * {@link MalformedConfigurationException}, or in the case of tooling register problems
+	 * {@link BeanDefinitionParsingException}, or in the case of tooling register problems
 	 * with the UI.
 	 * @param configModel {@link ConfigurationModel} to validate
 	 */
 	protected abstract void validateModel(ConfigurationModel configModel);
+	
+	/**
+	 * Override the default {@link ProblemReporter}.
+	 * @param problemReporter custom problem reporter
+	 */
+	protected final void setProblemReporter(ProblemReporter problemReporter) {
+		this.problemReporter = problemReporter;
+	}
+	
+	/**
+	 * Get the currently registered {@link ProblemReporter}.
+	 */
+	protected final ProblemReporter getProblemReporter() {
+		return problemReporter;
+	}
 	
 	/**
 	 * Build and validate a {@link ConfigurationModel} based on the registry of

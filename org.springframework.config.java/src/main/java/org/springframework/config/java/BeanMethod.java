@@ -16,16 +16,22 @@
 package org.springframework.config.java;
 
 import static java.lang.String.*;
+import static org.springframework.config.java.StandardScopes.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
 
 
-public final class BeanMethod implements Validatable {
+public final class BeanMethod {
 
 	private final String name;
 	private final int modifiers;
@@ -65,9 +71,8 @@ public final class BeanMethod implements Validatable {
 	}
 
 	/**
-	 * Returns the annotation on this method matching <var>annoType</var> or null
-	 * IllegalStateException} if not present.
-	 * 
+	 * @return the annotation on this method matching <var>annoType</var> or
+	 * {@literal null} if not present.
 	 * @see #getRequiredAnnotation(Class)
 	 */
 	@SuppressWarnings("unchecked")
@@ -80,9 +85,8 @@ public final class BeanMethod implements Validatable {
 	}
 
 	/**
-	 * Returns the annotation on this method matching <var>annoType</var> or throws
-	 * {@link IllegalStateException} if not present.
-	 * 
+	 * @return the annotation on this method matching <var>annoType</var>
+	 * @throws {@link IllegalStateException} if not present
 	 * @see #getAnnotation(Class)
 	 */
 	public <T extends Annotation> T getRequiredAnnotation(Class<T> annoType) {
@@ -96,7 +100,7 @@ public final class BeanMethod implements Validatable {
 	}
 
 	/**
-	 * Sets up bi-directional relationship between this method and its declaring class.
+	 * Set up a bi-directional relationship between this method and its declaring class.
 	 * 
 	 * @see ConfigurationClass#addMethod(BeanMethod)
 	 */
@@ -116,22 +120,20 @@ public final class BeanMethod implements Validatable {
 		return lineNumber;
 	}
 
-	public void validate(List<UsageError> errors) {
+	public void validate(ProblemReporter problemReporter) {
 
 		if (Modifier.isPrivate(getModifiers()))
-			errors.add(new PrivateMethodError());
+			problemReporter.error(new PrivateMethodError());
 
 		if (Modifier.isFinal(getModifiers()))
-			errors.add(new FinalMethodError());
+			problemReporter.error(new FinalMethodError());
 		
 		if (this.getAnnotation(ScopedProxy.class) == null)
 			return;
 
-		Bean bean =this.getRequiredAnnotation(Bean.class);
-
-		if (bean.scope().equals(StandardScopes.SINGLETON)
-				|| bean.scope().equals(StandardScopes.PROTOTYPE))
-			errors.add(new InvalidScopedProxyDeclarationError(this));
+		Scope scope = this.getAnnotation(Scope.class);
+		if(scope == null || scope.equals(SINGLETON) || scope.equals(PROTOTYPE))
+			problemReporter.error(new InvalidScopedProxyDeclarationError(this));
 	}
 
 	@Override
@@ -181,27 +183,17 @@ public final class BeanMethod implements Validatable {
 		return true;
 	}
 
-	/** JavaConfigMethods must be visible (non-private) in order to accommodate CGLIB. */
-	public class PrivateMethodError extends UsageError {
+	/** {@link Bean} methods must be non-private in order to accommodate CGLIB. */
+	public class PrivateMethodError extends Problem {
 		public PrivateMethodError() {
-			super(getDeclaringClass(), getLineNumber());
-		}
-
-		@Override
-		public String getDescription() {
-			return format("method '%s' may not be private", getName());
+			super(format("method '%s' may not be private", getName()), new Location(new FileSystemResource("/dev/null")));
 		}
 	}
 
-	/** JavaConfigMethods must be extensible (non-final) in order to accommodate CGLIB. */
-	public class FinalMethodError extends UsageError {
+	/** {@link Bean} methods must be non-final in order to accommodate CGLIB. */
+	public class FinalMethodError extends Problem {
 		public FinalMethodError() {
-			super(getDeclaringClass(), getLineNumber());
-		}
-
-		@Override
-		public String getDescription() {
-			return format("method '%s' may not be final - remove the final modifier to continue", getName());
+			super(format("method '%s' may not be final. remove the final modifier to continue", getName()), new Location(new FileSystemResource("/dev/null")));
 		}
 	}
 

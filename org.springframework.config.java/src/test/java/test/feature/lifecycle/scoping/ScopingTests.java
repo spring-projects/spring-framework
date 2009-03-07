@@ -24,11 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.InvalidScopedProxyDeclarationError;
-import org.springframework.config.java.MalformedConfigurationException;
 import org.springframework.config.java.ScopedProxy;
 import org.springframework.config.java.StandardScopes;
 import org.springframework.config.java.support.ConfigurationClassPostProcessor;
@@ -118,8 +117,8 @@ public class ScopingTests {
 		try {
 			createContext(null, InvalidProxyOnPredefinedScopesConfiguration.class);
 			fail("exception expected");
-		} catch (MalformedConfigurationException ex) {
-			assertTrue(ex.containsError(InvalidScopedProxyDeclarationError.class));
+		} catch (BeanDefinitionParsingException ex) {
+			assertTrue(ex.getMessage().contains("cannot be used on a singleton/prototype bean"));
 		}
 	}
 
@@ -241,7 +240,8 @@ public class ScopingTests {
 	@Configuration
 	static class ScopeTestConfiguration {
 
-		@Bean(scope = StandardScopes.SESSION)
+		@Bean
+		@org.springframework.context.annotation.Scope(StandardScopes.SESSION)
 		@ScopedProxy
 		public Foo foo() {
 			return new Foo();
@@ -326,21 +326,24 @@ public class ScopingTests {
 
 	@Configuration
 	public static class ScopedConfigurationClass {
-		@Bean(scope = SCOPE)
+		@Bean
+		@org.springframework.context.annotation.Scope(SCOPE)
 		public TestBean scopedClass() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
 			return tb;
 		}
 
-		@Bean(scope = SCOPE)
+		@Bean
+		@org.springframework.context.annotation.Scope(SCOPE)
 		public ITestBean scopedInterface() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
 			return tb;
 		}
 
-		@Bean(scope = SCOPE)
+		@Bean
+		@org.springframework.context.annotation.Scope(SCOPE)
 		@ScopedProxy(proxyTargetClass = false)
 		public ITestBean scopedProxyInterface() {
 			TestBean tb = new TestBean();
@@ -349,7 +352,8 @@ public class ScopingTests {
 		}
 
 		@ScopedProxy
-		@Bean(scope = SCOPE)
+		@Bean
+		@org.springframework.context.annotation.Scope(SCOPE)
 		public TestBean scopedProxyClass() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
