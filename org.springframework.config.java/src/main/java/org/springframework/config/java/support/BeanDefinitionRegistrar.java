@@ -1,4 +1,4 @@
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 import java.lang.reflect.Method;
 
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 // TODO: SJC-242 document FactoryMethodHandler
 // TODO: SJC-242 odd that the api here uses both ModelMethod and java.lang.reflect.Member
 // TODO: SJC-242 document that there must be a no-arg ctor
-public interface BeanDefinitionRegistrar {
+interface BeanDefinitionRegistrar {
 
 	/**
 	 * Determines whether this registrar is capable of handling <var>method</var>.

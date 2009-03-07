@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 import static org.springframework.config.java.StandardScopes.*;
@@ -26,13 +26,14 @@ import java.util.List;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.config.java.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
 
 
-public final class BeanMethod {
+final class BeanMethod {
 
 	private final String name;
 	private final int modifiers;

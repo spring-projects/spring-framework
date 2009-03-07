@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.parsing;
+package org.springframework.config.java.support;
 
 import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.Util;
 import org.springframework.util.ClassUtils;
 
 
@@ -33,7 +30,7 @@ import org.springframework.util.ClassUtils;
  * from the concern of registering {@link BeanDefinition} objects based on the content of
  * that model.
  * 
- * @see org.springframework.config.java.ConfigurationModel
+ * @see org.springframework.config.java.support.ConfigurationModel
  * @see org.springframework.config.java.support.ConfigurationModelBeanDefinitionReader
  * 
  * @author Chris Beams

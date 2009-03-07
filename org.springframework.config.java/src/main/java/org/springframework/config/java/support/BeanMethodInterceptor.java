@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.enhancement;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 
@@ -23,7 +23,6 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.config.java.Bean;
-import org.springframework.config.java.BeanRegistrar;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationUtils;

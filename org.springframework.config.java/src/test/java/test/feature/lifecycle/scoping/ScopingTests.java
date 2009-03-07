@@ -26,7 +26,6 @@ import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Bean;
-import org.springframework.config.java.BeanRegistrar;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.StandardScopes;
 import org.springframework.config.java.support.ConfigurationClassPostProcessor;
@@ -145,7 +144,7 @@ public class ScopingTests {
 
 		String beanName = "scopedProxyInterface";
 
-		String scopedBeanName = BeanRegistrar.resolveHiddenScopedProxyBeanName(beanName);
+		String scopedBeanName = "scopedTarget." + beanName;
 
 		// get hidden bean
 		assertEquals(flag, spouse.getName());
@@ -179,7 +178,7 @@ public class ScopingTests {
 
 		String beanName = "scopedProxyClass";
 
-		String scopedBeanName = BeanRegistrar.resolveHiddenScopedProxyBeanName(beanName);
+		String scopedBeanName = "scopedTarget." + beanName;
 
 		// get hidden bean
 		assertEquals(flag, spouse.getName());

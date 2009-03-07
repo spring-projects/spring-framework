@@ -1,4 +1,4 @@
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 import static org.springframework.util.StringUtils.*;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.config.java.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -25,7 +26,7 @@ import org.springframework.util.Assert;
 
 // TODO: SJC-242 document BeanHandler
 // TODO: SJC-242 make package-private
-public class BeanRegistrar implements BeanDefinitionRegistrar {
+class BeanRegistrar implements BeanDefinitionRegistrar {
 
 	private static final Log logger = LogFactory.getLog(BeanRegistrar.class);
 	

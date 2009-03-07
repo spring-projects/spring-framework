@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.parsing;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;

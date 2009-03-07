@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.parsing;
+package org.springframework.config.java.support;
 
 /**
  * Note: the visibility of this interface would be reduced to package-private save for an
@@ -22,9 +22,8 @@ package org.springframework.config.java.internal.parsing;
  * two interfaces: this one, and whatever annotation is currently being parsed. The
  * restriction is that both interfaces may not be package-private if they are in separate
  * packages. In order to avoid unnecessarily restricting the visibility options for
- * user-defined annotations, this interface becomes public. Because it is in the internal.*
- * package, it won't pollute the public API, but developers should take caution not to use
- * this annotation outside the internal.parsing package.
+ * user-defined annotations, this interface becomes public. Developers should take caution
+ * not to use this annotation outside this package.
  * 
  * @author Chris Beams
  */
