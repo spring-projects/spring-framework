@@ -22,10 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-
 
 /**
  * Annotation to be applied to methods that create beans in a Spring context. The name of
@@ -65,33 +61,39 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 @Documented
 public @interface Bean {
 
-	/**
-	 * Role this bean plays in the overall application configuration.
-	 * 
-	 * @see BeanDefinition#ROLE_APPLICATION
-	 * @see BeanDefinition#ROLE_INFRASTRUCTURE
-	 * @see BeanDefinition#ROLE_SUPPORT
-	 * 
-	 * @see AbstractBeanDefinition the 'role' field is assigned by default to
-	 *      ROLE_APPLICATION
-	 */
-	int role() default BeanDefinition.ROLE_APPLICATION;
+	// TODO: 
+//	/**
+//	 * Role this bean plays in the overall application configuration.
+//	 * 
+//	 * @see BeanDefinition#ROLE_APPLICATION
+//	 * @see BeanDefinition#ROLE_INFRASTRUCTURE
+//	 * @see BeanDefinition#ROLE_SUPPORT
+//	 * 
+//	 * @see AbstractBeanDefinition the 'role' field is assigned by default to
+//	 *      ROLE_APPLICATION
+//	 */
+//	int role() default BeanDefinition.ROLE_APPLICATION;
+	
+	String[] name() default {};
 
-	/**
-	 * Bean aliases.
-	 */
-	String[] aliases() default {};
+	// TODO: Prune aliases, favor name[]
+//	/**
+//	 * Bean aliases.
+//	 */
+//	String[] aliases() default {};
 
-	/**
-	 * Scope: whether the bean is a singleton, prototype or custom scope. Default is
-	 * singleton.
-	 */
-	String scope() default StandardScopes.SINGLETON;
+	// TODO: favor @Scope
+//	/**
+//	 * Scope: whether the bean is a singleton, prototype or custom scope. Default is
+//	 * singleton.
+//	 */
+//	String scope() default StandardScopes.SINGLETON;
 
-	/**
-	 * Bean autowire strategy.
-	 */
-	Autowire autowire() default Autowire.INHERITED;
+	// TODO: prune autowiring?
+//	/**
+//	 * Bean autowire strategy.
+//	 */
+//	Autowire autowire() default Autowire.INHERITED;
 
 	// /**
 	// * Bean lazy strategy.
@@ -111,13 +113,14 @@ public @interface Bean {
 	 * Bean init method name. Normally this is not needed, as the initialization (with
 	 * parameterization) can be done directly through java code.
 	 */
-	String initMethodName() default "";
+	String initMethod() default "";
 
 	/**
 	 * Bean destroy method name.
 	 */
-	String destroyMethodName() default "";
+	String destroyMethod() default "";
 
+	// TODO: Prune DependencyCheck
 	// /**
 	// * Bean dependency check strategy.
 	// */
@@ -128,19 +131,23 @@ public @interface Bean {
 	 */
 	String[] dependsOn() default {};
 
+	// TODO: Prune @Meta
 	// /**
 	// * Metadata for the current bean.
 	// */
 	// Meta[] meta() default { };
 
-	/**
-	 * Allow the bean to be overridden in another JavaConfig, XML or other non-Java
-	 * configuration. This is consistent with DefaultListableBeanFactory's
-	 * allowBeanDefinitionOverriding property, which defaults to true.
-	 * 
-	 * @return whether overriding of this bean is allowed
-	 */
-	boolean allowOverriding() default true;
+	// TODO: Prune allowOverriding
+//	/**
+//	 * Allow the bean to be overridden in another JavaConfig, XML or other non-Java
+//	 * configuration. This is consistent with DefaultListableBeanFactory's
+//	 * allowBeanDefinitionOverriding property, which defaults to true.
+//	 * 
+//	 * @return whether overriding of this bean is allowed
+//	 */
+//	boolean allowOverriding() default true;
+//
+	//String name() default "";
 
 }
 

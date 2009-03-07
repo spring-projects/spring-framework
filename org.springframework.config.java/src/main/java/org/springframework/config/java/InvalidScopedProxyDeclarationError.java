@@ -15,19 +15,19 @@
  */
 package org.springframework.config.java;
 
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.core.io.FileSystemResource;
 
-public class InvalidScopedProxyDeclarationError extends UsageError {
-	private final BeanMethod method;
 
+public class InvalidScopedProxyDeclarationError extends Problem {
 	public InvalidScopedProxyDeclarationError(BeanMethod method) {
-		super(method.getDeclaringClass(), method.getLineNumber());
-		this.method = method;
+		super(
+				String.format("method %s contains an invalid annotation declaration: @%s "
+				        + "cannot be used on a singleton/prototype bean", method.getName(), ScopedProxy.class
+				        .getSimpleName()),
+		        new Location(new FileSystemResource("/dev/null"))
+			);
 	}
 
-	@Override
-	public String getDescription() {
-		return String.format("method %s contains an invalid annotation declaration: @%s "
-		        + "cannot be used on a singleton/prototype bean", method.getName(), ScopedProxy.class
-		        .getSimpleName());
-	}
 }

@@ -21,9 +21,12 @@ import static java.lang.String.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
 
 import sun.security.x509.Extension;
@@ -47,7 +50,7 @@ import sun.security.x509.Extension;
  */
 // TODO: SJC-242 update documentation in light of generalization changes
 // consider removing all refs to Bean, ExternalBean, etc.
-public final class ConfigurationClass extends ModelClass implements Validatable {
+public final class ConfigurationClass extends ModelClass {
 
 	private String beanName;
 
@@ -174,18 +177,18 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 		return this;
 	}
 
-	public void validate(List<UsageError> errors) {
+	public void validate(ProblemReporter problemReporter) {
 
 		// configuration classes must be annotated with @Configuration
 		if (metadata == null)
-			errors.add(new NonAnnotatedConfigurationError());
+			problemReporter.error(new NonAnnotatedConfigurationError());
 
 		// a configuration class may not be final (CGLIB limitation)
 		if (Modifier.isFinal(modifiers))
-			errors.add(new FinalConfigurationError());
+			problemReporter.error(new FinalConfigurationError());
 
 		for (BeanMethod method : methods)
-			method.validate(errors);
+			method.validate(problemReporter);
 	}
 
 
@@ -248,94 +251,27 @@ public final class ConfigurationClass extends ModelClass implements Validatable 
 
 
 	/** Configuration classes must be annotated with {@link Configuration @Configuration}. */
-	public class NonAnnotatedConfigurationError extends UsageError {
+	public class NonAnnotatedConfigurationError extends Problem {
 		public NonAnnotatedConfigurationError() {
-			super(ConfigurationClass.this, -1);
+			super(
+				format("%s was provided as a Java Configuration class but was not annotated with @%s. "
+			        + "Update the class definition to continue.", getSimpleName(), Configuration.class
+			        .getSimpleName()),
+		        new Location(new FileSystemResource("/dev/null"))
+			);
 		}
 
-		@Override
-		public String getDescription() {
-			return format("%s was provided as a Java Configuration class but was not annotated with @%s. "
-			        + "Update the class definition to continue.", getSimpleName(), Configuration.class
-			        .getSimpleName());
-		}
 	}
 
 	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
-	public class FinalConfigurationError extends UsageError {
+	public class FinalConfigurationError extends Problem {
 		public FinalConfigurationError() {
-			super(ConfigurationClass.this, -1);
+			super(
+				format("@%s class may not be final. Remove the final modifier to continue.",
+			        Configuration.class.getSimpleName()),
+		        new Location(new FileSystemResource("/dev/null"))
+			);
 		}
-
-		@Override
-		public String getDescription() {
-			return format("@%s class may not be final. Remove the final modifier to continue.",
-			        Configuration.class.getSimpleName());
-		}
-	}
-
-
-	public class InvalidPluginException extends UsageError {
-
-		private final Annotation invalidPluginAnnotation;
-
-		public InvalidPluginException(Annotation invalidPluginAnnotation) {
-			super(ConfigurationClass.this, -1);
-			this.invalidPluginAnnotation = invalidPluginAnnotation;
-		}
-
-		@Override
-		public String getDescription() {
-			return format("Annotation [%s] was not annotated with @Plugin", invalidPluginAnnotation);
-		}
-
-	}
-
-	/**
-	 * Error raised when a Bean marked as 'allowOverriding=false' is attempted to be
-	 * overridden by another bean definition.
-	 * 
-	 * @see Bean#allowOverriding()
-	 */
-	public class IllegalBeanOverrideError extends UsageError {
-		private final ConfigurationClass authoritativeClass;
-		private final BeanMethod finalMethodInQuestion;
-
-		/**
-		 * Creates a new IllegalBeanOverrideError object.
-		 * 
-		 * @param violatingClass class attempting an illegal override. null value signifies
-		 *        that the violating class is unknown or that there is no class to speak of
-		 *        (in the case of an XML bean definition doing the illegal overriding)
-		 * @param finalMethodInQuestion the method that has been marked
-		 *        'allowOverriding=false'
-		 */
-		public IllegalBeanOverrideError(ConfigurationClass violatingClass, BeanMethod finalMethodInQuestion) {
-			super(violatingClass, -1);
-			this.authoritativeClass = ConfigurationClass.this;
-			this.finalMethodInQuestion = finalMethodInQuestion;
-		}
-
-		@Override
-		public String getDescription() {
-			return format("Illegal attempt by '%s' to override bean definition originally "
-			        + "specified by %s.%s. Consider removing 'allowOverride=false' from original method.",
-			        finalMethodInQuestion.getName(), authoritativeClass.getSimpleName(),
-			        finalMethodInQuestion.getName());
-		}
-	}
-
-	public boolean hasMethod(String methodName) {
-		return getMethod(methodName) != null;
-	}
-
-	public BeanMethod getMethod(String methodName) {
-
-		for (BeanMethod method : methods)
-			if (methodName.equals(method.getName()))
-				return method;
-
-		return null;
 	}
 
 }

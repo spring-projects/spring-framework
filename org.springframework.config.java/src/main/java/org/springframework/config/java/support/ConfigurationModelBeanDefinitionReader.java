@@ -19,12 +19,10 @@ import static java.lang.String.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.BeanMethod;
@@ -96,18 +94,18 @@ class ConfigurationModelBeanDefinitionReader {
 	 * @param beanDefs 
 	 */
 	private void doLoadBeanDefinitionForConfigurationClass(ConfigurationClass configClass) {
-		Configuration metadata = configClass.getMetadata();
 
-		// TODO: think about implications with annotation-config
-		if (metadata.checkRequired() == true) {
-			RootBeanDefinition requiredAnnotationPostProcessor = new RootBeanDefinition();
-			Class<?> beanClass = RequiredAnnotationBeanPostProcessor.class;
-			String beanName = beanClass.getName() + "#0";
-			requiredAnnotationPostProcessor.setBeanClass(beanClass);
-			requiredAnnotationPostProcessor
-			        .setResourceDescription("ensures @Required methods have been invoked");
-			registry.registerBeanDefinition(beanName, requiredAnnotationPostProcessor);
-		}
+		// TODO: prune support for @Required
+//		Configuration metadata = configClass.getMetadata();
+//		if (metadata.checkRequired() == true) {
+//			RootBeanDefinition requiredAnnotationPostProcessor = new RootBeanDefinition();
+//			Class<?> beanClass = RequiredAnnotationBeanPostProcessor.class;
+//			String beanName = beanClass.getName() + "#0";
+//			requiredAnnotationPostProcessor.setBeanClass(beanClass);
+//			requiredAnnotationPostProcessor
+//			        .setResourceDescription("ensures @Required methods have been invoked");
+//			registry.registerBeanDefinition(beanName, requiredAnnotationPostProcessor);
+//		}
 
 		GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
 		configBeanDef.setBeanClassName(configClass.getName());

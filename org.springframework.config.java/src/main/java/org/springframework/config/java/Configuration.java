@@ -22,8 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Component;
 
 
@@ -44,9 +42,13 @@ import org.springframework.stereotype.Component;
  * fact that this annotation is meta-annotated with {@link Component @Component}.
  * </p>
  * 
+ * May be used in conjunction with {@link Lazy}
+ * 
  * @author Rod Johnson
  * @author Chris Beams
  * @since 3.0
+ * @see Lazy
+ * @see Bean
  */
 @Component
 @Target( { ElementType.TYPE })
@@ -55,22 +57,25 @@ import org.springframework.stereotype.Component;
 @Documented
 public @interface Configuration {
 
-	/**
-	 * Configuration name. Allow different variants, such as test, production etc. Default
-	 * will always match.
-	 * 
-	 * @return
-	 */
-	String[] names() default "";
+	// TODO: consider pruning @Configuration(name[])
+//	/**
+//	 * Configuration name. Allow different variants, such as test, production etc. Default
+//	 * will always match.
+//	 * 
+//	 * @return
+//	 */
+//	String[] name() default "";
 
-	/**
-	 * Specifies the default autowiring strategy.
-	 * 
-	 * @see Autowire
-	 * @return
-	 */
-	Autowire defaultAutowire() default Autowire.INHERITED;
+	// TODO: Prune defaultAutowire
+//	/**
+//	 * Specifies the default autowiring strategy.
+//	 * 
+//	 * @see Autowire
+//	 * @return
+//	 */
+//	Autowire defaultAutowire() default Autowire.INHERITED;
 
+	// TODO: Prune DependencyCheck
 	// /**
 	// * Dependency check strategy. By default, the dependency check is
 	// * unspecified, that is the default Spring option will apply. In most cases,
@@ -81,6 +86,8 @@ public @interface Configuration {
 	// */
 	// DependencyCheck defaultDependencyCheck() default DependencyCheck.UNSPECIFIED;
 	//
+	
+	// TODO: Favor @Lazy at the @Configuration class level.  Should have @Target(TYPE, METHOD)
 	// /**
 	// * Bean instantiation strategy. By default, it is unspecified.
 	// *
@@ -89,14 +96,16 @@ public @interface Configuration {
 	// */
 	// Lazy defaultLazy() default Lazy.UNSPECIFIED;
 
-	/**
-	 * Do we autowire with aspects from the enclosing factory scope?
-	 */
-	boolean useFactoryAspects() default false;
+	// TODO: prune useFactoryAspects
+//	/**
+//	 * Do we autowire with aspects from the enclosing factory scope?
+//	 */
+//	boolean useFactoryAspects() default false;
 
-	/**
-	 * Do we check {@link Required @Required} methods to make sure they've been called?
-	 */
-	boolean checkRequired() default false;
+	// TODO: this is the default, and needs to be switched off at annotation-config
+//	/**
+//	 * Do we check {@link Required @Required} methods to make sure they've been called?
+//	 */
+//	boolean checkRequired() default false;
 
 }

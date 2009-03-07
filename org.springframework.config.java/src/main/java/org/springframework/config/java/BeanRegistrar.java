@@ -4,6 +4,8 @@ import static java.lang.String.*;
 import static org.springframework.util.StringUtils.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
 
 
@@ -42,20 +45,28 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		beanDef.setFactoryMethodName(method.getName());
 
 		Bean bean = method.getRequiredAnnotation(Bean.class);
-
-		Configuration defaults = configClass.getMetadata();
+		
+		// TODO: prune defaults
+		//Configuration defaults = configClass.getMetadata();
 
 		// consider scoping
-		beanDef.setScope(bean.scope());
+		Scope scope = method.getAnnotation(Scope.class);
+		if(scope != null)
+			beanDef.setScope(scope.value());
 
-		// consider autowiring
-		if (bean.autowire() != AnnotationUtils.getDefaultValue(Bean.class, "autowire"))
-			beanDef.setAutowireMode(bean.autowire().value());
-		else if (defaults.defaultAutowire() != AnnotationUtils.getDefaultValue(Configuration.class,
-				"defaultAutowire"))
-			beanDef.setAutowireMode(defaults.defaultAutowire().value());
+		// TODO: prune autowiring
+//		// consider autowiring
+//		if (bean.autowire() != AnnotationUtils.getDefaultValue(Bean.class, "autowire"))
+//			beanDef.setAutowireMode(bean.autowire().value());
+//		else if (defaults.defaultAutowire() != AnnotationUtils.getDefaultValue(Configuration.class,
+//				"defaultAutowire"))
+//			beanDef.setAutowireMode(defaults.defaultAutowire().value());
 
-		String beanName = method.getName();
+		// consider name and any aliases
+		ArrayList<String> names = new ArrayList<String>(Arrays.asList(bean.name()));
+		String beanName = (names.size() > 0) ? names.remove(0) : method.getName();
+		for (String alias : bean.name())
+			registry.registerAlias(beanName, alias);
 
 		// has this already been overriden (i.e.: via XML)?
 		if (containsBeanDefinitionIncludingAncestry(beanName, registry)) {
@@ -65,11 +76,12 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 			if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
 				// no -> then it's an external override, probably XML
 
-				// ensure that overriding is ok
-				if (bean.allowOverriding() == false) {
-					UsageError error = configClass.new IllegalBeanOverrideError(null, method);
-					throw new MalformedConfigurationException(error);
-				}
+				// TODO: Prune this
+//				// ensure that overriding is ok
+//				if (bean.allowOverriding() == false) {
+//					UsageError error = configClass.new IllegalBeanOverrideError(null, method);
+//					throw new MalformedConfigurationException(error);
+//				}
 
 				// overriding is legal, return immediately
 				logger.info(format("Skipping loading bean definition for %s: a definition for bean "
@@ -77,13 +89,6 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 				return;
 			}
 		}
-
-		// propagate this bean's 'role' attribute
-		beanDef.setRole(bean.role());
-
-		// consider aliases
-		for (String alias : bean.aliases())
-			registry.registerAlias(beanName, alias);
 
 		// TODO: re-enable for Lazy support
 		// // is this bean marked as primary for disambiguation?
@@ -96,12 +101,12 @@ public class BeanRegistrar implements BeanDefinitionRegistrar {
 		// beanDef.setLazyInit(true);
 
 		// does this bean have a custom init-method specified?
-		String initMethodName = bean.initMethodName();
+		String initMethodName = bean.initMethod();
 		if (hasText(initMethodName))
 			beanDef.setInitMethodName(initMethodName);
 
 		// does this bean have a custom destroy-method specified?
-		String destroyMethodName = bean.destroyMethodName();
+		String destroyMethodName = bean.destroyMethod();
 		if (hasText(destroyMethodName))
 			beanDef.setDestroyMethodName(destroyMethodName);
 

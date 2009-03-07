@@ -174,6 +174,7 @@ public class ConfigurationEnhancer {
 	 * @return original subclass instance unless superclass is annnotated with @Aspect, in
 	 *         which case a subclass of the subclass is returned
 	 */
+	// TODO: try to implement with modifications to AbstractAspectJAdvisorFactory#isAspect
 	private Class<?> nestOneClassDeeperIfAspect(Class<?> superclass, Class<?> origSubclass) {
 		boolean superclassIsAnAspect = false;
 

@@ -18,7 +18,6 @@ package org.springframework.config.java.support;
 import static java.lang.String.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,8 +30,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.MalformedConfigurationException;
-import org.springframework.config.java.UsageError;
 import org.springframework.config.java.internal.enhancement.ConfigurationEnhancer;
 import org.springframework.config.java.internal.parsing.ConfigurationParser;
 import org.springframework.core.Ordered;
@@ -136,15 +133,12 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	}
 
 	/**
-	 * Validates the given <var>model</var>.
-	 * @throws MalformedConfigurationException if any errors are detected
+	 * Validates the given <var>model</var>. Any problems found are delegated
+	 * to {@link #getProblemReporter()}.
 	 */
 	@Override
 	protected void validateModel(ConfigurationModel model) {
-		ArrayList<UsageError> errors = new ArrayList<UsageError>();
-		model.validate(errors);
-		if (errors.size() > 0)
-			throw new MalformedConfigurationException(errors.toArray(new UsageError[] {}));
+		model.validate(this.getProblemReporter());
 	}
 
 	/**
