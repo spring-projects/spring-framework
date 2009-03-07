@@ -9,9 +9,9 @@
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-2.1.3.jar" sourcepath="/IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-sources-2.1.3.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.objectweb.asm/com.springsource.org.objectweb.asm.commons/2.2.3/com.springsource.org.objectweb.asm.commons-2.2.3.jar" sourcepath="/IVY_CACHE/org.objectweb.asm/com.springsource.org.objectweb.asm.commons/2.2.3/com.springsource.org.objectweb.asm.commons-sources-2.2.3.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.objectweb.asm/com.springsource.org.objectweb.asm/2.2.3/com.springsource.org.objectweb.asm-2.2.3.jar" sourcepath="/IVY_CACHE/org.objectweb.asm/com.springsource.org.objectweb.asm/2.2.3/com.springsource.org.objectweb.asm-sources-2.2.3.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
