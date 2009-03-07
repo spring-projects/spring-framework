@@ -70,5 +70,18 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * annotation is defined.
 	 */
 	Map<String, Object> getAnnotationAttributes(String annotationType);
+	
+	
+	// TODO return null would be more consistent with other methods if no match is found
+
+	/**
+	 * Retrieve the method meta-data for all methods that have the
+	 * given annotation type.
+	 * @param annotationType the annotation type to look for
+	 * @return a Set of (@link MethodMetadata) for methods that
+	 * have a matching annotation.  The return value will be an
+	 * empty set if no methods match the annotation type. 
+	 */
+	Set<MethodMetadata> getAnnotatedMethods(String annotationType);
 
 }

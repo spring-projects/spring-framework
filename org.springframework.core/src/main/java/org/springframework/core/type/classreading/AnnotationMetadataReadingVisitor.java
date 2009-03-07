@@ -22,15 +22,18 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.core.type.MethodMetadata;
 
 /**
  * ASM class visitor which looks for the class name and implemented types as
@@ -46,8 +49,9 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
-
-
+	
+	private final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>();
+    
 	private final ClassLoader classLoader;
 
 
@@ -55,11 +59,23 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 		this.classLoader = classLoader;
 	}
 
+	
+
+	@Override
+	public MethodVisitor visitMethod(int access, String name, String desc,
+			String signature, String[] exceptions) {
+		MethodMetadataReadingVisitor md = new MethodMetadataReadingVisitor(classLoader, name, access);
+		methodMetadataSet.add(md);
+		return md;
+	}
+
+
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+		final Map<String, Object> metaAttributes = new LinkedHashMap<String, Object>();
 		return new EmptyVisitor() {
 			@Override
 			public void visit(String name, Object value) {
@@ -107,7 +123,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 					Annotation[] metaAnnotations = annotationClass.getAnnotations();
 					Set<String> metaAnnotationTypeNames = new HashSet<String>();
 					for (Annotation metaAnnotation : metaAnnotations) {
-						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());						
 					}
 					metaAnnotationMap.put(className, metaAnnotationTypeNames);
 				}
@@ -115,6 +131,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 					// Class not found - can't determine meta-annotations.
 				}
 				attributesMap.put(className, attributes);
+				
 			}
 		};
 	}
@@ -131,7 +148,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		return this.metaAnnotationMap.get(annotationType);
 	}
-
+	
 	public boolean hasMetaAnnotation(String metaAnnotationType) {
 		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
 		for (Set<String> metaTypes : allMetaTypes) {
@@ -142,8 +159,21 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 		return false;
 	}
 
+
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.attributesMap.get(annotationType);
+	}
+
+
+	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+		for (MethodMetadata method : methodMetadataSet) {
+			if (method.hasAnnotation(annotationType))
+			{
+				annotatedMethods.add(method);
+			}
+		}
+		return annotatedMethods;
 	}
 
 }

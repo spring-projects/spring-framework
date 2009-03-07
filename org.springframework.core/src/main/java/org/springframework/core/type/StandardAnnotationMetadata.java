@@ -17,7 +17,9 @@
 package org.springframework.core.type;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,6 +96,23 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 			}
 		}
 		return null;
+	}
+
+	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
+		Method[] methods = getIntrospectedClass().getMethods();
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];			
+			Annotation[] methodAnnotations = method.getAnnotations();
+			for (int j = 0; j < methodAnnotations.length; j++) {
+				Annotation ann = methodAnnotations[j];
+				if (ann.annotationType().getName().equals(annotationType)) {
+					MethodMetadata mm = new StandardMethodMetadata(method);
+					annotatedMethods.add(mm);
+				}
+			}
+		}
+		return annotatedMethods;
 	}
 
 }
