@@ -17,137 +17,83 @@ package org.springframework.config.java;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.context.annotation.Scope;
+
 
 /**
- * Annotation to be applied to methods that create beans in a Spring context. The name of
- * the bean is the method name. (It is also possible to specify aliases using the aliases
- * array on this annotation.)
+ * Indicates that a method produces a bean to be managed by the Spring container. The
+ * names and semantics of the attributes to this annotation are intentionally similar
+ * to those of the {@literal <bean/>} element in the Spring XML schema. Deviations are
+ * as follows:
  * 
- * <p>
- * Contains information similar to that held in Spring's internal BeanDefinition metadata.
- * </p>
+ * <p>The Bean annotation does not provide attributes for scope, primary or lazy. Rather,
+ * it should be used in conjunction with {@link Scope}, {@link Primary} and {@link Lazy}
+ * annotations to acheive the same semantics.
  * 
- * <p>
- * Bean creation methods must be non-private (default, public or protected). Bean creation
- * methods may throw any exception, which will be caught and handled by the Spring container
- * on processing of the configuration class.<br>
- * Bean creation methods must return an object type. The decision to return a class or an
- * interface will be significant in the event of proxying. Bean methods that return
- * interfaces will be proxied using dynamic proxies; those that return a class will require
- * CGLIB or other subclass-based proxying. It is recommended to return an interface where
- * possible, as this is also consistent with best practice around loose coupling.
- * </p>
+ * <p>While a {@link #name()} attribute is available, the default strategy for determining
+ * the name of a bean is to use the name of the Bean method. This is convenient and
+ * intuitive, but if explicit naming is desired, the {@link #name()} attribute may be used.
+ * Also note that {@link #name()} accepts an array of strings. This is in order to allow
+ * for specifying multiple names (aka aliases) for a single bean.
  * 
- * <p>
- * Bean creation methods may reference other bean creation methods by calling them directly,
- * as follows. This ensures that references between beans are strongly typed:
- * </p>
+ * <h3>Constraints</h3>
+ * <ul>
+ *     <li>Bean methods are valid only when declared within a {@link Configuration}-annotated class
+ * 	   <li>Bean methods must be non-void, non-final, non-private
+ * 	   <li>Bean methods may not accept any arguments
+ *     <li>Bean methods may throw any exception, which will be caught and handled
+ *  by the Spring container on processing of the declaring {@link Configuration} class.
+ * </ul>
  * 
- * @see Configuration
+ * <h3>Usage</h3>
+ * <p>Bean methods may reference other Bean methods by calling them directly. This ensures
+ * that references between beans are strongly typed and navigable. So called 'inter-bean
+ * references' are guaranteed to respect scoping and AOP semantics.
+ * 
  * 
  * @author Rod Johnson
  * @author Costin Leau
  * @author Chris Beams
  * @since 3.0
+ * @see Configuration
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface Bean {
 
-	// TODO: 
-//	/**
-//	 * Role this bean plays in the overall application configuration.
-//	 * 
-//	 * @see BeanDefinition#ROLE_APPLICATION
-//	 * @see BeanDefinition#ROLE_INFRASTRUCTURE
-//	 * @see BeanDefinition#ROLE_SUPPORT
-//	 * 
-//	 * @see AbstractBeanDefinition the 'role' field is assigned by default to
-//	 *      ROLE_APPLICATION
-//	 */
-//	int role() default BeanDefinition.ROLE_APPLICATION;
-	
+	/**
+	 * The name of this bean, or if plural, aliases for this bean. If left unspecified
+	 * the name of the bean is the name of the annotated method. If specified, the method
+	 * name is ignored.
+	 */
 	String[] name() default {};
 
-	// TODO: Prune aliases, favor name[]
-//	/**
-//	 * Bean aliases.
-//	 */
-//	String[] aliases() default {};
-
-	// TODO: favor @Scope
-//	/**
-//	 * Scope: whether the bean is a singleton, prototype or custom scope. Default is
-//	 * singleton.
-//	 */
-//	String scope() default StandardScopes.SINGLETON;
-
-	// TODO: prune autowiring?
-//	/**
-//	 * Bean autowire strategy.
-//	 */
-//	Autowire autowire() default Autowire.INHERITED;
-
-	// /**
-	// * Bean lazy strategy.
-	// */
-	// Lazy lazy() default Lazy.UNSPECIFIED;
-	//
-	// /**
-	// * A bean may be marked as primary, useful for disambiguation when looking
-	// * up beans by type.
-	// *
-	// * @see
-	// org.springframework.config.java.context.JavaConfigApplicationContext#getBean(Class);
-	// */
-	// Primary primary() default Primary.UNSPECIFIED;
-
 	/**
-	 * Bean init method name. Normally this is not needed, as the initialization (with
-	 * parameterization) can be done directly through java code.
+	 * The optional name of a method to call on the bean instance during initialization.
+	 * Not commonly used, given that the method may be called programmatically directly
+	 * within the Bean method.
 	 */
 	String initMethod() default "";
 
 	/**
-	 * Bean destroy method name.
+	 * The optional name of a method to call on the bean instance during upon closing
+	 * the application context, for example a {@literal close()}
+	 * method on a {@literal DataSource}.
 	 */
 	String destroyMethod() default "";
 
-	// TODO: Prune DependencyCheck
-	// /**
-	// * Bean dependency check strategy.
-	// */
-	// DependencyCheck dependencyCheck() default DependencyCheck.UNSPECIFIED;
-
 	/**
-	 * Beans on which the current bean depends on.
+	 * Beans on which the current bean depends. Any beans specified are guaranteed to be
+	 * created by the container before this bean. Used infrequently in cases where a bean
+	 * does not explicitly depend on another through properties or constructor arguments,
+	 * but rather depends on the side effects of another bean's initialization.
 	 */
 	String[] dependsOn() default {};
-
-	// TODO: Prune @Meta
-	// /**
-	// * Metadata for the current bean.
-	// */
-	// Meta[] meta() default { };
-
-	// TODO: Prune allowOverriding
-//	/**
-//	 * Allow the bean to be overridden in another JavaConfig, XML or other non-Java
-//	 * configuration. This is consistent with DefaultListableBeanFactory's
-//	 * allowBeanDefinitionOverriding property, which defaults to true.
-//	 * 
-//	 * @return whether overriding of this bean is allowed
-//	 */
-//	boolean allowOverriding() default true;
-//
-	//String name() default "";
 
 }
 
