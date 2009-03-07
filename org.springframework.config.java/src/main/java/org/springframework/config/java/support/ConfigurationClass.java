@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 
 import static java.lang.String.*;
@@ -26,6 +26,7 @@ import java.util.Set;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.config.java.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
 
@@ -48,9 +49,7 @@ import sun.security.x509.Extension;
  * 
  * @author Chris Beams
  */
-// TODO: SJC-242 update documentation in light of generalization changes
-// consider removing all refs to Bean, ExternalBean, etc.
-public final class ConfigurationClass extends ModelClass {
+final class ConfigurationClass extends ModelClass {
 
 	private String beanName;
 

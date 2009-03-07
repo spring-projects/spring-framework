@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.enhancement;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
-import static org.springframework.config.java.Util.*;
+import static org.springframework.config.java.support.Util.*;
 import static org.springframework.util.Assert.*;
 
 import java.lang.annotation.Annotation;
@@ -39,9 +39,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.config.java.BeanDefinitionRegistrar;
-import org.springframework.config.java.BeanMethod;
-import org.springframework.config.java.BeanRegistrar;
 import org.springframework.config.java.Configuration;
 
 
@@ -53,7 +50,7 @@ import org.springframework.config.java.Configuration;
  * 
  * @author Chris Beams
  */
-public class ConfigurationEnhancer {
+class ConfigurationEnhancer {
 
 	private static final Log log = LogFactory.getLog(ConfigurationEnhancer.class);
 

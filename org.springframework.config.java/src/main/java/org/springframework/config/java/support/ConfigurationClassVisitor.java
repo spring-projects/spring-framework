@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.parsing;
+package org.springframework.config.java.support;
 
-import static org.springframework.config.java.Util.*;
-import static org.springframework.config.java.internal.parsing.MutableAnnotationUtils.*;
+import static org.springframework.config.java.support.MutableAnnotationUtils.*;
+import static org.springframework.config.java.support.Util.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.lang.annotation.Annotation;
@@ -30,10 +30,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.ConfigurationModel;
-import org.springframework.config.java.plugin.Extension;
-import org.springframework.util.ClassUtils;
 
 
 /**
@@ -130,8 +126,8 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		// return new ImportAnnotationVisitor(model);
 		// }
 
-		// -------------------------------------
-		// Detect @Plugin annotations
+		/* -------------------------------------
+		// Detect @Extension annotations
 		// -------------------------------------
 		PluginAnnotationDetectingClassVisitor classVisitor = new PluginAnnotationDetectingClassVisitor(classLoader);
 
@@ -142,6 +138,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 		if (!classVisitor.hasPluginAnnotation())
 			return super.visitAnnotation(annoTypeDesc, visible);
+		*/
 
 		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
 
@@ -153,6 +150,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		return new MutableAnnotationVisitor(pluginAnno, classLoader);
 	}
 
+	/* Support for @Extension annotation processing
 	private static class PluginAnnotationDetectingClassVisitor extends ClassAdapter {
 		private boolean hasPluginAnnotation = false;
 		private final Extension pluginAnnotation = createMutableAnnotation(Extension.class);
@@ -180,6 +178,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			return pluginAnnotation;
 		}
 	}
+	*/
 
 	/**
 	 * Delegates all {@link Configuration @Configuration} class method parsing to

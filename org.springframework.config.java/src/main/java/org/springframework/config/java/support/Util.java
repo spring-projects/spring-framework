@@ -1,4 +1,4 @@
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 import static org.springframework.util.ClassUtils.*;
@@ -24,7 +24,7 @@ import sun.security.x509.Extension;
 // TODO: SJC-242 general - check tabs & spaces
 // TODO: SJC-242 general - check apache header
 // TODO: SJC-242 rename, repackage, document
-public class Util {
+class Util {
 
 	private static final Log log = LogFactory.getLog(Util.class);
 

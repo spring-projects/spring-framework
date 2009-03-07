@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.config.java.Configuration;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -27,7 +28,7 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  */
 // TODO: Consider eliminating in favor of just ConfigurationClass
-public class ModelClass implements BeanMetadataElement {
+class ModelClass implements BeanMetadataElement {
 
 	private String name;
 	private boolean isInterface;

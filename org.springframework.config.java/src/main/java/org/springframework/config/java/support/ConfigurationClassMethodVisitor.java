@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java.internal.parsing;
+package org.springframework.config.java.support;
 
-import static org.springframework.config.java.Util.*;
-import static org.springframework.config.java.internal.parsing.AsmUtils.*;
-import static org.springframework.config.java.internal.parsing.MutableAnnotationUtils.*;
+import static org.springframework.config.java.support.AsmUtils.*;
+import static org.springframework.config.java.support.MutableAnnotationUtils.*;
+import static org.springframework.config.java.support.Util.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.lang.annotation.Annotation;
@@ -29,10 +29,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.springframework.config.java.Bean;
-import org.springframework.config.java.BeanMethod;
 import org.springframework.config.java.Configuration;
-import org.springframework.config.java.ConfigurationClass;
-import org.springframework.config.java.ModelClass;
 
 
 /**

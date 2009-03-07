@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.config.java;
+package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.config.java.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
 
@@ -30,7 +31,7 @@ import org.springframework.core.io.FileSystemResource;
  * An abstract representation of a set of user-provided "Configuration classes", usually but
  * not necessarily annotated with {@link Configuration @Configuration}. The model is
  * populated with a
- * {@link org.springframework.config.java.internal.parsing.ConfigurationParser}
+ * {@link org.springframework.config.java.support.ConfigurationParser}
  * implementation which may be reflection-based or ASM-based. Once a model has been
  * populated, it can then be rendered out to a set of BeanDefinitions. The model provides an
  * important layer of indirection between the complexity of parsing a set of classes and the
@@ -41,9 +42,9 @@ import org.springframework.core.io.FileSystemResource;
  * </p>
  * 
  * @author Chris Beams
- * @see org.springframework.config.java.internal.parsing.ConfigurationParser
+ * @see org.springframework.config.java.support.ConfigurationParser
  */
-public final class ConfigurationModel {
+final class ConfigurationModel {
 
 	/* list is used because order and collection equality matters. */
 	private final ArrayList<ConfigurationClass> configurationClasses = new ArrayList<ConfigurationClass>();
