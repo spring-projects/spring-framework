@@ -48,9 +48,6 @@ import org.springframework.stereotype.Component;
  *        {@link Autowired} constructor
  * </ul>
  * 
- * TODO: test constructor autowiring<br>
- * TODO: test private Configuration classes<br>
- * TODO: test @Lazy @Configuration<br>
  * 
  * @author Rod Johnson
  * @author Chris Beams
@@ -67,3 +64,7 @@ import org.springframework.stereotype.Component;
 public @interface Configuration {
 
 }
+
+// TODO: test constructor autowiring<br>
+// TODO: test private Configuration classes<br>
+// TODO: test @Lazy @Configuration<br>

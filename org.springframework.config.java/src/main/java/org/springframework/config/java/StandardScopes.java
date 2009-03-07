@@ -39,3 +39,5 @@ public class StandardScopes {
 	public static final String SESSION = "session";
 
 }
+
+// TODO: move StandardScopes to appropriate package
