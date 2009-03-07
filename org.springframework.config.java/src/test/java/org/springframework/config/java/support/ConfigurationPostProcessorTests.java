@@ -47,9 +47,7 @@ public class ConfigurationPostProcessorTests {
 	 */
 	@Test
 	public void testFailFastIfCglibNotPresent() {
-		@Configuration class Config {
-			public @Bean String name() { return "foo"; }
-		}
+		@Configuration class Config { }
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
