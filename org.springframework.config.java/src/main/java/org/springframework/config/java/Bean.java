@@ -54,7 +54,6 @@ import org.springframework.context.annotation.Scope;
  * that references between beans are strongly typed and navigable. So called 'inter-bean
  * references' are guaranteed to respect scoping and AOP semantics.
  * 
- * 
  * @author Rod Johnson
  * @author Costin Leau
  * @author Chris Beams
@@ -97,3 +96,8 @@ public @interface Bean {
 
 }
 
+// TODO: test @Lazy @Bean
+// TODO: test @Primary @Bean
+// TODO: test Bean alias scenarios
+// TODO: test init/destroy method scenarios
+// TODO: test dependsOn
