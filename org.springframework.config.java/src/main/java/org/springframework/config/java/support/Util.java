@@ -1,3 +1,18 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.config.java.support;
 
 import static java.lang.String.*;
@@ -20,10 +35,6 @@ import sun.security.x509.Extension;
  * 
  * @author Chris Beams
  */
-// TODO: SJC-242 general - check cycles with s101
-// TODO: SJC-242 general - check tabs & spaces
-// TODO: SJC-242 general - check apache header
-// TODO: SJC-242 rename, repackage, document
 class Util {
 
 	private static final Log log = LogFactory.getLog(Util.class);
@@ -158,8 +169,8 @@ class Util {
 		InputStream is = classLoader.getResourceAsStream(classFileName);
 
 		if (is == null)
-			throw new RuntimeException(new FileNotFoundException("Class file [" + classFileName
-			        + "] not found"));
+			throw new RuntimeException(
+					new FileNotFoundException("Class file [" + classFileName + "] not found"));
 
 		return is;
 	}

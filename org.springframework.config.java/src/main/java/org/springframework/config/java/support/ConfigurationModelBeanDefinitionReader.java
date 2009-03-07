@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,7 @@ class ConfigurationModelBeanDefinitionReader {
 
 	/**
 	 * Reads a particular {@link ConfigurationClass}, registering bean definitions for the
-	 * class itself, all its {@link Bean} methods and all its {@link Extension}
-	 * annotations.
+	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClass(configClass);
@@ -90,18 +89,6 @@ class ConfigurationModelBeanDefinitionReader {
 	 */
 	private void doLoadBeanDefinitionForConfigurationClass(ConfigurationClass configClass) {
 
-		// TODO: prune support for @Required
-//		Configuration metadata = configClass.getMetadata();
-//		if (metadata.checkRequired() == true) {
-//			RootBeanDefinition requiredAnnotationPostProcessor = new RootBeanDefinition();
-//			Class<?> beanClass = RequiredAnnotationBeanPostProcessor.class;
-//			String beanName = beanClass.getName() + "#0";
-//			requiredAnnotationPostProcessor.setBeanClass(beanClass);
-//			requiredAnnotationPostProcessor
-//			        .setResourceDescription("ensures @Required methods have been invoked");
-//			registry.registerBeanDefinition(beanName, requiredAnnotationPostProcessor);
-//		}
-
 		GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
 		configBeanDef.setBeanClassName(configClass.getName());
 
@@ -111,11 +98,9 @@ class ConfigurationModelBeanDefinitionReader {
 		// and potentially has PropertyValues and ConstructorArgs)
 		if (registry.containsBeanDefinition(configBeanName)) {
 			if (log.isInfoEnabled())
-				log.info(format(
-				        "Copying property and constructor arg values from existing bean definition for "
-				                + "@Configuration class %s to new bean definition", configBeanName));
-			AbstractBeanDefinition existing =
-				(AbstractBeanDefinition) registry.getBeanDefinition(configBeanName);
+				log.info(format("Copying property and constructor arg values from existing bean definition for "
+				              + "@Configuration class %s to new bean definition", configBeanName));
+			AbstractBeanDefinition existing = (AbstractBeanDefinition) registry.getBeanDefinition(configBeanName);
 			configBeanDef.setPropertyValues(existing.getPropertyValues());
 			configBeanDef.setConstructorArgumentValues(existing.getConstructorArgumentValues());
 			configBeanDef.setResource(existing.getResource());
@@ -127,14 +112,12 @@ class ConfigurationModelBeanDefinitionReader {
 		registry.registerBeanDefinition(configBeanName, configBeanDef);
 	}
 
-
 	/**
 	 * Reads a particular {@link BeanMethod}, registering bean definitions with
 	 * {@link #registry} based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(BeanMethod method) {
 		new BeanRegistrar().register(method, registry);
-		//method.getRegistrar().register(method, registry);
 	}
 
 //	@SuppressWarnings("unchecked")
@@ -169,6 +152,5 @@ class ConfigurationModelBeanDefinitionReader {
 //			return plugin.order();
 //		}
 //	}
-
 
 }

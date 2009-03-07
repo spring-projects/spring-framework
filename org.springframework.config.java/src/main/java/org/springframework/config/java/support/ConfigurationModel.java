@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Configuration;
 import org.springframework.core.io.FileSystemResource;
-
 
 
 /**
@@ -163,11 +162,9 @@ final class ConfigurationModel {
 
 	public class EmptyModelError extends Problem {
 		public EmptyModelError() {
-			super(
-				format("Configuration model was empty. Make sure at least one "
-						+ "@%s class has been specified.", Configuration.class.getSimpleName()),
-						new Location(new FileSystemResource("/dev/null"))
-		        );
+			super(format("Configuration model was empty. Make sure at least one "
+			           + "@%s class has been specified.", Configuration.class.getSimpleName()),
+			             new Location(new FileSystemResource("/dev/null")));
 		}
 	}
 

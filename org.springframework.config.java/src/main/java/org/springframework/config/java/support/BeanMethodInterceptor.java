@@ -59,7 +59,7 @@ class BeanMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
 	 * existence of this bean object.
 	 */
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-		
+
 		// determine the name of the bean
 		String beanName;
 		// check to see if the user has explicitly set the bean name
@@ -83,8 +83,8 @@ class BeanMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
 			// we have an already existing cached instance of this bean -> retrieve it
 			Object cachedBean = beanFactory.getBean(beanName);
 			if (log.isInfoEnabled())
-				log.info(format("Returning cached singleton object [%s] for @Bean method %s.%s", cachedBean,
-				        method.getDeclaringClass().getSimpleName(), beanName));
+				log.info(format("Returning cached singleton object [%s] for @Bean method %s.%s",
+				                cachedBean, method.getDeclaringClass().getSimpleName(), beanName));
 
 			return cachedBean;
 		}

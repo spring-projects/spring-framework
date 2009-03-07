@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	 * @param modifiers modifiers for this method
 	 */
 	public ConfigurationClassMethodVisitor(ConfigurationClass configClass, String methodName,
-	        String methodDescriptor, int modifiers, ClassLoader classLoader) {
+	                                       String methodDescriptor, int modifiers, ClassLoader classLoader) {
 		super(AsmUtils.EMPTY_VISITOR);
 
 		this.configClass = configClass;
@@ -133,12 +133,12 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 
 		// detect whether the return type is an interface
 		newClassReader(convertClassNameToResourcePath(returnType.getName()), classLoader).accept(
-		        new ClassAdapter(AsmUtils.EMPTY_VISITOR) {
-			        @Override
-			        public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
-				        returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
-			        }
-		        }, false);
+				new ClassAdapter(AsmUtils.EMPTY_VISITOR) {
+					@Override
+					public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
+						returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
+					}
+				}, false);
 
 		return returnType;
 	}

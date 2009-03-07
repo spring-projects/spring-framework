@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,8 +140,8 @@ final class BeanMethod {
 	@Override
 	public String toString() {
 		String returnTypeName = returnType == null ? "<unknown>" : returnType.getSimpleName();
-		return String.format("%s: name=%s; returnType=%s; modifiers=%d", getClass().getSimpleName(), name,
-		                     returnTypeName, modifiers);
+		return format("%s: name=%s; returnType=%s; modifiers=%d",
+		              getClass().getSimpleName(), name, returnTypeName, modifiers);
 	}
 
 	@Override
@@ -187,24 +187,24 @@ final class BeanMethod {
 	/** {@link Bean} methods must be non-private in order to accommodate CGLIB. */
 	public class PrivateMethodError extends Problem {
 		public PrivateMethodError() {
-			super(format("method '%s' may not be private", getName()), new Location(new FileSystemResource("/dev/null")));
+			super(format("method '%s' may not be private", getName()),
+			      new Location(new FileSystemResource("/dev/null")));
 		}
 	}
 
 	/** {@link Bean} methods must be non-final in order to accommodate CGLIB. */
 	public class FinalMethodError extends Problem {
 		public FinalMethodError() {
-			super(format("method '%s' may not be final. remove the final modifier to continue", getName()), new Location(new FileSystemResource("/dev/null")));
+			super(format("method '%s' may not be final. remove the final modifier to continue", getName()),
+			      new Location(new FileSystemResource("/dev/null")));
 		}
 	}
-	
+
 	public class InvalidScopedProxyDeclarationError extends Problem {
 		public InvalidScopedProxyDeclarationError(BeanMethod method) {
-			super(
-					String.format("method %s contains an invalid annotation declaration: scoped proxies "
-					        + "cannot be created for singleton/prototype beans", method.getName()),
-			        new Location(new FileSystemResource("/dev/null"))
-				);
+			super(format("method %s contains an invalid annotation declaration: scoped proxies "
+			           + "cannot be created for singleton/prototype beans", method.getName()),
+			      new Location(new FileSystemResource("/dev/null")));
 		}
 
 	}

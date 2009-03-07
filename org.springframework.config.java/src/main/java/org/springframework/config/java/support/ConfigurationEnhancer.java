@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,10 @@ class ConfigurationEnhancer {
 				if (iter.next().accepts(candidateMethod))
 					return i;
 
-			throw new IllegalStateException(format("No registrar is capable of "
-			        + "handling method [%s].  Perhaps you forgot to add a catch-all registrar?",
-			        candidateMethod.getName()));
+			throw new IllegalStateException(
+					format("No registrar is capable of handling method [%s]. "
+					     + "Perhaps you forgot to add a catch-all registrar?",
+					       candidateMethod.getName()));
 		}
 	};
 
@@ -98,10 +99,9 @@ class ConfigurationEnhancer {
 		});
 		callbackInstances.add(new MethodInterceptor() {
 
-			public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy)
-                    throws Throwable {
-	            return null;
-            }
+			public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+				return null;
+			}
 			
 		});
 		
@@ -127,8 +127,8 @@ class ConfigurationEnhancer {
 		subclass = nestOneClassDeeperIfAspect(superclass, subclass);
 
 		if (log.isInfoEnabled())
-			log.info(format("Successfully enhanced %s; enhanced class name is: %s", configClassName, subclass
-			        .getName()));
+			log.info(format("Successfully enhanced %s; enhanced class name is: %s",
+			                configClassName, subclass.getName()));
 
 		return subclass.getName();
 	}
@@ -193,8 +193,7 @@ class ConfigurationEnhancer {
 			@Override
 			protected byte[] transform(byte[] b) throws Exception {
 				ClassWriter writer = new ClassWriter(false);
-				ClassAdapter adapter = new AddAnnotationAdapter(writer,
-				        "Lorg/aspectj/lang/annotation/Aspect;");
+				ClassAdapter adapter = new AddAnnotationAdapter(writer, "Lorg/aspectj/lang/annotation/Aspect;");
 				ClassReader reader = new ClassReader(b);
 				reader.accept(adapter, false);
 				return writer.toByteArray();

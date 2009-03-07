@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,8 +109,6 @@ class AsmUtils {
 	 * 
 	 * @param bytes byte array that will be provided as input to the new ClassReader
 	 *        instance.
-	 * 
-	 * @return
 	 */
 	public static ClassReader newClassReader(byte[] bytes) {
 		return new ClassReader(bytes);
@@ -129,8 +127,7 @@ class AsmUtils {
 		try {
 			return new ClassReader(is);
 		} catch (IOException ex) {
-			throw new RuntimeException("An unexpected exception occurred while creating ASM ClassReader: "
-			        + ex);
+			throw new RuntimeException("An unexpected exception occurred while creating ASM ClassReader: " + ex);
 		} finally {
 			try {
 				is.close();
