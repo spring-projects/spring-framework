@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import static org.springframework.util.ClassUtils.*;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
@@ -40,7 +38,6 @@ import org.springframework.config.java.Configuration;
  */
 class ConfigurationClassVisitor extends ClassAdapter {
 
-	private static final Log log = LogFactory.getLog(ConfigurationClassVisitor.class);
 	private static final String OBJECT_DESC = convertClassNameToResourcePath(Object.class.getName());
 
 	private final ConfigurationClass configClass;
@@ -63,15 +60,16 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 	@Override
 	public void visitSource(String sourceFile, String debug) {
-		String resourcePath = convertClassNameToResourcePath(configClass.getName()).substring(0,
-		        configClass.getName().lastIndexOf('.') + 1).concat(sourceFile);
+		String resourcePath =
+			convertClassNameToResourcePath(configClass.getName())
+				.substring(0, configClass.getName().lastIndexOf('.') + 1).concat(sourceFile);
 
 		configClass.setSource(resourcePath);
 	}
 
 	@Override
 	public void visit(int classVersion, int modifiers, String classTypeDesc, String arg3,
-	        String superTypeDesc, String[] arg5) {
+	                  String superTypeDesc, String[] arg5) {
 		visitSuperType(superTypeDesc);
 
 		configClass.setName(convertResourcePathToClassName(classTypeDesc));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import static org.springframework.config.java.support.Util.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Type;
 import org.springframework.util.Assert;
@@ -32,8 +30,6 @@ import org.springframework.util.Assert;
  * Populates a given {@link MutableAnnotation} instance with its attributes.
  */
 class MutableAnnotationVisitor implements AnnotationVisitor {
-
-	private static final Log log = LogFactory.getLog(MutableAnnotationVisitor.class);
 
 	protected final MutableAnnotation mutableAnno;
 

@@ -43,7 +43,7 @@ import org.springframework.config.java.Configuration;
  * @see ConfigurationClassPostProcessor
  */
 public abstract class AbstractConfigurationClassProcessor {
-	
+
 	/**
 	 * Used to register any problems detected with {@link Configuration} or {@link Bean}
 	 * declarations. For instance, a Bean method marked as {@literal final} is illegal
@@ -62,7 +62,7 @@ public abstract class AbstractConfigurationClassProcessor {
 	 * @see #processConfigBeanDefinitions()
 	 */
 	protected abstract BeanDefinitionRegistry getConfigurationBeanDefinitions(boolean includeAbstractBeanDefs);
-	
+
 	/**
 	 * Create and return a new {@link ConfigurationParser}, allowing for customization of
 	 * type (ASM/JDT/Reflection) as well as providing specialized ClassLoader during
@@ -70,7 +70,7 @@ public abstract class AbstractConfigurationClassProcessor {
 	 * @see #processConfigBeanDefinitions() 
 	 */
 	protected abstract ConfigurationParser createConfigurationParser();
-	
+
 	/**
 	 * Validate the given model and handle any errors.  Implementations may choose to throw
 	 * {@link BeanDefinitionParsingException}, or in the case of tooling register problems
@@ -78,7 +78,7 @@ public abstract class AbstractConfigurationClassProcessor {
 	 * @param configModel {@link ConfigurationModel} to validate
 	 */
 	protected abstract void validateModel(ConfigurationModel configModel);
-	
+
 	/**
 	 * Override the default {@link ProblemReporter}.
 	 * @param problemReporter custom problem reporter
@@ -86,14 +86,14 @@ public abstract class AbstractConfigurationClassProcessor {
 	protected final void setProblemReporter(ProblemReporter problemReporter) {
 		this.problemReporter = problemReporter;
 	}
-	
+
 	/**
 	 * Get the currently registered {@link ProblemReporter}.
 	 */
 	protected final ProblemReporter getProblemReporter() {
 		return problemReporter;
 	}
-	
+
 	/**
 	 * Build and validate a {@link ConfigurationModel} based on the registry of
 	 * {@link Configuration} classes provided by {@link #getConfigurationBeanDefinitions},
@@ -105,28 +105,28 @@ public abstract class AbstractConfigurationClassProcessor {
 	 */
 	protected final BeanDefinitionRegistry processConfigBeanDefinitions() {
 		BeanDefinitionRegistry configBeanDefs = getConfigurationBeanDefinitions(false);
-		
+
 		// return an empty registry immediately if no @Configuration classes were found
 		if(configBeanDefs.getBeanDefinitionCount() == 0)
 			return configBeanDefs;
-		
+
 		// populate a new ConfigurationModel by parsing each @Configuration classes
 		ConfigurationParser parser = createConfigurationParser();
-        
-        for(String beanName : configBeanDefs.getBeanDefinitionNames()) {
-        	BeanDefinition beanDef = configBeanDefs.getBeanDefinition(beanName);
-        	String className = beanDef.getBeanClassName();
-        	
-        	parser.parse(className, beanName);
-        }
-		
+
+		for(String beanName : configBeanDefs.getBeanDefinitionNames()) {
+			BeanDefinition beanDef = configBeanDefs.getBeanDefinition(beanName);
+			String className = beanDef.getBeanClassName();
+
+			parser.parse(className, beanName);
+		}
+
 		ConfigurationModel configModel = parser.getConfigurationModel();
-		
+
 		// validate the ConfigurationModel
 		validateModel(configModel);
-		
+
 		// read the model and create bean definitions based on its content
-	    return new ConfigurationModelBeanDefinitionReader().loadBeanDefinitions(configModel);
-    }
+		return new ConfigurationModelBeanDefinitionReader().loadBeanDefinitions(configModel);
+	}
 
 }

@@ -53,8 +53,8 @@ class AddAnnotationAdapter extends ClassAdapter {
 	 * Ensures that the version of the resulting class is Java 5 or better.
 	 */
 	@Override
-	public void visit(int version, int access, String name, String signature, String superName,
-	        String[] interfaces) {
+	public void visit(int version, int access, String name, String signature,
+	                  String superName, String[] interfaces) {
 		int v = (version & 0xFF) < Constants.V1_5 ? Constants.V1_5 : version;
 		cv.visit(v, access, name, signature, superName, interfaces);
 	}
@@ -83,8 +83,7 @@ class AddAnnotationAdapter extends ClassAdapter {
 	}
 
 	@Override
-	public MethodVisitor visitMethod(int access, String name, String desc, String signature,
-	        String[] exceptions) {
+	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		addAnnotation();
 		return cv.visitMethod(access, name, desc, signature, exceptions);
 	}

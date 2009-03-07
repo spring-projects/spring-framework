@@ -161,8 +161,8 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 			String enhancedClassName = enhancer.enhance(configClassName);
 
 			if (logger.isDebugEnabled())
-				logger.debug(format("Replacing bean definition '%s' existing class name '%s' with enhanced class name '%s'",
-				                    beanName, configClassName, enhancedClassName));
+				logger.debug(format("Replacing bean definition '%s' existing class name '%s' "
+				                  + "with enhanced class name '%s'", beanName, configClassName, enhancedClassName));
 
 			beanDef.setBeanClassName(enhancedClassName);
 		}

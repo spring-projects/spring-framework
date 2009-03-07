@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.config.java.support;
-
 
 import static java.lang.String.*;
 
@@ -147,7 +146,6 @@ final class ConfigurationClass extends ModelClass {
 		return this;
 	}
 
-
 	public ConfigurationClass setDeclaringClass(ConfigurationClass configurationClass) {
 		this.declaringClass = configurationClass;
 		return this;
@@ -189,7 +187,6 @@ final class ConfigurationClass extends ModelClass {
 		for (BeanMethod method : methods)
 			method.validate(problemReporter);
 	}
-
 
 	@Override
 	public String toString() {
@@ -252,23 +249,22 @@ final class ConfigurationClass extends ModelClass {
 	/** Configuration classes must be annotated with {@link Configuration @Configuration}. */
 	public class NonAnnotatedConfigurationError extends Problem {
 		public NonAnnotatedConfigurationError() {
-			super(
-				format("%s was provided as a Java Configuration class but was not annotated with @%s. "
-			        + "Update the class definition to continue.", getSimpleName(), Configuration.class
-			        .getSimpleName()),
-		        new Location(new FileSystemResource("/dev/null"))
+			super(format("%s was provided as a Java Configuration class but was not annotated with @%s. "
+			           + "Update the class definition to continue.",
+			             getSimpleName(), Configuration.class.getSimpleName()),
+			      new Location(new FileSystemResource("/dev/null"))
 			);
 		}
 
 	}
 
+
 	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
 	public class FinalConfigurationError extends Problem {
 		public FinalConfigurationError() {
-			super(
-				format("@%s class may not be final. Remove the final modifier to continue.",
-			        Configuration.class.getSimpleName()),
-		        new Location(new FileSystemResource("/dev/null"))
+			super(format("@%s class may not be final. Remove the final modifier to continue.",
+			             Configuration.class.getSimpleName()),
+			      new Location(new FileSystemResource("/dev/null"))
 			);
 		}
 	}
