@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,33 +22,42 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.config.java.support.ConfigurationClassPostProcessor;
 import org.springframework.stereotype.Component;
 
 
 /**
- * Annotation indicating that a class is a "Java Configuration" class, meaning that it
- * exposes one or more {@link Bean} methods. Holds similar information to that held in the
- * default values of a bean factory; can generally be thought of as the JavaConfig
- * equivalent of XML's 'beans' root element.
+ * Indicates that a class declares one or more {@link Bean} methods and may be processed
+ * by the Spring container to generate bean definitions and service requests for those beans
+ * at runtime.
  * 
- * <p>
- * Note however that the information here is not used to populate the defaults of the owning
- * bean factory, which would affect other configurations. In the style of the Java
- * configuration mechanism generally, each Java configuration class is kept isolated.
- * </p>
+ * <p>Configuration is itself annotated as a {@link Component}, therefore Configuration
+ * classes are candidates for component-scanning and may also take advantage of
+ * {@link Autowire} at the field and method and constructor level.
  * 
- * <p>
- * Configuration-annotated classes are also candidates for component scanning thanks to the
- * fact that this annotation is meta-annotated with {@link Component @Component}.
- * </p>
+ * <p>May be used in conjunction with the {@link Lazy} annotation to indicate that all Bean
+ * methods declared within this class are by default lazily initialized.
  * 
- * May be used in conjunction with {@link Lazy}
+ * <h3>Constraints</h3>
+ * <ul>
+ *    <li>Configuration classes must be non-final
+ *    <li>Configuration classes must be non-local (may not be declared within a method)
+ *    <li>Configuration classes must have a default/no-arg constructor or an
+ *        {@link Autowired} constructor
+ * </ul>
+ * 
+ * TODO: test constructor autowiring<br>
+ * TODO: test private Configuration classes<br>
+ * TODO: test @Lazy @Configuration<br>
  * 
  * @author Rod Johnson
  * @author Chris Beams
  * @since 3.0
- * @see Lazy
+ * @see ConfigurationClassPostProcessor
  * @see Bean
+ * @see Lazy
  */
 @Component
 @Target( { ElementType.TYPE })
@@ -56,56 +65,5 @@ import org.springframework.stereotype.Component;
 @Inherited
 @Documented
 public @interface Configuration {
-
-	// TODO: consider pruning @Configuration(name[])
-//	/**
-//	 * Configuration name. Allow different variants, such as test, production etc. Default
-//	 * will always match.
-//	 * 
-//	 * @return
-//	 */
-//	String[] name() default "";
-
-	// TODO: Prune defaultAutowire
-//	/**
-//	 * Specifies the default autowiring strategy.
-//	 * 
-//	 * @see Autowire
-//	 * @return
-//	 */
-//	Autowire defaultAutowire() default Autowire.INHERITED;
-
-	// TODO: Prune DependencyCheck
-	// /**
-	// * Dependency check strategy. By default, the dependency check is
-	// * unspecified, that is the default Spring option will apply. In most cases,
-	// * it means no dependency check will be done.
-	// *
-	// * @see DependencyCheck
-	// * @return
-	// */
-	// DependencyCheck defaultDependencyCheck() default DependencyCheck.UNSPECIFIED;
-	//
-	
-	// TODO: Favor @Lazy at the @Configuration class level.  Should have @Target(TYPE, METHOD)
-	// /**
-	// * Bean instantiation strategy. By default, it is unspecified.
-	// *
-	// * @see Lazy
-	// * @return
-	// */
-	// Lazy defaultLazy() default Lazy.UNSPECIFIED;
-
-	// TODO: prune useFactoryAspects
-//	/**
-//	 * Do we autowire with aspects from the enclosing factory scope?
-//	 */
-//	boolean useFactoryAspects() default false;
-
-	// TODO: this is the default, and needs to be switched off at annotation-config
-//	/**
-//	 * Do we check {@link Required @Required} methods to make sure they've been called?
-//	 */
-//	boolean checkRequired() default false;
 
 }

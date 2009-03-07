@@ -23,16 +23,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.stereotype.Component;
 
 /**
- * Indicates the name of a scope to use for instances of the annotated class.
+ * When used as a type-level annotation in conjunction with the {@link Component}
+ * annotation, indicates the name of a scope to use for instances of the annotated
+ * type.
+ * 
+ * <p>When used as a method-level annotation in conjunction with the
+ * {@link Bean} annotation, indicates the name of a scope to use for
+ * the instance returned from the method.
  *
  * <p>In this context, scope means the lifecycle of an instance, such as
- * '<code>singleton</code>', '<code>prototype</code>', and so forth.
+ * {@literal singleton}, {@literal prototype}, and so forth.
  * 
  * @author Mark Fisher
  * @author Chris Beams
  * @since 2.5
+ * @see Component
+ * @see Bean
+ * @see StandardScopes
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -40,8 +50,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 public @interface Scope {
 
 	/**
-	 * Specifies the scope to use for instances of the annotated class.
-	 * @return the desired scope
+	 * Specifies the scope to use for the annotated component/bean.
+	 * @return the specified scope
+	 * @see StandardScopes
 	 */
 	String value() default BeanDefinition.SCOPE_SINGLETON;
 
@@ -52,7 +63,7 @@ public @interface Scope {
 	 * <p>Defaults to {@link ScopedProxyMode#NO}, indicating no scoped proxy
 	 * should be created.
 	 * 
-	 * <p>Analogous to {@literal <aop:scoped-proxy/>} support in XML. Valid
+	 * <p>Analogous to {@literal <aop:scoped-proxy/>} support in Spring XML. Valid
 	 * only in conjunction with a non-singleton, non-prototype {@link #value()}.
 	 */
 	ScopedProxyMode proxyMode() default ScopedProxyMode.NO;
