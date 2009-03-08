@@ -16,13 +16,7 @@
 package org.springframework.core.convert.service;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.ConversionExecutor;
@@ -36,7 +30,7 @@ import org.springframework.core.convert.converter.SuperConverter;
  * @author Keith Donald
  */
 @SuppressWarnings("unchecked")
-class ObjectToCollection implements SuperConverter {
+class ObjectToCollection implements SuperConverter<Object, Collection> {
 
 	private ConversionService conversionService;
 
@@ -59,20 +53,9 @@ class ObjectToCollection implements SuperConverter {
 		this.elementConverter = elementConverter;
 	}
 
-	public Class getSourceClass() {
-		return Object.class;
-	}
-
-	public Class getSuperTargetClass() {
-		return Collection.class;
-	}
-
-	public Object convert(Object source, Class targetClass) throws Exception {
-		if (source == null) {
-			return null;
-		}
-		Class collectionImplClass = getCollectionImplClass(targetClass);
-		Constructor constructor = collectionImplClass.getConstructor((Class[]) null);
+	public Collection convert(Object source, Class targetClass) throws Exception {
+		Class implClass = CollectionConversionUtils.getImpl(targetClass);
+		Constructor constructor = implClass.getConstructor((Class[]) null);
 		Collection collection = (Collection) constructor.newInstance((Object[]) null);
 		ConversionExecutor converter = getElementConverter(source, targetClass);
 		Object value;
@@ -83,27 +66,6 @@ class ObjectToCollection implements SuperConverter {
 		}
 		collection.add(value);
 		return collection;
-	}
-
-	public Object convertBack(Object target) throws Exception {
-		throw new UnsupportedOperationException("Not supported");
-	}
-
-	// this code is duplicated in ArrayToCollection and CollectionToCollection
-	private Class getCollectionImplClass(Class targetClass) {
-		if (targetClass.isInterface()) {
-			if (List.class.equals(targetClass)) {
-				return ArrayList.class;
-			} else if (Set.class.equals(targetClass)) {
-				return LinkedHashSet.class;
-			} else if (SortedSet.class.equals(targetClass)) {
-				return TreeSet.class;
-			} else {
-				throw new IllegalArgumentException("Unsupported collection interface [" + targetClass.getName() + "]");
-			}
-		} else {
-			return targetClass;
-		}
 	}
 
 	private ConversionExecutor getElementConverter(Object source, Class targetClass) {

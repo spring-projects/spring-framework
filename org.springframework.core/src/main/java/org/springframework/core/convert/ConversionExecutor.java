@@ -16,7 +16,7 @@
 package org.springframework.core.convert;
 
 /**
- * A command object that is parameterized with the information necessary to perform a conversion of a source input to a
+ * A command parameterized with the information necessary to perform a conversion of a source input to a
  * target output. Encapsulates knowledge about how to convert source objects to a specific target type using a specific
  * converter.
  * 
@@ -25,20 +25,19 @@ package org.springframework.core.convert;
 public interface ConversionExecutor<S, T> {
 
 	/**
-	 * Returns the source class of conversions performed by this executor.
-	 * @return the source class
+	 * The type this executor converts from.
 	 */
 	public Class<S> getSourceClass();
 
 	/**
-	 * Returns the target class of conversions performed by this executor.
-	 * @return the target class
-	 */
+	 * The type this executor converts to.
+s	 */
 	public Class<T> getTargetClass();
 
 	/**
-	 * Execute the conversion for the provided source object.
-	 * @param source the source object to convert
+	 * Convert the source to T.
+	 * @param source the source to convert
+	 * @throws ConversionExecutionException if an exception occurs during type conversion
 	 */
 	public T execute(S source) throws ConversionExecutionException;
 

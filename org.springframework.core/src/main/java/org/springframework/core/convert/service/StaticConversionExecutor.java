@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2004-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,15 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
-@SuppressWarnings("unchecked")
-class StaticConversionExecutor implements ConversionExecutor {
+class StaticConversionExecutor<S, T> implements ConversionExecutor<S, T> {
 
-	private final Class sourceClass;
+	private final Class<S> sourceClass;
 
-	private final Class targetClass;
+	private final Class<T> targetClass;
 
-	private final Converter converter;
+	private final Converter<S, T> converter;
 
-	public StaticConversionExecutor(Class sourceClass, Class targetClass, Converter converter) {
+	public StaticConversionExecutor(Class<S> sourceClass, Class<T> targetClass, Converter<S, T> converter) {
 		Assert.notNull(sourceClass, "The source class is required");
 		Assert.notNull(targetClass, "The target class is required");
 		Assert.notNull(converter, "The converter is required");
@@ -39,15 +38,15 @@ class StaticConversionExecutor implements ConversionExecutor {
 		this.converter = converter;
 	}
 
-	public Class getSourceClass() {
+	public Class<S> getSourceClass() {
 		return sourceClass;
 	}
 
-	public Class getTargetClass() {
+	public Class<T> getTargetClass() {
 		return targetClass;
 	}
 
-	public Object execute(Object source) throws ConversionExecutionException {
+	public T execute(S source) throws ConversionExecutionException {
 		if (source == null) {
 			return null;
 		}
@@ -66,7 +65,7 @@ class StaticConversionExecutor implements ConversionExecutor {
 		if (!(o instanceof StaticConversionExecutor)) {
 			return false;
 		}
-		StaticConversionExecutor other = (StaticConversionExecutor) o;
+		StaticConversionExecutor<?, ?> other = (StaticConversionExecutor<?, ?>) o;
 		return sourceClass.equals(other.sourceClass) && targetClass.equals(other.targetClass);
 	}
 

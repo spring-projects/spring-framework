@@ -26,7 +26,7 @@ package org.springframework.core.convert;
 public interface ConversionService {
 
 	/**
-	 * Convert the source object to <code>targetClass</code>
+	 * Convert the source to target class T.
 	 * @param source the source to convert from (may be null)
 	 * @param targetClass the target class to convert to
 	 * @return the converted object, an instance of the <code>targetClass</code>, or <code>null</code> if a null source
@@ -39,7 +39,7 @@ public interface ConversionService {
 			ConversionException;
 
 	/**
-	 * Convert the source object to <code>targetClass</code> using a custom converter.
+	 * Convert the source to target class T with a custom converter.
 	 * @param converterId the id of the custom converter, which must be registered with this conversion service and
 	 * capable of converting to the targetClass
 	 * @param source the source to convert from (may be null)
@@ -54,7 +54,7 @@ public interface ConversionService {
 			throws ConversionExecutorNotFoundException, ConversionException;
 
 	/**
-	 * Get a ConversionExecutor capable of converting objects from <code>sourceClass</code> to <code>targetClass</code>.
+	 * Get a ConversionExecutor that converts objects from S to T.
 	 * The returned ConversionExecutor is thread-safe and may safely be cached for later use by client code.
 	 * @param sourceClass the source class to convert from (required)
 	 * @param targetClass the target class to convert to (required)
@@ -65,9 +65,8 @@ public interface ConversionService {
 			throws ConversionExecutorNotFoundException;
 
 	/**
-	 * Get a ConversionExecutor that uses a custom converter to capable convert objects from <code>sourceClass</code> to
-	 * <code>targetClass</code>. The returned ConversionExecutor is thread-safe and may safely be cached for use in
-	 * client code.
+	 * Get a ConversionExecutor that that converts objects from S to T with a custom converter.
+	 * The returned ConversionExecutor is thread-safe and may safely be cached for use in client code.
 	 * @param converterId the id of the custom converter, which must be registered with this conversion service and
 	 * capable of converting from sourceClass to targetClass (required)
 	 * @param sourceClass the source class to convert from (required)
@@ -79,9 +78,8 @@ public interface ConversionService {
 			Class<T> targetClass) throws ConversionExecutorNotFoundException;
 
 	/**
-	 * Lookup a class by its well-known alias. For example, <code>long</code> for <code>java.lang.Long</code>
-	 * @param alias the class alias
-	 * @return the class, or <code>null</code> if no alias exists
+	 * Get a class by its alias.
+	 * @return the class, or <code>null</code> if no such alias exists
 	 */
 	public Class<?> getClassForAlias(String alias);
 

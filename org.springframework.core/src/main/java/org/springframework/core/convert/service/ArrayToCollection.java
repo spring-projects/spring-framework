@@ -17,19 +17,13 @@ package org.springframework.core.convert.service;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.SuperConverter;
+import org.springframework.core.convert.converter.SuperTwoWayConverter;
 
 /**
  * Special converter that converts from a source array to a target collection. Supports the selection of an
@@ -45,7 +39,7 @@ import org.springframework.core.convert.converter.SuperConverter;
  * @author Keith Donald
  */
 @SuppressWarnings("unchecked")
-class ArrayToCollection implements SuperConverter {
+class ArrayToCollection implements SuperTwoWayConverter {
 
 	private ConversionService conversionService;
 
@@ -69,11 +63,8 @@ class ArrayToCollection implements SuperConverter {
 	}
 
 	public Object convert(Object source, Class targetClass) throws Exception {
-		if (source == null) {
-			return null;
-		}
-		Class collectionImplClass = getCollectionImplClass(targetClass);
-		Constructor constructor = collectionImplClass.getConstructor((Class[]) null);
+		Class implClass = CollectionConversionUtils.getImpl(targetClass);
+		Constructor constructor = implClass.getConstructor((Class[]) null);
 		Collection collection = (Collection) constructor.newInstance((Object[]) null);
 		ConversionExecutor converter = getArrayElementConverter(source, targetClass);
 		int length = Array.getLength(source);
@@ -87,16 +78,10 @@ class ArrayToCollection implements SuperConverter {
 		return collection;
 	}
 
-	public Object convertBack(Object target) throws Exception {
-		throw new UnsupportedOperationException("Should never be called");
-	}
-
 	public Object convertBack(Object target, Class sourceClass) throws Exception {
-		if (target == null) {
-			return null;
-		}
 		Collection collection = (Collection) target;
-		Object array = Array.newInstance(sourceClass.getComponentType(), collection.size());
+		Class elementType = sourceClass.getComponentType();
+		Object array = Array.newInstance(elementType, collection.size());
 		int i = 0;
 		for (Iterator it = collection.iterator(); it.hasNext(); i++) {
 			Object value = it.next();
@@ -105,30 +90,13 @@ class ArrayToCollection implements SuperConverter {
 				if (elementConverter != null) {
 					converter = elementConverter;
 				} else {
-					converter = conversionService.getConversionExecutor(value.getClass(), sourceClass
-							.getComponentType());
+					converter = conversionService.getConversionExecutor(value.getClass(), elementType);
 				}
 				value = converter.execute(value);
 			}
 			Array.set(array, i, value);
 		}
 		return array;
-	}
-
-	private Class getCollectionImplClass(Class targetClass) {
-		if (targetClass.isInterface()) {
-			if (List.class.equals(targetClass)) {
-				return ArrayList.class;
-			} else if (Set.class.equals(targetClass)) {
-				return LinkedHashSet.class;
-			} else if (SortedSet.class.equals(targetClass)) {
-				return TreeSet.class;
-			} else {
-				throw new IllegalArgumentException("Unsupported collection interface [" + targetClass.getName() + "]");
-			}
-		} else {
-			return targetClass;
-		}
 	}
 
 	private ConversionExecutor getArrayElementConverter(Object source, Class targetClass) {
