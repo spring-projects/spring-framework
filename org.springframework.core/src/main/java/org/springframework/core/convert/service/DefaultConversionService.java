@@ -35,7 +35,7 @@ import org.springframework.core.convert.converter.StringToLong;
 import org.springframework.core.convert.converter.StringToShort;
 
 /**
- * Default, local implementation of a conversion service. Will automatically register <i>from string</i> converters for
+ * Default implementation of a conversion service. Will automatically register <i>from string</i> converters for
  * a number of standard Java types like Class, Number, Boolean and so on.
  * 
  * @author Keith Donald
@@ -67,6 +67,7 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverter(new StringToLocale());
 		addConverter(new StringToEnum());
 		addConverter(new NumberToNumber());
+		// TODO probably don't allow these to be customized, or at least make public
 		addConverter(new ObjectToCollection(this));
 		addConverter(new CollectionToCollection(this));
 	}

@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.converter;
+package org.springframework.core.convert.service;
 
-/**
- * Converts a String to a Enum using {@link Enum#valueOf(Class, String)}.
- * 
- * @author Keith Donald
- */
+import org.springframework.core.convert.converter.SuperConverter;
+import org.springframework.core.convert.converter.SuperTwoWayConverter;
+
 @SuppressWarnings("unchecked")
-public class StringToEnum implements SuperTwoWayConverter<String, Enum> {
+class ReverseSuperConverter implements SuperConverter {
 
-	public <RT extends Enum> RT convert(String source, Class<RT> targetClass) throws Exception {
-		return Enum.valueOf(targetClass, source);
+	private SuperTwoWayConverter converter;
+
+	public ReverseSuperConverter(SuperTwoWayConverter converter) {
+		this.converter = converter;
 	}
 
-	public <RS extends String> RS convertBack(Enum target, Class<RS> sourceClass) throws Exception {
-		return (RS) target.name();
+	public Object convert(Object source, Class targetClass) throws Exception {
+		return converter.convertBack(source, targetClass);
 	}
 
 }

@@ -53,18 +53,7 @@ class ArrayToArray implements SuperConverter {
 		this.elementConverter = elementConverter;
 	}
 
-	public Class getSourceClass() {
-		return Object[].class;
-	}
-
-	public Class getSuperTargetClass() {
-		return Object[].class;
-	}
-
 	public Object convert(Object source, Class targetClass) throws Exception {
-		if (source == null) {
-			return null;
-		}
 		Class sourceComponentType = source.getClass().getComponentType();
 		Class targetComponentType = targetClass.getComponentType();
 		int length = Array.getLength(source);
@@ -75,10 +64,6 @@ class ArrayToArray implements SuperConverter {
 			Array.set(targetArray, i, converter.execute(value));
 		}
 		return targetArray;
-	}
-
-	public Object convertBack(Object target) throws Exception {
-		throw new UnsupportedOperationException("Not supported");
 	}
 
 	private ConversionExecutor getElementConverter(Class sourceComponentType, Class targetComponentType) {

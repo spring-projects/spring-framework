@@ -22,7 +22,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.SuperConverter;
 
 /**
- * Special two-way converter that converts an object to an single-element array. Mainly used internally by
+ * Special converter that converts an object to an single-element array. Mainly used internally by
  * {@link ConversionService} implementations.
  * 
  * @author Keith Donald
@@ -51,14 +51,6 @@ class ObjectToArray implements SuperConverter {
 		this.elementConverter = elementConverter;
 	}
 
-	public Class getSourceClass() {
-		return Object.class;
-	}
-
-	public Class getSuperTargetClass() {
-		return Object[].class;
-	}
-
 	public Object convert(Object source, Class targetClass) throws Exception {
 		Class componentType = targetClass.getComponentType();
 		Object array = Array.newInstance(componentType, 1);
@@ -70,10 +62,6 @@ class ObjectToArray implements SuperConverter {
 		}
 		Array.set(array, 0, converter.execute(source));
 		return array;
-	}
-
-	public Object convertBack(Object target) throws Exception {
-		throw new UnsupportedOperationException("Not supported");
 	}
 
 }

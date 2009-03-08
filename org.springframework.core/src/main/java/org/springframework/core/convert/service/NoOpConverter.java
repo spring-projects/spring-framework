@@ -17,11 +17,6 @@ package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.converter.Converter;
 
-/**
- * Package private converter that is a "no op".
- * 
- * @author Keith Donald
- */
 @SuppressWarnings("unchecked")
 class NoOpConverter implements Converter {
 

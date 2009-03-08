@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2004-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,15 @@ import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
-@SuppressWarnings("unchecked")
-class StaticSuperConversionExecutor implements ConversionExecutor {
+class StaticSuperConversionExecutor<S, T> implements ConversionExecutor<S, T> {
 
-	private final Class sourceClass;
+	private final Class<S> sourceClass;
 
-	private final Class targetClass;
+	private final Class<T> targetClass;
 
-	private final SuperConverter converter;
+	private final SuperConverter<S, T> converter;
 
-	public StaticSuperConversionExecutor(Class sourceClass, Class targetClass, SuperConverter converter) {
+	public StaticSuperConversionExecutor(Class<S> sourceClass, Class<T> targetClass, SuperConverter<S, T> converter) {
 		Assert.notNull(sourceClass, "The source class is required");
 		Assert.notNull(targetClass, "The target class is required");
 		Assert.notNull(converter, "The super converter is required");
@@ -39,15 +38,15 @@ class StaticSuperConversionExecutor implements ConversionExecutor {
 		this.converter = converter;
 	}
 
-	public Class getSourceClass() {
+	public Class<S> getSourceClass() {
 		return sourceClass;
 	}
-	
-	public Class getTargetClass() {
+
+	public Class<T> getTargetClass() {
 		return targetClass;
 	}
 
-	public Object execute(Object source) throws ConversionExecutionException {
+	public T execute(S source) throws ConversionExecutionException {
 		if (source == null) {
 			return null;
 		}
@@ -66,7 +65,7 @@ class StaticSuperConversionExecutor implements ConversionExecutor {
 		if (!(o instanceof StaticSuperConversionExecutor)) {
 			return false;
 		}
-		StaticSuperConversionExecutor other = (StaticSuperConversionExecutor) o;
+		StaticSuperConversionExecutor<?, ?> other = (StaticSuperConversionExecutor<?, ?>) o;
 		return sourceClass.equals(other.sourceClass) && targetClass.equals(other.targetClass);
 	}
 
