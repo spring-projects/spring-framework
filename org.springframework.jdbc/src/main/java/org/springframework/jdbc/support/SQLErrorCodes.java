@@ -41,6 +41,8 @@ public class SQLErrorCodes {
 
 	private String[] invalidResultSetAccessCodes = new String[0];
 
+	private String[] duplicateKeyCodes = new String[0];
+
 	private String[] dataIntegrityViolationCodes = new String[0];
 
 	private String[] permissionDeniedCodes = new String[0];
@@ -110,6 +112,14 @@ public class SQLErrorCodes {
 
 	public String[] getInvalidResultSetAccessCodes() {
 		return this.invalidResultSetAccessCodes;
+	}
+
+	public String[] getDuplicateKeyCodes() {
+		return duplicateKeyCodes;
+	}
+
+	public void setDuplicateKeyCodes(String[] duplicateKeyCodes) {
+		this.duplicateKeyCodes = duplicateKeyCodes;
 	}
 
 	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
