@@ -1,5 +1,21 @@
+/*
+ * Copyright 2004-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.core.convert.service;
 
+import java.security.Principal;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +24,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionExecutionException;
 import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionExecutorNotFoundException;
@@ -15,7 +32,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.NumberToNumber;
 import org.springframework.core.convert.converter.StringToEnum;
 import org.springframework.core.convert.converter.StringToInteger;
-import org.springframework.core.convert.service.GenericConversionService;
 
 public class GenericConversionServiceTests extends TestCase {
 
@@ -250,4 +266,257 @@ public class GenericConversionServiceTests extends TestCase {
 
 		}
 	}
+
+	public void testAddConverterNoSourceTargetClassInfoAvailable() {
+		try {
+			service.addConverter(new Converter() {
+				public Object convert(Object source) throws Exception {
+					return source;
+				}
+
+				public Object convertBack(Object target) throws Exception {
+					return target;
+				}
+			});
+			fail("Should have failed");
+		} catch (IllegalArgumentException e) {
+
+		}
+	}
+
+	public void testCustomConverterConversionForwardIndex() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", String.class, Principal.class);
+		assertEquals("keith", ((Principal) executor.execute("keith")).getName());
+	}
+
+	public void testCustomConverterConversionReverseIndex() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", Principal.class, String.class);
+		assertEquals("keith", executor.execute(new Principal() {
+			public String getName() {
+				return "keith";
+			}
+		}));
+	}
+
+	public void testCustomConverterConversionForSameType() {
+		service.addConverter("trimmer", new Trimmer());
+		ConversionExecutor executor = service.getConversionExecutor("trimmer", String.class, String.class);
+		assertEquals("a string", executor.execute("a string   "));
+	}
+
+	public void testCustomConverterLookupNotCompatibleSource() {
+		service.addConverter("trimmer", new Trimmer());
+		try {
+			service.getConversionExecutor("trimmer", Object.class, String.class);
+			fail("Should have failed");
+		} catch (ConversionException e) {
+
+		}
+	}
+
+	public void testCustomConverterLookupNotCompatibleTarget() {
+		service.addConverter("trimmer", new Trimmer());
+		try {
+			service.getConversionExecutor("trimmer", String.class, Object.class);
+		} catch (ConversionException e) {
+
+		}
+	}
+
+	public void testCustomConverterLookupNotCompatibleTargetReverse() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		try {
+			service.getConversionExecutor("princy", Principal.class, Integer.class);
+		} catch (ConversionException e) {
+
+		}
+	}
+
+	public void testCustomConverterConversionArrayToArray() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", String[].class, Principal[].class);
+		Principal[] p = (Principal[]) executor.execute(new String[] { "princy1", "princy2" });
+		assertEquals("princy1", p[0].getName());
+		assertEquals("princy2", p[1].getName());
+	}
+
+	public void testCustomConverterConversionArrayToArrayReverse() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", Principal[].class, String[].class);
+		final Principal princy1 = new Principal() {
+			public String getName() {
+				return "princy1";
+			}
+		};
+		final Principal princy2 = new Principal() {
+			public String getName() {
+				return "princy2";
+			}
+		};
+		String[] p = (String[]) executor.execute(new Principal[] { princy1, princy2 });
+		assertEquals("princy1", p[0]);
+		assertEquals("princy2", p[1]);
+	}
+
+	public void testCustomConverterLookupArrayToArrayBogusSource() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		try {
+			service.getConversionExecutor("princy", Integer[].class, Principal[].class);
+			fail("Should have failed");
+		} catch (ConversionExecutorNotFoundException e) {
+		}
+	}
+
+	public void testCustomConverterLookupArrayToArrayBogusTarget() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		try {
+			service.getConversionExecutor("princy", Principal[].class, Integer[].class);
+		} catch (ConversionExecutorNotFoundException e) {
+
+		}
+	}
+
+	public void testCustomConverterConversionArrayToCollection() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", String[].class, List.class);
+		List list = (List) executor.execute(new String[] { "princy1", "princy2" });
+		assertEquals("princy1", ((Principal) list.get(0)).getName());
+		assertEquals("princy2", ((Principal) list.get(1)).getName());
+	}
+
+	public void testCustomConverterConversionArrayToCollectionReverse() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", Principal[].class, List.class);
+		final Principal princy1 = new Principal() {
+			public String getName() {
+				return "princy1";
+			}
+		};
+		final Principal princy2 = new Principal() {
+			public String getName() {
+				return "princy2";
+			}
+		};
+		List p = (List) executor.execute(new Principal[] { princy1, princy2 });
+		assertEquals("princy1", p.get(0));
+		assertEquals("princy2", p.get(1));
+	}
+
+	public void testCustomConverterLookupArrayToCollectionBogusSource() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		try {
+			service.getConversionExecutor("princy", Integer[].class, List.class);
+			fail("Should have failed");
+		} catch (ConversionExecutorNotFoundException e) {
+
+		}
+	}
+
+	public void testCustomConverterLookupCollectionToArray() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", List.class, Principal[].class);
+		List princyList = new ArrayList();
+		princyList.add("princy1");
+		princyList.add("princy2");
+		Principal[] p = (Principal[]) executor.execute(princyList);
+		assertEquals("princy1", p[0].getName());
+		assertEquals("princy2", p[1].getName());
+	}
+
+	public void testCustomConverterLookupCollectionToArrayReverse() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", List.class, String[].class);
+		final Principal princy1 = new Principal() {
+			public String getName() {
+				return "princy1";
+			}
+		};
+		final Principal princy2 = new Principal() {
+			public String getName() {
+				return "princy2";
+			}
+		};
+		List princyList = new ArrayList();
+		princyList.add(princy1);
+		princyList.add(princy2);
+		String[] p = (String[]) executor.execute(princyList);
+		assertEquals("princy1", p[0]);
+		assertEquals("princy2", p[1]);
+	}
+
+	public void testtestCustomConverterLookupCollectionToArrayBogusTarget() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		try {
+			service.getConversionExecutor("princy", List.class, Integer[].class);
+			fail("Should have failed");
+		} catch (ConversionExecutorNotFoundException e) {
+
+		}
+	}
+
+	public void testCustomConverterConversionObjectToArray() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", String.class, Principal[].class);
+		Principal[] p = (Principal[]) executor.execute("princy1");
+		assertEquals("princy1", p[0].getName());
+	}
+
+	public void testCustomConverterConversionObjectToArrayReverse() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		ConversionExecutor executor = service.getConversionExecutor("princy", Principal.class, String[].class);
+		final Principal princy1 = new Principal() {
+			public String getName() {
+				return "princy1";
+			}
+		};
+		String[] p = (String[]) executor.execute(princy1);
+		assertEquals("princy1", p[0]);
+	}
+
+	public void testCustomConverterLookupObjectToArrayBogusSource() {
+		service.addConverter("princy", new CustomTwoWayConverter());
+		try {
+			service.getConversionExecutor("princy", Integer.class, Principal[].class);
+			fail("Should have failed");
+		} catch (ConversionExecutorNotFoundException e) {
+
+		}
+	}
+
+	private static class CustomTwoWayConverter implements Converter<String, Principal> {
+
+		public Principal convert(final String source) throws Exception {
+			return new Principal() {
+				public String getName() {
+					return (String) source;
+				}
+			};
+		}
+
+		public String convertBack(Principal target) throws Exception {
+			return ((Principal) target).getName();
+		}
+
+	}
+
+	private static class Trimmer implements Converter<String, String> {
+
+		public String convert(String source) throws Exception {
+			return ((String) source).trim();
+		}
+
+		public String convertBack(String target) throws Exception {
+			throw new UnsupportedOperationException("Will never run");
+		}
+
+	}
+
+	public void testSuperTwoWayConverterConverterAdaption() {
+		// this fails at the moment
+		//service.addConverter(GenericConversionService.converterFor(String.class, FooEnum.class, new StringToEnum()));
+		//assertEquals(FooEnum.BAR, service.executeConversion("BAR", FooEnum.class));
+	}
+
 }
