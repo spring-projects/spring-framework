@@ -27,6 +27,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
@@ -39,6 +40,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 	static {
 		ERROR_CODES.setBadSqlGrammarCodes(new String[] { "1", "2" });
 		ERROR_CODES.setInvalidResultSetAccessCodes(new String[] { "3", "4" });
+		ERROR_CODES.setDuplicateKeyCodes(new String[] {"10"});
 		ERROR_CODES.setDataAccessResourceFailureCodes(new String[] { "5" });
 		ERROR_CODES.setDataIntegrityViolationCodes(new String[] { "6" });
 		ERROR_CODES.setCannotAcquireLockCodes(new String[] { "7" });
@@ -64,6 +66,12 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		checkTranslation(sext, 7, CannotAcquireLockException.class);
 		checkTranslation(sext, 8, DeadlockLoserDataAccessException.class);
 		checkTranslation(sext, 9, CannotSerializeTransactionException.class);
+		checkTranslation(sext, 10, DuplicateKeyException.class);
+
+		SQLException dupKeyEx = new SQLException("", "", 10);
+		DataAccessException dksex = sext.translate("task", "SQL", dupKeyEx);
+		assertTrue("Not instance of DataIntegrityViolationException",
+				DataIntegrityViolationException.class.isAssignableFrom(dksex.getClass()));
 
 		// Test fallback. We assume that no database will ever return this error code,
 		// but 07xxx will be bad grammar picked up by the fallback SQLState translator

@@ -21,8 +21,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>-007,-029,-097,-104,-109,-115,-128,-199,-204,-206,-301,-408,-441,-491</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>-803</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>-407,-530,-531,-532,-543,-544,-545,-603,-667,-803</value>
+			<value>-407,-530,-531,-532,-543,-544,-545,-603,-667</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>-904,-971</value>
@@ -45,8 +48,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>42802,42821,42X01,42X02,42X03,42X04,42X05,42X06,42X07,42X08</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>23505</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>22001,22005,23502,23503,23505,23513,X0Y32</value>
+			<value>22001,22005,23502,23503,23513,X0Y32</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>04501,08004,42Y07</value>
@@ -63,8 +69,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>42000,42001,42101,42102,42111,42112,42121,42122,42132</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>23001</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>22003,22012,22025,23000,23001</value>
+			<value>22003,22012,22025,23000</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>90046,90100,90117,90121,90126</value>
@@ -77,6 +86,9 @@
 		</property>
 		<property name="badSqlGrammarCodes">
 			<value>-22,-28</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>-104</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>-9</value>
@@ -93,8 +105,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>-201,-217,-696</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>-239,-268,-6017</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>-239,-268,-692,-11030</value>
+			<value>-692,-11030</value>
 		</property>
 	</bean>
 
@@ -108,8 +123,11 @@
 		<property name="permissionDeniedCodes">
 			<value>229</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>2601,2627</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>544,2601,2627,8114,8115</value>
+			<value>544,8114,8115</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
 			<value>1222</value>
@@ -123,8 +141,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>1054,1064,1146</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>1062</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>630,839,840,893,1062,1169,1215,1216,1217,1451,1452,1557</value>
+			<value>630,839,840,893,1169,1215,1216,1217,1451,1452,1557</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>1</value>
@@ -144,8 +165,11 @@
 		<property name="invalidResultSetAccessCodes">
 			<value>17003</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>1</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>1,1400,1722,2291,2292</value>
+			<value>1400,1722,2291,2292</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>17002,17447</value>
@@ -168,8 +192,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>03000,42000,42601,42602,42622,42804,42P01</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>23505</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>23000,23502,23503,23505,23514</value>
+			<value>23000,23502,23503,23514</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>53000,53100,53200,53300</value>
@@ -196,8 +223,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value>
 		</property>
+		<property name="duplicateKeyCodes">
+			<value>2601</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>233,423,511,515,530,547,2601,2615,2714</value>
+			<value>233,423,511,515,530,547,2615,2714</value>
 		</property>
 		<property name="transientDataAccessResourceCodes">
 			<value>921,1105</value>
