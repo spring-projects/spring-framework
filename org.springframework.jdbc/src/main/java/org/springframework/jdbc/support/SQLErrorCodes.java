@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import org.springframework.util.StringUtils;
-import org.springframework.util.Assert;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
