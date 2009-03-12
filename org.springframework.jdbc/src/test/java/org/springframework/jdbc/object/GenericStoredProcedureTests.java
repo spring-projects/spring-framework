@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.verify;
 
 import java.sql.CallableStatement;
 import java.sql.Types;
@@ -64,7 +63,7 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
-			verify(mockCallable);
+			EasyMock.verify(mockCallable);
 		}
 	}
 
