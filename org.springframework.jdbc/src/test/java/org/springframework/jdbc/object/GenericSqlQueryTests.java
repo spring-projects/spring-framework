@@ -30,6 +30,11 @@ import java.util.Map;
 
 import org.easymock.EasyMock;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runners.JUnit4;
+import org.junit.runner.RunWith;
 
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.Customer;
@@ -42,6 +47,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Thomas Risberg
  */
+@RunWith(JUnit4.class)
 public class GenericSqlQueryTests extends AbstractJdbcTests {
 
 	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
@@ -55,7 +61,8 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 	private BeanFactory bf;
 
 	
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		mockPreparedStatement =	createMock(PreparedStatement.class);
 		mockResultSet = createMock(ResultSet.class);
@@ -65,7 +72,8 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 		testDataSource.setTarget(mockDataSource);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
 			EasyMock.verify(mockPreparedStatement);
@@ -79,11 +87,13 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 		EasyMock.replay(mockResultSet);
 	}
 
+	@Test
 	public void testPlaceHoldersCustomerQuery() throws SQLException {
 		SqlQuery query = (SqlQuery) bf.getBean("queryWithPlaceHolders");
 		testCustomerQuery(query, false);
 	}
 
+	@Test
 	public void testNamedParameterCustomerQuery() throws SQLException {
 		SqlQuery query = (SqlQuery) bf.getBean("queryWithNamedParameters");
 		testCustomerQuery(query, true);

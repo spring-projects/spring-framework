@@ -30,6 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runners.JUnit4;
+import org.junit.runner.RunWith;
 
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
@@ -41,6 +43,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Thomas Risberg
  */
+@RunWith(JUnit4.class)
 public class GenericStoredProcedureTests extends AbstractJdbcTests {
 
 	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
@@ -50,7 +53,7 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 	private BeanFactory bf;
 
 	@Before
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		mockCallable = createMock(CallableStatement.class);
 		bf = new XmlBeanFactory(
@@ -60,7 +63,7 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 	}
 
 	@After
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
 			EasyMock.verify(mockCallable);
