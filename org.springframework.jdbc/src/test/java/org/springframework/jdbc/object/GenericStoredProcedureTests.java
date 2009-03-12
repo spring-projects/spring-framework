@@ -55,7 +55,7 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 		super.setUp();
 		mockCallable = createMock(CallableStatement.class);
 		bf = new XmlBeanFactory(
-				new ClassPathResource("org/springframework/jdbc/support/GenericStoredProcedureTests-context.xml"));
+				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));
 		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
 		testDataSource.setTarget(mockDataSource);
 	}
