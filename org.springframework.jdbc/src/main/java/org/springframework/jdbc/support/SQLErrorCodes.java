@@ -17,6 +17,8 @@
 package org.springframework.jdbc.support;
 
 import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
  * JavaBean for holding JDBC error codes for a particular database.
@@ -36,6 +38,8 @@ public class SQLErrorCodes {
 	private String[] databaseProductNames;
 
 	private boolean useSqlStateForTranslation = false;
+
+	private SQLExceptionTranslator customSqlExceptionTranslator = null;
 
 	private String[] badSqlGrammarCodes = new String[0];
 
@@ -97,6 +101,26 @@ public class SQLErrorCodes {
 		return this.useSqlStateForTranslation;
 	}
 
+	public SQLExceptionTranslator getCustomSqlExceptionTranslator() {
+		return customSqlExceptionTranslator;
+	}
+
+	public void setCustomSqlExceptionTranslatorClass(Class customSqlExceptionTranslatorClass) {
+		if (customSqlExceptionTranslatorClass != null) {
+			try {
+				this.customSqlExceptionTranslator =
+						(SQLExceptionTranslator) customSqlExceptionTranslatorClass.newInstance();
+			}
+			catch (InstantiationException e) {
+				throw new InvalidDataAccessResourceUsageException(
+						"Unable to instantiate " + customSqlExceptionTranslatorClass.getName(), e);
+			}
+			catch (IllegalAccessException e) {
+				throw new InvalidDataAccessResourceUsageException(
+						"Unable to instantiate " + customSqlExceptionTranslatorClass.getName(), e);
+			}
+		}
+	}
 
 	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
 		this.badSqlGrammarCodes = StringUtils.sortStringArray(badSqlGrammarCodes);

@@ -188,6 +188,17 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 			return dex;
 		}
 
+		// Next, try the custom SQLException translator, if available.
+		if (this.sqlErrorCodes != null) {
+			SQLExceptionTranslator customTranslator = this.sqlErrorCodes.getCustomSqlExceptionTranslator();
+			if (customTranslator != null) {
+				DataAccessException customDex = customTranslator.translate(task, sql, sqlEx);
+				if (customDex != null) {
+					return customDex;
+				}
+			}
+		}
+
 		// Check SQLErrorCodes with corresponding error code, if available.
 		if (this.sqlErrorCodes != null) {
 			String errorCode = null;
