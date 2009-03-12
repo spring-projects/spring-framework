@@ -16,13 +16,11 @@
 
 package org.springframework.jdbc.object;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 public class GenericSqlQuery extends SqlQuery {
 
@@ -49,10 +47,10 @@ public class GenericSqlQuery extends SqlQuery {
 			return (RowMapper) rowMapperClass.newInstance();
 		}
 		catch (InstantiationException e) {
-			throw new InvalidDataAccessApiUsageException("Unable to instantiate RowMapper", e);
+			throw new InvalidDataAccessResourceUsageException("Unable to instantiate RowMapper", e);
 		}
 		catch (IllegalAccessException e) {
-			throw new InvalidDataAccessApiUsageException("Unable to instantiate RowMapper", e);
+			throw new InvalidDataAccessResourceUsageException("Unable to instantiate RowMapper", e);
 		}
 	}
 }
