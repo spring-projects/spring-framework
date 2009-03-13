@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +35,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -77,6 +80,8 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	protected static final String QUALIFIER_CLASS_NAME = "org.springframework.beans.factory.annotation.Qualifier";
 	
 	protected static final String SCOPE_CLASS_NAME = "org.springframework.context.annotation.Scope";
+	
+	protected static final String SCOPEDPROXY_CLASS_NAME = "org.springframework.beans.factory.annotation.ScopedProxy";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -89,6 +94,8 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
 	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
+
+	private int factoryBeanCount = 0;
 
 
 	/**
@@ -259,10 +266,33 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 						
 						factoryBeanDef.setResource(containingBeanDef.getResource());
 						factoryBeanDef.setSource(containingBeanDef.getSource());
+						
 						if (debugEnabled) {
 							logger.debug("Identified candidate factory method in class: " + resource);
 						}
 						candidates.add(factoryBeanDef);
+												
+						RootBeanDefinition scopedFactoryBeanDef = null;
+						if (methodMetadata.hasAnnotation(SCOPEDPROXY_CLASS_NAME))	{
+							//TODO validate that @ScopedProxy isn't applied to singleton/prototype beans.
+							Map<String, Object> attributes = methodMetadata.getAnnotationAttributes(SCOPEDPROXY_CLASS_NAME);
+							scopedFactoryBeanDef = new RootBeanDefinition(ScopedProxyFactoryBean.class);
+							String t= scopedFactoryBeanDef.getBeanClassName();
+							String targetBeanName = createFactoryBeanName(beanDefinitionHolder.getBeanName(), factoryBeanDef.getFactoryMethodName());
+							scopedFactoryBeanDef.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
+							
+							//TODO handle cglib options
+							//  scopedFactoryBeanDef.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
+							scopedFactoryBeanDef.setAutowireCandidate(false);
+							scopedFactoryBeanDef.setResource(containingBeanDef.getResource());
+							scopedFactoryBeanDef.setSource(containingBeanDef.getSource());
+							
+							candidates.add(scopedFactoryBeanDef);
+							
+						}
+						
+
+
 					}
 					else {
 						if (traceEnabled) {
@@ -363,6 +393,13 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	 */
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
 		return (beanDefinition.getMetadata().isConcrete() && beanDefinition.getMetadata().isIndependent());
+	}
+
+
+	protected String createFactoryBeanName(String configurationComponentBeanName, String factoryMethodName) {
+		//TODO consider adding hex string and passing in definition object.
+		String beanName = configurationComponentBeanName + "$" + factoryMethodName;
+		return beanName;
 	}
 
 }

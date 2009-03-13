@@ -65,8 +65,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
 	private boolean includeAnnotationConfig = true;
-
-
+	
 	/**
 	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
 	 * @param registry the BeanFactory to load bean definitions into,
@@ -221,22 +220,29 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	protected void postProcessComponentBeanDefinitions(Set<BeanDefinitionHolder> beanDefinitions) {
 		//TODO refactor increment index count as part of naming strategy.
-		int count = 0;
 		Set<BeanDefinitionHolder> factoryBeanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
 		for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitions) {
 			Set<BeanDefinition> candidates = findCandidateFactoryMethods(beanDefinitionHolder);			
-			for (BeanDefinition candidate : candidates ) {
-				//TODO refactor to introduce naming strategy and some sanity checks.
-				String beanName = beanDefinitionHolder.getBeanName() + "$" + candidate.getFactoryMethodName() + "#" + count++;												
-				BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+			for (BeanDefinition candidate : candidates ) {	
+				
+
+				BeanDefinitionHolder definitionHolder;
+				if (candidate.getBeanClassName().equals("org.springframework.aop.scope.ScopedProxyFactoryBean")){
+					String scopedFactoryBeanName = "scopedTarget." + candidate.getPropertyValues().getPropertyValue("targetBeanName").getValue();					
+					definitionHolder = new BeanDefinitionHolder(candidate, scopedFactoryBeanName);
+				} else {	
+					String configurationComponentBeanName = beanDefinitionHolder.getBeanName();
+					String factoryMethodName = candidate.getFactoryMethodName();
+					String beanName = createFactoryBeanName(configurationComponentBeanName, factoryMethodName);	
+					definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+				}
+																			
 				factoryBeanDefinitions.add(definitionHolder);
 				registerBeanDefinition(definitionHolder, this.registry);
 			}			
 		}
 		beanDefinitions.addAll(factoryBeanDefinitions);
 	}
-
-
 
 	/**
 	 * Apply further settings to the given bean definition,
