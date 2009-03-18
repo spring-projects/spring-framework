@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preface id="preface">
+  <title>Preface</title>
+
+  <para>Developing software applications is hard enough even with good tools
+  and technologies. Implementing applications using platforms which promise
+  everything but turn out to be heavy-weight, hard to control and not very
+  efficient during the development cycle makes it even harder. Spring provides
+  a light-weight solution for building enterprise-ready applications, while
+  still supporting the possibility of using declarative transaction
+  management, remote access to your logic using RMI or web services, and
+  various options for persisting your data to a database. Spring provides a
+  full-featured <link linkend="mvc-introduction">MVC framework</link>, and
+  transparent ways of integrating <link linkend="aop-introduction">AOP</link>
+  into your software.</para>
+
+  <para>Spring could potentially be a one-stop-shop for all your enterprise
+  applications; however, Spring is modular, allowing you to use just those
+  parts of it that you need, without having to bring in the rest. You can use
+  the IoC container, with Struts on top, but you could also choose to use just
+  the <link linkend="orm-hibernate">Hibernate integration code</link> or the
+  <link linkend="jdbc-introduction">JDBC abstraction layer</link>. Spring has
+  been (and continues to be) designed to be non-intrusive, meaning
+  dependencies on the framework itself are generally none (or absolutely
+  minimal, depending on the area of use).</para>
+
+  <para>This document provides a reference guide to Spring's features. Since
+  this document is still to be considered very much work-in-progress, if you
+  have any requests or comments, please post them on the user mailing list or
+  on the support forums at <ulink
+  url="http://forum.springframework.org/" />.</para>
+
+  <para>Before we go on, a few words of gratitude are due to Christian Bauer
+  (of the <ulink url="http://www.hibernate.org/">Hibernate</ulink> team), who
+  prepared and adapted the DocBook-XSL software in order to be able to create
+  Hibernate's reference guide, thus also allowing us to create this one. Also
+  thanks to Russell Healy for doing an extensive and valuable review of some
+  of the material.</para>
+</preface>

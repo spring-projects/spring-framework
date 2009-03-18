@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="introduction">
+  <title>Introduction</title>
+
+  <sidebar id="background-ioc">
+    <title>Background</title>
+
+    <para>In early 2004, Martin Fowler asked the readers of his site: when
+    talking about Inversion of Control: <quote><emphasis>the question is, what
+    aspect of control are [they] inverting?</emphasis></quote>. Fowler then
+    suggested renaming the principle (or at least giving it a more
+    self-explanatory name), and started to use the term <firstterm>Dependency
+    Injection</firstterm>. His article then continued to explain the ideas
+    underpinning the Inversion of Control (<acronym>IoC</acronym>) and
+    Dependency Injection (<acronym>DI</acronym>) principle.</para>
+
+    <para>If you need a decent insight into IoC and DI, please do refer to
+    said article : <ulink
+    url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.</para>
+  </sidebar>
+
+  <para>Java applications (a loose term which runs the gamut from constrained
+  applets to full-fledged n-tier server-side enterprise applications)
+  typically are composed of a number of objects that collaborate with one
+  another to form the application proper. The objects in an application can
+  thus be said to have <emphasis>dependencies</emphasis> between
+  themselves.</para>
+
+  <para>The Java language and platform provides a wealth of functionality for
+  architecting and building applications, ranging all the way from the very
+  basic building blocks of primitive types and classes (and the means to
+  define new classes), to rich full-featured application servers and web
+  frameworks. One area that is decidedly conspicuous by its absence is any
+  means of taking the basic building blocks and composing them into a coherent
+  whole; this area has typically been left to the purvey of the architects and
+  developers tasked with building an application (or applications). Now to be
+  fair, there are a number of design patterns devoted to the business of
+  composing the various classes and object instances that makeup an
+  all-singing, all-dancing application. Design patterns such as
+  <firstterm>Factory</firstterm>, <firstterm>Abstract Factory</firstterm>,
+  <firstterm>Builder</firstterm>, <firstterm>Decorator</firstterm>, and
+  <firstterm>Service Locator</firstterm> (to name but a few) have widespread
+  recognition and acceptance within the software development industry
+  (presumably that is why these patterns have been formalized as patterns in
+  the first place). This is all very well, but these patterns are just that:
+  best practices given a name, typically together with a description of what
+  the pattern does, where the pattern is typically best applied, the problems
+  that the application of the pattern addresses, and so forth. Notice that the
+  last paragraph used the phrase <quote>... a <emphasis>description</emphasis>
+  of what the pattern does...</quote>; pattern books and wikis are typically
+  listings of such formalized best practice that you can certainly take away,
+  mull over, and then <emphasis>implement yourself</emphasis> in your
+  application.</para>
+
+  <para>The IoC component of the Spring Framework addresses the enterprise
+  concern of taking the classes, objects, and services that are to compose an
+  application, by providing a formalized means of composing these various
+  disparate components into a fully working application ready for use. The
+  Spring Framework takes best practices that have been proven over the years
+  in numerous applications and formalized as design patterns, and actually
+  codifies these patterns as first class objects that you as an architect and
+  developer can take away and integrate into your own application(s). This is
+  a <firstterm>Very Good Thing Indeed</firstterm> as attested to by the
+  numerous organizations and institutions that have used the Spring Framework
+  to engineer robust, <emphasis>maintainable</emphasis> applications.</para>
+
+  <section id="introduction-overview">
+    <title>Overview</title>
+
+    <para>The Spring Framework contains a lot of features, which are
+    well-organized in six modules shown in the diagram below. This chapter
+    discusses each of the modules in turn.</para>
+
+    <para><mediaobject>
+        <imageobject role="fo">
+          <imagedata align="left" fileref="images/spring-overview.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/spring-overview.png"
+                     format="PNG" />
+        </imageobject>
+
+        <caption><para>Overview of the Spring Framework</para></caption>
+      </mediaobject></para>
+
+    <para>The <link
+    linkend="beans-introduction"><emphasis>Core</emphasis></link> package is
+    the most fundamental part of the framework and provides the IoC and
+    Dependency Injection features. The basic concept here is the
+    <classname>BeanFactory</classname>, which provides a sophisticated
+    implementation of the factory pattern which removes the need for
+    programmatic singletons and allows you to decouple the configuration and
+    specification of dependencies from your actual program logic.</para>
+
+    <para>The <link
+    linkend="context-introduction"><emphasis>Context</emphasis></link> package
+    build on the solid base provided by the <link
+    linkend="beans-introduction"><emphasis>Core</emphasis></link> package: it
+    provides a way to access objects in a framework-style manner in a fashion
+    somewhat reminiscent of a JNDI-registry. The context package inherits its
+    features from the beans package and adds support for internationalization
+    (I18N) (using for example resource bundles), event-propagation,
+    resource-loading, and the transparent creation of contexts by, for
+    example, a servlet container.</para>
+
+    <para>The <link linkend="dao-introduction"><emphasis>DAO</emphasis></link>
+    package provides a JDBC-abstraction layer that removes the need to do
+    tedious JDBC coding and parsing of database-vendor specific error codes.
+    Also, the <link linkend="jdbc-introduction">JDBC</link> package provides a
+    way to do programmatic as well as declarative transaction management, not
+    only for classes implementing special interfaces, but for <emphasis>all
+    your POJOs (plain old Java objects)</emphasis>.</para>
+
+    <para>The <link linkend="orm-introduction"><emphasis>ORM</emphasis></link>
+    package provides integration layers for popular object-relational mapping
+    APIs, including <link linkend="orm-jpa">JPA</link>, <link
+    linkend="orm-jdo">JDO</link>, <link
+    linkend="orm-hibernate">Hibernate</link>, and <link
+    linkend="orm-ibatis">iBatis</link>. Using the ORM package you can use all
+    those O/R-mappers in combination with all the other features Spring
+    offers, such as the simple declarative transaction management feature
+    mentioned previously.</para>
+
+    <para>Spring's <link
+    linkend="aop-introduction"><emphasis>AOP</emphasis></link> package
+    provides an <emphasis>AOP Alliance</emphasis>-compliant aspect-oriented
+    programming implementation allowing you to define, for example,
+    method-interceptors and pointcuts to cleanly decouple code implementing
+    functionality that should logically speaking be separated. Using
+    source-level metadata functionality you can also incorporate all kinds of
+    behavioral information into your code, in a manner similar to that of .NET
+    attributes.</para>
+
+    <para>Spring's <emphasis>Web</emphasis> package provides basic
+    web-oriented integration features, such as multipart file-upload
+    functionality, the initialization of the IoC container using servlet
+    listeners and a web-oriented application context. When using Spring
+    together with WebWork or Struts, this is the package to integrate
+    with.</para>
+
+    <para>Spring's <link
+    linkend="mvc-introduction"><emphasis>MVC</emphasis></link> package
+    provides a Model-View-Controller (MVC) implementation for
+    web-applications. Spring's MVC framework is not just any old
+    implementation; it provides a <emphasis>clean</emphasis> separation
+    between domain model code and web forms, and allows you to use all the
+    other features of the Spring Framework.</para>
+  </section>
+
+  <section id="overview-usagescenarios">
+    <title>Usage scenarios</title>
+
+    <para>With the building blocks described above you can use Spring in all
+    sorts of scenarios, from applets up to fully-fledged enterprise
+    applications using Spring's transaction management functionality and web
+    framework integration.</para>
+
+    <para><mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/full.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/full.gif" format="GIF" />
+        </imageobject>
+
+        <caption><para>Typical full-fledged Spring web
+        application</para></caption>
+      </mediaobject></para>
+
+    <para>By using Spring's <link
+    linkend="transaction-declarative">declarative transaction management
+    features</link> the web application is fully transactional, just as it
+    would be when using container managed transactions as provided by
+    Enterprise JavaBeans. All your custom business logic can be implemented
+    using simple POJOs, managed by Spring's IoC container. Additional services
+    include support for sending email, and validation that is independent of
+    the web layer enabling you to choose where to execute validation rules.
+    Spring's ORM support is integrated with JPA, Hibernate, JDO and iBatis;
+    for example, when using Hibernate, you can continue to use your existing
+    mapping files and standard Hibernate
+    <interfacename>SessionFactory</interfacename> configuration. Form
+    controllers seamlessly integrate the web-layer with the domain model,
+    removing the need for <classname>ActionForms</classname> or other classes
+    that transform HTTP parameters to values for your domain model.</para>
+
+    <para><mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/thirdparty-web.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/thirdparty-web.gif"
+                     format="GIF" />
+        </imageobject>
+
+        <caption><para>Spring middle-tier using a third-party web
+        framework</para></caption>
+      </mediaobject></para>
+
+    <para>Sometimes the current circumstances do not allow you to completely
+    switch to a different framework. The Spring Framework does
+    <emphasis>not</emphasis> force you to use everything within it; it is not
+    an <emphasis>all-or-nothing</emphasis> solution. Existing front-ends built
+    using WebWork, Struts, Tapestry, or other UI frameworks can be integrated
+    perfectly well with a Spring-based middle-tier, allowing you to use the
+    transaction features that Spring offers. The only thing you need to do is
+    wire up your business logic using an
+    <classname>ApplicationContext</classname> and integrate your web layer
+    using a <classname>WebApplicationContext</classname>.</para>
+
+    <para><mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/remoting.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/remoting.gif" format="GIF" />
+        </imageobject>
+
+        <caption><para>Remoting usage scenario</para></caption>
+      </mediaobject></para>
+
+    <para>When you need to access existing code via web services, you can use
+    Spring's <literal>Hessian-</literal>, <literal>Burlap-</literal>,
+    <literal>Rmi-</literal> or <classname>JaxRpcProxyFactory</classname>
+    classes. Enabling remote access to existing applications suddenly is not
+    that hard anymore.</para>
+
+    <para><mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/ejb.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/ejb.gif" format="GIF" />
+        </imageobject>
+
+        <caption><para>EJBs - Wrapping existing POJOs</para></caption>
+      </mediaobject></para>
+
+    <para>The Spring Framework also provides an <link linkend="ejb">access-
+    and abstraction- layer</link> for Enterprise JavaBeans, enabling you to
+    reuse your existing POJOs and wrap them in Stateless Session Beans, for
+    use in scalable, failsafe web applications that might need declarative
+    security.</para>
+  </section>
+</chapter>

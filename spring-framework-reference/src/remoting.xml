@@ -1,0 +1,1003 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="remoting">
+  <title>Remoting and web services using Spring</title>
+
+  <section id="remoting-introduction">
+    <title>Introduction</title>
+		<para>Spring features integration classes for remoting support using various
+    technologies. The remoting support eases the development of remote-enabled
+    services, implemented by your usual (Spring) POJOs. Currently, Spring supports
+    four remoting technologies:
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>Remote Method Invocation (RMI)</emphasis>. Through the use
+        of the <classname>RmiProxyFactoryBean</classname> and the
+        <classname>RmiServiceExporter</classname> Spring supports both traditional
+        RMI (with <interfacename>java.rmi.Remote</interfacename> interfaces and
+        <exceptionname>java.rmi.RemoteException</exceptionname>) and
+        transparent remoting via RMI invokers (with any Java interface).</para>
+      </listitem>
+      <listitem>
+        <para><emphasis>Spring's HTTP invoker</emphasis>. Spring provides a special
+        remoting strategy which allows for Java serialization via HTTP,
+        supporting any Java interface (just like the RMI invoker). The corresponding
+        support classes are <classname>HttpInvokerProxyFactoryBean</classname> and
+        <classname>HttpInvokerServiceExporter</classname>.</para>
+      </listitem>
+      <listitem>
+        <para><emphasis>Hessian</emphasis>. By using Spring's
+        <classname>HessianProxyFactoryBean</classname> and the
+        <classname>HessianServiceExporter</classname> you can transparently
+        expose your services using the lightweight binary HTTP-based protocol
+        provided by Caucho.</para>
+      </listitem>
+      <listitem>
+        <para><emphasis>Burlap</emphasis>. Burlap is Caucho's XML-based
+        alternative to Hessian. Spring provides support classes such
+        as <classname>BurlapProxyFactoryBean</classname> and
+        <classname>BurlapServiceExporter</classname>.</para>
+      </listitem>
+      <listitem>
+        <para><emphasis>JAX-RPC</emphasis>. Spring provides remoting support
+        for web services via JAX-RPC (J2EE 1.4's web service API).</para>
+      </listitem>
+      <listitem>
+        <para><emphasis>JAX-WS</emphasis>. Spring provides remoting support
+        for web services via JAX-WS (the successor of JAX-RPC, as introduced
+        in Java EE 5 and Java 6).</para>
+      </listitem>
+      <listitem>
+        <para><emphasis>JMS</emphasis>. Remoting using JMS as the underlying protocol
+        is supported via the <classname>JmsInvokerServiceExporter</classname> and
+        <classname>JmsInvokerProxyFactoryBean</classname> classes.</para>
+      </listitem>
+    </itemizedlist></para>
+    <para>While discussing the remoting capabilities of Spring, we'll use the following domain
+    model and corresponding services:</para>
+    <programlisting><![CDATA[public class Account implements Serializable{
+
+    private String name;
+
+    public String getName();
+
+    public void setName(String name) {
+      this.name = name;
+    }
+}]]></programlisting>
+    <programlisting><![CDATA[public interface AccountService {
+
+    public void insertAccount(Account account);
+
+    public List getAccounts(String name);
+}]]></programlisting>
+    <programlisting><![CDATA[public interface RemoteAccountService extends Remote {
+
+    public void insertAccount(Account account) throws RemoteException;
+
+    public List getAccounts(String name) throws RemoteException;
+}]]></programlisting>
+    <programlisting><lineannotation>// the implementation doing nothing at the moment</lineannotation><![CDATA[
+public class AccountServiceImpl implements AccountService {
+
+    public void insertAccount(Account acc) {
+        ]]><lineannotation>// do something...</lineannotation><![CDATA[
+    }
+  
+    public List getAccounts(String name) {
+        ]]><lineannotation>// do something...</lineannotation><![CDATA[
+    }
+}]]></programlisting>
+		<para>We will start exposing the service to a remote client by using RMI and 
+		talk a bit about the drawbacks of using RMI. We'll then continue to show
+		an example using Hessian as the protocol.</para>		
+  </section>
+
+  <section id="remoting-rmi">
+    <title>Exposing services using RMI</title>
+    <para>Using Spring's support for RMI, you can transparently expose your services through
+    the RMI infrastructure. After having this set up, you basically have a configuration
+    similar to remote EJBs, except for the fact that there is no standard support for
+    security context propagation or remote transaction propagation. Spring does provide
+    hooks for such additional invocation context when using the RMI invoker, so you can
+    for example plug in security frameworks or custom security credentials here.</para>
+
+    <section id="remoting-rmi-server">
+      <title>Exporting the service using the <classname>RmiServiceExporter</classname></title>
+			<para>Using the <classname>RmiServiceExporter</classname>, we can expose the interface
+      of our AccountService object as RMI object. The interface can be accessed by using
+      <classname>RmiProxyFactoryBean</classname>, or via plain RMI in case of a traditional
+      RMI service. The <classname>RmiServiceExporter</classname> explicitly supports the
+      exposing of any non-RMI services via RMI invokers.
+      </para>
+      <para>Of course, we first have to set up our service in the Spring container:</para>
+      <programlisting><![CDATA[<bean id="accountService" class="example.AccountServiceImpl">
+    ]]><lineannotation>&lt;!-- any additional properties, maybe a DAO? --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+      <para>Next we'll have to expose our service using the <classname>RmiServiceExporter</classname>:</para>
+      <programlisting><![CDATA[<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+    ]]><lineannotation>&lt;!-- does not necessarily have to be the same name as the bean to be exported --&gt;</lineannotation><![CDATA[
+    <property name="serviceName" value="AccountService"/>
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+    ]]><lineannotation>&lt;!-- defaults to <literal>1099</literal> --&gt;</lineannotation><![CDATA[
+    <property name="registryPort" value="1199"/>
+</bean>]]></programlisting>
+      <para>As you can see, we're overriding the port for the RMI registry. Often,
+      your application server also maintains an RMI registry and it is wise
+      to not interfere with that one. Furthermore, the service name is used to bind the
+      service under. So right now, the service will be bound at
+      <literal>'rmi://HOST:1199/AccountService'</literal>. We'll use the URL later on to
+      link in the service at the client side.</para>
+      <note>
+        <para>The <literal>servicePort</literal> property has been omitted (it defaults to 0).
+        This means that an anonymous port will be used to communicate with the service.</para>
+      </note>
+    </section>
+
+    <section id="remoting-rmi-client">
+      <title>Linking in the service at the client</title>
+      <para>Our client is a simple object using the <interfacename>AccountService</interfacename>
+      to manage accounts:</para>
+      <programlisting><![CDATA[public class SimpleObject {
+
+    private AccountService accountService;
+
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
+}]]></programlisting>
+			<para>To link in the service on the client, we'll create a separate Spring container,
+			containing the simple object and the service linking configuration bits:</para>
+			<programlisting><![CDATA[<bean class="example.SimpleObject">
+    <property name="accountService" ref="accountService"/>
+</bean>
+
+<bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+    <property name="serviceUrl" value="rmi://HOST:1199/AccountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>]]></programlisting>
+      <para>That's all we need to do to support the remote account service on the client.
+      Spring will transparently create an invoker and remotely enable the account
+      service through the <classname>RmiServiceExporter</classname>. At the client
+      we're linking it in using the <classname>RmiProxyFactoryBean</classname>.</para>
+    </section>
+  </section>
+
+  <section id="remoting-caucho-protocols">
+    <title>Using Hessian or Burlap to remotely call services via HTTP</title>
+    <para>Hessian offers a binary HTTP-based remoting protocol. It is developed by
+    Caucho and more information about Hessian itself can be found at
+    <ulink url="http://www.caucho.com"/>.</para>
+
+    <section id="remoting-caucho-protocols-hessian">
+			<title>Wiring up the <classname>DispatcherServlet</classname> for Hessian and co.</title>
+			<para>Hessian communicates via HTTP and does so using a custom servlet.
+			Using Spring's <classname>DispatcherServlet</classname> principles, as known
+      from Spring Web MVC usage, you can easily  wire up such a servlet exposing
+      your services. First we'll have to create a new servlet in your application
+      (this an excerpt from <filename>'web.xml'</filename>):</para>
+			<programlisting><![CDATA[<servlet>
+    <servlet-name>remoting</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>remoting</servlet-name>
+    <url-pattern>/remoting/*</url-pattern>
+</servlet-mapping>]]></programlisting>
+      <para>You're probably familiar with Spring's <classname>DispatcherServlet</classname>
+      principles and if so, you know that now you'll have to create a Spring container
+      configuration resource named <filename>'remoting-servlet.xml'</filename> (after
+      the name of your servlet) in the <filename class="directory">'WEB-INF'</filename>
+      directory. The application context will be used	in the next section.</para>
+      <para>Alternatively, consider the use of Spring's simpler
+      <classname>HttpRequestHandlerServlet</classname>.
+      This allows you to embed the remote exporter definitions in your root application
+      context (by default in <filename>'WEB-INF/applicationContext.xml'</filename>),
+      with individual servlet definitions pointing to specific exporter beans.
+      Each servlet name needs to match the bean name of its target exporter in this case.</para>
+    </section>
+
+    <section id="remoting-caucho-protocols-hessian-server">
+      <title>Exposing your beans by using the <classname>HessianServiceExporter</classname></title>
+      <para>In the newly created application context called <literal>remoting-servlet.xml</literal>,
+      we'll create a <classname>HessianServiceExporter</classname> exporting your services:</para>
+      <programlisting><![CDATA[<bean id="accountService" class="example.AccountServiceImpl">
+    ]]><lineannotation>&lt;!-- any additional properties, maybe a DAO? --&gt;</lineannotation><![CDATA[
+</bean>
+
+<bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>]]></programlisting>
+      <para>Now we're ready to link in the service at the client. No explicit handler mapping
+      is specified, mapping request URLs onto services, so <classname>BeanNameUrlHandlerMapping</classname>
+      will be used: Hence, the service will be exported at the URL indicated through
+      its bean name within the containing <classname>DispatcherServlet</classname>'s
+      mapping (as defined above): <literal>'http://HOST:8080/remoting/AccountService'</literal>.
+      </para>
+      <para>Alternatively, create a <classname>HessianServiceExporter</classname> in your
+      root application context (e.g. in <filename>'WEB-INF/applicationContext.xml'</filename>):</para>
+      <programlisting><![CDATA[<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>]]></programlisting>
+      <para>In the latter case, define a corresponding servlet for this exporter
+      in <filename>'web.xml'</filename>, with the same end result: The exporter
+      getting mapped to the request path <literal>/remoting/AccountService</literal>.
+      Note that the servlet name needs to match the bean name of the target exporter.</para>
+      <programlisting><![CDATA[<servlet>
+    <servlet-name>accountExporter</servlet-name>
+    <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>accountExporter</servlet-name>
+    <url-pattern>/remoting/AccountService</url-pattern>
+</servlet-mapping>]]></programlisting>
+    </section>
+
+    <section id="remoting-caucho-protocols-hessian-client">
+      <title>Linking in the service on the client</title>
+      <para>Using the <classname></classname> we can link in the service
+      at the client. The same principles apply as with the RMI example. We'll create
+      a separate bean factory or application context and mention the following beans
+      where the <classname>SimpleObject</classname> is using the
+      <interfacename>AccountService</interfacename> to manage accounts:</para>
+			<programlisting><![CDATA[<bean class="example.SimpleObject">
+    <property name="accountService" ref="accountService"/>
+</bean>
+
+<bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+    <property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>]]></programlisting>
+		</section>
+
+    <section id="remoting-caucho-protocols-burlap">
+      <title>Using Burlap</title>
+      <para>We won't discuss Burlap, the XML-based equivalent of Hessian, in detail here,
+      since it is configured and set up in exactly the same way as the Hessian
+      variant explained above. Just replace the word <literal>Hessian</literal>
+      with <literal>Burlap</literal> and you're all set to go.</para>
+    </section>
+
+    <section id="remoting-caucho-protocols-security">
+      <title>Applying HTTP basic authentication to a service exposed through Hessian or Burlap</title>
+      <para>One of the advantages of Hessian and Burlap is that we can easily apply HTTP basic
+      authentication, because both protocols are HTTP-based. Your normal HTTP server security
+      mechanism can easily be applied through using the <literal>web.xml</literal> security
+      features, for example. Usually, you don't use per-user security credentials here, but
+      rather shared credentials defined at the <literal>Hessian/BurlapProxyFactoryBean</literal> level
+      (similar to a JDBC <interfacename>DataSource</interfacename>).</para>
+      <programlisting><![CDATA[<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+    <property name="interceptors" ref="authorizationInterceptor"/>
+</bean>
+
+<bean id="authorizationInterceptor" 
+      class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
+    <property name="authorizedRoles" value="administrator,operator"/>
+</bean>]]></programlisting>
+      <para>This an example where we explicitly mention the <classname>BeanNameUrlHandlerMapping</classname>
+      and set an interceptor allowing only administrators and operators to call
+      the beans mentioned in this application context.</para>
+      <note>
+        <para>Of course, this example doesn't show a flexible kind of security
+        infrastructure. For more options as far as security is concerned,
+        have a look at the Acegi Security System for Spring, to be found at
+        <ulink url="http://acegisecurity.sourceforge.net"/>.</para>
+      </note>
+    </section>
+  </section>
+	
+	<section id="remoting-httpinvoker">
+		<title>Exposing services using HTTP invokers</title>
+		<para>As opposed to Burlap and Hessian, which are both lightweight protocols using their
+		own slim serialization mechanisms, Spring Http invokers use the standard
+		Java serialization mechanism to expose services through HTTP. This has a huge
+		advantage if your arguments and return types are complex types that cannot be
+		serialized using the serialization mechanisms Hessian and Burlap use (refer to the
+		next section for more considerations when choosing a remoting technology).</para>
+		<para>Under the hood, Spring uses either the standard facilities provided by J2SE to
+		perform HTTP calls or Commons <classname>HttpClient</classname>. Use the latter if you need more advanced
+		and easy-to-use functionality. Refer to 
+		<ulink url="http://jakarta.apache.org/commons/httpclient">jakarta.apache.org/commons/httpclient</ulink>
+		for more info.</para>
+
+		<section id="remoting-httpinvoker-server">
+			<title>Exposing the service object</title>
+			<para>Setting up the HTTP invoker infrastructure for a service objects much resembles
+			the way you would do using Hessian or Burlap. Just as Hessian support provides
+			the <classname>HessianServiceExporter</classname>, Spring's HttpInvoker support provides
+			the <classname>org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter</classname>.
+      </para>
+      <para>To expose the <literal>AccountService</literal> (mentioned above) within a
+      Spring Web MVC <classname>DispatcherServlet</classname>, the following configuration
+      needs to be in place in the dispatcher's application context:</para>
+<programlisting><![CDATA[<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+]]></programlisting>
+      <para>Such an exporter definition will be exposed through the
+      <classname>DispatcherServlet</classname>'s standard mapping facilities,
+      as explained in the section on Hessian.</para>
+      <para>Alternatively, create an <classname>HttpInvokerServiceExporter</classname> in your
+      root application context (e.g. in <filename>'WEB-INF/applicationContext.xml'</filename>):</para>
+      <programlisting><![CDATA[<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>]]></programlisting>
+      <para>In addition, define a corresponding servlet for this exporter in
+      <filename>'web.xml'</filename>, with the servlet name matching the bean
+      name of the target exporter:</para>
+      <programlisting><![CDATA[<servlet>
+    <servlet-name>accountExporter</servlet-name>
+    <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>accountExporter</servlet-name>
+    <url-pattern>/remoting/AccountService</url-pattern>
+</servlet-mapping>]]></programlisting>
+    </section>
+
+    <section id="remoting-httpinvoker-client">
+      <title>Linking in the service at the client</title>
+      <para>Again, linking in the service from the client much resembles the way you would
+      do it when using Hessian or Burlap. Using a proxy, Spring will be able to
+      translate your calls to HTTP POST requests to the URL pointing to the exported
+      service.</para>
+       <programlisting><![CDATA[<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+    <property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+]]></programlisting>
+      <para>As mentioned before, you can choose what HTTP client you want to use.
+      By default, the <classname>HttpInvokerProxy</classname> uses the J2SE HTTP functionality, but
+      you can also use the Commons <classname>HttpClient</classname> by setting the
+      <literal>httpInvokerRequestExecutor</literal> property:</para>
+<programlisting><![CDATA[<property name="httpInvokerRequestExecutor">
+    <bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+</property>
+]]></programlisting>
+    </section>
+  </section>
+
+  <section id="remoting-web-services">
+    <title>Web services</title>
+    <para>Spring provides full support for standard Java web services APIs:</para>
+    <itemizedlist>
+      <listitem><para>Exposing web services using JAX-RPC</para></listitem>
+      <listitem><para>Accessing web services using JAX-RPC</para></listitem>
+      <listitem><para>Exposing web services using JAX-WS</para></listitem>
+      <listitem><para>Accessing web services using JAX-WS</para></listitem>
+    </itemizedlist>
+    <note>
+      <para>Why two standard Java web services APIs?</para>
+      <para>JAX-RPC 1.1 is the standard web service API in J2EE 1.4.
+      As its name indicates, it focuses on on RPC bindings, which became
+      less and less popular in the past couple of years. As a consequence,
+      it has been superseded by JAX-WS 2.0 in Java EE 5, being more flexible
+      in terms of bindings but also being heavily annotation-based. JAX-WS 2.1
+      is also included in Java 6 (or more specifically, in Sun's JDK 1.6.0_04
+      and above; previous Sun JDK 1.6.0 releases included JAX-WS 2.0),
+      integrated with the JDK's built-in HTTP server.</para>
+      <para>Spring can work with both standard Java web services APIs.
+      The choice is effectively dependent on the runtime platform:
+      On JDK 1.4 / J2EE 1.4, the only option is JAX-RPC. On Java EE 5 / Java 6,
+      the obvious choice is JAX-WS. On J2EE 1.4 environments that run on Java 5,
+      you might have the option to plug in a JAX-WS provider; check your J2EE
+      server's documentation.</para>
+    </note>
+    <para>In addition to stock support for JAX-RPC and JAX-WS in Spring Core, the Spring portfolio also
+    features <ulink url="http://www.springframework.org/spring-ws">Spring Web Services</ulink>, a solution
+    for contract-first, document-driven web services - highly recommended for building modern, future-proof
+    web services. Last but not least, <ulink url="http://xfire.codehaus.org">XFire</ulink> also allows
+    you to export Spring-managed beans as a web service, through built-in Spring support.</para>
+
+    <section id="remoting-web-services-jaxrpc-export">
+      <title>Exposing servlet-based web services using JAX-RPC</title>
+      <para>Spring provides a convenience base class for JAX-RPC servlet endpoint implementations -
+      <classname>ServletEndpointSupport</classname>. To expose our
+      <interfacename>AccountService</interfacename> we extend Spring's
+      <classname>ServletEndpointSupport</classname> class and implement our business
+      logic here, usually delegating the call to the business layer.</para>
+      <programlisting><lineannotation>/**
+ * JAX-RPC compliant RemoteAccountService implementation that simply delegates
+ * to the AccountService implementation in the root web application context.
+ *
+ * This wrapper class is necessary because JAX-RPC requires working with dedicated
+ * endpoint classes. If an existing service needs to be exported, a wrapper that
+ * extends ServletEndpointSupport for simple application context access is
+ * the simplest JAX-RPC compliant way.
+ *
+ * This is the class registered with the server-side JAX-RPC implementation.
+ * In the case of Axis, this happens in "server-config.wsdd" respectively via
+ * deployment calls. The web service engine manages the lifecycle of instances
+ * of this class: A Spring application context can just be accessed here.
+ */</lineannotation><![CDATA[import org.springframework.remoting.jaxrpc.ServletEndpointSupport;
+
+public class AccountServiceEndpoint extends ServletEndpointSupport implements RemoteAccountService {
+    
+    private AccountService biz;
+	
+    protected void onInit() {
+        this.biz = (AccountService) getWebApplicationContext().getBean("accountService");
+    }
+
+    public void insertAccount(Account acc) throws RemoteException {
+        biz.insertAccount(acc);
+    }
+  
+    public Account[] getAccounts(String name) throws RemoteException {
+        return biz.getAccounts(name);
+    }
+}]]></programlisting>
+      <para>Our <classname>AccountServletEndpoint</classname> needs to run in the same web
+      application as the Spring context to allow for access to Spring's facilities. In case of
+      Axis, copy the <classname>AxisServlet</classname> definition into your
+      <filename>'web.xml'</filename>, and set up the endpoint in
+      <filename>'server-config.wsdd'</filename> (or use the deploy tool).	See the sample
+      application JPetStore where the <interfacename>OrderService</interfacename> is exposed as
+      a web service using Axis.</para>
+    </section>
+
+    <section id="remoting-web-services-jaxrpc-access">
+      <title>Accessing web services using JAX-RPC</title>
+      <para>Spring provides two factory beans to create JAX-RPC web service proxies,
+      namely <classname>LocalJaxRpcServiceFactoryBean</classname> and
+      <classname>JaxRpcPortProxyFactoryBean</classname>. The former can only return a JAX-RPC
+      service class for us to work with. The latter is the full-fledged version that can return
+      a proxy that implements our business service interface. In this example we use the latter
+      to create a proxy for the <interfacename>AccountService</interfacename> endpoint we exposed
+      in the previous section. You will see that Spring has great support for web services
+      requiring little coding efforts - most of the setup is done in the Spring configuration
+      file as usual:</para>
+      <programlisting><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
+    <property name="serviceInterface" value="example.RemoteAccountService"/>
+    <property name="wsdlDocumentUrl" value="http://localhost:8080/account/services/accountService?WSDL"/>
+    <property name="namespaceUri" value="http://localhost:8080/account/services/accountService"/>
+    <property name="serviceName" value="AccountService"/>
+    <property name="portName" value="AccountPort"/>
+</bean>]]></programlisting>
+      <para>Where <literal>serviceInterface</literal> is our remote business interface the clients will use.
+      <literal>wsdlDocumentUrl</literal> is the URL for the WSDL file. Spring needs this a startup time to create the JAX-RPC Service.
+      <literal>namespaceUri</literal> corresponds to the targetNamespace in the .wsdl file.
+      <literal>serviceName</literal> corresponds to the service name in the .wsdl file.
+      <literal>portName</literal> corresponds to the port name in the .wsdl file.
+      </para>
+      <para>Accessing the web service is now very easy as we have a bean factory for it that will expose it
+      as <literal>RemoteAccountService</literal> interface. We can wire this up in Spring:</para>
+      <programlisting><![CDATA[<bean id="client" class="example.AccountClientImpl">
+    ...
+    <property name="service" ref="accountWebService"/>
+</bean>]]></programlisting>
+      <para>From the client code we can access the web service just as if it
+      was a normal class, except that it throws <exceptionname>RemoteException</exceptionname>.</para>
+<programlisting><![CDATA[public class AccountClientImpl {
+
+    private RemoteAccountService service;
+    
+    public void setService(RemoteAccountService service) {
+        this.service = service;
+    }
+    
+    public void foo() {
+        try {
+            service.insertAccount(...);
+        }
+        catch (RemoteException ex) {
+            ]]><lineannotation>// ouch</lineannotation><![CDATA[
+        }
+    }
+}
+]]></programlisting>
+      <para>We can get rid of the checked <exceptionname>RemoteException</exceptionname> since
+      Spring supports automatic conversion to its corresponding unchecked
+      <exceptionname>RemoteException</exceptionname>. This requires that we provide a non-RMI
+      interface also. Our configuration is now:</para>
+      <programlisting><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
+    <property name="serviceInterface" value="example.AccountService"/>
+    <property name="portInterface" value="example.RemoteAccountService"/>
+</bean>]]></programlisting>
+      <para>Where <literal>serviceInterface</literal> is changed to our non RMI interface. Our RMI
+      interface is now defined using the property	<literal>portInterface</literal>. Our client
+      code can now avoid handling <exceptionname>java.rmi.RemoteException</exceptionname>:</para>
+      <programlisting><![CDATA[public class AccountClientImpl {
+
+    private AccountService service;
+    
+    public void setService(AccountService service) {
+        this.service = service;
+    }
+    
+    public void foo() {
+        service.insertAccount(...);
+    }
+}]]></programlisting>
+      <para>Note that you can also drop the "portInterface" part and specify a plain
+      business interface as "serviceInterface". In this case,
+      <classname>JaxRpcPortProxyFactoryBean</classname> will automatically switch
+      to the JAX-RPC "Dynamic Invocation Interface", performing dynamic invocations
+      without a fixed port stub. The advantage is that you don't even need to have
+      an RMI-compliant Java port interface around (e.g. in case of a non-Java target
+      web service); all you need is a matching business interface. Check out
+      <classname>JaxRpcPortProxyFactoryBean</classname>'s javadoc for details
+      on the runtime implications.</para>
+    </section>
+
+    <section id="remoting-web-services-jaxrpc-mapping-registration">
+      <title>Registering JAX-RPC Bean Mappings</title>
+      <para>To transfer complex objects over the wire such as <classname>Account</classname> we must
+      register bean mappings on the client side.</para>
+      <note>
+        <para>On the server side using Axis registering bean mappings is usually done in
+        the <filename>'server-config.wsdd'</filename> file.</para>
+      </note>
+      <para>We will use Axis to register bean mappings on the client side. To do this we need to
+      register the bean mappings programmatically:</para>
+      <programlisting><![CDATA[public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
+
+    protected void postProcessJaxRpcService(Service service) {
+        TypeMappingRegistry registry = service.getTypeMappingRegistry();
+        TypeMapping mapping = registry.createTypeMapping();
+        registerBeanMapping(mapping, Account.class, "Account");
+        registry.register("http://schemas.xmlsoap.org/soap/encoding/", mapping);
+    }
+
+    protected void registerBeanMapping(TypeMapping mapping, Class type, String name) {
+        QName qName = new QName("http://localhost:8080/account/services/accountService", name);
+        mapping.register(type, qName,
+                new BeanSerializerFactory(type, qName),
+                new BeanDeserializerFactory(type, qName));
+    }
+}]]></programlisting>
+   </section>
+
+    <section id="remoting-web-services-jaxrpc-handler-registration">
+      <title>Registering your own JAX-RPC Handler</title>
+      <para>In this section we will register our own
+      <interfacename>javax.rpc.xml.handler.Handler</interfacename> to the web service proxy
+      where we can do custom code before the SOAP message is sent over the wire.
+      The <interfacename>Handler</interfacename> is a callback interface. There is a convenience
+      base class provided in <filename class="libraryfile">jaxrpc.jar</filename>, namely
+      <classname>javax.rpc.xml.handler.GenericHandler</classname> that we will extend:</para>
+      <programlisting><![CDATA[public class AccountHandler extends GenericHandler {
+
+    public QName[] getHeaders() {
+        return null;
+    }
+
+    public boolean handleRequest(MessageContext context) {
+        SOAPMessageContext smc = (SOAPMessageContext) context;
+        SOAPMessage msg = smc.getMessage();
+        try {
+            SOAPEnvelope envelope = msg.getSOAPPart().getEnvelope();
+            SOAPHeader header = envelope.getHeader();
+            ...
+        }
+        catch (SOAPException ex) {
+            throw new JAXRPCException(ex);
+        }
+        return true;
+    }
+}]]></programlisting>
+      <para>What we need to do now is to register our AccountHandler to JAX-RPC Service so it would
+      invoke <methodname>handleRequest(..)</methodname> before the message is sent over the wire.
+      Spring has at this time of writing no declarative support for registering handlers, so we must
+      use the programmatic approach. However Spring has made it very easy for us to do this as we can
+      override the <methodname>postProcessJaxRpcService(..)</methodname> method that is designed for
+      this:</para>
+      <programlisting><![CDATA[public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
+
+    protected void postProcessJaxRpcService(Service service) {
+        QName port = new QName(this.getNamespaceUri(), this.getPortName());
+        List list = service.getHandlerRegistry().getHandlerChain(port);
+        list.add(new HandlerInfo(AccountHandler.class, null, null));
+        logger.info("Registered JAX-RPC AccountHandler on port " + port);
+    }
+}]]></programlisting>
+      <para>The last thing we must remember to do is to change the Spring configuration to use our
+      factory bean:</para>
+<programlisting><![CDATA[<bean id="accountWebService" class="example.AccountHandlerJaxRpcPortProxyFactoryBean">
+    ...
+</bean>]]></programlisting>
+		</section>
+
+    <section id="remoting-web-services-jaxws-export-servlet">
+      <title>Exposing servlet-based web services using JAX-WS</title>
+      <para>Spring provides a convenient base class for JAX-WS servlet endpoint implementations -
+      <classname>SpringBeanAutowiringSupport</classname>. To expose our
+      <interfacename>AccountService</interfacename> we extend Spring's
+      <classname>SpringBeanAutowiringSupport</classname> class and implement our business
+      logic here, usually delegating the call to the business layer.
+      We'll simply use Spring 2.5's <literal>@Autowired</literal>
+      annotation for expressing such dependencies on Spring-managed beans.</para>
+      <programlisting><lineannotation>/**
+ * JAX-WS compliant AccountService implementation that simply delegates
+ * to the AccountService implementation in the root web application context.
+ *
+ * This wrapper class is necessary because JAX-WS requires working with dedicated
+ * endpoint classes. If an existing service needs to be exported, a wrapper that
+ * extends SpringBeanAutowiringSupport for simple Spring bean autowiring (through
+ * the @Autowired annotation) is the simplest JAX-WS compliant way.
+ *
+ * This is the class registered with the server-side JAX-WS implementation.
+ * In the case of a Java EE 5 server, this would simply be defined as a servlet
+ * in web.xml, with the server detecting that this is a JAX-WS endpoint and reacting
+ * accordingly. The servlet name usually needs to match the specified WS service name.
+ *
+ * The web service engine manages the lifecycle of instances of this class.
+ * Spring bean references will just be wired in here.
+ */</lineannotation><![CDATA[import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+@WebService(serviceName="AccountService")
+public class AccountServiceEndpoint extends SpringBeanAutowiringSupport {
+
+    @Autowired
+    private AccountService biz;
+
+    @WebMethod
+    public void insertAccount(Account acc) {
+       biz.insertAccount(acc);
+    }
+
+    @WebMethod
+    public Account[] getAccounts(String name) {
+       return biz.getAccounts(name);
+    }
+}]]></programlisting>
+      <para>Our <classname>AccountServletEndpoint</classname> needs to run in the same web
+      application as the Spring context to allow for access to Spring's facilities. This is
+      the case by default in Java EE 5 environments, using the standard contract for JAX-WS
+      servlet endpoint deployment. See Java EE 5 web service tutorials for details.</para>
+    </section>
+
+    <section id="remoting-web-services-jaxws-export-standalone">
+      <title>Exporting standalone web services using JAX-WS</title>
+      <para>The built-in JAX-WS provider that comes with Sun's JDK 1.6 supports exposure
+      of web services using the built-in HTTP server that's included in JDK 1.6 as well.
+      Spring's <classname>SimpleJaxWsServiceExporter</classname> detects all
+      <literal>@WebService</literal> annotated beans in the Spring application context,
+      exporting them through the default JAX-WS server (the JDK 1.6 HTTP server).</para>
+      <para>In this scenario, the endpoint instances are defined and managed as Spring beans
+      themselves; they will be registered with the JAX-WS engine but their lifecycle
+      will be up to the Spring application context. This means that Spring functionality
+      like explicit dependency injection may be applied to the endpoint instances.
+      Of course, annotation-driven injection through <literal>@Autowired</literal>
+      will work as well.
+      </para>
+      <programlisting><![CDATA[<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
+    <property name="baseAddress" value="http://localhost:9999/"/>
+</bean>
+
+<bean id="accountServiceEndpoint" class="example.AccountServiceEndpoint">
+    ...
+</bean>
+
+...]]></programlisting>
+      <para>The <classname>AccountServiceEndpoint</classname> may derive from
+      Spring's <classname>SpringBeanAutowiringSupport</classname> but doesn't
+      have to since the endpoint is a fully Spring-managed bean here.
+      This means that the endpoint implementation may look like as follows,
+      without any superclass declared - and Spring's <literal>@Autowired</literal>
+			configuration annotation still being honored:</para>
+      <programlisting><![CDATA[@WebService(serviceName="AccountService")
+public class AccountServiceEndpoint {
+
+    @Autowired
+    private AccountService biz;
+
+    @WebMethod
+    public void insertAccount(Account acc) {
+       biz.insertAccount(acc);
+    }
+
+    @WebMethod
+    public Account[] getAccounts(String name) {
+       return biz.getAccounts(name);
+    }
+}]]></programlisting>
+    </section>
+
+    <section id="remoting-web-services-jaxws-export-ri">
+      <title>Exporting web services using the JAX-WS RI's Spring support</title>
+      <para>Sun's JAX-WS RI, developed as part of the GlassFish project, ships Spring support
+      as part of its JAX-WS Commons project. This allows for defining JAX-WS endpoints as
+      Spring-managed beans, similar to the standalone mode discussed in the previous section
+      - but this time in a Servlet environment. <emphasis>Note that this is not portable
+      in a Java EE 5 environment; it is mainly intended for non-EE environments such as Tomcat,
+      embedding the JAX-WS RI as part of the web application.</emphasis></para>
+      <para>The difference to the standard style of exporting servlet-based endpoints is
+      that the lifecycle of the endpoint instances themselves will be managed by Spring here,
+      and that there will be only one JAX-WS servlet defined in <literal>web.xml</literal>.
+      With the standard Java EE 5 style (as illustrated above), you'll have one servlet
+      definition per service endpoint, with each endpoint typically delegating to Spring
+      beans (through the use of <literal>@Autowired</literal>, as shown above).</para>
+      <para>Check out
+      <ulink url="https://jax-ws-commons.dev.java.net/spring/">https://jax-ws-commons.dev.java.net/spring/</ulink>
+      for the details on setup and usage style.</para>
+    </section>
+
+    <section id="remoting-web-services-jaxws-access">
+      <title>Accessing web services using JAX-WS</title>
+      <para>Analogous to the JAX-RPC support, Spring provides two factory beans
+      to create JAX-WS web service proxies, namely <classname>LocalJaxWsServiceFactoryBean</classname> and
+      <classname>JaxWsPortProxyFactoryBean</classname>. The former can only return a JAX-WS
+      service class for us to work with. The latter is the full-fledged version that can return
+      a proxy that implements our business service interface. In this example we use the latter
+      to create a proxy for the <interfacename>AccountService</interfacename> endpoint (again):
+      </para>
+      <programlisting><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
+    <property name="serviceInterface" value="example.AccountService"/>
+    <property name="wsdlDocumentUrl" value="http://localhost:8080/account/services/accountService?WSDL"/>
+    <property name="namespaceUri" value="http://localhost:8080/account/services/accountService"/>
+    <property name="serviceName" value="AccountService"/>
+    <property name="portName" value="AccountPort"/>
+</bean>]]></programlisting>
+      <para>Where <literal>serviceInterface</literal> is our business interface the clients will use.
+      <literal>wsdlDocumentUrl</literal> is the URL for the WSDL file. Spring needs this a startup time to create the JAX-WS Service.
+      <literal>namespaceUri</literal> corresponds to the targetNamespace in the .wsdl file.
+      <literal>serviceName</literal> corresponds to the service name in the .wsdl file.
+      <literal>portName</literal> corresponds to the port name in the .wsdl file.
+      </para>
+      <para>Accessing the web service is now very easy as we have a bean factory for it that will expose it
+      as <literal>AccountService</literal> interface. We can wire this up in Spring:</para>
+      <programlisting><![CDATA[<bean id="client" class="example.AccountClientImpl">
+    ...
+    <property name="service" ref="accountWebService"/>
+</bean>]]></programlisting>
+      <para>From the client code we can access the web service just as if it
+      was a normal class:</para>
+      <programlisting><![CDATA[public class AccountClientImpl {
+
+    private AccountService service;
+
+    public void setService(AccountService service) {
+        this.service = service;
+    }
+
+    public void foo() {
+        service.insertAccount(...);
+    }
+}]]></programlisting>
+      <para><emphasis>NOTE:</emphasis> The above is slightly simplified in that JAX-WS
+      requires endpoint interfaces and implementation classes to be annotated with
+      <literal>@WebService</literal>, <literal>@SOAPBinding</literal> etc annotations.
+      This means that you cannot (easily) use plain Java interfaces and implementation
+      classes as JAX-WS endpoint artifacts; you need to annotate them accordingly first.
+      Check the JAX-WS documentation for details on those requirements.</para>
+    </section>
+
+    <section id="remoting-web-services-xfire">
+      <title>Exposing web services using XFire</title>
+      <para>XFire is a lightweight SOAP library, hosted by Codehaus. Exposing XFire is done using a
+      XFire context that shipping with XFire itself in combination with a RemoteExporter-style bean
+      you have to add to your <interfacename>WebApplicationContext</interfacename>. As with all
+      methods that allow you to expose service, you have to create a
+      <classname>DispatcherServlet</classname> with a corresponding
+      <interfacename>WebApplicationContext</interfacename> containing the services you will be
+      exposing:</para>
+      <programlisting><![CDATA[<servlet>
+    <servlet-name>xfire</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+</servlet>]]></programlisting>
+      <para>You also have to link in the XFire configuration. This is done by adding a context
+      file to the <literal>contextConfigLocations</literal> context parameter picked up by the
+      <classname>ContextLoaderListener</classname> (or <classname>ContextLoaderServlet</classname>
+      for that matter).</para>
+      <programlisting><![CDATA[<context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:org/codehaus/xfire/spring/xfire.xml</param-value>
+</context-param>
+
+<listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>]]></programlisting>
+
+      <para>After you added a servlet mapping (mapping <literal>/*</literal> to the XFire servlet
+      declared above) you only have to add one extra bean to expose the service using XFire.
+      Add for example the following configuration in your <filename>'xfire-servlet.xml'</filename>
+      file:</para>
+      <programlisting><![CDATA[<beans>
+
+    <bean name="/Echo" class="org.codehaus.xfire.spring.remoting.XFireExporter">
+        <property name="serviceInterface" value="org.codehaus.xfire.spring.Echo"/>
+        <property name="serviceBean">
+    	       <bean class="org.codehaus.xfire.spring.EchoImpl"/>
+        </property>
+        ]]><lineannotation>&lt;!-- the XFire bean is defined in the <filename>xfire.xml</filename> file --&gt;</lineannotation><![CDATA[
+        <property name="xfire" ref="xfire"/>
+  </bean>
+
+</beans>]]></programlisting>
+      <para>XFire handles the rest. It introspects your service interface and generates a WSDL from it.
+      Parts of this documentation have been taken from the XFire site; for more detailed information
+      on XFire Spring integration, navigate to
+      <ulink url="http://docs.codehaus.org/display/XFIRE/Spring">http://docs.codehaus.org/display/XFIRE/Spring</ulink>.</para>
+    </section>
+  </section>
+	
+  <section id="remoting-jms">
+    <title>JMS</title>
+    <para>It is also possible to expose services transparently using JMS as the underlying
+    communication protocol. The JMS remoting support in the Spring Framework is pretty basic -
+    it sends and receives on the <interfacename>same thread</interfacename> and in the
+    <emphasis>same non-transactional</emphasis> <interfacename>Session</interfacename>, and as
+    such throughput will be very implementation dependent.</para>
+    <para>The following interface is used on both the server and the client side.</para>
+    <programlisting><![CDATA[package com.foo;
+
+public interface CheckingAccountService {
+
+    public void cancelAccount(Long accountId);
+}]]></programlisting>
+    <para>The following simple implementation of the above interface is used on the server-side.</para>
+    <programlisting><![CDATA[package com.foo;
+
+public class SimpleCheckingAccountService implements CheckingAccountService {
+
+    public void cancelAccount(Long accountId) {
+        System.out.println("Cancelling account [" + accountId + "]");
+    }
+}]]></programlisting>
+    <para>This configuration file contains the JMS-infrastructure beans that are shared on both
+    the client and server.</para>
+    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://ep-t43:61616"/>
+    </bean>
+
+    <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="mmm"/>
+    </bean>
+
+</beans>]]></programlisting>
+
+    <section id="remoting-jms-server">
+      <title>Server-side configuration</title>
+      <para>On the server, you just need to expose the service object using the
+      <classname>JmsInvokerServiceExporter</classname>.</para>
+      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="checkingAccountService"
+          class="org.springframework.jms.remoting.JmsInvokerServiceExporter">
+        <property name="serviceInterface" value="com.foo.CheckingAccountService"/>
+        <property name="service">
+            <bean class="com.foo.SimpleCheckingAccountService"/>
+        </property>
+   </bean>
+
+   <bean class="org.springframework.jms.listener.SimpleMessageListenerContainer">
+       <property name="connectionFactory" ref="connectionFactory"/>
+       <property name="destination" ref="queue"/>
+       <property name="concurrentConsumers" value="3"/>
+       <property name="messageListener" ref="checkingAccountService"/>
+   </bean>
+
+</beans>]]></programlisting>
+      <programlisting><![CDATA[package com.foo;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Server {
+
+    public static void main(String[] args) throws Exception {
+        new ClassPathXmlApplicationContext(new String[]{"com/foo/server.xml", "com/foo/jms.xml"});
+    }
+}]]></programlisting>
+    </section>
+
+    <section id="remoting-jms-client">
+      <title>Client-side configuration</title>
+      <para>The client merely needs to create a client-side proxy that will implement the agreed
+      upon interface (<interfacename>CheckingAccountService</interfacename>). The resulting
+      object created off the back of the following bean definition can be injected into other
+      client side objects, and the proxy will take care of forwarding the call to the
+      server-side object via JMS.</para>
+      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="checkingAccountService"
+          class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean">
+        <property name="serviceInterface" value="com.foo.CheckingAccountService"/>
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="queue" ref="queue"/>
+    </bean>
+
+</beans>]]></programlisting>
+      <programlisting><![CDATA[package com.foo;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Client {
+
+    public static void main(String[] args) throws Exception {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext(
+                new String[] {"com/foo/client.xml", "com/foo/jms.xml"});
+        CheckingAccountService service = (CheckingAccountService) ctx.getBean("checkingAccountService");
+        service.cancelAccount(new Long(10));
+    }
+}]]></programlisting>
+    </section>
+
+    <para>You may also wish to investigate the support provided by the
+    <ulink url="http://lingo.codehaus.org/">Lingo</ulink> project, which (to quote the
+    homepage blurb) <quote><emphasis>... is a lightweight POJO based remoting and messaging library
+    based on the Spring Framework's remoting libraries which extends it to support JMS.</emphasis></quote></para>
+	</section>
+
+  <section id="remoting-autodection-remote-interfaces">
+    <title>Auto-detection is not implemented for remote interfaces</title>
+    <para>The main reason why auto-detection of implemented interfaces does not occur for
+    remote interfaces is to avoid opening too many doors to remote callers. The target
+    object might implement internal callback interfaces like <interfacename>InitializingBean</interfacename> or
+    <interfacename>DisposableBean</interfacename> which one would not want to expose to callers.
+    </para>
+    <para>Offering a proxy with all interfaces implemented by the target usually does not
+    matter in the local case. But when exporting a remote service, you should expose
+    a specific service interface, with specific operations intended for remote usage.
+    Besides internal callback interfaces, the target might implement multiple business
+    interfaces, with just one of them intended for remote exposure. For these reasons,
+    we <emphasis>require</emphasis> such a service interface to be specified.
+    </para>
+    <para>This is a trade-off between configuration convenience and the risk of accidental
+    exposure of internal methods. Always specifying a service interface is not too much
+    effort, and puts you on the safe side regarding controlled exposure of specific methods.
+    </para>
+  </section>
+
+  <section id="remoting-considerations">
+    <title>Considerations when choosing a technology</title>
+    <para>Each and every technology presented here has its drawbacks. You should carefully
+    consider you needs, the services your exposing and the objects you'll be sending
+    over the wire when choosing a technology.
+    </para>
+    <para>When using RMI, it's not possible to access the objects through the HTTP protocol,
+    unless you're tunneling the RMI traffic. RMI is a fairly heavy-weight protocol
+    in that it support full-object serialization which is important when using a
+    complex data model that needs serialization over the wire. However, RMI-JRMP
+    is tied to Java clients: It is a Java-to-Java remoting solution.
+    </para>
+    <para>Spring's HTTP invoker is a good choice if you need HTTP-based remoting but also
+    rely on Java serialization. It shares the basic infrastructure with RMI invokers,
+    just using HTTP as transport. Note that HTTP invokers are not only limited to
+    Java-to-Java remoting but also to Spring on both the client and server side.
+    (The latter also applies to Spring's RMI invoker for non-RMI interfaces.)
+    </para>
+    <para>Hessian and/or Burlap might provide significant value when operating in a
+    heterogeneous environment, because they explicitly allow for non-Java clients.
+    However, non-Java support is still limited. Known issues include the serialization
+    of Hibernate objects in combination with lazily-initialized collections. If you
+    have such a data model, consider using RMI or HTTP invokers instead of Hessian.
+    </para>
+    <para>JMS can be useful for providing clusters of services and allowing the JMS broker
+    to take care of load balancing, discovery and auto-failover.
+    By default: Java serialization is used when using JMS remoting but
+    the JMS provider could use a different mechanism for the wire formatting,
+    such as XStream to allow servers to be implemented in other technologies.
+    </para>
+    <para>Last but not least, EJB has an advantage over RMI in that it supports standard
+    role-based authentication and authorization and remote transaction propagation.
+    It is possible to get RMI invokers or HTTP invokers to support security context
+    propagation as well, although this is not provided by core Spring: There are
+    just appropriate hooks for plugging in third-party or custom solutions here.
+    </para>
+  </section>
+
+</chapter>

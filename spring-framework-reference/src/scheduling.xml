@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter id="scheduling">
+    <title>Scheduling and Thread Pooling</title>
+	<section id="scheduling-introduction">
+		<title>Introduction</title>
+		<para>
+		The Spring Framework features integration classes for scheduling support. Currently, Spring
+		supports the <classname>Timer</classname>, part of the JDK since 1.3, and the
+		Quartz Scheduler (<ulink url="http://www.opensymphony.com/quartz/"/>). Both schedulers
+		are set up using a <interfacename>FactoryBean</interfacename> with optional references
+		to <classname>Timer</classname> or <classname>Trigger</classname> instances, respectively.
+		Furthermore, a convenience class for both the Quartz Scheduler and the <classname>Timer</classname> is
+		available that allows you to invoke a method of an existing target object
+		(analogous to the normal <classname>MethodInvokingFactoryBean</classname> operation).
+		Spring also features classes for thread pooling that abstract
+		away differences between Java SE 1.4, Java SE 5 and Java EE environments.
+  	</para>
+	</section>
+	<section id="scheduling-quartz">
+		<title>Using the OpenSymphony Quartz Scheduler</title>
+		<para>Quartz uses <classname>Trigger</classname>, <classname>Job</classname> and 
+		<classname>JobDetail</classname> objects to realize scheduling of all kinds of jobs.
+		For the basic concepts behind Quartz, have a look at
+		<ulink url="http://www.opensymphony.com/quartz" />. For convenience purposes,
+		Spring offers a couple of classes that simplify the usage of Quartz within
+		Spring-based applications.
+		</para>
+		<section id="scheduling-quartz-jobdetail">
+			<title>Using the JobDetailBean</title>
+			<para>
+			<classname>JobDetail</classname> objects contain all information needed to
+			run a job. The Spring Framework provides a <classname>JobDetailBean</classname>
+			that makes the <classname>JobDetail</classname> more of an actual JavaBean
+			with sensible defaults. Let's have a look at an example:
+			</para>
+			<programlisting><![CDATA[
+<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+  <property name="jobClass" value="example.ExampleJob" />
+  <property name="jobDataAsMap">
+    <map>
+      <entry key="timeout" value="5" />
+    </map>
+  </property>
+</bean>]]></programlisting>
+			<para>The job detail bean has all information it needs to run the job (<classname>ExampleJob</classname>).
+			The timeout is specified in the job data map. The job data map is
+			available through the <classname>JobExecutionContext</classname>
+			(passed to you at execution time), but the <classname>JobDetailBean</classname>
+			also maps the properties from the job data map to properties of the actual job.
+			So in this case, if the <classname>ExampleJob</classname> contains a property
+			named <literal>timeout</literal>, the <classname>JobDetailBean</classname> will
+			automatically apply it:</para>
+			<programlisting><![CDATA[package example;
+
+public class ExampleJob extends QuartzJobBean {
+
+  private int timeout;
+  
+  /**
+   * Setter called after the ExampleJob is instantiated
+   * with the value from the JobDetailBean (5)
+   */ 
+  public void setTimeout(int timeout) {
+    this.timeout = timeout;
+  }
+  
+  protected void executeInternal(JobExecutionContext ctx) throws JobExecutionException {
+      ]]><lineannotation>// do the actual work</lineannotation><![CDATA[
+  }
+}]]></programlisting>
+			<para>All additional settings from the job detail bean are of course available to you as well.</para>
+			<para><emphasis>Note: Using the <literal>name</literal> and <literal>group</literal> properties,
+			you can modify the name and the group of the job, respectively. By default, the name of
+			the job matches the bean name of the job detail bean (in the example above, this is
+			<literal>exampleJob</literal>).</emphasis></para>
+		</section>
+		<section id="scheduling-quartz-method-invoking-job">
+			<title>Using the <classname>MethodInvokingJobDetailFactoryBean</classname></title>
+			<para>Often you just need to invoke a method on a specific object. Using the
+			<classname>MethodInvokingJobDetailFactoryBean</classname> you can do exactly this:</para>
+			<programlisting><![CDATA[<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+  <property name="targetObject" ref="exampleBusinessObject" />
+  <property name="targetMethod" value="doIt" />
+</bean>]]></programlisting>
+			<para>The above example will result in the <literal>doIt</literal> method being called on the
+			<literal>exampleBusinessObject</literal> method (see below):</para>
+			<programlisting><![CDATA[public class ExampleBusinessObject {
+  
+  ]]><lineannotation>// properties and collaborators</lineannotation><![CDATA[
+  
+  public void doIt() {
+    ]]><lineannotation>// do the actual work</lineannotation><![CDATA[
+  }
+}]]></programlisting>
+
+			<programlisting><![CDATA[
+<bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>]]></programlisting>
+			<para>Using the <classname>MethodInvokingJobDetailFactoryBean</classname>, you don't need to
+			create one-line jobs that just invoke a method, and you only need to create the actual
+			business object and wire up the detail object.</para>
+			<para>By default, Quartz Jobs are stateless, resulting in the possibility of jobs interfering
+			with each other. If you specify two triggers for the same <classname>JobDetail</classname>,
+			it might be possible that before the first job has finished, the second one will start.
+			If <classname>JobDetail</classname> classes implement the
+			<interfacename>Stateful</interfacename> interface, this won't happen. The second job
+			will not start before the first one has finished. To make jobs resulting from the
+			<classname>MethodInvokingJobDetailFactoryBean</classname> non-concurrent, set the
+			<literal>concurrent</literal> flag to <literal>false</literal>.</para>
+			<programlisting><![CDATA[
+<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+  <property name="targetObject" ref="exampleBusinessObject" />
+  <property name="targetMethod" value="doIt" />
+  <property name="concurrent" value="false" />
+</bean>]]></programlisting>
+			<note>
+				<para>By default, jobs will run in a concurrent fashion.</para>
+			</note>
+		</section>
+		<section id="scheduling-quartz-cron">
+			<title>Wiring up jobs using triggers and the <classname>SchedulerFactoryBean</classname></title>
+			<para>
+				We've created job details and jobs. We've also reviewed the convenience bean
+				that allows to you invoke a method on a specific object. Of course, we still need
+				to schedule the jobs themselves. This is done using triggers and a 
+				<classname>SchedulerFactoryBean</classname>. Several triggers are available
+				within Quartz. Spring offers two subclassed triggers with convenient defaults:
+				<classname>CronTriggerBean</classname> and <classname>SimpleTriggerBean</classname>.
+			</para>
+			<para>
+				Triggers need to be scheduled. Spring offers a <classname>SchedulerFactoryBean</classname>
+				that exposes triggers to be set as properties. <classname>SchedulerFactoryBean</classname>
+				schedules the actual jobs with those triggers.
+			</para>
+			<para>Find below a couple of examples:</para>
+			<programlisting><![CDATA[<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+    <!-- see the example of method invoking job above -->
+    <property name="jobDetail" ref="jobDetail" />
+    <!-- 10 seconds -->
+    <property name="startDelay" value="10000" />
+    <!-- repeat every 50 seconds -->
+    <property name="repeatInterval" value="50000" />
+</bean>
+
+<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+    <property name="jobDetail" ref="exampleJob" />
+    <!-- run every morning at 6 AM -->
+    <property name="cronExpression" value="0 0 6 * * ?" />
+</bean>]]></programlisting>
+			<para>Now we've set up two triggers, one running every 50 seconds with a starting delay of
+			10 seconds and one every morning at 6 AM. To finalize everything, we need to set up the
+			<classname>SchedulerFactoryBean</classname>:</para>
+			<programlisting><![CDATA[<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <property name="triggers">
+        <list>
+            <ref bean="cronTrigger" />
+            <ref bean="simpleTrigger" />
+        </list>
+    </property>
+</bean>]]></programlisting>
+			<para>
+				More properties are available for the <classname>SchedulerFactoryBean</classname> for you
+				to set, such as the	calendars used by the job details, properties to customize Quartz with,
+				etc. Have a look at the
+				<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean Javadoc</ulink>
+				for more information.
+			</para>
+		</section>
+	</section>
+	<section id="scheduling-jdk-timer">
+		<title>Using JDK Timer support</title>
+		<para>
+  			The other way to schedule jobs in Spring is to use JDK
+			<classname>Timer</classname> objects. You can create custom timers or
+			use the timer that invokes methods. Wiring timers is done using the
+			<classname>TimerFactoryBean</classname>.
+  		</para>
+		<section id="scheduling-jdk-timer-creating">
+			<title>Creating custom timers</title>
+			<para>
+  				Using the <classname>TimerTask</classname> you can create customer
+				timer tasks, similar to Quartz jobs:
+			</para>
+  			<programlisting><![CDATA[public class CheckEmailAddresses extends TimerTask {
+
+  private List emailAddresses;
+  
+  public void setEmailAddresses(List emailAddresses) {
+    this.emailAddresses = emailAddresses;
+  }
+  
+  public void run() {
+    ]]><lineannotation>// iterate over all email addresses and archive them</lineannotation><![CDATA[
+  }
+}]]></programlisting>
+			<para>
+				Wiring it up is simple:
+			</para>
+			<programlisting><![CDATA[<bean id="checkEmail" class="examples.CheckEmailAddress">
+    <property name="emailAddresses">
+        <list>
+            <value>test@springframework.org</value>
+            <value>foo@bar.com</value>
+            <value>john@doe.net</value>
+        </list>
+    </property>
+</bean>
+
+<bean id="scheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    ]]><lineannotation>&lt;!-- wait 10 seconds before starting repeated execution --&gt;</lineannotation><![CDATA[
+    <property name="delay" value="10000" />
+    ]]><lineannotation>&lt;!-- run every 50 seconds --&gt;</lineannotation><![CDATA[
+    <property name="period" value="50000" />
+    <property name="timerTask" ref="checkEmail" />
+</bean>]]></programlisting>
+			<para>
+				<emphasis>
+					Note that letting the task only run once can be done by changing the
+					<literal>period</literal> property to 0 (or a negative value).
+				</emphasis>
+			</para>
+		</section>
+		<section id="scheduling-jdk-timer-method-invoking-task">
+			<title>Using the <classname>MethodInvokingTimerTaskFactoryBean</classname></title>
+			<para>
+				Similar to the Quartz support, the <classname>Timer</classname> support also features
+				a component that allows you to periodically invoke a method:
+			</para>
+			<programlisting><![CDATA[<bean id="doIt" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+    <property name="targetObject" ref="exampleBusinessObject" />
+    <property name="targetMethod" value="doIt" />
+</bean>]]></programlisting>
+			<para>
+				The above example will result in the <literal>doIt</literal> method being called on the
+				<literal>exampleBusinessObject</literal> (see below):
+			</para>
+			<programlisting><![CDATA[public class BusinessObject {
+  
+  ]]><lineannotation>// properties and collaborators</lineannotation><![CDATA[
+  
+  public void doIt() {
+    ]]><lineannotation>// do the actual work</lineannotation><![CDATA[
+  }
+}]]></programlisting>
+			<para>Changing the <literal>timerTask</literal> reference of the
+			<classname>ScheduledTimerTask</classname> example to the bean <literal>doIt</literal>
+			will result in the <literal>doIt</literal> method being executed on a fixed schedule.</para>
+		</section>
+		<section id="scheduling-jdk-timer-factory-bean">
+			<title>Wrapping up: setting up the tasks using the <classname>TimerFactoryBean</classname></title>
+			<para>The <classname>TimerFactoryBean</classname> is similar to the Quartz
+			<classname>SchedulerFactoryBean</classname> in that it serves the same
+			purpose: setting up the actual scheduling. The <classname>TimerFactoryBean</classname>
+			sets up an actual <classname>Timer</classname> and schedules the tasks it has
+			references to. You can specify whether or not daemon threads should be used.</para>
+			<programlisting><![CDATA[<bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
+    <property name="scheduledTimerTasks">
+        <list>
+            ]]><lineannotation>&lt;!-- see the example above --&gt;</lineannotation><![CDATA[
+            <ref bean="scheduledTask" />
+        </list>
+    </property>
+</bean>]]></programlisting>
+		</section>
+	</section>
+	<section id="scheduling-task-executor">
+		<title>The Spring <interfacename>TaskExecutor</interfacename> abstraction</title>
+		<para>Spring 2.0 introduces a new abstraction for dealing with
+		executors. Executors are the Java 5 name for the concept of
+		thread pools. The "executor" naming is due to the fact that there
+		is no guarantee that the underlying implementation is actually a
+		pool; an executor may be single-threaded or even synchronous.
+		Spring's abstraction hides implementation details between
+		Java SE 1.4, Java SE 5 and Java EE environments.</para>
+		<title>The <interfacename>TaskExecutor</interfacename> interface</title>
+		<para>Spring's <interfacename>TaskExecutor</interfacename> interface is
+		identical to the <classname>java.util.concurrent.Executor</classname>
+		interface. In fact, its primary reason for existence is to abstract away
+		the need for Java 5 when using thread pools. The interface has a single
+		method <classname>execute(Runnable task)</classname> that accepts a task
+		for execution based on the semantics and configuration of the thread pool.</para>
+		<para>The <interfacename>TaskExecutor</interfacename> was originally
+		created to give other Spring components an abstraction for thread pooling where
+		needed. Components such as the <classname>ApplicationEventMulticaster</classname>,
+		JMS's <classname>AbstractMessageListenerContainer</classname>,
+		and Quartz integration all use the <interfacename>TaskExecutor</interfacename>
+		abstraction to pool threads. However, if your beans need thread pooling behavior,
+		it is possible to use this abstraction for your own needs.</para>
+		
+		<section id="scheduling-task-executor-types">
+			<title><interfacename>TaskExecutor</interfacename> types</title>
+			<para>There are a number of pre-built implementations of
+			<interfacename>TaskExecutor</interfacename> included with the
+			Spring distribution. In all likelihood, you shouldn't ever
+			need to implement your own.</para>
+			
+			<itemizedlist>
+				<listitem>
+					<para>
+						<classname>SimpleAsyncTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation does not reuse any threads,
+						rather it starts up a new thread for each
+						invocation. However, it does support a
+						concurrency limit which will block any
+						invocations that are over the limit until a slot
+						has been freed up. If you're looking for true
+						pooling, keep scrolling further down the page.
+					</para>
+				</listitem>
+				
+				<listitem id="syncTaskExecutor">
+					<para>
+						<classname>SyncTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation doesn't execute
+						invocations asynchronously. Instead, each
+						invocation takes place in the calling thread. It
+						is primarily used in situations where
+						mutlithreading isn't necessary such as simple
+						test cases.
+					</para>
+				</listitem>
+				
+				<listitem id="concurrentTaskExecutor">
+					<para>
+						<classname>ConcurrentTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation is a wrapper for a Java 5
+						<classname>java.util.concurrent.Executor</classname>.
+						There is an alternative,
+						<classname>ThreadPoolTaskExecutor</classname>,
+						that exposes the <classname>Executor</classname>
+						configuration parameters as bean properties. It
+						is rare to need to use the <classname>ConcurrentTaskExecutor</classname>
+						but if the
+						<link linkend="threadPoolTaskExecutor"><classname>ThreadPoolTaskExecutor</classname></link>
+						isn't robust enough for your needs, the
+						<classname>ConcurrentTaskExecutor</classname>
+						is an alternative.
+					</para>
+				</listitem>
+				
+				<listitem id="simpleThreadPoolTaskExecutor">
+					<para>
+						<classname>SimpleThreadPoolTaskExecutor</classname>
+					</para>
+					
+					<para>
+						This implementation is actually a subclass of
+						Quartz's <classname>SimpleThreadPool</classname>
+						which listens to Spring's lifecycle callbacks.
+						This is typically used when you have a
+						threadpool that may need to be shared by both
+						Quartz and non-Quartz components.
+					</para>
+				</listitem>
+
+				<listitem id="threadPoolTaskExecutor">
+					<para>
+						<classname>ThreadPoolTaskExecutor</classname>
+					</para>
+					
+					<sidebar>
+						<para>
+							It is not possible to use any backport or
+							alternate versions of the
+							<classname>java.util.concurrent</classname>
+							package with this implementation. Both Doug
+							Lea's and Dawid Kurzyniec's implementations
+							use different package structures which will
+							prevent them from working correctly.
+						</para>
+					</sidebar>
+
+					<para>
+						This implementation can only be used in a Java 5
+						environment but is also the most commonly used
+						one in that environment. It exposes bean properties for
+						configuring a 
+						<classname>java.util.concurrent.ThreadPoolExecutor</classname>
+						and wraps it in a <interfacename>TaskExecutor</interfacename>.
+						If you need something advanced such as a
+						<classname>ScheduledThreadPoolExecutor</classname>,
+						it is recommended that you use a
+						<link linkend="concurrentTaskExecutor"><classname>ConcurrentTaskExecutor</classname></link>
+						instead.
+                    </para>
+                </listitem>
+				
+				<listitem>
+					<para>
+						<classname>TimerTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation uses a single
+						<classname>TimerTask</classname>
+						as its backing implementation. It's different
+						from the
+						<link linkend="syncTaskExecutor"><classname>SyncTaskExecutor</classname></link>
+						in that the method invocations are executed in a
+						separate thread, although they are synchronous
+						in that thread.
+					</para>
+                </listitem>
+				
+				<listitem>
+					<para>
+						<classname>WorkManagerTaskExecutor</classname>
+					</para>
+					
+					<sidebar><para>
+							CommonJ is a set of specifications jointly
+							developed between BEA and IBM. These
+							specifications are not Java EE standards, but
+							are standard across BEA's and IBM's
+							Application Server implementations.
+						</para></sidebar>
+
+					<para>
+						This implementation uses the CommonJ WorkManager
+						as its backing implementation and is the central
+						convenience class for setting up a CommonJ
+						WorkManager reference in a Spring context.
+						Similar to the
+						<link linkend="simpleThreadPoolTaskExecutor"><classname>SimpleThreadPoolTaskExecutor</classname></link>,
+						this class implements the WorkManager
+						interface and therefore can be used directly as
+						a WorkManager as well.
+					</para>
+                </listitem>
+
+			</itemizedlist>
+		</section>
+		<section id="scheduling-task-executor-usage">
+			<title>Using a <interfacename>TaskExecutor</interfacename></title>
+			<para>Spring's <interfacename>TaskExecutor</interfacename> implementations
+			are used as simple JavaBeans.  In the example below, we define
+			a bean that uses the <classname>ThreadPoolTaskExecutor</classname>
+			to asynchronously print out a set of messages.</para>
+
+			<programlisting><![CDATA[import org.springframework.core.task.TaskExecutor;
+
+public class TaskExecutorExample {
+
+  private class MessagePrinterTask implements Runnable {
+
+    private String message;
+
+    public MessagePrinterTask(String message) {
+      this.message = message;
+    }
+
+    public void run() {
+      System.out.println(message);
+    }
+
+  }
+
+  private TaskExecutor taskExecutor;
+
+  public TaskExecutorExample(TaskExecutor taskExecutor) {
+    this.taskExecutor = taskExecutor;
+  }
+
+  public void printMessages() {
+    for(int i = 0; i < 25; i++) {
+      taskExecutor.execute(new MessagePrinterTask("Message" + i));
+    }
+  }
+}]]></programlisting>
+			
+			<para>As you can see, rather than retrieving a thread from the
+			pool and executing yourself, you add your <classname>Runnable</classname>
+			to the queue and the <interfacename>TaskExecutor</interfacename>
+			uses its internal rules to decide when the task gets executed.</para>
+			
+			<para>To configure the rules that the <interfacename>TaskExecutor</interfacename>
+			will use, simple bean properties have been exposed.</para>
+			
+			<programlisting><![CDATA[<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+  <property name="corePoolSize" value="5" />
+  <property name="maxPoolSize" value="10" />
+  <property name="queueCapacity" value="25" />
+</bean>
+
+<bean id="taskExecutorExample" class="TaskExecutorExample">
+  <constructor-arg ref="taskExecutor" />
+</bean>]]></programlisting>
+
+		</section>
+	</section>
+</chapter>
