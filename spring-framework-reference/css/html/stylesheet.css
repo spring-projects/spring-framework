@@ -1,0 +1,56 @@
+html {
+  padding:       0pt;
+  margin:        0pt;
+}
+
+body {
+  margin-left:   10%;
+  margin-right:  10%;
+  font-family:   Arial, Sans-serif;
+}
+
+div {
+  margin:        0pt;
+}
+
+p {
+  text-align:    justify;
+}
+
+hr {
+  border:        1px solid gray;
+  background:    gray;
+}
+
+h1,h2,h3 {
+  color:         #234623;
+  font-family:   Arial, Sans-serif;
+}
+
+pre {
+  line-height:   1.0;
+  color:         black;
+}
+
+pre.programlisting {
+  font-size:     10pt;
+  padding:       7pt 3pt;
+  border:        1pt solid black;
+  background:    #eeeeee;
+}
+
+div.table {
+  margin:        1em;
+  padding:       0.5em;
+  text-align:    center;
+}
+
+div.table table {
+  display:       table;
+  width:         100%;
+}
+
+div.table td {
+  padding-left:  7px;
+  padding-right: 7px;
+}

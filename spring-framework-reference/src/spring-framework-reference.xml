@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY preface 			SYSTEM "preface.xml">
+<!ENTITY overview			SYSTEM "overview.xml">
+<!ENTITY whats-new-in-3		SYSTEM "new-in-3.xml">
+<!ENTITY beans				SYSTEM "beans.xml">
+<!ENTITY resources			SYSTEM "resources.xml">
+<!ENTITY validation			SYSTEM "validation.xml">
+<!ENTITY aop				SYSTEM "aop.xml">
+<!ENTITY aop-api			SYSTEM "aop-api.xml">
+<!ENTITY transaction		SYSTEM "transaction.xml">
+<!ENTITY metadata			SYSTEM "metadata.xml">
+<!ENTITY dao				SYSTEM "dao.xml">
+<!ENTITY jdbc				SYSTEM "jdbc.xml">
+<!ENTITY orm				SYSTEM "orm.xml">
+<!ENTITY mvc				SYSTEM "mvc.xml">
+<!ENTITY view				SYSTEM "view.xml">
+<!ENTITY web-integration		SYSTEM "web-integration.xml">
+<!ENTITY portlet            SYSTEM "portlet.xml">
+<!ENTITY remoting			SYSTEM "remoting.xml">
+<!ENTITY ejb				SYSTEM "ejb.xml">
+<!ENTITY jms				SYSTEM "jms.xml">
+<!ENTITY jmx                SYSTEM "jmx.xml">
+<!ENTITY cci				SYSTEM "cci.xml">
+<!ENTITY mail				SYSTEM "mail.xml">
+<!ENTITY scheduling			SYSTEM "scheduling.xml">
+<!ENTITY testing			SYSTEM "testing.xml">
+<!ENTITY dynamic-languages  SYSTEM "dynamic-languages.xml">
+<!ENTITY xsd-configuration  SYSTEM "xsd-configuration.xml">
+<!ENTITY xml-custom         SYSTEM "xml-custom.xml">
+<!ENTITY dtd				SYSTEM "dtd.xml">
+<!ENTITY spring-tld         SYSTEM "spring.tld.xml">
+<!ENTITY spring-form-tld    SYSTEM "spring-form.tld.xml">
+<!ENTITY swf-sidebar        SYSTEM "swf-sidebar.xml">
+]>
+<book>
+	<bookinfo>
+		<title>Reference Documentation</title>
+		<subtitle>(Work in progress)</subtitle>
+	    <productname>Spring Framework</productname>
+		<releaseinfo>3.0.M3</releaseinfo>
+	    <mediaobject>
+	      <imageobject role="fo">
+	        <imagedata align="center" fileref="images/logo-pdf.png"
+	                   format="PNG" width="240"/>
+	      </imageobject>
+	    </mediaobject>
+		<authorgroup>
+			<author>
+				<firstname>Rod</firstname>
+				<surname>Johnson</surname>
+			</author>
+			<author>
+				<firstname>Juergen</firstname>
+				<surname>Hoeller</surname>
+			</author>
+			<author>
+				<firstname>Alef</firstname>
+				<surname>Arendsen</surname>
+			</author>
+			<author>
+				<firstname>Colin</firstname>
+				<surname>Sampaleanu</surname>
+			</author>
+			<author>
+				<firstname>Rob</firstname>
+				<surname>Harrop</surname>
+			</author>
+			<author>
+				<firstname>Thomas</firstname>
+				<surname>Risberg</surname>
+			</author>
+			<author>
+				<firstname>Darren</firstname>
+				<surname>Davison</surname>
+			</author>
+			<author>
+				<firstname>Dmitriy</firstname>
+				<surname>Kopylenko</surname>
+			</author>
+			<author>
+				<firstname>Mark</firstname>
+				<surname>Pollack</surname>
+			</author>
+			<author>
+				<firstname>Thierry</firstname>
+				<surname>Templier</surname>
+			</author>
+			<author>
+				<firstname>Erwin</firstname>
+				<surname>Vervaet</surname>
+			</author>
+			<author>
+				<firstname>Portia</firstname>
+				<surname>Tung</surname>
+			</author>
+			<author>
+				<firstname>Ben</firstname>
+				<surname>Hale</surname>
+			</author>
+			<author>
+				<firstname>Adrian</firstname>
+				<surname>Colyer</surname>
+			</author>
+			<author>
+				<firstname>John</firstname>
+				<surname>Lewis</surname>
+			</author>
+			<author>
+				<firstname>Costin</firstname>
+				<surname>Leau</surname>
+			</author>
+			<author>
+				<firstname>Mark</firstname>
+				<surname>Fisher</surname>
+			</author>
+			<author>
+				<firstname>Sam</firstname>
+				<surname>Brannen</surname>
+			</author>
+			<author>
+				<firstname>Ramnivas</firstname>
+				<surname>Laddad</surname>
+			</author>
+			<author>
+				<firstname>Arjen</firstname>
+				<surname>Poutsma</surname>
+			</author>
+		</authorgroup>
+		<copyright>
+			<year>2004-2009</year>
+			<holder>Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop, Thomas Risberg, Darren Davison, 
+				Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, Costin Leau, 
+				Mark Fisher, Sam Brannen, Ramnivas Laddad, Arjen Poutsma
+			</holder>
+		</copyright>
+		<legalnotice>
+			<para>Copies of this document may be made for your own use and for
+			distribution to others, provided that you do not charge any
+			fee for such copies and further provided that each copy
+			contains this Copyright Notice, whether distributed in print
+			or electronically.</para>
+		</legalnotice>
+	</bookinfo>
+	<!-- front matter -->
+	<toc/>
+	&preface;
+	&overview;
+	&whats-new-in-3;
+	<part id="spring-core">
+		<title>Core Technologies</title>
+		<partintro id="spring-core-intro">
+			<para>
+				This initial part of the reference documentation covers
+				all of those technologies that are absolutely integral
+				to the Spring Framework.
+			</para>
+			<para>
+				Foremost amongst these is the Spring Framework's
+				Inversion of Control (IoC) container. A thorough treatment
+				of the Spring Framework's IoC container is closely followed
+				by comprehensive coverage of Spring's Aspect-Oriented
+				Programming (AOP) technologies. The Spring Framework has
+				its own AOP	framework, which is conceptually easy to understand,
+				and	which successfully addresses the 80% sweet spot of AOP
+				requirements in Java enterprise programming.
+			</para>
+			<para>
+				Coverage of Spring's integration with AspectJ (currently
+				the richest - in terms of features - and certainly most
+				mature AOP implementation in the Java enterprise space)
+				is also provided.
+			</para>
+			<para>
+			    Finally, the adoption of the test-driven-development (TDD)
+			    approach to software development is certainly advocated by
+			    the Spring team, and so coverage of Spring's support for
+			    integration testing is covered (alongside best practices for
+			    unit testing). The Spring team have found that the correct
+			    use of IoC certainly does make both unit and integration
+			    testing easier (in that the presence of setter methods and
+			    appropriate constructors on classes makes them
+			    easier to wire together on a test without having to set up
+			    service locator registries and suchlike)... the chapter
+			    dedicated solely to testing will hopefully convince you of
+			    this as well.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<para><xref linkend="beans"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="resources"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="validation"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="aop"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="aop-api"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="testing"/></para>
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&beans;
+		&resources;
+		&validation;
+		&aop;
+		&aop-api;
+		&testing;
+	</part>
+	<part id="spring-middle-tier">
+		<title>Middle Tier Data Access</title>
+		<partintro id="spring-middle-tier-intro">
+			<para>
+				This part of the reference documentation is concerned
+				with the middle tier, and specifically the data access
+				responsibilities of said tier.
+			</para>
+			<para>
+				Spring's comprehensive transaction management support is
+				covered in some detail, followed by thorough coverage of
+				the various middle tier data access frameworks and
+				technologies that the Spring Framework integrates with.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<para><xref linkend="transaction"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="dao"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="jdbc"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="orm"/></para>
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&transaction;
+		&dao;
+		&jdbc;
+		&orm;
+	</part>
+	<part id="spring-web">
+		<title>The Web</title>
+		<partintro id="spring-web-intro">
+			<para>
+				This part of the reference documentation covers the
+				Spring Framework's support for the presentation tier
+				(and specifically web-based presentation tiers).
+			</para>
+			<para>
+				The Spring Framework's own web framework,
+				<link linkend="mvc">Spring Web MVC</link>, is covered in
+				the first couple of chapters. A number of the remaining
+				chapters in this part of the reference documentation are
+				concerned with the Spring Framework's integration with
+				other web technologies, such as <link linkend="struts">Struts</link>
+				and <link linkend="jsf">JSF</link> (to name but two).
+			</para>
+			<para>
+				This section concludes with coverage of Spring's MVC
+				<link linkend="portlet">portlet framework</link>.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<para><xref linkend="mvc"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="view"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="web-integration"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="portlet"/></para>
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&mvc;
+		&view;
+		&web-integration;
+		&portlet;
+	</part>
+	<part id="spring-integration">
+		<title>Integration</title>
+		<partintro id="spring-integration-intro">
+			<para>
+				This part of the reference documentation covers
+				the Spring Framework's integration with a number of J2EE
+				(and related) technologies.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<para><xref linkend="remoting"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="ejb"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="jms"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="jmx"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="cci"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="mail"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="scheduling"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="dynamic-language"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="metadata"/></para>
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&remoting;
+		&ejb;
+		&jms;
+		&jmx;
+		&cci;
+		&mail;
+		&scheduling;
+		&dynamic-languages;
+		&metadata;
+	</part>
+	<!-- back matter -->
+	&xsd-configuration;
+	&xml-custom;
+	&dtd;
+	&spring-tld;
+	&spring-form-tld;
+</book>

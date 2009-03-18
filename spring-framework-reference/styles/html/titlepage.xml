@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+
+<t:templates xmlns:t="http://nwalsh.com/docbook/xsl/template/1.0"
+             xmlns:param="http://nwalsh.com/docbook/xsl/template/1.0/param"
+             xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+<!-- ==================================================================== -->
+
+<t:titlepage t:element="book" t:wrapper="div" class="titlepage">
+  <t:titlepage-content t:side="recto">
+    <productname/>
+    <title/>
+    <subtitle/>
+    <!-- <corpauthor/>
+    <authorgroup/>
+    <author/>
+    <mediaobject/> -->
+    <othercredit/>
+    <releaseinfo/>
+    <copyright/>
+    <legalnotice/>
+    <pubdate/>
+    <revision/>
+    <revhistory/>
+    <abstract/>
+  </t:titlepage-content>
+
+  <t:titlepage-content t:side="verso">
+  </t:titlepage-content>
+
+  <t:titlepage-separator>
+    <hr/>
+  </t:titlepage-separator>
+
+  <t:titlepage-before t:side="recto">
+  </t:titlepage-before>
+
+  <t:titlepage-before t:side="verso">
+  </t:titlepage-before>
+</t:titlepage>
+
+</t:templates>

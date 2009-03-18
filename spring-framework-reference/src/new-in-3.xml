@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="new-in-2">
+  <title>What's new in Spring 3.0?</title>
+
+  <section id="new-in-3-intro">
+    <title>Introduction</title>
+
+    <para>*** WORK IN PROGRESS ***</para>
+
+    <para>If you have been using the Spring Framework for some time, you will
+    be aware that Spring has undergone two major revisions: Spring 2.0,
+    released in October 2006, and Spring 2.5, released in November 2007.</para>
+
+    <sidebar id="new-in-3-intro-java">
+      <title>Java SE and Java EE Support</title>
+
+      <para>The Spring Framework is now based on Java 5 and Java 6 is fully supported.</para>
+
+      <para>Furthermore, Spring is compatible with J2EE 1.4 and Java EE 5,
+      while at the same time introducing dedicated support for Java EE 6.</para>
+    </sidebar>
+
+  </section>
+
+  <section id="new-in-3-other-documentation">
+    <title>Improved documentation</title>
+
+    <para>The Spring reference documentation has also substantially been
+    updated to reflect all of the changes and new features for Spring 3.0. 
+    While every effort has been made to ensure that there are no errors in this
+    documentation, some errors may nevertheless have crept in. If you do spot
+    any typos or even more serious errors, and you can spare a few cycles
+    during lunch, please do bring the error to the attention of the Spring
+    team by <ulink
+    url="http://jira.springframework.org/">raising an
+    issue</ulink>.</para>
+
+  </section>
+
+</chapter>

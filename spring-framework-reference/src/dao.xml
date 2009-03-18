@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter id="dao">
+	<title>DAO support</title>
+	<section id="dao-introduction">
+		<title>Introduction</title>
+		<para>
+			The Data Access Object (DAO) support in Spring is aimed at
+			making it easy to work with data access technologies like
+			JDBC, Hibernate or JDO in a consistent way. This allows one
+			to switch between the aforementioned persistence technologies
+			fairly easily and it also allows one to code without worrying
+			about catching exceptions that are specific to each technology.
+		</para>
+	</section>
+	<section id="dao-exceptions">
+		<title>Consistent exception hierarchy</title>
+		<para>
+			Spring provides a convenient translation from technology-specific
+			exceptions like <classname>SQLException</classname> to its own
+			exception class hierarchy with the
+			<classname>DataAccessException</classname> as the root exception.
+			These exceptions wrap the original exception so there is never
+			any risk that one might lose any information as to what might
+			have gone wrong.
+		</para>
+		<para>
+			In addition to JDBC exceptions, Spring can also wrap Hibernate-specific
+			exceptions, converting them from proprietary, checked exceptions
+			(in the case of versions of Hibernate prior to Hibernate 3.0), to
+			a set of focused runtime exceptions (the same is true for JDO and
+			JPA exceptions). This allows one to handle most persistence exceptions,
+			which are non-recoverable, only in the appropriate layers, without
+			having annoying boilerplate catch-and-throw blocks and exception
+			declarations in one's DAOs. (One can still trap and handle exceptions
+			anywhere one needs to though.) As mentioned above, JDBC exceptions
+			(including database-specific dialects) are also converted to the
+			same hierarchy, meaning that one can perform some operations with
+			JDBC within a consistent programming model.
+		</para>
+		<para>
+			The above holds true for the various template classes in Springs
+			support for various ORM frameworks. If one uses the interceptor-based
+			classes then the application must care about handling
+			<classname>HibernateExceptions</classname> and
+			<classname>JDOExceptions</classname> itself, preferably via delegating
+			to <classname>SessionFactoryUtils</classname>'
+			<methodname>convertHibernateAccessException(..)</methodname> or
+			<methodname>convertJdoAccessException</methodname> methods respectively.
+			These methods convert the exceptions to ones that are compatible
+			with the exceptions in the <literal>org.springframework.dao</literal>
+			exception hierarchy. As <classname>JDOExceptions</classname> are
+			unchecked, they can simply get thrown too, sacrificing generic DAO
+			abstraction in terms of exceptions though.
+		</para>
+		<para>
+			The exception hierarchy that Spring provides can be seen below.
+			(Please note that the class hierarchy detailed in the image
+			shows only a subset of the entire
+			<classname>DataAccessException</classname> hierarchy.)
+		</para>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/DataAccessException.gif" align="center" />
+			</imageobject>
+		</mediaobject>
+	</section>
+	<section id="dao-abstract-superclasses">
+		<title>Consistent abstract classes for DAO support</title>
+		<para>
+			To make it easier to work with a variety of data access technologies
+			such as JDBC, JDO and Hibernate in a consistent way, Spring provides
+			a set of <literal>abstract</literal> DAO classes that one can extend.
+			These abstract classes have methods for providing the data source and
+			any other configuration settings that are specific to the relevant
+			data-access technology.
+		</para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					<classname>JdbcDaoSupport</classname> - superclass for JDBC data
+					access objects. Requires a <interfacename>DataSource</interfacename>
+					to be provided; in turn, this class provides a 
+					<classname>JdbcTemplate</classname> instance initialized from the
+					supplied <interfacename>DataSource</interfacename> to subclasses.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<classname>HibernateDaoSupport</classname> - superclass for
+					Hibernate data access objects. Requires a
+					<interfacename>SessionFactory</interfacename> to be provided;
+					in turn, this class provides a
+					<classname>HibernateTemplate</classname> instance initialized
+					from the supplied <interfacename>SessionFactory</interfacename>
+					to subclasses. Can alternatively be initialized directly via a
+					<classname>HibernateTemplate</classname>, to reuse the latters
+					settings like <interfacename>SessionFactory</interfacename>,
+					flush mode, exception translator, and so forth.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<classname>JdoDaoSupport</classname> - super class for JDO data
+					access objects. Requires a
+					<interfacename>PersistenceManagerFactory</interfacename>
+					to be provided; in turn, this class provides a
+					<classname>JdoTemplate</classname> instance initialized from the
+					supplied <interfacename>PersistenceManagerFactory</interfacename>
+					to subclasses.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<classname>JpaDaoSupport</classname> - super class for JPA data
+					access objects. Requires a
+					<interfacename>EntityManagerFactory</interfacename> to be provided;
+					in turn, this class provides a <classname>JpaTemplate</classname>
+					instance initialized from the supplied
+					<interfacename>EntityManagerFactory</interfacename> to subclasses.
+				</para>
+			</listitem>
+		</itemizedlist>
+	</section>
+
+</chapter>
