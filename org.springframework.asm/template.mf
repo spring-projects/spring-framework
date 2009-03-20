@@ -1,0 +1,4 @@
+Bundle-SymbolicName: org.springframework.asm
+Bundle-Name: Spring ASM
+Bundle-Vendor: SpringSource
+Bundle-ManifestVersion: 2
