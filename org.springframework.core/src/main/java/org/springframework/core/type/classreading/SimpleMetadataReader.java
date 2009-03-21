@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.core.type.classreading;
 
-import org.objectweb.asm.ClassReader;
-
+import org.springframework.asm.ClassReader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 
 /**
  * {@link MetadataReader} implementation based on an ASM
- * {@link org.objectweb.asm.ClassReader}.
+ * {@link org.springframework.asm.ClassReader}.
  *
  * <p>Package-visible in order to allow for repackaging the ASM library
  * without effect on users of the <code>core.type</code> package.

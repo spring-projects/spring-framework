@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package org.springframework.core.type.classreading;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.objectweb.asm.ClassReader;
-
+import org.springframework.asm.ClassReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -28,7 +27,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Simple implementation of the {@link MetadataReaderFactory} interface,
- * creating a new ASM {@link org.objectweb.asm.ClassReader} for every request.
+ * creating a new ASM {@link org.springframework.asm.ClassReader} for every request.
  *
  * @author Juergen Hoeller
  * @since 2.5

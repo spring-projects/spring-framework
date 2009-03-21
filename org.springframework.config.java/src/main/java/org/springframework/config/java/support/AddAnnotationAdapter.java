@@ -17,11 +17,11 @@ package org.springframework.config.java.support;
 
 import net.sf.cglib.asm.Constants;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassAdapter;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.ClassAdapter;
+import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.FieldVisitor;
+import org.springframework.asm.MethodVisitor;
 
 
 /**

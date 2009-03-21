@@ -63,7 +63,7 @@ import org.springframework.util.SystemPropertyUtils;
  *
  * <p>This implementation is based on Spring's
  * {@link org.springframework.core.type.classreading.MetadataReader MetadataReader}
- * facility, backed by an ASM {@link org.objectweb.asm.ClassReader ClassReader}.
+ * facility, backed by an ASM {@link org.springframework.asm.ClassReader ClassReader}.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller

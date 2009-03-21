@@ -22,7 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import org.objectweb.asm.AnnotationVisitor;
+import org.springframework.asm.AnnotationVisitor;
 
 
 class MutableAnnotationArrayVisitor extends AnnotationAdapter {

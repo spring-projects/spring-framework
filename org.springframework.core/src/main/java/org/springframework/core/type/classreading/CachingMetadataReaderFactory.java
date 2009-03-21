@@ -25,7 +25,7 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
- * caching an ASM {@link org.objectweb.asm.ClassReader} per Spring Resource handle
+ * caching an ASM {@link org.springframework.asm.ClassReader} per Spring Resource handle
  * (i.e. per ".class" file).
  *
  * @author Juergen Hoeller

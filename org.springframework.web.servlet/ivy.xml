@@ -76,14 +76,12 @@
 		<!-- test dependencies -->
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
-		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="test->compile"/>
-		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3"
-					conf="test->compile"/>
+		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0"
 					conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
-        <dependency org="org.jaxen" name="com.springsource.org.jaxen" rev="1.1.1" conf="test->compile"/>
-        <dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
+		<dependency org="org.jaxen" name="com.springsource.org.jaxen" rev="1.1.1" conf="test->compile"/>
+		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
 
 	</dependencies>
 

@@ -26,14 +26,13 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
-
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Type;
+import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * ASM class visitor which looks for the class name and implemented types as
@@ -49,9 +48,9 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
-	
+
 	private final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>();
-    
+
 	private final ClassLoader classLoader;
 
 
@@ -59,7 +58,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 		this.classLoader = classLoader;
 	}
 
-	
+
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc,
@@ -75,7 +74,6 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
-		final Map<String, Object> metaAttributes = new LinkedHashMap<String, Object>();
 		return new EmptyVisitor() {
 			@Override
 			public void visit(String name, Object value) {
@@ -95,7 +93,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 			public void visitEnum(String name, String desc, String value) {
 				Object valueToUse = value;
 				try {
-					Class enumType = classLoader.loadClass(Type.getType(desc).getClassName());
+					Class<?> enumType = classLoader.loadClass(Type.getType(desc).getClassName());
 					Field enumConstant = ReflectionUtils.findField(enumType, value);
 					if (enumConstant != null) {
 						valueToUse = enumConstant.get(null);
@@ -109,7 +107,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 			@Override
 			public void visitEnd() {
 				try {
-					Class annotationClass = classLoader.loadClass(className);
+					Class<?> annotationClass = classLoader.loadClass(className);
 					// Check declared default values of attributes in the annotation type.
 					Method[] annotationAttributes = annotationClass.getMethods();
 					for (Method annotationAttribute : annotationAttributes) {
@@ -123,7 +121,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 					Annotation[] metaAnnotations = annotationClass.getAnnotations();
 					Set<String> metaAnnotationTypeNames = new HashSet<String>();
 					for (Annotation metaAnnotation : metaAnnotations) {
-						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());						
+						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
 					}
 					metaAnnotationMap.put(className, metaAnnotationTypeNames);
 				}

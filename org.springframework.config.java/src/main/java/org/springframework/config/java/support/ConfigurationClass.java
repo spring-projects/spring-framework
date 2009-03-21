@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
@@ -34,17 +35,10 @@ import sun.security.x509.Extension;
 
 /**
  * Abstract representation of a user-defined {@link Configuration @Configuration} class.
- * Includes a set of Bean methods, AutoBean methods, ExternalBean methods, ExternalValue
- * methods, etc. Includes all such methods defined in the ancestry of the class, in a
- * 'flattened-out' manner. Note that each BeanMethod representation does still contain
- * source information about where it was originally detected (for the purpose of tooling
- * with Spring IDE).
- * 
- * <p>
- * Like the rest of the {@link org.springframework.config.java.model model} package, this
- * class follows the fluent interface / builder pattern such that a model can be built up
- * easily by method chaining.
- * </p>
+ * Includes a set of {@link Bean} methods, including all such methods defined in the
+ * ancestry of the class, in a 'flattened-out' manner. Note that each {@link BeanMethod}
+ * representation contains source information about where it was originally detected
+ * (for the purpose of tooling with Spring IDE).
  * 
  * @author Chris Beams
  */
@@ -178,11 +172,11 @@ final class ConfigurationClass extends ModelClass {
 
 		// configuration classes must be annotated with @Configuration
 		if (metadata == null)
-			problemReporter.error(new NonAnnotatedConfigurationError());
+			problemReporter.error(new NonAnnotatedConfigurationProblem());
 
 		// a configuration class may not be final (CGLIB limitation)
 		if (Modifier.isFinal(modifiers))
-			problemReporter.error(new FinalConfigurationError());
+			problemReporter.error(new FinalConfigurationProblem());
 
 		for (BeanMethod method : methods)
 			method.validate(problemReporter);
@@ -247,11 +241,12 @@ final class ConfigurationClass extends ModelClass {
 
 
 	/** Configuration classes must be annotated with {@link Configuration @Configuration}. */
-	public class NonAnnotatedConfigurationError extends Problem {
-		public NonAnnotatedConfigurationError() {
-			super(format("%s was provided as a Java Configuration class but was not annotated with @%s. "
-			           + "Update the class definition to continue.",
-			             getSimpleName(), Configuration.class.getSimpleName()),
+	public class NonAnnotatedConfigurationProblem extends Problem {
+
+		public NonAnnotatedConfigurationProblem() {
+			super(format("%s was specified as a @Configuration class but was not actually annotated " +
+			             "with @Configuration. Annotate the class or do not attempt to process it.",
+			             getSimpleName()),
 			      new Location(new FileSystemResource("/dev/null"))
 			);
 		}
@@ -260,13 +255,15 @@ final class ConfigurationClass extends ModelClass {
 
 
 	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
-	public class FinalConfigurationError extends Problem {
-		public FinalConfigurationError() {
-			super(format("@%s class may not be final. Remove the final modifier to continue.",
-			             Configuration.class.getSimpleName()),
+	public class FinalConfigurationProblem extends Problem {
+
+		public FinalConfigurationProblem() {
+			super(format("@Configuration class [%s] may not be final. Remove the final modifier to continue.",
+			             ConfigurationClass.this.getSimpleName()),
 			      new Location(new FileSystemResource("/dev/null"))
 			);
 		}
+
 	}
 
 }

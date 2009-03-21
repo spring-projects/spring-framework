@@ -8,7 +8,7 @@ Import-Template:
  edu.emory.mathcs.backport.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  org.apache.commons.collections.*;version="[3.2.0, 4.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
- org.objectweb.asm.*;version="[2.2.3, 3.0.0)";resolution:=optional,
+ org.springframework.asm.*;version="[2.5.6, 3.0.0]";resolution:=optional,
  org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
  org.aspectj.*;version="[1.5.4, 2.0.0)";resolution:=optional
 Unversioned-Imports: 
