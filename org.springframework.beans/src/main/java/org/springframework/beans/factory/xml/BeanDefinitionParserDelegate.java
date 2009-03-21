@@ -26,11 +26,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.PropertyValue;
@@ -63,6 +58,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Stateful delegate class used to parse XML bean definitions.
@@ -374,7 +373,7 @@ public class BeanDefinitionParserDelegate {
 
 		String beanName = id;
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
-			beanName = (String) aliases.remove(0);
+			beanName = aliases.remove(0);
 			if (logger.isDebugEnabled()) {
 				logger.debug("No XML 'id' specified - using '" + beanName +
 						"' as bean name and " + aliases + " as aliases");
@@ -1054,7 +1053,7 @@ public class BeanDefinitionParserDelegate {
 			typedValue = new TypedStringValue(value);
 		}
 		else if (classLoader != null) {
-			Class targetType = ClassUtils.forName(targetTypeName, classLoader);
+			Class<?> targetType = ClassUtils.forName(targetTypeName, classLoader);
 			typedValue = new TypedStringValue(value, targetType);
 		}
 		else {
@@ -1067,7 +1066,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a list element.
 	 */
-	public List parseListElement(Element collectionEle, BeanDefinition bd) {
+	public List<?> parseListElement(Element collectionEle, BeanDefinition bd) {
 		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());

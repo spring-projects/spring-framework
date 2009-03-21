@@ -15,15 +15,15 @@
  */
 package org.springframework.config.java.support;
 
-import org.objectweb.asm.AnnotationVisitor;
+import org.springframework.asm.AnnotationVisitor;
 
 
 /**
- * An empty AnnotationVisitor that delegates to another AnnotationVisitor. This class can be
- * used as a super class to quickly implement useful annotation adapter classes, just by
- * overriding the necessary methods. Note that for some reason, ASM doesn't provide this
- * class (it does provide MethodAdapter and ClassAdapter), thus we're following the general
- * pattern and adding our own here.
+ * An empty {@link AnnotationVisitor} that delegates to another AnnotationVisitor. This
+ * class can be used as a super class to quickly implement useful annotation adapter
+ * classes, just by overriding the necessary methods. Note that for some reason, ASM
+ * doesn't provide this class (it does provide MethodAdapter and ClassAdapter), thus
+ * we're following the general pattern and adding our own here.
  * 
  * @author Chris Beams
  */

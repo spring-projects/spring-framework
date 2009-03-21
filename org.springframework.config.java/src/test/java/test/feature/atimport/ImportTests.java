@@ -1,0 +1,275 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package test.feature.atimport;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.config.java.Bean;
+import org.springframework.config.java.Configuration;
+import org.springframework.config.java.Import;
+import org.springframework.config.java.support.ConfigurationClassPostProcessor;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
+
+
+/**
+ * System tests for {@link Import} annotation support.
+ * 
+ * @author Chris Beams
+ */
+public class ImportTests {
+
+	private DefaultListableBeanFactory processConfigurationClasses(Class<?>... classes) {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		for (Class<?> clazz : classes)
+			beanFactory.registerBeanDefinition(clazz.getSimpleName(), new RootBeanDefinition(clazz));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		return beanFactory;
+	}
+
+	private void assertBeanDefinitionCount(int expectedCount, Class<?>... classes) {
+		DefaultListableBeanFactory beanFactory = processConfigurationClasses(classes);
+		assertThat(beanFactory.getBeanDefinitionCount(), equalTo(expectedCount));
+	}
+
+	@Test
+	public void testProcessImports() {
+		int configClasses = 2;
+		int beansInClasses = 2;
+
+		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class);
+	}
+
+	@Configuration
+	@Import(OtherConfiguration.class)
+	static class ConfigurationWithImportAnnotation {
+		@Bean
+		public ITestBean one() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class OtherConfiguration {
+		@Bean
+		public ITestBean two() {
+			return new TestBean();
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	@Test
+	public void testImportAnnotationWithTwoLevelRecursion() {
+		int configClasses = 2;
+		int beansInClasses = 3;
+
+		assertBeanDefinitionCount((configClasses + beansInClasses), AppConfig.class);
+	}
+
+	@Configuration
+	@Import(DataSourceConfig.class)
+	static class AppConfig {
+		
+		@Bean
+		public ITestBean transferService() {
+			return new TestBean(accountRepository());
+		}
+
+		@Bean
+		public ITestBean accountRepository() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class DataSourceConfig {
+		@Bean
+		public ITestBean dataSourceA() {
+			return new TestBean();
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	@Test
+	public void testImportAnnotationWithThreeLevelRecursion() {
+		int configClasses = 3;
+		int beansInClasses = 5;
+
+		assertBeanDefinitionCount((configClasses + beansInClasses), FirstLevel.class);
+	}
+
+	// ------------------------------------------------------------------------
+
+	@Test
+	public void testImportAnnotationWithMultipleArguments() {
+		int configClasses = 3;
+		int beansInClasses = 3;
+
+		assertBeanDefinitionCount((configClasses + beansInClasses),
+				WithMultipleArgumentsToImportAnnotation.class);
+	}
+
+
+	@Test
+	public void testImportAnnotationWithMultipleArgumentsResultingInOverriddenBeanDefinition() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(
+				WithMultipleArgumentsThatWillCauseDuplication.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		assertThat(beanFactory.getBeanDefinitionCount(), equalTo(4));
+		assertThat(beanFactory.getBean("foo", ITestBean.class).getName(), equalTo("foo2"));
+	}
+
+	@Configuration
+	@Import( { Foo1.class, Foo2.class })
+	static class WithMultipleArgumentsThatWillCauseDuplication {
+	}
+
+	@Configuration
+	static class Foo1 {
+		@Bean
+		public ITestBean foo() {
+			return new TestBean("foo1");
+		}
+	}
+
+	@Configuration
+	static class Foo2 {
+		@Bean
+		public ITestBean foo() {
+			return new TestBean("foo2");
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	@Test
+	public void testImportAnnotationOnInnerClasses() {
+		int configClasses = 2;
+		int beansInClasses = 2;
+
+		assertBeanDefinitionCount((configClasses + beansInClasses), OuterConfig.InnerConfig.class);
+	}
+
+	@Configuration
+	static class OuterConfig {
+		@Bean
+		String whatev() {
+			return "whatev";
+		}
+
+		@Configuration
+		@Import(ExternalConfig.class)
+		static class InnerConfig {
+			@Bean
+			public ITestBean innerBean() {
+				return new TestBean();
+			}
+		}
+	}
+
+	@Configuration
+	static class ExternalConfig {
+		@Bean
+		public ITestBean extBean() {
+			return new TestBean();
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	@Configuration
+	@Import(SecondLevel.class)
+	static class FirstLevel {
+		@Bean
+		public TestBean m() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	@Import(ThirdLevel.class)
+	static class SecondLevel {
+		@Bean
+		public TestBean n() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class ThirdLevel {
+		@Bean
+		public ITestBean thirdLevelA() {
+			return new TestBean();
+		}
+
+		@Bean
+		public ITestBean thirdLevelB() {
+			return new TestBean();
+		}
+
+		@Bean
+		public ITestBean thirdLevelC() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	@Import( { LeftConfig.class, RightConfig.class })
+	static class WithMultipleArgumentsToImportAnnotation {
+		@Bean
+		public TestBean m() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class LeftConfig {
+		@Bean
+		public ITestBean left() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class RightConfig {
+		@Bean
+		public ITestBean right() {
+			return new TestBean();
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	@Test(expected=BeanDefinitionParsingException.class)
+	public void testImportNonConfigurationAnnotationClassCausesError() {
+		processConfigurationClasses(ConfigAnnotated.class);
+	}
+
+	@Configuration
+	@Import(NonConfigAnnotated.class)
+	static class ConfigAnnotated { }
+
+	static class NonConfigAnnotated { }
+}

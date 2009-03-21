@@ -21,8 +21,8 @@ import static org.springframework.config.java.support.Util.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Type;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.Type;
 import org.springframework.util.Assert;
 
 

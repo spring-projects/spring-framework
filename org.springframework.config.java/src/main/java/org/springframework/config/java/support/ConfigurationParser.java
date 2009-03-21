@@ -15,7 +15,7 @@
  */
 package org.springframework.config.java.support;
 
-import org.objectweb.asm.ClassReader;
+import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.config.java.Configuration;
 import org.springframework.util.ClassUtils;

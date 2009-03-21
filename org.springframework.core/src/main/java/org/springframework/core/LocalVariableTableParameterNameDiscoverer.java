@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
-
+import org.springframework.asm.ClassReader;
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Opcodes;
+import org.springframework.asm.Type;
+import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.util.ClassUtils;
 
 /**

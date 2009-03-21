@@ -137,7 +137,7 @@ public abstract class AnnotationUtils {
 				return annotation;
 			}
 		}
-		Class superClass = clazz.getSuperclass();
+		Class<?> superClass = clazz.getSuperclass();
 		if (superClass == null || superClass == Object.class) {
 			return null;
 		}

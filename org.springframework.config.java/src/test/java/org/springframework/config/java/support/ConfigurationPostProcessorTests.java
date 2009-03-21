@@ -50,9 +50,7 @@ public class ConfigurationPostProcessorTests {
 		@Configuration class Config { }
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-
-		factory.registerBeanDefinition("config1", rootBeanDefinition(Config.class).getBeanDefinition());
-
+		factory.registerBeanDefinition("config", rootBeanDefinition(Config.class).getBeanDefinition());
 		ConfigurationClassPostProcessor cpp = new ConfigurationClassPostProcessor();
 
 		// temporarily set the cglib test class to something bogus

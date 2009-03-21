@@ -34,9 +34,9 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassAdapter;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import org.springframework.asm.ClassAdapter;
+import org.springframework.asm.ClassReader;
+import org.springframework.asm.ClassWriter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Configuration;

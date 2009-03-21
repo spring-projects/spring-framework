@@ -76,8 +76,7 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.1.ga" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.1.0" conf="optional, runtime->compile"/>
-		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm" rev="2.2.3" conf="test->runtime" />
-		<dependency org="org.objectweb.asm" name="com.springsource.org.objectweb.asm.commons" rev="2.2.3" conf="test->runtime" />
+		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="test->compile"/>

@@ -22,12 +22,13 @@ import static org.springframework.util.ClassUtils.*;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassAdapter;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.ClassAdapter;
+import org.springframework.asm.ClassReader;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Opcodes;
 import org.springframework.config.java.Configuration;
+import org.springframework.config.java.Import;
 
 
 /**
@@ -112,17 +113,16 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			return new MutableAnnotationVisitor(mutableConfiguration, classLoader);
 		}
 
-		// TODO: re-enable for @Import support
-		// if (Import.class.getName().equals(annoTypeName)) {
-		// ImportStack importStack = ImportStackHolder.getImportStack();
-		//
-		// if(importStack.contains(configClass))
-		// throw new CircularImportException(configClass, importStack);
-		//
-		// importStack.push(configClass);
-		//
-		// return new ImportAnnotationVisitor(model);
-		// }
+		 if (Import.class.getName().equals(annoTypeName)) {
+			ImportStack importStack = ImportStackHolder.getImportStack();
+
+			if (importStack.contains(configClass))
+				throw new CircularImportException(configClass, importStack);
+
+			importStack.push(configClass);
+
+			return new ImportAnnotationVisitor(model, classLoader);
+		}
 
 		/* -------------------------------------
 		// Detect @Extension annotations

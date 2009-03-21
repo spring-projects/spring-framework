@@ -23,11 +23,11 @@ import static org.springframework.util.ClassUtils.*;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassAdapter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodAdapter;
-import org.objectweb.asm.Opcodes;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.ClassAdapter;
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodAdapter;
+import org.springframework.asm.Opcodes;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 

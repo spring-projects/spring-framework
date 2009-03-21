@@ -20,8 +20,8 @@ import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.asm.ClassReader;
+import org.springframework.asm.commons.EmptyVisitor;
 
 
 /**

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.core.type.classreading;
 
 import java.lang.annotation.Annotation;
@@ -10,24 +26,24 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.MethodAdapter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.MethodAdapter;
+import org.springframework.asm.Opcodes;
+import org.springframework.asm.Type;
+import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.MethodMetadata;
 
 public class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
-	
+
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
-	
+
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
-		
+
 	private ClassLoader classLoader;
 	private String name;
 	private int access;
 	private boolean isStatic;
-	
+
 	public MethodMetadataReadingVisitor(ClassLoader classLoader, String name, int access) {
 		super(new EmptyVisitor());
 		this.classLoader = classLoader;
@@ -35,7 +51,7 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 		this.access = access;
 		this.isStatic = ((access & Opcodes.ACC_STATIC) != 0);
 	}
-	
+
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.attributesMap.get(annotationType);
 	}
@@ -76,7 +92,7 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 
 	
 	public Set<String> getAnnotationTypesWithMetaAnnotation(String metaAnnotationType) {
-		
+
 		///metaAnnotationMap.put(className, metaAnnotationTypeNames);
 		Set<String> annotationTypes = new LinkedHashSet<String>();
 		Set< Map.Entry<String, Set<String>> > metaValues = metaAnnotationMap.entrySet();
@@ -93,7 +109,7 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 		}
 		return annotationTypes;
 	}
-	
+
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
@@ -107,7 +123,7 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 			@Override
 			public void visitEnd() {
 				try {
-					Class annotationClass = classLoader.loadClass(className);
+					Class<?> annotationClass = classLoader.loadClass(className);
 					// Check declared default values of attributes in the annotation type.
 					Method[] annotationAttributes = annotationClass.getMethods();
 					for (int i = 0; i < annotationAttributes.length; i++) {
@@ -133,7 +149,6 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 			}
 		};
 	}
-
 
 
 }
