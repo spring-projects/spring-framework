@@ -15,20 +15,27 @@
  */
 package org.springframework.config.java.support;
 
+import static java.lang.String.*;
 import static org.springframework.config.java.support.MutableAnnotationUtils.*;
 import static org.springframework.config.java.support.Util.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
+import java.util.Stack;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassAdapter;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.asm.commons.EmptyVisitor;
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.Import;
+import org.springframework.core.io.FileSystemResource;
 
 
 /**
@@ -43,15 +50,18 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 	private final ConfigurationClass configClass;
 	private final ConfigurationModel model;
+	private final ProblemReporter problemReporter;
 	private final HashMap<String, ConfigurationClass> innerClasses = new HashMap<String, ConfigurationClass>();
 
 	private boolean processInnerClasses = true;
 	private final ClassLoader classLoader;
 
-	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model, ClassLoader classLoader) {
+	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model,
+	                                 ProblemReporter problemReporter, ClassLoader classLoader) {
 		super(AsmUtils.EMPTY_VISITOR);
 		this.configClass = configClass;
 		this.model = model;
+		this.problemReporter = problemReporter;
 		this.classLoader = classLoader;
 	}
 
@@ -86,7 +96,8 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		if (OBJECT_DESC.equals(superTypeDesc))
 			return;
 
-		ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model, classLoader);
+		ConfigurationClassVisitor visitor =
+			new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader);
 
 		ClassReader reader = AsmUtils.newClassReader(superTypeDesc, classLoader);
 		reader.accept(visitor, false);
@@ -113,15 +124,18 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			return new MutableAnnotationVisitor(mutableConfiguration, classLoader);
 		}
 
-		 if (Import.class.getName().equals(annoTypeName)) {
+		if (Import.class.getName().equals(annoTypeName)) {
 			ImportStack importStack = ImportStackHolder.getImportStack();
 
-			if (importStack.contains(configClass))
-				throw new CircularImportException(configClass, importStack);
+			if (importStack.contains(configClass)) {
+				//throw new CircularImportException(configClass, importStack);
+				problemReporter.error(new CircularImportProblem(configClass, importStack));
+				return new EmptyVisitor();
+			}
 
 			importStack.push(configClass);
 
-			return new ImportAnnotationVisitor(model, classLoader);
+			return new ImportAnnotationVisitor(model, problemReporter, classLoader);
 		}
 
 		/* -------------------------------------
@@ -217,7 +231,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		ConfigurationClass innerConfigClass = new ConfigurationClass();
 
 		ConfigurationClassVisitor ccVisitor =
-			new ConfigurationClassVisitor(innerConfigClass, new ConfigurationModel(), classLoader);
+			new ConfigurationClassVisitor(innerConfigClass, new ConfigurationModel(), problemReporter, classLoader);
 		ccVisitor.setProcessInnerClasses(false);
 
 		ClassReader reader = AsmUtils.newClassReader(name, classLoader);
@@ -230,4 +244,27 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		if (innerConfigClass.getMetadata() != null)
 			innerClasses.put(name, innerConfigClass);
 	}
+
+
+	/**
+	 * {@link Problem} registered upon detection of a circular {@link Import}.
+	 * 
+	 * @see Import
+	 * @see ImportStack
+	 * @see ImportStackHolder
+	 */
+	class CircularImportProblem extends Problem {
+
+		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> currentImportStack) {
+			super(format("A circular @Import has been detected: " +
+			             "Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
+			             "already present in the current import stack [%s]",
+			             currentImportStack.peek().getSimpleName(), attemptedImport.getSimpleName(),
+			             attemptedImport.getSimpleName(), currentImportStack),
+			      new Location(new FileSystemResource("/dev/null"))
+			);
+		}
+
+	}
+
 }
