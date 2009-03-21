@@ -18,6 +18,7 @@ package org.springframework.config.java.support;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Import;
 
@@ -40,7 +41,7 @@ public abstract class AbstractCircularImportDetectionTests {
 		boolean threw = false;
 		try {
 			newParser().parse(loadAsConfigurationSource(A.class), null);
-		} catch (CircularImportException ex) {
+		} catch (BeanDefinitionParsingException ex) {
 			assertTrue("Wrong message. Got: " + ex.getMessage(),
 					ex.getMessage().contains(
 						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
@@ -57,7 +58,7 @@ public abstract class AbstractCircularImportDetectionTests {
 		boolean threw = false;
 		try {
 			newParser().parse(loadAsConfigurationSource(X.class), null);
-		} catch (CircularImportException ex) {
+		} catch (BeanDefinitionParsingException ex) {
 			assertTrue("Wrong message. Got: " + ex.getMessage(),
 					ex.getMessage().contains(
 						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +

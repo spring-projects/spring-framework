@@ -15,6 +15,7 @@
  */
 package org.springframework.config.java.support;
 
+import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.config.java.Import;
 import org.springframework.util.ClassUtils;
 
@@ -32,7 +33,7 @@ import org.springframework.util.ClassUtils;
 public class AsmCircularImportDetectionTests extends AbstractCircularImportDetectionTests {
 	@Override
 	protected ConfigurationParser newParser() {
-		return new ConfigurationParser(ClassUtils.getDefaultClassLoader());
+		return new ConfigurationParser(new FailFastProblemReporter(), ClassUtils.getDefaultClassLoader());
 	}
 
 	@Override

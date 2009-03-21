@@ -104,7 +104,7 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	 */
 	@Override
 	protected ConfigurationParser createConfigurationParser() {
-		return new ConfigurationParser(beanFactory.getBeanClassLoader());
+		return new ConfigurationParser(this.getProblemReporter(), beanFactory.getBeanClassLoader());
 	}
 
 	/**

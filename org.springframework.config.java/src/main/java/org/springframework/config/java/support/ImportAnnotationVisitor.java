@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.Type;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Import;
 import org.springframework.util.Assert;
 
@@ -42,11 +43,13 @@ import org.springframework.util.Assert;
 class ImportAnnotationVisitor extends AnnotationAdapter {
 	private final ArrayList<String> classesToImport = new ArrayList<String>();
 	private final ConfigurationModel model;
+	private final ProblemReporter problemReporter;
 	private final ClassLoader classLoader;
 
-	public ImportAnnotationVisitor(ConfigurationModel model, ClassLoader classLoader) {
+	public ImportAnnotationVisitor(ConfigurationModel model, ProblemReporter problemReporter, ClassLoader classLoader) {
 		super(AsmUtils.EMPTY_VISITOR);
 		this.model = model;
+		this.problemReporter = problemReporter;
 		this.classLoader = classLoader;
 	}
 
@@ -77,7 +80,7 @@ class ImportAnnotationVisitor extends AnnotationAdapter {
 
 		ClassReader reader = newClassReader(convertClassNameToResourcePath(classToImport), classLoader);
 
-		reader.accept(new ConfigurationClassVisitor(configClass, model, classLoader), false);
+		reader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader), false);
 
 		model.add(configClass);
 	}

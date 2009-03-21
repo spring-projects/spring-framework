@@ -17,6 +17,7 @@ package org.springframework.config.java.support;
 
 import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Configuration;
 import org.springframework.util.ClassUtils;
 
@@ -41,17 +42,18 @@ public class ConfigurationParser {
 	 * Model to be populated during calls to {@link #parse(Object, String)}
 	 */
 	private final ConfigurationModel model;
+	private final ProblemReporter problemReporter;
 	private final ClassLoader classLoader;
 
 	/**
 	 * Creates a new parser instance that will be used to populate <var>model</var>.
-	 * 
 	 * @param model model to be populated by each successive call to
 	 *        {@link #parse(Object, String)}
 	 */
-	public ConfigurationParser(ClassLoader classLoader) {
-		this.classLoader = classLoader;
+	public ConfigurationParser(ProblemReporter problemReporter, ClassLoader classLoader) {
 		this.model = new ConfigurationModel();
+		this.problemReporter = problemReporter;
+		this.classLoader = classLoader;
 	}
 
 	/**
@@ -71,7 +73,7 @@ public class ConfigurationParser {
 		ConfigurationClass configClass = new ConfigurationClass();
 		configClass.setBeanName(configurationId);
 
-		configClassReader.accept(new ConfigurationClassVisitor(configClass, model, classLoader), false);
+		configClassReader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader), false);
 		model.add(configClass);
 	}
 
