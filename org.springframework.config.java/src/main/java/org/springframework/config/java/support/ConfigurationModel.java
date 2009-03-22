@@ -17,7 +17,7 @@ package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -36,66 +36,24 @@ import org.springframework.config.java.Configuration;
  * @see ConfigurationParser
  * @see ConfigurationModelBeanDefinitionReader
  */
-final class ConfigurationModel {
-
-	/* list is used because order and collection equality matters. */
-	private final ArrayList<ConfigurationClass> configurationClasses = new ArrayList<ConfigurationClass>();
+@SuppressWarnings("serial")
+final class ConfigurationModel extends LinkedHashSet<ConfigurationClass> {
 
 	/**
-	 * Add a {@link Configuration @Configuration} class to the model. Classes may be added
-	 * at will and without any particular validation. Malformed classes will be caught and
-	 * errors processed during {@link #validate() validation}
+	 * Recurses through the model validating each {@link ConfigurationClass}.
 	 * 
-	 * @param configurationClass user-supplied Configuration class
-	 */
-	public ConfigurationModel add(ConfigurationClass configurationClass) {
-		configurationClasses.add(configurationClass);
-		return this;
-	}
-
-	public ConfigurationClass[] getAllConfigurationClasses() {
-		return configurationClasses.toArray(new ConfigurationClass[configurationClasses.size()]);
-	}
-
-	/**
-	 * Recurses through the model validating each object along the way and aggregating any
-	 * <var>errors</var>.
-	 * 
+	 * @param problemReporter {@link ProblemReporter} against which any validation errors
+	 *        will be registered
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate(ProblemReporter problemReporter) {
-		for (ConfigurationClass configClass : configurationClasses)
+		for (ConfigurationClass configClass : this)
 			configClass.validate(problemReporter);
 	}
 
 	@Override
 	public String toString() {
-		return format("%s: configurationClasses=%s", getClass().getSimpleName(), configurationClasses);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((configurationClasses == null) ? 0 : configurationClasses.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ConfigurationModel other = (ConfigurationModel) obj;
-		if (configurationClasses == null) {
-			if (other.configurationClasses != null)
-				return false;
-		} else if (!configurationClasses.equals(other.configurationClasses))
-			return false;
-		return true;
+		return format("%s containing @Configuration classes: %s", getClass().getSimpleName(), super.toString());
 	}
 
 }
