@@ -74,7 +74,7 @@ class ConfigurationModelBeanDefinitionReader {
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClass(configClass);
 
-		for (BeanMethod method : configClass.getMethods())
+		for (BeanMethod method : configClass.getBeanMethods())
 			loadBeanDefinitionsForModelMethod(method);
 
 //		Annotation[] pluginAnnotations = configClass.getPluginAnnotations();

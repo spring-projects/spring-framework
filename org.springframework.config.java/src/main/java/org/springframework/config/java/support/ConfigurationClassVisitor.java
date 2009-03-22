@@ -17,10 +17,8 @@ package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 import static org.springframework.config.java.support.MutableAnnotationUtils.*;
-import static org.springframework.config.java.support.Util.*;
 import static org.springframework.util.ClassUtils.*;
 
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -29,13 +27,12 @@ import org.springframework.asm.ClassAdapter;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Configuration;
 import org.springframework.config.java.Import;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 
 
 /**
@@ -51,10 +48,11 @@ class ConfigurationClassVisitor extends ClassAdapter {
 	private final ConfigurationClass configClass;
 	private final ConfigurationModel model;
 	private final ProblemReporter problemReporter;
+	private final ClassLoader classLoader;
+
 	private final HashMap<String, ConfigurationClass> innerClasses = new HashMap<String, ConfigurationClass>();
 
 	private boolean processInnerClasses = true;
-	private final ClassLoader classLoader;
 
 	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model,
 	                                 ProblemReporter problemReporter, ClassLoader classLoader) {
@@ -120,77 +118,23 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 		if (Configuration.class.getName().equals(annoTypeName)) {
 			Configuration mutableConfiguration = createMutableAnnotation(Configuration.class);
-			configClass.setMetadata(mutableConfiguration);
+			configClass.setConfigurationAnnotation(mutableConfiguration);
 			return new MutableAnnotationVisitor(mutableConfiguration, classLoader);
 		}
 
 		if (Import.class.getName().equals(annoTypeName)) {
 			ImportStack importStack = ImportStackHolder.getImportStack();
 
-			if (importStack.contains(configClass)) {
-				//throw new CircularImportException(configClass, importStack);
-				problemReporter.error(new CircularImportProblem(configClass, importStack));
-				return new EmptyVisitor();
+			if (!importStack.contains(configClass)) {
+				importStack.push(configClass);
+				return new ImportAnnotationVisitor(model, problemReporter, classLoader);
 			}
 
-			importStack.push(configClass);
-
-			return new ImportAnnotationVisitor(model, problemReporter, classLoader);
+			problemReporter.error(new CircularImportProblem(configClass, importStack));
 		}
 
-		/* -------------------------------------
-		// Detect @Extension annotations
-		// -------------------------------------
-		PluginAnnotationDetectingClassVisitor classVisitor = new PluginAnnotationDetectingClassVisitor(classLoader);
-
-		String className = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
-		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
-		ClassReader reader = AsmUtils.newClassReader(resourcePath, classLoader);
-		reader.accept(classVisitor, false);
-
-		if (!classVisitor.hasPluginAnnotation())
-			return super.visitAnnotation(annoTypeDesc, visible);
-		*/
-
-		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
-
-		if (annoType == null)
-			return super.visitAnnotation(annoTypeDesc, visible);
-
-		Annotation pluginAnno = createMutableAnnotation(annoType);
-		configClass.addPluginAnnotation(pluginAnno);
-		return new MutableAnnotationVisitor(pluginAnno, classLoader);
+		return super.visitAnnotation(annoTypeDesc, visible);
 	}
-
-	/* Support for @Extension annotation processing
-	private static class PluginAnnotationDetectingClassVisitor extends ClassAdapter {
-		private boolean hasPluginAnnotation = false;
-		private final Extension pluginAnnotation = createMutableAnnotation(Extension.class);
-		private final ClassLoader classLoader;
-
-		public PluginAnnotationDetectingClassVisitor(ClassLoader classLoader) {
-			super(AsmUtils.EMPTY_VISITOR);
-			this.classLoader = classLoader;
-		}
-
-		@Override
-		public AnnotationVisitor visitAnnotation(String typeDesc, boolean arg1) {
-			if (Extension.class.getName().equals(AsmUtils.convertTypeDescriptorToClassName(typeDesc))) {
-				hasPluginAnnotation = true;
-				return new MutableAnnotationVisitor(pluginAnnotation, classLoader);
-			}
-			return super.visitAnnotation(typeDesc, arg1);
-		}
-
-		public boolean hasPluginAnnotation() {
-			return hasPluginAnnotation;
-		}
-
-		public Extension getPluginAnnotation() {
-			return pluginAnnotation;
-		}
-	}
-	*/
 
 	/**
 	 * Delegates all {@link Configuration @Configuration} class method parsing to
@@ -241,7 +185,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			innerConfigClass.setDeclaringClass(innerClasses.get(outerName));
 
 		// is the inner class a @Configuration class? If so, add it to the list
-		if (innerConfigClass.getMetadata() != null)
+		if (innerConfigClass.getConfigurationAnnotation() != null)
 			innerClasses.put(name, innerConfigClass);
 	}
 
@@ -255,13 +199,14 @@ class ConfigurationClassVisitor extends ClassAdapter {
 	 */
 	class CircularImportProblem extends Problem {
 
-		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> currentImportStack) {
+		CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack) {
 			super(format("A circular @Import has been detected: " +
 			             "Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
 			             "already present in the current import stack [%s]",
-			             currentImportStack.peek().getSimpleName(), attemptedImport.getSimpleName(),
-			             attemptedImport.getSimpleName(), currentImportStack),
-			      new Location(new FileSystemResource("/dev/null"))
+			             importStack.peek().getSimpleName(), attemptedImport.getSimpleName(),
+			             attemptedImport.getSimpleName(), importStack),
+			      new Location(new ClassPathResource(convertClassNameToResourcePath(importStack.peek().getName())),
+			                   importStack.peek().getSource())
 			);
 		}
 

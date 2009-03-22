@@ -32,10 +32,11 @@ import test.beans.TestBean;
  * @author Chris Beams
  */
 public abstract class AbstractCircularImportDetectionTests {
+
 	protected abstract ConfigurationParser newParser();
 
 	protected abstract String loadAsConfigurationSource(Class<?> clazz) throws Exception;
-
+	
 	@Test
 	public void simpleCircularImportIsDetected() throws Exception {
 		boolean threw = false;

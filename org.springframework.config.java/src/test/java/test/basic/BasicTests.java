@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
@@ -49,6 +50,17 @@ public class BasicTests {
 		return factory;
 	}
 
+	@Test(expected=BeanDefinitionParsingException.class)
+	public void testFinalBeanMethod() {
+		initBeanFactory(ConfigWithFinalBean.class);
+	}
+
+	@Configuration
+	static class ConfigWithFinalBean {
+		public final @Bean TestBean testBean() {
+			return new TestBean();
+		}
+	}
 
 	@Test
 	public void simplestPossibleConfiguration() {
@@ -61,8 +73,7 @@ public class BasicTests {
 
 	@Configuration
 	static class SimplestPossibleConfig {
-		public @Bean
-		String stringBean() {
+		public @Bean String stringBean() {
 			return "foo";
 		}
 	}
@@ -82,15 +93,13 @@ public class BasicTests {
 
 	@Configuration
 	static class ConfigWithPrototypeBean {
-		public @Bean
-		TestBean foo() {
+		public @Bean TestBean foo() {
 			TestBean foo = new TestBean("foo");
 			foo.setSpouse(bar());
 			return foo;
 		}
 
-		public @Bean
-		TestBean bar() {
+		public @Bean TestBean bar() {
 			TestBean bar = new TestBean("bar");
 			bar.setSpouse(baz());
 			return bar;

@@ -23,24 +23,31 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Bean;
+import org.springframework.config.java.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
 
 
-final class BeanMethod {
+/**
+ * Represents a {@link Configuration} class method marked with the {@link Bean} annotation.
+ *
+ * @author Chris Beams
+ */
+final class BeanMethod implements BeanMetadataElement {
 
 	private final String name;
 	private final int modifiers;
 	private final ModelClass returnType;
 	private final List<Annotation> annotations = new ArrayList<Annotation>();
+
 	private transient ConfigurationClass declaringClass;
-	private transient int lineNumber;
+	private transient Object source;
 
 	public BeanMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
 		Assert.hasText(name);
@@ -104,7 +111,7 @@ final class BeanMethod {
 	/**
 	 * Set up a bi-directional relationship between this method and its declaring class.
 	 * 
-	 * @see ConfigurationClass#addMethod(BeanMethod)
+	 * @see ConfigurationClass#addBeanMethod(BeanMethod)
 	 */
 	public void setDeclaringClass(ConfigurationClass declaringClass) {
 		this.declaringClass = declaringClass;
@@ -114,12 +121,16 @@ final class BeanMethod {
 		return declaringClass;
 	}
 
-	public void setLineNumber(int lineNumber) {
-		this.lineNumber = lineNumber;
+	public void setSource(Object source) {
+		this.source = source;
 	}
 
-	public int getLineNumber() {
-		return lineNumber;
+	public Object getSource() {
+		return source;
+	}
+
+	public Location getLocation() {
+		return new Location(declaringClass.getLocation().getResource(), getSource());
 	}
 
 	public void validate(ProblemReporter problemReporter) {
@@ -188,7 +199,7 @@ final class BeanMethod {
 	public class PrivateMethodError extends Problem {
 		public PrivateMethodError() {
 			super(format("method '%s' may not be private", getName()),
-			      new Location(new FileSystemResource("/dev/null")));
+			      BeanMethod.this.getLocation());
 		}
 	}
 
@@ -196,7 +207,7 @@ final class BeanMethod {
 	public class FinalMethodError extends Problem {
 		public FinalMethodError() {
 			super(format("method '%s' may not be final. remove the final modifier to continue", getName()),
-			      new Location(new FileSystemResource("/dev/null")));
+			      BeanMethod.this.getLocation());
 		}
 	}
 
@@ -204,7 +215,7 @@ final class BeanMethod {
 		public InvalidScopedProxyDeclarationError(BeanMethod method) {
 			super(format("method %s contains an invalid annotation declaration: scoped proxies "
 			           + "cannot be created for singleton/prototype beans", method.getName()),
-			      new Location(new FileSystemResource("/dev/null")));
+			      BeanMethod.this.getLocation());
 		}
 
 	}

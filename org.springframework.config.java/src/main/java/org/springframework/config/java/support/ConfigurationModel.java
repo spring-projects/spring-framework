@@ -19,11 +19,8 @@ import static java.lang.String.*;
 
 import java.util.ArrayList;
 
-import org.springframework.beans.factory.parsing.Location;
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Configuration;
-import org.springframework.core.io.FileSystemResource;
 
 
 /**
@@ -60,31 +57,6 @@ final class ConfigurationModel {
 		return this;
 	}
 
-	/**
-	 * Return configuration classes that have been directly added to this model.
-	 * 
-	 * @see #getAllConfigurationClasses()
-	 */
-	public ConfigurationClass[] getConfigurationClasses() {
-		return configurationClasses.toArray(new ConfigurationClass[] {});
-	}
-
-	// /**
-	// * Return all configuration classes, including all imported configuration classes.
-	// This method
-	// * should be generally preferred over {@link #getConfigurationClasses()}
-	// *
-	// * @see #getConfigurationClasses()
-	// */
-	// public ConfigurationClass[] getAllConfigurationClasses() {
-	// ArrayList<ConfigurationClass> allConfigClasses = new ArrayList<ConfigurationClass>();
-	//
-	// for (ConfigurationClass configClass : configurationClasses)
-	// allConfigClasses.addAll(configClass.getSelfAndAllImports());
-	//
-	// return allConfigClasses.toArray(new ConfigurationClass[allConfigClasses.size()]);
-	// }
-
 	public ConfigurationClass[] getAllConfigurationClasses() {
 		return configurationClasses.toArray(new ConfigurationClass[configurationClasses.size()]);
 	}
@@ -94,37 +66,8 @@ final class ConfigurationModel {
 	 * <var>errors</var>.
 	 * 
 	 * @see ConfigurationClass#validate
-	 * @see BeanMethod#validate
 	 */
 	public void validate(ProblemReporter problemReporter) {
-		// user must specify at least one configuration
-		if (configurationClasses.isEmpty())
-			problemReporter.error(new EmptyModelError());
-
-		// TODO: prune this
-//		// check for any illegal @Bean overriding
-//        ConfigurationClass[] allClasses = getAllConfigurationClasses();
-//        for (int i = 0; i < allClasses.length; i++) {
-//        	for (BeanMethod method : allClasses[i].getMethods()) {
-//        		Bean bean = method.getAnnotation(Bean.class);
-//        
-//        		if (bean == null || bean.allowOverriding())
-//        			continue;
-//        
-//        		for (int j = i + 1; j < allClasses.length; j++)
-//        			if (allClasses[j].hasMethod(method.getName()))
-//        				problemReporter.error(
-//        						new Problem(
-//        							allClasses[i].new IllegalBeanOverrideError(allClasses[j], method).getDescription(),
-//        							new Location(new ClassPathResource(allClasses[i].getName().replace('.', '/').concat(".class")))
-//    							)
-//    						);
-//        	}
-//        }
-
-		// each individual configuration class must be well-formed
-		// note that each configClass detects usage errors on its imports recursively
-		// note that each configClass will recursively process its respective methods
 		for (ConfigurationClass configClass : configurationClasses)
 			configClass.validate(problemReporter);
 	}
@@ -157,15 +100,6 @@ final class ConfigurationModel {
 		} else if (!configurationClasses.equals(other.configurationClasses))
 			return false;
 		return true;
-	}
-
-
-	public class EmptyModelError extends Problem {
-		public EmptyModelError() {
-			super(format("Configuration model was empty. Make sure at least one "
-			           + "@%s class has been specified.", Configuration.class.getSimpleName()),
-			             new Location(new FileSystemResource("/dev/null")));
-		}
 	}
 
 }
