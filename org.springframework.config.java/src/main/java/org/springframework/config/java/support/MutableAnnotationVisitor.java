@@ -27,7 +27,13 @@ import org.springframework.util.Assert;
 
 
 /**
- * Populates a given {@link MutableAnnotation} instance with its attributes.
+ * ASM {@link AnnotationVisitor} that populates a given {@link MutableAnnotation} instance
+ * with its attributes.
+ *
+ * @author Chris Beams
+ * @see MutableAnnotation
+ * @see MutableAnnotationInvocationHandler
+ * @see MutableAnnotationUtils
  */
 class MutableAnnotationVisitor implements AnnotationVisitor {
 

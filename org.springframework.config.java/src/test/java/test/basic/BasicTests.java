@@ -6,6 +6,7 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
@@ -39,8 +40,7 @@ public class BasicTests {
 
 		for (Class<?> configClass : configClasses) {
 			String configBeanName = configClass.getName();
-			factory.registerBeanDefinition(configBeanName, rootBeanDefinition(configClass)
-			        .getBeanDefinition());
+			factory.registerBeanDefinition(configBeanName, rootBeanDefinition(configClass).getBeanDefinition());
 		}
 
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(factory);
@@ -48,6 +48,51 @@ public class BasicTests {
 		factory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
 
 		return factory;
+	}
+
+	@Test
+	public void customBeanNameIsRespected() {
+		BeanFactory factory = initBeanFactory(ConfigWithBeanWithCustomName.class);
+		assertSame(factory.getBean("customName"), ConfigWithBeanWithCustomName.testBean);
+
+		// method name should not be registered
+		try {
+			factory.getBean("methodName");
+			fail("bean should not have been registered with 'methodName'");
+		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
+	}
+
+	@Configuration
+	static class ConfigWithBeanWithCustomName {
+		static TestBean testBean = new TestBean();
+		@Bean(name="customName")
+		public TestBean methodName() {
+			return testBean;
+		}
+	}
+
+	@Test
+	public void aliasesAreRespected() {
+		BeanFactory factory = initBeanFactory(ConfigWithBeanWithAliases.class);
+		assertSame(factory.getBean("name1"), ConfigWithBeanWithAliases.testBean);
+		String[] aliases = factory.getAliases("name1");
+		for(String alias : aliases)
+			assertSame(factory.getBean(alias), ConfigWithBeanWithAliases.testBean);
+
+		// method name should not be registered
+		try {
+			factory.getBean("methodName");
+			fail("bean should not have been registered with 'methodName'");
+		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
+	}
+
+	@Configuration
+	static class ConfigWithBeanWithAliases {
+		static TestBean testBean = new TestBean();
+		@Bean(name={"name1", "alias1", "alias2", "alias3"})
+		public TestBean methodName() {
+			return testBean;
+		}
 	}
 
 	@Test(expected=BeanDefinitionParsingException.class)

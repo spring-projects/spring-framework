@@ -24,7 +24,7 @@ import org.springframework.util.ClassUtils;
 
 
 /**
- * Representation of a class, free from java reflection,
+ * Represents a class, free from java reflection,
  * populated by {@link ConfigurationParser}.
  * 
  * @author Chris Beams

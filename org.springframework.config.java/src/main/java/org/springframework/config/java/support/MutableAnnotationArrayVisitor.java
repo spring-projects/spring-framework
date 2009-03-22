@@ -25,6 +25,14 @@ import java.util.ArrayList;
 import org.springframework.asm.AnnotationVisitor;
 
 
+/**
+ * ASM {@link AnnotationVisitor} that visits any annotation array values while populating
+ * a new {@link MutableAnnotation} instance.
+ *
+ * @author Chris Beams
+ * @see MutableAnnotation
+ * @see MutableAnnotationUtils
+ */
 class MutableAnnotationArrayVisitor extends AnnotationAdapter {
 
 	private final ArrayList<Object> values = new ArrayList<Object>();

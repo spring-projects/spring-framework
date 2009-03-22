@@ -30,6 +30,14 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 
+/**
+ * Handles calls to {@link MutableAnnotation} attribute methods at runtime. Essentially
+ * emulates what JDK annotation dynamic proxies do.
+ *
+ * @author Chris Beams
+ * @see MutableAnnotation
+ * @see MutableAnnotationUtils
+ */
 final class MutableAnnotationInvocationHandler implements InvocationHandler {
 
 	private final Class<? extends Annotation> annoType;

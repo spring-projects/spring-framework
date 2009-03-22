@@ -17,29 +17,27 @@ package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 import static org.springframework.config.java.support.Util.*;
-import static org.springframework.util.Assert.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 
 import net.sf.cglib.core.DefaultGeneratorStrategy;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.NoOp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.asm.ClassAdapter;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassWriter;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.Assert;
 
 
 /**
@@ -54,59 +52,30 @@ class ConfigurationEnhancer {
 
 	private static final Log log = LogFactory.getLog(ConfigurationEnhancer.class);
 
-	private final ArrayList<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
-
-	private final LinkedHashSet<BeanDefinitionRegistrar> registrars = new LinkedHashSet<BeanDefinitionRegistrar>();
-
 	private final ArrayList<Callback> callbackInstances = new ArrayList<Callback>();
-
-	private final CallbackFilter callbackFilter = new CallbackFilter() {
-		public int accept(Method candidateMethod) {
-			Iterator<BeanDefinitionRegistrar> iter = registrars.iterator();
-			for (int i = 0; iter.hasNext(); i++)
-				if (iter.next().accepts(candidateMethod))
-					return i;
-
-			throw new IllegalStateException(
-					format("No registrar is capable of handling method [%s]. "
-					     + "Perhaps you forgot to add a catch-all registrar?",
-					       candidateMethod.getName()));
-		}
-	};
+	private final ArrayList<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
+	private final CallbackFilter callbackFilter;
 
 
 	/**
 	 * Creates a new {@link ConfigurationEnhancer} instance.
 	 */
 	public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory) {
-		notNull(beanFactory, "beanFactory must be non-null");
-		
-		registrars.add(new BeanRegistrar());
-		BeanMethodInterceptor beanMethodInterceptor = new BeanMethodInterceptor();
-		beanMethodInterceptor.setBeanFactory(beanFactory);
-		callbackInstances.add(beanMethodInterceptor);
-		
-		// add no-op default registrar and method interceptor
-		registrars.add(new BeanDefinitionRegistrar() {
+		Assert.notNull(beanFactory, "beanFactory must be non-null");
 
-			public boolean accepts(Method method) {
-				return true;
-			}
+		callbackInstances.add(new BeanMethodInterceptor(beanFactory));
+		callbackInstances.add(NoOp.INSTANCE);
 
-			public void register(BeanMethod method, BeanDefinitionRegistry registry) {
-				// no-op
-			}
-		});
-		callbackInstances.add(new MethodInterceptor() {
-
-			public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-				return null;
-			}
-			
-		});
-		
 		for (Callback callback : callbackInstances)
 			callbackTypes.add(callback.getClass());
+
+		// set up the callback filter to return the index of the BeanMethodInterceptor when
+		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
+		callbackFilter = new CallbackFilter() {
+			public int accept(Method candidateMethod) {
+				return (AnnotationUtils.findAnnotation(candidateMethod, Bean.class) != null) ? 0 : 1;
+			}
+		};
 	}
 
 
