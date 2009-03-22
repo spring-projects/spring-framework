@@ -17,20 +17,15 @@ package org.springframework.config.java.support;
 
 import static java.lang.String.*;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.Assert;
-
-import sun.security.x509.Extension;
 
 
 /**
@@ -41,107 +36,51 @@ import sun.security.x509.Extension;
  * (for the purpose of tooling with Spring IDE).
  * 
  * @author Chris Beams
+ * @see ConfigurationModel
+ * @see BeanMethod
+ * @see ConfigurationParser
  */
 final class ConfigurationClass extends ModelClass {
 
 	private String beanName;
-
 	private int modifiers;
-
-	private Configuration metadata;
-
+	private Configuration configurationAnnotation;
 	private HashSet<BeanMethod> methods = new HashSet<BeanMethod>();
-
-	private HashSet<Annotation> pluginAnnotations = new HashSet<Annotation>();
-
 	private ConfigurationClass declaringClass;
-
-	public ConfigurationClass() {
-	}
-
-	// TODO: get rid of constructors used only for testing. put in testing util.
-	/**
-	 * Creates a new ConfigurationClass named <var>className.</var>
-	 * 
-	 * @param name fully-qualified Configuration class being represented
-	 * 
-	 * @see #setClassName(String)
-	 */
-	ConfigurationClass(String name) {
-		this(name, null, defaultAnnotation(), 0);
-	}
-
-	ConfigurationClass(String name, Configuration metadata) {
-		this(name, null, metadata, 0);
-	}
-
-	ConfigurationClass(String name, int modifiers) {
-		this(name, null, defaultAnnotation(), modifiers);
-	}
-
-	private static Configuration defaultAnnotation() {
-		@Configuration
-		class Prototype {
-		}
-		return Prototype.class.getAnnotation(Configuration.class);
-	}
-
-	/**
-	 * Creates a new ConfigurationClass object.
-	 * 
-	 * @param name Fully qualified name of the class being represented
-	 * @param id Bean name/id (if any) of this configuration class. used only in the case of
-	 *        XML integration where {@link Configuration} beans may have a user-specified
-	 *        id.
-	 * @param metadata Configuration annotation resident on this class. May be null
-	 *        indicating that the user specified this class to be processed but failed to
-	 *        properly annotate it.
-	 * @param modifiers Per {@link java.lang.reflect.Modifier}
-	 */
-	public ConfigurationClass(String name, String id, Configuration metadata, int modifiers) {
-		super(name);
-		Assert.hasText(name, "Configuration class name must have text");
-
-		setBeanName(id);
-		setMetadata(metadata);
-		setModifiers(modifiers);
-	}
-
-	public ConfigurationClass addMethod(BeanMethod method) {
-		method.setDeclaringClass(this);
-		methods.add(method);
-		return this;
-	}
 
 	public String getBeanName() {
 		return beanName == null ? getName() : beanName;
 	}
 
-	public ConfigurationClass setBeanName(String id) {
+	public void setBeanName(String id) {
 		this.beanName = id;
-		return this;
 	}
 
-	public Set<BeanMethod> getMethods() {
+	public int getModifiers() {
+		return modifiers;
+	}
+
+	public void setModifiers(int modifiers) {
+		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative");
+		this.modifiers = modifiers;
+	}
+
+	public Configuration getConfigurationAnnotation() {
+		return this.configurationAnnotation;
+	}
+
+	public void setConfigurationAnnotation(Configuration configAnno) {
+		Assert.notNull(configAnno, "configuration annotation must be non-null");
+		this.configurationAnnotation = configAnno;
+	}
+
+	public Set<BeanMethod> getBeanMethods() {
 		return methods;
 	}
 
-	public Annotation[] getPluginAnnotations() {
-		return pluginAnnotations.toArray(new Annotation[pluginAnnotations.size()]);
-	}
-
-	/**
-	 * Add a {@link Extension @Plugin}-annotated annotation to this configuration class.
-	 * 
-	 * @param pluginAnno type-level <code>Plugin</code> annotation
-	 */
-	public ConfigurationClass addPluginAnnotation(Annotation pluginAnno) {
-		pluginAnnotations.add(pluginAnno);
-		return this;
-	}
-
-	public ConfigurationClass setDeclaringClass(ConfigurationClass configurationClass) {
-		this.declaringClass = configurationClass;
+	public ConfigurationClass addBeanMethod(BeanMethod method) {
+		method.setDeclaringClass(this);
+		methods.add(method);
 		return this;
 	}
 
@@ -149,29 +88,13 @@ final class ConfigurationClass extends ModelClass {
 		return declaringClass;
 	}
 
-	public int getModifiers() {
-		return modifiers;
-	}
-
-	public ConfigurationClass setModifiers(int modifiers) {
-		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative");
-		this.modifiers = modifiers;
-		return this;
-	}
-
-	public Configuration getMetadata() {
-		return this.metadata;
-	}
-
-	public ConfigurationClass setMetadata(Configuration configAnno) {
-		this.metadata = configAnno;
-		return this;
+	public void setDeclaringClass(ConfigurationClass configurationClass) {
+		this.declaringClass = configurationClass;
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-
 		// configuration classes must be annotated with @Configuration
-		if (metadata == null)
+		if (configurationAnnotation == null)
 			problemReporter.error(new NonAnnotatedConfigurationProblem());
 
 		// a configuration class may not be final (CGLIB limitation)
@@ -193,10 +116,9 @@ final class ConfigurationClass extends ModelClass {
 		int result = super.hashCode();
 		result = prime * result + ((declaringClass == null) ? 0 : declaringClass.hashCode());
 		result = prime * result + ((beanName == null) ? 0 : beanName.hashCode());
-		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
+		result = prime * result + ((configurationAnnotation == null) ? 0 : configurationAnnotation.hashCode());
 		result = prime * result + ((methods == null) ? 0 : methods.hashCode());
 		result = prime * result + modifiers;
-		result = prime * result + ((pluginAnnotations == null) ? 0 : pluginAnnotations.hashCode());
 		return result;
 	}
 
@@ -219,10 +141,10 @@ final class ConfigurationClass extends ModelClass {
 				return false;
 		} else if (!beanName.equals(other.beanName))
 			return false;
-		if (metadata == null) {
-			if (other.metadata != null)
+		if (configurationAnnotation == null) {
+			if (other.configurationAnnotation != null)
 				return false;
-		} else if (!metadata.equals(other.metadata))
+		} else if (!configurationAnnotation.equals(other.configurationAnnotation))
 			return false;
 		if (methods == null) {
 			if (other.methods != null)
@@ -231,37 +153,30 @@ final class ConfigurationClass extends ModelClass {
 			return false;
 		if (modifiers != other.modifiers)
 			return false;
-		if (pluginAnnotations == null) {
-			if (other.pluginAnnotations != null)
-				return false;
-		} else if (!pluginAnnotations.equals(other.pluginAnnotations))
-			return false;
 		return true;
 	}
 
 
 	/** Configuration classes must be annotated with {@link Configuration @Configuration}. */
-	public class NonAnnotatedConfigurationProblem extends Problem {
+	class NonAnnotatedConfigurationProblem extends Problem {
 
-		public NonAnnotatedConfigurationProblem() {
+		NonAnnotatedConfigurationProblem() {
 			super(format("%s was specified as a @Configuration class but was not actually annotated " +
 			             "with @Configuration. Annotate the class or do not attempt to process it.",
 			             getSimpleName()),
-			      new Location(new FileSystemResource("/dev/null"))
-			);
+			      ConfigurationClass.this.getLocation());
 		}
 
 	}
 
 
 	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
-	public class FinalConfigurationProblem extends Problem {
+	class FinalConfigurationProblem extends Problem {
 
-		public FinalConfigurationProblem() {
+		FinalConfigurationProblem() {
 			super(format("@Configuration class [%s] may not be final. Remove the final modifier to continue.",
-			             ConfigurationClass.this.getSimpleName()),
-			      new Location(new FileSystemResource("/dev/null"))
-			);
+			             getSimpleName()),
+			      ConfigurationClass.this.getLocation());
 		}
 
 	}

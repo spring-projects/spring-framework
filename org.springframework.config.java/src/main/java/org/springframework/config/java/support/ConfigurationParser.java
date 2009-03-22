@@ -31,10 +31,10 @@ import org.springframework.util.ClassUtils;
  * from the concern of registering {@link BeanDefinition} objects based on the content of
  * that model.
  * 
- * @see org.springframework.config.java.support.ConfigurationModel
- * @see org.springframework.config.java.support.ConfigurationModelBeanDefinitionReader
- * 
  * @author Chris Beams
+ * @since 3.0
+ * @see ConfigurationModel
+ * @see ConfigurationModelBeanDefinitionReader
  */
 public class ConfigurationParser {
 

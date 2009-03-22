@@ -48,7 +48,6 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	private final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
 	private final ClassLoader classLoader;
 
-	private boolean isModelMethod = false;
 	private int lineNumber;
 
 	/**
@@ -104,24 +103,20 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 
 	/**
 	 * Parses through all {@link #annotations} on this method in order to determine whether
-	 * it is a {@link Bean} method or not and if so adds it to the enclosing {@link #configClass}.
+	 * it is a {@link Bean} method and if so adds it to the enclosing {@link #configClass}.
 	 */
 	@Override
 	public void visitEnd() {
 		for (Annotation anno : annotations) {
-			if (anno.annotationType().equals(Bean.class)) {
-				isModelMethod = true;
+			if (Bean.class.equals(anno.annotationType())) {
+				// this method is annotated with @Bean -> add it to the ConfigurationClass model
+				Annotation[] annoArray = annotations.toArray(new Annotation[] {});
+				BeanMethod method = new BeanMethod(methodName, modifiers, returnType, annoArray);
+				method.setSource(lineNumber);
+				configClass.addBeanMethod(method);
 				break;
 			}
 		}
-
-		if (!isModelMethod)
-			return;
-
-		Annotation[] annoArray = annotations.toArray(new Annotation[] {});
-		BeanMethod method = new BeanMethod(methodName, modifiers, returnType, annoArray);
-		method.setLineNumber(lineNumber);
-		configClass.addMethod(method);
 	}
 
 	/**

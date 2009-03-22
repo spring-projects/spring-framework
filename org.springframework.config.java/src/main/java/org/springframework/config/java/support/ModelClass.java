@@ -15,23 +15,28 @@
  */
 package org.springframework.config.java.support;
 
+import static org.springframework.util.ClassUtils.*;
+
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.config.java.Configuration;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 
 
 /**
- * Abstract representation of a class, free from java reflection. Base class used within the
- * internal JavaConfig metamodel for representing {@link Configuration} classes.
+ * Representation of a class, free from java reflection,
+ * populated by {@link ConfigurationParser}.
  * 
  * @author Chris Beams
+ * @see ConfigurationModel
+ * @see ConfigurationClass
+ * @see ConfigurationParser
  */
 class ModelClass implements BeanMetadataElement {
 
 	private String name;
 	private boolean isInterface;
-	private String source;
+	private transient Object source;
 
 	/**
 	 * Creates a new and empty ModelClass instance.
@@ -98,8 +103,7 @@ class ModelClass implements BeanMetadataElement {
 	 * Returns a resource path-formatted representation of the .java file that declares this
 	 * class
 	 */
-	// TODO: return type should be Object here.  Spring IDE will return a JDT representation...
-	public String getSource() {
+	public Object getSource() {
 		return source;
 	}
 
@@ -109,8 +113,11 @@ class ModelClass implements BeanMetadataElement {
 	 * @param source resource path to the .java file that declares this class.
 	 */
 	public void setSource(Object source) {
-		Assert.isInstanceOf(String.class, source);
-		this.source = (String) source;
+		this.source = source;
+	}
+
+	public Location getLocation() {
+		return new Location(new ClassPathResource(convertClassNameToResourcePath(getName())), getSource());
 	}
 
 	/**
@@ -160,5 +167,3 @@ class ModelClass implements BeanMetadataElement {
 	}
 
 }
-
-// TODO: Consider eliminating in favor of just ConfigurationClass
