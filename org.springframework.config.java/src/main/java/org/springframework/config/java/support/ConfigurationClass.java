@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 
 
 /**
- * Abstract representation of a user-defined {@link Configuration @Configuration} class.
+ * Represents a user-defined {@link Configuration @Configuration} class.
  * Includes a set of {@link Bean} methods, including all such methods defined in the
  * ancestry of the class, in a 'flattened-out' manner. Note that each {@link BeanMethod}
  * representation contains source information about where it was originally detected

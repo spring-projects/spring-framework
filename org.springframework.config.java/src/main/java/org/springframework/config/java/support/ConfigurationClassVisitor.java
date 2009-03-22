@@ -25,6 +25,7 @@ import java.util.Stack;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassAdapter;
 import org.springframework.asm.ClassReader;
+import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.beans.factory.parsing.Location;
@@ -36,10 +37,12 @@ import org.springframework.core.io.ClassPathResource;
 
 
 /**
- * Visits a {@link Configuration} class, populating a {@link ConfigurationClass} instance
- * with information gleaned along the way.
+ * ASM {@link ClassVisitor} that visits a {@link Configuration} class, populating a
+ * {@link ConfigurationClass} instance with information gleaned along the way.
  * 
  * @author Chris Beams
+ * @see ConfigurationParser
+ * @see ConfigurationClass
  */
 class ConfigurationClassVisitor extends ClassAdapter {
 

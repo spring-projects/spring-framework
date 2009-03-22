@@ -46,9 +46,11 @@ public class ConfigurationParser {
 	private final ClassLoader classLoader;
 
 	/**
-	 * Creates a new parser instance that will be used to populate <var>model</var>.
-	 * @param model model to be populated by each successive call to
-	 *        {@link #parse(Object, String)}
+	 * Creates a new {@link ConfigurationParser} instance that will be used to populate a
+	 * {@link ConfigurationModel}.
+	 * 
+	 * @param model model to be populated by each successive call to {@link #parse}
+	 * @see #getConfigurationModel()
 	 */
 	public ConfigurationParser(ProblemReporter problemReporter, ClassLoader classLoader) {
 		this.model = new ConfigurationModel();
@@ -77,6 +79,9 @@ public class ConfigurationParser {
 		model.add(configClass);
 	}
 
+	/**
+	 * Returns the current {@link ConfigurationModel}, to be called after {@link #parse}.
+	 */
 	public ConfigurationModel getConfigurationModel() {
 		return model;
 	}

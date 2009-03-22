@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 
 /**
- * Stack used for detecting circular use of the {@link Import} annotation.
+ * {@link Stack} used for detecting circular use of the {@link Import} annotation.
  * 
  * @author Chris Beams
  * @see Import

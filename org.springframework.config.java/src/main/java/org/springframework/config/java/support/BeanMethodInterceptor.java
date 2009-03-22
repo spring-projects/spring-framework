@@ -24,16 +24,12 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.config.java.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.Assert;
 
 
 /**
@@ -41,17 +37,16 @@ import org.springframework.util.Assert;
  * handling of bean semantics such as scoping and AOP proxying.
  * 
  * @author Chris Beams
- * @since 3.0
  * @see Bean
- * @see BeanRegistrar
  */
-class BeanMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
-	protected final Log log = LogFactory.getLog(this.getClass());
-	protected DefaultListableBeanFactory beanFactory;
+class BeanMethodInterceptor implements MethodInterceptor {
 
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		Assert.isInstanceOf(DefaultListableBeanFactory.class, beanFactory);
-		this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+	private static final Log log = LogFactory.getLog(BeanMethodInterceptor.class);
+
+	private final DefaultListableBeanFactory beanFactory;
+
+	public BeanMethodInterceptor(DefaultListableBeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
@@ -60,20 +55,18 @@ class BeanMethodInterceptor implements BeanFactoryAware, MethodInterceptor {
 	 */
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 
-		// determine the name of the bean
-		String beanName;
+		// by default the bean name is the name of the @Bean-annotated method
+		String beanName = method.getName();
+
 		// check to see if the user has explicitly set the bean name
 		Bean bean = method.getAnnotation(Bean.class);
-		if(bean != null && bean.name().length > 1)
+		if(bean != null && bean.name().length > 0)
 			beanName = bean.name()[0];
-		// if not, simply return the name of the method as the bean name
-		else
-			beanName = method.getName();
 
 		// determine whether this bean is a scoped-proxy
 		Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
 		boolean isScopedProxy = (scope != null && scope.proxyMode() != ScopedProxyMode.NO);
-		String scopedBeanName = BeanRegistrar.resolveHiddenScopedProxyBeanName(beanName);
+		String scopedBeanName = ConfigurationModelBeanDefinitionReader.resolveHiddenScopedProxyBeanName(beanName);
 		if (isScopedProxy && beanFactory.isCurrentlyInCreation(scopedBeanName))
 			 beanName = scopedBeanName;
 

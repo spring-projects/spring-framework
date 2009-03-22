@@ -27,15 +27,16 @@ import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassAdapter;
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodAdapter;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 
 
 /**
- * Visits a single method declared in a given {@link Configuration} class. Determines
- * whether the method is a {@link Bean} method and if so, adds it to the
- * {@link ConfigurationClass}.
+ * ASM {@link MethodVisitor} that visits a single method declared in a given
+ * {@link Configuration} class. Determines whether the method is a {@link Bean}
+ * method and if so, adds it to the {@link ConfigurationClass}.
  * 
  * @author Chris Beams
  */

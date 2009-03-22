@@ -38,6 +38,10 @@ import org.springframework.util.Assert;
  * Represents a {@link Configuration} class method marked with the {@link Bean} annotation.
  *
  * @author Chris Beams
+ * @see ConfigurationClass
+ * @see ConfigurationModel
+ * @see ConfigurationParser
+ * @see ConfigurationModelBeanDefinitionReader
  */
 final class BeanMethod implements BeanMetadataElement {
 

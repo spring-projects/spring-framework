@@ -156,15 +156,10 @@ public class BeanMethodTests {
 
 	@Test
 	public void sessionInterfaceScopedProxiesAreLegal() {
-		Scope scope = PrototypeInterfaceProxy.class.getAnnotation(Scope.class);
+		Scope scope = SessionInterfaceProxy.class.getAnnotation(Scope.class);
 		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno, scope);
 		beanMethod.setDeclaringClass(declaringClass);
-		try {
-			beanMethod.validate(problemReporter);
-			fail("should have failed due to prototype with scoped proxy");
-		} catch (Exception ex) {
-			assertTrue(ex.getMessage().contains("cannot be created for singleton/prototype beans"));
-		}
+		beanMethod.validate(problemReporter); // should validate without problems - it's legal
 	}
 
 	@Scope(value=SINGLETON, proxyMode=INTERFACES)
