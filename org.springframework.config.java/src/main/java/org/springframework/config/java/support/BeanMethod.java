@@ -21,7 +21,6 @@ import static org.springframework.config.java.StandardScopes.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.parsing.Location;
@@ -48,7 +47,7 @@ final class BeanMethod implements BeanMetadataElement {
 	private final String name;
 	private final int modifiers;
 	private final ModelClass returnType;
-	private final List<Annotation> annotations = new ArrayList<Annotation>();
+	private final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
 
 	private transient ConfigurationClass declaringClass;
 	private transient Object source;

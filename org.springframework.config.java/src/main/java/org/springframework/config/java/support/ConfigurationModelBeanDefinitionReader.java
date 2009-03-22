@@ -68,10 +68,10 @@ class ConfigurationModelBeanDefinitionReader {
 	 * 
 	 * @return number of bean definitions generated
 	 */
-	public BeanDefinitionRegistry loadBeanDefinitions(ConfigurationModel model) {
+	public BeanDefinitionRegistry loadBeanDefinitions(ConfigurationModel configurationModel) {
 		registry = new SimpleBeanDefinitionRegistry();
 
-		for (ConfigurationClass configClass : model.getAllConfigurationClasses())
+		for (ConfigurationClass configClass : configurationModel)
 			loadBeanDefinitionsForConfigurationClass(configClass);
 
 		return registry;
