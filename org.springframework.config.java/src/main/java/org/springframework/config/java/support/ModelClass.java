@@ -117,6 +117,8 @@ class ModelClass implements BeanMetadataElement {
 	}
 
 	public Location getLocation() {
+		if(getName() == null)
+			throw new IllegalStateException("'name' property is null. Call setName() before calling getLocation()");
 		return new Location(new ClassPathResource(convertClassNameToResourcePath(getName())), getSource());
 	}
 

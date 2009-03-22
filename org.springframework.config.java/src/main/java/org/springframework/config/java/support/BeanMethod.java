@@ -101,9 +101,7 @@ final class BeanMethod implements BeanMetadataElement {
 	public <T extends Annotation> T getRequiredAnnotation(Class<T> annoType) {
 		T anno = getAnnotation(annoType);
 
-		if (anno == null)
-			throw new IllegalStateException(
-				format("annotation %s not found on %s", annoType.getSimpleName(), this));
+		Assert.notNull(anno, format("annotation %s not found on %s", annoType.getSimpleName(), this));
 
 		return anno;
 	}
@@ -130,6 +128,9 @@ final class BeanMethod implements BeanMetadataElement {
 	}
 
 	public Location getLocation() {
+		if (declaringClass == null)
+			throw new IllegalStateException(
+					"declaringClass property is null. Call setDeclaringClass() before calling getLocation()");
 		return new Location(declaringClass.getLocation().getResource(), getSource());
 	}
 
@@ -196,24 +197,24 @@ final class BeanMethod implements BeanMetadataElement {
 	}
 
 	/** {@link Bean} methods must be non-private in order to accommodate CGLIB. */
-	public class PrivateMethodError extends Problem {
-		public PrivateMethodError() {
-			super(format("method '%s' may not be private", getName()),
+	class PrivateMethodError extends Problem {
+		PrivateMethodError() {
+			super(format("Method '%s' may not be private; increase the method's visibility to continue", getName()),
 			      BeanMethod.this.getLocation());
 		}
 	}
 
 	/** {@link Bean} methods must be non-final in order to accommodate CGLIB. */
-	public class FinalMethodError extends Problem {
-		public FinalMethodError() {
-			super(format("method '%s' may not be final. remove the final modifier to continue", getName()),
+	class FinalMethodError extends Problem {
+		FinalMethodError() {
+			super(format("Method '%s' may not be final; remove the final modifier to continue", getName()),
 			      BeanMethod.this.getLocation());
 		}
 	}
 
-	public class InvalidScopedProxyDeclarationError extends Problem {
-		public InvalidScopedProxyDeclarationError(BeanMethod method) {
-			super(format("method %s contains an invalid annotation declaration: scoped proxies "
+	class InvalidScopedProxyDeclarationError extends Problem {
+		InvalidScopedProxyDeclarationError(BeanMethod method) {
+			super(format("Method %s contains an invalid annotation declaration: scoped proxies "
 			           + "cannot be created for singleton/prototype beans", method.getName()),
 			      BeanMethod.this.getLocation());
 		}
