@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.ObjectUtils;
  * @author Chris Beams
  */
 public final class ClassPathXmlApplicationContextTests {
-	
+
 	private static final String PATH = "/org/springframework/context/support/";
 	private static final String RESOURCE_CONTEXT = PATH + "ClassPathXmlApplicationContextTests-resource.xml";
 	private static final String CONTEXT_WILDCARD = PATH + "test/context*.xml";
