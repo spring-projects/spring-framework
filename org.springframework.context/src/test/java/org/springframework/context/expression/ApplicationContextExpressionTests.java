@@ -106,6 +106,11 @@ public class ApplicationContextExpressionTests {
 		bd5.setScope("myScope");
 		ac.registerBeanDefinition("tb5", bd5);
 
+		GenericBeanDefinition bd6 = new GenericBeanDefinition();
+		bd6.setBeanClass(PropertyValueTestBean.class);
+		bd6.setScope("myScope");
+		ac.registerBeanDefinition("tb6", bd6);
+
 		System.getProperties().put("country", "UK");
 		try {
 			ac.refresh();
@@ -138,6 +143,12 @@ public class ApplicationContextExpressionTests {
 			assertEquals(42, tb5.age);
 			assertEquals("UK", tb5.country);
 			assertSame(tb0, tb5.tb);
+
+			PropertyValueTestBean tb6 = ac.getBean("tb6", PropertyValueTestBean.class);
+			assertEquals("XXXmyNameYYY42ZZZ", tb6.name);
+			assertEquals(42, tb6.age);
+			assertEquals("UK", tb6.country);
+			assertSame(tb0, tb6.tb);
 		}
 		finally {
 			System.getProperties().remove("country");
@@ -153,12 +164,13 @@ public class ApplicationContextExpressionTests {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().addPropertyValue("name", "juergen");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
 		rbd.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("test", rbd);
 		ac.refresh();
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
+		System.getProperties().put("name", "juergen");
 		System.getProperties().put("country", "UK");
 		try {
 			for (int i = 0; i < 100000; i++) {
@@ -170,6 +182,7 @@ public class ApplicationContextExpressionTests {
 		}
 		finally {
 			System.getProperties().remove("country");
+			System.getProperties().remove("name");
 		}
 		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 6000);
@@ -230,11 +243,43 @@ public class ApplicationContextExpressionTests {
 		public void configure(
 				@Qualifier("original") TestBean tb,
 				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
-				@Value("#{mySpecialAttr}")int age,
+				@Value("#{mySpecialAttr}") int age,
 				@Value("#{systemProperties.country}") String country) {
 			this.name = name;
 			this.age = age;
 			this.country = country;
+			this.tb = tb;
+		}
+	}
+
+
+	public static class PropertyValueTestBean {
+
+		public String name;
+
+		public int age;
+
+		public String country;
+
+		public TestBean tb;
+
+		@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Value("#{mySpecialAttr}")
+		public void setAge(int age) {
+			this.age = age;
+		}
+
+		@Value("#{systemProperties.country}")
+		public void setCountry(String country) {
+			this.country = country;
+		}
+
+		@Qualifier("original")
+		public void setTb(TestBean tb) {
 			this.tb = tb;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.core;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.TypeVariable;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -177,7 +177,14 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the annotations associated with the method/constructor parameter.
+	 * Return the annotations associated with the target method/constructor itself.
+	 */
+	public Annotation[] getAnnotations() {
+		return (this.method != null ? this.method.getAnnotations() : this.constructor.getAnnotations());
+	}
+
+	/**
+	 * Return the annotations associated with the specific method/constructor parameter.
 	 */
 	public Annotation[] getParameterAnnotations() {
 		if (this.parameterAnnotations == null) {
