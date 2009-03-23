@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class AspectJTypeFilterTests extends TestCase {
 				"java.lang.String+");
 	}
 
-	public void testAnnotationPatternMathces() throws Exception {
+	public void testAnnotationPatternMatches() throws Exception {
 		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassAnnotatedWithComponent",
 				"@org.springframework.stereotype.Component *..*");
 		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassAnnotatedWithComponent",
