@@ -24,10 +24,12 @@ import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.core.task.TaskExecutor} implementation that uses a
@@ -38,13 +40,15 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see java.util.Timer
  */
-public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBean, DisposableBean {
+public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Timer timer;
 
 	private long delay = 0;
+
+	private String beanName;
 
 	private boolean timerInternal = false;
 
@@ -89,6 +93,10 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 		this.delay = delay;
 	}
 
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
 
 	public void afterPropertiesSet() {
 		if (this.timer == null) {
@@ -101,14 +109,27 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	/**
 	 * Create a new {@link Timer} instance. Called by <code>afterPropertiesSet</code>
 	 * if no {@link Timer} has been specified explicitly.
-	 * <p>The default implementation creates a plain daemon {@link Timer}.
+	 * <p>The default implementation creates a plain non-daemon {@link Timer}.
 	 * If overridden, subclasses must take care to ensure that a non-null
 	 * {@link Timer} is returned from the execution of this method.
 	 * @see #afterPropertiesSet
-	 * @see java.util.Timer#Timer(boolean)
+	 * @see java.util.Timer#Timer(String, boolean)
 	 */
 	protected Timer createTimer() {
-		return new Timer(true);
+		if (StringUtils.hasText(this.beanName)) {
+			return new Timer(this.beanName);
+		}
+		else {
+			return new Timer();
+		}
+	}
+
+	/**
+	 * Return the underlying Timer behind this TimerTaskExecutor.
+	 */
+	protected final Timer getTimer() {
+		Assert.notNull(this.timer, "Timer not initialized yet");
+		return this.timer;
 	}
 
 
@@ -118,14 +139,12 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	 * @param task the task to be executed
 	 */
 	public void execute(Runnable task) {
-		Assert.notNull(this.timer, "Timer is required");
-		this.timer.schedule(new DelegatingTimerTask(task), this.delay);
+		getTimer().schedule(new DelegatingTimerTask(task), this.delay);
 	}
 
 	public void execute(Runnable task, long startTimeout) {
-		Assert.notNull(this.timer, "Timer is required");
 		long actualDelay = (startTimeout < this.delay ? startTimeout : this.delay);
-		this.timer.schedule(new DelegatingTimerTask(task), actualDelay);
+		getTimer().schedule(new DelegatingTimerTask(task), actualDelay);
 	}
 
 	public Future<?> submit(Runnable task) {
