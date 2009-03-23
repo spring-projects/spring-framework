@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import javax.jms.Session;
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  * @see javax.jms.MessageListener
  */
-public interface SessionAwareMessageListener {
+public interface SessionAwareMessageListener<M extends Message> {
 
 	/**
 	 * Callback for processing a received JMS message.
@@ -51,6 +51,6 @@ public interface SessionAwareMessageListener {
 	 * @param session the underlying JMS Session (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS methods
 	 */
-	void onMessage(Message message, Session session) throws JMSException;
+	void onMessage(M message, Session session) throws JMSException;
 
 }

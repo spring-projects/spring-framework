@@ -128,7 +128,8 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.jms.listener.SessionAwareMessageListener
  * @see org.springframework.jms.listener.AbstractMessageListenerContainer#setMessageListener
  */
-public class MessageListenerAdapter implements MessageListener, SessionAwareMessageListener, SubscriptionNameProvider {
+public class MessageListenerAdapter
+		implements MessageListener, SessionAwareMessageListener<Message>, SubscriptionNameProvider {
 
 	/**
 	 * Out-of-the-box value for the default listener method: "handleMessage".
@@ -318,6 +319,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * @param session the JMS session to operate on
 	 * @throws JMSException if thrown by JMS API methods
 	 */
+	@SuppressWarnings("unchecked")
 	public void onMessage(Message message, Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
 		// In that case, the adapter will simply act as a pass-through.
