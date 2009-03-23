@@ -22,8 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -32,9 +32,10 @@ import org.springframework.stereotype.Component;
  * by the Spring container to generate bean definitions and service requests for those beans
  * at runtime.
  * 
- * <p>Configuration is itself annotated as a {@link Component}, therefore Configuration
+ * <p>Configuration is meta-annotated as a {@link Component}, therefore Configuration
  * classes are candidates for component-scanning and may also take advantage of
- * {@link Autowire} at the field and method and constructor level.
+ * {@link Autowired} at the field, method and constructor level. Externalized values
+ * may be wired into Configuration classes using the {@link Value} annotation.
  * 
  * <p>May be used in conjunction with the {@link Lazy} annotation to indicate that all Bean
  * methods declared within this class are by default lazily initialized.
@@ -43,17 +44,17 @@ import org.springframework.stereotype.Component;
  * <ul>
  *    <li>Configuration classes must be non-final
  *    <li>Configuration classes must be non-local (may not be declared within a method)
- *    <li>Configuration classes must have a default/no-arg constructor or an
+ *    <li>Configuration classes must have a default/no-arg constructor or at least one
  *        {@link Autowired} constructor
  * </ul>
- * 
  * 
  * @author Rod Johnson
  * @author Chris Beams
  * @since 3.0
- * @see org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
  * @see Bean
  * @see Lazy
+ * @see Value
+ * @see org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
  */
 @Component
 @Target( { ElementType.TYPE })
@@ -64,6 +65,6 @@ public @interface Configuration {
 
 }
 
-// TODO: test constructor autowiring<br>
-// TODO: test private Configuration classes<br>
-// TODO: test @Lazy @Configuration<br>
+// TODO: test @Configuration constructor autowiring
+// TODO: test @Lazy @Configuration
+
