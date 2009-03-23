@@ -121,4 +121,14 @@ public class UriTemplateTests {
 		Map<String, String> expected = Collections.singletonMap("c", "cheeseburger");
 		assertEquals("Invalid match", expected, result);
 	}
+
+	@Test
+	public void matchMultipleInOneSegment() throws Exception {
+		template = new UriTemplate("/{foo}-{bar}");
+		Map<String, String> result = template.match("/12-34");
+		Map<String, String> expected = new HashMap<String, String>(2);
+		expected.put("foo", "12");
+		expected.put("bar", "34");
+		assertEquals("Invalid match", expected, result);
+	}
 }
