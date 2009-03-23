@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 
 	public LabeledEnum getLabeledEnumByCode(Class type, Comparable code) throws IllegalArgumentException {
 		Assert.notNull(code, "No enum code specified");
-		Map typeEnums = getLabeledEnumMap(type);
-		LabeledEnum codedEnum = (LabeledEnum) typeEnums.get(code);
+		Map<Comparable, LabeledEnum> typeEnums = getLabeledEnumMap(type);
+		LabeledEnum codedEnum = typeEnums.get(code);
 		if (codedEnum == null) {
 			throw new IllegalArgumentException(
 					"No enumeration with code '" + code + "'" + " of type [" + type.getName() +
@@ -94,6 +94,9 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	protected abstract Set<LabeledEnum> findLabeledEnums(Class type);
 
 
+	/**
+	 * Inner cache class that implements lazy building of LabeledEnum Maps.
+	 */
 	private class LabeledEnumCache extends CachingMapDecorator<Class, Map<Comparable, LabeledEnum>> {
 
 		public LabeledEnumCache() {
