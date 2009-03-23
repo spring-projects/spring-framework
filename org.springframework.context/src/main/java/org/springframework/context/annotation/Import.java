@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Documented;
@@ -42,5 +43,5 @@ public @interface Import {
 	/**
 	 * The {@link Configuration} class or classes to import.
 	 */
-    Class<?>[] value();
+	Class<?>[] value();
 }

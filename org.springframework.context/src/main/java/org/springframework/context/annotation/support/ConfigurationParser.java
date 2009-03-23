@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation.support;
 
 import org.springframework.asm.ClassReader;
@@ -67,7 +68,7 @@ public class ConfigurationParser {
 	 *        that this configuration class was configured via XML)
 	 */
 	public void parse(String className, String configurationId) {
-		
+
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
 
 		ClassReader configClassReader = AsmUtils.newClassReader(Util.getClassAsStream(resourcePath, classLoader));

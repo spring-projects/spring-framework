@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation.support;
 
 import static java.lang.String.*;
@@ -144,8 +145,8 @@ class ConfigurationClassVisitor extends ClassAdapter {
 	 * {@link ConfigurationClassMethodVisitor}.
 	 */
 	@Override
-	public MethodVisitor visitMethod(int modifiers, String methodName, String methodDescriptor, String arg3,
-	        String[] arg4) {
+	public MethodVisitor visitMethod(int modifiers, String methodName, String methodDescriptor,
+	                                 String arg3, String[] arg4) {
 
 		return new ConfigurationClassMethodVisitor(configClass, methodName, methodDescriptor, modifiers, classLoader);
 	}

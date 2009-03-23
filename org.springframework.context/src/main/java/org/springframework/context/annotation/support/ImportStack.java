@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation.support;
 
 import java.util.Collections;
@@ -71,7 +72,6 @@ class ImportStack extends Stack<ConfigurationClass> {
 		StringBuilder builder = new StringBuilder();
 
 		Iterator<ConfigurationClass> iterator = this.iterator();
-
 		while (iterator.hasNext()) {
 			builder.append(iterator.next().getSimpleName());
 			if (iterator.hasNext())

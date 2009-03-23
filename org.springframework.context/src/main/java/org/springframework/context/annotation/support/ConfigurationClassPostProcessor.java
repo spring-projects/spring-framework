@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation.support;
 
 import static java.lang.String.*;
@@ -146,7 +147,7 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 
 		ConfigurationEnhancer enhancer = new ConfigurationEnhancer(beanFactory);
 
-		for(String beanName : configBeanDefs.getBeanDefinitionNames()) {
+		for (String beanName : configBeanDefs.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			String configClassName = beanDef.getBeanClassName();
 			String enhancedClassName = enhancer.enhance(configClassName);
