@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author Arjen Poutsma
  */
-public class RequestMappingInfoComparatorTest {
+public class RequestMappingInfoComparatorTests {
 
 	private AnnotationMethodHandlerAdapter.RequestMappingInfoComparator comparator;
 
@@ -43,6 +43,7 @@ public class RequestMappingInfoComparatorTest {
 	private AnnotationMethodHandlerAdapter.RequestMappingInfo oneMethodOneParamInfo;
 
 	private AnnotationMethodHandlerAdapter.RequestMappingInfo oneMethodTwoParamsInfo;
+
 
 	@Before
 	public void setUp() throws NoSuchMethodException {
@@ -83,6 +84,7 @@ public class RequestMappingInfoComparatorTest {
 		assertEquals(twoMethodsInfo, infos.get(3));
 		assertEquals(emptyInfo, infos.get(4));
 	}
+
 
 	private static class MockComparator implements Comparator<String> {
 

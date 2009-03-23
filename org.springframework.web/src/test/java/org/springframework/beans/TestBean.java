@@ -104,6 +104,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private List pets;
 
+
 	public TestBean() {
 	}
 
@@ -396,9 +397,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 
-	/**
-	 * @see org.springframework.beans.ITestBean#exceptional(Throwable)
-	 */
 	public void exceptional(Throwable t) throws Throwable {
 		if (t != null) {
 			throw t;
@@ -408,16 +406,11 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
-	/**
-	 * @see org.springframework.beans.ITestBean#returnsThis()
-	 */
+
 	public Object returnsThis() {
 		return this;
 	}
 
-	/**
-	 * @see org.springframework.beans.IOther#absquatulate()
-	 */
 	public void absquatulate() {
 	}
 

@@ -372,13 +372,13 @@
 	</xsd:element>
 
 	<xsd:complexType name="listenerType">
-			<xsd:attribute name="id" type="xsd:ID">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
+		<xsd:attribute name="id" type="xsd:ID">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The unique identifier for a listener.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="destination" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
