@@ -16,16 +16,10 @@
 
 package org.springframework.expression.spel;
 
-import java.awt.*;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.expression.spel.testresources.Fruit;
 import org.springframework.expression.spel.testresources.Inventor;
-import org.springframework.expression.spel.testresources.Person;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
@@ -39,7 +33,6 @@ public class TestScenarioCreator {
 	public static StandardEvaluationContext getTestEvaluationContext() {
 		StandardEvaluationContext testContext = new StandardEvaluationContext();
 		setupRootContextObject(testContext);
-		populateContextMap(testContext);
 		populateVariables(testContext);
 		populateFunctions(testContext);
 		return testContext;
@@ -92,78 +85,6 @@ public class TestScenarioCreator {
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
 				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights" });
 		testContext.setRootObject(tesla);
-	}
-
-	/**
-	 * Create a context configuration that tests can reference into using the
-	 * @() language construct. at(context:objectName) will index a particular object within a particular context. The
-	 * 'root' context will be used for references where no context is specified, eg.
-	 * @(orange).
-	 *
-	 * @param testContext the evaluation context in which to register the new references
-	 */
-	private static void populateContextMap(StandardEvaluationContext testContext) {
-		Map<String, Map<String, Object>> contextToReferencesMap = new HashMap<String, Map<String, Object>>();
-
-		Person andy, christian, julie, stefanie, rob, rod, adrian;
-		andy = new Person("Andy");
-		christian = new Person("Christian");
-		julie = new Person("Julie");
-		stefanie = new Person("Stefanie");
-		rod = new Person("Rod");
-		rob = new Person("Rob");
-		adrian = new Person("Adrian");
-
-		Map<String, Object> people = new HashMap<String, Object>();
-		people.put("Andy", andy);
-		people.put("Christian", christian);
-		people.put("Julie", julie);
-		people.put("Stefanie", stefanie);
-
-		Map<String, Object> colors = new HashMap<String, Object>();
-		colors.put("red", Color.red);
-		colors.put("orange", Color.orange);
-		colors.put("yellow", Color.yellow);
-		colors.put("green", Color.red);
-		colors.put("blue", Color.orange);
-		contextToReferencesMap.put("colors", colors);
-
-		Map<String, Object> fruits = new HashMap<String, Object>();
-		fruits.put("orange", new Fruit("Orange", Color.orange, "orange"));
-		fruits.put("apple", new Fruit("Apple", Color.green, "green"));
-		fruits.put("banana", new Fruit("Banana", Color.yellow, "yellow"));
-
-		Map<String, Object> root = new HashMap<String, Object>();
-		root.put("orange", new Fruit("Orange", Color.orange, "orange"));
-		root.put("apple", new Fruit("Apple", Color.green, "green"));
-		root.put("banana", new Fruit("Banana", Color.yellow, "yellow"));
-		root.put("red", Color.red);
-		root.put("orange", Color.orange);
-		root.put("yellow", Color.yellow);
-		root.put("green", Color.red);
-		root.put("blue", Color.orange);
-		root.put("Andy", andy);
-		root.put("Christian", christian);
-		root.put("Julie", julie);
-		root.put("Stefanie", stefanie);
-		root.put("Adrian", adrian);
-		root.put("Rob", rob);
-		root.put("Rod", rod);
-
-		contextToReferencesMap.put("people", people);
-		contextToReferencesMap.put("fruits", fruits);
-		contextToReferencesMap.put("root", root); // used if no context
-		// specified
-
-		contextToReferencesMap.put("a.b.c", fruits);
-		java.util.Set<String> contextKeys = contextToReferencesMap.keySet();
-		for (String contextName : contextKeys) {
-			Map<String, Object> elements = contextToReferencesMap.get(contextName);
-			Set<String> objectNames = elements.keySet();
-			for (String objectName : objectNames) {
-				testContext.addReference(contextName, objectName, elements.get(objectName));
-			}
-		}
 	}
 
 	// These methods are registered in the test context and therefore accessible through function calls

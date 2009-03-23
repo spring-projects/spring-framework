@@ -47,8 +47,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private final Map<String, Object> variables = new HashMap<String, Object>();
 
-	private final Map<String, Map<String, Object>> simpleReferencesMap = new HashMap<String, Map<String, Object>>();
-
 	private final List<ConstructorResolver> constructorResolvers = new ArrayList<ConstructorResolver>();
 
 	private final List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
@@ -63,13 +61,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
-
 	public StandardEvaluationContext() {
 		this.methodResolvers.add(new ReflectiveMethodResolver());
 		this.constructorResolvers.add(new ReflectiveConstructorResolver());
 		this.propertyAccessors.add(new ReflectivePropertyResolver());
 	}
-
 
 	public void setRootObject(Object rootObject) {
 		this.rootObject = rootObject;
@@ -89,28 +85,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public Object lookupVariable(String name) {
 		return this.variables.get(name);
-	}
-
-	public void addReference(String contextName, String objectName, Object value) {
-		Map<String, Object> contextMap = this.simpleReferencesMap.get(contextName);
-		if (contextMap == null) {
-			contextMap = new HashMap<String, Object>();
-			this.simpleReferencesMap.put(contextName, contextMap);
-		}
-		contextMap.put(objectName, value);
-	}
-
-	public Object lookupReference(Object contextName, String objectName) {
-		String contextToLookup = (contextName == null ? "root" : (String) contextName);
-		// if (contextName==null) return simpleReferencesMap;
-		Map<String, Object> contextMap = this.simpleReferencesMap.get(contextToLookup);
-		if (contextMap == null) {
-			return null;
-		}
-		if (objectName == null) {
-			return contextMap;
-		}
-		return contextMap.get(objectName);
 	}
 
 	public void addConstructorResolver(ConstructorResolver resolver) {

@@ -51,16 +51,6 @@ public interface EvaluationContext {
 	 */
 	Object lookupVariable(String name);
 
-	// TODO lookupReference() - is it too expensive to return all objects within a context?
-	/**
-	 * Look up an object reference in a particular context. If no contextName is specified (null), assume the default
-	 * context. If no objectName is specified (null), return all objects in the specified context (List).
-	 * @param contextName the context in which to perform the lookup (or <code>null</code> for default context)
-	 * @param objectName the object to lookup in the context (or <code>null</code> to get all objects)
-	 * @return a specific object or List
-	 */
-	Object lookupReference(Object contextName, String objectName) throws EvaluationException;
-
 	/**
 	 * @return a list of resolvers that will be asked in turn to locate a constructor
 	 */
