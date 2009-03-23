@@ -22,6 +22,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -33,7 +34,7 @@ import java.util.WeakHashMap;
  * A simple decorator for a Map, encapsulating the workflow for caching
  * expensive values in a target Map. Supports caching weak or strong keys.
  *
- * <p>This class is also an abstract template. Caching Map implementations
+ * <p>This class is an abstract template. Caching Map implementations
  * should subclass and override the <code>create(key)</code> method which
  * encapsulates expensive creation of a new object.
  * 
@@ -41,9 +42,9 @@ import java.util.WeakHashMap;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
+public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 
-	protected static Object NULL_VALUE = new Object();
+	private static Object NULL_VALUE = new Object();
 
 
 	private final Map<K, Object> targetMap;
@@ -150,7 +151,16 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 	}
 
 	public V remove(Object key) {
-		return unwrapIfNecessary(this.targetMap.remove(key));
+		return unwrapReturnValue(this.targetMap.remove(key));
+	}
+
+	@SuppressWarnings("unchecked")
+	private V unwrapReturnValue(Object value) {
+		Object returnValue = value;
+		if (returnValue instanceof Reference) {
+			returnValue = ((Reference) returnValue).get();
+		}
+		return (returnValue == NULL_VALUE ? null : (V) returnValue);
 	}
 
 	public void putAll(Map<? extends K, ? extends V> map) {
@@ -186,8 +196,16 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 	@SuppressWarnings("unchecked")
 	private Collection<V> valuesCopy() {
 		LinkedList<V> values = new LinkedList<V>();
-		for (Object value : this.targetMap.values()) {
-			values.add(value instanceof Reference ? ((Reference<V>) value).get() : (V) value);
+		for (Iterator<Object> it = this.targetMap.values().iterator(); it.hasNext();) {
+			Object value = it.next();
+			if (value instanceof Reference) {
+				value = ((Reference) value).get();
+				if (value == null) {
+					it.remove();
+					continue;
+				}
+			}
+			values.add(value == NULL_VALUE ? null : (V) value);
 		}
 		return values;
 	}
@@ -203,10 +221,20 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private Set<Map.Entry<K, V>> entryCopy() {
 		Map<K,V> entries = new LinkedHashMap<K, V>();
-		for (Entry<K, Object> entry : this.targetMap.entrySet()) {
-			entries.put(entry.getKey(), unwrapIfNecessary(entry.getValue()));
+		for (Iterator<Entry<K, Object>> it = this.targetMap.entrySet().iterator(); it.hasNext();) {
+			Entry<K, Object> entry = it.next();
+			Object value = entry.getValue();
+			if (value instanceof Reference) {
+				value = ((Reference) value).get();
+				if (value == null) {
+					it.remove();
+					continue;
+				}
+			}
+			entries.put(entry.getKey(), value == NULL_VALUE ? null : (V) value);
 		}
 		return entries.entrySet();
 	}
@@ -223,13 +251,13 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 			newValue = NULL_VALUE;
 		}
 		else if (useWeakValue(key, value)) {
-			newValue = new WeakReference<V>(value);
+			newValue = new WeakReference<Object>(newValue);
 		}
-		return unwrapIfNecessary(this.targetMap.put(key, newValue));
+		return unwrapReturnValue(this.targetMap.put(key, newValue));
 	}
 
 	/**
-	 * Decide whether use a weak reference for the value of
+	 * Decide whether to use a weak reference for the value of
 	 * the given key-value pair.
 	 * @param key the candidate key
 	 * @param value the candidate value
@@ -252,27 +280,15 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 	@SuppressWarnings("unchecked")
 	public V get(Object key) {
 		Object value = this.targetMap.get(key);
-		if (value == null) {
-			V newVal = create((K) key);
-			if (newVal != null) {
-				put((K) key, newVal);
-			}
-			return newVal;
-		}
-		return unwrapIfNecessary(value);
-	}
-
-	@SuppressWarnings("unchecked")
-	private V unwrapIfNecessary(Object value) {
 		if (value instanceof Reference) {
-			return ((Reference<V>) value).get();
+			value = ((Reference) value).get();
 		}
-		else if (value != null) {
-			return (V) value;
+		if (value == null) {
+			V newValue = create((K) key);
+			put((K) key, newValue);
+			return newValue;
 		}
-		else {
-			return null;
-		}
+		return (value == NULL_VALUE ? null : (V) value);
 	}
 
 	/**
@@ -281,9 +297,7 @@ public class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 	 * @param key the cache key
 	 * @see #get(Object)
 	 */
-	protected V create(K key) {
-		return null;
-	}
+	protected abstract V create(K key);
 
 
 	@Override
