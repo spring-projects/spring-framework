@@ -1,4 +1,4 @@
-package test.basic;
+package org.springframework.context.annotation.configuration;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
