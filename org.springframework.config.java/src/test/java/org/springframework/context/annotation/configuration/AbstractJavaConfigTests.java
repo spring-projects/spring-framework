@@ -1,4 +1,4 @@
-package test.basic;
+package org.springframework.context.annotation.configuration;
 
 import org.junit.Before;
 

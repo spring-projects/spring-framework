@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="var" path="CLOVER_RUNTIME"/>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -8,6 +7,7 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-4.5.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-sources-4.5.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-2.1.3.jar" sourcepath="/IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-sources-2.1.3.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar" sourcepath="IVY_CACHE/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-sources-1.6.2.RELEASE.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>

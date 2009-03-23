@@ -1,5 +1,7 @@
 /**
- * Unit tests for classes in
- * {@literal org.springframework.context.annotation.support}
+ * Unit tests for support classes related to 
+ * {@link org.springframework.config.java.Configuration} class processing.
+ * 
+ * @author Chris Beams
  */
 package org.springframework.config.java.support;
