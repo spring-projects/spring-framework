@@ -33,9 +33,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.GenericApplicationContext;
 
+import test.beans.CustomScope;
 import test.beans.ITestBean;
 import test.beans.TestBean;
-import test.common.scope.CustomScope;
 
 
 

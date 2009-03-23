@@ -16,7 +16,6 @@
 package org.springframework.config.java.support;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -40,6 +39,7 @@ import org.springframework.config.java.Configuration;
  *
  * @author Chris Beams
  * @since 3.0
+ * @see Configuration
  * @see ConfigurationClassPostProcessor
  */
 public abstract class AbstractConfigurationClassProcessor {
@@ -70,14 +70,6 @@ public abstract class AbstractConfigurationClassProcessor {
 	 * @see #processConfigBeanDefinitions() 
 	 */
 	protected abstract ConfigurationParser createConfigurationParser();
-
-	/**
-	 * Validate the given model and handle any errors.  Implementations may choose to throw
-	 * {@link BeanDefinitionParsingException}, or in the case of tooling register problems
-	 * with the UI.
-	 * @param configModel {@link ConfigurationModel} to validate
-	 */
-	protected abstract void validateModel(ConfigurationModel configModel);
 
 	/**
 	 * Override the default {@link ProblemReporter}.
@@ -122,8 +114,7 @@ public abstract class AbstractConfigurationClassProcessor {
 
 		ConfigurationModel configModel = parser.getConfigurationModel();
 
-		// validate the ConfigurationModel
-		validateModel(configModel);
+		configModel.validate(problemReporter);
 
 		// read the model and create bean definitions based on its content
 		return new ConfigurationModelBeanDefinitionReader().loadBeanDefinitions(configModel);

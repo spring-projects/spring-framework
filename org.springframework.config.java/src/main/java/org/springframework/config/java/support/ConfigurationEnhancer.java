@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  * @see #enhance(String)
  * 
  * @author Chris Beams
+ * @see ConfigurationClassPostProcessor
  */
 class ConfigurationEnhancer {
 
