@@ -7,9 +7,9 @@
 
 	<context:annotation-config/>
 	
-	<bean class="org.springframework.config.java.support.ConfigurationClassPostProcessor"/>
+	<bean class="org.springframework.context.annotation.support.ConfigurationClassPostProcessor"/>
 	
-	<bean class="test.basic.AutowiredConfigurationTests$AutowiredConfig"/>
-	<bean class="test.basic.AutowiredConfigurationTests$ColorConfig"/>
+	<bean class="org.springframework.context.annotation.configuration.AutowiredConfigurationTests$AutowiredConfig"/>
+	<bean class="org.springframework.context.annotation.configuration.AutowiredConfigurationTests$ColorConfig"/>
 	
 </beans>

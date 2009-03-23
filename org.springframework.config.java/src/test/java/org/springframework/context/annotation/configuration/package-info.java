@@ -1,10 +1,10 @@
 /**
- * Integration tests for {@link org.springframework.config.java.Configuration}
+ * Integration tests for {@link org.springframework.context.annotation.Configuration}
  * class processing.
  * 
  * @author Chris Beams
- * @see org.springframework.config.java.Configuration
- * @see org.springframework.config.java.Bean
- * @see org.springframework.config.java.support.ConfigurationClassPostProcessor
+ * @see org.springframework.context.annotation.Configuration
+ * @see org.springframework.context.annotation.Bean
+ * @see org.springframework.context.annotation.support.ConfigurationClassPostProcessor
  */
 package org.springframework.context.annotation.configuration;
