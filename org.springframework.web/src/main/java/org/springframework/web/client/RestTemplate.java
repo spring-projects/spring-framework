@@ -126,7 +126,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	}
 
 	/**
-	 * Returnsthe message body converters. These converters are used to convert
+	 * Returns the message body converters. These converters are used to convert
 	 * from and to HTTP requests and responses.
 	 */
 	public HttpMessageConverter<?>[] getMessageConverters() {
