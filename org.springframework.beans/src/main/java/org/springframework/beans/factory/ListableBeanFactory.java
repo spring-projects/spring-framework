@@ -209,7 +209,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
 	<T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
-	    throws BeansException;
+			throws BeansException;
 
 	/**
 	 * Find all beans whose <code>Class</code> has the supplied {@link java.lang.annotation.Annotation} type.
