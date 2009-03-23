@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -43,8 +45,8 @@ import org.springframework.util.Assert;
 public abstract class GenericTypeResolver {
 
 	/** Cache from Class to TypeVariable Map */
-	private static final Map<Class, Map<TypeVariable, Type>> typeVariableCache =
-			Collections.synchronizedMap(new WeakHashMap<Class, Map<TypeVariable, Type>>());
+	private static final Map<Class, Reference<Map<TypeVariable, Type>>> typeVariableCache =
+			Collections.synchronizedMap(new WeakHashMap<Class, Reference<Map<TypeVariable, Type>>>());
 
 
 	/**
@@ -152,7 +154,8 @@ public abstract class GenericTypeResolver {
 	 * enclosing types and interfaces.
 	 */
 	static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
-		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
+		Reference<Map<TypeVariable, Type>> ref = typeVariableCache.get(clazz);
+		Map<TypeVariable, Type> typeVariableMap = (ref != null ? ref.get() : null);
 
 		if (typeVariableMap == null) {
 			typeVariableMap = new HashMap<TypeVariable, Type>();
@@ -184,7 +187,7 @@ public abstract class GenericTypeResolver {
 				type = type.getEnclosingClass();
 			}
 
-			typeVariableCache.put(clazz, typeVariableMap);
+			typeVariableCache.put(clazz, new WeakReference<Map<TypeVariable, Type>>(typeVariableMap));
 		}
 
 		return typeVariableMap;
