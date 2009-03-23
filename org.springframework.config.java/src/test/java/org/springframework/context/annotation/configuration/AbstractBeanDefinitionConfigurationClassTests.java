@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.config.java.Bean;
-import org.springframework.config.java.Configuration;
-import org.springframework.config.java.support.ConfigurationClassPostProcessor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
 
 
 /**
