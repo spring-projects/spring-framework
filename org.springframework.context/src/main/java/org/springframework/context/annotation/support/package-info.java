@@ -15,9 +15,11 @@
  */
 
 /**
- * Unit tests for support classes related to 
+ * Supporting infrastructure for
  * {@link org.springframework.context.annotation.Configuration} class processing.
  * 
  * @author Chris Beams
+ * @see ConfigurationClassPostProcessor
+ * @see ConfigurationParser
  */
 package org.springframework.context.annotation.support;
