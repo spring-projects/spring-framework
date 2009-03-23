@@ -21,8 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.annotation.Scope;
-
 
 /**
  * Indicates that a method produces a bean to be managed by the Spring container. The
@@ -59,6 +57,9 @@ import org.springframework.context.annotation.Scope;
  * @author Chris Beams
  * @since 3.0
  * @see Configuration
+ * @see Lazy
+ * @see Primary
+ * @see Scope
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -98,6 +99,5 @@ public @interface Bean {
 
 // TODO: test @Lazy @Bean
 // TODO: test @Primary @Bean
-// TODO: test Bean alias scenarios
 // TODO: test init/destroy method scenarios
 // TODO: test dependsOn
