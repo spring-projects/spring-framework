@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation.support;
 
 import static java.lang.String.*;
@@ -41,6 +42,7 @@ import org.springframework.util.Assert;
  * @see ConfigurationClassVisitor
  */
 class ImportAnnotationVisitor extends AnnotationAdapter {
+
 	private final ArrayList<String> classesToImport = new ArrayList<String>();
 	private final ConfigurationModel model;
 	private final ProblemReporter problemReporter;

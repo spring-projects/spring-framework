@@ -67,5 +67,5 @@ public @interface Scope {
 	 * only in conjunction with a non-singleton, non-prototype {@link #value()}.
 	 */
 	ScopedProxyMode proxyMode() default ScopedProxyMode.NO;
-	
+
 }

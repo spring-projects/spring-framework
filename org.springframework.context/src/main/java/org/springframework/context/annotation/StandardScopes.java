@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation;
 
 
@@ -25,6 +26,7 @@ package org.springframework.context.annotation;
  * 
  * @author Chris Beams
  * @since 3.0
+ * @see Scope
  */
 public class StandardScopes {
 
@@ -39,5 +41,3 @@ public class StandardScopes {
 	public static final String SESSION = "session";
 
 }
-
-// TODO: move StandardScopes to appropriate package

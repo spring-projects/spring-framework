@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation.support;
 
 import static java.lang.String.*;
@@ -63,10 +64,11 @@ class ConfigurationModelBeanDefinitionReader {
 
 
 	/**
-	 * Reads {@code model}, registering bean definitions with {@link #registry} based on
-	 * its contents.
+	 * Reads {@code configurationModel}, registering bean definitions with {@link #registry}
+	 * based on its contents.
 	 * 
-	 * @return number of bean definitions generated
+	 * @return new {@link BeanDefinitionRegistry} containing {@link BeanDefinition}s read
+	 *         from the model.
 	 */
 	public BeanDefinitionRegistry loadBeanDefinitions(ConfigurationModel configurationModel) {
 		registry = new SimpleBeanDefinitionRegistry();
@@ -130,9 +132,6 @@ class ConfigurationModelBeanDefinitionReader {
 		beanDef.setFactoryMethodName(method.getName());
 
 		Bean bean = method.getRequiredAnnotation(Bean.class);
-
-		// TODO: prune defaults
-		//Configuration defaults = configClass.getMetadata();
 
 		// consider scoping
 		Scope scope = method.getAnnotation(Scope.class);

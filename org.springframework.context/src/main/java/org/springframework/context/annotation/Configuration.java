@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Documented;
@@ -64,7 +65,3 @@ import org.springframework.stereotype.Component;
 public @interface Configuration {
 
 }
-
-// TODO: test @Configuration constructor autowiring
-// TODO: test @Lazy @Configuration
-
