@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @see MutableAnnotation
- * @see MutableAnnotationUtils
+ * @see AsmUtils#createMutableAnnotation
  */
 final class MutableAnnotationInvocationHandler implements InvocationHandler {
 

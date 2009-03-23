@@ -17,7 +17,7 @@
 package org.springframework.context.annotation.support;
 
 import static java.lang.String.*;
-import static org.springframework.context.annotation.support.Util.*;
+import static org.springframework.context.annotation.support.AsmUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

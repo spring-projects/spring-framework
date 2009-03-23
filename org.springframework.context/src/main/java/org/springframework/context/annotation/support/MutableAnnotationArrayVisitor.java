@@ -16,8 +16,7 @@
 
 package org.springframework.context.annotation.support;
 
-import static org.springframework.context.annotation.support.MutableAnnotationUtils.*;
-import static org.springframework.context.annotation.support.Util.*;
+import static org.springframework.context.annotation.support.AsmUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -32,7 +31,7 @@ import org.springframework.asm.AnnotationVisitor;
  *
  * @author Chris Beams
  * @see MutableAnnotation
- * @see MutableAnnotationUtils
+ * @see AsmUtils#createMutableAnnotation
  */
 class MutableAnnotationArrayVisitor extends AnnotationAdapter {
 
@@ -43,7 +42,7 @@ class MutableAnnotationArrayVisitor extends AnnotationAdapter {
 	private final ClassLoader classLoader;
 
 	public MutableAnnotationArrayVisitor(MutableAnnotation mutableAnno, String attribName, ClassLoader classLoader) {
-		super(AsmUtils.EMPTY_VISITOR);
+		super(AsmUtils.ASM_EMPTY_VISITOR);
 
 		this.mutableAnno = mutableAnno;
 		this.attribName = attribName;
@@ -57,13 +56,13 @@ class MutableAnnotationArrayVisitor extends AnnotationAdapter {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String na, String annoTypeDesc) {
-		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+		String annoTypeName = convertAsmTypeDescriptorToClassName(annoTypeDesc);
 		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
 
 		if (annoType == null)
 			return super.visitAnnotation(na, annoTypeDesc);
 
-		Annotation anno = createMutableAnnotation(annoType);
+		Annotation anno = createMutableAnnotation(annoType, classLoader);
 		values.add(anno);
 		return new MutableAnnotationVisitor(anno, classLoader);
 	}

@@ -37,7 +37,7 @@ class AnnotationAdapter implements AnnotationVisitor {
 	 * <var>delegate</var>.
 	 * 
 	 * @param delegate In most cases, the delegate will simply be
-	 *        {@link AsmUtils#EMPTY_VISITOR}
+	 *        {@link AsmUtils#ASM_EMPTY_VISITOR}
 	 */
 	public AnnotationAdapter(AnnotationVisitor delegate) {
 		this.delegate = delegate;

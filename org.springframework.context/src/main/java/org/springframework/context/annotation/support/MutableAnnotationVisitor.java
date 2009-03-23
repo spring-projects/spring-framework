@@ -16,8 +16,7 @@
 
 package org.springframework.context.annotation.support;
 
-import static org.springframework.context.annotation.support.MutableAnnotationUtils.*;
-import static org.springframework.context.annotation.support.Util.*;
+import static org.springframework.context.annotation.support.AsmUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -34,7 +33,7 @@ import org.springframework.util.Assert;
  * @author Chris Beams
  * @see MutableAnnotation
  * @see MutableAnnotationInvocationHandler
- * @see MutableAnnotationUtils
+ * @see AsmUtils#createMutableAnnotation
  */
 class MutableAnnotationVisitor implements AnnotationVisitor {
 
@@ -52,7 +51,7 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 	 * @throws IllegalArgumentException if <var>mutableAnno</var> is not of type
 	 *         {@link MutableAnnotation}
 	 * 
-	 * @see MutableAnnotationUtils#createMutableAnnotation(Class)
+	 * @see AsmUtils#createMutableAnnotation
 	 */
 	public MutableAnnotationVisitor(Annotation mutableAnno, ClassLoader classLoader) {
 		Assert.isInstanceOf(MutableAnnotation.class, mutableAnno, "annotation must be mutable");
@@ -86,7 +85,7 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 
 	@SuppressWarnings("unchecked")
 	public void visitEnum(String attribName, String enumTypeDescriptor, String strEnumValue) {
-		String enumClassName = AsmUtils.convertTypeDescriptorToClassName(enumTypeDescriptor);
+		String enumClassName = convertAsmTypeDescriptorToClassName(enumTypeDescriptor);
 
 		Class<? extends Enum> enumClass = loadToolingSafeClass(enumClassName, classLoader);
 
@@ -98,13 +97,13 @@ class MutableAnnotationVisitor implements AnnotationVisitor {
 	}
 
 	public AnnotationVisitor visitAnnotation(String attribName, String attribAnnoTypeDesc) {
-		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(attribAnnoTypeDesc);
+		String annoTypeName = convertAsmTypeDescriptorToClassName(attribAnnoTypeDesc);
 		Class<? extends Annotation> annoType = loadToolingSafeClass(annoTypeName, classLoader);
 
 		if (annoType == null)
-			return AsmUtils.EMPTY_VISITOR.visitAnnotation(attribName, attribAnnoTypeDesc);
+			return ASM_EMPTY_VISITOR.visitAnnotation(attribName, attribAnnoTypeDesc);
 
-		Annotation anno = createMutableAnnotation(annoType);
+		Annotation anno = createMutableAnnotation(annoType, classLoader);
 
 		try {
 			Field attribute = mutableAnno.getClass().getField(attribName);

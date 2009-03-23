@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation.support;
 
+import static org.springframework.context.annotation.support.AsmUtils.*;
+
 import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -71,7 +73,7 @@ public class ConfigurationParser {
 
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
 
-		ClassReader configClassReader = AsmUtils.newClassReader(Util.getClassAsStream(resourcePath, classLoader));
+		ClassReader configClassReader = newAsmClassReader(getClassAsStream(resourcePath, classLoader));
 
 		ConfigurationClass configClass = new ConfigurationClass();
 		configClass.setBeanName(configurationId);
