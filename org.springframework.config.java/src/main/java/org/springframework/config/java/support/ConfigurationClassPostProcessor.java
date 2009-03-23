@@ -31,6 +31,7 @@ import org.springframework.config.java.Bean;
 import org.springframework.config.java.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
@@ -122,7 +123,7 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 			if (beanDef.isAbstract() && !includeAbstractBeanDefs)
 				continue;
 
-			if (isConfigClass(beanDef))
+			if (isConfigurationClassBeanDefinition(beanDef))
 				configBeanDefs.registerBeanDefinition(beanName, beanDef);
 		}
 
@@ -130,20 +131,10 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	}
 
 	/**
-	 * Validates the given <var>model</var>. Any problems found are delegated
-	 * to {@link #getProblemReporter()}.
-	 */
-	@Override
-	protected void validateModel(ConfigurationModel model) {
-		model.validate(this.getProblemReporter());
-	}
-
-	/**
 	 * Post-processes a BeanFactory in search of Configuration class BeanDefinitions; any
 	 * candidates are then enhanced by a {@link ConfigurationEnhancer}. Candidate status is
 	 * determined by BeanDefinition attribute metadata.
 	 * 
-	 * @author Chris Beams
 	 * @see ConfigurationEnhancer
 	 * @see BeanFactoryPostProcessor
 	 */
@@ -171,12 +162,13 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	/**
 	 * Tests for the presence of CGLIB on the classpath by trying to
 	 * classload {@link #CGLIB_TEST_CLASS}.
+	 * @throws IllegalStateException if CGLIB is not present.
 	 */
 	private void assertCglibIsPresent(BeanDefinitionRegistry configBeanDefs) {
 		try {
 			Class.forName(CGLIB_TEST_CLASS);
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("CGLIB is required to process @Configuration classes. " +
+			throw new IllegalStateException("CGLIB is required to process @Configuration classes. " +
 					"Either add CGLIB v2.2.3 to the classpath or remove the following " +
 					"@Configuration bean definitions: ["
 					+ StringUtils.arrayToCommaDelimitedString(configBeanDefs.getBeanDefinitionNames()) + "]");
@@ -184,23 +176,30 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	}
 
 	/**
-	 * @return whether the BeanDefinition's beanClass is Configuration-annotated,
-	 * false if no beanClass is specified.
+	 * @return whether the BeanDefinition's beanClass (or its ancestry) is
+	 * {@link Configuration}-annotated, false if no beanClass is specified.
 	 */
-	private static boolean isConfigClass(BeanDefinition beanDef) {
+	private static boolean isConfigurationClassBeanDefinition(BeanDefinition beanDef) {
 
 		String className = beanDef.getBeanClassName();
 
-		if(className == null)
-			return false;
+		while (className != null && !(className.equals(Object.class.getName()))) {
+			try {
+				MetadataReader metadataReader =
+					new SimpleMetadataReaderFactory().getMetadataReader(className);
+				AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+				ClassMetadata classMetadata = metadataReader.getClassMetadata();
 
-		try {
-			MetadataReader metadataReader = new SimpleMetadataReaderFactory().getMetadataReader(className);
-			AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
-			return annotationMetadata.hasAnnotation(Configuration.class.getName());
-		} catch (IOException ex) {
-			throw new RuntimeException(ex); 
+				if (annotationMetadata.hasAnnotation(Configuration.class.getName()))
+					return true;
+
+				className = classMetadata.getSuperClassName();
+			} catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
 		}
+
+		return false;
 	}
 
 }

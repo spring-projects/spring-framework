@@ -86,7 +86,15 @@ public abstract class AopUtils {
 	 * @param clazz the class to check
 	 */
 	public static boolean isCglibProxyClass(Class clazz) {
-		return (clazz != null && clazz.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
+		return (clazz != null && isCglibProxyClassName(clazz.getName()));
+	}
+
+	/**
+	 * Check whether the specified class name is a CGLIB-generated class.
+	 * @param className the class name to check
+	 */
+	public static boolean isCglibProxyClassName(String className) {
+		return (className != null && className.contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
 	}
 
 	/**
