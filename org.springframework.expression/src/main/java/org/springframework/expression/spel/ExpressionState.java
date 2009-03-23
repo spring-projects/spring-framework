@@ -91,10 +91,6 @@ public class ExpressionState {
 		return this.relatedContext.lookupVariable(name);
 	}
 
-	public Object lookupReference(Object contextName, String objectName) throws EvaluationException {
-		return this.relatedContext.lookupReference(contextName, objectName);
-	}
-
 	public TypeComparator getTypeComparator() {
 		return this.relatedContext.getTypeComparator();
 	}
