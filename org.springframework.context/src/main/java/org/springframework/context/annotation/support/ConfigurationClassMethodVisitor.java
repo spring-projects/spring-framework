@@ -17,8 +17,6 @@
 package org.springframework.context.annotation.support;
 
 import static org.springframework.context.annotation.support.AsmUtils.*;
-import static org.springframework.context.annotation.support.MutableAnnotationUtils.*;
-import static org.springframework.context.annotation.support.Util.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.lang.annotation.Annotation;
@@ -62,7 +60,7 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	 */
 	public ConfigurationClassMethodVisitor(ConfigurationClass configClass, String methodName,
 	                                       String methodDescriptor, int modifiers, ClassLoader classLoader) {
-		super(AsmUtils.EMPTY_VISITOR);
+		super(ASM_EMPTY_VISITOR);
 
 		this.configClass = configClass;
 		this.methodName = methodName;
@@ -77,14 +75,14 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	 */
 	@Override
 	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
-		String annoClassName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+		String annoClassName = convertAsmTypeDescriptorToClassName(annoTypeDesc);
 
 		Class<? extends Annotation> annoClass = loadToolingSafeClass(annoClassName, classLoader);
 
 		if (annoClass == null)
 			return super.visitAnnotation(annoTypeDesc, visible);
 
-		Annotation annotation = createMutableAnnotation(annoClass);
+		Annotation annotation = createMutableAnnotation(annoClass, classLoader);
 
 		annotations.add(annotation);
 
@@ -126,11 +124,11 @@ class ConfigurationClassMethodVisitor extends MethodAdapter {
 	 * that type is an interface.
 	 */
 	private ModelClass initReturnTypeFromMethodDescriptor(String methodDescriptor) {
-		final ModelClass returnType = new ModelClass(getReturnTypeFromMethodDescriptor(methodDescriptor));
+		final ModelClass returnType = new ModelClass(getReturnTypeFromAsmMethodDescriptor(methodDescriptor));
 
 		// detect whether the return type is an interface
-		newClassReader(convertClassNameToResourcePath(returnType.getName()), classLoader).accept(
-				new ClassAdapter(AsmUtils.EMPTY_VISITOR) {
+		newAsmClassReader(convertClassNameToResourcePath(returnType.getName()), classLoader).accept(
+				new ClassAdapter(ASM_EMPTY_VISITOR) {
 					@Override
 					public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
 						returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);

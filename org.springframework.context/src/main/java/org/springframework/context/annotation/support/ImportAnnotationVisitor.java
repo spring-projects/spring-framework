@@ -49,7 +49,7 @@ class ImportAnnotationVisitor extends AnnotationAdapter {
 	private final ClassLoader classLoader;
 
 	public ImportAnnotationVisitor(ConfigurationModel model, ProblemReporter problemReporter, ClassLoader classLoader) {
-		super(AsmUtils.EMPTY_VISITOR);
+		super(ASM_EMPTY_VISITOR);
 		this.model = model;
 		this.problemReporter = problemReporter;
 		this.classLoader = classLoader;
@@ -60,7 +60,7 @@ class ImportAnnotationVisitor extends AnnotationAdapter {
 		Assert.isTrue("value".equals(attribName),
 				format("expected 'value' attribute, got unknown '%s' attribute", attribName));
 
-		return new AnnotationAdapter(AsmUtils.EMPTY_VISITOR) {
+		return new AnnotationAdapter(ASM_EMPTY_VISITOR) {
 			@Override
 			public void visit(String na, Object type) {
 				Assert.isInstanceOf(Type.class, type);
@@ -80,7 +80,7 @@ class ImportAnnotationVisitor extends AnnotationAdapter {
 	private void processClassToImport(String classToImport) {
 		ConfigurationClass configClass = new ConfigurationClass();
 
-		ClassReader reader = newClassReader(convertClassNameToResourcePath(classToImport), classLoader);
+		ClassReader reader = newAsmClassReader(convertClassNameToResourcePath(classToImport), classLoader);
 
 		reader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader), false);
 

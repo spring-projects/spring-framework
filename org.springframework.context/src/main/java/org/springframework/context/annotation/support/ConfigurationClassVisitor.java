@@ -17,7 +17,7 @@
 package org.springframework.context.annotation.support;
 
 import static java.lang.String.*;
-import static org.springframework.context.annotation.support.MutableAnnotationUtils.*;
+import static org.springframework.context.annotation.support.AsmUtils.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.util.HashMap;
@@ -60,7 +60,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 	public ConfigurationClassVisitor(ConfigurationClass configClass, ConfigurationModel model,
 	                                 ProblemReporter problemReporter, ClassLoader classLoader) {
-		super(AsmUtils.EMPTY_VISITOR);
+		super(ASM_EMPTY_VISITOR);
 		this.configClass = configClass;
 		this.model = model;
 		this.problemReporter = problemReporter;
@@ -101,7 +101,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 		ConfigurationClassVisitor visitor =
 			new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader);
 
-		ClassReader reader = AsmUtils.newClassReader(superTypeDesc, classLoader);
+		ClassReader reader = newAsmClassReader(superTypeDesc, classLoader);
 		reader.accept(visitor, false);
 	}
 
@@ -118,10 +118,10 @@ class ConfigurationClassVisitor extends ClassAdapter {
 	 */
 	@Override
 	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
-		String annoTypeName = AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+		String annoTypeName = convertAsmTypeDescriptorToClassName(annoTypeDesc);
 
 		if (Configuration.class.getName().equals(annoTypeName)) {
-			Configuration mutableConfiguration = createMutableAnnotation(Configuration.class);
+			Configuration mutableConfiguration = createMutableAnnotation(Configuration.class, classLoader);
 			configClass.setConfigurationAnnotation(mutableConfiguration);
 			return new MutableAnnotationVisitor(mutableConfiguration, classLoader);
 		}
@@ -182,7 +182,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			new ConfigurationClassVisitor(innerConfigClass, new ConfigurationModel(), problemReporter, classLoader);
 		ccVisitor.setProcessInnerClasses(false);
 
-		ClassReader reader = AsmUtils.newClassReader(name, classLoader);
+		ClassReader reader = newAsmClassReader(name, classLoader);
 		reader.accept(ccVisitor, false);
 
 		if (innerClasses.containsKey(outerName))

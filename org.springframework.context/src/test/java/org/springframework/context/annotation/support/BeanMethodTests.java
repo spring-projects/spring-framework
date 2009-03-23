@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.context.annotation.ScopedProxyMode.*;
 import static org.springframework.context.annotation.StandardScopes.*;
-import static org.springframework.context.annotation.support.MutableAnnotationUtils.*;
+import static org.springframework.context.annotation.support.AsmUtils.*;
 
 import java.lang.reflect.Modifier;
 
@@ -30,10 +30,8 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.support.BeanMethod;
-import org.springframework.context.annotation.support.ConfigurationClass;
-import org.springframework.context.annotation.support.ModelClass;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ClassUtils;
 
 
 /**
@@ -45,7 +43,7 @@ public class BeanMethodTests {
 	
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 	private String beanName = "foo";
-	private Bean beanAnno = createMutableAnnotation(Bean.class);
+	private Bean beanAnno = createMutableAnnotation(Bean.class, ClassUtils.getDefaultClassLoader());
 	private ModelClass returnType = new ModelClass("FooType");
 	private ConfigurationClass declaringClass = new ConfigurationClass();
 	{ declaringClass.setName("test.Config"); }

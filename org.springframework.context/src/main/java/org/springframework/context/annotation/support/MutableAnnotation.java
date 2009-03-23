@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
  * 
  * <p>Note: the visibility of this interface would be reduced to package-private save for an
  * obscure restriction of JDK dynamic proxies.
- * {@link MutableAnnotationUtils#createMutableAnnotation(Class)} creates a proxy based on
+ * {@link AsmUtils#createMutableAnnotation} creates a proxy based on
  * two interfaces: this one, and whatever annotation is currently being parsed. The
  * restriction is that both interfaces may not be package-private if they are in separate
  * packages. In order to avoid unnecessarily restricting the visibility options for
@@ -39,9 +39,10 @@ import org.springframework.context.annotation.Configuration;
  * not to use this annotation outside this package.
  * 
  * @author Chris Beams
- * @see MutableAnnotationUtils
+ * @since 3.0
  * @see MutableAnnotationVisitor
  * @see MutableAnnotationInvocationHandler
+ * @see AsmUtils#createMutableAnnotation
  */
 public interface MutableAnnotation {
 
