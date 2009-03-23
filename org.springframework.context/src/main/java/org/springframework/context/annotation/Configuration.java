@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
 import org.springframework.stereotype.Component;
 
 
@@ -52,7 +51,7 @@ import org.springframework.stereotype.Component;
  * @author Rod Johnson
  * @author Chris Beams
  * @since 3.0
- * @see ConfigurationClassPostProcessor
+ * @see org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
  * @see Bean
  * @see Lazy
  */
