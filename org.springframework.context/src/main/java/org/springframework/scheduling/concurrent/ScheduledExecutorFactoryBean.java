@@ -23,9 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.support.DelegatingExceptionProofRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -59,12 +57,14 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setPoolSize
+ * @see #setThreadFactory
  * @see ScheduledExecutorTask
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
  */
 public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
-		implements FactoryBean<ScheduledExecutorService>, InitializingBean, DisposableBean {
+		implements FactoryBean<ScheduledExecutorService> {
 
 	private int poolSize = 1;
 
@@ -144,10 +144,8 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	/**
 	 * Create a new {@link ScheduledExecutorService} instance.
-	 * Called by <code>afterPropertiesSet</code>.
 	 * <p>The default implementation creates a {@link ScheduledThreadPoolExecutor}.
-	 * Can be overridden in subclasses to provide custom
-	 * {@link ScheduledExecutorService} instances.
+	 * Can be overridden in subclasses to provide custom {@link ScheduledExecutorService} instances.
 	 * @param poolSize the specified pool size
 	 * @param threadFactory the ThreadFactory to use
 	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use

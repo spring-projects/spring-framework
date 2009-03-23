@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,17 +69,12 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * Find and return the first AspectJ annotation on the given method
 	 * (there <i>should</i> only be one anyway...)
 	 */
-	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method aMethod) {
-		Class<? extends Annotation>[] classesToLookFor = (Class<? extends Annotation>[]) new Class[] {
-					Before.class, 
-					Around.class, 
-					After.class, 
-					AfterReturning.class, 
-					AfterThrowing.class, 
-					Pointcut.class
-				};
+	@SuppressWarnings("unchecked")
+	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
+		Class<? extends Annotation>[] classesToLookFor = new Class[] {
+				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
 		for (Class<? extends Annotation> c : classesToLookFor) {
-			AspectJAnnotation foundAnnotation = findAnnotation(aMethod, c);
+			AspectJAnnotation foundAnnotation = findAnnotation(method, c);
 			if (foundAnnotation != null) {
 				return foundAnnotation;
 			}
@@ -199,7 +194,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		// come first in the advice declaration.
 		int typeOffset = paramTypes.length - argNames.length;
 		for (int i = 0; i < ret.length; i++) {
-			ret[i] = paramTypes[i+typeOffset];			
+			ret[i] = paramTypes[i + typeOffset];
 		}
 		return ret;
 	}
@@ -212,7 +207,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		AtAfterReturning,
 		AtAfterThrowing,
 		AtAround
-	};
+	}
 
 
 	/**
@@ -265,8 +260,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private String resolveExpression() throws Exception {
 			String expression = null;
-			for (int i = 0; i < EXPRESSION_PROPERTIES.length; i++) {
-				String methodName = EXPRESSION_PROPERTIES[i];
+			for (String methodName : EXPRESSION_PROPERTIES) {
 				Method method;
 				try {
 					method = this.annotation.getClass().getDeclaredMethod(methodName);

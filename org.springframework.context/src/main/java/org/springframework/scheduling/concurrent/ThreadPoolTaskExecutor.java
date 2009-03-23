@@ -235,12 +235,6 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	}
 
 
-	/**
-	 * Implementation of both the JDK 1.5 Executor interface and the Spring
-	 * TaskExecutor interface, delegating to the ThreadPoolExecutor instance.
-	 * @see java.util.concurrent.Executor#execute(Runnable)
-	 * @see org.springframework.core.task.TaskExecutor#execute(Runnable)
-	 */
 	public void execute(Runnable task) {
 		Executor executor = getThreadPoolExecutor();
 		try {
