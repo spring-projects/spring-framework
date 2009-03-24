@@ -45,6 +45,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testRelOperatorGE02() {
 		evaluate("3 >= 3", "true", Boolean.class);
 	}
+	
 
 	// public void testRelOperatorsIn01() {
 	// evaluate("3 in {1,2,3,4,5}", "true", Boolean.class);
@@ -137,7 +138,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testPropertiesNested02() {
 		evaluate("placeOfBirth.doubleIt(12)", "24", Integer.class);
 	}
-
+	
 	// methods
 	public void testMethods01() {
 		evaluate("echo(12)", "12", String.class);
@@ -454,4 +455,5 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndAskForReturnType("3*4+5", "17", String.class);
 	}
 
+	
 }

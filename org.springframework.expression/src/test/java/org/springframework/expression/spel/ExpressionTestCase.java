@@ -334,7 +334,7 @@ public abstract class ExpressionTestCase extends TestCase {
 			}
 		}
 	}
-
+	
 	/**
 	 * Produce a nice string representation of the input object.
 	 *
