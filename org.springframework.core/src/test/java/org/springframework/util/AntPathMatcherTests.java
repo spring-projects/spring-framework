@@ -43,7 +43,7 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void standard() {
+	public void match() {
 		// test exact matching
 		assertTrue(pathMatcher.match("test", "test"));
 		assertTrue(pathMatcher.match("/test", "/test"));
@@ -123,6 +123,8 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.match("/x/x/**/bla", "/x/x/x/"));
 
 		assertTrue(pathMatcher.match("", ""));
+
+		assertTrue(pathMatcher.match("/{bla}.*", "/testing.html"));
 	}
 
 	@Test
@@ -319,8 +321,17 @@ public class AntPathMatcherTests {
 		result = pathMatcher.extractUriTemplateVariables("/{page}.html", "/42.html");
 		assertEquals(Collections.singletonMap("page", "42"), result);
 
+		result = pathMatcher.extractUriTemplateVariables("/{page}.*", "/42.html");
+		assertEquals(Collections.singletonMap("page", "42"), result);
+
 		result = pathMatcher.extractUriTemplateVariables("/A-{B}-C", "/A-b-C");
 		assertEquals(Collections.singletonMap("B", "b"), result);
+
+		result = pathMatcher.extractUriTemplateVariables("/{name}.{extension}", "/test.html");
+		expected = new LinkedHashMap<String, String>();
+		expected.put("name", "test");
+		expected.put("extension", "html");
+		assertEquals(expected, result);
 	}
 
 	@Test
