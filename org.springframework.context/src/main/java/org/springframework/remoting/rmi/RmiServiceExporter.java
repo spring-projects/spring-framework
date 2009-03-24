@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,17 +352,19 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			if (logger.isInfoEnabled()) {
 				logger.info("Looking for RMI registry at port '" + registryPort + "', using custom socket factory");
 			}
-			try {
-				// Retrieve existing registry.
-				Registry reg = LocateRegistry.getRegistry(null, registryPort, clientSocketFactory);
-				testRegistry(reg);
-				return reg;
-			}
-			catch (RemoteException ex) {
-				logger.debug("RMI registry access threw exception", ex);
-				logger.info("Could not detect RMI registry - creating new one");
-				// Assume no registry found -> create new one.
-				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
+			synchronized (LocateRegistry.class) {
+				try {
+					// Retrieve existing registry.
+					Registry reg = LocateRegistry.getRegistry(null, registryPort, clientSocketFactory);
+					testRegistry(reg);
+					return reg;
+				}
+				catch (RemoteException ex) {
+					logger.debug("RMI registry access threw exception", ex);
+					logger.info("Could not detect RMI registry - creating new one");
+					// Assume no registry found -> create new one.
+					return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
+				}
 			}
 		}
 
@@ -385,17 +387,19 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		if (logger.isInfoEnabled()) {
 			logger.info("Looking for RMI registry at port '" + registryPort + "'");
 		}
-		try {
-			// Retrieve existing registry.
-			Registry reg = LocateRegistry.getRegistry(registryPort);
-			testRegistry(reg);
-			return reg;
-		}
-		catch (RemoteException ex) {
-			logger.debug("RMI registry access threw exception", ex);
-			logger.info("Could not detect RMI registry - creating new one");
-			// Assume no registry found -> create new one.
-			return LocateRegistry.createRegistry(registryPort);
+		synchronized (LocateRegistry.class) {
+			try {
+				// Retrieve existing registry.
+				Registry reg = LocateRegistry.getRegistry(registryPort);
+				testRegistry(reg);
+				return reg;
+			}
+			catch (RemoteException ex) {
+				logger.debug("RMI registry access threw exception", ex);
+				logger.info("Could not detect RMI registry - creating new one");
+				// Assume no registry found -> create new one.
+				return LocateRegistry.createRegistry(registryPort);
+			}
 		}
 	}
 
