@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.ServletException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
@@ -81,6 +81,17 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("test-42-21", response.getContentAsString());
 	}
 
+	@Test
+	public void extension() throws Exception {
+		initServlet(SimpleUriTemplateController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42.xml");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42", response.getContentAsString());
+
+	}
+
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -103,8 +114,8 @@ public class UriTemplateServletAnnotationControllerTests {
 	public static class SimpleUriTemplateController {
 
 		@RequestMapping("/{root}")
-		public void handle(@PathVariable("root") String root, Writer writer) throws IOException {
-			assertEquals("Invalid path variable value", "42", root);
+		public void handle(@PathVariable("root") int root, Writer writer) throws IOException {
+			assertEquals("Invalid path variable value", 42, root);
 			writer.write("test-" + root);
 		}
 
