@@ -1,12 +1,28 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-    <parent>
-	    <groupId>org.springframework</groupId>
-	    <artifactId>org.springframework.parent</artifactId>
-	    <version>3.0-M1-SNAPSHOT</version>
-    </parent>
-	<artifactId>org.springframework.agent</artifactId>
-	<packaging>jar</packaging>
-	<name>Spring Framework: Agent</name>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring-instrument</artifactId>
+  <packaging>jar</packaging>
+  <version>3.0.0.M3</version>
+  <parent>
+    <groupId>org.springframework</groupId>
+    <artifactId>org.springframework.parent</artifactId>
+    <relativePath>../build-spring-framework</relativePath>
+    <version>3.0.0.M3</version>
+  </parent>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <junitArtifactName>junit:junit</junitArtifactName>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
