@@ -1,7 +1,9 @@
 package org.springframework.expression.spel.testresources;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -14,7 +16,10 @@ public class Inventor {
 	private String[] inventions;
 	public String randomField;
 	public Map testMap;
-
+	private boolean wonNobelPrize;
+	private PlaceOfBirth[] placesLived;
+	private List<PlaceOfBirth> placesLivedList = new ArrayList<PlaceOfBirth>();
+	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
 		this.birthdate = birthdate;
@@ -31,8 +36,14 @@ public class Inventor {
 
 	public void setPlaceOfBirth(PlaceOfBirth placeOfBirth2) {
 		placeOfBirth = placeOfBirth2;
+		this.placesLived = new PlaceOfBirth[] { placeOfBirth2 };
+		this.placesLivedList.add(placeOfBirth2);
 	}
 
+	public String[] getInventions() {
+		return inventions;
+	}
+	
 	public void setInventions(String[] inventions) {
 		this.inventions = inventions;
 	}
@@ -43,6 +54,30 @@ public class Inventor {
 
 	public String getName() {
 		return name;
+	}
+	
+	public boolean getWonNobelPrize() {
+		return wonNobelPrize;
+	}
+
+	public void setWonNobelPrize(boolean wonNobelPrize) {
+		this.wonNobelPrize = wonNobelPrize;
+	}
+
+	public PlaceOfBirth[] getPlacesLived() {
+		return placesLived;
+	}
+
+	public void setPlacesLived(PlaceOfBirth[] placesLived) {
+		this.placesLived = placesLived;
+	}
+
+	public List<PlaceOfBirth> getPlacesLivedList() {
+		return placesLivedList;
+	}
+
+	public void setPlacesLivedList(List<PlaceOfBirth> placesLivedList) {
+		this.placesLivedList = placesLivedList;
 	}
 
 	public String echo(Object o) {
