@@ -19,9 +19,11 @@ package org.springframework.web.bind.annotation.support;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,6 +37,9 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
@@ -42,11 +47,13 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
@@ -89,24 +96,28 @@ public class HandlerMethodInvoker {
 
 	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
+	private final HttpMessageConverter[] messageConverters;
+
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver) {
 		this(methodResolver, null);
 	}
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer) {
-		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null);
+		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null, new WebArgumentResolver[0],
+				new HttpMessageConverter[0]);
 	}
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
 			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer,
-			WebArgumentResolver... customArgumentResolvers) {
+			WebArgumentResolver[] customArgumentResolvers, HttpMessageConverter[] messageConverters) {
 
 		this.methodResolver = methodResolver;
 		this.bindingInitializer = bindingInitializer;
 		this.sessionAttributeStore = sessionAttributeStore;
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 		this.customArgumentResolvers = customArgumentResolvers;
+		this.messageConverters = messageConverters;
 	}
 
 
@@ -159,6 +170,7 @@ public class HandlerMethodInvoker {
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
 			String headerName = null;
+			boolean requestBodyFound = false;
 			String cookieName = null;
 			String pathVarName = null;
 			String attrName = null;
@@ -180,6 +192,10 @@ public class HandlerMethodInvoker {
 					headerName = requestHeader.value();
 					required = requestHeader.required();
 					defaultValue = requestHeader.defaultValue();
+					found++;
+				}
+				else if (RequestBody.class.isInstance(paramAnn)) {
+					requestBodyFound = true;
 					found++;
 				}
 				else if (CookieValue.class.isInstance(paramAnn)) {
@@ -237,6 +253,9 @@ public class HandlerMethodInvoker {
 			}
 			else if (headerName != null) {
 				args[i] = resolveRequestHeader(headerName, required, defaultValue, methodParam, webRequest, handler);
+			}
+			else if (requestBodyFound) {
+				args[i] = resolveRequestBody(methodParam, webRequest, handler);
 			}
 			else if (cookieName != null) {
 				args[i] = resolveCookieValue(cookieName, required, defaultValue, methodParam, webRequest, handler);
@@ -416,6 +435,45 @@ public class HandlerMethodInvoker {
 		WebDataBinder binder = createBinder(webRequest, null, headerName);
 		initBinder(handlerForInitBinderCall, headerName, binder, webRequest);
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
+	}
+
+	/**
+	 * Resolves the given {@link RequestBody @RequestBody} annotation.
+	 * Throws an UnsupportedOperationException by default.
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object resolveRequestBody(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
+			throws Exception {
+
+		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
+
+		Class paramType = methodParam.getParameterType();
+		MediaType contentType = inputMessage.getHeaders().getContentType();
+		if (contentType == null) {
+			throw new IllegalStateException("Cannot extract response: no Content-Type found");
+		}
+		List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
+		for (HttpMessageConverter<?> messageConverter : messageConverters) {
+			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
+			if (messageConverter.supports(paramType)) {
+				for (MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
+					if (supportedMediaType.includes(contentType)) {
+						return messageConverter.read(paramType, inputMessage);
+					}
+				}
+			}
+		}
+		
+		throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
+	}
+
+	/**
+	 * Returns a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
+	 * Throws an UnsupportedOperationException by default.
+	 */
+	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
+
+		throw new UnsupportedOperationException("@RequestBody not supported");
 	}
 
 	private Object resolveCookieValue(String cookieName, boolean required, String defaultValue,

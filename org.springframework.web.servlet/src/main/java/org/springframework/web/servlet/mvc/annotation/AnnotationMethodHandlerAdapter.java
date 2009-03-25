@@ -51,6 +51,14 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
@@ -60,6 +68,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -149,6 +158,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
 
+	private HttpMessageConverter<?>[] messageConverters =
+			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
+					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
 
 	public AnnotationMethodHandlerAdapter() {
 		// no restriction of HTTP methods by default
@@ -291,6 +303,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
+	/**
+	 * Set the message body converters to use. These converters are used to convert
+	 * from and to HTTP requests and responses.
+	 */
+	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
+		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		this.messageConverters = messageConverters;
+	}
+
+
 
 	public boolean supports(Object handler) {
 		return getMethodResolver(handler).hasHandlerMethods();
@@ -346,12 +368,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		catch (HttpRequestMethodNotSupportedException ex) {
 			return handleHttpRequestMethodNotSupportedException(ex, request, response);
 		}
+		catch (HttpMediaTypeNotSupportedException ex) {
+			return handleHttpMediaTypeNotSupportedException(ex, request, response);
+		}
 	}
 
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}
-
 
 	/**
 	 * Handle the case where no request handler method was found.
@@ -391,6 +415,27 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		pageNotFoundLogger.warn(ex.getMessage());
 		response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		response.addHeader("Allow", StringUtils.arrayToDelimitedString(ex.getSupportedMethods(), ", "));
+		return null;
+	}
+
+	/**
+	 * Handle the case where no {@linkplain HttpMessageConverter message converters} was found for the PUT or POSTed
+	 * content.
+	 * <p>The default implementation logs a warning, sends an HTTP 415 error and sets the "Allow" header.
+	 * Alternatively, a fallback view could be chosen, or the HttpMediaTypeNotSupportedException
+	 * could be rethrown as-is.
+	 * @param ex the HttpMediaTypeNotSupportedException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleHttpMediaTypeNotSupportedException(
+			HttpMediaTypeNotSupportedException ex, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+		response.addHeader("Accept", MediaType.toString(ex.getSupportedMediaTypes()));
 		return null;
 	}
 
@@ -593,7 +638,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private ServletHandlerMethodInvoker(HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore,
-					parameterNameDiscoverer, customArgumentResolvers);
+					parameterNameDiscoverer, customArgumentResolvers, messageConverters);
 		}
 
 		@Override
@@ -623,6 +668,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			if (failOnErrors) {
 				servletBinder.closeNoCatch();
 			}
+		}
+
+		@Override
+		protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
+			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			return new ServletServerHttpRequest(servletRequest);
 		}
 
 		@Override

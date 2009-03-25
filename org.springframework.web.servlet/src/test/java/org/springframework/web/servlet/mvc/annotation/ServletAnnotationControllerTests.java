@@ -42,6 +42,7 @@ import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -66,6 +67,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -93,18 +95,11 @@ import org.springframework.web.util.NestedServletException;
  */
 public class ServletAnnotationControllerTests {
 
+	private DispatcherServlet servlet;
+
 	@Test
 	public void standardHandleMethod() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(MyController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -114,16 +109,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test(expected = MissingServletRequestParameterException.class)
 	public void requiredParamMissing() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequiredParamController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(RequiredParamController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -132,16 +118,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void optionalParamPresent() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(OptionalParamController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(OptionalParamController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		request.addParameter("id", "val");
@@ -154,16 +131,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void optionalParamMissing() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(OptionalParamController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(OptionalParamController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -173,16 +141,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void defaultParamMissing() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(DefaultValueParamController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(DefaultValueParamController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -192,16 +151,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void methodNotAllowed() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNotAllowedController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(MethodNotAllowedController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -285,17 +235,23 @@ public class ServletAnnotationControllerTests {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
-	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+	private void initServlet(final Class<?> controllerclass) throws ServletException {
+		servlet = new DispatcherServlet() {
 			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerclass));
 				wac.refresh();
 				return wac;
 			}
 		};
 		servlet.init(new MockServletConfig());
+	}
+
+
+	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
+		initServlet(controllerClass);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath1.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -886,21 +842,40 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void pathOrdering() throws ServletException, IOException {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(PathOrderingController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
+		initServlet(PathOrderingController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/dir/myPath1.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("method1", response.getContentAsString());
+	}
+
+	@Test
+	public void requestBody() throws ServletException, IOException {
+		initServlet(RequestBodyController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
+		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes("UTF-8"));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(requestBody, response.getContentAsString());
+	}
+
+	@Test
+	public void unsupportedRequestBody() throws ServletException, IOException {
+		initServlet(RequestBodyController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
+		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes("UTF-8"));
+		request.addHeader("Content-Type", "application/pdf");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Invalid response status code", HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,
+				response.getStatus());
+		assertNotNull("No Accept response header set", response.getHeader("Accept"));
 	}
 
 	/*
@@ -1479,6 +1454,15 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping("/dir/*.do")
 		public void method2(Writer writer) throws IOException {
 			writer.write("method2");
+		}
+	}
+
+	@Controller
+	public static class RequestBodyController {
+
+		@RequestMapping(value = "/something", method = RequestMethod.PUT)
+		public void handle(@RequestBody String body, Writer writer) throws IOException {
+			writer.write(body);
 		}
 	}
 
