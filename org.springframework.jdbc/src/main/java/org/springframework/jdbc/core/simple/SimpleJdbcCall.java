@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
@@ -133,22 +132,22 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 
 
 	@SuppressWarnings("unchecked")
-	public <T> T executeFunction(Class<T> returnType, Map args) {
+	public <T> T executeFunction(Class<T> returnType, Map<String, Object> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T executeFunction(Class<T> returnType, MapSqlParameterSource args) {
+	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T executeObject(Class<T> returnType, Map args) {
+	public <T> T executeObject(Class<T> returnType, Map<String, Object> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T executeObject(Class<T> returnType, MapSqlParameterSource args) {
+	public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
