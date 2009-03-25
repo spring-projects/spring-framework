@@ -19,7 +19,6 @@ package org.springframework.jdbc.core.simple;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
@@ -107,14 +106,14 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
-	<T> T executeFunction(Class<T> returnType, Map args);
+	<T> T executeFunction(Class<T> returnType, Map<String, Object> args);
 
 	/**
 	 * Execute the stored function and return the results obtained as an Object of the specified return type.
 	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
-	<T> T executeFunction(Class<T> returnType, MapSqlParameterSource args);
+	<T> T executeFunction(Class<T> returnType, SqlParameterSource args);
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
@@ -123,7 +122,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
-	<T> T executeObject(Class<T> returnType, Map args);
+	<T> T executeObject(Class<T> returnType, Map<String, Object> args);
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
@@ -132,7 +131,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
-	<T> T executeObject(Class<T> returnType, MapSqlParameterSource args);
+	<T> T executeObject(Class<T> returnType, SqlParameterSource args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name as in parameter declarations..
