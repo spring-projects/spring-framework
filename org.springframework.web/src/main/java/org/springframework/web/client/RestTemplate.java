@@ -421,7 +421,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				}
 			}
 			throw new RestClientException(
-					"Could not extract response: no suitable HttpMessageConverter found for " + "response type [" +
+					"Could not extract response: no suitable HttpMessageConverter found for response type [" +
 							this.responseType.getName() + "] and content type [" + contentType + "]");
 		}
 
