@@ -1,4 +1,4 @@
-Bundle-SymbolicName: org.springframework.orm
+Bundle-SymbolicName: org.springframework.oxm
 Bundle-Name: Spring ORM
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
