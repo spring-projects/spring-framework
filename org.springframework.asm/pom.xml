@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
-  <artifactId>spring-aspects</artifactId>
+  <artifactId>spring-asm</artifactId>
   <packaging>jar</packaging>
   <version>3.0.0.M3</version>
   <parent>
@@ -14,27 +14,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjweaver</artifactId>
-      <version>1.6.2</version>
+      <groupId>asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>2.2.3</version>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>3.0.0.M3</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-tx</artifactId>
-      <version>3.0.0.M3</version>
+      <groupId>asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <version>2.2.3</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
