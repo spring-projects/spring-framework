@@ -32,6 +32,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -53,6 +54,11 @@ import org.springframework.util.Assert;
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
+ *
+ * <p>For 'null' values read from the databasem, we will attempt to call the setter, but in the case of
+ * primitives, this causes a TypeMismatchException. We will trap this exception and log a warning message.
+ * Be aware that if you use the values from the generated bean to update the database the primitive value
+ * will have been set to the primitive's default value instead of null.
  *
  * <p>Please note that this class is designed to provide convenience rather than high performance.
  * For best performance consider using a custom RowMapper.
@@ -219,7 +225,18 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 						logger.debug("Mapping column '" + column + "' to property '" +
 								pd.getName() + "' of type " + pd.getPropertyType());
 					}
-					bw.setPropertyValue(pd.getName(), value);
+					try {
+						bw.setPropertyValue(pd.getName(), value);
+					}
+					catch (TypeMismatchException e) {
+						logger.warn("Intercepted TypeMismatchException for row " + rowNumber +
+								" and column '" + column + "' with value " + value +
+								" when setting property '" + pd.getName() + "' of type " + pd.getPropertyType() +
+								" on object: " + mappedObject);
+						if (value != null) {
+							throw e;
+						}
+					}
 					if (populatedProperties != null) {
 						populatedProperties.add(pd.getName());
 					}
