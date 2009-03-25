@@ -23,6 +23,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
+import org.springframework.beans.TypeMismatchException;
 
 /**
  * @author Thomas Risberg
@@ -87,6 +88,24 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		catch (InvalidDataAccessApiUsageException ex) {
 			// expected
 		}
+	}
+
+	public void testMappingNullValue() throws SQLException {
+		BeanPropertyRowMapper mapper = new BeanPropertyRowMapper(Person.class);
+		try {
+			List result1 = jdbcTemplate2.query("select name, null as age, birth_date, balance from people",
+					mapper);
+			fail("Should have thrown TypeMismatchException because of null value");
+		}
+		catch (TypeMismatchException ex) {
+			// expected
+		}
+		mapper.setPrimitivesDefaultedForNullValue(true);
+		List result2 = jdbcTemplate2.query("select name, null as age, birth_date, balance from people",
+				mapper);
+		assertEquals(1, result2.size());
+		Person bean = (Person) result2.get(0);
+		verifyPersonWithZeroAge(bean);
 	}
 
 }

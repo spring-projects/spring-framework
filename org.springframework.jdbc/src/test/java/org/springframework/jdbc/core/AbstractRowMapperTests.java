@@ -46,6 +46,8 @@ public abstract class AbstractRowMapperTests extends TestCase {
 
 	protected MockControl conControl;
 	protected Connection con;
+	protected MockControl conControl2;
+	protected Connection con2;
 	protected MockControl rsmdControl;
 	protected ResultSetMetaData rsmd;
 	protected MockControl rsControl;
@@ -53,6 +55,13 @@ public abstract class AbstractRowMapperTests extends TestCase {
 	protected MockControl stmtControl;
 	protected Statement stmt;
 	protected JdbcTemplate jdbcTemplate;
+	protected MockControl rsmdControl2;
+	protected ResultSetMetaData rsmd2;
+	protected MockControl rsControl2;
+	protected ResultSet rs2;
+	protected MockControl stmtControl2;
+	protected Statement stmt2;
+	protected JdbcTemplate jdbcTemplate2;
 
 	protected void setUp() throws SQLException {
 		conControl = MockControl.createControl(Connection.class);
@@ -110,19 +119,92 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		stmt.close();
 		stmtControl.setVoidCallable(1);
 
+		conControl2 = MockControl.createControl(Connection.class);
+		con2 = (Connection) conControl2.getMock();
+		con2.isClosed();
+		conControl2.setDefaultReturnValue(false);
+
+		rsmdControl2 = MockControl.createControl(ResultSetMetaData.class);
+		rsmd2 = (ResultSetMetaData)rsmdControl2.getMock();
+		rsmd2.getColumnCount();
+		rsmdControl2.setReturnValue(4, 2);
+		rsmd2.getColumnLabel(1);
+		rsmdControl2.setReturnValue("name", 2);
+		rsmd2.getColumnLabel(2);
+		rsmdControl2.setReturnValue("age", 2);
+		rsmd2.getColumnLabel(3);
+		rsmdControl2.setReturnValue("birth_date", 1);
+		rsmd2.getColumnLabel(4);
+		rsmdControl2.setReturnValue("balance", 1);
+		rsmdControl2.replay();
+
+		rsControl2 = MockControl.createControl(ResultSet.class);
+		rs2 = (ResultSet) rsControl2.getMock();
+		rs2.getMetaData();
+		rsControl2.setReturnValue(rsmd2, 2);
+		rs2.next();
+		rsControl2.setReturnValue(true, 2);
+		rs2.getString(1);
+		rsControl2.setReturnValue("Bubba", 2);
+		rs2.wasNull();
+		rsControl2.setReturnValue(true, 2);
+		rs2.getLong(2);
+		rsControl2.setReturnValue(0, 2);
+		rs2.getTimestamp(3);
+		rsControl2.setReturnValue(new Timestamp(1221222L), 1);
+		rs2.getBigDecimal(4);
+		rsControl2.setReturnValue(new BigDecimal("1234.56"), 1);
+		rs2.next();
+		rsControl2.setReturnValue(false, 1);
+		rs2.close();
+		rsControl2.setVoidCallable(2);
+		rsControl2.replay();
+
+		stmtControl2 = MockControl.createControl(Statement.class);
+		stmt2 = (Statement) stmtControl2.getMock();
+
+		con2.createStatement();
+		conControl2.setReturnValue(stmt2, 2);
+		stmt2.executeQuery("select name, null as age, birth_date, balance from people");
+		stmtControl2.setReturnValue(rs2, 2);
+		if (debugEnabled) {
+			stmt2.getWarnings();
+			stmtControl2.setReturnValue(null, 2);
+		}
+		stmt2.close();
+		stmtControl2.setVoidCallable(2);
+
 		conControl.replay();
 		stmtControl.replay();
+		conControl2.replay();
+		stmtControl2.replay();
 
 		jdbcTemplate = new JdbcTemplate();
 		jdbcTemplate.setDataSource(new SingleConnectionDataSource(con, false));
 		jdbcTemplate.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		jdbcTemplate.afterPropertiesSet();
+
+		jdbcTemplate2 = new JdbcTemplate();
+		jdbcTemplate2.setDataSource(new SingleConnectionDataSource(con2, false));
+		jdbcTemplate2.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		jdbcTemplate2.afterPropertiesSet();
 	}
 
 	protected void verifyPerson(Person bean) {
 		verify();
 		assertEquals("Bubba", bean.getName());
 		assertEquals(22L, bean.getAge());
+		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	}
+
+	protected void verifyPersonWithZeroAge(Person bean) {
+		conControl2.verify();
+		rsControl2.verify();
+		rsmdControl2.verify();
+		stmtControl2.verify();
+		assertEquals("Bubba", bean.getName());
+		assertEquals(0L, bean.getAge());
 		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
 		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
