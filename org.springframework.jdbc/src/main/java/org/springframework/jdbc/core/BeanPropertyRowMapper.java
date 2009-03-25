@@ -56,7 +56,8 @@ import org.springframework.util.Assert;
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
  *
  * <p>For 'null' values read from the databasem, we will attempt to call the setter, but in the case of
- * primitives, this causes a TypeMismatchException. We will trap this exception and log a warning message.
+ * Java primitives, this causes a TypeMismatchException. This class can be configured (using the
+ * primitivesDefaultedForNullValue property) to trap this exception and use the primitives default value.
  * Be aware that if you use the values from the generated bean to update the database the primitive value
  * will have been set to the primitive's default value instead of null.
  *
@@ -77,6 +78,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/** Whether we're strictly validating */
 	private boolean checkFullyPopulated = false;
+
+	/** Whether we're defaulting primitives when mapping a null value */
+	private boolean primitivesDefaultedForNullValue = false;
 
 	/** Map of the fields we provide mapping for */
 	private Map<String, PropertyDescriptor> mappedFields;
@@ -199,6 +203,22 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		return this.checkFullyPopulated;
 	}
 
+	/**
+	 * Set whether we're defaulting Java primitives in the case of mapping a null value from corresponding
+	 * database fields.
+	 * <p>Default is <code>false</code>, throwing an exception when nulls are mapped to Java primitives.
+	 */
+	public boolean isPrimitivesDefaultedForNullValue() {
+		return primitivesDefaultedForNullValue;
+	}
+
+	/**
+	 * Return whether we're defaulting Java primitives in the case of mapping a null value from corresponding
+	 * database fields.
+	 */
+	public void setPrimitivesDefaultedForNullValue(boolean primitivesDefaultedForNullValue) {
+		this.primitivesDefaultedForNullValue = primitivesDefaultedForNullValue;
+	}
 
 	/**
 	 * Extract the values for all columns in the current row.
@@ -229,11 +249,13 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 						bw.setPropertyValue(pd.getName(), value);
 					}
 					catch (TypeMismatchException e) {
-						logger.warn("Intercepted TypeMismatchException for row " + rowNumber +
-								" and column '" + column + "' with value " + value +
-								" when setting property '" + pd.getName() + "' of type " + pd.getPropertyType() +
-								" on object: " + mappedObject);
-						if (value != null) {
+						if (value == null && primitivesDefaultedForNullValue) {
+							logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
+									" and column '" + column + "' with value " + value +
+									" when setting property '" + pd.getName() + "' of type " + pd.getPropertyType() +
+									" on object: " + mappedObject);
+						}
+						else {
 							throw e;
 						}
 					}
