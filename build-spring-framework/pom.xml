@@ -16,11 +16,34 @@
       <url>http://download.java.net/maven/1/</url>
       <layout>legacy</layout>
     </repository>
-    <!-- for websphere uow -->
+     <!--  
     <repository>
-      <id>maven.seasar.org</id>
-      <name>The Seasar Foundation Maven2 Repository</name>
-      <url>http://maven.seasar.org/maven2</url>
+      <id>ibiblio</id>
+      <name>IBiblio mirro</name>
+      <url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>
+    </repository>
+    <repository>
+      <id>EclipseLink Repo</id>
+      <url>http://mirror.cc.vt.edu/pub/eclipse/rt/eclipselink/maven.repo/</url>
+      </repository>    
+    -->
+    <!-- for use with jexcelapi 2.6.8, portlet 2.0-->
+    <repository>
+      <id>jboss</id>
+      <name>JBoss Repository</name>
+      <url>http://repository.jboss.org/maven2</url>
+    </repository>
+
+    <!-- fallback to S2 bundle repo for com.ibm.websphere.uow, oracle.classloader, com.sun.enterprise.loader -->
+    <repository>
+      <id>com.springsource.repository.bundles.release</id>
+      <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+      <url>http://repository.springsource.com/maven/bundles/release</url>
+    </repository>
+    <repository>
+      <id>com.springsource.repository.bundles.external</id>
+      <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+      <url>http://repository.springsource.com/maven/bundles/external</url>
     </repository>
   </repositories>
 
@@ -85,6 +108,26 @@
       </distributionManagement>
     </profile>
     <profile>
+      <id>central</id>
+      <distributionManagement>
+        <site>
+          <id>staging</id>
+          <url>file:///${user.dir}/target/staging</url>
+        </site>
+        <repository>
+          <id>spring-milestone</id>
+          <name>Spring Milestone Repository</name>
+          <url>s3://maven.springframework.org/milestone</url>
+          <!-- <url>https://springframework.svn.sourceforge.net/svnroot/springframework/repos/repo</url> -->
+        </repository>
+        <snapshotRepository>
+          <id>spring-snapshot</id>
+          <name>Spring Snapshot Repository</name>
+          <url>s3://maven.springframework.org/snapshot</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+    <profile>
       <id>release</id>
       <build>
         <plugins>
@@ -116,6 +159,32 @@
     </profile>
   </profiles>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*Tests.java</include>
+          </includes>
+          <excludes>
+            <exclude>**/Abstract*.java</exclude>
+          </excludes>
+          <junitArtifactName>junit:junit</junitArtifactName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
   <modules>
     <module>../org.springframework.aop</module>
     <module>../org.springframework.aspects</module>
