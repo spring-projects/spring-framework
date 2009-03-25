@@ -60,6 +60,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.StylerUtils;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -547,7 +548,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		public PortletHandlerMethodInvoker(HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore,
-					parameterNameDiscoverer, customArgumentResolvers);
+					parameterNameDiscoverer, customArgumentResolvers, new HttpMessageConverter[0]);
 		}
 
 		@Override
