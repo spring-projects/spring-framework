@@ -27,9 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.TagSupport;
 
-import org.springframework.util.StringUtils;
+import org.springframework.web.util.ExpressionEvaluationUtils;
+import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
@@ -39,7 +40,8 @@ import org.springframework.web.util.TagUtils;
  * <p>Enhancements to the JSTL functionality include:
  * <ul>
  * <li>URL encoded template URI variables</li>
- * <li>XML escaping of URLs</li>
+ * <li>HTML/XML escaping of URLs</li>
+ * <li>JavaScipt escaping of URLs</li>
  * </ul>
  * 
  * <p>Template URI variables are indicated in the {@link #setValue(String) 'value'}
@@ -53,8 +55,10 @@ import org.springframework.web.util.TagUtils;
  * over direct EL substitution as the values are URL encoded.  Failure to properly 
  * encode URL can leave an application vulnerable to XSS and other injection attacks.
  * 
- * <p>URLs can be XML escaped by setting the {@link #setEscapeXml(String) 
- * 'escapeXml'} attribute to 'true', the default is 'false'.
+ * <p>URLs can be HTML/XML escaped by setting the {@link #setHtmlEscape(String) 
+ * 'htmlEscape'} attribute to 'true'.  Detects an HTML escaping setting, either on 
+ * this tag instance, the page level, or the <code>web.xml</code> level. The default 
+ * is 'false'.  When setting the URL value into a variable, escaping is not recommended.
  * 
  * <p>Example usage:
  * <pre>&lt;spring:url value="/url/path/{variableName}"&gt;
@@ -67,15 +71,13 @@ import org.springframework.web.util.TagUtils;
  * @since 3.0
  * @see ParamTag
  */
-public class UrlTag extends TagSupport implements ParamAware {
+public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 	private static final String URL_TEMPLATE_DELIMITER_PREFIX = "{";
 
 	private static final String URL_TEMPLATE_DELIMITER_SUFFIX = "}";
 
 	private static final String URL_TYPE_ABSOLUTE = "://";
-
-	private static final char[] XML_CHARS = { '&', '<', '>', '"', '\'' };
 
 
 	private List<Param> params;
@@ -92,7 +94,7 @@ public class UrlTag extends TagSupport implements ParamAware {
 
 	private int scope = PageContext.PAGE_SCOPE;
 
-	private boolean escapeXml = false;
+	private boolean javaScriptEscape = false;
 
 
 	/**
@@ -142,13 +144,12 @@ public class UrlTag extends TagSupport implements ParamAware {
 	}
 
 	/**
-	 * Instructs the tag to XML entity encode the resulting URL.
-	 * <p>Defaults to false to maintain compatibility with the JSTL c:url tag.
-	 * <p><b>NOTE:</b> Strongly recommended to set as 'true' when rendering
-	 * directly to the JspWriter in an XML or HTML based file.
+	 * Set JavaScript escaping for this tag, as boolean value.
+	 * Default is "false".
 	 */
-	public void setEscapeXml(String escapeXml) {
-		this.escapeXml = Boolean.valueOf(escapeXml);
+	public void setJavaScriptEscape(String javaScriptEscape) throws JspException {
+		this.javaScriptEscape =
+				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, pageContext);
 	}
 
 	public void addParam(Param param) {
@@ -157,7 +158,7 @@ public class UrlTag extends TagSupport implements ParamAware {
 
 
 	@Override
-	public int doStartTag() throws JspException {
+	public int doStartTagInternal() throws JspException {
 		this.params = new LinkedList<Param>();
 		this.templateParams = new HashSet<String>();
 		return EVAL_BODY_INCLUDE;
@@ -213,9 +214,11 @@ public class UrlTag extends TagSupport implements ParamAware {
 			// (Do not embed the session identifier in a remote link!)
 			urlStr = response.encodeURL(urlStr);
 		}
-		if (this.escapeXml) {
-			urlStr = escapeXml(urlStr);
-		}
+
+		// HTML and/or JavaScript escape, if demanded.
+		urlStr = isHtmlEscape() ? HtmlUtils.htmlEscape(urlStr) : urlStr;
+		urlStr = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr;
+		
 		return urlStr;
 	}
 
@@ -295,40 +298,11 @@ public class UrlTag extends TagSupport implements ParamAware {
 		}
 	}
 
-	/**
-	 * XML entity encode the provided string. &#38;, &#60;, &#62;, &#39; and
-	 * &#34; are encoded to their entity values.
-	 * @param xml the value to escape
-	 * @return the escaped value
-	 */
-	protected String escapeXml(String xml) {
-		if (xml == null) {
-			return null;
-		}
-		String escapedXml = xml;
-		for (char xmlChar : XML_CHARS) {
-			escapedXml = StringUtils.replace(escapedXml, String.valueOf(xmlChar), entityValue(xmlChar));
-		}
-		return escapedXml;
-	}
-
-	/**
-	 * Convert a character value to a XML entity value.
-	 * The decimal value of the character is used.
-	 * <p>For example, 'A' is converted to "&amp;#65;".
-	 * @param xmlChar the character to encode
-	 * @return the entity value
-	 */
-	protected String entityValue(char xmlChar) {
-		return new StringBuilder().append("&#").append(Integer.toString(xmlChar)).append(";").toString();
-	}
-
 
 	/**
 	 * Internal enum that classifies URLs by type.
 	 */
 	private enum UrlType {
-
 		CONTEXT_RELATIVE, RELATIVE, ABSOLUTE
 	}
 

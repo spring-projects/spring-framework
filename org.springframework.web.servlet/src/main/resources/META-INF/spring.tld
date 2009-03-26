@@ -379,13 +379,18 @@
 			effect unless the var attribute is also defined.</description>
 		</attribute>
 		<attribute>
-			<name>escapeXml</name>
+			<name>htmlEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Escape XML special characters in the resulting URL.  'true' and 
-			'false' are supported.  Defaults to 'false' to maintain compatibility with 
-			the JSTL c:url tag.  Strongly recommended to set as 'true' when rendering 
-			directly to the JspWriter in an XML or HTML based document.</description>
+			<description>Set HTML escaping for this tag, as boolean value. Overrides the
+			default HTML escaping setting for the current page.</description>
+		</attribute>
+		<attribute>
+			<name>javaScriptEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Set JavaScript escaping for this tag, as boolean value.
+			Default is false.</description>
 		</attribute>
 	</tag>
 

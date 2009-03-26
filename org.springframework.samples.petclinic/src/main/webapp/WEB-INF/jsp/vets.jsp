@@ -23,7 +23,7 @@
 <table class="table-buttons">
   <tr>
     <td>
-      <a href="<spring:url value="/vets.xml" escapeXml="true" />">View as XML</a>
+      <a href="<spring:url value="/vets.xml" htmlEscape="true" />">View as XML</a>
     </td>
   </tr>
 </table>

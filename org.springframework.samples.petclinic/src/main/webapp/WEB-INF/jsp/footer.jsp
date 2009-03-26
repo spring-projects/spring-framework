@@ -1,8 +1,8 @@
 
   <table class="footer">
     <tr>
-      <td><a href="<spring:url value="/" escapeXml="true" />">Home</a></td>
-      <td align="right"><img src="<spring:url value="/static/images/springsource-logo.png" escapeXml="true" />" alt="Sponsored by SpringSource"/></td>
+      <td><a href="<spring:url value="/" htmlEscape="true" />">Home</a></td>
+      <td align="right"><img src="<spring:url value="/static/images/springsource-logo.png" htmlEscape="true" />" alt="Sponsored by SpringSource"/></td>
     </tr>
   </table>
 
