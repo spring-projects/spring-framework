@@ -88,9 +88,10 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 */
 	public void setManagedInterfaces(Class[] managedInterfaces) {
 		if (managedInterfaces != null) {
-			for (Class ifc : managedInterfaces) {
+			for (Class<?> ifc : managedInterfaces) {
 				if (!ifc.isInterface()) {
-					throw new IllegalArgumentException("Management interface [" + ifc.getName() + "] is no interface");
+					throw new IllegalArgumentException(
+							"Management interface [" + ifc.getName() + "] is not an interface");
 				}
 			}
 		}
