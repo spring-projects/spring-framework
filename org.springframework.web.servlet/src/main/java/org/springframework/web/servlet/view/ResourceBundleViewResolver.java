@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +27,7 @@ import java.util.ResourceBundle;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -61,7 +61,8 @@ import org.springframework.web.servlet.View;
  * @see java.util.PropertyResourceBundle
  * @see UrlBasedViewResolver
  */
-public class ResourceBundleViewResolver extends AbstractCachingViewResolver implements Ordered, DisposableBean {
+public class ResourceBundleViewResolver extends AbstractCachingViewResolver
+		implements Ordered, InitializingBean, DisposableBean {
 
 	/** The default basename if no other basename is supplied. */
 	public final static String DEFAULT_BASENAME = "views";
@@ -175,15 +176,18 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		this.localesToInitialize = localesToInitialize;
 	}
 
-
-	@Override
-	protected void initApplicationContext() throws BeansException {
+	/**
+	 * Eagerly initialize Locales if necessary.
+	 * @see #setLocalesToInitialize
+	 */
+	public void afterPropertiesSet() throws BeansException {
 		if (this.localesToInitialize != null) {
 			for (Locale locale : this.localesToInitialize) {
 				initFactory(locale);
 			}
 		}
 	}
+
 
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {

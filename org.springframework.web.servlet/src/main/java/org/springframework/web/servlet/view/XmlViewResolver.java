@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Locale;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -50,7 +51,8 @@ import org.springframework.web.servlet.View;
  * @see ResourceBundleViewResolver
  * @see UrlBasedViewResolver
  */
-public class XmlViewResolver extends AbstractCachingViewResolver implements Ordered, DisposableBean {
+public class XmlViewResolver extends AbstractCachingViewResolver
+		implements Ordered, InitializingBean, DisposableBean {
 
 	/** Default if no other location is supplied */
 	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
@@ -84,8 +86,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	 * Pre-initialize the factory from the XML file.
 	 * Only effective if caching is enabled.
 	 */
-	@Override
-	protected void initApplicationContext() throws BeansException {
+	public void afterPropertiesSet() throws BeansException {
 		if (isCache()) {
 			initFactory();
 		}
