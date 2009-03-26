@@ -21,6 +21,6 @@
 </form:form>
 
 <br/>
-<a href='<spring:url value="/owners/new" escapeXml="true"/>'>Add Owner</a>
+<a href='<spring:url value="/owners/new" htmlEscape="true"/>'>Add Owner</a>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

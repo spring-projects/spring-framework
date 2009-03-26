@@ -90,7 +90,7 @@ public class UrlTagTests extends AbstractTagTests {
 				PageContext.REQUEST_SCOPE));
 	}
 
-	public void testSetEscapeXmlDefault() throws JspException {
+	public void testSetHtmlEscapeDefault() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 
@@ -112,10 +112,10 @@ public class UrlTagTests extends AbstractTagTests {
 				.getAttribute("var"));
 	}
 
-	public void testSetEscapeXmlFalse() throws JspException {
+	public void testSetHtmlEscapeFalse() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-		tag.setEscapeXml("false");
+		tag.setHtmlEscape("false");
 
 		tag.doStartTag();
 
@@ -135,10 +135,10 @@ public class UrlTagTests extends AbstractTagTests {
 				.getAttribute("var"));
 	}
 
-	public void testSetEscapeXmlTrue() throws JspException {
+	public void testSetHtmlEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-		tag.setEscapeXml("true");
+		tag.setHtmlEscape("true");
 
 		tag.doStartTag();
 
@@ -154,7 +154,54 @@ public class UrlTagTests extends AbstractTagTests {
 
 		tag.doEndTag();
 
-		assertEquals("url/path?n+me=v%26l%3De&#38;name=value2", context
+		assertEquals("url/path?n+me=v%26l%3De&amp;name=value2", context
+				.getAttribute("var"));
+	}
+
+	public void testSetJavaScriptEscapeTrue() throws JspException {
+		tag.setValue("url/path");
+		tag.setVar("var");
+		tag.setJavaScriptEscape("true");
+
+		tag.doStartTag();
+
+		Param param = new Param();
+		param.setName("n me");
+		param.setValue("v&l=e");
+		tag.addParam(param);
+
+		param = new Param();
+		param.setName("name");
+		param.setValue("value2");
+		tag.addParam(param);
+
+		tag.doEndTag();
+
+		assertEquals("url\\/path?n+me=v%26l%3De&name=value2", context
+				.getAttribute("var"));
+	}
+
+	public void testSetHtmlAndJavaScriptEscapeTrue() throws JspException {
+		tag.setValue("url/path");
+		tag.setVar("var");
+		tag.setHtmlEscape("true");
+		tag.setJavaScriptEscape("true");
+
+		tag.doStartTag();
+
+		Param param = new Param();
+		param.setName("n me");
+		param.setValue("v&l=e");
+		tag.addParam(param);
+
+		param = new Param();
+		param.setName("name");
+		param.setValue("value2");
+		tag.addParam(param);
+
+		tag.doEndTag();
+
+		assertEquals("url\\/path?n+me=v%26l%3De&amp;name=value2", context
 				.getAttribute("var"));
 	}
 
@@ -519,35 +566,6 @@ public class UrlTagTests extends AbstractTagTests {
 		catch (JspException e) {
 			// we want this
 		}
-	}
-
-	public void testEscapeXml() {
-		assertEquals("&#60;script type=&#34;text/javascript&#34;&#62;", tag
-				.escapeXml("<script type=\"text/javascript\">"));
-	}
-
-	public void testEscapeXmlNull() {
-		assertNull(tag.escapeXml(null));
-	}
-
-	public void testEntityValueAmpersand() {
-		assertEquals("&#38;", tag.entityValue('&'));
-	}
-
-	public void testEntityValueLessThan() {
-		assertEquals("&#60;", tag.entityValue('<'));
-	}
-
-	public void testEntityValueGreaterThan() {
-		assertEquals("&#62;", tag.entityValue('>'));
-	}
-
-	public void testEntityValueSingleQuote() {
-		assertEquals("&#39;", tag.entityValue('\''));
-	}
-
-	public void testEntityValueDoubleQuote() {
-		assertEquals("&#34;", tag.entityValue('"'));
 	}
 
 	public void testJspWriterOutput() {
