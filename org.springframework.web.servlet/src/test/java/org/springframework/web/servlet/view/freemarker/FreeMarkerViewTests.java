@@ -22,14 +22,14 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import junit.framework.TestCase;
 import org.easymock.MockControl;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -44,9 +44,10 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Juergen Hoeller
  * @since 14.03.2004
  */
-public class FreeMarkerViewTests extends TestCase {
+public class FreeMarkerViewTests {
 
-	public void testNoFreemarkerConfig() {
+	@Test
+	public void testNoFreemarkerConfig() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
@@ -55,12 +56,15 @@ public class FreeMarkerViewTests extends TestCase {
 		wmc.setReturnValue(new HashMap());
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
+		wac.getServletContext();
+		wmc.setReturnValue(new MockServletContext());
 		wmc.replay();
 
 		fv.setUrl("anythingButNull");
 		try {
 			fv.setApplicationContext(wac);
-			fail();
+			fv.afterPropertiesSet();
+			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (ApplicationContextException ex) {
 			// Check there's a helpful error message
@@ -70,6 +74,7 @@ public class FreeMarkerViewTests extends TestCase {
 		wmc.verify();
 	}
 
+	@Test
 	public void testNoTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 		try {
@@ -82,6 +87,7 @@ public class FreeMarkerViewTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testValidTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
@@ -118,6 +124,7 @@ public class FreeMarkerViewTests extends TestCase {
 		assertEquals(AbstractView.DEFAULT_CONTENT_TYPE, response.getContentType());
 	}
 
+	@Test
 	public void testKeepExistingContentType() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
