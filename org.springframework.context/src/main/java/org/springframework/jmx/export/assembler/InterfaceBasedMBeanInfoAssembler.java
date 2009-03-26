@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	/**
 	 * Stores the mappings of bean keys to an array of <code>Class</code>es.
 	 */
-	private Map resolvedInterfaceMappings;
+	private Map<String, Class[]> resolvedInterfaceMappings;
 
 
 	/**
@@ -89,7 +89,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	public void setManagedInterfaces(Class[] managedInterfaces) {
 		if (managedInterfaces != null) {
 			for (Class ifc : managedInterfaces) {
-				if (ifc.isInterface()) {
+				if (!ifc.isInterface()) {
 					throw new IllegalArgumentException("Management interface [" + ifc.getName() + "] is no interface");
 				}
 			}
@@ -99,7 +99,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 
 	/**
 	 * Set the mappings of bean keys to a comma-separated list of interface names.
-	 * The property key should match the bean key and the property value should match
+	 * <p>The property key should match the bean key and the property value should match
 	 * the list of interface names. When searching for interfaces for a bean, Spring
 	 * will check these mappings first.
 	 * @param mappings the mappins of bean keys to interface names
@@ -124,7 +124,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @param mappings the specified interface mappings
 	 * @return the resolved interface mappings (with Class objects as values)
 	 */
-	private Map resolveInterfaceMappings(Properties mappings) {
+	private Map<String, Class[]> resolveInterfaceMappings(Properties mappings) {
 		Map<String, Class[]> resolvedMappings = new HashMap<String, Class[]>(mappings.size());
 		for (Enumeration en = mappings.propertyNames(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
@@ -217,7 +217,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 		Class[] ifaces = null;
 
 		if (this.resolvedInterfaceMappings != null) {
-			ifaces = (Class[]) this.resolvedInterfaceMappings.get(beanKey);
+			ifaces = this.resolvedInterfaceMappings.get(beanKey);
 		}
 
 		if (ifaces == null) {
