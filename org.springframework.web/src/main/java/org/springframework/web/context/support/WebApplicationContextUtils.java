@@ -119,7 +119,7 @@ public abstract class WebApplicationContextUtils {
 	 * as used by the WebApplicationContext.
 	 * @param beanFactory the BeanFactory to configure
 	 */
-	static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
+	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
 		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
