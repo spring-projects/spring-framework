@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -38,7 +35,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 
 	private static final String BASE_PACKAGE = FactoryMethodComponent.class.getPackage().getName();
 	
-	private static final int NUM_DEFAULT_BEAN_DEFS = 4;
+	private static final int NUM_DEFAULT_BEAN_DEFS = 5;
 	
 	private static final int NUM_FACTORY_METHODS = 5;  // @ScopedProxy creates another
 	
