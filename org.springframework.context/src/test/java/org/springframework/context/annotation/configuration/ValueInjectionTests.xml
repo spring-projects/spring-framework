@@ -6,11 +6,9 @@
 	xmlns:context="http://www.springframework.org/schema/context">
 
 	<context:annotation-config/>
-	
-	<bean class="org.springframework.context.annotation.support.ConfigurationClassPostProcessor"/>
-	
+
 	<bean class="org.springframework.context.annotation.configuration.AutowiredConfigurationTests$ValueConfig"/>
-	
+
 <!--
 	<context:component-scan  base-package="test.basic.value"/>
 -->
