@@ -55,7 +55,8 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	}
 
 	/** Invokes {@link #readFromSource(Class, HttpHeaders, Source)}. */
-	public final T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException {
+	@Override
+	public final T readInternal(Class<T> clazz, HttpInputMessage inputMessage) throws IOException {
 		return readFromSource(clazz, inputMessage.getHeaders(), new StreamSource(inputMessage.getBody()));
 	}
 

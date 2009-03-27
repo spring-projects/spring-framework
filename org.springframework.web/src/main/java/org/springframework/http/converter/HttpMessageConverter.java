@@ -33,33 +33,34 @@ public interface HttpMessageConverter<T> {
 
 	/**
 	 * Indicate whether the given class is supported by this converter.
+	 *
 	 * @param clazz the class to test for support
 	 * @return <code>true</code> if supported; <code>false</code> otherwise
 	 */
 	boolean supports(Class<? extends T> clazz);
 
-	/**
-	 * Return the list of {@link MediaType} objects supported by this converter.
-	 */
+	/** Return the list of {@link MediaType} objects supported by this converter. */
 	List<MediaType> getSupportedMediaTypes();
 
 	/**
 	 * Read an object of the given type form the given input message, and returns it.
+	 *
 	 * @param clazz the type of object to return
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted object
 	 * @throws IOException in case of I/O errors
-	 * @throws HttpMessageConversionException in case of conversion errors
+	 * @throws HttpMessageNotReadableException in case of conversion errors
 	 */
-	T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException;
+	T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException;
 
 	/**
 	 * Write an given object to the given output message.
-	 * @param t	the object to write to the output message
+	 *
+	 * @param t the object to write to the output message
 	 * @param outputMessage the message to write to
 	 * @throws IOException in case of I/O errors
-	 * @throws HttpMessageConversionException in case of conversion errors
+	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
-	void write(T t, HttpOutputMessage outputMessage) throws IOException;
+	void write(T t, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException;
 
 }
