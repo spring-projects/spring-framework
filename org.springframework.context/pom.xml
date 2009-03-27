@@ -182,16 +182,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>2.2.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>asm</groupId>
-      <artifactId>asm-commons</artifactId>
-      <version>2.2.3</version>
-      <scope>test</scope>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-asm</artifactId>
+      <version>3.0.0.M3</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
   <build>

@@ -59,10 +59,23 @@
     -->
     <dependency>
       <groupId>org.hibernate</groupId>
-      <artifactId>hibernate</artifactId>
-      <version>3.2.6.ga</version>
+      <artifactId>hibernate-core</artifactId>
+      <version>3.3.1.GA</version>
       <optional>true</optional>
     </dependency>
+
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib-nodep</artifactId>
+      <version>2.1_3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <version>1.5.2</version>
+    </dependency>
+
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-annotations</artifactId>
@@ -185,16 +198,26 @@
     </dependency>
   </dependencies>
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <junitArtifactName>junit:junit</junitArtifactName>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </testResource>
+      <testResource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.xsd</include>
+        </includes>
+      </testResource>
+
+      <testResource>
+        <directory>../org.springframework.integration/src/main/java</directory>
+        <includes>
+          <include>**/*.xsd</include>
+        </includes>
+      </testResource>
+    </testResources>
   </build>
 </project>

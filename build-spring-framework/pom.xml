@@ -27,7 +27,7 @@
       <url>http://mirror.cc.vt.edu/pub/eclipse/rt/eclipselink/maven.repo/</url>
       </repository>    
     -->
-    <!-- for use with jexcelapi 2.6.8, portlet 2.0-->
+    <!-- for use with jexcelapi 2.6.8, portlet 2.0, hibernate 3.3.1-->
     <repository>
       <id>jboss</id>
       <name>JBoss Repository</name>
@@ -186,25 +186,31 @@
   </build>
   
   <modules>
-    <module>../org.springframework.aop</module>
-    <module>../org.springframework.aspects</module>
-    <module>../org.springframework.beans</module>
-    <module>../org.springframework.context</module>
-    <module>../org.springframework.context.support</module>
-    <module>../org.springframework.core</module>
-    <module>../org.springframework.expression</module>
     <module>../org.springframework.instrument</module>
     <module>../org.springframework.instrument.classloading</module>
-    <module>../org.springframework.integration-tests</module>
-    <module>../org.springframework.jdbc</module>
-    <module>../org.springframework.jms</module>
-    <module>../org.springframework.orm</module>
-    <module>../org.springframework.oxm</module>
-    <module>../org.springframework.test</module>
+    <module>../org.springframework.asm</module>
+    <module>../org.springframework.core</module>
+    <module>../org.springframework.expression</module>
+    <module>../org.springframework.core</module>
+    <module>../org.springframework.beans</module>
+    <module>../org.springframework.aop</module>
+    <module>../org.springframework.context</module>
     <module>../org.springframework.transaction</module>
+    <module>../org.springframework.oxm</module>
+    <module>../org.springframework.jms</module>
+    <module>../org.springframework.aspects</module>
+    <module>../org.springframework.jdbc</module>
     <module>../org.springframework.web</module>
+    <module>../org.springframework.orm</module>
+    <module>../org.springframework.context.support</module>
     <module>../org.springframework.web.portlet</module>
     <module>../org.springframework.web.servlet</module>
+    <module>../org.springframework.test</module>
+    <!--
+    <module>../org.springframework.integration-tests</module>
+    -->
+
+
   </modules>
 
   <url>http://static.springframework.org/docs</url>
