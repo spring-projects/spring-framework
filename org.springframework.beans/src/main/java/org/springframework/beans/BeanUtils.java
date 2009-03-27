@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@ public abstract class BeanUtils {
 
 		Method targetMethod = doFindMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
 		if (targetMethod == null) {
-			return findDeclaredMethodWithMinimalParameters(clazz, methodName);
+			targetMethod = findDeclaredMethodWithMinimalParameters(clazz, methodName);
 		}
 		return targetMethod;
 	}
@@ -232,7 +232,7 @@ public abstract class BeanUtils {
 
 		Method targetMethod = doFindMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
 		if (targetMethod == null && clazz.getSuperclass() != null) {
-			return findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);
+			targetMethod = findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);
 		}
 		return targetMethod;
 	}

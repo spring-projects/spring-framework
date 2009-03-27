@@ -65,7 +65,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
 	private boolean includeAnnotationConfig = true;
-	
+
+
 	/**
 	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
 	 * @param registry the BeanFactory to load bean definitions into,
