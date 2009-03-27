@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.FileCopyUtils;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.
- * This exporter requires Hessian 3.0.20 or above.
+ * This exporter requires Hessian 3.1.3 or above.
  *
  * <p>Note: Hessian services exported with this class can be accessed by
  * any Hessian client, as there isn't any special handling involved.

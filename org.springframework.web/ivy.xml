@@ -29,7 +29,7 @@
 	</publications>
 
 	<dependencies>
-		<dependency org="com.caucho" name="com.springsource.com.caucho" rev="3.1.5"
+		<dependency org="com.caucho" name="com.springsource.com.caucho" rev="3.2.1"
 					conf="optional, hessian, burlap->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="provided, el->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08"

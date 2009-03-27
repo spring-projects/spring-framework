@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hessian.io.HessianDebugOutputStream;
+import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
@@ -34,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CommonsLogWriter;
 
 /**
@@ -43,7 +44,7 @@ import org.springframework.util.CommonsLogWriter;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.
- * This exporter requires Hessian 3.0.20 or above.
+ * This exporter requires Hessian 3.1.3 or above.
  *
  * @author Juergen Hoeller
  * @since 2.5.1
@@ -52,9 +53,6 @@ import org.springframework.util.CommonsLogWriter;
  * @see SimpleHessianServiceExporter
  */
 public class HessianExporter extends RemoteExporter implements InitializingBean {
-
-	private static final boolean debugOutputStreamAvailable = ClassUtils.isPresent(
-			"com.caucho.hessian.io.HessianDebugOutputStream", HessianExporter.class.getClassLoader());
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
@@ -129,31 +127,43 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 		if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
 			PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
 			isToUse = new HessianDebugInputStream(inputStream, debugWriter);
-			if (debugOutputStreamAvailable) {
-				osToUse = DebugStreamFactory.createDebugOutputStream(outputStream, debugWriter);
+			osToUse = new HessianDebugOutputStream(outputStream, debugWriter);
+		}
+
+		int code = isToUse.read();
+		int major;
+		int minor;
+
+		AbstractHessianInput in;
+		AbstractHessianOutput out;
+
+		if (code == 'H') {
+			major = isToUse.read();
+			minor = isToUse.read();
+			if (major != 0x02) {
+				throw new IOException("Version " + major + "." + minor + " is not understood");
+			}
+			in = new Hessian2Input(isToUse);
+			out = new Hessian2Output(osToUse);
+			in.readCall();
+		}
+		else if (code == 'c') {
+			major = isToUse.read();
+			minor = isToUse.read();
+			in = new HessianInput(isToUse);
+			if (major >= 2) {
+				out = new Hessian2Output(osToUse);
+			}
+			else {
+				out = new HessianOutput(osToUse);
 			}
 		}
+		else {
+			throw new IOException("Expected 'H' (Hessian 2.0) or 'c' (Hessian 1.0) in hessian input at " + code);
+		}
 
-		Hessian2Input in = new Hessian2Input(isToUse);
 		if (this.serializerFactory != null) {
 			in.setSerializerFactory(this.serializerFactory);
-		}
-
-		int code = in.read();
-		if (code != 'c') {
-			throw new IOException("expected 'c' in hessian input at " + code);
-		}
-
-		AbstractHessianOutput out = null;
-		int major = in.read();
-		int minor = in.read();
-		if (major >= 2) {
-			out = new Hessian2Output(osToUse);
-		}
-		else {
-			out = new HessianOutput(osToUse);
-		}
-		if (this.serializerFactory != null) {
 			out.setSerializerFactory(this.serializerFactory);
 		}
 
@@ -175,17 +185,6 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 			catch (IOException ex) {
 				// ignore
 			}
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid hard dependency on Hessian 3.1.3's HessianDebugOutputStream.
-	 */
-	private static class DebugStreamFactory {
-
-		public static OutputStream createDebugOutputStream(OutputStream os, PrintWriter debug) {
-			return new HessianDebugOutputStream(os, debug);
 		}
 	}
 
