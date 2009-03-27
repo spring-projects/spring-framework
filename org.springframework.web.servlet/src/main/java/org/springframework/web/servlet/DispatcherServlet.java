@@ -1059,6 +1059,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			exMv = it.next().resolveException(request, response, handler, ex);
 		}
 		if (exMv != null) {
+			if (exMv.isEmpty()) {
+				return null;
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
 			}
