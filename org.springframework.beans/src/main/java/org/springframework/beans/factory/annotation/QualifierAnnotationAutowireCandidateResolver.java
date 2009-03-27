@@ -209,8 +209,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 				actualValue = bd.getAttribute(attributeName);
 			}
 			if (actualValue == null && attributeName.equals(AutowireCandidateQualifier.VALUE_KEY) &&
-					(expectedValue.equals(bdHolder.getBeanName()) ||
-							ObjectUtils.containsElement(bdHolder.getAliases(), expectedValue))) {
+					expectedValue instanceof String && bdHolder.matchesName((String) expectedValue)) {
 				// fall back on bean name (or alias) match
 				continue;
 			}
