@@ -24,10 +24,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.util.FileCopyUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
@@ -45,12 +45,10 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	private final List<Charset> availableCharsets;
 
-
 	public StringHttpMessageConverter() {
 		super(new MediaType("text", "plain", DEFAULT_CHARSET), new MediaType("text", "*"));
 		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
 	}
-
 
 	public boolean supports(Class<? extends String> clazz) {
 		return String.class.equals(clazz);
@@ -80,7 +78,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	protected void writeToInternal(String s, HttpOutputMessage outputMessage) throws IOException {
+	protected void writeInternal(String s, HttpOutputMessage outputMessage) throws IOException {
 		outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
 		MediaType contentType = getContentType(s);
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
@@ -90,6 +88,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	/**
 	 * Return the list of supported {@link Charset}.
 	 * <p>By default, returns {@link Charset#availableCharsets()}. Can be overridden in subclasses.
+	 *
 	 * @return the list of accepted charsets
 	 */
 	protected List<Charset> getAcceptedCharsets() {

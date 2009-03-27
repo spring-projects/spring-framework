@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,12 +72,12 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	protected abstract T readFromSource(Class<T> clazz, HttpHeaders headers, Source source) throws IOException;
 
 	@Override
-	protected final void writeToInternal(T t, HttpOutputMessage outputMessage) throws IOException {
+	protected final void writeInternal(T t, HttpOutputMessage outputMessage) throws IOException {
 		writeToResult(t, outputMessage.getHeaders(), new StreamResult(outputMessage.getBody()));
 	}
 
 	/**
-	 * Abstract template method called from {@link #writeToInternal(Object, HttpOutputMessage)}.
+	 * Abstract template method called from {@link #writeInternal(Object, HttpOutputMessage)}.
 	 *
 	 * @param t the object to write to the output message
 	 * @param headers the HTTP output headers
@@ -94,14 +94,9 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	 * @param result the result to transform to
 	 * @throws HttpMessageConversionException in case of transformation errors
 	 */
-	protected void transform(Source source, Result result) {
-		try {
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.transform(source, result);
-		}
-		catch (TransformerException ex) {
-			throw new HttpMessageConversionException("Could not transform XML", ex);
-		}
+	protected void transform(Source source, Result result) throws TransformerException {
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.transform(source, result);
 	}
 
 }

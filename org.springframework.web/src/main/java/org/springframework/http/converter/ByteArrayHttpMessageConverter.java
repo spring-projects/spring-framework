@@ -19,10 +19,10 @@ package org.springframework.http.converter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.springframework.util.FileCopyUtils;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.
@@ -37,9 +37,7 @@ import org.springframework.http.HttpOutputMessage;
  */
 public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<byte[]> {
 
-	/**
-	 * Creates a new instance of the {@code ByteArrayHttpMessageConverter}.
-	 */
+	/** Creates a new instance of the {@code ByteArrayHttpMessageConverter}. */
 	public ByteArrayHttpMessageConverter() {
 		super(MediaType.ALL);
 	}
@@ -71,7 +69,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	}
 
 	@Override
-	protected void writeToInternal(byte[] bytes, HttpOutputMessage outputMessage) throws IOException {
+	protected void writeInternal(byte[] bytes, HttpOutputMessage outputMessage) throws IOException {
 		FileCopyUtils.copy(bytes, outputMessage.getBody());
 	}
 
