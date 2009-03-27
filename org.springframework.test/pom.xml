@@ -152,6 +152,12 @@
       <version>1.8.0.7</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib-nodep</artifactId>
+      <version>2.1_3</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
   <build>
     <pluginManagement>
