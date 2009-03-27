@@ -54,7 +54,8 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		return String.class.equals(clazz);
 	}
 
-	public String read(Class<String> clazz, HttpInputMessage inputMessage) throws IOException {
+	@Override
+	public String readInternal(Class<String> clazz, HttpInputMessage inputMessage) throws IOException {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 		return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
@@ -86,8 +87,8 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	/**
-	 * Return the list of supported {@link Charset}.
-	 * <p>By default, returns {@link Charset#availableCharsets()}. Can be overridden in subclasses.
+	 * Return the list of supported {@link Charset}. <p>By default, returns {@link Charset#availableCharsets()}. Can be
+	 * overridden in subclasses.
 	 *
 	 * @return the list of accepted charsets
 	 */

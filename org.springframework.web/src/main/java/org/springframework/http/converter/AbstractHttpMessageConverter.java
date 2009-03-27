@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -34,8 +35,8 @@ import org.springframework.util.Assert;
  * Abstract base class for most {@link HttpMessageConverter} implementations.
  *
  * <p>This base class adds support for setting supported {@code MediaTypes}, through the {@link
- * #setSupportedMediaTypes(List) supportedMediaTypes} bean property. It also adds support for
- * {@code Content-Type} and {@code Content-Length} when writing to output messages.
+ * #setSupportedMediaTypes(List) supportedMediaTypes} bean property. It also adds support for {@code Content-Type} and
+ * {@code Content-Length} when writing to output messages.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -76,11 +77,29 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * <p>This implementation delegates to {@link #getContentType(Object)} and {@link #getContentLength(Object)},
-	 * and sets the corresponding headers on the output message. It then calls
-	 * {@link #writeInternal(Object, HttpOutputMessage)}.
+	 * {@inheritDoc} <p>This implementation simple delegates to {@link #readInternal(Class, HttpInputMessage)}. Future
+	 * implementations might add some default behavior, however.
+	 */
+	public final T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException {
+		return readInternal(clazz, inputMessage);
+	}
+
+	/**
+	 * Abstract template method that reads the actualy object. Invoked from {@link #read(Class, HttpInputMessage)}.
 	 *
-	 * @throws HttpMessageConversionException in case of conversion errors
+	 * @param clazz the type of object to return
+	 * @param inputMessage the HTTP input message to read from
+	 * @return the converted object
+	 * @throws IOException in case of I/O errors
+	 * @throws HttpMessageNotReadableException in case of conversion errors
+	 */
+	protected abstract T readInternal(Class<T> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException;
+
+	/**
+	 * {@inheritDoc} <p>This implementation delegates to {@link #getContentType(Object)} and {@link
+	 * #getContentLength(Object)}, and sets the corresponding headers on the output message. It then calls {@link
+	 * #writeInternal(Object, HttpOutputMessage)}.
 	 */
 	public final void write(T t, HttpOutputMessage outputMessage) throws IOException {
 		HttpHeaders headers = outputMessage.getHeaders();
@@ -97,9 +116,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Returns the content type for the given type.
-	 * <p>By default, this returns the first element of the {@link #setSupportedMediaTypes(List) supportedMediaTypes}
-	 * property, if any. Can be overriden in subclasses.
+	 * Returns the content type for the given type. <p>By default, this returns the first element of the {@link
+	 * #setSupportedMediaTypes(List) supportedMediaTypes} property, if any. Can be overriden in subclasses.
 	 *
 	 * @param t the type to return the content type for
 	 * @return the content type, or <code>null</code> if not known
@@ -110,8 +128,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Returns the content length for the given type.
-	 * <p>By default, this returns <code>null</code>. Can be overriden in subclasses.
+	 * Returns the content length for the given type. <p>By default, this returns <code>null</code>. Can be overriden in
+	 * subclasses.
 	 *
 	 * @param t the type to return the content length for
 	 * @return the content length, or <code>null</code> if not known
@@ -126,8 +144,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @param t the object to write to the output message
 	 * @param outputMessage the message to write to
 	 * @throws IOException in case of I/O errors
-	 * @throws HttpMessageConversionException in case of conversion errors
+	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
-	protected abstract void writeInternal(T t, HttpOutputMessage outputMessage) throws IOException;
+	protected abstract void writeInternal(T t, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException;
 
 }

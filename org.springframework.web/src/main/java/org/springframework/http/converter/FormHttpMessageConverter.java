@@ -37,9 +37,9 @@ import org.springframework.util.StringUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write form data.
  *
- * <p>By default, this converter reads and writes the media type ({@code application/x-www-form-urlencoded}). This
- * can be overridden by setting the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property. Form
- * data is read from and written into a {@link MultiValueMap MultiValueMap&lt;String, String&gt;}.
+ * <p>By default, this converter reads and writes the media type ({@code application/x-www-form-urlencoded}). This can
+ * be overridden by setting the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property. Form data
+ * is read from and written into a {@link MultiValueMap MultiValueMap&lt;String, String&gt;}.
  *
  * @author Arjen Poutsma
  * @see MultiValueMap
@@ -58,8 +58,9 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 		return MultiValueMap.class.isAssignableFrom(clazz);
 	}
 
-	public MultiValueMap<String, String> read(Class<MultiValueMap<String, String>> clazz, HttpInputMessage inputMessage)
-			throws IOException {
+	@Override
+	public MultiValueMap<String, String> readInternal(Class<MultiValueMap<String, String>> clazz,
+			HttpInputMessage inputMessage) throws IOException {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 		String body = FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));

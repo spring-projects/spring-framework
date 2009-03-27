@@ -46,7 +46,8 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 		return byte[].class.equals(clazz);
 	}
 
-	public byte[] read(Class<byte[]> clazz, HttpInputMessage inputMessage) throws IOException {
+	@Override
+	public byte[] readInternal(Class<byte[]> clazz, HttpInputMessage inputMessage) throws IOException {
 		long contentLength = inputMessage.getHeaders().getContentLength();
 		if (contentLength >= 0) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream((int) contentLength);
