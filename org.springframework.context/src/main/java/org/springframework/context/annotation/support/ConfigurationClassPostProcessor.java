@@ -143,6 +143,10 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 
 		BeanDefinitionRegistry configBeanDefs = getConfigurationBeanDefinitions(true);
 
+		if (configBeanDefs.getBeanDefinitionCount() == 0)
+			// nothing to enhance -> return immediately
+			return;
+
 		assertCglibIsPresent(configBeanDefs);
 
 		ConfigurationEnhancer enhancer = new ConfigurationEnhancer(beanFactory);
