@@ -471,6 +471,14 @@ public final class BeanWrapperGenericsTests {
 		Assert.assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
 	}
 
+	@Test
+	public void testSettingGenericPropertyWithReadOnlyInterface() {
+		Bar bar = new Bar();
+		BeanWrapper bw = new BeanWrapperImpl(bar);
+		bw.setPropertyValue("version", "10");
+		Assert.assertEquals(10.0, bar.getVersion());
+	}
+
 
 	private static abstract class BaseGenericCollectionBean {
 
@@ -564,5 +572,26 @@ public final class BeanWrapperGenericsTests {
 	private static class DerivedMap extends HashMap<Integer, List<Long>> {
 
 	}
+
+
+	public interface Foo {
+
+		Number getVersion();
+	}
+
+
+	public class Bar implements Foo {
+
+		private double version;
+
+		public Double getVersion() {
+			return this.version;
+		}
+
+		public void setVersion(Double theDouble) {
+			this.version = theDouble;
+		}
+	}
+
 
 }
