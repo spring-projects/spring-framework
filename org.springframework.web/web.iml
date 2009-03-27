@@ -83,11 +83,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.caucho/com.springsource.com.caucho/3.1.5/com.springsource.com.caucho-3.1.5.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.caucho/com.springsource.com.caucho/3.2.1/com.springsource.com.caucho-3.2.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/com.caucho/com.springsource.com.caucho/3.1.5/com.springsource.com.caucho-sources-3.1.5.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.caucho/com.springsource.com.caucho/3.2.1/com.springsource.com.caucho-sources-3.2.1.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
