@@ -27,7 +27,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-2.1.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-sources-2.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-3.2.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-sources-3.2.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-1.8.0.9.jar" sourcepath="/IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-sources-1.8.0.9.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-2.1.3.jar" sourcepath="/IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-sources-2.1.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
