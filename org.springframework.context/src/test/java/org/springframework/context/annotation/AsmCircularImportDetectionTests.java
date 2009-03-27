@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
+import org.springframework.context.annotation.ConfigurationParser;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.support.ConfigurationParser;
 import org.springframework.util.ClassUtils;
 
 

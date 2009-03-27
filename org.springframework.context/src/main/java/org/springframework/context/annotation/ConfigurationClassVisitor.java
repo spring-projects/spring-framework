@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static java.lang.String.*;
-import static org.springframework.context.annotation.support.AsmUtils.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.util.HashMap;
@@ -32,8 +32,6 @@ import org.springframework.asm.Opcodes;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 
 

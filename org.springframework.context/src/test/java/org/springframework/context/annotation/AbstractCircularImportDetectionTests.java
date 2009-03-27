@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ConfigurationParser;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.support.ConfigurationParser;
 
 import test.beans.TestBean;
 

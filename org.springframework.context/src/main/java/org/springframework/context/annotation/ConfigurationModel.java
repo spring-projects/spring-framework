@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static java.lang.String.*;
 
@@ -22,7 +22,6 @@ import java.util.LinkedHashSet;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.context.annotation.Configuration;
 
 
 /**

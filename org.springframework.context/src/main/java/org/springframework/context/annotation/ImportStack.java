@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Stack;
 
-import org.springframework.context.annotation.Import;
 import org.springframework.util.Assert;
 
 

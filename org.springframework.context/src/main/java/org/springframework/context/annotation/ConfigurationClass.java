@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static java.lang.String.*;
 
@@ -24,8 +24,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 

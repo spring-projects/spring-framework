@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static org.junit.Assert.*;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
@@ -23,7 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 
 
 /**

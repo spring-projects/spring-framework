@@ -31,10 +31,10 @@ import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.annotation.StandardScopes;
-import org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 
 import test.beans.ITestBean;

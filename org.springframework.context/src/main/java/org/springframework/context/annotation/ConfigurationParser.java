@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.support.AsmUtils.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 
 import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
 
 
@@ -39,7 +38,7 @@ import org.springframework.util.ClassUtils;
  * @see ConfigurationModel
  * @see ConfigurationModelBeanDefinitionReader
  */
-public class ConfigurationParser {
+class ConfigurationParser {
 
 	/**
 	 * Model to be populated during calls to {@link #parse(Object, String)}

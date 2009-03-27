@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.support.AsmUtils.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.lang.annotation.Annotation;
@@ -28,8 +28,6 @@ import org.springframework.asm.Label;
 import org.springframework.asm.MethodAdapter;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 
 /**

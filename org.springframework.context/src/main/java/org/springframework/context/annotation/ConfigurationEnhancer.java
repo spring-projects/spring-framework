@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static java.lang.String.*;
-import static org.springframework.context.annotation.support.AsmUtils.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -35,8 +35,6 @@ import org.springframework.asm.ClassAdapter;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassWriter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 

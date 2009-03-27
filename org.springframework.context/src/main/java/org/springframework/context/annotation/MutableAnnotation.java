@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Interface used when dynamically creating mutable instances of annotations associated
@@ -29,22 +28,12 @@ import org.springframework.context.annotation.Configuration;
  * model representations of all annotations and attributes. It is better to simply attach
  * annotation instances and read them as needed.
  * 
- * <p>Note: the visibility of this interface would be reduced to package-private save for an
- * obscure restriction of JDK dynamic proxies.
- * {@link AsmUtils#createMutableAnnotation} creates a proxy based on
- * two interfaces: this one, and whatever annotation is currently being parsed. The
- * restriction is that both interfaces may not be package-private if they are in separate
- * packages. In order to avoid unnecessarily restricting the visibility options for
- * user-defined annotations, this interface becomes public. Developers should take caution
- * not to use this annotation outside this package.
- * 
  * @author Chris Beams
- * @since 3.0
  * @see MutableAnnotationVisitor
  * @see MutableAnnotationInvocationHandler
  * @see AsmUtils#createMutableAnnotation
  */
-public interface MutableAnnotation {
+interface MutableAnnotation {
 
 	void setAttributeValue(String attribName, Object attribValue);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import net.sf.cglib.asm.Constants;
 
