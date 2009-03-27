@@ -170,9 +170,8 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 			Class.forName(CGLIB_TEST_CLASS);
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException("CGLIB is required to process @Configuration classes. " +
-					"Either add CGLIB v2.2.3 to the classpath or remove the following " +
-					"@Configuration bean definitions: ["
-					+ StringUtils.arrayToCommaDelimitedString(configBeanDefs.getBeanDefinitionNames()) + "]");
+					"Either add CGLIB to the classpath or remove the following @Configuration bean definitions: [" +
+					StringUtils.arrayToCommaDelimitedString(configBeanDefs.getBeanDefinitionNames()) + "]");
 		}
 	}
 
