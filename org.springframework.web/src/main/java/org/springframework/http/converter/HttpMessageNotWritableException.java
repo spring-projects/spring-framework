@@ -16,33 +16,31 @@
 
 package org.springframework.http.converter;
 
-import org.springframework.core.NestedRuntimeException;
-
 /**
- * Thrown by {@link HttpMessageConverter} implementations when the conversion fails.
+ * Thrown by {@link org.springframework.http.converter.HttpMessageConverter} implementations when the
+ * {@link org.springframework.http.converter.HttpMessageConverter#write(Object, org.springframework.http.HttpOutputMessage) write} method fails.
  *
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class HttpMessageConversionException extends NestedRuntimeException {
+public class HttpMessageNotWritableException extends HttpMessageConversionException {
 
 	/**
-	 * Create a new HttpMessageConversionException.
+	 * Create a new HttpMessageNotWritableException.
 	 *
 	 * @param msg the detail message
 	 */
-	public HttpMessageConversionException(String msg) {
+	public HttpMessageNotWritableException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Create a new HttpMessageConversionException.
+	 * Create a new HttpMessageNotWritableException.
 	 *
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageConversionException(String msg, Throwable cause) {
+	public HttpMessageNotWritableException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
-
 }

@@ -16,33 +16,31 @@
 
 package org.springframework.http.converter;
 
-import org.springframework.core.NestedRuntimeException;
-
 /**
- * Thrown by {@link HttpMessageConverter} implementations when the conversion fails.
+ * Thrown by {@link HttpMessageConverter} implementations when the
+ * {@link HttpMessageConverter#read(Class, org.springframework.http.HttpInputMessage) read} method fails.
  *
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class HttpMessageConversionException extends NestedRuntimeException {
+public class HttpMessageNotReadableException extends HttpMessageConversionException {
 
 	/**
-	 * Create a new HttpMessageConversionException.
+	 * Create a new HttpMessageNotReadableException.
 	 *
 	 * @param msg the detail message
 	 */
-	public HttpMessageConversionException(String msg) {
+	public HttpMessageNotReadableException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Create a new HttpMessageConversionException.
+	 * Create a new HttpMessageNotReadableException.
 	 *
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageConversionException(String msg, Throwable cause) {
+	public HttpMessageNotReadableException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
-
 }

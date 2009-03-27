@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
@@ -6,8 +22,12 @@ import javax.xml.transform.Source;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.util.Assert;
 
 /**
@@ -98,11 +118,21 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 
 	@Override
 	protected Object readFromSource(Class<Object> clazz, HttpHeaders headers, Source source) throws IOException {
-		return unmarshaller.unmarshal(source);
+		try {
+			return unmarshaller.unmarshal(source);
+		}
+		catch (UnmarshallingFailureException ex) {
+			throw new HttpMessageNotReadableException("Could not read [" + clazz + "]", ex);
+		}
 	}
 
 	@Override
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws IOException {
-		marshaller.marshal(o, result);
+		try {
+			marshaller.marshal(o, result);
+		}
+		catch (MarshallingFailureException ex) {
+			throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
+		}
 	}
 }

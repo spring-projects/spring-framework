@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * <p>By default, this converter reads and writes the media type ({@code application/x-www-form-urlencoded}). This
  * can be overridden by setting the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property. Form
  * data is read from and written into a {@link MultiValueMap MultiValueMap&lt;String, String&gt;}.
+ *
  * @author Arjen Poutsma
  * @see MultiValueMap
  * @since 3.0
@@ -48,9 +49,7 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 
-	/**
-	 * Creates a new instance of the {@code FormHttpMessageConverter}.
-	 */
+	/** Creates a new instance of the {@code FormHttpMessageConverter}. */
 	public FormHttpMessageConverter() {
 		super(new MediaType("application", "x-www-form-urlencoded"));
 	}
@@ -84,7 +83,7 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 	}
 
 	@Override
-	protected void writeToInternal(MultiValueMap<String, String> form, HttpOutputMessage outputMessage)
+	protected void writeInternal(MultiValueMap<String, String> form, HttpOutputMessage outputMessage)
 			throws IOException {
 		MediaType contentType = getContentType(form);
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
