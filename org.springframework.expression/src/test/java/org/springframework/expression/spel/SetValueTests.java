@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests set value expressions.
@@ -70,9 +71,10 @@ public class SetValueTests extends ExpressionTestCase {
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			assertTrue("Expression is not writeable but should be", e.isWritable(eContext));
-			e.setValue(eContext, value);
-			assertEquals("Retrieved value was not equal to set value", value, e.getValue(eContext));
+			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
+			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
+			e.setValue(lContext, value);
+			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext));
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
