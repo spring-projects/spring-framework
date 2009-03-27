@@ -512,7 +512,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Register bean as disposable.
-		registerDisposableBeanIfNecessary(beanName, bean, mbd);
+		try {
+			registerDisposableBeanIfNecessary(beanName, bean, mbd);
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, "Invalid destruction signature", ex);
+		}
 
 		return exposedObject;
 	}
@@ -1387,8 +1392,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
 		if (initMethod == null) {
 			if (enforceInitMethod) {
-				throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
-						"' on bean with name '" + beanName + "'");
+				throw new BeanDefinitionValidationException("Couldn't find an init method named '" +
+						initMethodName + "' on bean with name '" + beanName + "'");
 			}
 			else {
 				if (logger.isDebugEnabled()) {

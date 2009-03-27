@@ -12,6 +12,9 @@
 	<bean id="defaultTestBean" factory-bean="default" factory-method="getTestBean"
 			init-method="haveBirthday" destroy-method="destroy"/>
 			
+	<bean id="defaultTestBeanWithInvalidDestroyMethod" factory-bean="default" factory-method="getTestBean"
+			init-method="haveBirthday" destroy-method="xxx" lazy-init="true"/>
+
 	<bean id="defaultTestBean.protected" factory-bean="default" factory-method="protectedGetTestBean"
 			init-method="haveBirthday" destroy-method="destroy"/>
 			

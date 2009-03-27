@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,19 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+import test.beans.TestBean;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
-
-import test.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
@@ -69,6 +68,21 @@ public class FactoryMethodTests {
 
 		xbf.destroySingletons();
 		assertTrue(tb.wasDestroyed());
+	}
+
+	@Test
+	public void testFactoryMethodsWithInvalidDestroyMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		try {
+			xbf.getBean("defaultTestBeanWithInvalidDestroyMethod");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+		}
 	}
 
 	@Test
