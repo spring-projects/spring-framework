@@ -1055,8 +1055,11 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Check registerer HandlerExceptionResolvers...
 		ModelAndView exMv = null;
-		for (Iterator<HandlerExceptionResolver> it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-			exMv = it.next().resolveException(request, response, handler, ex);
+		for (HandlerExceptionResolver handlerExceptionResolver : this.handlerExceptionResolvers) {
+			exMv = handlerExceptionResolver.resolveException(request, response, handler, ex);
+			if (exMv != null) {
+				break;
+			}
 		}
 		if (exMv != null) {
 			if (exMv.isEmpty()) {
