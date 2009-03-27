@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * Base class for dynamic TargetSources that can create new prototype bean
  * instances to support a pooling or new-instance-per-invocation strategy.
  *
- * <p>Such TargetSources must run in a BeanFactory, as it needs to call the
- * <code>getBean</code> method to create a new prototype instance.
+ * <p>Such TargetSources must run in a {@link BeanFactory}, as it needs to
+ * call the <code>getBean</code> method to create a new prototype instance.
  * Therefore, this base class extends {@link AbstractBeanFactoryBasedTargetSource}.
  *
  * @author Rod Johnson
@@ -56,8 +56,8 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 	 * @throws BeansException if bean creation failed
 	 */
 	protected Object newPrototypeInstance() throws BeansException {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Creating new instance of bean '" + getTargetBeanName() + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating new instance of bean '" + getTargetBeanName() + "'");
 		}
 		return getBeanFactory().getBean(getTargetBeanName());
 	}
@@ -78,7 +78,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 				((DisposableBean) target).destroy();
 			}
 			catch (Throwable ex) {
-				this.logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
+				logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
 			}
 		}
 	}
