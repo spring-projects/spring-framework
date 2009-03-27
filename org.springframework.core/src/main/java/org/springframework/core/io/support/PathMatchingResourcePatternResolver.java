@@ -385,7 +385,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (equinoxResolveMethod != null) {
 			URL url = original.getURL();
 			if (url.getProtocol().startsWith("bundle")) {
-				return new UrlResource((URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, new Object[] {url}));
+				return new UrlResource((URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, url));
 			}
 		}
 		return original;
