@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -24,9 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class UriTemplateServletAnnotationControllerTests {
 
 	private DispatcherServlet servlet;
@@ -90,6 +89,16 @@ public class UriTemplateServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("test-42", response.getContentAsString());
 
+	}
+
+	@Test
+	public void typeConversionError() throws Exception {
+		initServlet(SimpleUriTemplateController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
 	}
 
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
