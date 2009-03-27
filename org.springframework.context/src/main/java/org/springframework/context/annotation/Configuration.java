@@ -45,8 +45,8 @@ import org.springframework.stereotype.Component;
  * <ul>
  *    <li>Configuration classes must be non-final
  *    <li>Configuration classes must be non-local (may not be declared within a method)
- *    <li>Configuration classes must have a default/no-arg constructor or at least one
- *        {@link Autowired} constructor
+ *    <li>Configuration classes must have a default/no-arg constructor and may not use
+ *        {@link Autowired} constructor parameters
  * </ul>
  * 
  * @author Rod Johnson
