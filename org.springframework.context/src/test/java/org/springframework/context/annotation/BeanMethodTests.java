@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 import static org.springframework.context.annotation.ScopedProxyMode.*;
 import static org.springframework.context.annotation.StandardScopes.*;
-import static org.springframework.context.annotation.support.AsmUtils.*;
 
 import java.lang.reflect.Modifier;
 
@@ -29,6 +29,9 @@ import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.BeanMethod;
+import org.springframework.context.annotation.ConfigurationClass;
+import org.springframework.context.annotation.ModelClass;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;

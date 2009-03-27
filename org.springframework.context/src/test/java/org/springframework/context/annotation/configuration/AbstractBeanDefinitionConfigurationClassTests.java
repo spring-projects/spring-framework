@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 
 
 /**

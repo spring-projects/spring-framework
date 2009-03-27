@@ -24,8 +24,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
 
 import test.beans.ITestBean;
 import test.beans.TestBean;

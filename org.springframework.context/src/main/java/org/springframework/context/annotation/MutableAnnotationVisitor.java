@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.support.AsmUtils.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

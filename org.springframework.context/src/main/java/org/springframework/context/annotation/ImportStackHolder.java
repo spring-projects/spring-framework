@@ -14,12 +14,35 @@
  * limitations under the License.
  */
 
+package org.springframework.context.annotation;
+
+
+
 /**
- * Supporting infrastructure for
- * {@link org.springframework.context.annotation.Configuration} class processing.
+ * Holder class to expose a thread-bound {@link ImportStack}, used while detecting circular
+ * declarations of the {@link Import} annotation.
  * 
  * @author Chris Beams
- * @see ConfigurationClassPostProcessor
- * @see ConfigurationParser
+ * @see Import
+ * @see ImportStack
+ * @see CircularImportException
  */
-package org.springframework.context.annotation.support;
+class ImportStackHolder {
+
+	private static ThreadLocal<ImportStack> stackHolder = new ThreadLocal<ImportStack>() {
+		@Override
+		protected ImportStack initialValue() {
+			return new ImportStack();
+		}
+	};
+
+	public static ImportStack getImportStack() {
+		return stackHolder.get();
+	}
+
+	@Override
+	public String toString() {
+		return "Holder for circular @Import detection stack";
+	}
+
+}

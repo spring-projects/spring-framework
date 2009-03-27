@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static java.lang.String.*;
-import static org.springframework.context.annotation.support.AsmUtils.*;
+import static org.springframework.context.annotation.AsmUtils.*;
 import static org.springframework.util.ClassUtils.*;
 
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.context.annotation.Import;
 import org.springframework.util.Assert;
 
 

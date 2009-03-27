@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation.support;
+package org.springframework.context.annotation;
 
 import static java.lang.String.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.context.annotation.support.ConfigurationClass;
-import org.springframework.context.annotation.support.ConfigurationModel;
+import org.springframework.context.annotation.ConfigurationClass;
+import org.springframework.context.annotation.ConfigurationModel;
 
 
 /**
