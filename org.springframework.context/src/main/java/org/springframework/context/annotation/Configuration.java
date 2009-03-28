@@ -55,13 +55,13 @@ import org.springframework.stereotype.Component;
  * @see Bean
  * @see Lazy
  * @see Value
- * @see org.springframework.context.annotation.support.ConfigurationClassPostProcessor;
+ * @see ConfigurationClassPostProcessor;
  */
-@Component
 @Target( { ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Component
 public @interface Configuration {
 
 }

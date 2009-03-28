@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import static java.lang.String.*;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +44,7 @@ final class ConfigurationClass extends ModelClass {
 
 	private String beanName;
 	private int modifiers;
-	private Configuration configurationAnnotation;
+	private HashSet<Annotation> annotations = new HashSet<Annotation>();
 	private HashSet<BeanMethod> methods = new HashSet<BeanMethod>();
 	private ConfigurationClass declaringClass;
 
@@ -63,14 +64,38 @@ final class ConfigurationClass extends ModelClass {
 		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative");
 		this.modifiers = modifiers;
 	}
-
-	public Configuration getConfigurationAnnotation() {
-		return this.configurationAnnotation;
+	
+	public void addAnnotation(Annotation annotation) {
+		this.annotations.add(annotation);
 	}
 
-	public void setConfigurationAnnotation(Configuration configAnno) {
-		Assert.notNull(configAnno, "configuration annotation must be non-null");
-		this.configurationAnnotation = configAnno;
+	/**
+	 * @return the annotation on this class matching <var>annoType</var> or
+	 * {@literal null} if not present.
+	 * @see #getRequiredAnnotation(Class)
+	 */
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> A getAnnotation(Class<A> annoType) {
+		for (Annotation annotation : annotations)
+			if(annotation.annotationType().equals(annoType))
+				return (A) annotation;
+
+		return null;
+	}
+
+	/**
+	 * @return the annotation on this class matching <var>annoType</var>
+	 * @throws {@link IllegalStateException} if not present
+	 * @see #getAnnotation(Class)
+	 */
+	public <A extends Annotation> A getRequiredAnnotation(Class<A> annoType) {
+		A anno = getAnnotation(annoType);
+
+		if(anno == null)
+			throw new IllegalStateException(
+					format("required annotation %s is not present on %s", annoType.getSimpleName(), this));
+
+		return anno;
 	}
 
 	public Set<BeanMethod> getBeanMethods() {
@@ -93,7 +118,7 @@ final class ConfigurationClass extends ModelClass {
 
 	public void validate(ProblemReporter problemReporter) {
 		// configuration classes must be annotated with @Configuration
-		if (configurationAnnotation == null)
+		if (getAnnotation(Configuration.class) == null)
 			problemReporter.error(new NonAnnotatedConfigurationProblem());
 
 		// a configuration class may not be final (CGLIB limitation)
@@ -113,9 +138,12 @@ final class ConfigurationClass extends ModelClass {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((declaringClass == null) ? 0 : declaringClass.hashCode());
-		result = prime * result + ((beanName == null) ? 0 : beanName.hashCode());
-		result = prime * result + ((configurationAnnotation == null) ? 0 : configurationAnnotation.hashCode());
+		result = prime * result
+				+ ((annotations == null) ? 0 : annotations.hashCode());
+		result = prime * result
+				+ ((beanName == null) ? 0 : beanName.hashCode());
+		result = prime * result
+				+ ((declaringClass == null) ? 0 : declaringClass.hashCode());
 		result = prime * result + ((methods == null) ? 0 : methods.hashCode());
 		result = prime * result + modifiers;
 		return result;
@@ -130,20 +158,20 @@ final class ConfigurationClass extends ModelClass {
 		if (getClass() != obj.getClass())
 			return false;
 		ConfigurationClass other = (ConfigurationClass) obj;
-		if (declaringClass == null) {
-			if (other.declaringClass != null)
+		if (annotations == null) {
+			if (other.annotations != null)
 				return false;
-		} else if (!declaringClass.equals(other.declaringClass))
+		} else if (!annotations.equals(other.annotations))
 			return false;
 		if (beanName == null) {
 			if (other.beanName != null)
 				return false;
 		} else if (!beanName.equals(other.beanName))
 			return false;
-		if (configurationAnnotation == null) {
-			if (other.configurationAnnotation != null)
+		if (declaringClass == null) {
+			if (other.declaringClass != null)
 				return false;
-		} else if (!configurationAnnotation.equals(other.configurationAnnotation))
+		} else if (!declaringClass.equals(other.declaringClass))
 			return false;
 		if (methods == null) {
 			if (other.methods != null)
