@@ -20,6 +20,20 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>javax.transaction</groupId>
+      <artifactId>jta</artifactId>
+      <version>1.1</version>
+    </dependency>
+
+
+
+    <dependency>
+      <groupId>quartz</groupId>
+      <artifactId>quartz</artifactId>
+      <version>1.6.2</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
       <version>2.3.12</version>
@@ -71,6 +85,12 @@
       <groupId>opensymphony</groupId>
       <artifactId>quartz-all</artifactId>
       <version>1.6.0</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>jfree</groupId>
+      <artifactId>jfreechart</artifactId>
+      <version>1.0.9-brew</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -128,17 +148,15 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <junitArtifactName>junit:junit</junitArtifactName>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <testResources>
+      <testResource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.types</include>
+        </includes>
+      </testResource>
+    </testResources>
   </build>
 </project>

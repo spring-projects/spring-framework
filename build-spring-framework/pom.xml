@@ -22,10 +22,6 @@
       <name>IBiblio mirro</name>
       <url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>
     </repository>
-    <repository>
-      <id>EclipseLink Repo</id>
-      <url>http://mirror.cc.vt.edu/pub/eclipse/rt/eclipselink/maven.repo/</url>
-      </repository>    
     -->
     <!-- for use with jexcelapi 2.6.8, portlet 2.0, hibernate 3.3.1-->
     <repository>
@@ -33,6 +29,11 @@
       <name>JBoss Repository</name>
       <url>http://repository.jboss.org/maven2</url>
     </repository>
+    <repository>
+      <id>EclipseLink Repo</id>
+      <url>http://mirror.cc.vt.edu/pub/eclipse/rt/eclipselink/maven.repo/</url>
+    </repository>    
+
 
     <!-- fallback to S2 bundle repo for com.ibm.websphere.uow, oracle.classloader, com.sun.enterprise.loader -->
     <repository>

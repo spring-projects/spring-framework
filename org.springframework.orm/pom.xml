@@ -43,10 +43,10 @@
       <version>1.1.0</version>
       <optional>true</optional>
     </dependency>
-    <!--
+
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence</artifactId>
+      <artifactId>org.eclipse.persistence.core</artifactId>
       <version>1.0.1</version>
       <scope>test</scope>
     </dependency>
@@ -54,9 +54,21 @@
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>org.eclipse.persistence.jpa</artifactId>
       <version>1.0.1</version>
-      <optional>true</optional>
+      <scope>test</scope>
     </dependency>
-    -->
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.asm</artifactId>
+      <version>1.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.antlr</artifactId>
+      <version>1.0.1</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
@@ -65,11 +77,19 @@
     </dependency>
 
     <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-cglib-repack</artifactId>
+      <version>2.1_3</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-nodep</artifactId>
       <version>2.1_3</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
