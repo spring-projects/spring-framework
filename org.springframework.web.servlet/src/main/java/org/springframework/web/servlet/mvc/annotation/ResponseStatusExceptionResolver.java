@@ -28,6 +28,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver HandlerExceptionResolver}
  * interface that uses the {@link ResponseStatus @ResponseStatus} annotation to map exceptions to HTTP status codes.
+ * <p>This exception resolver is enabled by default in the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
  * @since 3.0

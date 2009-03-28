@@ -38,7 +38,8 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 /**
  * Default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver
  * HandlerExceptionResolver} interface that resolves standard Spring exceptions. <p>Default implementations typically
- * set the response status.
+ * set the response status to a corresponding HTTP status code. <p>This exception resolver is enabled by default in the
+ * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
  * @see #handleNoSuchRequestHandlingMethod
