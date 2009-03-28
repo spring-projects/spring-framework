@@ -28,11 +28,6 @@ import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.BeanMethod;
-import org.springframework.context.annotation.ConfigurationClass;
-import org.springframework.context.annotation.ModelClass;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 
@@ -63,8 +58,8 @@ public class BeanMethodTests {
 		assertThat(beanMethod.getRequiredAnnotation(Bean.class), sameInstance(beanAnno));
 		try {
 			beanMethod.getRequiredAnnotation(Override.class);
-			fail("expected IllegalArgumentException ex");
-		} catch (IllegalArgumentException ex) { /* expected */ }
+			fail("expected IllegalStateException ex");
+		} catch (IllegalStateException ex) { /* expected */ }
 
 		// must call setDeclaringClass() before calling getLocation()
 		try {
