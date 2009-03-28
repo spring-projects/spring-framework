@@ -20,6 +20,7 @@ import static java.lang.String.*;
 import static org.springframework.context.annotation.AsmUtils.*;
 import static org.springframework.util.ClassUtils.*;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -105,26 +106,27 @@ class ConfigurationClassVisitor extends ClassAdapter {
 
 	/**
 	 * Visits a class level annotation on a {@link Configuration @Configuration} class.
-	 * Accounts for all possible class-level annotations that are respected by JavaConfig
-	 * including AspectJ's {@code @Aspect} annotation.
-	 * <p>
-	 * Upon encountering such an annotation, update the {@link #configClass} model object
-	 * appropriately, and then return an {@link AnnotationVisitor} implementation that can
-	 * populate the annotation appropriately with data.
+	 * 
+	 * <p>Upon encountering such an annotation, updates the {@link #configClass} model
+	 * object appropriately, and then returns an {@link AnnotationVisitor} implementation
+	 * that can populate the annotation appropriately with its attribute data as parsed
+	 * by ASM.
 	 * 
 	 * @see MutableAnnotation
+	 * @see Configuration
+	 * @see Lazy
+	 * @see Import
 	 */
 	@Override
 	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
 		String annoTypeName = convertAsmTypeDescriptorToClassName(annoTypeDesc);
+		Class<? extends Annotation> annoClass = loadToolingSafeClass(annoTypeName, classLoader);
 
-		if (Configuration.class.getName().equals(annoTypeName)) {
-			Configuration mutableConfiguration = createMutableAnnotation(Configuration.class, classLoader);
-			configClass.setConfigurationAnnotation(mutableConfiguration);
-			return new MutableAnnotationVisitor(mutableConfiguration, classLoader);
-		}
+		if (annoClass == null)
+			// annotation was unable to be loaded -> probably Spring IDE unable to load a user-defined annotation
+			return super.visitAnnotation(annoTypeDesc, visible);
 
-		if (Import.class.getName().equals(annoTypeName)) {
+		if (Import.class.equals(annoClass)) {
 			ImportStack importStack = ImportStackHolder.getImportStack();
 
 			if (!importStack.contains(configClass)) {
@@ -135,7 +137,9 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			problemReporter.error(new CircularImportProblem(configClass, importStack));
 		}
 
-		return super.visitAnnotation(annoTypeDesc, visible);
+		Annotation mutableAnnotation = createMutableAnnotation(annoClass, classLoader);
+		configClass.addAnnotation(mutableAnnotation);
+		return new MutableAnnotationVisitor(mutableAnnotation, classLoader);
 	}
 
 	/**
@@ -187,7 +191,7 @@ class ConfigurationClassVisitor extends ClassAdapter {
 			innerConfigClass.setDeclaringClass(innerClasses.get(outerName));
 
 		// is the inner class a @Configuration class? If so, add it to the list
-		if (innerConfigClass.getConfigurationAnnotation() != null)
+		if (innerConfigClass.getAnnotation(Configuration.class) != null)
 			innerClasses.put(name, innerConfigClass);
 	}
 

@@ -85,10 +85,10 @@ final class BeanMethod implements BeanMetadataElement {
 	 * @see #getRequiredAnnotation(Class)
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Annotation> T getAnnotation(Class<T> annoType) {
+	public <A extends Annotation> A getAnnotation(Class<A> annoType) {
 		for (Annotation anno : annotations)
 			if (anno.annotationType().equals(annoType))
-				return (T) anno;
+				return (A) anno;
 
 		return null;
 	}
@@ -101,7 +101,9 @@ final class BeanMethod implements BeanMetadataElement {
 	public <T extends Annotation> T getRequiredAnnotation(Class<T> annoType) {
 		T anno = getAnnotation(annoType);
 
-		Assert.notNull(anno, format("annotation %s not found on %s", annoType.getSimpleName(), this));
+		if(anno == null)
+			throw new IllegalStateException(
+					format("required annotation %s is not present on %s", annoType.getSimpleName(), this));
 
 		return anno;
 	}

@@ -155,15 +155,16 @@ class ConfigurationModelBeanDefinitionReader {
 			}
 		}
 
-		// TODO: re-enable for Lazy support
-		// // is this bean marked as primary for disambiguation?
-		// if (bean.primary() == Primary.TRUE)
-		// beanDef.setPrimary(true);
-		//
-		// // is this bean lazily instantiated?
-		// if ((bean.lazy() == Lazy.TRUE)
-		// || ((bean.lazy() == Lazy.UNSPECIFIED) && (defaults.defaultLazy() == Lazy.TRUE)))
-		// beanDef.setLazyInit(true);
+		if (method.getAnnotation(Primary.class) != null)
+			beanDef.setPrimary(true);
+
+		// is this bean to be instantiated lazily?
+		Lazy defaultLazy = configClass.getAnnotation(Lazy.class);
+		if (defaultLazy != null)
+			beanDef.setLazyInit(defaultLazy.value());
+		Lazy lazy = method.getAnnotation(Lazy.class);
+		if (lazy != null)
+			beanDef.setLazyInit(lazy.value());
 
 		// does this bean have a custom init-method specified?
 		String initMethodName = bean.initMethod();
