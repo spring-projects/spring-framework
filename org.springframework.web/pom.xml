@@ -4,12 +4,12 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-web</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.0.M3</version>
+  <version>3.0.0.BUILD-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework</groupId>
-    <artifactId>org.springframework.parent</artifactId>
-    <relativePath>../build-spring-framework</relativePath>
-    <version>3.0.0.M3</version>
+    <artifactId>spring-parent</artifactId>
+    <relativePath>../org.springframework.spring-parent</relativePath>
+    <version>3.0.0.BUILD-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -98,31 +98,31 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-aop</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-oxm</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -162,17 +162,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <junitArtifactName>junit:junit</junitArtifactName>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>

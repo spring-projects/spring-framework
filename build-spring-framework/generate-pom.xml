@@ -74,7 +74,7 @@
      <mapping conf="runtime" scope="runtime"/>
     </ivy:makepom>
 
-    <xmlproperty file="../build-spring-framework/pom.xml"/>
+    <xmlproperty file="../org.springframework.spring-library/pom.xml"/>
 
     <replaceregexp file="pom.xml" 
 	           match="&lt;version>.*?&lt;/version>"
@@ -93,8 +93,8 @@
 	 <replacevalue><![CDATA[  <version>@project-version@</version>
   <parent>
     <groupId>org.springframework</groupId>
-    <artifactId>org.springframework.parent</artifactId>
-    <relativePath>../build-spring-framework</relativePath>
+    <artifactId>spring-parent</artifactId>
+    <relativePath>../org.springframework.spring-parent</relativePath>
     <version>@project-version@</version>
   </parent>
 ]]></replacevalue>

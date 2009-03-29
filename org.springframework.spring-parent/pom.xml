@@ -4,10 +4,12 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
-  <artifactId>org.springframework.parent</artifactId>
-  <name>Spring Framework</name>
-  <version>3.0.0.M3</version>
+  <artifactId>spring-parent</artifactId>
   <packaging>pom</packaging>
+  <name>Spring Framework</name>
+  <version>3.0.0.BUILD-SNAPSHOT</version>
+  <description>Spring Framework</description>
+
 
   <repositories>
     <repository>
@@ -65,7 +67,7 @@
       <dependency>
         <artifactId>org.springframework</artifactId>
         <groupId>spring-context</groupId>
-        <version>3.0.0.M3</version>
+        <version>${project.version}</version>
         <exclusions>
           <exclusion>
             <groupId>com.oracle.oc4j</groupId>
@@ -96,15 +98,15 @@
       <distributionManagement>
         <site>
           <id>staging</id>
-          <url>file:///${user.dir}/target/staging</url>
+          <url>file:${maven.local.staging.repository}</url>
         </site>
         <repository>
           <id>staging</id>
-          <url>file:///${user.dir}/target/staging</url>
+          <url>file:${maven.local.staging.repository}</url>
         </repository>
         <snapshotRepository>
           <id>staging</id>
-          <url>file:///${user.dir}/target/staging</url>
+          <url>file:${maven.local.staging.repository}</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>
@@ -186,39 +188,6 @@
     </plugins>
   </build>
   
-  <modules>
-    <module>../org.springframework.instrument</module>
-    <module>../org.springframework.instrument.classloading</module>
-    <module>../org.springframework.asm</module>
-    <module>../org.springframework.core</module>
-    <module>../org.springframework.expression</module>
-    <module>../org.springframework.core</module>
-    <module>../org.springframework.beans</module>
-    <module>../org.springframework.aop</module>
-    <module>../org.springframework.context</module>
-    <module>../org.springframework.transaction</module>
-    <module>../org.springframework.oxm</module>
-    <module>../org.springframework.jms</module>
-    <module>../org.springframework.aspects</module>
-    <module>../org.springframework.jdbc</module>
-    <module>../org.springframework.web</module>
-    <module>../org.springframework.orm</module>
-    <module>../org.springframework.context.support</module>
-    <module>../org.springframework.web.portlet</module>
-    <module>../org.springframework.web.servlet</module>
-    <module>../org.springframework.test</module>
-    <!--
-    <module>../org.springframework.integration-tests</module>
-    -->
-
-
-  </modules>
-
-  <url>http://static.springframework.org/docs</url>
-  <organization>
-    <name>SpringSource</name>
-    <url>http://www.springsource.com</url>
-  </organization>
   <pluginRepositories>
     <pluginRepository>
       <id>com.springsource.repository.bundles.milestone</id>
