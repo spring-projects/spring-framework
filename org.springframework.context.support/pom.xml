@@ -4,12 +4,12 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-context-support</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.0.M3</version>
+  <version>3.0.0.BUILD-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework</groupId>
-    <artifactId>org.springframework.parent</artifactId>
-    <relativePath>../build-spring-framework</relativePath>
-    <version>3.0.0.M3</version>
+    <artifactId>spring-parent</artifactId>
+    <relativePath>../org.springframework.spring-parent</relativePath>
+    <version>3.0.0.BUILD-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -26,12 +26,19 @@
     </dependency>
 
 
-
+    
     <dependency>
       <groupId>quartz</groupId>
       <artifactId>quartz</artifactId>
       <version>1.6.2</version>
     </dependency>
+    <dependency>
+      <groupId>opensymphony</groupId>
+      <artifactId>quartz-all</artifactId>
+      <version>1.6.0</version>
+      <optional>true</optional>
+    </dependency>
+
 
     <dependency>
       <groupId>org.freemarker</groupId>
@@ -82,12 +89,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>opensymphony</groupId>
-      <artifactId>quartz-all</artifactId>
-      <version>1.6.0</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>jfree</groupId>
       <artifactId>jfreechart</artifactId>
       <version>1.0.9-brew</version>
@@ -96,31 +97,31 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-tx</artifactId>
-      <version>3.0.0.M3</version>
+      <version>${project.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -152,7 +153,7 @@
   <build>
     <testResources>
       <testResource>
-        <directory>src/main/java</directory>
+        <directory>${pom.build.sourceDirectory}</directory>
         <includes>
           <include>**/*.types</include>
         </includes>
