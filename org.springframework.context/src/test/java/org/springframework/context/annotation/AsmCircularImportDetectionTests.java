@@ -16,13 +16,13 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
-import org.springframework.context.annotation.ConfigurationParser;
+import org.springframework.context.annotation.ConfigurationClassParser;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.ClassUtils;
 
 
 /**
- * Unit test proving that ASM-based {@link ConfigurationParser} correctly detects circular use of
+ * Unit test proving that ASM-based {@link ConfigurationClassParser} correctly detects circular use of
  * the {@link Import @Import} annotation.
  * 
  * <p>While this test is the only subclass of {@link AbstractCircularImportDetectionTests}, the
@@ -33,8 +33,8 @@ import org.springframework.util.ClassUtils;
  */
 public class AsmCircularImportDetectionTests extends AbstractCircularImportDetectionTests {
 	@Override
-	protected ConfigurationParser newParser() {
-		return new ConfigurationParser(new FailFastProblemReporter(), ClassUtils.getDefaultClassLoader());
+	protected ConfigurationClassParser newParser() {
+		return new ConfigurationClassParser(new FailFastProblemReporter(), ClassUtils.getDefaultClassLoader());
 	}
 
 	@Override

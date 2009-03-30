@@ -103,8 +103,8 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	 * ClassLoader to load all Configuration class artifacts.
 	 */
 	@Override
-	protected ConfigurationParser createConfigurationParser() {
-		return new ConfigurationParser(this.getProblemReporter(), beanFactory.getBeanClassLoader());
+	protected ConfigurationClassParser createConfigurationParser() {
+		return new ConfigurationClassParser(this.getProblemReporter(), beanFactory.getBeanClassLoader());
 	}
 
 	/**
@@ -131,10 +131,10 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 
 	/**
 	 * Post-processes a BeanFactory in search of Configuration class BeanDefinitions; any
-	 * candidates are then enhanced by a {@link ConfigurationEnhancer}. Candidate status is
+	 * candidates are then enhanced by a {@link ConfigurationClassEnhancer}. Candidate status is
 	 * determined by BeanDefinition attribute metadata.
 	 * 
-	 * @see ConfigurationEnhancer
+	 * @see ConfigurationClassEnhancer
 	 * @see BeanFactoryPostProcessor
 	 */
 	private void enhanceConfigurationClasses() {
@@ -147,7 +147,7 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 
 		assertCglibIsPresent(configBeanDefs);
 
-		ConfigurationEnhancer enhancer = new ConfigurationEnhancer(beanFactory);
+		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer(beanFactory);
 
 		for (String beanName : configBeanDefs.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);

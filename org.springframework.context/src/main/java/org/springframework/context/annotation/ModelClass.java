@@ -26,12 +26,12 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Represents a class, free from java reflection,
- * populated by {@link ConfigurationParser}.
+ * populated by {@link ConfigurationClassParser}.
  * 
  * @author Chris Beams
  * @see ConfigurationModel
  * @see ConfigurationClass
- * @see ConfigurationParser
+ * @see ConfigurationClassParser
  */
 class ModelClass implements BeanMetadataElement {
 

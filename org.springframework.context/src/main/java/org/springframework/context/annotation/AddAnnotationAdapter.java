@@ -28,7 +28,7 @@ import org.springframework.asm.MethodVisitor;
 /**
  * Transforms a class by adding bytecode for a class-level annotation. Checks to ensure that
  * the desired annotation is not already present before adding. Used by
- * {@link ConfigurationEnhancer} to dynamically add an {@link org.aspectj.lang.Aspect}
+ * {@link ConfigurationClassEnhancer} to dynamically add an {@link org.aspectj.lang.Aspect}
  * annotation to an enhanced Configuration subclass.
  * 
  * <p>This class was originally adapted from examples the ASM 3.0 documentation.

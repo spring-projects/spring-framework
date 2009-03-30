@@ -48,9 +48,9 @@ import org.springframework.util.Assert;
  * @author Chris Beams
  * @see ConfigurationClassPostProcessor
  */
-class ConfigurationEnhancer {
+class ConfigurationClassEnhancer {
 
-	private static final Log log = LogFactory.getLog(ConfigurationEnhancer.class);
+	private static final Log log = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
 	private final ArrayList<Callback> callbackInstances = new ArrayList<Callback>();
 	private final ArrayList<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
@@ -58,9 +58,9 @@ class ConfigurationEnhancer {
 
 
 	/**
-	 * Creates a new {@link ConfigurationEnhancer} instance.
+	 * Creates a new {@link ConfigurationClassEnhancer} instance.
 	 */
-	public ConfigurationEnhancer(DefaultListableBeanFactory beanFactory) {
+	public ConfigurationClassEnhancer(DefaultListableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "beanFactory must be non-null");
 
 		callbackInstances.add(new BeanMethodInterceptor(beanFactory));
