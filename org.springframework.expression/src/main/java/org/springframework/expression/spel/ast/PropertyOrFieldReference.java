@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.runtime.Token;
-
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
@@ -141,7 +140,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canWrite(eContext, contextObject, name)) {
 						this.cachedWriteAccessor = accessor;
-						accessor.write(eContext, contextObject, name, newValue);
+						accessor.write(eContext, contextObject, name, newValue); // TODO missing conversion of newValue to the type of the property
 						return;
 					}
 				}
