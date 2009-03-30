@@ -31,6 +31,7 @@
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration" conf="compile->compile"/>
+		<dependency org="org.springframework" name="org.springframework.web.portlet" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.aopalliance" name="com.springsource.org.aopalliance" rev="1.0.0" conf="compile->compile"/>
 	</dependencies>
 
