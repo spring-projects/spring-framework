@@ -44,7 +44,7 @@ import org.springframework.web.util.UriTemplate;
  * enforces RESTful principles. It handles HTTP connections, leaving application code to provide URLs (with possible
  * template variables) and extract results.
  *
- * <p>The main entry points of this template are the methods named after the five main HTTP methods:
+ * <p>The main entry points of this template are the methods named after the six main HTTP methods:
  * <table>
  * <tr><th>HTTP method</th><th>RestTemplate methods</th></tr>
  * <tr><td>DELETE</td><td>{@link #delete}</td></tr>
@@ -82,11 +82,11 @@ import org.springframework.web.util.UriTemplate;
  * {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
  * @author Arjen Poutsma
- * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
  * @see ResponseExtractor
  * @see ResponseErrorHandler
+ * @since 3.0
  */
 public class RestTemplate extends HttpAccessor implements RestOperations {
 
@@ -98,15 +98,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
-
-	/**
-	 * Create a new instance of the {@link RestTemplate} using default settings.
-	 */
+	/** Create a new instance of the {@link RestTemplate} using default settings. */
 	public RestTemplate() {
 	}
 
 	/**
 	 * Create a new instance of the {@link RestTemplate} based on the given {@link ClientHttpRequestFactory}.
+	 *
 	 * @param requestFactory HTTP request factory to use
 	 * @see org.springframework.http.client.SimpleClientHttpRequestFactory
 	 * @see org.springframework.http.client.CommonsClientHttpRequestFactory
@@ -114,7 +112,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public RestTemplate(ClientHttpRequestFactory requestFactory) {
 		setRequestFactory(requestFactory);
 	}
-
 
 	/**
 	 * Set the message body converters to use. These converters are used to convert
@@ -135,6 +132,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	/**
 	 * Returns the message body converters that support a particular type.
+	 *
 	 * @param type the type to return converters for
 	 * @return converters that support the given type
 	 */
@@ -150,21 +148,16 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		return result;
 	}
 
-	/**
-	 * Set the error handler.
-	 */
+	/** Set the error handler. */
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "'errorHandler' must not be null");
 		this.errorHandler = errorHandler;
 	}
 
-	/**
-	 * Return the error handler. By default, this is the {@link DefaultResponseErrorHandler}.
-	 */
+	/** Return the error handler. By default, this is the {@link DefaultResponseErrorHandler}. */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
-
 
 	// GET
 
@@ -183,7 +176,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				new HttpMessageConverterExtractor<T>(responseType), urlVariables);
 	}
 
-
 	// HEAD
 
 	public HttpHeaders headForHeaders(String url, String... urlVariables) throws RestClientException {
@@ -193,7 +185,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public HttpHeaders headForHeaders(String url, Map<String, String> urlVariables) throws RestClientException {
 		return execute(url, HttpMethod.HEAD, null, this.headersExtractor, urlVariables);
 	}
-
 
 	// POST
 
@@ -216,7 +207,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		return headers.getLocation();
 	}
 
-
 	// PUT
 
 	public void put(String url, Object request, String... urlVariables) throws RestClientException {
@@ -233,7 +223,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		execute(url, HttpMethod.PUT, new PostPutCallback(request), null, urlVariables);
 	}
 
-
 	// DELETE
 
 	public void delete(String url, String... urlVariables) throws RestClientException {
@@ -243,7 +232,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public void delete(String url, Map<String, String> urlVariables) throws RestClientException {
 		execute(url, HttpMethod.DELETE, null, null, urlVariables);
 	}
-
 
 	// OPTIONS
 
@@ -258,7 +246,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, this.headersExtractor, urlVariables);
 		return headers.getAllow();
 	}
-
 
 	// general execution
 
@@ -287,9 +274,10 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	/**
 	 * Execute the given method on the provided URI. The {@link ClientHttpRequest} is processed using the {@link
 	 * RequestCallback}; the response with the {@link ResponseExtractor}.
-	 * @param url			   the fully-expanded URL to connect to
-	 * @param method			the HTTP method to execute (GET, POST, etc.)
-	 * @param requestCallback   object that prepares the request (can be <code>null</code>)
+	 *
+	 * @param url the fully-expanded URL to connect to
+	 * @param method the HTTP method to execute (GET, POST, etc.)
+	 * @param requestCallback object that prepares the request (can be <code>null</code>)
 	 * @param responseExtractor object that extracts the return value from the response (can be <code>null</code>)
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
@@ -330,6 +318,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	/**
 	 * Check whether any of the registered {@linkplain #setMessageConverters(HttpMessageConverter[]) message body
 	 * converters} can convert the given type.
+	 *
 	 * @param type the type to check for
 	 * @throws IllegalArgumentException if no supported entity converter can be found
 	 * @see HttpMessageConverter#supports(Class)
@@ -343,10 +332,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		throw new IllegalArgumentException("Could not resolve HttpMessageConverter for [" + type.getName() + "]");
 	}
 
-
-	/**
-	 * Request callback implementation that prepares the request's accept headers.
-	 */
+	/** Request callback implementation that prepares the request's accept headers. */
 	private class GetCallback<T> implements RequestCallback {
 
 		private final Class<T> responseType;
@@ -372,10 +358,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		}
 	}
 
-
-	/**
-	 * Request callback implementation that writes the given object to the request stream.
-	 */
+	/** Request callback implementation that writes the given object to the request stream. */
 	private class PostPutCallback implements RequestCallback {
 
 		private final Object request;
@@ -427,10 +410,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	}
 
-
-	/**
-	 * Response extractor that extracts the response {@link HttpHeaders}.
-	 */
+	/** Response extractor that extracts the response {@link HttpHeaders}. */
 	private static class HeadersExtractor implements ResponseExtractor<HttpHeaders> {
 
 		public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
