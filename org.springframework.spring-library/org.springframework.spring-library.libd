@@ -16,4 +16,5 @@ Import-Bundle:
  org.springframework.transaction;version="[@bundle.version@, @bundle.version@]",
  org.springframework.web;version="[@bundle.version@, @bundle.version@]",
  org.springframework.web.servlet;version="[@bundle.version@, @bundle.version@]",
+ org.springframework.web.portlet;version="[@bundle.version@, @bundle.version@]",
  com.springsource.org.aopalliance;version="[1.0.0, 1.0.0]"
