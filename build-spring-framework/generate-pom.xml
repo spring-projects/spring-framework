@@ -6,7 +6,6 @@
 
 
   <path id="modules-to-process">
-<!--
           <pathelement location="../org.springframework.instrument"/>
           <pathelement location="../org.springframework.instrument.classloading"/>
           <pathelement location="../org.springframework.asm"/>
@@ -26,22 +25,8 @@
           <pathelement location="../org.springframework.web.servlet"/>
           <pathelement location="../org.springframework.web.portlet"/>
           <pathelement location="../org.springframework.test"/>
--->
-
-<!--
-
-          <pathelement location="../org.springframework.integration-tests"/>
--->
   </path>
 
-<!--
- <target name="create-poms" depends="clean,clean-integration,test"
-   description="Create a Maven pom for each module (use -Dbuild.stamp=m3-SNAPSHOT etc. to get the version number right).">
-  <all-bundles target="create-pom">
-   <property name="pom.output.file" value="pom.xml"/>
-  </all-bundles>
- </target>
--->
   <condition property="maven.extension" value=".bat" else="">
     <os family="windows"/>
   </condition>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring</artifactId>
+  <version>3.0.0.BUILD-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Spring Framework</name>
+
+  <modules>
+    <module>../org.springframework.spring-parent</module>
+    <module>../org.springframework.instrument</module>
+    <module>../org.springframework.instrument.classloading</module>
+    <module>../org.springframework.asm</module>
+    <module>../org.springframework.core</module>
+    <module>../org.springframework.expression</module>
+    <module>../org.springframework.core</module>
+    <module>../org.springframework.beans</module>
+    <module>../org.springframework.aop</module>
+    <module>../org.springframework.context</module>
+    <module>../org.springframework.transaction</module>
+    <module>../org.springframework.oxm</module>
+    <module>../org.springframework.jms</module>
+    <module>../org.springframework.aspects</module>
+    <module>../org.springframework.jdbc</module>
+    <module>../org.springframework.web</module>
+    <module>../org.springframework.orm</module>
+    <module>../org.springframework.context.support</module>
+    <module>../org.springframework.web.portlet</module>
+    <module>../org.springframework.web.servlet</module>
+    <module>../org.springframework.test</module>
+  </modules>
+
+  <url>http://www.springframework.org</url>
+  <organization>
+    <name>SpringSource</name>
+    <url>http://www.springsource.com</url>
+  </organization>
+
+  <description>Spring Framework</description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <profiles>
+      <profile>
+      <id>staging</id>
+      <distributionManagement>
+        <site>
+          <id>staging</id>
+          <url>file:${maven.local.staging.repository}</url>
+        </site>
+        <repository>
+          <id>staging</id>
+          <url>file:${maven.local.staging.repository}</url>
+        </repository>
+        <snapshotRepository>
+          <id>staging</id>
+          <url>file:${maven.local.staging.repository}</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
+
+</project>
