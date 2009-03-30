@@ -29,7 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * <p>Provides template method {@link #processConfigBeanDefinitions()} that orchestrates calling each
  * of several abstract methods to be overriden by concrete implementations that allow for
  * customizing how {@link Configuration} classes are found ({@link #getConfigurationBeanDefinitions}),
- * customizing the creation of a {@link ConfigurationParser} ({@link #createConfigurationParser}),
+ * customizing the creation of a {@link ConfigurationClassParser} ({@link #createConfigurationParser}),
  * and customizing {@link ConfigurationModel} validation logic ({@link #validateModel}).
  * 
  * <p>This class was expressly designed with tooling in mind. Spring IDE will maintain it's
@@ -63,12 +63,12 @@ public abstract class AbstractConfigurationClassProcessor {
 	protected abstract BeanDefinitionRegistry getConfigurationBeanDefinitions(boolean includeAbstractBeanDefs);
 
 	/**
-	 * Create and return a new {@link ConfigurationParser}, allowing for customization of
+	 * Create and return a new {@link ConfigurationClassParser}, allowing for customization of
 	 * type (ASM/JDT/Reflection) as well as providing specialized ClassLoader during
 	 * construction.
 	 * @see #processConfigBeanDefinitions() 
 	 */
-	protected abstract ConfigurationParser createConfigurationParser();
+	protected abstract ConfigurationClassParser createConfigurationParser();
 
 	/**
 	 * Override the default {@link ProblemReporter}.
@@ -102,7 +102,7 @@ public abstract class AbstractConfigurationClassProcessor {
 			return configBeanDefs;
 
 		// populate a new ConfigurationModel by parsing each @Configuration classes
-		ConfigurationParser parser = createConfigurationParser();
+		ConfigurationClassParser parser = createConfigurationParser();
 
 		for(String beanName : configBeanDefs.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = configBeanDefs.getBeanDefinition(beanName);

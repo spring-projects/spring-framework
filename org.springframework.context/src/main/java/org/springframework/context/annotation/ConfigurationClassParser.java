@@ -34,11 +34,10 @@ import org.springframework.util.ClassUtils;
  * that model.
  * 
  * @author Chris Beams
- * @since 3.0
  * @see ConfigurationModel
  * @see ConfigurationModelBeanDefinitionReader
  */
-class ConfigurationParser {
+class ConfigurationClassParser {
 
 	/**
 	 * Model to be populated during calls to {@link #parse(Object, String)}
@@ -48,13 +47,13 @@ class ConfigurationParser {
 	private final ClassLoader classLoader;
 
 	/**
-	 * Creates a new {@link ConfigurationParser} instance that will be used to populate a
+	 * Creates a new {@link ConfigurationClassParser} instance that will be used to populate a
 	 * {@link ConfigurationModel}.
 	 * 
 	 * @param model model to be populated by each successive call to {@link #parse}
 	 * @see #getConfigurationModel()
 	 */
-	public ConfigurationParser(ProblemReporter problemReporter, ClassLoader classLoader) {
+	public ConfigurationClassParser(ProblemReporter problemReporter, ClassLoader classLoader) {
 		this.model = new ConfigurationModel();
 		this.problemReporter = problemReporter;
 		this.classLoader = classLoader;

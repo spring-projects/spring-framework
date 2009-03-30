@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @author Chris Beams
  * @see ConfigurationModel
  * @see BeanMethod
- * @see ConfigurationParser
+ * @see ConfigurationClassParser
  */
 final class ConfigurationClass extends ModelClass {
 

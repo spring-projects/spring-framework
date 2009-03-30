@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Chris Beams
  * @see ConfigurationClass
  * @see ConfigurationModel
- * @see ConfigurationParser
+ * @see ConfigurationClassParser
  * @see ConfigurationModelBeanDefinitionReader
  */
 final class BeanMethod implements BeanMetadataElement {

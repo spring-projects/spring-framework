@@ -26,14 +26,14 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 
 /**
  * Represents the set of all user-defined {@link Configuration} classes. Once this model
- * is populated using a {@link ConfigurationParser}, it can be rendered out to a set of
+ * is populated using a {@link ConfigurationClassParser}, it can be rendered out to a set of
  * {@link BeanDefinition} objects. This model provides an important layer of indirection
  * between the complexity of parsing a set of classes and the complexity of representing
  * the contents of those classes as BeanDefinitions.
  * 
  * @author Chris Beams
  * @see ConfigurationClass
- * @see ConfigurationParser
+ * @see ConfigurationClassParser
  * @see ConfigurationModelBeanDefinitionReader
  */
 @SuppressWarnings("serial")

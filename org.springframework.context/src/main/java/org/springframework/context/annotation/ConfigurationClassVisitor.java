@@ -41,7 +41,7 @@ import org.springframework.core.io.ClassPathResource;
  * {@link ConfigurationClass} instance with information gleaned along the way.
  * 
  * @author Chris Beams
- * @see ConfigurationParser
+ * @see ConfigurationClassParser
  * @see ConfigurationClass
  */
 class ConfigurationClassVisitor extends ClassAdapter {

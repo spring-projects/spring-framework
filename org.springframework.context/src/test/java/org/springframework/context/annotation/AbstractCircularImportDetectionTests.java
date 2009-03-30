@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ConfigurationParser;
+import org.springframework.context.annotation.ConfigurationClassParser;
 import org.springframework.context.annotation.Import;
 
 import test.beans.TestBean;
@@ -34,7 +34,7 @@ import test.beans.TestBean;
  */
 public abstract class AbstractCircularImportDetectionTests {
 
-	protected abstract ConfigurationParser newParser();
+	protected abstract ConfigurationClassParser newParser();
 
 	protected abstract String loadAsConfigurationSource(Class<?> clazz) throws Exception;
 	

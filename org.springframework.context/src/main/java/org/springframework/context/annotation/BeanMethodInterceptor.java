@@ -36,7 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  * 
  * @author Chris Beams
  * @see Bean
- * @see ConfigurationEnhancer
+ * @see ConfigurationClassEnhancer
  */
 class BeanMethodInterceptor implements MethodInterceptor {
 
