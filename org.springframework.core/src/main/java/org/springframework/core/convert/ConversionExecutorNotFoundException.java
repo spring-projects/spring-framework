@@ -23,33 +23,33 @@ package org.springframework.core.convert;
  */
 public class ConversionExecutorNotFoundException extends ConversionException {
 
-	private Class<?> sourceClass;
+	private TypeDescriptor sourceType;
 
-	private Class<?> targetClass;
+	private TypeDescriptor targetType;
 
 	/**
 	 * Creates a new conversion executor not found exception.
-	 * @param sourceClass the source type requested to convert from
-	 * @param targetClass the target type requested to convert to
+	 * @param sourceType the source type requested to convert from
+	 * @param targetType the target type requested to convert to
 	 * @param message a descriptive message
 	 */
-	public ConversionExecutorNotFoundException(Class<?> sourceClass, Class<?> targetClass, String message) {
+	public ConversionExecutorNotFoundException(TypeDescriptor sourceType, TypeDescriptor targetType, String message) {
 		super(message);
-		this.sourceClass = sourceClass;
-		this.targetClass = targetClass;
+		this.sourceType = sourceType;
+		this.targetType = targetType;
 	}
 
 	/**
 	 * Returns the source type requested to convert from.
 	 */
-	public Class<?> getSourceClass() {
-		return sourceClass;
+	public TypeDescriptor getSourceType() {
+		return sourceType;
 	}
 
 	/**
 	 * Returns the target type requested to convert to.
 	 */
-	public Class<?> getTargetClass() {
-		return targetClass;
+	public TypeDescriptor getTargetType() {
+		return targetType;
 	}
 }

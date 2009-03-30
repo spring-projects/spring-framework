@@ -22,23 +22,13 @@ package org.springframework.core.convert;
  * 
  * @author Keith Donald
  */
-public interface ConversionExecutor<S, T> {
-
-	/**
-	 * The type this executor converts from.
-	 */
-	public Class<S> getSourceClass();
-
-	/**
-	 * The type this executor converts to.
-s	 */
-	public Class<T> getTargetClass();
+public interface ConversionExecutor {
 
 	/**
 	 * Convert the source to T.
 	 * @param source the source to convert
 	 * @throws ConversionExecutionException if an exception occurs during type conversion
 	 */
-	public T execute(S source) throws ConversionExecutionException;
+	public Object execute(Object source) throws ConversionExecutionException;
 
 }

@@ -20,66 +20,45 @@ import java.util.Iterator;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.ConversionExecutor;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.SuperConverter;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * A converter that can convert from one collection type to another.
  * 
  * @author Keith Donald
  */
-@SuppressWarnings("unchecked")
-class CollectionToCollection implements SuperConverter<Collection, Collection> {
-
-	private ConversionService conversionService;
-
-	private ConversionExecutor elementConverter;
-
-	/**
-	 * Creates a new collection-to-collection converter
-	 * @param conversionService the conversion service to use to convert collection elements to add to the target
-	 * collection
-	 */
-	public CollectionToCollection(ConversionService conversionService) {
-		this.conversionService = conversionService;
+class CollectionToCollection extends AbstractCollectionConverter {
+	
+	public CollectionToCollection(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType,
+			GenericConversionService conversionService) {
+		super(sourceCollectionType, targetCollectionType, conversionService);
 	}
 
-	/**
-	 * Creates a new collection-to-collection converter
-	 * @param elementConverter a specific converter to use to convert collection elements added to the target collection
-	 */
-	public CollectionToCollection(ConversionExecutor elementConverter) {
-		this.elementConverter = elementConverter;
-	}
-
-	public Collection convert(Collection source, Class targetClass) throws Exception {
-		Class implClass = CollectionConversionUtils.getImpl(targetClass);
+	@Override
+	@SuppressWarnings("unchecked")
+	protected Object doExecute(Object source) throws Exception {
+		Collection sourceCollection = (Collection) source;
+		Class targetCollectionType = getTargetType().getType();
+		Class implClass = CollectionConversionUtils.getImpl(targetCollectionType);
 		Collection targetCollection = (Collection) implClass.getConstructor((Class[]) null)
 				.newInstance((Object[]) null);
-		ConversionExecutor elementConverter = getElementConverter(source, targetClass);
-		Collection sourceCollection = (Collection) source;
+		ConversionExecutor elementConverter = getElementConverter();
+		Class elementType;
+		if (elementConverter == null) {
+			elementType = GenericCollectionTypeResolver.getCollectionType(targetCollectionType);
+		} else {
+			elementType = null;
+		}
 		Iterator it = sourceCollection.iterator();
 		while (it.hasNext()) {
 			Object value = it.next();
-			if (elementConverter != null) {
-				value = elementConverter.execute(value);
+			if (elementConverter == null && elementType != null) {
+				elementConverter = getConversionService().getElementConverter(value.getClass(), elementType); 			
 			}
+			value = elementConverter.execute(value);
 			targetCollection.add(value);
 		}
 		return targetCollection;
 	}
-
-	private ConversionExecutor getElementConverter(Object source, Class targetClass) {
-		if (elementConverter != null) {
-			return elementConverter;
-		} else {
-			Class elementType = GenericCollectionTypeResolver.getCollectionType(targetClass);
-			if (elementType != null) {
-				Class componentType = source.getClass().getComponentType();
-				return conversionService.getConversionExecutor(componentType, elementType);
-			}
-			return null;
-		}
-	}
-
+	
 }

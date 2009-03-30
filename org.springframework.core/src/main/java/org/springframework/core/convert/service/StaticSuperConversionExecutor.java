@@ -17,47 +17,37 @@ package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.ConversionExecutionException;
 import org.springframework.core.convert.ConversionExecutor;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
-class StaticSuperConversionExecutor<S, T> implements ConversionExecutor<S, T> {
+class StaticSuperConversionExecutor implements ConversionExecutor {
 
-	private final Class<S> sourceClass;
+	private final TypeDescriptor sourceType;
 
-	private final Class<T> targetClass;
+	private final TypeDescriptor targetType;
 
-	private final SuperConverter<S, T> converter;
+	private final SuperConverter converter;
 
-	public StaticSuperConversionExecutor(Class<S> sourceClass, Class<T> targetClass, SuperConverter<S, T> converter) {
-		Assert.notNull(sourceClass, "The source class is required");
-		Assert.notNull(targetClass, "The target class is required");
-		Assert.notNull(converter, "The super converter is required");
-		this.sourceClass = sourceClass;
-		this.targetClass = targetClass;
+	public StaticSuperConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType, SuperConverter converter) {
+		this.sourceType = sourceType;
+		this.targetType = targetType;
 		this.converter = converter;
 	}
 
-	public Class<S> getSourceClass() {
-		return sourceClass;
-	}
-
-	public Class<T> getTargetClass() {
-		return targetClass;
-	}
-
-	public T execute(S source) throws ConversionExecutionException {
+	public Object execute(Object source) throws ConversionExecutionException {
 		if (source == null) {
 			return null;
 		}
-		if (!sourceClass.isInstance(source)) {
-			throw new ConversionExecutionException(source, getSourceClass(), getTargetClass(), "Source object "
-					+ source + " to convert is expected to be an instance of [" + getSourceClass().getName() + "]");
+		if (!sourceType.isInstance(source)) {
+			throw new ConversionExecutionException(source, sourceType, targetType, "Source object "
+					+ source + " to convert is expected to be an instance of [" + sourceType.getName() + "]");
 		}
 		try {
-			return converter.convert(source, targetClass);
+			return converter.convert(source, targetType.getType());
 		} catch (Exception e) {
-			throw new ConversionExecutionException(source, getSourceClass(), getTargetClass(), e);
+			throw new ConversionExecutionException(source, sourceType, targetType, e);
 		}
 	}
 
@@ -65,16 +55,16 @@ class StaticSuperConversionExecutor<S, T> implements ConversionExecutor<S, T> {
 		if (!(o instanceof StaticSuperConversionExecutor)) {
 			return false;
 		}
-		StaticSuperConversionExecutor<?, ?> other = (StaticSuperConversionExecutor<?, ?>) o;
-		return sourceClass.equals(other.sourceClass) && targetClass.equals(other.targetClass);
+		StaticSuperConversionExecutor other = (StaticSuperConversionExecutor) o;
+		return sourceType.equals(other.sourceType) && targetType.equals(other.targetType);
 	}
 
 	public int hashCode() {
-		return sourceClass.hashCode() + targetClass.hashCode();
+		return sourceType.hashCode() + targetType.hashCode();
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("sourceClass", sourceClass).append("targetClass", targetClass)
+		return new ToStringCreator(this).append("sourceClass", sourceType).append("targetClass", targetType)
 				.toString();
 	}
 }

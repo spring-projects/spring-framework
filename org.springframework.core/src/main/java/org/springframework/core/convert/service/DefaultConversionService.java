@@ -67,9 +67,6 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverter(new StringToLocale());
 		addConverter(new StringToEnum());
 		addConverter(new NumberToNumber());
-		// TODO probably don't allow these to be customized, or at least make public
-		addConverter(new ObjectToCollection(this));
-		addConverter(new CollectionToCollection(this));
 	}
 
 	protected void addDefaultAliases() {

@@ -32,39 +32,39 @@ public class ConversionExecutionException extends ConversionException {
 	/**
 	 * The source type we tried to convert the value from.
 	 */
-	private Class<?> sourceClass;
+	private TypeDescriptor sourceType;
 
 	/**
 	 * The target type we tried to convert the value to.
 	 */
-	private Class<?> targetClass;
+	private TypeDescriptor targetType;
 
 	/**
 	 * Creates a new conversion exception.
 	 * @param value the value we tried to convert
-	 * @param sourceClass the value's original type
-	 * @param targetClass the value's target type
+	 * @param sourceType the value's original type
+	 * @param targetType the value's target type
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionExecutionException(Object value, Class<?> sourceClass, Class<?> targetClass, Throwable cause) {
-		super(defaultMessage(value, sourceClass, targetClass, cause), cause);
+	public ConversionExecutionException(Object value, TypeDescriptor sourceType, TypeDescriptor targetType, Throwable cause) {
+		super(defaultMessage(value, sourceType, targetType, cause), cause);
 		this.value = value;
-		this.sourceClass = sourceClass;
-		this.targetClass = targetClass;
+		this.sourceType = sourceType;
+		this.targetType = targetType;
 	}
 
 	/**
 	 * Creates a new conversion exception.
 	 * @param value the value we tried to convert
-	 * @param sourceClass the value's original type
-	 * @param targetClass the value's target type
+	 * @param sourceType the value's original type
+	 * @param targetType the value's target type
 	 * @param message a descriptive message of what went wrong.
 	 */
-	public ConversionExecutionException(Object value, Class<?> sourceClass, Class<?> targetClass, String message) {
+	public ConversionExecutionException(Object value, TypeDescriptor sourceType, TypeDescriptor targetType, String message) {
 		super(message);
 		this.value = value;
-		this.sourceClass = sourceClass;
-		this.targetClass = targetClass;
+		this.sourceType = sourceType;
+		this.targetType = targetType;
 	}
 
 	/**
@@ -77,20 +77,20 @@ public class ConversionExecutionException extends ConversionException {
 	/**
 	 * Returns the source type we tried to convert the value from.
 	 */
-	public Class<?> getSourceClass() {
-		return sourceClass;
+	public TypeDescriptor getSourceClass() {
+		return sourceType;
 	}
 
 	/**
 	 * Returns the target type we tried to convert the value to.
 	 */
-	public Class<?> getTargetClass() {
-		return targetClass;
+	public TypeDescriptor getTargetClass() {
+		return targetType;
 	}
 
-	private static String defaultMessage(Object value, Class<?> sourceClass, Class<?> targetClass, Throwable cause) {
-		return "Unable to convert value " + StylerUtils.style(value) + " from type [" + sourceClass.getName()
-				+ "] to type [" + targetClass.getName() + "]; reason = '" + cause.getMessage() + "'";
+	private static String defaultMessage(Object value, TypeDescriptor sourceType, TypeDescriptor targetType, Throwable cause) {
+		return "Unable to convert value " + StylerUtils.style(value) + " from type [" + sourceType.getName()
+				+ "] to type [" + targetType.getName() + "]; reason = '" + cause.getMessage() + "'";
 	}
 
 }
