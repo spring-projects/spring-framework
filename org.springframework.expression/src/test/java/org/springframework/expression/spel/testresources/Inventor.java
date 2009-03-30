@@ -15,16 +15,19 @@ public class Inventor {
 	private String nationality;
 	private String[] inventions;
 	public String randomField;
-	public Map testMap;
+	public Map<String,String> testMap;
 	private boolean wonNobelPrize;
 	private PlaceOfBirth[] placesLived;
 	private List<PlaceOfBirth> placesLivedList = new ArrayList<PlaceOfBirth>();
+	public ArrayContainer arrayContainer;
+	public boolean publicBoolean;
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
 		this.birthdate = birthdate;
 		this.nationality = nationality;
-		testMap = new HashMap();
+		this.arrayContainer = new ArrayContainer();
+		testMap = new HashMap<String,String>();
 		testMap.put("monday", "montag");
 		testMap.put("tuesday", "dienstag");
 		testMap.put("wednesday", "mittwoch");
