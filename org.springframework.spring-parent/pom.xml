@@ -6,9 +6,9 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-parent</artifactId>
   <packaging>pom</packaging>
-  <name>Spring Framework</name>
+  <name>Spring Framework Parent</name>
   <version>3.0.0.BUILD-SNAPSHOT</version>
-  <description>Spring Framework</description>
+  <description>Spring Framework Parent</description>
 
 
   <repositories>
@@ -98,15 +98,15 @@
       <distributionManagement>
         <site>
           <id>staging</id>
-          <url>file:${maven.local.staging.repository}</url>
+	  <url>file:${maven.local.staging.repository}</url>
         </site>
         <repository>
           <id>staging</id>
-          <url>file:${maven.local.staging.repository}</url>
+	  <url>file:${maven.local.staging.repository}</url>
         </repository>
         <snapshotRepository>
           <id>staging</id>
-          <url>file:${maven.local.staging.repository}</url>
+	  <url>file:${maven.local.staging.repository}</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>
