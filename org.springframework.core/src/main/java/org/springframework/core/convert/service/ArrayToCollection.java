@@ -18,12 +18,10 @@ package org.springframework.core.convert.service;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
-import java.util.Iterator;
 
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.SuperTwoWayConverter;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special converter that converts from a source array to a target collection. Supports the selection of an
@@ -38,78 +36,29 @@ import org.springframework.core.convert.converter.SuperTwoWayConverter;
  * 
  * @author Keith Donald
  */
-@SuppressWarnings("unchecked")
-class ArrayToCollection implements SuperTwoWayConverter {
+class ArrayToCollection extends AbstractCollectionConverter {
 
-	private ConversionService conversionService;
-
-	private ConversionExecutor elementConverter;
-
-	/**
-	 * Creates a new array to collection converter.
-	 * @param conversionService the conversion service to use to lookup the converter to apply to array elements added
-	 * to the target collection
-	 */
-	public ArrayToCollection(ConversionService conversionService) {
-		this.conversionService = conversionService;
+	public ArrayToCollection(TypeDescriptor sourceArrayType, TypeDescriptor targetCollectionType,
+			GenericConversionService conversionService) {
+		super(sourceArrayType, targetCollectionType, conversionService);
 	}
 
-	/**
-	 * Creates a new array to collection converter.
-	 * @param elementConverter A specific converter to use on array elements when adding them to the target collection
-	 */
-	public ArrayToCollection(ConversionExecutor elementConverter) {
-		this.elementConverter = elementConverter;
-	}
-
-	public Object convert(Object source, Class targetClass) throws Exception {
-		Class implClass = CollectionConversionUtils.getImpl(targetClass);
+	@Override
+	@SuppressWarnings("unchecked")
+	protected Object doExecute(Object sourceArray) throws Exception {
+		Class implClass = CollectionConversionUtils.getImpl(getTargetType().getType());
 		Constructor constructor = implClass.getConstructor((Class[]) null);
 		Collection collection = (Collection) constructor.newInstance((Object[]) null);
-		ConversionExecutor converter = getArrayElementConverter(source, targetClass);
-		int length = Array.getLength(source);
+		int length = Array.getLength(sourceArray);
+		ConversionExecutor converter = getElementConverter();
 		for (int i = 0; i < length; i++) {
-			Object value = Array.get(source, i);
+			Object value = Array.get(sourceArray, i);
 			if (converter != null) {
 				value = converter.execute(value);
 			}
 			collection.add(value);
 		}
 		return collection;
-	}
-
-	public Object convertBack(Object target, Class sourceClass) throws Exception {
-		Collection collection = (Collection) target;
-		Class elementType = sourceClass.getComponentType();
-		Object array = Array.newInstance(elementType, collection.size());
-		int i = 0;
-		for (Iterator it = collection.iterator(); it.hasNext(); i++) {
-			Object value = it.next();
-			if (value != null) {
-				ConversionExecutor converter;
-				if (elementConverter != null) {
-					converter = elementConverter;
-				} else {
-					converter = conversionService.getConversionExecutor(value.getClass(), elementType);
-				}
-				value = converter.execute(value);
-			}
-			Array.set(array, i, value);
-		}
-		return array;
-	}
-
-	private ConversionExecutor getArrayElementConverter(Object source, Class targetClass) {
-		if (elementConverter != null) {
-			return elementConverter;
-		} else {
-			Class elementType = GenericCollectionTypeResolver.getCollectionType(targetClass);
-			if (elementType != null) {
-				Class componentType = source.getClass().getComponentType();
-				return conversionService.getConversionExecutor(componentType, elementType);
-			}
-			return null;
-		}
 	}
 
 }

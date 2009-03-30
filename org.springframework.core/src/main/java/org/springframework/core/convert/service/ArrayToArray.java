@@ -17,9 +17,8 @@ package org.springframework.core.convert.service;
 
 import java.lang.reflect.Array;
 
-import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.SuperConverter;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special one-way converter that converts from a source array to a target array. Supports type conversion of the
@@ -28,49 +27,20 @@ import org.springframework.core.convert.converter.SuperConverter;
  * 
  * @author Keith Donald
  */
-@SuppressWarnings("unchecked")
-class ArrayToArray implements SuperConverter {
+class ArrayToArray extends AbstractCollectionConverter {
 
-	private ConversionService conversionService;
-
-	private ConversionExecutor elementConverter;
-
-	/**
-	 * Creates a new array-to-array converter.
-	 * @param conversionService the service to use to lookup conversion executors for individual array elements
-	 * dynamically
-	 */
-	public ArrayToArray(ConversionService conversionService) {
-		this.conversionService = conversionService;
+	public ArrayToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetArrayType, GenericConversionService conversionService) {
+		super(sourceArrayType, targetArrayType, conversionService);
 	}
 
-	/**
-	 * Creates a new array-to-array converter.
-	 * @param elementConverter a specific conversion executor to use to convert elements in the source array to elements
-	 * in the target array.
-	 */
-	public ArrayToArray(ConversionExecutor elementConverter) {
-		this.elementConverter = elementConverter;
-	}
-
-	public Object convert(Object source, Class targetClass) throws Exception {
-		Class sourceComponentType = source.getClass().getComponentType();
-		Class targetComponentType = targetClass.getComponentType();
-		int length = Array.getLength(source);
-		Object targetArray = Array.newInstance(targetComponentType, length);
-		ConversionExecutor converter = getElementConverter(sourceComponentType, targetComponentType);
+	public Object doExecute(Object sourceArray) throws Exception {
+		int length = Array.getLength(sourceArray);
+		Object targetArray = Array.newInstance(getTargetType().getElementType(), length);
 		for (int i = 0; i < length; i++) {
-			Object value = Array.get(source, i);
-			Array.set(targetArray, i, converter.execute(value));
+			Object value = Array.get(sourceArray, i);
+			Array.set(targetArray, i, getElementConverter().execute(value));
 		}
 		return targetArray;
 	}
 
-	private ConversionExecutor getElementConverter(Class sourceComponentType, Class targetComponentType) {
-		if (elementConverter != null) {
-			return elementConverter;
-		} else {
-			return conversionService.getConversionExecutor(sourceComponentType, targetComponentType);
-		}
-	}
 }

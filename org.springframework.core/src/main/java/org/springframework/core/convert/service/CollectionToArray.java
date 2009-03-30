@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.SuperConverter;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special converter that converts from a source array to a target collection. Supports the selection of an
@@ -36,53 +36,29 @@ import org.springframework.core.convert.converter.SuperConverter;
  * 
  * @author Keith Donald
  */
-@SuppressWarnings("unchecked")
-class CollectionToArray implements SuperConverter {
+class CollectionToArray extends AbstractCollectionConverter {
 
-	private ConversionService conversionService;
-
-	private ConversionExecutor elementConverter;
-
-	/**
-	 * Creates a new array to collection converter.
-	 * @param conversionService the conversion service to use to lookup the converter to apply to array elements added
-	 * to the target collection
-	 */
-	public CollectionToArray(ConversionService conversionService) {
-		this.conversionService = conversionService;
+	public CollectionToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetCollectionType,
+			GenericConversionService conversionService) {
+		super(sourceArrayType, targetCollectionType, conversionService);
 	}
 
-	/**
-	 * Creates a new array to collection converter.
-	 * @param elementConverter A specific converter to use on array elements when adding them to the target collection
-	 */
-	public CollectionToArray(ConversionExecutor elementConverter) {
-		this.elementConverter = elementConverter;
-	}
-
-	public Object convert(Object source, Class targetClass) throws Exception {
-		Collection collection = (Collection) source;
-		Object array = Array.newInstance(targetClass.getComponentType(), collection.size());
+	@Override
+	protected Object doExecute(Object source) throws Exception {
+		Collection<?> collection = (Collection<?>) source;
+		Class<?> targetComponentType = getTargetType().getElementType();
+		Object array = Array.newInstance(targetComponentType, collection.size());
 		int i = 0;
-		for (Iterator it = collection.iterator(); it.hasNext(); i++) {
+		ConversionExecutor converter = getElementConverter();
+		for (Iterator<?> it = collection.iterator(); it.hasNext(); i++) {
 			Object value = it.next();
-			if (value != null) {
-				ConversionExecutor converter;
-				if (elementConverter != null) {
-					converter = elementConverter;
-				} else {
-					converter = conversionService.getConversionExecutor(value.getClass(), targetClass
-							.getComponentType());
-				}
-				value = converter.execute(value);
+			if (converter == null) {
+				converter = getConversionService().getElementConverter(value.getClass(), targetComponentType);
 			}
+			value = converter.execute(value);
 			Array.set(array, i, value);
 		}
 		return array;
-	}
-
-	public Object convertBack(Object target) throws Exception {
-		throw new UnsupportedOperationException("Should never be called");
 	}
 
 }

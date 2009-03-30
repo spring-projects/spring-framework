@@ -32,6 +32,8 @@ import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionExecutorNotFoundException;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.TypedValue;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.convert.converter.SuperTwoWayConverter;
@@ -149,9 +151,9 @@ public class GenericConversionService implements ConversionService {
 	}
 
 	/**
-	 * Add a convenient alias for the target type. {@link #getClassForAlias(String)} can then be used to lookup the type
+	 * Add a convenient alias for the target type. {@link #getType(String)} can then be used to lookup the type
 	 * given the alias.
-	 * @see #getClassForAlias(String)
+	 * @see #getType(String)
 	 */
 	public void addAlias(String alias, Class targetType) {
 		aliasMap.put(alias, targetType);
@@ -159,225 +161,85 @@ public class GenericConversionService implements ConversionService {
 
 	// implementing ConversionService
 
-	public Object executeConversion(Object source, Class targetClass) throws ConversionExecutorNotFoundException,
+	public boolean canConvert(TypedValue source, TypeDescriptor targetType) {
+		return false;
+	}
+	
+	public Object executeConversion(TypedValue source, TypeDescriptor targetType) throws ConversionExecutorNotFoundException,
 			ConversionException {
-		return getConversionExecutor(source.getClass(), targetClass).execute(source);
+		return getConversionExecutor(source.getTypeDescriptor(), targetType).execute(source.getValue());
 	}
 
-	public Object executeConversion(String converterId, Object source, Class targetClass)
+	public Object executeConversion(String converterId, TypedValue source, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException, ConversionException {
-		return getConversionExecutor(converterId, source.getClass(), targetClass).execute(source);
+		return getConversionExecutor(converterId, source.getTypeDescriptor(), targetType).execute(source.getValue());
 	}
 
-	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass)
+	public ConversionExecutor getConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException {
-		Assert.notNull(sourceClass, "The source class to convert from is required");
-		Assert.notNull(targetClass, "The target class to convert to is required");
-		if (targetClass.isAssignableFrom(sourceClass)) {
-			return new StaticConversionExecutor(sourceClass, targetClass, new NoOpConverter());
-		}
-		sourceClass = convertToWrapperClassIfNecessary(sourceClass);
-		targetClass = convertToWrapperClassIfNecessary(targetClass);
+		Assert.notNull(sourceType, "The sourceType to convert from is required");
+		Assert.notNull(targetType, "The targetType to convert to is required");
 		// special handling for arrays since they are not indexable classes
-		if (sourceClass.isArray()) {
-			if (targetClass.isArray()) {
-				return new StaticSuperConversionExecutor(sourceClass, targetClass, new ArrayToArray(this));
-			} else if (Collection.class.isAssignableFrom(targetClass)) {
-				if (!targetClass.isInterface() && Modifier.isAbstract(targetClass.getModifiers())) {
-					throw new IllegalArgumentException("Conversion target class [" + targetClass.getName()
+		if (sourceType.isArray()) {
+			if (targetType.isArray()) {
+				return new ArrayToArray(sourceType, targetType, this);
+			} else if (targetType.isCollection()) {
+				if (targetType.isAbstractClass()) {
+					throw new IllegalArgumentException("Conversion target class [" + targetType.getName()
 							+ "] is invalid; cannot convert to abstract collection types--"
 							+ "request an interface or concrete implementation instead");
 				}
-				return new StaticSuperConversionExecutor(sourceClass, targetClass, new ArrayToCollection(this));
+				return new ArrayToCollection(sourceType, targetType, this);
 			}
 		}
-		if (targetClass.isArray()) {
-			if (Collection.class.isAssignableFrom(sourceClass)) {
-				SuperConverter collectionToArray = new ReverseSuperConverter(new ArrayToCollection(this));
-				return new StaticSuperConversionExecutor(sourceClass, targetClass, collectionToArray);
+		if (targetType.isArray()) {
+			if (sourceType.isCollection()) {
+				return new CollectionToArray(sourceType, targetType, this);
 			} else {
-				return new StaticSuperConversionExecutor(sourceClass, targetClass, new ObjectToArray(this));
+				throw new UnsupportedOperationException("Object to Array not yet supported");
 			}
 		}
+		if (sourceType.isCollection()) {
+			if (targetType.isCollection()) {
+				return new CollectionToCollection(sourceType, targetType, this);
+			} else {
+				throw new UnsupportedOperationException("Object to collection not yet supported");				
+			}
+		}
+		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
+		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();
 		Converter converter = findRegisteredConverter(sourceClass, targetClass);
 		if (converter != null) {
 			// we found a converter
-			return new StaticConversionExecutor(sourceClass, targetClass, converter);
+			return new StaticConversionExecutor(sourceType, targetType, converter);
 		} else {
 			SuperConverter superConverter = findRegisteredSuperConverter(sourceClass, targetClass);
 			if (superConverter != null) {
-				return new StaticSuperConversionExecutor(sourceClass, targetClass, superConverter);
+				return new StaticSuperConversionExecutor(sourceType, targetType, superConverter);
 			}
 			if (parent != null) {
 				// try the parent
-				return parent.getConversionExecutor(sourceClass, targetClass);
+				return parent.getConversionExecutor(sourceType, targetType);
 			} else {
-				throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-						"No ConversionExecutor found for converting from sourceClass [" + sourceClass.getName()
-								+ "] to target class [" + targetClass.getName() + "]");
+				throw new ConversionExecutorNotFoundException(sourceType, targetType,
+						"No ConversionExecutor found for converting from sourceType [" + sourceType.getName()
+								+ "] to targetType [" + targetType.getName() + "]");
 			}
 		}
 	}
 
-	public ConversionExecutor getConversionExecutor(String id, Class sourceClass, Class targetClass)
-			throws ConversionExecutorNotFoundException {
-		Assert.hasText(id, "The id of the custom converter is required");
-		Assert.notNull(sourceClass, "The source class to convert from is required");
-		Assert.notNull(targetClass, "The target class to convert to is required");
-		Converter converter = (Converter) customConverters.get(id);
-		if (converter == null) {
-			if (parent != null) {
-				return parent.getConversionExecutor(id, sourceClass, targetClass);
-			} else {
-				throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-						"No custom Converter found with id '" + id + "' for converting from sourceClass ["
-								+ sourceClass.getName() + "] to targetClass [" + targetClass.getName() + "]");
-			}
-		}
-		sourceClass = convertToWrapperClassIfNecessary(sourceClass);
-		targetClass = convertToWrapperClassIfNecessary(targetClass);
-		// TODO Not optimal getting this each time
-		List typeInfo = getRequiredTypeInfo(converter);
-		Class converterSourceClass = (Class) typeInfo.get(0);
-		Class converterTargetClass = (Class) typeInfo.get(1);
-		if (sourceClass.isArray()) {
-			Class sourceComponentType = sourceClass.getComponentType();
-			if (targetClass.isArray()) {
-				Class targetComponentType = targetClass.getComponentType();
-				if (converterSourceClass.isAssignableFrom(sourceComponentType)) {
-					if (!converterTargetClass.equals(targetComponentType)) {
-						throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-								"Custom Converter with id '" + id
-										+ "' cannot convert from an array storing elements of type ["
-										+ sourceComponentType.getName() + "] to an array of storing elements of type ["
-										+ targetComponentType.getName() + "]");
-					}
-					ConversionExecutor elementConverter = new StaticConversionExecutor(sourceComponentType,
-							targetComponentType, converter);
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, new ArrayToArray(
-							elementConverter));
-				} else if (converterTargetClass.isAssignableFrom(sourceComponentType)) {
-					if (!converterSourceClass.equals(targetComponentType)) {
-						throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-								"Custom Converter with id '" + id
-										+ "' cannot convert from an array storing elements of type ["
-										+ sourceComponentType.getName() + "] to an array of storing elements of type ["
-										+ targetComponentType.getName() + "]");
-					}
-					ConversionExecutor elementConverter = new StaticConversionExecutor(sourceComponentType,
-							targetComponentType, new ReverseConverter(converter));
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, new ArrayToArray(
-							elementConverter));
-				} else {
-					throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-							"Custom Converter with id '" + id
-									+ "' cannot convert from an array storing elements of type ["
-									+ sourceComponentType.getName() + "] to an array storing elements of type ["
-									+ targetComponentType.getName() + "]");
-				}
-			} else if (Collection.class.isAssignableFrom(targetClass)) {
-				if (!targetClass.isInterface() && Modifier.isAbstract(targetClass.getModifiers())) {
-					throw new IllegalArgumentException("Conversion target class [" + targetClass.getName()
-							+ "] is invalid; cannot convert to abstract collection types--"
-							+ "request an interface or concrete implementation instead");
-				}
-				if (converterSourceClass.isAssignableFrom(sourceComponentType)) {
-					// type erasure has prevented us from getting the concrete type, this is best we can do for now
-					ConversionExecutor elementConverter = new StaticConversionExecutor(sourceComponentType,
-							converterTargetClass, converter);
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, new ArrayToCollection(
-							elementConverter));
-				} else if (converterTargetClass.isAssignableFrom(sourceComponentType)) {
-					ConversionExecutor elementConverter = new StaticConversionExecutor(sourceComponentType,
-							converterSourceClass, new ReverseConverter(converter));
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, new ArrayToCollection(
-							elementConverter));
-				} else {
-					throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-							"Custom Converter with id '" + id
-									+ "' cannot convert from array an storing elements type ["
-									+ sourceComponentType.getName() + "] to a collection of type ["
-									+ targetClass.getName() + "]");
-				}
-			}
-		}
-		if (targetClass.isArray()) {
-			Class targetComponentType = targetClass.getComponentType();
-			if (Collection.class.isAssignableFrom(sourceClass)) {
-				// type erasure limits us here as well
-				if (converterTargetClass.equals(targetComponentType)) {
-					ConversionExecutor elementConverter = new StaticConversionExecutor(converterSourceClass,
-							targetComponentType, converter);
-					SuperConverter collectionToArray = new ReverseSuperConverter(
-							new ArrayToCollection(elementConverter));
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, collectionToArray);
-				} else if (converterSourceClass.equals(targetComponentType)) {
-					ConversionExecutor elementConverter = new StaticConversionExecutor(converterTargetClass,
-							targetComponentType, new ReverseConverter(converter));
-					SuperConverter collectionToArray = new ReverseSuperConverter(
-							new ArrayToCollection(elementConverter));
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, collectionToArray);
-				} else {
-					throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-							"Custom Converter with id '" + id + "' cannot convert from collection of type ["
-									+ sourceClass.getName() + "] to an array storing elements of type ["
-									+ targetComponentType.getName() + "]");
-				}
-			} else {
-				if (converterSourceClass.isAssignableFrom(sourceClass)) {
-					if (!converterTargetClass.equals(targetComponentType)) {
-						throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-								"Custom Converter with id '" + id + "' cannot convert from sourceClass ["
-										+ sourceClass.getName() + "] to array holding elements of type ["
-										+ targetComponentType.getName() + "]");
-					}
-					ConversionExecutor elementConverter = new StaticConversionExecutor(sourceClass,
-							targetComponentType, converter);
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, new ObjectToArray(
-							elementConverter));
-				} else if (converterTargetClass.isAssignableFrom(sourceClass)) {
-					if (!converterSourceClass.equals(targetComponentType)) {
-						throw new ConversionExecutorNotFoundException(sourceClass, targetClass,
-								"Custom Converter with id '" + id + "' cannot convert from sourceClass ["
-										+ sourceClass.getName() + "] to array holding elements of type ["
-										+ targetComponentType.getName() + "]");
-					}
-					ConversionExecutor elementConverter = new StaticConversionExecutor(sourceClass,
-							targetComponentType, new ReverseConverter(converter));
-					return new StaticSuperConversionExecutor(sourceClass, targetClass, new ObjectToArray(
-							elementConverter));
-				}
-			}
-		}
-		// TODO look to factor some of this duplicated code here and above out a bit
-		if (converterSourceClass.isAssignableFrom(sourceClass)) {
-			if (!converterTargetClass.equals(targetClass)) {
-				throw new ConversionExecutorNotFoundException(sourceClass, targetClass, "Custom Converter with id '"
-						+ id + "' cannot convert from sourceClass [" + sourceClass.getName() + "] to targetClass ["
-						+ targetClass.getName() + "]");
-			}
-			return new StaticConversionExecutor(sourceClass, targetClass, converter);
-		} else if (converterTargetClass.isAssignableFrom(sourceClass)) {
-			if (!converterSourceClass.equals(targetClass)) {
-				throw new ConversionExecutorNotFoundException(sourceClass, targetClass, "Custom Converter with id '"
-						+ id + "' cannot convert from sourceClass [" + sourceClass.getName() + "] to targetClass ["
-						+ targetClass.getName() + "]");
-			}
-			return new StaticConversionExecutor(sourceClass, targetClass, new ReverseConverter(converter));
-		} else {
-			throw new ConversionExecutorNotFoundException(sourceClass, targetClass, "Custom Converter with id '" + id
-					+ "' cannot convert from sourceClass [" + sourceClass.getName() + "] to targetClass ["
-					+ targetClass.getName() + "]");
-		}
+	public ConversionExecutor getConversionExecutor(String converterId, TypeDescriptor sourceType,
+			TypeDescriptor targetType) throws ConversionExecutorNotFoundException {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
-	public Class getClassForAlias(String name) throws IllegalArgumentException {
+	public Class getType(String name) throws IllegalArgumentException {
 		Class clazz = (Class) aliasMap.get(name);
 		if (clazz != null) {
 			return clazz;
 		} else {
 			if (parent != null) {
-				return parent.getClassForAlias(name);
+				return parent.getType(name);
 			} else {
 				return null;
 			}
@@ -442,32 +304,6 @@ public class GenericConversionService implements ConversionService {
 			sourceClassSuperConverters.put(sourceClass, sourceMap);
 		}
 		return sourceMap;
-	}
-
-	private Class convertToWrapperClassIfNecessary(Class targetType) {
-		if (targetType.isPrimitive()) {
-			if (targetType.equals(int.class)) {
-				return Integer.class;
-			} else if (targetType.equals(short.class)) {
-				return Short.class;
-			} else if (targetType.equals(long.class)) {
-				return Long.class;
-			} else if (targetType.equals(float.class)) {
-				return Float.class;
-			} else if (targetType.equals(double.class)) {
-				return Double.class;
-			} else if (targetType.equals(byte.class)) {
-				return Byte.class;
-			} else if (targetType.equals(boolean.class)) {
-				return Boolean.class;
-			} else if (targetType.equals(char.class)) {
-				return Character.class;
-			} else {
-				throw new IllegalStateException("Should never happen - primitive type is not a primitive?");
-			}
-		} else {
-			return targetType;
-		}
 	}
 
 	private Converter findRegisteredConverter(Class sourceClass, Class targetClass) {
@@ -602,6 +438,10 @@ public class GenericConversionService implements ConversionService {
 			}
 			return null;
 		}
+	}
+
+	public ConversionExecutor getElementConverter(Class<?> sourceElementType, Class<?> targetElementType) {
+		return getConversionExecutor(new TypeDescriptor(sourceElementType), new TypeDescriptor(targetElementType));
 	}
 
 }
