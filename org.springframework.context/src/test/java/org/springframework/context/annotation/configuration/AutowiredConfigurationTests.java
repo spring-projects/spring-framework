@@ -118,4 +118,29 @@ public class AutowiredConfigurationTests {
 			return new TestBean(name);
 		}
 	}
+
+	@Test
+	public void testCustomProperties() {
+		ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext(
+		        "AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class);
+
+		TestBean testBean = factory.getBean("testBean", TestBean.class);
+		assertThat(testBean.getName(), equalTo("localhost"));
+	}
+
+	@Configuration
+	static class PropertiesConfig {
+
+		private String hostname;
+
+		@Value("#{myProps.hostname}")
+		public void setHostname(String hostname) {
+			this.hostname = hostname;
+		}
+
+		@Bean
+		public TestBean testBean() {
+			return new TestBean(hostname);
+		}
+	}
 }
