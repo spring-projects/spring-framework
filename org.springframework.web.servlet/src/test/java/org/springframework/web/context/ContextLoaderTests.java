@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package org.springframework.web.context;
 
-import static org.junit.Assert.*;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
@@ -42,15 +41,14 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
 
 /**
- * Tests for {@link ContextLoader}, {@link ContextLoaderListener},
- * {@link ContextLoaderServlet}, and related classes.
+ * Tests for {@link ContextLoader} and {@link ContextLoaderListener}.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Chris Beams
  * @since 12.08.2003
  */
-public class ContextLoaderTests {
+public final class ContextLoaderTests {
 
 	@Test
 	public void testContextLoaderListenerWithDefaultContext() {
@@ -62,8 +60,7 @@ public class ContextLoaderTests {
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
 		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext",
-				context instanceof XmlWebApplicationContext);
+		assertTrue("Correct WebApplicationContext exposed in ServletContext", context instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
 		assertTrue("Has father", context.containsBean("father"));
 		assertTrue("Has rod", context.containsBean("rod"));
@@ -89,15 +86,11 @@ public class ContextLoaderTests {
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		final ServletContextListener listener = new ContextLoaderListener() {
-			protected ContextLoader createContextLoader() {
-				return new ContextLoader() {
-					protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
-						assertNotNull("The ServletContext should not be null.", servletContext);
-						assertEquals("Verifying that we received the expected ServletContext.", sc, servletContext);
-						assertFalse("The ApplicationContext should not yet have been refreshed.", applicationContext.isActive());
-						buffer.append(expectedContents);
-					}
-				};
+			protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
+				assertNotNull("The ServletContext should not be null.", servletContext);
+				assertEquals("Verifying that we received the expected ServletContext.", sc, servletContext);
+				assertFalse("The ApplicationContext should not yet have been refreshed.", applicationContext.isActive());
+				buffer.append(expectedContents);
 			}
 		};
 		listener.contextInitialized(new ServletContextEvent(sc));
@@ -189,7 +182,7 @@ public class ContextLoaderTests {
 		catch (BeanDefinitionStoreException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof IOException);
-			assertTrue(ex.getCause().getMessage().indexOf("/WEB-INF/applicationContext.xml") != -1);
+			assertTrue(ex.getCause().getMessage().contains("/WEB-INF/applicationContext.xml"));
 		}
 	}
 
@@ -204,7 +197,7 @@ public class ContextLoaderTests {
 		catch (BeanDefinitionStoreException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof IOException);
-			assertTrue(ex.getCause().getMessage().indexOf("/WEB-INF/test-servlet.xml") != -1);
+			assertTrue(ex.getCause().getMessage().contains("/WEB-INF/test-servlet.xml"));
 		}
 	}
 
