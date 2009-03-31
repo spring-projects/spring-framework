@@ -16,12 +16,33 @@
 
 
         <!-- top level targets -->
-        <target name="publish-maven-central-only-pom-artifacts" depends="publish-only-pom-windows,publish-only-pom-unix">
+
+        <target name="publish-maven-central-only-pom-artifacts" depends="publish-central-only-pom-windows,publish-central-only-pom-unix">
+	</target>
+
+	<target name="publish-maven-central-code-artifacts" depends="publish-central-windows,publish-code-unix">
 	</target>
 
 
-	<target name="publish-maven-central-code-artifacts" depends="publish-code-windows,publish-code-unix">
+	<target name="publish-maven-milestone-only-pom-artifacts" depends="maven.init">
+	  <maven:deploy>
+	    <remoteRepository url="s3://${publish.bucket}/maven/bundles/${adjusted.release.type}">
+	      <authentication username="${accessKey}" passphrase="${secretKey}"/>
+	     </remoteRepository>
+	    <pom file="${local.pom.output.file}"/>
+	  </maven:deploy>
 	</target>
+
+	<target name="publish-maven-milestone-code-artifacts" depends="maven.init">
+		<maven:deploy file="${jar.output.file}">
+			<remoteRepository url="s3://${publish.bucket}/maven/bundles/${adjusted.release.type}">
+				<authentication username="${accessKey}" passphrase="${secretKey}"/>
+			</remoteRepository>
+			<pom file="${pom.output.file}"/>
+			<attach file="${source-jar.output.file}" classifier="sources"/>
+		</maven:deploy>	
+	</target>
+
 
 	<target name="install-pom" depends="maven.init">
 	  <maven:install>
@@ -33,7 +54,7 @@
 
         <!-- POM only deployment -->
 
-	<target name="publish-only-pom-windows" depends="maven.init" if="is.windows">
+	<target name="publish-central-only-pom-windows" depends="maven.init" if="is.windows">
 	  <maven:deploy>
   	    <!-- Due to http://jira.codehaus.org/browse/MANTTASKS-103 in 2.0.8 on windows, fixed in 2.0.9 -->
             <!-- Assuming using local file, value of variable should be of the form L:\temp\maven-repo-test -->
@@ -42,7 +63,7 @@
 	  </maven:deploy>
 	</target>
 
-	<target name="publish-only-pom-unix" depends="maven.init" unless="is.windows">
+	<target name="publish-central-only-pom-unix" depends="maven.init" unless="is.windows">
 	  <maven:deploy>
   	    <remoteRepository url="${maven.central.repository}"/>
 	    <pom file="${local.pom.output.file}"/>
@@ -52,7 +73,7 @@
 
         <!-- jar, source-jar and POM deployment -->
 
-	<target name="publish-code-windows" depends="maven.init">
+	<target name="publish-central-windows" depends="maven.init">
 		<maven:deploy file="${jar.output.file}">
  	  	    <!-- Due to http://jira.codehaus.org/browse/MANTTASKS-103 in 2.0.8 on windows, fixed in 2.0.9 -->
                     <!-- Assuming using local file, value of variable should be of the form L:\temp\maven-repo-test -->
