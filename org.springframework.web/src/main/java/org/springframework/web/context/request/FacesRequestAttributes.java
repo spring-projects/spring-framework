@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.portlet.PortletSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
@@ -47,6 +49,9 @@ import org.springframework.web.util.WebUtils;
  * @see RequestContextHolder#currentRequestAttributes()
  */
 public class FacesRequestAttributes implements RequestAttributes {
+
+	private static final boolean portletApiPresent =
+			ClassUtils.isPresent("javax.portlet.PortletSession", FacesRequestAttributes.class.getClassLoader());
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
@@ -92,6 +97,9 @@ public class FacesRequestAttributes implements RequestAttributes {
 	protected Map<String, Object> getAttributeMap(int scope) {
 		if (scope == SCOPE_REQUEST) {
 			return getExternalContext().getRequestMap();
+		}
+		else if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
+			return PortletSessionAccessor.getGlobalSessionMapIfPossible(getExternalContext());
 		}
 		else {
 			return getExternalContext().getSessionMap();
@@ -191,6 +199,23 @@ public class FacesRequestAttributes implements RequestAttributes {
 			mutex = session;
 		}
 		return mutex;
+	}
+
+
+	/**
+	 * Inner class to avoid hard-coded Portlet API dependency.
+ 	 */
+	private static class PortletSessionAccessor {
+
+		public static Map<String, Object> getGlobalSessionMapIfPossible(ExternalContext externalContext) {
+			Object session = externalContext.getSession(true);
+			if (session instanceof PortletSession) {
+				return ((PortletSession) session).getAttributeMap(PortletSession.APPLICATION_SCOPE);
+			}
+			else {
+				return externalContext.getSessionMap();
+			}
+		}
 	}
 
 }
