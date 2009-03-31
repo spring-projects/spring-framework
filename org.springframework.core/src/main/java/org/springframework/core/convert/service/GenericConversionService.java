@@ -40,6 +40,10 @@ import org.springframework.util.Assert;
 /**
  * Base implementation of a conversion service. Initially empty, e.g. no converters are registered by default.
  * 
+ * TODO - custom converters
+ * TODO - object to collection/map converters
+ * TODO - allow registration of converters to apply on presence of annotation values on setter or field e.g. String-to-@Mask String to apply a mask
+ * 
  * @author Keith Donald
  */
 @SuppressWarnings("unchecked")
