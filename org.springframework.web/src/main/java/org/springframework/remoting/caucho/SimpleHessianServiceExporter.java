@@ -66,6 +66,7 @@ public class SimpleHessianServiceExporter extends HessianExporter implements Htt
 			throw new IOException("Hessian skeleton invocation failed", ex);
 		}
 
+		exchange.getResponseHeaders().set("Content-Type", CONTENT_TYPE_HESSIAN);
 		exchange.sendResponseHeaders(200, output.size());
 		FileCopyUtils.copy(output.toByteArray(), exchange.getResponseBody());
 	}

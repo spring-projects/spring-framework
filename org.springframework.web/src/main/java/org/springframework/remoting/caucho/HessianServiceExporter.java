@@ -61,6 +61,7 @@ public class HessianServiceExporter extends HessianExporter implements HttpReque
 					new String[] {"POST"}, "HessianServiceExporter only supports POST requests");
 		}
 
+		response.setContentType(CONTENT_TYPE_HESSIAN);
 		try {
 		  invoke(request.getInputStream(), response.getOutputStream());
 		}
