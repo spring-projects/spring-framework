@@ -575,9 +575,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	public void testSuperTwoWayConverterConverterAdaption() {
-		// this fails at the moment
-		//service.addConverter(GenericConversionService.converterFor(String.class, FooEnum.class, new StringToEnum()));
-		//assertEquals(FooEnum.BAR, service.executeConversion("BAR", FooEnum.class));
+		service.addConverter(GenericConversionService.converterFor(String.class, FooEnum.class, new StringToEnum()));
+		assertEquals(FooEnum.BAR, service.executeConversion(value("BAR"), type(FooEnum.class)));
 	}
 
 	private TypedValue value(Object obj) {

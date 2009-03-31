@@ -18,7 +18,6 @@ package org.springframework.core.convert;
 /**
  * Thrown when a conversion executor could not be found in a conversion service.
  * 
- * @see ConversionService#getConversionExecutor(Class, Class)
  * @author Keith Donald
  */
 public class ConversionExecutorNotFoundException extends ConversionException {
@@ -40,14 +39,14 @@ public class ConversionExecutorNotFoundException extends ConversionException {
 	}
 
 	/**
-	 * Returns the source type requested to convert from.
+	 * Returns the source type that was requested to convert from.
 	 */
 	public TypeDescriptor getSourceType() {
 		return sourceType;
 	}
 
 	/**
-	 * Returns the target type requested to convert to.
+	 * Returns the target type that was requested to convert to.
 	 */
 	public TypeDescriptor getTargetType() {
 		return targetType;

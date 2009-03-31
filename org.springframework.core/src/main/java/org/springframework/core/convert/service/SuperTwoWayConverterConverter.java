@@ -1,6 +1,7 @@
 package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.convert.converter.SuperTwoWayConverter;
 
@@ -9,26 +10,34 @@ import org.springframework.core.convert.converter.SuperTwoWayConverter;
  * for applying more general {@link SuperConverter} logic to a specific source/target class pair.
  */
 @SuppressWarnings("unchecked")
-class SuperTwoWayConverterConverter<S, T> implements Converter<S, T> {
+class SuperTwoWayConverterConverter implements Converter, ConverterInfo {
 
 	private SuperTwoWayConverter superConverter;
 
-	private Class sourceClass;
+	private Class sourceType;
 
-	private Class targetClass;
+	private Class targetType;
 
-	public SuperTwoWayConverterConverter(SuperTwoWayConverter superConverter, Class sourceClass, Class targetClass) {
+	public SuperTwoWayConverterConverter(SuperTwoWayConverter superConverter, Class sourceType, Class targetType) {
 		this.superConverter = superConverter;
-		this.sourceClass = sourceClass;
-		this.targetClass = targetClass;
+		this.sourceType = sourceType;
+		this.targetType = targetType;
+	}
+	
+	public Class getSourceType() {
+		return sourceType;
 	}
 
-	public T convert(S source) throws Exception {
-		return (T) superConverter.convert(source, targetClass);
+	public Class getTargetType() {
+		return targetType;
 	}
 
-	public S convertBack(T target) throws Exception {
-		return (S) superConverter.convertBack(target, sourceClass);
+	public Object convert(Object source) throws Exception {
+		return superConverter.convert(source, targetType);
+	}
+
+	public Object convertBack(Object target) throws Exception {
+		return superConverter.convertBack(target, sourceType);
 	}
 
 }

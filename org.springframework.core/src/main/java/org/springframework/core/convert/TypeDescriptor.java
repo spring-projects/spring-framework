@@ -10,7 +10,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 
 /**
- * Type metadata about a bindable value.
+ * Type metadata about a bindable target value.
  * 
  * @author Keith Donald
  */

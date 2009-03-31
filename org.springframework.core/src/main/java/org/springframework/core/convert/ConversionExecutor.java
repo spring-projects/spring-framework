@@ -25,7 +25,7 @@ package org.springframework.core.convert;
 public interface ConversionExecutor {
 
 	/**
-	 * Convert the source to T.
+	 * Convert the source.
 	 * @param source the source to convert
 	 * @throws ConversionExecutionException if an exception occurs during type conversion
 	 */

@@ -7,6 +7,8 @@ package org.springframework.core.convert;
  * It also allows access to field-level or method-level annotations.
  * All of this context can be utilized when performing a type conversion as part of a data binding routine.
  * 
+ * TODO - is this needed?
+ * 
  * @author Keith Donald
  */
 public class TypedValue {

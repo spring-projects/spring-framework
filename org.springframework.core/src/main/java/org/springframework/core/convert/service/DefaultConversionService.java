@@ -79,7 +79,7 @@ public class DefaultConversionService extends GenericConversionService {
 		addAlias("long", Long.class);
 		addAlias("float", Float.class);
 		addAlias("double", Double.class);
-		addAlias("bigInteger", BigInteger.class);
+		addAlias("bigInt", BigInteger.class);
 		addAlias("bigDecimal", BigDecimal.class);
 		addAlias("locale", Locale.class);
 		addAlias("enum", Enum.class);
