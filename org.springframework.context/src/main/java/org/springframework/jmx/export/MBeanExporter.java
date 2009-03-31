@@ -66,23 +66,19 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * JMX exporter that allows for exposing any <i>Spring-managed bean</i>
- * to a JMX <code>MBeanServer</code>, without the need to define any
+ * JMX exporter that allows for exposing any <i>Spring-managed bean</i> to a
+ * JMX {@link javax.management.MBeanServer}, without the need to define any
  * JMX-specific information in the bean classes.
  *
- * <p>If the bean implements one of the JMX management interfaces,
- * then MBeanExporter can simply register the MBean with the server
- * automatically, through its autodetection process.
+ * <p>If a bean implements one of the JMX management interfaces, MBeanExporter can
+ * simply register the MBean with the server through its autodetection process.
  *
- * <p>If the bean does not implement one of the JMX management interfaces,
- * then MBeanExporter will create the management information using the
- * supplied {@link MBeanInfoAssembler} implementation.
+ * <p>If a bean does not implement one of the JMX management interfaces, MBeanExporter
+ * will create the management information using the supplied {@link MBeanInfoAssembler}.
  *
- * <p>A list of {@link MBeanExporterListener MBeanExporterListeners}
- * can be registered via the
- * {@link #setListeners(MBeanExporterListener[]) listeners} property,
- * allowing application code to be notified of MBean registration and
- * unregistration events.
+ * <p>A list of {@link MBeanExporterListener MBeanExporterListeners} can be registered
+ * via the {@link #setListeners(MBeanExporterListener[]) listeners} property, allowing
+ * application code to be notified of MBean registration and unregistration events.
  *
  * <p>This exporter is compatible with JMX 1.2 on Java 5 and above.
  * As of Spring 2.5, it also autodetects and exports Java 6 MXBeans.
@@ -442,7 +438,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 	public ObjectName registerManagedResource(Object managedResource) throws MBeanExportException {
 		Assert.notNull(managedResource, "Managed resource must not be null");
-		ObjectName objectName = null;
+		ObjectName objectName;
 		try {
 			objectName = getObjectName(managedResource, null);
 			if (this.ensureUniqueRuntimeObjectNames) {
@@ -473,6 +469,11 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			throw new UnableToRegisterMBeanException(
 					"Unable to register MBean [" + managedResource + "] with object name [" + objectName + "]", ex);
 		}
+	}
+
+	public void unregisterManagedResource(ObjectName objectName) {
+		Assert.notNull(objectName, "ObjectName must not be null");
+		doUnregister(objectName);
 	}
 
 
