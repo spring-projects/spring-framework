@@ -15,14 +15,19 @@
        </condition>
 
 
-       <!-- top level targets -->
-         <target name="publish-maven-central-only-pom-artifacts" depends="publish-only-pom-windows,publish-only-pom-unix">
+        <!-- top level targets -->
+        <target name="publish-maven-central-only-pom-artifacts" depends="publish-only-pom-windows,publish-only-pom-unix">
 	</target>
 
 
 	<target name="publish-maven-central-code-artifacts" depends="publish-code-windows,publish-code-unix">
 	</target>
 
+	<target name="install-pom" depends="maven.init">
+	  <maven:install>
+	    <pom file="${local.pom.output.file}"/>
+	  </maven:install>
+	</target>
 
 	<!-- Supporting targets -->
 
