@@ -167,11 +167,19 @@ public class GenericConversionService implements ConversionService {
 	
 	public Object executeConversion(TypedValue source, TypeDescriptor targetType) throws ConversionExecutorNotFoundException,
 			ConversionException {
+		Assert.notNull(source, "The source to convert from is required");
+		if (source.isNull()) {
+			return null;
+		}
 		return getConversionExecutor(source.getTypeDescriptor(), targetType).execute(source.getValue());
 	}
 
 	public Object executeConversion(String converterId, TypedValue source, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException, ConversionException {
+		Assert.notNull(source, "The source to convert from is required");
+		if (source.isNull()) {
+			return null;
+		}		
 		return getConversionExecutor(converterId, source.getTypeDescriptor(), targetType).execute(source.getValue());
 	}
 
@@ -206,21 +214,20 @@ public class GenericConversionService implements ConversionService {
 				throw new UnsupportedOperationException("Object to collection not yet supported");				
 			}
 		}
-		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
-		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();
-		Converter converter = findRegisteredConverter(sourceClass, targetClass);
+		Converter converter = findRegisteredConverter(sourceType, targetType);
 		if (converter != null) {
-			// we found a converter
 			return new StaticConversionExecutor(sourceType, targetType, converter);
 		} else {
-			SuperConverter superConverter = findRegisteredSuperConverter(sourceClass, targetClass);
+			SuperConverter superConverter = findRegisteredSuperConverter(sourceType, targetType);
 			if (superConverter != null) {
 				return new StaticSuperConversionExecutor(sourceType, targetType, superConverter);
 			}
 			if (parent != null) {
-				// try the parent
 				return parent.getConversionExecutor(sourceType, targetType);
 			} else {
+				if (sourceType.isAssignableTo(targetType)) {
+					return new StaticConversionExecutor(sourceType, targetType, NoOpConverter.INSTANCE);
+				}
 				throw new ConversionExecutorNotFoundException(sourceType, targetType,
 						"No ConversionExecutor found for converting from sourceType [" + sourceType.getName()
 								+ "] to targetType [" + targetType.getName() + "]");
@@ -306,7 +313,9 @@ public class GenericConversionService implements ConversionService {
 		return sourceMap;
 	}
 
-	private Converter findRegisteredConverter(Class sourceClass, Class targetClass) {
+	private Converter findRegisteredConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
+		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();		
 		if (sourceClass.isInterface()) {
 			LinkedList classQueue = new LinkedList();
 			classQueue.addFirst(sourceClass);
@@ -355,7 +364,9 @@ public class GenericConversionService implements ConversionService {
 		return (Converter) converters.get(targetClass);
 	}
 
-	private SuperConverter findRegisteredSuperConverter(Class sourceClass, Class targetClass) {
+	private SuperConverter findRegisteredSuperConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
+		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();		
 		if (sourceClass.isInterface()) {
 			LinkedList classQueue = new LinkedList();
 			classQueue.addFirst(sourceClass);
@@ -441,7 +452,7 @@ public class GenericConversionService implements ConversionService {
 	}
 
 	public ConversionExecutor getElementConverter(Class<?> sourceElementType, Class<?> targetElementType) {
-		return getConversionExecutor(new TypeDescriptor(sourceElementType), new TypeDescriptor(targetElementType));
+		return getConversionExecutor(TypeDescriptor.valueOf(sourceElementType), TypeDescriptor.valueOf(targetElementType));
 	}
 
 }

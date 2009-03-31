@@ -10,7 +10,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 
 /**
- * Metadata about a retrieved value or value type.
+ * Type metadata about a bindable value.
  * 
  * @author Keith Donald
  */
@@ -24,13 +24,18 @@ public class TypeDescriptor {
 
 	private Class<?> type;
 	
+	/**
+	 * Creates a new descriptor for the given type.
+	 * Use this constructor when a bound value comes from a source such as a Map or collection, where no additional binding metadata is available.
+	 * @param type the actual type
+	 */
 	public TypeDescriptor(Class<?> type) {
 		this.type = type;
 	}
 	
 	/**
 	 * Create a new descriptor for a method or constructor parameter.
-	 * 
+	 * Use this constructor when a bound value originates from a method parameter, such as a setter method argument.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
@@ -39,8 +44,8 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new descriptor for a field. Considers the dependency as 'eager'.
-	 * 
+	 * Create a new descriptor for a field.
+	 * Use this constructor when a bound value originates from a field.
 	 * @param field the field to wrap
 	 */
 	public TypeDescriptor(Field field) {
@@ -63,6 +68,10 @@ public class TypeDescriptor {
 		}
 	}
 
+	/**
+	 * If the actual type is a primitive, returns its wrapper type, else just returns {@link #getType()}.
+	 * @return the wrapper type if the underlying type is a primitive, else the actual type as-is
+	 */
 	public Class<?> getWrapperTypeIfPrimitive() {
 		Class<?> type = getType();
 		if (type.isPrimitive()) {
@@ -90,42 +99,41 @@ public class TypeDescriptor {
 		}
 	}
 	
+	/**
+	 * Returns the name of this type; the fully qualified classname.
+	 */
 	public String getName() {
 		return getType().getName();
 	}
-	
+
+	/**
+	 * Is this type an array type?
+	 */
 	public boolean isArray() {
 		return getType().isArray();
 	}
-	
-	public Class<?> getElementType() {
-		return isArray() ? getArrayComponentType() : getCollectionElementType();
-	}
-	
-	public Class<?> getArrayComponentType() {
-		return getType().getComponentType();
-	}
 
-	public boolean isInstance(Object source) {
-		return getType().isInstance(source);
-	}
-
-	
 	/**
-	 * Determine the generic element type of the wrapped Collection parameter/field, if any.
-	 * 
-	 * @return the generic type, or <code>null</code> if none
+	 * Is this type a {@link Collection} type?
 	 */
-	public Class<?> getCollectionElementType() {
-		if (type != null) {
-			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) type);
-		} else if (field != null) {
-			return GenericCollectionTypeResolver.getCollectionFieldType(field);
+	public boolean isCollection() {
+		return Collection.class.isAssignableFrom(getType());
+	}
+
+	/**
+	 * If this type is an array type or {@link Collection} type, returns the underlying element type.
+	 * Returns null if the type is neither an array or collection.
+	 */
+	public Class<?> getElementType() {
+		if (isArray()) {
+			return getArrayComponentType();
+		} else if (isCollection()) {
+			return getCollectionElementType();
 		} else {
-			return  GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
+			return null;
 		}
 	}
-
+	
 	/**
 	 * Determine the generic key type of the wrapped Map parameter/field, if any.
 	 * 
@@ -182,12 +190,53 @@ public class TypeDescriptor {
 		return field;
 	}
 
-	public boolean isCollection() {
-		return Collection.class.isAssignableFrom(getType());
-	}
-
+	/**
+	 * Returns true if this type is an abstract class.
+	 */
 	public boolean isAbstractClass() {
 		return !getType().isInterface() && Modifier.isAbstract(getType().getModifiers());
+	}
+
+	/**
+	 * Is the obj an instance of this type?
+	 */
+	public boolean isInstance(Object obj) {
+		return getType().isInstance(obj);
+	}
+
+	/**
+	 * Returns true if an object this type can be assigned to a rereference of given targetType.
+	 * @param targetType the target type
+	 * @return true if this type is assignable to the target
+	 */
+	public boolean isAssignableTo(TypeDescriptor targetType) {
+		return targetType.getType().isAssignableFrom(getType());
+	}
+	
+
+	/**
+	 * Creates a new type descriptor for the given class.
+	 * @param type the class
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor valueOf(Class<? extends Object> type) {
+		return new TypeDescriptor(type);
+	}
+
+	// internal helpers
+	
+	private Class<?> getArrayComponentType() {
+		return getType().getComponentType();
+	}
+	
+	private Class<?> getCollectionElementType() {
+		if (type != null) {
+			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) type);
+		} else if (field != null) {
+			return GenericCollectionTypeResolver.getCollectionFieldType(field);
+		} else {
+			return  GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
+		}
 	}
 
 }
