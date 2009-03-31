@@ -42,6 +42,7 @@ class MapToMap implements ConversionExecutor {
 	@SuppressWarnings("unchecked")
 	public Object execute(Object source) throws ConversionExecutionException {
 		try {
+			// TODO shouldn't do all this if generic info is null - should cache executor after first iteration?
 			Map map = (Map) source;
 			Map targetMap = (Map) getImpl(targetType.getType()).newInstance();
 			Iterator<Map.Entry<?, ?>> it = map.entrySet().iterator();
