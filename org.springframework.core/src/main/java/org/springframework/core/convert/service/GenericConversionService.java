@@ -31,7 +31,6 @@ import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionExecutorNotFoundException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.TypedValue;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.SuperConverter;
@@ -155,33 +154,32 @@ public class GenericConversionService implements ConversionService {
 
 	// implementing ConversionService
 
-	public boolean canConvert(TypedValue source, TypeDescriptor targetType) {
+	public boolean canConvert(Object source, TypeDescriptor targetType) {
 		return false;
 	}
 
-	public Object executeConversion(TypedValue source, TypeDescriptor targetType)
+	public Object executeConversion(Object source, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException, ConversionException {
-		Assert.notNull(source, "The source to convert from is required");
-		if (source.isNull()) {
+		if (source == null) {
 			return null;
 		}
-		return getConversionExecutor(source.getTypeDescriptor(), targetType).execute(source.getValue());
+		return getConversionExecutor(source.getClass(), targetType).execute(source);
 	}
 
-	public Object executeConversion(String converterId, TypedValue source, TypeDescriptor targetType)
+	public Object executeConversion(String converterId, Object source, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException, ConversionException {
-		Assert.notNull(source, "The source to convert from is required");
-		if (source.isNull()) {
+		if (source == null) {
 			return null;
 		}
-		return getConversionExecutor(converterId, source.getTypeDescriptor(), targetType).execute(source.getValue());
+		return getConversionExecutor(converterId, source.getClass(), targetType).execute(source);
 	}
 
-	public ConversionExecutor getConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType)
+	public ConversionExecutor getConversionExecutor(Class sourceClass, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException {
-		Assert.notNull(sourceType, "The sourceType to convert from is required");
+		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
 		// special handling for arrays since they are not indexable classes
+		TypeDescriptor sourceType = TypeDescriptor.valueOf(sourceClass);
 		if (sourceType.isArray()) {
 			if (targetType.isArray()) {
 				return new ArrayToArray(sourceType, targetType, this);
@@ -217,7 +215,7 @@ public class GenericConversionService implements ConversionService {
 				return new StaticSuperConversionExecutor(sourceType, targetType, superConverter);
 			}
 			if (parent != null) {
-				return parent.getConversionExecutor(sourceType, targetType);
+				return parent.getConversionExecutor(sourceClass, targetType);
 			} else {
 				if (sourceType.isAssignableTo(targetType)) {
 					return new StaticConversionExecutor(sourceType, targetType, NoOpConverter.INSTANCE);
@@ -229,7 +227,7 @@ public class GenericConversionService implements ConversionService {
 		}
 	}
 
-	public ConversionExecutor getConversionExecutor(String converterId, TypeDescriptor sourceType,
+	public ConversionExecutor getConversionExecutor(String converterId, Class sourceType,
 			TypeDescriptor targetType) throws ConversionExecutorNotFoundException {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
@@ -450,7 +448,7 @@ public class GenericConversionService implements ConversionService {
 	}
 
 	public ConversionExecutor getElementConverter(Class<?> sourceElementType, Class<?> targetElementType) {
-		return getConversionExecutor(TypeDescriptor.valueOf(sourceElementType), TypeDescriptor
+		return getConversionExecutor(sourceElementType, TypeDescriptor
 				.valueOf(targetElementType));
 	}
 
