@@ -282,7 +282,7 @@
     <classname>DispatcherServlet</classname> declaration and mapping can be
     found below.</para>
 
-    <programlisting>&lt;web-app&gt;
+    <programlisting language="xml">&lt;web-app&gt;
 
     &lt;servlet&gt;
         &lt;servlet-name&gt;example&lt;/servlet-name&gt;
@@ -3232,6 +3232,50 @@ public class EditPetForm {
 }
 </programlisting>
     </section>
+    <section id="mvc-ann-cookievalue">
+    <title>Mapping cookie values with the @CookieValue annotation</title>
+    <para>
+    The <interfacename>@CookieValue</interfacename> annotation allows a method parameter to be bound to the value of an HTTP cookie. 
+    </para>
+		
+    <para>Let us consider that the following cookie has been received with an http request: </para>
+    <programlisting>JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84</programlisting>		
+    <para>The following code sample allows you to easily get the value of the "JSESSIONID"cookie:</para>
+    <programlisting>@RequestMapping("/displayHeaderInfo.do")
+public void displayHeaderInfo(<emphasis role="bold">@CookieValue("JSESSIONID")</emphasis> String cookie)  {
+
+  //...
+
+}</programlisting>
+    <para>This annotation is supported for annotated handler methods in Servlet and Portlet environments.	</para>
+    </section>
+
+    <section id="mvc-ann-requestheader">
+      <title>Mapping request header attributes with the @RequestHeader annotation</title>
+      <para>
+      The <interfacename>@RequestHeader</interfacename> annotation allows a method parameter to be bound to a request header. 
+      </para>
+		
+      <para>Here is a request header sample: </para>
+      <programlisting><![CDATA[
+Host                    localhost:8080
+Accept                  text/html,application/xhtml+xml,application/xml;q=0.9
+Accept-Language         fr,en-gb;q=0.7,en;q=0.3
+Accept-Encoding         gzip,deflate
+Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive              300
+]]></programlisting>		
+      <para>The following code sample allows you to easily get the value of the "Accept-Encoding" and "Keep-Alive" headers:</para>
+      <programlisting>@RequestMapping("/displayHeaderInfo.do")
+  public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encoding")</emphasis> String encoding, 
+                                <emphasis role="bold">@RequestHeader("Keep-Alive")</emphasis> long keepAlive)  {
+
+  //...
+
+}</programlisting>
+      <para>This annotation is supported for annotated handler methods in Servlet and Portlet environments.	</para>
+    </section>
+
 
     <section id="mvc-ann-webdatabinder">
       <title>Customizing <classname>WebDataBinder</classname>
