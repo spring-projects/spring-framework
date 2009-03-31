@@ -54,6 +54,9 @@ import org.springframework.util.CommonsLogWriter;
  */
 public class HessianExporter extends RemoteExporter implements InitializingBean {
 
+	public static final String CONTENT_TYPE_HESSIAN = "application/x-hessian";
+
+
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
 	private Log debugLogger;
