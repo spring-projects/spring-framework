@@ -15,14 +15,19 @@
  */
 package org.springframework.core.convert.service;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.fail;
+
 import java.security.Principal;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.TestCase;
+import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,34 +41,39 @@ import org.springframework.core.convert.converter.NumberToNumber;
 import org.springframework.core.convert.converter.StringToEnum;
 import org.springframework.core.convert.converter.StringToInteger;
 
-public class GenericConversionServiceTests extends TestCase {
+public class GenericConversionServiceTests {
 
 	private GenericConversionService service = new GenericConversionService();
 
-	public void testExecuteConversion() {
+	@Test
+	public void executeConversion() {
 		service.addConverter(new StringToInteger());
 		assertEquals(new Integer(3), service.executeConversion("3", type(Integer.class)));
 	}
-	
-	public void testExecuteConversionNullSource() {
+
+	@Test
+	public void executeConversionNullSource() {
 		assertEquals(null, service.executeConversion(null, type(Integer.class)));
 	}
 
-	public void testConverterConversionForwardIndex() {
+	@Test
+	public void converterConvertForwardIndex() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(Integer.class));
 		Integer three = (Integer) executor.execute("3");
 		assertEquals(3, three.intValue());
 	}
 
-	public void testConverterConversionReverseIndex() {
+	@Test
+	public void convertReverseIndex() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(Integer.class, type(String.class));
 		String threeString = (String) executor.execute(new Integer(3));
 		assertEquals("3", threeString);
 	}
 
-	public void testConversionExecutorNotFound() {
+	@Test
+	public void convertExecutorNotFound() {
 		try {
 			service.getConversionExecutor(String.class, type(Integer.class));
 			fail("Should have thrown an exception");
@@ -71,7 +81,8 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testAddConverterNoSourceTargetClassInfoAvailable() {
+	@Test
+	public void addConverterNoSourceTargetClassInfoAvailable() {
 		try {
 			service.addConverter(new Converter() {
 				public Object convert(Object source) throws Exception {
@@ -88,18 +99,21 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testConversionCompatibleTypes() {
+	@Test
+	public void convertCompatibleTypes() {
 		String source = "foo";
 		assertSame(source, service.getConversionExecutor(String.class, type(String.class)).execute(source));
 	}
 
-	public void testConversionExecutorNullArgument() {
+	@Test
+	public void convertNull() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(Integer.class));
 		assertNull(executor.execute(null));
 	}
 
-	public void testConversionExecutorWrongTypeArgument() {
+	@Test
+	public void convertWrongTypeArgument() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(Integer.class, type(String.class));
 		try {
@@ -110,7 +124,8 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testConverterConversionSuperSourceType() {
+	@Test
+	public void convertSuperSourceType() {
 		service.addConverter(new Converter<CharSequence, Integer>() {
 			public Integer convert(CharSequence source) throws Exception {
 				return Integer.valueOf(source.toString());
@@ -125,7 +140,8 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals(new Integer(3), result);
 	}
 
-	public void testConverterConversionNoSuperTargetType() {
+	@Test
+	public void convertNoSuperTargetType() {
 		service.addConverter(new Converter<CharSequence, Number>() {
 			public Integer convert(CharSequence source) throws Exception {
 				return Integer.valueOf(source.toString());
@@ -143,14 +159,16 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testConversionObjectToPrimitive() {
+	@Test
+	public void convertObjectToPrimitive() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(int.class));
 		Integer three = (Integer) executor.execute("3");
 		assertEquals(3, three.intValue());
 	}
 
-	public void testConversionArrayToArray() {
+	@Test
+	public void convertArrayToArray() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(String[].class, type(Integer[].class));
 		Integer[] result = (Integer[]) executor.execute(new String[] { "1", "2", "3" });
@@ -159,7 +177,8 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals(new Integer(3), result[2]);
 	}
 
-	public void testConversionArrayToPrimitiveArray() {
+	@Test
+	public void convertArrayToPrimitiveArray() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(String[].class, type(int[].class));
 		int[] result = (int[]) executor.execute(new String[] { "1", "2", "3" });
@@ -168,7 +187,8 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals(3, result[2]);
 	}
 
-	public void testConversionArrayToListInterface() {
+	@Test
+	public void convertArrayToListInterface() {
 		ConversionExecutor executor = service.getConversionExecutor(String[].class, type(List.class));
 		List result = (List) executor.execute(new String[] { "1", "2", "3" });
 		assertEquals("1", result.get(0));
@@ -177,17 +197,20 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	public List<Integer> genericList = new ArrayList<Integer>();
-	
-	public void testConversionArrayToListGenericTypeConversion() throws Exception {
+
+	@Test
+	public void convertArrayToListGenericTypeConversion() throws Exception {
 		service.addConverter(new StringToInteger());
-		ConversionExecutor executor = service.getConversionExecutor(String[].class, new TypeDescriptor(getClass().getDeclaredField("genericList")));
+		ConversionExecutor executor = service.getConversionExecutor(String[].class, new TypeDescriptor(getClass()
+				.getDeclaredField("genericList")));
 		List result = (List) executor.execute(new String[] { "1", "2", "3" });
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
 	}
-	
-	public void testConversionArrayToListImpl() {
+
+	@Test
+	public void convertArrayToListImpl() {
 		ConversionExecutor executor = service.getConversionExecutor(String[].class, type(LinkedList.class));
 		LinkedList result = (LinkedList) executor.execute(new String[] { "1", "2", "3" });
 		assertEquals("1", result.get(0));
@@ -195,7 +218,8 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("3", result.get(2));
 	}
 
-	public void testConversionArrayToAbstractList() {
+	@Test
+	public void convertArrayToAbstractList() {
 		try {
 			service.getConversionExecutor(String[].class, type(AbstractList.class));
 		} catch (IllegalArgumentException e) {
@@ -203,7 +227,8 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testConversionListToArray() {
+	@Test
+	public void convertListToArray() {
 		ConversionExecutor executor = service.getConversionExecutor(Collection.class, type(String[].class));
 		List list = new ArrayList();
 		list.add("1");
@@ -215,7 +240,8 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("3", result[2]);
 	}
 
-	public void testConversionListToArrayWithComponentConversion() {
+	@Test
+	public void convertListToArrayWithComponentConversion() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(Collection.class, type(Integer[].class));
 		List list = new ArrayList();
@@ -228,9 +254,21 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals(new Integer(3), result[2]);
 	}
 
+	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
+
+	@Test
+	public void convertMapToMap() throws Exception {
+		Map<String, String> foo = new HashMap<String, String>();
+		foo.put("1", "BAR");
+		foo.put("2", "BAZ");
+		service.addConverter(new StringToInteger());
+		service.addConverter(new StringToEnum());
+		service.executeConversion(foo, new TypeDescriptor(getClass().getField("genericMap")));
+	}
+
 	@Ignore
 	@Test
-	public void conversionObjectToArray() {
+	public void convertObjectToArray() {
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(String[].class));
 		String[] result = (String[]) executor.execute("1,2,3");
 		assertEquals(1, result.length);
@@ -238,8 +276,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	@Test	
-	public void conversionObjectToArrayWithElementConversion() {
+	@Test
+	public void convertObjectToArrayWithElementConversion() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(Integer[].class));
 		Integer[] result = (Integer[]) executor.execute("123");
@@ -248,22 +286,25 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	public static enum FooEnum {
-		BAR
+		BAR, BAZ
 	}
 
-	public void testSuperConverterConversionForwardIndex() {
+	@Test
+	public void superConverterConvertForwardIndex() {
 		service.addConverter(new StringToEnum());
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(FooEnum.class));
 		assertEquals(FooEnum.BAR, executor.execute("BAR"));
 	}
 
-	public void testSuperTwoWayConverterConversionReverseIndex() {
+	@Test
+	public void superTwoWayConverterConvertReverseIndex() {
 		service.addConverter(new StringToEnum());
 		ConversionExecutor executor = service.getConversionExecutor(FooEnum.class, type(String.class));
 		assertEquals("BAR", executor.execute(FooEnum.BAR));
 	}
 
-	public void testSuperConverterConversionNotConvertibleAbstractType() {
+	@Test
+	public void superConverterConvertNotConvertibleAbstractType() {
 		service.addConverter(new StringToEnum());
 		ConversionExecutor executor = service.getConversionExecutor(String.class, type(Enum.class));
 		try {
@@ -274,7 +315,8 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testSuperConverterConversionNotConvertibleAbstractType2() {
+	@Test
+	public void superConverterConvertNotConvertibleAbstractType2() {
 		service.addConverter(new NumberToNumber());
 		Number customNumber = new Number() {
 			@Override
@@ -308,7 +350,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionForwardIndex() {
+	public void customConverterConvertForwardIndex() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", String.class, type(Principal.class));
 		assertEquals("keith", ((Principal) executor.execute("keith")).getName());
@@ -316,7 +358,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionReverseIndex() {
+	public void customConverterConvertReverseIndex() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", Principal.class, type(String.class));
 		assertEquals("keith", executor.execute(new Principal() {
@@ -328,7 +370,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionForSameType() {
+	public void customConverterConvertForSameType() {
 		service.addConverter("trimmer", new Trimmer());
 		ConversionExecutor executor = service.getConversionExecutor("trimmer", String.class, type(String.class));
 		assertEquals("a string", executor.execute("a string   "));
@@ -370,7 +412,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionArrayToArray() {
+	public void customConverterConvertArrayToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", String[].class, type(Principal[].class));
 		Principal[] p = (Principal[]) executor.execute(new String[] { "princy1", "princy2" });
@@ -380,7 +422,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionArrayToArrayReverse() {
+	public void customConverterConvertArrayToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", Principal[].class, type(String[].class));
 		final Principal princy1 = new Principal() {
@@ -422,7 +464,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionArrayToCollection() {
+	public void customConverterConvertArrayToCollection() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", String[].class, type(List.class));
 		List list = (List) executor.execute(new String[] { "princy1", "princy2" });
@@ -432,7 +474,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionArrayToCollectionReverse() {
+	public void customConverterConvertArrayToCollectionReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", Principal[].class, type(List.class));
 		final Principal princy1 = new Principal() {
@@ -512,7 +554,7 @@ public class GenericConversionServiceTests extends TestCase {
 
 	@Ignore
 	@Test
-	public void customConverterConversionObjectToArray() {
+	public void customConverterConvertObjectToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", String.class, type(Principal[].class));
 		Principal[] p = (Principal[]) executor.execute("princy1");
@@ -520,8 +562,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	@Test	
-	public void customConverterConversionObjectToArrayReverse() {
+	@Test
+	public void customConverterConvertObjectToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", Principal.class, type(String[].class));
 		final Principal princy1 = new Principal() {
@@ -534,7 +576,7 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	@Test	
+	@Test
 	public void customConverterLookupObjectToArrayBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
@@ -577,9 +619,9 @@ public class GenericConversionServiceTests extends TestCase {
 		service.addConverter(GenericConversionService.converterFor(String.class, FooEnum.class, new StringToEnum()));
 		assertEquals(FooEnum.BAR, service.executeConversion("BAR", type(FooEnum.class)));
 	}
-	
+
 	private TypeDescriptor type(Class<?> clazz) {
 		return TypeDescriptor.valueOf(clazz);
 	}
-	
+
 }

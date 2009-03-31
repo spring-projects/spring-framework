@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Map;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -133,6 +134,13 @@ public class TypeDescriptor {
 	 */
 	public boolean isCollection() {
 		return Collection.class.isAssignableFrom(getType());
+	}
+
+	/**
+	 * Is this type a {@link Map} type?
+	 */
+	public boolean isMap() {
+		return Map.class.isAssignableFrom(getType());
 	}
 
 	/**
