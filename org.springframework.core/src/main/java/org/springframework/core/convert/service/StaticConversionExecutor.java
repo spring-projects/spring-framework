@@ -21,6 +21,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;
 
+@SuppressWarnings("unchecked")
 class StaticConversionExecutor implements ConversionExecutor {
 
 	private final TypeDescriptor sourceType;
@@ -35,26 +36,18 @@ class StaticConversionExecutor implements ConversionExecutor {
 		this.converter = converter;
 	}
 
-	public TypeDescriptor getSourceType() {
-		return sourceType;
-	}
-
-	public TypeDescriptor getTargetType() {
-		return targetType;
-	}
-
 	public Object execute(Object source) throws ConversionExecutionException {
 		if (source == null) {
 			return null;
 		}
 		if (sourceType != null && !sourceType.isInstance(source)) {
-			throw new ConversionExecutionException(source, getSourceType(), getTargetType(), "Source object "
-					+ source + " to convert is expected to be an instance of [" + getSourceType().getName() + "]");
+			throw new ConversionExecutionException(source, sourceType, targetType, "Source object "
+					+ source + " to convert is expected to be an instance of [" + sourceType.getName() + "]");
 		}
 		try {
 			return converter.convert(source);
 		} catch (Exception e) {
-			throw new ConversionExecutionException(source, getSourceType(), getTargetType(), e);
+			throw new ConversionExecutionException(source, sourceType, targetType, e);
 		}
 	}
 

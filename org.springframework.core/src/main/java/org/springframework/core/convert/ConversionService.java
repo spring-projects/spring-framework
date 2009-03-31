@@ -17,9 +17,11 @@ package org.springframework.core.convert;
 
 /**
  * A service interface for type conversion. This is the entry point into the convert system. Call one of the
- * {@link #executeConversion(Object, Class) executeConversion} operations to perform a thread-safe type conversion using
- * this system. Call one of the {@link #getConversionExecutor(Class, Class) getConversionExecutor} operations to obtain
+ * <i>executeConversion</i> operations to perform a thread-safe type conversion using
+ * this system. Call one of the <i>getConversionExecutor</i> operations to obtain
  * a thread-safe {@link ConversionExecutor} command for later use.
+ * 
+ * TODO - is TypeDescriptor/TypedValue needed on source?
  * 
  * @author Keith Donald
  */
@@ -86,7 +88,7 @@ public interface ConversionService {
 			 TypeDescriptor targetType) throws ConversionExecutorNotFoundException;
 
 	/**
-	 * Get a type by its name; may be the fully-qualified class name or a registered alias.
+	 * Get a type by its name; may be the fully-qualified class name or a registered type alias such as 'int'.
 	 * @return the class, or <code>null</code> if no such name exists
 	 */
 	public Class<?> getType(String name);

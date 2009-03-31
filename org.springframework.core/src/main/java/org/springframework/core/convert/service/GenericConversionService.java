@@ -15,12 +15,10 @@
  */
 package org.springframework.core.convert.service;
 
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,14 +33,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.TypedValue;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.convert.converter.SuperTwoWayConverter;
 import org.springframework.util.Assert;
 
 /**
  * Base implementation of a conversion service. Initially empty, e.g. no converters are registered by default.
- * 
- * TODO auto-conversion of generic collection elements
  * 
  * @author Keith Donald
  */
@@ -137,9 +134,6 @@ public class GenericConversionService implements ConversionService {
 	/**
 	 * Adapts a {@link SuperTwoWayConverter} that converts between BS and BT class hierarchies to a {@link Converter}
 	 * that converts between the specific BS/BT sub types S and T.
-	 * 
-	 * TODO - I think this is going to force indexing on a getSourceClass/getTargetclass prop instead generic args
-	 * 
 	 * @param sourceClass the source class S to convert from, which must be equal or extend BS
 	 * @param targetClass the target type T to convert to, which must equal or extend BT
 	 * @param converter the super two way converter
@@ -147,12 +141,12 @@ public class GenericConversionService implements ConversionService {
 	 */
 	public static <S, T> Converter<S, T> converterFor(Class<S> sourceClass, Class<T> targetClass,
 			SuperTwoWayConverter converter) {
-		return new SuperTwoWayConverterConverter<S, T>(converter, sourceClass, targetClass);
+		return new SuperTwoWayConverterConverter(converter, sourceClass, targetClass);
 	}
 
 	/**
-	 * Add a convenient alias for the target type. {@link #getType(String)} can then be used to lookup the type
-	 * given the alias.
+	 * Add a convenient alias for the target type. {@link #getType(String)} can then be used to lookup the type given
+	 * the alias.
 	 * @see #getType(String)
 	 */
 	public void addAlias(String alias, Class targetType) {
@@ -164,9 +158,9 @@ public class GenericConversionService implements ConversionService {
 	public boolean canConvert(TypedValue source, TypeDescriptor targetType) {
 		return false;
 	}
-	
-	public Object executeConversion(TypedValue source, TypeDescriptor targetType) throws ConversionExecutorNotFoundException,
-			ConversionException {
+
+	public Object executeConversion(TypedValue source, TypeDescriptor targetType)
+			throws ConversionExecutorNotFoundException, ConversionException {
 		Assert.notNull(source, "The source to convert from is required");
 		if (source.isNull()) {
 			return null;
@@ -179,7 +173,7 @@ public class GenericConversionService implements ConversionService {
 		Assert.notNull(source, "The source to convert from is required");
 		if (source.isNull()) {
 			return null;
-		}		
+		}
 		return getConversionExecutor(converterId, source.getTypeDescriptor(), targetType).execute(source.getValue());
 	}
 
@@ -204,14 +198,14 @@ public class GenericConversionService implements ConversionService {
 			if (sourceType.isCollection()) {
 				return new CollectionToArray(sourceType, targetType, this);
 			} else {
-				throw new UnsupportedOperationException("Object to Array not yet supported");
+				throw new UnsupportedOperationException("Object to Array conversion not yet supported");
 			}
 		}
 		if (sourceType.isCollection()) {
 			if (targetType.isCollection()) {
 				return new CollectionToCollection(sourceType, targetType, this);
 			} else {
-				throw new UnsupportedOperationException("Object to collection not yet supported");				
+				throw new UnsupportedOperationException("Object to Collection conversion not yet supported");
 			}
 		}
 		Converter converter = findRegisteredConverter(sourceType, targetType);
@@ -257,18 +251,22 @@ public class GenericConversionService implements ConversionService {
 
 	private List getRequiredTypeInfo(Object converter) {
 		List typeInfo = new ArrayList(2);
+		if (converter instanceof ConverterInfo) {
+			ConverterInfo info = (ConverterInfo) converter;
+			typeInfo.add(info.getSourceType());
+			typeInfo.add(info.getTargetType());
+			return typeInfo;
+		}
 		Class classToIntrospect = converter.getClass();
 		while (classToIntrospect != null) {
 			Type[] genericInterfaces = classToIntrospect.getGenericInterfaces();
 			for (Type genericInterface : genericInterfaces) {
 				if (genericInterface instanceof ParameterizedType) {
-					ParameterizedType parameterizedInterface = (ParameterizedType) genericInterface;
-					if (Converter.class.equals(parameterizedInterface.getRawType())
-							|| SuperConverter.class.isAssignableFrom((Class) parameterizedInterface.getRawType())) {
-						Class s = getParameterClass(parameterizedInterface.getActualTypeArguments()[0], converter
-								.getClass());
-						Class t = getParameterClass(parameterizedInterface.getActualTypeArguments()[1], converter
-								.getClass());
+					ParameterizedType pInterface = (ParameterizedType) genericInterface;
+					if (Converter.class.equals(pInterface.getRawType())
+							|| SuperConverter.class.isAssignableFrom((Class) pInterface.getRawType())) {
+						Class s = getParameterClass(pInterface.getActualTypeArguments()[0], converter.getClass());
+						Class t = getParameterClass(pInterface.getActualTypeArguments()[1], converter.getClass());
 						typeInfo.add(getParameterClass(s, converter.getClass()));
 						typeInfo.add(getParameterClass(t, converter.getClass()));
 						break;
@@ -315,7 +313,7 @@ public class GenericConversionService implements ConversionService {
 
 	private Converter findRegisteredConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
-		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();		
+		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();
 		if (sourceClass.isInterface()) {
 			LinkedList classQueue = new LinkedList();
 			classQueue.addFirst(sourceClass);
@@ -366,7 +364,7 @@ public class GenericConversionService implements ConversionService {
 
 	private SuperConverter findRegisteredSuperConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
-		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();		
+		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();
 		if (sourceClass.isInterface()) {
 			LinkedList classQueue = new LinkedList();
 			classQueue.addFirst(sourceClass);
@@ -452,7 +450,8 @@ public class GenericConversionService implements ConversionService {
 	}
 
 	public ConversionExecutor getElementConverter(Class<?> sourceElementType, Class<?> targetElementType) {
-		return getConversionExecutor(TypeDescriptor.valueOf(sourceElementType), TypeDescriptor.valueOf(targetElementType));
+		return getConversionExecutor(TypeDescriptor.valueOf(sourceElementType), TypeDescriptor
+				.valueOf(targetElementType));
 	}
 
 }

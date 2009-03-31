@@ -68,7 +68,7 @@ public class ConversionExecutionException extends ConversionException {
 	}
 
 	/**
-	 * Returns the actual value we tried to convert, an instance of {@link #getSourceClass()}.
+	 * Returns the actual value we tried to convert, an instance of {@link #getSourceType()}.
 	 */
 	public Object getValue() {
 		return value;
@@ -77,14 +77,14 @@ public class ConversionExecutionException extends ConversionException {
 	/**
 	 * Returns the source type we tried to convert the value from.
 	 */
-	public TypeDescriptor getSourceClass() {
+	public TypeDescriptor getSourceType() {
 		return sourceType;
 	}
 
 	/**
 	 * Returns the target type we tried to convert the value to.
 	 */
-	public TypeDescriptor getTargetClass() {
+	public TypeDescriptor getTargetType() {
 		return targetType;
 	}
 
