@@ -45,8 +45,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.Conventions;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -662,11 +660,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			else if (returnValue instanceof Model) {
 				return new ModelAndView().addAllObjects(implicitModel).addAllObjects(((Model) returnValue).asMap());
 			}
-			else if (returnValue instanceof Map) {
-				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
-			}
 			else if (returnValue instanceof View) {
 				return new ModelAndView((View) returnValue).addAllObjects(implicitModel);
+			}
+			else if (handlerMethod.isAnnotationPresent(ModelAttribute.class)) {
+				addReturnValueAsModelAttribute(handlerMethod, handlerType, returnValue, implicitModel);
+				return new ModelAndView().addAllObjects(implicitModel);
+			}
+			else if (returnValue instanceof Map) {
+				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
 			}
 			else if (returnValue instanceof String) {
 				return new ModelAndView((String) returnValue).addAllObjects(implicitModel);
@@ -683,14 +685,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
 				// Assume a single model attribute...
-				ModelAttribute attr = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class);
-				String attrName = (attr != null ? attr.value() : "");
-				ModelAndView mav = new ModelAndView().addAllObjects(implicitModel);
-				if ("".equals(attrName)) {
-					Class resolvedType = GenericTypeResolver.resolveReturnType(handlerMethod, handlerType);
-					attrName = Conventions.getVariableNameForReturnType(handlerMethod, resolvedType, returnValue);
-				}
-				return mav.addObject(attrName, returnValue);
+				addReturnValueAsModelAttribute(handlerMethod, handlerType, returnValue, implicitModel);
+				return new ModelAndView().addAllObjects(implicitModel);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
@@ -725,6 +721,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					Arrays.hashCode(this.params));
 		}
 	}
+
 
 	/**
 	 * Comparator capable of sorting {@link RequestMappingInfo}s (RHIs) so that sorting a list with this comparator will

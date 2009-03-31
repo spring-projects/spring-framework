@@ -136,10 +136,10 @@ public class HandlerMethodInvoker {
 				Object attrValue = doInvokeMethod(attributeMethodToInvoke, handler, args);
 				String attrName = AnnotationUtils.findAnnotation(attributeMethodToInvoke, ModelAttribute.class).value();
 				if ("".equals(attrName)) {
-					Class resolvedType =
-							GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
-					attrName =
-							Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
+					Class resolvedType = GenericTypeResolver.resolveReturnType(
+							attributeMethodToInvoke, handler.getClass());
+					attrName = Conventions.getVariableNameForReturnType(
+							attributeMethodToInvoke, resolvedType, attrValue);
 				}
 				implicitModel.addAttribute(attrName, attrValue);
 			}
@@ -156,10 +156,8 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object[] resolveHandlerArguments(Method handlerMethod,
-			Object handler,
-			NativeWebRequest webRequest,
-			ExtendedModelMap implicitModel) throws Exception {
+	private Object[] resolveHandlerArguments(Method handlerMethod, Object handler,
+			NativeWebRequest webRequest, ExtendedModelMap implicitModel) throws Exception {
 
 		Class[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
@@ -446,7 +444,6 @@ public class HandlerMethodInvoker {
 			throws Exception {
 
 		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
-
 		Class paramType = methodParam.getParameterType();
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		if (contentType == null) {
@@ -463,16 +460,14 @@ public class HandlerMethodInvoker {
 				}
 			}
 		}
-		
 		throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
 	}
 
 	/**
-	 * Returns a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
+	 * Return a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
 	 * Throws an UnsupportedOperationException by default.
 	 */
 	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
-
 		throw new UnsupportedOperationException("@RequestBody not supported");
 	}
 
@@ -585,10 +580,8 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final void updateModelAttributes(Object handler,
-			Map mavModel,
-			ExtendedModelMap implicitModel,
-			NativeWebRequest webRequest) throws Exception {
+	public final void updateModelAttributes(Object handler, Map<String, Object> mavModel,
+			ExtendedModelMap implicitModel, NativeWebRequest webRequest) throws Exception {
 
 		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
 			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
@@ -692,11 +685,22 @@ public class HandlerMethodInvoker {
 	}
 
 	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest) throws Exception {
-
 		if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
 		}
 		return WebArgumentResolver.UNRESOLVED;
+	}
+
+	protected final void addReturnValueAsModelAttribute(
+			Method handlerMethod, Class handlerType, Object returnValue, ExtendedModelMap implicitModel) {
+
+		ModelAttribute attr = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class);
+		String attrName = (attr != null ? attr.value() : "");
+		if ("".equals(attrName)) {
+			Class resolvedType = GenericTypeResolver.resolveReturnType(handlerMethod, handlerType);
+			attrName = Conventions.getVariableNameForReturnType(handlerMethod, resolvedType, returnValue);
+		}
+		implicitModel.addAttribute(attrName, returnValue);
 	}
 
 }
