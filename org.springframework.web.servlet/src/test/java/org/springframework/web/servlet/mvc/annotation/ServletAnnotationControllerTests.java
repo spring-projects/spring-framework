@@ -346,7 +346,7 @@ public class ServletAnnotationControllerTests {
 		request.addParameter("age", "value2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
+		assertEquals("myPath-name1-typeMismatch-tb1-myValue-yourValue", response.getContentAsString());
 	}
 
 	@Test
@@ -360,8 +360,7 @@ public class ServletAnnotationControllerTests {
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
 				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-				wac.getBeanFactory()
-						.registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -1108,11 +1107,12 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/myPath.do")
+		@ModelAttribute("yourKey")
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, Model model) {
 			if (!model.containsAttribute("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
-			return "myView";
+			return "yourValue";
 		}
 	}
 
@@ -1379,9 +1379,9 @@ public class ServletAnnotationControllerTests {
 					}
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 					if (errors.hasFieldErrors("age")) {
-						response.getWriter()
-								.write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
-										"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+						response.getWriter().write(viewName + "-" + tb.getName() + "-" +
+								errors.getFieldError("age").getCode() + "-" + testBeans.get(0).getName() + "-" +
+								model.get("myKey") + (model.containsKey("yourKey") ? "-" + model.get("yourKey") : ""));
 					}
 					else {
 						response.getWriter().write(viewName + "-" + tb.getName() + "-" + tb.getAge() + "-" +
@@ -1472,6 +1472,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	public static class PathOrderingController {
 
@@ -1486,6 +1487,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+
 	@Controller
 	public static class RequestBodyController {
 
@@ -1494,6 +1496,7 @@ public class ServletAnnotationControllerTests {
 			writer.write(body);
 		}
 	}
+
 
 	public static class MyMessageConverter implements HttpMessageConverter {
 
@@ -1515,6 +1518,5 @@ public class ServletAnnotationControllerTests {
 			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
-
 
 }
