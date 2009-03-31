@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -611,7 +611,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
-		BeanWrapperImpl nestedBw = null;
+		BeanWrapperImpl nestedBw;
 		try {
 			nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		}
@@ -628,7 +628,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
 			String propertyName = pv.getName();
-			BeanWrapperImpl nestedBw = null;
+			BeanWrapperImpl nestedBw;
 			try {
 				nestedBw = getBeanWrapperForPropertyPath(propertyName);
 			}
@@ -647,6 +647,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void setPropertyValue(PropertyTokenHolder tokens, PropertyValue pv) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
@@ -658,7 +659,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			getterTokens.actualName = tokens.actualName;
 			getterTokens.keys = new String[tokens.keys.length - 1];
 			System.arraycopy(tokens.keys, 0, getterTokens.keys, 0, tokens.keys.length - 1);
-			Object propValue = null;
+			Object propValue;
 			try {
 				propValue = getPropertyValue(getterTokens);
 			}
@@ -740,8 +741,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				Class mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(
 						pd.getReadMethod(), tokens.keys.length);
 				Map map = (Map) propValue;
-				Object convertedMapKey = null;
-				Object convertedMapValue = null;
+				Object convertedMapKey;
+				Object convertedMapValue;
 				try {
 					// IMPORTANT: Do not pass full property name in here - property editors
 					// must not kick in for map keys but rather only for map values.
