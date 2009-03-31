@@ -178,7 +178,6 @@ public class GenericConversionService implements ConversionService {
 			throws ConversionExecutorNotFoundException {
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
-		// special handling for arrays since they are not indexable classes
 		TypeDescriptor sourceType = TypeDescriptor.valueOf(sourceClass);
 		if (sourceType.isArray()) {
 			if (targetType.isArray()) {
@@ -204,6 +203,13 @@ public class GenericConversionService implements ConversionService {
 				return new CollectionToCollection(sourceType, targetType, this);
 			} else {
 				throw new UnsupportedOperationException("Object to Collection conversion not yet supported");
+			}
+		}
+		if (sourceType.isMap()) {
+			if (targetType.isMap()) {
+				return new MapToMap(sourceType, targetType, this);
+			} else {
+				throw new UnsupportedOperationException("Object to Map conversion not yet supported");				
 			}
 		}
 		Converter converter = findRegisteredConverter(sourceType, targetType);

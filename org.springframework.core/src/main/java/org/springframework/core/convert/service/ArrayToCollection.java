@@ -16,7 +16,6 @@
 package org.springframework.core.convert.service;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.util.Collection;
 
 import org.springframework.core.convert.ConversionExecutor;
@@ -47,8 +46,7 @@ class ArrayToCollection extends AbstractCollectionConverter {
 	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object sourceArray) throws Exception {
 		Class implClass = CollectionConversionUtils.getImpl(getTargetType().getType());
-		Constructor constructor = implClass.getConstructor((Class[]) null);
-		Collection collection = (Collection) constructor.newInstance((Object[]) null);
+		Collection collection = (Collection) implClass.newInstance();
 		int length = Array.getLength(sourceArray);
 		ConversionExecutor converter = getElementConverter();
 		for (int i = 0; i < length; i++) {

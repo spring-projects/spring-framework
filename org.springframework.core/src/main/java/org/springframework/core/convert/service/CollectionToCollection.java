@@ -40,8 +40,7 @@ class CollectionToCollection extends AbstractCollectionConverter {
 		Collection sourceCollection = (Collection) source;
 		Class targetCollectionType = getTargetType().getType();
 		Class implClass = CollectionConversionUtils.getImpl(targetCollectionType);
-		Collection targetCollection = (Collection) implClass.getConstructor((Class[]) null)
-				.newInstance((Object[]) null);
+		Collection targetCollection = (Collection) implClass.newInstance();
 		ConversionExecutor elementConverter = getElementConverter();
 		Class elementType;
 		if (elementConverter == null) {
