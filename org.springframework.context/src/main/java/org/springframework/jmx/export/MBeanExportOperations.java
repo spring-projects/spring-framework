@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,5 +53,11 @@ public interface MBeanExportOperations {
 	 * @throws MBeanExportException if Spring is unable to register the MBean
 	 */
 	void registerManagedResource(Object managedResource, ObjectName objectName) throws MBeanExportException;
+
+	/**
+	 * Remove the specified MBean from the underlying MBeanServer registry.
+	 * @param objectName the {@link ObjectName} of the resource to remove
+	 */
+	void unregisterManagedResource(ObjectName objectName);
 
 }
