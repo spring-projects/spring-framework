@@ -20,6 +20,12 @@ import org.springframework.core.convert.converter.Converter;
 @SuppressWarnings("unchecked")
 class NoOpConverter implements Converter {
 
+	public static final Converter INSTANCE = new NoOpConverter();
+	
+	private NoOpConverter() {
+		
+	}
+
 	public Object convert(Object source) throws Exception {
 		return source;
 	}

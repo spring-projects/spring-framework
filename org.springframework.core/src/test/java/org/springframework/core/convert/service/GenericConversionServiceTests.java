@@ -24,6 +24,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionExecutionException;
 import org.springframework.core.convert.ConversionExecutor;
@@ -35,24 +36,17 @@ import org.springframework.core.convert.converter.NumberToNumber;
 import org.springframework.core.convert.converter.StringToEnum;
 import org.springframework.core.convert.converter.StringToInteger;
 
-import org.junit.Ignore;
-
-@Ignore
 public class GenericConversionServiceTests extends TestCase {
 
 	private GenericConversionService service = new GenericConversionService();
 
-	private TypedValue value(Object obj) {
-		return new TypedValue(obj, new TypeDescriptor(obj.getClass()));
-	}
-	
-	private TypeDescriptor type(Class clazz) {
-		return new TypeDescriptor(clazz);
-	}
-	
 	public void testExecuteConversion() {
 		service.addConverter(new StringToInteger());
 		assertEquals(new Integer(3), service.executeConversion(value("3"), type(Integer.class)));
+	}
+	
+	public void testExecuteConversionNullSource() {
+		assertEquals(null, service.executeConversion(TypedValue.NULL, type(Integer.class)));
 	}
 
 	public void testConverterConversionForwardIndex() {
@@ -74,6 +68,23 @@ public class GenericConversionServiceTests extends TestCase {
 			service.getConversionExecutor(type(String.class), type(Integer.class));
 			fail("Should have thrown an exception");
 		} catch (ConversionExecutorNotFoundException e) {
+		}
+	}
+
+	public void testAddConverterNoSourceTargetClassInfoAvailable() {
+		try {
+			service.addConverter(new Converter() {
+				public Object convert(Object source) throws Exception {
+					return source;
+				}
+
+				public Object convertBack(Object target) throws Exception {
+					return target;
+				}
+			});
+			fail("Should have failed");
+		} catch (IllegalArgumentException e) {
+
 		}
 	}
 
@@ -165,8 +176,11 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("3", result.get(2));
 	}
 
-	public void testConversionArrayToListGenericTypeConversion() {
-		ConversionExecutor executor = service.getConversionExecutor(type(String[].class), type(List.class));
+	public List<Integer> genericList = new ArrayList<Integer>();
+	
+	public void testConversionArrayToListGenericTypeConversion() throws Exception {
+		service.addConverter(new StringToInteger());
+		ConversionExecutor executor = service.getConversionExecutor(type(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
 		List result = (List) executor.execute(new String[] { "1", "2", "3" });
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
@@ -214,6 +228,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals(new Integer(3), result[2]);
 	}
 
+	@Ignore
 	public void testConversionObjectToArray() {
 		ConversionExecutor executor = service.getConversionExecutor(type(String.class), type(String[].class));
 		String[] result = (String[]) executor.execute("1,2,3");
@@ -221,6 +236,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("1,2,3", result[0]);
 	}
 
+	@Ignore
 	public void testConversionObjectToArrayWithElementConversion() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(type(String.class), type(Integer[].class));
@@ -288,29 +304,14 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
-	public void testAddConverterNoSourceTargetClassInfoAvailable() {
-		try {
-			service.addConverter(new Converter() {
-				public Object convert(Object source) throws Exception {
-					return source;
-				}
-
-				public Object convertBack(Object target) throws Exception {
-					return target;
-				}
-			});
-			fail("Should have failed");
-		} catch (IllegalArgumentException e) {
-
-		}
-	}
-
+	@Ignore
 	public void testCustomConverterConversionForwardIndex() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String.class), type(Principal.class));
 		assertEquals("keith", ((Principal) executor.execute("keith")).getName());
 	}
 
+	@Ignore
 	public void testCustomConverterConversionReverseIndex() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal.class), type(String.class));
@@ -321,12 +322,14 @@ public class GenericConversionServiceTests extends TestCase {
 		}));
 	}
 
+	@Ignore
 	public void testCustomConverterConversionForSameType() {
 		service.addConverter("trimmer", new Trimmer());
 		ConversionExecutor executor = service.getConversionExecutor("trimmer", type(String.class), type(String.class));
 		assertEquals("a string", executor.execute("a string   "));
 	}
 
+	@Ignore
 	public void testCustomConverterLookupNotCompatibleSource() {
 		service.addConverter("trimmer", new Trimmer());
 		try {
@@ -337,6 +340,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterLookupNotCompatibleTarget() {
 		service.addConverter("trimmer", new Trimmer());
 		try {
@@ -346,6 +350,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterLookupNotCompatibleTargetReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
@@ -355,6 +360,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterConversionArrayToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String[].class), type(Principal[].class));
@@ -363,6 +369,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy2", p[1].getName());
 	}
 
+	@Ignore
 	public void testCustomConverterConversionArrayToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal[].class), type(String[].class));
@@ -381,6 +388,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy2", p[1]);
 	}
 
+	@Ignore
 	public void testCustomConverterLookupArrayToArrayBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
@@ -390,6 +398,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterLookupArrayToArrayBogusTarget() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
@@ -399,6 +408,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterConversionArrayToCollection() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String[].class), type(List.class));
@@ -407,6 +417,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy2", ((Principal) list.get(1)).getName());
 	}
 
+	@Ignore
 	public void testCustomConverterConversionArrayToCollectionReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal[].class), type(List.class));
@@ -425,6 +436,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy2", p.get(1));
 	}
 
+	@Ignore
 	public void testCustomConverterLookupArrayToCollectionBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
@@ -435,6 +447,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterLookupCollectionToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(List.class), type(Principal[].class));
@@ -446,6 +459,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy2", p[1].getName());
 	}
 
+	@Ignore
 	public void testCustomConverterLookupCollectionToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(List.class), type(String[].class));
@@ -467,7 +481,8 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy2", p[1]);
 	}
 
-	public void testtestCustomConverterLookupCollectionToArrayBogusTarget() {
+	@Ignore
+	public void testCustomConverterLookupCollectionToArrayBogusTarget() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(List.class), type(Integer[].class));
@@ -477,6 +492,7 @@ public class GenericConversionServiceTests extends TestCase {
 		}
 	}
 
+	@Ignore
 	public void testCustomConverterConversionObjectToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String.class), type(Principal[].class));
@@ -484,6 +500,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy1", p[0].getName());
 	}
 
+	@Ignore
 	public void testCustomConverterConversionObjectToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal.class), type(String[].class));
@@ -496,6 +513,7 @@ public class GenericConversionServiceTests extends TestCase {
 		assertEquals("princy1", p[0]);
 	}
 
+	@Ignore
 	public void testCustomConverterLookupObjectToArrayBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
@@ -540,4 +558,12 @@ public class GenericConversionServiceTests extends TestCase {
 		//assertEquals(FooEnum.BAR, service.executeConversion("BAR", FooEnum.class));
 	}
 
+	private TypedValue value(Object obj) {
+		return new TypedValue(obj);
+	}
+	
+	private TypeDescriptor type(Class<?> clazz) {
+		return TypeDescriptor.valueOf(clazz);
+	}
+	
 }
