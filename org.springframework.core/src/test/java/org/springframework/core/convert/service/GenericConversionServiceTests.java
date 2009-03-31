@@ -25,6 +25,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionExecutionException;
 import org.springframework.core.convert.ConversionExecutor;
@@ -229,7 +230,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testConversionObjectToArray() {
+	@Test
+	public void conversionObjectToArray() {
 		ConversionExecutor executor = service.getConversionExecutor(type(String.class), type(String[].class));
 		String[] result = (String[]) executor.execute("1,2,3");
 		assertEquals(1, result.length);
@@ -237,7 +239,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testConversionObjectToArrayWithElementConversion() {
+	@Test	
+	public void conversionObjectToArrayWithElementConversion() {
 		service.addConverter(new StringToInteger());
 		ConversionExecutor executor = service.getConversionExecutor(type(String.class), type(Integer[].class));
 		Integer[] result = (Integer[]) executor.execute("123");
@@ -305,14 +308,16 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionForwardIndex() {
+	@Test
+	public void customConverterConversionForwardIndex() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String.class), type(Principal.class));
 		assertEquals("keith", ((Principal) executor.execute("keith")).getName());
 	}
 
 	@Ignore
-	public void testCustomConverterConversionReverseIndex() {
+	@Test
+	public void customConverterConversionReverseIndex() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal.class), type(String.class));
 		assertEquals("keith", executor.execute(new Principal() {
@@ -323,14 +328,16 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionForSameType() {
+	@Test
+	public void customConverterConversionForSameType() {
 		service.addConverter("trimmer", new Trimmer());
 		ConversionExecutor executor = service.getConversionExecutor("trimmer", type(String.class), type(String.class));
 		assertEquals("a string", executor.execute("a string   "));
 	}
 
 	@Ignore
-	public void testCustomConverterLookupNotCompatibleSource() {
+	@Test
+	public void customConverterLookupNotCompatibleSource() {
 		service.addConverter("trimmer", new Trimmer());
 		try {
 			service.getConversionExecutor("trimmer", type(Object.class), type(String.class));
@@ -341,7 +348,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupNotCompatibleTarget() {
+	@Test
+	public void customConverterLookupNotCompatibleTarget() {
 		service.addConverter("trimmer", new Trimmer());
 		try {
 			service.getConversionExecutor("trimmer", type(String.class), type(Object.class));
@@ -351,7 +359,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupNotCompatibleTargetReverse() {
+	@Test
+	public void customConverterLookupNotCompatibleTargetReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(Principal.class), type(Integer.class));
@@ -361,7 +370,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionArrayToArray() {
+	@Test
+	public void customConverterConversionArrayToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String[].class), type(Principal[].class));
 		Principal[] p = (Principal[]) executor.execute(new String[] { "princy1", "princy2" });
@@ -370,7 +380,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionArrayToArrayReverse() {
+	@Test
+	public void customConverterConversionArrayToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal[].class), type(String[].class));
 		final Principal princy1 = new Principal() {
@@ -389,7 +400,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupArrayToArrayBogusSource() {
+	@Test
+	public void customConverterLookupArrayToArrayBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(Integer[].class), type(Principal[].class));
@@ -399,7 +411,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupArrayToArrayBogusTarget() {
+	@Test
+	public void customConverterLookupArrayToArrayBogusTarget() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(Principal[].class), type(Integer[].class));
@@ -409,7 +422,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionArrayToCollection() {
+	@Test
+	public void customConverterConversionArrayToCollection() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String[].class), type(List.class));
 		List list = (List) executor.execute(new String[] { "princy1", "princy2" });
@@ -418,7 +432,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionArrayToCollectionReverse() {
+	@Test
+	public void customConverterConversionArrayToCollectionReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal[].class), type(List.class));
 		final Principal princy1 = new Principal() {
@@ -437,7 +452,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupArrayToCollectionBogusSource() {
+	@Test
+	public void customConverterLookupArrayToCollectionBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(Integer[].class), type(List.class));
@@ -448,7 +464,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupCollectionToArray() {
+	@Test
+	public void customConverterLookupCollectionToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(List.class), type(Principal[].class));
 		List princyList = new ArrayList();
@@ -460,7 +477,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupCollectionToArrayReverse() {
+	@Test
+	public void customConverterLookupCollectionToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(List.class), type(String[].class));
 		final Principal princy1 = new Principal() {
@@ -482,7 +500,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupCollectionToArrayBogusTarget() {
+	@Test
+	public void customConverterLookupCollectionToArrayBogusTarget() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(List.class), type(Integer[].class));
@@ -493,7 +512,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionObjectToArray() {
+	@Test
+	public void customConverterConversionObjectToArray() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(String.class), type(Principal[].class));
 		Principal[] p = (Principal[]) executor.execute("princy1");
@@ -501,7 +521,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterConversionObjectToArrayReverse() {
+	@Test	
+	public void customConverterConversionObjectToArrayReverse() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		ConversionExecutor executor = service.getConversionExecutor("princy", type(Principal.class), type(String[].class));
 		final Principal princy1 = new Principal() {
@@ -514,7 +535,8 @@ public class GenericConversionServiceTests extends TestCase {
 	}
 
 	@Ignore
-	public void testCustomConverterLookupObjectToArrayBogusSource() {
+	@Test	
+	public void customConverterLookupObjectToArrayBogusSource() {
 		service.addConverter("princy", new CustomTwoWayConverter());
 		try {
 			service.getConversionExecutor("princy", type(Integer.class), type(Principal[].class));
