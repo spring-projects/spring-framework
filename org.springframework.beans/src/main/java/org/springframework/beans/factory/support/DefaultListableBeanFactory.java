@@ -44,6 +44,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -87,6 +88,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Whether to allow eager class loading even for lazy-init beans */
 	private boolean allowEagerClassLoading = true;
+
+	/** Resolver strategy for method parameter names */
+	private ParameterNameDiscoverer parameterNameDiscoverer;
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
@@ -146,6 +150,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public void setAllowEagerClassLoading(boolean allowEagerClassLoading) {
 		this.allowEagerClassLoading = allowEagerClassLoading;
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed (e.g. for default qualifier values on autowired methods).
+	 * <p>Default is none. A typical candidate is
+	 * {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer},
+	 * which implies an ASM dependency and hence isn't set as the default.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
 	/**
@@ -581,12 +596,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
+		descriptor.initParameterNameDiscovery(this.parameterNameDiscoverer);
 		Class type = descriptor.getDependencyType();
 
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 		if (value != null) {
 			if (value instanceof String) {
-				value = evaluateBeanDefinitionString((String) value, getMergedBeanDefinition(beanName));
+				String strVal = resolveEmbeddedValue((String) value);
+				value = evaluateBeanDefinitionString(strVal, getMergedBeanDefinition(beanName));
 			}
 			return typeConverter.convertIfNecessary(value, type);
 		}
@@ -665,7 +682,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			if (matchingBeans.size() > 1) {
-				String primaryBeanName = determinePrimaryCandidate(matchingBeans, type);
+				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
 					throw new NoSuchBeanDefinitionException(type,
 							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
@@ -730,19 +747,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param type the required type
 	 * @return the name of the primary candidate, or <code>null</code> if none found
 	 */
-	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, Class type) {
+	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {
 		String primaryBeanName = null;
+		String fallbackBeanName = null;
 		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
 			String candidateBeanName = entry.getKey();
-			if (isPrimary(candidateBeanName, entry.getValue())) {
+			Object beanInstance = entry.getValue();
+			if (isPrimary(candidateBeanName, beanInstance)) {
 				if (primaryBeanName != null) {
-					throw new NoSuchBeanDefinitionException(type,
+					throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),
 							"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
 				}
 				primaryBeanName = candidateBeanName;
 			}
+			if (primaryBeanName == null &&
+					(this.resolvableDependencies.values().contains(beanInstance) ||
+							matchesBeanName(candidateBeanName, descriptor.getDependencyName()))) {
+				fallbackBeanName = candidateBeanName;
+			}
 		}
-		return primaryBeanName;
+		return (primaryBeanName != null ? primaryBeanName : fallbackBeanName);
 	}
 
 	/**
@@ -756,12 +780,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (containsBeanDefinition(beanName)) {
 			return getMergedLocalBeanDefinition(beanName).isPrimary();
 		}
-		if (this.resolvableDependencies.values().contains(beanInstance)) {
-			return true;
-		}
 		BeanFactory parentFactory = getParentBeanFactory();
 		return (parentFactory instanceof DefaultListableBeanFactory &&
 				((DefaultListableBeanFactory) parentFactory).isPrimary(beanName, beanInstance));
+	}
+
+	/**
+	 * Determine whether the given candidate name matches the bean name or the aliases
+	 * stored in this bean definition.
+	 */
+	protected boolean matchesBeanName(String beanName, String candidateName) {
+		return (candidateName != null &&
+				(candidateName.equals(beanName) || ObjectUtils.containsElement(getAliases(beanName), candidateName)));
 	}
 
 	/**

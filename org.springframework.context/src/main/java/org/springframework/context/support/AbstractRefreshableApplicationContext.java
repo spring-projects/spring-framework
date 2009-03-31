@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
@@ -93,7 +94,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 */
 	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
-		this.allowBeanDefinitionOverriding = Boolean.valueOf(allowBeanDefinitionOverriding);
+		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
 	}
 
 	/**
@@ -104,7 +105,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
 	 */
 	public void setAllowCircularReferences(boolean allowCircularReferences) {
-		this.allowCircularReferences = Boolean.valueOf(allowCircularReferences);
+		this.allowCircularReferences = allowCircularReferences;
 	}
 
 
@@ -201,6 +202,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		if (this.allowCircularReferences != null) {
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}
+		beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 	}
 

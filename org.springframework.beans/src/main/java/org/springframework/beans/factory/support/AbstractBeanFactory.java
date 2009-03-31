@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,11 +59,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.config.DependencyProxyBuilder;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
@@ -122,6 +125,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Custom PropertyEditors to apply to the beans of this factory */
 	private final Map<Class, Class<PropertyEditor>> customEditors =
 			new HashMap<Class, Class<PropertyEditor>>(4);
+
+	/** String resolvers to apply e.g. to annotation attribute values */
+	private final List<StringValueResolver> embeddedValueResolvers = new LinkedList<StringValueResolver>();
 
 	/** BeanPostProcessors to apply in createBean */
 	private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
@@ -648,6 +654,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			registerCustomEditors(typeConverter);
 			return typeConverter;
 		}
+	}
+
+	public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
+		Assert.notNull(valueResolver, "StringValueResolver must not be null");
+		this.embeddedValueResolvers.add(valueResolver);
+	}
+
+	/**
+	 * Resolve the given embedded value, e.g. an annotation attribute.
+	 * @param value the value to resolve
+	 * @return the resolved value (may be the original value as-is)
+	 */
+	protected String resolveEmbeddedValue(String value) {
+		String result = value;
+		for (StringValueResolver resolver : this.embeddedValueResolvers) {
+			result = resolver.resolveStringValue(result);
+		}
+		return result;
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {

@@ -149,6 +149,13 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return the class that declares the underlying Method or Constructor.
+	 */
+	public Class getDeclaringClass() {
+		return (this.method != null ? this.method.getDeclaringClass() : this.constructor.getDeclaringClass());
+	}
+
+	/**
 	 * Return the index of the method/constructor parameter.
 	 * @return the parameter index (never negative)
 	 */

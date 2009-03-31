@@ -17,22 +17,22 @@
 package org.springframework.beans.factory.xml;
 
 import static java.lang.String.format;
-import static org.junit.Assert.*;
-import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Properties;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.support.StaticApplicationContext;
+import static org.springframework.util.ClassUtils.*;
 
 /**
  * @author Mark Fisher
@@ -84,6 +84,30 @@ public final class QualifierAnnotationTests {
 		Person person = testBean.getLarry();
 		assertEquals("LarryBean", person.getName());
 		assertTrue(testBean.myProps != null && testBean.myProps.isEmpty());
+	}
+
+	@Test
+	public void testQualifiedByFieldName() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
+		reader.loadBeanDefinitions(CONFIG_LOCATION);
+		context.registerSingleton("testBean", QualifiedByFieldNameTestBean.class);
+		context.refresh();
+		QualifiedByFieldNameTestBean testBean = (QualifiedByFieldNameTestBean) context.getBean("testBean");
+		Person person = testBean.getLarry();
+		assertEquals("LarryBean", person.getName());
+	}
+
+	@Test
+	public void testQualifiedByParameterName() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
+		reader.loadBeanDefinitions(CONFIG_LOCATION);
+		context.registerSingleton("testBean", QualifiedByParameterNameTestBean.class);
+		context.refresh();
+		QualifiedByParameterNameTestBean testBean = (QualifiedByParameterNameTestBean) context.getBean("testBean");
+		Person person = testBean.getLarry();
+		assertEquals("LarryBean", person.getName());
 	}
 
 	@Test
@@ -199,6 +223,32 @@ public final class QualifierAnnotationTests {
 
 		public Person getLarry() {
 			return larry;
+		}
+	}
+
+
+	private static class QualifiedByFieldNameTestBean {
+
+		@Autowired
+		private Person larryBean;
+
+		public Person getLarry() {
+			return larryBean;
+		}
+	}
+
+
+	private static class QualifiedByParameterNameTestBean {
+
+		private Person larryBean;
+
+		@Autowired
+		public void setLarryBean(Person larryBean) {
+			this.larryBean = larryBean;
+		}
+
+		public Person getLarry() {
+			return larryBean;
 		}
 	}
 
