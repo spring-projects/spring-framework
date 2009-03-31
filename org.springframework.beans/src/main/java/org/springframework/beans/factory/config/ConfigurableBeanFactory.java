@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,6 +180,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * TypeConverter will be aware of all custom editors that have been registered.
 	 */
 	TypeConverter getTypeConverter();
+
+	/**
+	 * Add a String resolver for embedded values such as annotation attributes.
+	 * @param valueResolver the String resolver to apply to embedded values
+	 */
+	void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
 	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created

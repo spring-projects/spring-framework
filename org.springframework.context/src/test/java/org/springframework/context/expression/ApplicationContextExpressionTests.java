@@ -16,6 +16,8 @@
 
 package org.springframework.context.expression;
 
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import static org.junit.Assert.*;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -70,6 +73,12 @@ public class ApplicationContextExpressionTests {
 			}
 		});
 
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties placeholders = new Properties();
+		placeholders.setProperty("code", "123");
+		ppc.setProperties(placeholders);
+		ac.addBeanFactoryPostProcessor(ppc);
+
 		GenericBeanDefinition bd0 = new GenericBeanDefinition();
 		bd0.setBeanClass(TestBean.class);
 		bd0.getPropertyValues().addPropertyValue("name", "myName");
@@ -88,7 +97,7 @@ public class ApplicationContextExpressionTests {
 		bd2.setScope("myScope");
 		bd2.getPropertyValues().addPropertyValue("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().addPropertyValue("age", "#{mySpecialAttr}");
-		bd2.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
+		bd2.getPropertyValues().addPropertyValue("country", "${code} #{systemProperties.country}");
 		ac.registerBeanDefinition("tb2", bd2);
 
 		GenericBeanDefinition bd3 = new GenericBeanDefinition();
@@ -124,30 +133,30 @@ public class ApplicationContextExpressionTests {
 			TestBean tb2 = ac.getBean("tb2", TestBean.class);
 			assertEquals("{ XXXmyNameYYY42ZZZ }", tb2.getName());
 			assertEquals(42, tb2.getAge());
-			assertEquals("UK", tb2.getCountry());
+			assertEquals("123 UK", tb2.getCountry());
 
 			ValueTestBean tb3 = ac.getBean("tb3", ValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb3.name);
 			assertEquals(42, tb3.age);
-			assertEquals("UK", tb3.country);
+			assertEquals("123 UK", tb3.country);
 			assertSame(tb0, tb3.tb);
 
 			ConstructorValueTestBean tb4 = ac.getBean("tb4", ConstructorValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb4.name);
 			assertEquals(42, tb4.age);
-			assertEquals("UK", tb4.country);
+			assertEquals("123 UK", tb4.country);
 			assertSame(tb0, tb4.tb);
 
 			MethodValueTestBean tb5 = ac.getBean("tb5", MethodValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb5.name);
 			assertEquals(42, tb5.age);
-			assertEquals("UK", tb5.country);
+			assertEquals("123 UK", tb5.country);
 			assertSame(tb0, tb5.tb);
 
 			PropertyValueTestBean tb6 = ac.getBean("tb6", PropertyValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb6.name);
 			assertEquals(42, tb6.age);
-			assertEquals("UK", tb6.country);
+			assertEquals("123 UK", tb6.country);
 			assertSame(tb0, tb6.tb);
 		}
 		finally {
@@ -197,7 +206,7 @@ public class ApplicationContextExpressionTests {
 		@Autowired @Value("#{mySpecialAttr}")
 		public int age;
 
-		@Value("#{systemProperties.country}")
+		@Value("${code} #{systemProperties.country}")
 		public String country;
 
 		@Qualifier("original")
@@ -218,9 +227,9 @@ public class ApplicationContextExpressionTests {
 		@Autowired
 		public ConstructorValueTestBean(
 				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
-				@Value("#{mySpecialAttr}")int age,
+				@Value("#{mySpecialAttr}") int age,
 				@Qualifier("original") TestBean tb,
-				@Value("#{systemProperties.country}") String country) {
+				@Value("${code} #{systemProperties.country}") String country) {
 			this.name = name;
 			this.age = age;
 			this.country = country;
@@ -244,7 +253,7 @@ public class ApplicationContextExpressionTests {
 				@Qualifier("original") TestBean tb,
 				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
 				@Value("#{mySpecialAttr}") int age,
-				@Value("#{systemProperties.country}") String country) {
+				@Value("${code} #{systemProperties.country}") String country) {
 			this.name = name;
 			this.age = age;
 			this.country = country;
@@ -273,7 +282,7 @@ public class ApplicationContextExpressionTests {
 			this.age = age;
 		}
 
-		@Value("#{systemProperties.country}")
+		@Value("${code} #{systemProperties.country}")
 		public void setCountry(String country) {
 			this.country = country;
 		}

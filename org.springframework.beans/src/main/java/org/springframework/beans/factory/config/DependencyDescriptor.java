@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
 /**
@@ -126,6 +127,26 @@ public class DependencyDescriptor {
 		return this.eager;
 	}
 
+
+	/**
+	 * Initialize parameter name discovery for the underlying method parameter, if any.
+	 * <p>This method does not actually try to retrieve the parameter name at
+	 * this point; it just allows discovery to happen when the application calls
+	 * {@link #getDependencyName()} (if ever).
+	 */
+	public void initParameterNameDiscovery(ParameterNameDiscoverer parameterNameDiscoverer) {
+		if (this.methodParameter != null) {
+			this.methodParameter.initParameterNameDiscovery(parameterNameDiscoverer);
+		}
+	}
+
+	/**
+	 * Determine the name of the wrapped parameter/field.
+	 * @return the declared name (never <code>null</code>)
+	 */
+	public String getDependencyName() {
+		return (this.field != null ? this.field.getName() : this.methodParameter.getParameterName());
+	}
 
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
