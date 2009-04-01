@@ -226,9 +226,6 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			return null;
 		}
 		
-		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-			return null;
-		}
 
 	}
 
@@ -259,9 +256,6 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			return null;
 		}
 
-		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-			return null;
-		}
 	}
 
 

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -266,9 +265,6 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 				throws AccessException {
 		}
 
-		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-			return null;
-		}
 	}
 
 
@@ -307,8 +303,5 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		}
 		
-		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-			return null;
-		}
 	}
 }
