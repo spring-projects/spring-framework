@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -86,6 +87,10 @@ public class PropertyAccessTests extends ExpressionTestCase {
 	private static class StringyPropertyAccessor implements PropertyAccessor {
 
 		int flibbles = 7;
+
+		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
+			return null;
+		}
 
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { String.class };

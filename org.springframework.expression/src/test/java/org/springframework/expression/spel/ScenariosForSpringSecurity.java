@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import java.lang.reflect.Method;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -224,6 +225,11 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
+		
+		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
+			return null;
+		}
+
 	}
 
 
@@ -250,6 +256,10 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		}
 
 		public Class<?>[] getSpecificTargetClasses() {
+			return null;
+		}
+
+		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
 			return null;
 		}
 	}

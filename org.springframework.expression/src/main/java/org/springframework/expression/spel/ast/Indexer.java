@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
@@ -51,7 +52,7 @@ public class Indexer extends SpelNodeImpl {
 			return ((Map<?, ?>) ctx).get(index);
 		}
 
-		int idx = state.convertValue(index, Integer.class);
+		int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
 		if (ctx.getClass().isArray()) {
 			return accessArrayElement(ctx, idx);
@@ -109,7 +110,7 @@ public class Indexer extends SpelNodeImpl {
 			return;
 		}
 
-		int idx = state.convertValue(index, Integer.class);
+		int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
 		if (ctx.getClass().isArray()) {
 			setArrayElement(state, ctx, idx, newValue);

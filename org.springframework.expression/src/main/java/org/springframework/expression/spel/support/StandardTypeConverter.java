@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.support;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelException;
@@ -25,6 +26,7 @@ import org.springframework.util.NumberUtils;
 
 /**
  * @author Juergen Hoeller
+ * @author Andy Clement
  * @since 3.0
  */
 public class StandardTypeConverter implements TypeConverter {
@@ -74,6 +76,11 @@ public class StandardTypeConverter implements TypeConverter {
 		throw new SpelException(SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), targetType);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> T convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
+		return (T)convertValue(value,typeDescriptor.getType());
+	}
+
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		if (ClassUtils.isAssignable(targetType, sourceType) || String.class.equals(targetType)) {
 			return true;
@@ -82,6 +89,10 @@ public class StandardTypeConverter implements TypeConverter {
 		return (((Number.class.isAssignableFrom(actualTargetType) || Character.class.equals(actualTargetType)) &&
 				(String.class.equals(sourceType) || Number.class.isAssignableFrom(sourceType))) ||
 				(Boolean.class.equals(actualTargetType) && String.class.equals(sourceType)));
+	}
+
+	public boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor) {
+		return canConvert(sourceType,typeDescriptor.getType());
 	}
 
 }

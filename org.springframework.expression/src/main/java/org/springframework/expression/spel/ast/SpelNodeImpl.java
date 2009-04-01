@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
-
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.common.ExpressionUtils;
 import org.springframework.expression.spel.ExpressionState;
@@ -38,6 +38,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Serializable {
 
+	protected static TypeDescriptor BOOLEAN_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Boolean.class);
+	protected static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
+	
 	/**
 	 * The Antlr parser uses this constructor to build SpelNodes.
 	 * @param payload the token for the node that has been parsed

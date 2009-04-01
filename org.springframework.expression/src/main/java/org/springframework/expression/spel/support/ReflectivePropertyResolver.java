@@ -24,6 +24,8 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
@@ -32,9 +34,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Simple PropertyResolver that uses reflection to access properties for reading and writing. A property can be accessed
- * if it is accessible as a field on the object or through a getter (if being read) or a setter (if being written). This
- * implementation currently follows the Resolver/Executor model (it extends CacheablePropertyAccessor) - the code that
- * would be used if it were a simple property accessor is shown at the end.
+ * if it is accessible as a field on the object or through a getter (if being read) or a setter (if being written). 
  * 
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -42,10 +42,11 @@ import org.springframework.util.StringUtils;
  */
 public class ReflectivePropertyResolver implements PropertyAccessor {
 
-	private final Map<CacheKey, Member> readerCache = new ConcurrentHashMap<CacheKey, Member>();
+	protected final Map<CacheKey, Member> readerCache = new ConcurrentHashMap<CacheKey, Member>();
 
-	private final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>();
-
+	protected final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>();
+	
+	protected final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey,TypeDescriptor>();
 
 	/**
 	 * @return null which means this is a general purpose accessor
@@ -69,12 +70,14 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		Method method = findGetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			this.readerCache.put(cacheKey, method);
+			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,0)));
 			return true;
 		}
 		else {
 			Field field = findField(name, type, target instanceof Class);
 			if (field != null) {
-				this.readerCache.put(cacheKey, field);
+				this.readerCache.put(cacheKey, field);	
+				this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(field));
 				return true;
 			}
 		}
@@ -152,12 +155,14 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		Method method = findSetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			this.writerCache.put(cacheKey, method);
+			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,0)));
 			return true;
 		}
 		else {
 			Field field = findField(name, type, target instanceof Class);
 			if (field != null) {
 				this.writerCache.put(cacheKey, field);
+				this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(field));
 				return true;
 			}
 		}
@@ -217,7 +222,32 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 
 		throw new AccessException("Neither setter nor field found for property '" + name + "'");
 	}
+	
+	public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
+		if (target == null) {
+			return null;
+		}
+		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
+		if (type.isArray() && name.equals("length")) {
+			return TypeDescriptor.valueOf(Integer.TYPE);
+		}
+		CacheKey cacheKey = new CacheKey(type, name);
+		TypeDescriptor typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+		if (typeDescriptor == null) {
+			// attempt to populate the cache entry
+			try {
+				if (canRead(context, target, name)) {
+					typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+				} else if (canWrite(context, target, name)) {
+					typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+				}
+			} catch (AccessException e) {
+				// continue with null typeDescriptor
+			}
+		}
+		return typeDescriptor;
+	}
 
 	/**
 	 * Find a getter method for the specified property. A getter is defined as a method whose name start with the prefix

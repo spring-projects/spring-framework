@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.runtime.Token;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
@@ -41,6 +43,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	private volatile PropertyAccessor cachedReadAccessor;
 
 	private volatile PropertyAccessor cachedWriteAccessor;
+	
+	private volatile TypeDescriptor cachedTypeDescriptor;
 
 
 	public PropertyOrFieldReference(Token payload) {
@@ -121,8 +125,20 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		PropertyAccessor accessorToUse = this.cachedWriteAccessor;
 		if (accessorToUse != null) {
-			try {
-				accessorToUse.write(state.getEvaluationContext(), contextObject, name, newValue);
+			try {				
+				Object possiblyConvertedValue = newValue;
+				if (cachedTypeDescriptor == null) {
+					cachedTypeDescriptor=accessorToUse.getTypeDescriptor(eContext, contextObject, name);
+				}
+				if (cachedTypeDescriptor != null) {
+					try {
+						possiblyConvertedValue = state.convertValue(newValue, cachedTypeDescriptor.getType());
+					} catch (EvaluationException evaluationException) {
+						throw new SpelException(getCharPositionInLine(), evaluationException, SpelMessages.TYPE_CONVERSION_ERROR,
+								newValue.getClass(), cachedTypeDescriptor.getType());
+					}
+				}
+				accessorToUse.write(state.getEvaluationContext(), contextObject, name, possiblyConvertedValue);
 				return;
 			}
 			catch (AccessException ae) {
@@ -140,7 +156,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canWrite(eContext, contextObject, name)) {
 						this.cachedWriteAccessor = accessor;
-						accessor.write(eContext, contextObject, name, newValue); // TODO missing conversion of newValue to the type of the property
+						Object possiblyConvertedValue = newValue;		
+						if (cachedTypeDescriptor == null) {
+							cachedTypeDescriptor=accessor.getTypeDescriptor(eContext, contextObject, name);
+						}
+						if (cachedTypeDescriptor != null) {
+							try {
+								possiblyConvertedValue = state.convertValue(newValue, cachedTypeDescriptor);
+							} catch (EvaluationException evaluationException) {
+								throw new SpelException(getCharPositionInLine(), evaluationException, SpelMessages.TYPE_CONVERSION_ERROR,
+										newValue.getClass(), cachedTypeDescriptor.getType());
+							}
+						}
+						accessor.write(eContext, contextObject, name, possiblyConvertedValue);
 						return;
 					}
 				}

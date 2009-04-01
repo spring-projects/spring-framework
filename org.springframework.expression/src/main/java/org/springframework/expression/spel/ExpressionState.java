@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -97,6 +98,10 @@ public class ExpressionState {
 
 	public Class<?> findType(String type) throws EvaluationException {
 		return this.relatedContext.getTypeLocator().findType(type);
+	}
+
+	public <T> T convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+		return this.relatedContext.getTypeConverter().convertValue(value, targetTypeDescriptor);
 	}
 
 	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {

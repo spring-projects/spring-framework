@@ -18,8 +18,8 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents a NOT operation.
@@ -36,7 +36,7 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	@Override
 	public Object getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			boolean value = state.convertValue(getChild(0).getValueInternal(state), Boolean.class);
+			boolean value = state.convertValue(getChild(0).getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 			return !value;
 		}
 		catch (SpelException see) {

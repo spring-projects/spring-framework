@@ -16,6 +16,8 @@
 
 package org.springframework.expression;
 
+import org.springframework.core.convert.TypeDescriptor;
+
 /**
  * A type converter can convert values between different types encountered
  * during expression evaluation.
@@ -26,6 +28,7 @@ package org.springframework.expression;
 public interface TypeConverter {
 	// TODO replace this stuff with Keiths spring-binding conversion code
 	// TODO should ExpressionException be thrown for lost precision in the case of coercion?
+	// TODO could remove the methods where the target is Class and just keep the TypeDescriptor variants
 
 	/**
 	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
@@ -37,11 +40,30 @@ public interface TypeConverter {
 	<T> T convertValue(Object value, Class<T> targetType) throws EvaluationException;
 
 	/**
+	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
+	 * The typeDescriptor parameter enables support for typed collections - if the caller really wishes they
+	 * can have a List<Integer> for example, rather than simply a List.
+	 * @param value the value to be converted
+	 * @param typeDescriptor a type descriptor that supplies extra information about the requested result type
+	 * @return the converted value
+	 * @throws EvaluationException if conversion is not possible
+	 */
+	<T> T convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException;
+
+	/**
 	 * Return true if the type converter can convert the specified type to the desired target type.
 	 * @param sourceType the type to be converted from
 	 * @param targetType the type to be converted to
 	 * @return true if that conversion can be performed
 	 */
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
+
+	/**
+	 * Return true if the type converter can convert the specified type to the desired target type.
+	 * @param sourceType the type to be converted from
+	 * @param typeDescriptor a type descriptor that supplies extra information about the requested result type
+	 * @return true if that conversion can be performed
+	 */
+	boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor);
 
 }

@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import java.util.Map;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -61,7 +62,7 @@ public class MapAccessTests extends ExpressionTestCase {
 	}
 
 
-	private static class MapAccessor implements PropertyAccessor {
+	public static class MapAccessor implements PropertyAccessor {
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (((Map) target).containsKey(name));
@@ -75,6 +76,7 @@ public class MapAccessTests extends ExpressionTestCase {
 			return true;
 		}
 
+		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 			((Map) target).put(name, newValue);
@@ -82,6 +84,10 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { Map.class };
+		}
+		
+		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
+			return TypeDescriptor.valueOf(Map.class);
 		}
 	}
 

@@ -18,8 +18,8 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents the boolean AND operation.
@@ -44,7 +44,7 @@ public class OperatorAnd extends Operator {
 		boolean rightValue;
 
 		try {
-			leftValue = state.convertValue(getLeftOperand().getValueInternal(state), Boolean.class);
+			leftValue = state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelException ee) {
 			ee.setPosition(getLeftOperand().getCharPositionInLine());
@@ -56,7 +56,7 @@ public class OperatorAnd extends Operator {
 		}
 
 		try {
-			rightValue = state.convertValue(getRightOperand().getValueInternal(state), Boolean.class);
+			rightValue = state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelException ee) {
 			ee.setPosition(getRightOperand().getCharPositionInLine());
