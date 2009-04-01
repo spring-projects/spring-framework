@@ -21,6 +21,8 @@ public class Inventor {
 	private List<PlaceOfBirth> placesLivedList = new ArrayList<PlaceOfBirth>();
 	public ArrayContainer arrayContainer;
 	public boolean publicBoolean;
+	private boolean accessedThroughGetSet;
+	public List<Integer> listOfInteger = new ArrayList<Integer>();
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
@@ -109,5 +111,13 @@ public class Inventor {
 
 	public Inventor(String... strings) {
 
+	}
+	
+	public boolean getSomeProperty() {
+		return accessedThroughGetSet;
+	}
+
+	public void setSomeProperty(boolean b) {
+		this.accessedThroughGetSet = b;
 	}
 }

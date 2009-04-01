@@ -98,11 +98,14 @@ public class SetValueTests extends ExpressionTestCase {
 		setValueExpectError("'hello'[3]", 'p');
 	}
 	
-//	public void testSetPropertyTypeCoersion() {
-//		setValue("publicBoolean", "true");
-//	}
+	public void testSetPropertyTypeCoersion() {
+		setValue("publicBoolean", "true", Boolean.TRUE);
+	}
 
-
+	public void testSetPropertyTypeCoersionThroughSetter() {
+		setValue("SomeProperty", "true", Boolean.TRUE);
+	}
+	
 	/**
 	 * Call setValue() but expect it to fail.
 	 */
@@ -116,7 +119,6 @@ public class SetValueTests extends ExpressionTestCase {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-//			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
 			fail("expected an error");
 		} catch (ParseException pe) {
@@ -140,6 +142,32 @@ public class SetValueTests extends ExpressionTestCase {
 			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
 			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext));
+		} catch (EvaluationException ee) {
+			ee.printStackTrace();
+			fail("Unexpected Exception: " + ee.getMessage());
+		} catch (ParseException pe) {
+			pe.printStackTrace();
+			fail("Unexpected Exception: " + pe.getMessage());
+		}
+	}
+
+	/**
+	 * For use when coercion is happening during a setValue().  The expectedValue should be
+	 * the coerced form of the value.
+	 */
+	protected void setValue(String expression, Object value, Object expectedValue) {
+		try {
+			Expression e = parser.parseExpression(expression);
+			if (e == null) {
+				fail("Parser returned null for expression");
+			}
+			if (DEBUG) {
+				SpelUtilities.printAbstractSyntaxTree(System.out, e);
+			}
+			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
+			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
+			e.setValue(lContext, value);
+			assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
