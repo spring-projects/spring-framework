@@ -18,7 +18,6 @@ package org.springframework.core.convert.service;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.TypeDescriptor;
 
@@ -44,7 +43,7 @@ class CollectionToCollection extends AbstractCollectionConverter {
 		ConversionExecutor elementConverter = getElementConverter();
 		Class elementType;
 		if (elementConverter == null) {
-			elementType = GenericCollectionTypeResolver.getCollectionType(targetCollectionType);
+			elementType = getTargetType().getElementType();
 		} else {
 			elementType = null;
 		}
