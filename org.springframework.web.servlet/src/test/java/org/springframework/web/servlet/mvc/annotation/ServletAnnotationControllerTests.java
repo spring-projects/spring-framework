@@ -778,16 +778,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void relativePathDispatchingController() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller",
-						new RootBeanDefinition(MyRelativePathDispatchingController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
+		initServlet(MyRelativePathDispatchingController.class);
 		servlet.init(new MockServletConfig());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myHandle");
@@ -813,15 +804,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void nullCommandController() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyNullCommandController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
+		initServlet(MyNullCommandController.class);
 		servlet.init(new MockServletConfig());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath");
@@ -833,15 +816,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void equivalentMappingsWithSameMethodName() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(ChildController.class));
-				wac.refresh();
-				return wac;
-			}
-		};
+		initServlet(ChildController.class);
 		servlet.init(new MockServletConfig());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/child/test");
