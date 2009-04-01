@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -44,10 +46,10 @@ public class UriTemplateServletAnnotationControllerTests {
 	public void multiple() throws Exception {
 		initServlet(MultipleUriTemplateController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21-other");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-42-21", response.getContentAsString());
+		assertEquals("test-42-21-other", response.getContentAsString());
 	}
 
 	@Test
@@ -71,11 +73,17 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	@Ignore("In progress")
 	public void relative() throws Exception {
 		initServlet(RelativePathUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42-21", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21.html");
+		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("test-42-21", response.getContentAsString());
 	}
@@ -99,6 +107,48 @@ public class UriTemplateServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+	}
+
+	@Test
+	public void explicitSubPath() throws Exception {
+		initServlet(ExplicitSubPathController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42", response.getContentAsString());
+	}
+
+	@Test
+	@Ignore("In progress")
+	public void implicitSubPath() throws Exception {
+		initServlet(ImplicitSubPathController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42", response.getContentAsString());
+	}
+
+	@Test
+	@Ignore("In progress")
+	public void crud() throws Exception {
+		initServlet(CrudController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("getHotels", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/hotels");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("newHotel", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/hotels");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("newHotel", response.getContentAsString());
 	}
 
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
@@ -133,12 +183,14 @@ public class UriTemplateServletAnnotationControllerTests {
 	@Controller
 	public static class MultipleUriTemplateController {
 
-		@RequestMapping("/hotels/{hotel}/bookings/{booking}")
-		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking, Writer writer)
-				throws IOException {
+		@RequestMapping("/hotels/{hotel}/bookings/{booking}-{other}")
+		public void handle(@PathVariable("hotel") String hotel,
+				@PathVariable int booking,
+				@PathVariable String other,
+				Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", 21, booking);
-			writer.write("test-" + hotel + "-" + booking);
+			writer.write("test-" + hotel + "-" + booking + "-" + other);
 		}
 
 	}
@@ -166,7 +218,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Controller
-	@RequestMapping("/hotels/{hotel}/**")
+	@RequestMapping("/hotels/{hotel}")
 	public static class RelativePathUriTemplateController {
 
 		@RequestMapping("bookings/{booking}")
@@ -198,7 +250,59 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write("wildcard");
 		}
 
+	}
+
+	@Controller
+	@RequestMapping("/hotels/*")
+	public static class ExplicitSubPathController {
+
+		@RequestMapping("{hotel}")
+		public void handleHotel(@PathVariable String hotel, Writer writer) throws IOException {
+			writer.write("test-" + hotel);
+		}
 
 	}
+
+	@Controller
+	@RequestMapping("hotels")
+	public static class ImplicitSubPathController {
+
+		@RequestMapping("{hotel}")
+		public void handleHotel(@PathVariable String hotel, Writer writer) throws IOException {
+			writer.write("test-" + hotel);
+		}
+	}
+
+	@Controller
+	@RequestMapping("hotels")
+	public static class CrudController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void list(Writer writer) throws IOException {
+			writer.write("list");
+		}
+
+		@RequestMapping(method = RequestMethod.POST)
+		public void create(Writer writer) throws IOException {
+			writer.write("create");
+		}
+
+		@RequestMapping(value = "{hotel}", method = RequestMethod.GET)
+		public void show(@PathVariable String hotel, Writer writer) throws IOException {
+			writer.write("show-" + hotel);
+		}
+
+		@RequestMapping(value = "{hotel}", method = RequestMethod.PUT)
+		public void createOrUpdate(@PathVariable String hotel, Writer writer) throws IOException {
+			writer.write("createOrUpdate-" + hotel);
+		}
+
+		@RequestMapping(value = "{hotel}", method = RequestMethod.DELETE)
+		public void remove(@PathVariable String hotel, Writer writer) throws IOException {
+			writer.write("remove-" + hotel);
+		}
+
+	}
+
 
 }
