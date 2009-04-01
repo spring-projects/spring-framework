@@ -18,7 +18,6 @@ package org.springframework.expression.spel;
 
 import java.util.Map;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -86,9 +85,6 @@ public class MapAccessTests extends ExpressionTestCase {
 			return new Class[] { Map.class };
 		}
 		
-		public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-			return TypeDescriptor.valueOf(Map.class);
-		}
 	}
 
 }

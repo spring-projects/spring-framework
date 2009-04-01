@@ -16,7 +16,6 @@
 
 package org.springframework.expression;
 
-import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * A property accessor is able to read (and possibly write) to object properties. The interface places no restrictions
@@ -43,15 +42,6 @@ public interface PropertyAccessor {
 	 * @return an array of classes that this resolver is suitable for (or null if a general resolver)
 	 */
 	Class[] getSpecificTargetClasses();
-	
-	/**
-	 * Called to retrieve a type descriptor that describes the type of the property.
-	 * @param context the evaluation context in which the access is being attempted
-	 * @param target the target object upon which the property is being accessed
-	 * @param name the name of the property being accessed
-	 * @return a type descriptor that describes the type of this property.
-	 */
-	TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name);
 
 	/**
 	 * Called to determine if a resolver instance is able to access a specified property on a specified target object.

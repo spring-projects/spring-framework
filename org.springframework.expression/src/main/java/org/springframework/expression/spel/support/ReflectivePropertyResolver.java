@@ -28,6 +28,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -175,6 +176,16 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		}
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
+		Object possiblyConvertedNewValue = newValue;
+		TypeDescriptor typeDescriptor = getTypeDescriptor(context, target, name);
+		if (typeDescriptor != null) {
+			try {
+				possiblyConvertedNewValue = context.getTypeConverter().convertValue(newValue, typeDescriptor);
+			} catch (EvaluationException evaluationException) {
+				throw new AccessException("Type conversion failure",evaluationException);
+			}
+		}
+		
 		CacheKey cacheKey = new CacheKey(type, name);
 		Member cachedMember = this.writerCache.get(cacheKey);
 
@@ -190,7 +201,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (method != null) {
 				try {
 					ReflectionUtils.makeAccessible(method);
-					method.invoke(target, newValue);
+					method.invoke(target, possiblyConvertedNewValue);
 					return;
 				}
 				catch (Exception ex) {
@@ -211,7 +222,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (field != null) {
 				try {
 					ReflectionUtils.makeAccessible(field);
-					field.set(target, newValue);
+					field.set(target, possiblyConvertedNewValue);
 					return;
 				}
 				catch (Exception ex) {
@@ -223,7 +234,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		throw new AccessException("Neither setter nor field found for property '" + name + "'");
 	}
 	
-	public TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
+	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
 		if (target == null) {
 			return null;
 		}
