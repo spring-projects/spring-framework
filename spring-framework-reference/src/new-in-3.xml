@@ -5,36 +5,207 @@
   <section id="new-in-3-intro">
     <title>Introduction</title>
 
-    <para>*** WORK IN PROGRESS ***</para>
-
     <para>If you have been using the Spring Framework for some time, you will
     be aware that Spring has undergone two major revisions: Spring 2.0,
-    released in October 2006, and Spring 2.5, released in November 2007.</para>
+    released in October 2006, and Spring 2.5, released in November 2007. It is
+    now time for a third overhaul resulting in Spring 3.0.</para>
 
     <sidebar id="new-in-3-intro-java">
       <title>Java SE and Java EE Support</title>
 
-      <para>The Spring Framework is now based on Java 5 and Java 6 is fully supported.</para>
+      <para>The Spring Framework is now based on Java 5 and Java 6 is fully
+      supported.</para>
 
       <para>Furthermore, Spring is compatible with J2EE 1.4 and Java EE 5,
-      while at the same time introducing dedicated support for Java EE 6.</para>
+      while at the same time introducing some early support for Java EE
+      6.</para>
     </sidebar>
-
   </section>
 
-  <section id="new-in-3-other-documentation">
+  <section id="new-in-3-improved-docs">
     <title>Improved documentation</title>
 
-    <para>The Spring reference documentation has also substantially been
-    updated to reflect all of the changes and new features for Spring 3.0. 
-    While every effort has been made to ensure that there are no errors in this
-    documentation, some errors may nevertheless have crept in. If you do spot
-    any typos or even more serious errors, and you can spare a few cycles
-    during lunch, please do bring the error to the attention of the Spring
-    team by <ulink
-    url="http://jira.springframework.org/">raising an
-    issue</ulink>.</para>
+    <sidebar id="new-in-3-intro-work-in-progress">
+      <title>Note:</title>
 
+      <para>The current documentation is a <emphasis>*** WORK IN PROGRESS
+      ***</emphasis> and is currently being re-written to reflect all the
+      changes in the framework and from now relying on Java 5 features.</para>
+    </sidebar>
+
+    <para>The Spring reference documentation has also substantially been
+    updated to reflect all of the changes and new features for Spring 3.0.
+    While every effort has been made to ensure that there are no errors in
+    this documentation, some errors may nevertheless have crept in. If you do
+    spot any typos or even more serious errors, and you can spare a few cycles
+    during lunch, please do bring the error to the attention of the Spring
+    team by <ulink url="http://jira.springframework.org/">raising an
+    issue</ulink>.</para>
   </section>
 
+  <section id="new-in-3-modules-build">
+    <title>New module organization and build system</title>
+
+    <para>The framework modules have been revised and are now managed
+    separately with one source-tree per module jar:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>org.springframework.aop</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.beans</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.context</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.context.support</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.expression</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.instrument</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.jdbc</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.jms</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.orm</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.oxm</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.test</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.transaction</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.web</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.web.portlet</para>
+      </listitem>
+
+      <listitem>
+        <para>org.springframework.web.servlet</para>
+      </listitem>
+    </itemizedlist>
+
+    <sidebar id="new-in-3-intro-spring-jar">
+      <title>Note:</title>
+
+      <para>The spring.jar artifact that contained almost the entire framework
+      is no longer provided.</para>
+    </sidebar>
+
+    <para>We are now using a new Spring build system as known from Spring Web
+    Flow 2.0. This gives us:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Ivy-based "Spring Build" system</para>
+      </listitem>
+
+      <listitem>
+        <para>consistent deployment procedure</para>
+      </listitem>
+
+      <listitem>
+        <para>consistent dependency management</para>
+      </listitem>
+
+      <listitem>
+        <para>consistent generation of OSGi manifests</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section id="new-in-3-features-overview">
+    <title>Overview of new features</title>
+
+    <para>This is a list of new features for Spring 3.0. We will cover these
+    features in more detail in the following sections.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Java 5+ foundation</para>
+
+        <para>compatible with J2EE 1.4 and Java EE 5</para>
+      </listitem>
+
+      <listitem>
+        <para>Spring Expression Language</para>
+
+        <para>Unified EL++</para>
+      </listitem>
+
+      <listitem>
+        <para>Container enhancements</para>
+
+        <para>Core JavaConfigfeatures added</para>
+      </listitem>
+
+      <listitem>
+        <para>Comprehensive REST support</para>
+
+        <para>and other Spring @MVC additions</para>
+      </listitem>
+
+      <listitem>
+        <para>Declarative model validation</para>
+
+        <para>Hibernate Validator, JSR 303</para>
+      </listitem>
+
+      <listitem>
+        <para>Early support for Java EE 6</para>
+
+        <para>JSF 2.0, JPA 2.0, etc</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+  <section id="new-feature-java-5">
+    <title>Java 5+ foundation</title>
+    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+  </section>
+  <section id="new-feature-el">
+    <title>Spring Expression Language</title>
+    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+  </section>
+  <section id="new-feature-java-config">
+    <title>Container enhancements</title>
+    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+  </section>
+  <section id="new-feature-rest">
+    <title>Comprehensive REST support</title>
+    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+  </section>
+  <section id="new-feature-validation">
+    <title>Declarative model validation</title>
+    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+  </section>
+  <section id="new-feature-jee-6">
+    <title>Early support for Java EE 6</title>
+    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+  </section>
 </chapter>
