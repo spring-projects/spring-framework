@@ -2,70 +2,105 @@
 <chapter id="introduction">
   <title>Introduction</title>
 
-  <sidebar id="background-ioc">
-    <title>Background</title>
+  <para>Fundamentally, what is Spring? We think of it as a Platform for your Java code. It provides 
+  comprehensive infrastructural support for developing Java applications. Spring deals with the plumbing 
+  so you can focus on solving the domain problem</para>
 
-    <para>In early 2004, Martin Fowler asked the readers of his site: when
-    talking about Inversion of Control: <quote><emphasis>the question is, what
-    aspect of control are [they] inverting?</emphasis></quote>. Fowler then
-    suggested renaming the principle (or at least giving it a more
-    self-explanatory name), and started to use the term <firstterm>Dependency
-    Injection</firstterm>. His article then continued to explain the ideas
-    underpinning the Inversion of Control (<acronym>IoC</acronym>) and
-    Dependency Injection (<acronym>DI</acronym>) principle.</para>
+  <para>Spring as a platform allows applications to be built from “plain old Java objects” (POJOs). This is true 
+  for the Java SE programming model as well as within a number of other environments including full and partial Java EE. 
+  Spring allows enterprise services to be applied to POJOs in a non-invasive way</para>
 
-    <para>If you need a decent insight into IoC and DI, please do refer to
-    said article : <ulink
-    url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.</para>
-  </sidebar>
+  <para>Examples of Spring as a platform:</para>
 
-  <para>Java applications (a loose term which runs the gamut from constrained
-  applets to full-fledged n-tier server-side enterprise applications)
-  typically are composed of a number of objects that collaborate with one
-  another to form the application proper. The objects in an application can
-  thus be said to have <emphasis>dependencies</emphasis> between
-  themselves.</para>
+  <itemizedlist>
+    <listitem>
+      <para>Make a Java method execute in a database transaction; without the implementer dealing with transaction 
+      APIs</para>
+    </listitem>
 
-  <para>The Java language and platform provides a wealth of functionality for
-  architecting and building applications, ranging all the way from the very
-  basic building blocks of primitive types and classes (and the means to
-  define new classes), to rich full-featured application servers and web
-  frameworks. One area that is decidedly conspicuous by its absence is any
-  means of taking the basic building blocks and composing them into a coherent
-  whole; this area has typically been left to the purvey of the architects and
-  developers tasked with building an application (or applications). Now to be
-  fair, there are a number of design patterns devoted to the business of
-  composing the various classes and object instances that makeup an
-  all-singing, all-dancing application. Design patterns such as
-  <firstterm>Factory</firstterm>, <firstterm>Abstract Factory</firstterm>,
-  <firstterm>Builder</firstterm>, <firstterm>Decorator</firstterm>, and
-  <firstterm>Service Locator</firstterm> (to name but a few) have widespread
-  recognition and acceptance within the software development industry
-  (presumably that is why these patterns have been formalized as patterns in
-  the first place). This is all very well, but these patterns are just that:
-  best practices given a name, typically together with a description of what
-  the pattern does, where the pattern is typically best applied, the problems
-  that the application of the pattern addresses, and so forth. Notice that the
-  last paragraph used the phrase <quote>... a <emphasis>description</emphasis>
-  of what the pattern does...</quote>; pattern books and wikis are typically
-  listings of such formalized best practice that you can certainly take away,
-  mull over, and then <emphasis>implement yourself</emphasis> in your
-  application.</para>
+    <listitem>
+      <para>Make a local Java method a remote-procedure; without the implementer dealing with remoting APIs</para>
+    </listitem>
 
-  <para>The IoC component of the Spring Framework addresses the enterprise
-  concern of taking the classes, objects, and services that are to compose an
-  application, by providing a formalized means of composing these various
-  disparate components into a fully working application ready for use. The
-  Spring Framework takes best practices that have been proven over the years
-  in numerous applications and formalized as design patterns, and actually
-  codifies these patterns as first class objects that you as an architect and
-  developer can take away and integrate into your own application(s). This is
-  a <firstterm>Very Good Thing Indeed</firstterm> as attested to by the
-  numerous organizations and institutions that have used the Spring Framework
-  to engineer robust, <emphasis>maintainable</emphasis> applications.</para>
+    <listitem>
+      <para>Make a local Java method a management operation; without the implementer dealing with JMX APIs</para>
+    </listitem>
 
-  <section id="introduction-overview">
-    <title>Overview</title>
+    <listitem>
+      <para>Make a local Java method a message handler; without the implementer dealing with JMS APIs</para>
+    </listitem>
+
+  </itemizedlist>
+
+  <section id="introduction-dependency-injection">
+    <title>Dependency Injection</title>
+
+    <sidebar id="background-ioc">
+      <title>Background</title>
+
+      <para>In early 2004, Martin Fowler asked the readers of his site: when
+      talking about Inversion of Control: <quote><emphasis>the question is, what
+      aspect of control are [they] inverting?</emphasis></quote>. Fowler then
+      suggested renaming the principle (or at least giving it a more
+      self-explanatory name), and started to use the term <firstterm>Dependency
+      Injection</firstterm>. His article then continued to explain the ideas
+      underpinning the Inversion of Control (<acronym>IoC</acronym>) and
+      Dependency Injection (<acronym>DI</acronym>) principle.</para>
+
+      <para>If you need a decent insight into IoC and DI, please do refer to
+      said article: <ulink
+      url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.</para>
+    </sidebar>
+
+    <para>Java applications (a loose term which runs the gamut from constrained
+    applets to full-fledged n-tier server-side enterprise applications)
+    typically are composed of a number of objects that collaborate with one
+    another to form the application proper. The objects in an application can
+    thus be said to have <emphasis>dependencies</emphasis> between
+    themselves.</para>
+
+    <para>The Java language and platform provides a wealth of functionality for
+    architecting and building applications, ranging all the way from the very
+    basic building blocks of primitive types and classes (and the means to
+    define new classes), to rich full-featured application servers and web
+    frameworks. One area that is decidedly conspicuous by its absence is any
+    means of taking the basic building blocks and composing them into a coherent
+    whole; this area has typically been left to the purvey of the architects and
+    developers tasked with building an application (or applications). Now to be
+    fair, there are a number of design patterns devoted to the business of
+    composing the various classes and object instances that makeup an
+    all-singing, all-dancing application. Design patterns such as
+    <firstterm>Factory</firstterm>, <firstterm>Abstract Factory</firstterm>,
+    <firstterm>Builder</firstterm>, <firstterm>Decorator</firstterm>, and
+    <firstterm>Service Locator</firstterm> (to name but a few) have widespread
+    recognition and acceptance within the software development industry
+    (presumably that is why these patterns have been formalized as patterns in
+    the first place). This is all very well, but these patterns are just that:
+    best practices given a name, typically together with a description of what
+    the pattern does, where the pattern is typically best applied, the problems
+    that the application of the pattern addresses, and so forth. Notice that the
+    last paragraph used the phrase <quote>... a <emphasis>description</emphasis>
+    of what the pattern does...</quote>; pattern books and wikis are typically
+    listings of such formalized best practice that you can certainly take away,
+    mull over, and then <emphasis>implement yourself</emphasis> in your
+    application.</para>
+
+    <para>The IoC component of the Spring Framework addresses the enterprise
+    concern of taking the classes, objects, and services that are to compose an
+    application, by providing a formalized means of composing these various
+    disparate components into a fully working application ready for use. The
+    Spring Framework takes best practices that have been proven over the years
+    in numerous applications and formalized as design patterns, and actually
+    codifies these patterns as first class objects that you as an architect and
+    developer can take away and integrate into your own application(s). This is
+    a <firstterm>Very Good Thing Indeed</firstterm> as attested to by the
+    numerous organizations and institutions that have used the Spring Framework
+    to engineer robust, <emphasis>maintainable</emphasis> applications.</para>
+
+  </section>
+
+  <section id="introduction-modules">
+    <title>Modules</title>
 
     <para>The Spring Framework contains a lot of features, which are
     well-organized in six modules shown in the diagram below. This chapter
@@ -86,7 +121,7 @@
       </mediaobject></para>
 
     <para>The <link
-    linkend="beans-introduction"><emphasis>Core</emphasis></link> package is
+    linkend="beans-introduction"><emphasis>Core</emphasis></link> module is
     the most fundamental part of the framework and provides the IoC and
     Dependency Injection features. The basic concept here is the
     <classname>BeanFactory</classname>, which provides a sophisticated
