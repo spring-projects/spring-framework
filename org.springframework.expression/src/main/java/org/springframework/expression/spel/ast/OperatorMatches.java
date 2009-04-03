@@ -25,6 +25,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Implements the matches operator. Matches takes two operands. The first is a string and the second is a java regex. It
@@ -51,11 +52,11 @@ public class OperatorMatches extends Operator {
 	 * @throws EvaluationException if there is a problem evaluating the expression (e.g. the regex is invalid)
 	 */
 	@Override
-	public Boolean getValueInternal(ExpressionState state) throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 		Object left = leftOp.getValue(state, String.class);
-		Object right = getRightOperand().getValueInternal(state);
+		Object right = getRightOperand().getValueInternal(state).getValue();
 		try {
 			if (!(left instanceof String)) {
 				throw new SpelException(leftOp.getCharPositionInLine(),
@@ -67,7 +68,7 @@ public class OperatorMatches extends Operator {
 			}
 			Pattern pattern = Pattern.compile((String) right);
 			Matcher matcher = pattern.matcher((String) left);
-			return matcher.matches();
+			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException pse) {
 			throw new SpelException(rightOp.getCharPositionInLine(), pse, SpelMessages.INVALID_PATTERN, right);

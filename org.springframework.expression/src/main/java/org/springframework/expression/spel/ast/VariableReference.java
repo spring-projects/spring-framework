@@ -17,7 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -44,14 +44,14 @@ public class VariableReference extends SpelNodeImpl {
 
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws SpelException {
+	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
 		if (this.name.equals(THIS)) {
 			return state.getActiveContextObject();
 		}
 		if (this.name.equals(ROOT)) {
 			return state.getRootContextObject();
 		}
-		Object result = state.lookupVariable(this.name);
+		TypedValue result = state.lookupVariable(this.name);
 		if (result == null) {
 			throw new SpelException(getCharPositionInLine(), SpelMessages.VARIABLE_NOT_FOUND, this.name);
 		}

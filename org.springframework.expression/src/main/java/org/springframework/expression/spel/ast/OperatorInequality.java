@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Implements the not-equal operator.
@@ -38,26 +39,21 @@ public class OperatorInequality extends Operator {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValueInternal(state);
-		Object right = getRightOperand().getValueInternal(state);
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		Object left = getLeftOperand().getValueInternal(state).getValue();
+		Object right = getRightOperand().getValueInternal(state).getValue();
 		if (left instanceof Number && right instanceof Number) {
 			Number op1 = (Number) left;
 			Number op2 = (Number) right;
 			if (op1 instanceof Double || op2 instanceof Double) {
-				return op1.doubleValue() != op2.doubleValue();
-			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return op1.floatValue() != op2.floatValue();
-			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
-				return op1.longValue() != op2.longValue();
-			}
-			else {
-				return op1.intValue() != op2.intValue();
+				return BooleanTypedValue.forValue(op1.doubleValue() != op2.doubleValue());
+			} else if (op1 instanceof Long || op2 instanceof Long) {
+				return BooleanTypedValue.forValue(op1.longValue() != op2.longValue());
+			} else {
+				return BooleanTypedValue.forValue(op1.intValue() != op2.intValue());
 			}
 		}
-		return state.getTypeComparator().compare(left, right) != 0;
+		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) != 0);
 	}
 
 }

@@ -21,12 +21,15 @@ import java.util.Map;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 
 /**
  * EL property accessor that knows how to traverse the keys
  * of a standard {@link java.util.Map}.
  *
  * @author Juergen Hoeller
+ * @author Andy Clement
  * @since 3.0
  */
 public class MapAccessor implements PropertyAccessor {
@@ -35,8 +38,8 @@ public class MapAccessor implements PropertyAccessor {
 		return (((Map) target).containsKey(name));
 	}
 
-	public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-		return ((Map) target).get(name);
+	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
 	}
 
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

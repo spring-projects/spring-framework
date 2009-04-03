@@ -24,6 +24,7 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents the between operator. The left operand to between must be a single value and the right operand must be a
@@ -52,9 +53,9 @@ public class OperatorBetween extends Operator {
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override
-	public Boolean getValueInternal(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValueInternal(state);
-		Object right = getRightOperand().getValueInternal(state);
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		Object left = getLeftOperand().getValueInternal(state).getValue();
+		Object right = getRightOperand().getValueInternal(state).getValue();
 		if (!(right instanceof List) || ((List<?>) right).size() != 2) {
 			throw new SpelException(getRightOperand().getCharPositionInLine(),
 					SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);
@@ -64,7 +65,7 @@ public class OperatorBetween extends Operator {
 		Object high = l.get(1);
 		TypeComparator comparator = state.getTypeComparator();
 		try {
-			return (comparator.compare(left, low) >= 0 && comparator.compare(left, high) <= 0);
+			return BooleanTypedValue.forValue((comparator.compare(left, low) >= 0 && comparator.compare(left, high) <= 0));
 		} catch (SpelException ex) {
 			ex.setPosition(getCharPositionInLine());
 			throw ex;

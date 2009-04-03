@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.TypedValue;
 
 /**
  * Expression language AST node that represents a long integer literal.
@@ -26,15 +27,15 @@ import org.antlr.runtime.Token;
  */
 public class LongLiteral extends Literal {
 
-	private final Long value;
+	private final TypedValue value;
 
 	LongLiteral(Token payload, long value) {
 		super(payload);
-		this.value = value;
+		this.value = new TypedValue(value, LONG_TYPE_DESCRIPTOR);
 	}
 
 	@Override
-	public Long getLiteralValue() {
+	public TypedValue getLiteralValue() {
 		return this.value;
 	}
 

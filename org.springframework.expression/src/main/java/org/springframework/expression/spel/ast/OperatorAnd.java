@@ -18,8 +18,10 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents the boolean AND operation.
@@ -39,7 +41,7 @@ public class OperatorAnd extends Operator {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
 
@@ -52,7 +54,7 @@ public class OperatorAnd extends Operator {
 		}
 
 		if (leftValue == false) {
-			return false; // no need to evaluate right operand
+			return BooleanTypedValue.forValue(false); // no need to evaluate right operand
 		}
 
 		try {
@@ -63,7 +65,7 @@ public class OperatorAnd extends Operator {
 			throw ee;
 		}
 
-		return /* leftValue && */rightValue;
+		return /* leftValue && */BooleanTypedValue.forValue(rightValue);
 	}
 
 }

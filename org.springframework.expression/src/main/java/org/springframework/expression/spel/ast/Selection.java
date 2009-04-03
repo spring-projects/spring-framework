@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
-
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -51,15 +52,17 @@ public class Selection extends SpelNodeImpl {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object operand = state.getActiveContextObject();
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue op = state.getActiveContextObject();
+		Object operand = op.getValue();
+		
 		SpelNodeImpl selectionCriteria = getChild(0);
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
 			for (Object k : mapdata.keySet()) {
 				try {
-					Object kvpair = new KeyValuePair(k, mapdata.get(k));
+					TypedValue kvpair = new TypedValue(new KeyValuePair(k, mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class));
 					state.pushActiveContextObject(kvpair);
 					Object o = selectionCriteria.getValueInternal(state);
 					if (o instanceof Boolean) {
@@ -79,10 +82,10 @@ public class Selection extends SpelNodeImpl {
 					return null;
 				}
 				if (variant == LAST) {
-					return result.get(result.size() - 1);
+					return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
 				}
 			}
-			return result;
+			return new TypedValue(result,op.getTypeDescriptor());
 		} else if (operand instanceof Collection) {
 			List<Object> data = new ArrayList<Object>();
 			data.addAll((Collection<?>) operand);
@@ -90,13 +93,13 @@ public class Selection extends SpelNodeImpl {
 			int idx = 0;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(element);
+					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType())));
 					state.enterScope("index", idx);
-					Object o = selectionCriteria.getValueInternal(state);
+					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST)
-								return element;
+								return new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
 							result.add(element);
 						}
 					} else {
@@ -113,9 +116,9 @@ public class Selection extends SpelNodeImpl {
 				return null;
 			}
 			if (variant == LAST) {
-				return result.get(result.size() - 1);
+				return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
 			}
-			return result;
+			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
 			throw new SpelException(getCharPositionInLine(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
 					(operand == null ? "null" : operand.getClass().getName()));

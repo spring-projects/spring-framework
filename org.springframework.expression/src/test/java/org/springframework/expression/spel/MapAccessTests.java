@@ -22,7 +22,9 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -67,8 +69,8 @@ public class MapAccessTests extends ExpressionTestCase {
 			return (((Map) target).containsKey(name));
 		}
 
-		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-			return ((Map) target).get(name);
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

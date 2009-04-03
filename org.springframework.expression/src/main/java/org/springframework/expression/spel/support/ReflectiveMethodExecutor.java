@@ -18,9 +18,12 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.TypedValue;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -42,7 +45,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 	}
 
 
-	public Object execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
+	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
 			if (this.argsRequiringConversion != null && arguments != null) {
 				ReflectionHelper.convertArguments(this.method.getParameterTypes(), this.method.isVarArgs(),
@@ -52,7 +55,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.method);
-			return this.method.invoke(target, arguments);
+			return new TypedValue(this.method.invoke(target, arguments), new TypeDescriptor(new MethodParameter(method,-1)));
 		}
 		catch (Exception ex) {
 			throw new AccessException("Problem invoking method: " + this.method, ex);

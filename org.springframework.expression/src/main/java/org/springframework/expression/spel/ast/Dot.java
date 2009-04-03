@@ -17,8 +17,9 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
 /**
  * This is used for preserving positional information from the input expression.
@@ -39,7 +40,7 @@ public class Dot extends SpelNodeImpl {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws SpelException {
+	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
 		// This makes Dot a do-nothing operation, but this is not free in terms of computation
 		return state.getActiveContextObject();
 	}

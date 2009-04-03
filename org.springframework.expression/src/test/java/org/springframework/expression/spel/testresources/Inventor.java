@@ -9,6 +9,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class Inventor {
 	private String name;
+	public String publicName;
 	private PlaceOfBirth placeOfBirth;
 	Date birthdate;
 	private int sinNumber;
@@ -23,6 +24,8 @@ public class Inventor {
 	public boolean publicBoolean;
 	private boolean accessedThroughGetSet;
 	public List<Integer> listOfInteger = new ArrayList<Integer>();
+	public List<Boolean> booleanList = new ArrayList<Boolean>();
+	public Map<String,Boolean> mapOfStringToBoolean = new HashMap<String,Boolean>();
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
@@ -37,6 +40,8 @@ public class Inventor {
 		testMap.put("friday", "freitag");
 		testMap.put("saturday", "samstag");
 		testMap.put("sunday", "sonntag");
+		booleanList.add(false);
+		booleanList.add(false);
 	}
 
 	public void setPlaceOfBirth(PlaceOfBirth placeOfBirth2) {

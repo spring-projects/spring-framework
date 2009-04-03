@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import java.lang.reflect.Method;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -27,6 +28,7 @@ import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeConverter;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -84,11 +86,11 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		ctx.setRootObject(null);
 		
 		pAccessor.setPerson(new Person("Andy"));
-		value = (Boolean)expr.getValue(ctx,Boolean.class);
+		value = expr.getValue(ctx,Boolean.class);
 		assertTrue(value);
 		
 		pAccessor.setPerson(new Person("Christian"));
-		value = (Boolean)expr.getValue(ctx,Boolean.class);
+		value = expr.getValue(ctx,Boolean.class);
 		assertFalse(value);
 	}
 
@@ -210,8 +212,8 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			return name.equals("principal");
 		}
 
-		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new Principal();
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			return new TypedValue(new Principal(),TypeDescriptor.valueOf(Principal.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -240,8 +242,8 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			return name.equals("p");
 		}
 
-		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-			return activePerson;
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			return new TypedValue(activePerson,TypeDescriptor.valueOf(Person.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -269,7 +271,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 				this.tc = typeConverter;
 			}
 
-			public Object execute(EvaluationContext context, Object target, Object... arguments)
+			public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
 					throws AccessException {
 				try {
 					Method m = HasRoleExecutor.class.getMethod("hasRole", String[].class);
@@ -280,7 +282,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 					if (m.isVarArgs()) {
 						args = ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(), args);
 					}
-					return m.invoke(null, args);
+					return new TypedValue(m.invoke(null, args), new TypeDescriptor(new MethodParameter(m,-1)));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Problem invoking hasRole", ex);

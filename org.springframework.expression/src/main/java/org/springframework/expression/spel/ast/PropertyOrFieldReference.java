@@ -23,6 +23,7 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -49,7 +50,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws SpelException {
+	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
 		return readProperty(state, this.name);
 	}
 
@@ -75,14 +76,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	 * @return the value of the property
 	 * @throws SpelException if any problem accessing the property or it cannot be found
 	 */
-	private Object readProperty(ExpressionState state, String name) throws SpelException {
-		Object contextObject = state.getActiveContextObject();
+	private TypedValue readProperty(ExpressionState state, String name) throws SpelException {
+		TypedValue contextObject = state.getActiveContextObject();
 		EvaluationContext eContext = state.getEvaluationContext();
 
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse != null) {
 			try {
-				return accessorToUse.read(state.getEvaluationContext(), contextObject, name);
+				return accessorToUse.read(state.getEvaluationContext(), contextObject.getValue(), name);
 			}
 			catch (AccessException ae) {
 				// this is OK - it may have gone stale due to a class change,
@@ -91,7 +92,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			}
 		}
 
-		Class<?> contextObjectClass = getObjectClass(contextObject);
+		Class<?> contextObjectClass = getObjectClass(contextObject.getValue());
 		List<PropertyAccessor> accessorsToTry = getPropertyAccessorsToTry(contextObjectClass, state);
 
 		// Go through the accessors that may be able to resolve it. If they are a cacheable accessor then
@@ -100,9 +101,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (accessorsToTry != null) {
 			try {
 				for (PropertyAccessor accessor : accessorsToTry) {
-					if (accessor.canRead(eContext, contextObject, name)) {
+					if (accessor.canRead(eContext, contextObject.getValue(), name)) {
 						this.cachedReadAccessor = accessor;
-						return accessor.read(eContext, contextObject, name);
+						return accessor.read(eContext, contextObject.getValue(), name);
 					}
 				}
 			}
@@ -115,13 +116,13 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	private void writeProperty(ExpressionState state, String name, Object newValue) throws SpelException {
-		Object contextObject = state.getActiveContextObject();
+		TypedValue contextObject = state.getActiveContextObject();
 		EvaluationContext eContext = state.getEvaluationContext();
 
 		PropertyAccessor accessorToUse = this.cachedWriteAccessor;
 		if (accessorToUse != null) {
 			try {				
-				accessorToUse.write(state.getEvaluationContext(), contextObject, name, newValue);
+				accessorToUse.write(state.getEvaluationContext(), contextObject.getValue(), name, newValue);
 				return;
 			}
 			catch (AccessException ae) {
@@ -131,15 +132,15 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			}
 		}
 
-		Class<?> contextObjectClass = getObjectClass(contextObject);
+		Class<?> contextObjectClass = getObjectClass(contextObject.getValue());
 
 		List<PropertyAccessor> accessorsToTry = getPropertyAccessorsToTry(contextObjectClass, state);
 		if (accessorsToTry != null) {
 			try {
 				for (PropertyAccessor accessor : accessorsToTry) {
-					if (accessor.canWrite(eContext, contextObject, name)) {
+					if (accessor.canWrite(eContext, contextObject.getValue(), name)) {
 						this.cachedWriteAccessor = accessor;
-						accessor.write(eContext, contextObject, name, newValue);
+						accessor.write(eContext, contextObject.getValue(), name, newValue);
 						return;
 					}
 				}
@@ -153,7 +154,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	public boolean isWritableProperty(String name, ExpressionState state) throws SpelException {
-		Object contextObject = state.getActiveContextObject();
+		Object contextObject = state.getActiveContextObject().getValue();
 		EvaluationContext eContext = state.getEvaluationContext();
 		if (contextObject == null) {
 			throw new SpelException(SpelMessages.ATTEMPTED_PROPERTY_FIELD_REF_ON_NULL_CONTEXT_OBJECT, name);

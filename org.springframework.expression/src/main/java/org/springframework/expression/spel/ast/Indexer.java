@@ -23,6 +23,7 @@ import java.util.Map;
 import org.antlr.runtime.Token;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -43,53 +44,44 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object ctx = state.getActiveContextObject();
-		Object index = getChild(0).getValueInternal(state);
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue context = state.getActiveContextObject();
+		Object targetObject = context.getValue();
+		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();
+		TypedValue indexValue =  getChild(0).getValueInternal(state);
+		Object index = indexValue.getValue();
 
 		// Indexing into a Map
-		if (ctx instanceof Map) {
-			return ((Map<?, ?>) ctx).get(index);
+		if (targetObject instanceof Map) {
+			Object possiblyConvertedKey = state.convertValue(indexValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
+			return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
 		}
 
 		int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
-		if (ctx.getClass().isArray()) {
-			return accessArrayElement(ctx, idx);
-		} else if (ctx instanceof Collection) {
-			Collection<?> c = (Collection<?>) ctx;
+		if (targetObjectTypeDescriptor.isArray()) {
+			return new TypedValue(accessArrayElement(targetObject, idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+		} else if (targetObjectTypeDescriptor.isCollection()) {
+			Collection<?> c = (Collection<?>) targetObject;
 			if (idx >= c.size()) {
 				throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 			}
 			int pos = 0;
 			for (Object o : c) {
 				if (pos == idx) {
-					return o;
+					return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
 				}
 				pos++;
 			}
-			// } else if (ctx instanceof Map) {
-			// Map<?,?> c = (Map<?,?>) ctx;
-			// // This code would allow a key/value pair to be pulled out by index from a map
-			// if (idx >= c.size()) {
-			// throw new ELException(ELMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
-			// }
-			// Set<?> keys = c.keySet();
-			// int pos = 0;
-			// for (Object k : keys) {
-			// if (pos==idx) {
-			// return new KeyValuePair(k,c.get(k));
-			// }
-			// pos++;
-			// }
-		} else if (ctx instanceof String) {
-			String ctxString = (String) ctx;
+		} else if (targetObject instanceof String) {
+			String ctxString = (String) targetObject;
 			if (idx >= ctxString.length()) {
 				throw new SpelException(SpelMessages.STRING_INDEX_OUT_OF_BOUNDS, ctxString.length(), idx);
 			}
-			return String.valueOf(ctxString.charAt(idx));
+			return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
 		}
-		throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, ctx.getClass().getName());
+		throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor);
 	}
 
 
@@ -101,27 +93,38 @@ public class Indexer extends SpelNodeImpl {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setValue(ExpressionState state, Object newValue) throws EvaluationException {
-		Object ctx = state.getActiveContextObject();
-		Object index = getChild(0).getValueInternal(state);
+		TypedValue contextObject = state.getActiveContextObject();
+		Object targetObject = contextObject.getValue();
+		TypeDescriptor targetObjectTypeDescriptor = contextObject.getTypeDescriptor();
+		TypedValue index = getChild(0).getValueInternal(state);
 
 		// Indexing into a Map
-		if (ctx instanceof Map) {
-			((Map) ctx).put(index,newValue); // TODO missing conversion for both index and newValue
+		if (targetObjectTypeDescriptor.isMap()) {
+			Map map = (Map)targetObject;
+			Object possiblyConvertedKey = state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+			map.put(possiblyConvertedKey,possiblyConvertedValue);
 			return;
 		}
 
-		int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
-
-		if (ctx.getClass().isArray()) {
-			setArrayElement(state, ctx, idx, newValue);
-		} else if (ctx instanceof List) {
-			List<Object> c = (List<Object>) ctx;
+		if (targetObjectTypeDescriptor.isArray()) {
+			int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
+			setArrayElement(state, contextObject.getValue(), idx, newValue, targetObjectTypeDescriptor.getElementType());
+		} else if (targetObjectTypeDescriptor.isCollection()) {
+			int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
+			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
 				throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 			}
-			c.set(idx,newValue); // TODO missing conversion
+			if (targetObject instanceof List) {
+				List list = (List)targetObject;
+				Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+				list.set(idx,possiblyConvertedValue);
+			} else {
+				throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
+			}
 		} else {
-			throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, ctx.getClass().getName());
+			throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
 		}
 	}
 	
@@ -138,44 +141,44 @@ public class Indexer extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	private void setArrayElement(ExpressionState state, Object ctx, int idx, Object newValue) throws EvaluationException {
-		Class<?> arrayComponentType = ctx.getClass().getComponentType();
+	private void setArrayElement(ExpressionState state, Object ctx, int idx, Object newValue, Class clazz) throws EvaluationException {
+		Class<?> arrayComponentType = clazz;
 		if (arrayComponentType == Integer.TYPE) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Integer.class);
+			array[idx] = state.convertValue(newValue, INTEGER_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Boolean.TYPE) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Boolean.class);
+			array[idx] = state.convertValue(newValue, BOOLEAN_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Character.TYPE) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Character.class);
+			array[idx] = state.convertValue(newValue, CHARACTER_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Long.TYPE) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Long.class);
+			array[idx] = state.convertValue(newValue, LONG_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Short.TYPE) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Short.class);
+			array[idx] = state.convertValue(newValue, SHORT_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Double.TYPE) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Double.class);
+			array[idx] = state.convertValue(newValue, DOUBLE_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Float.TYPE) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Float.class);
+			array[idx] = state.convertValue(newValue, FLOAT_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Byte.TYPE) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, Byte.class);
+			array[idx] = state.convertValue(newValue, BYTE_TYPE_DESCRIPTOR);
 		} else {
 			Object[] array = (Object[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, arrayComponentType);
+			array[idx] = state.convertValue(newValue, TypeDescriptor.valueOf(clazz));
 		}		
 	}
 	

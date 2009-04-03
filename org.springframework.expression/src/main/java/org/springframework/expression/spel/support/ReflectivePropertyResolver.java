@@ -30,6 +30,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -85,7 +86,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		return false;
 	}
 
-	public Object read(EvaluationContext context, Object target, String name) throws AccessException {
+	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 		if (target == null) {
 			return null;
 		}
@@ -95,7 +96,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (target instanceof Class) {
 				throw new AccessException("Cannot access length on array class itself");
 			}
-			return Array.getLength(target);
+			return new TypedValue(Array.getLength(target),TypeDescriptor.valueOf(Integer.TYPE));
 		}
 
 		CacheKey cacheKey = new CacheKey(type, name);
@@ -113,7 +114,8 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (method != null) {
 				try {
 					ReflectionUtils.makeAccessible(method);
-					return method.invoke(target);
+					TypeDescriptor resultTypeDescriptor = new TypeDescriptor(new MethodParameter(method,-1));
+					return new TypedValue(method.invoke(target),resultTypeDescriptor);
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
@@ -133,7 +135,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (field != null) {
 				try {
 					ReflectionUtils.makeAccessible(field);
-					return field.get(target);
+					return new TypedValue(field.get(target),new TypeDescriptor(field));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access field: " + name, ex);

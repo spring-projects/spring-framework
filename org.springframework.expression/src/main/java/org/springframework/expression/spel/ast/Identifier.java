@@ -17,9 +17,8 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
 
 /**
  * @author Andy Clement
@@ -27,20 +26,20 @@ import org.springframework.expression.spel.SpelException;
  */
 public class Identifier extends SpelNodeImpl {
 
-	private final String id;
+	private final TypedValue id;
 
 	public Identifier(Token payload) {
 		super(payload);
-		this.id = payload.getText();
+		this.id = new TypedValue(payload.getText(), STRING_TYPE_DESCRIPTOR);
 	}
 
 	@Override
 	public String toStringAST() {
-		return this.id;
+		return (String)this.id.getValue();
 	}
 
 	@Override
-	public String getValueInternal(ExpressionState state) {
+	public TypedValue getValueInternal(ExpressionState state) {
 		return this.id;
 	}
 

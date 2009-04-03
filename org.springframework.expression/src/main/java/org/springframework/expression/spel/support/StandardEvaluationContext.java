@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodResolver;
@@ -30,6 +31,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeLocator;
+import org.springframework.expression.TypedValue;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +45,7 @@ import org.springframework.util.Assert;
  */
 public class StandardEvaluationContext implements EvaluationContext {
 
-	private Object rootObject;
+	private TypedValue rootObject;
 
 	private final Map<String, Object> variables = new HashMap<String, Object>();
 
@@ -68,10 +70,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public void setRootObject(Object rootObject) {
-		this.rootObject = rootObject;
+		this.rootObject = new TypedValue(rootObject,TypeDescriptor.forObject(rootObject));
 	}
 
-	public Object getRootObject() {
+	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
+		this.rootObject = new TypedValue(rootObject,typeDescriptor);
+	}
+
+	public TypedValue getRootObject() {
 		return this.rootObject;
 	}
 

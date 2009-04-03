@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.TypedValue;
 
 /**
  * @author Andy Clement
@@ -24,15 +25,15 @@ import org.antlr.runtime.Token;
  */
 public class RealLiteral extends Literal {
 
-	private final Double value;
+	private final TypedValue value;
 
 	public RealLiteral(Token payload) {
 		super(payload);
-		value = Double.parseDouble(payload.getText());
+		value = new TypedValue(Double.parseDouble(payload.getText()),DOUBLE_TYPE_DESCRIPTOR);
 	}
 
 	@Override
-	public Double getLiteralValue() {
+	public TypedValue getLiteralValue() {
 		return this.value;
 	}
 

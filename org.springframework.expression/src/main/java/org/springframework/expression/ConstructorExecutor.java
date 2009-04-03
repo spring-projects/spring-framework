@@ -16,6 +16,7 @@
 
 package org.springframework.expression;
 
+
 // TODO Is the resolver/executor model too pervasive in this package?
 /**
  * Executors are built by resolvers and can be cached by the infrastructure to repeat an operation quickly without going
@@ -39,6 +40,6 @@ public interface ConstructorExecutor {
 	 * @return the new object
 	 * @throws AccessException if there is a problem executing the command or the CommandExecutor is no longer valid
 	 */
-	Object execute(EvaluationContext context, Object... arguments) throws AccessException;
+	TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException;
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.TypedValue;
 
 /**
  * @author Andy Clement
@@ -25,24 +26,24 @@ import org.antlr.runtime.Token;
  */
 public class StringLiteral extends Literal {
 
-	private final String value;
+	private final TypedValue value;
 
 	public StringLiteral(Token payload) {
 		super(payload);
 		String val = payload.getText();
 		// TODO should these have been skipped being created by the parser rules? or not?
 		val = val.substring(1, val.length() - 1);
-		this.value = val.replaceAll("''", "'");
+		this.value = new TypedValue(val.replaceAll("''", "'"),STRING_TYPE_DESCRIPTOR);
 	}
 
 	@Override
-	public String getLiteralValue() {
+	public TypedValue getLiteralValue() {
 		return this.value;
 	}
 
 	@Override
 	public String toString() {
-		return "'" + getLiteralValue() + "'";
+		return "'" + getLiteralValue().getValue() + "'";
 	}
 
 }

@@ -17,9 +17,10 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * PlaceHolder nodes are created for tokens that come through from the grammar purely to give us additional positional
@@ -35,7 +36,7 @@ public class Placeholder extends SpelNodeImpl {
 	}
 
 	@Override
-	public String getValueInternal(ExpressionState state) throws SpelException {
+	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
 		throw new SpelException(getCharPositionInLine(), SpelMessages.PLACEHOLDER_SHOULD_NEVER_BE_EVALUATED);
 	}
 

@@ -27,6 +27,7 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
+import org.springframework.expression.TypedValue;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
@@ -45,7 +46,7 @@ public class ExpressionState {
 
 	private final Stack<VariableScope> variableScopes = new Stack<VariableScope>();
 
-	private final Stack<Object> contextObjects = new Stack<Object>();
+	private final Stack<TypedValue> contextObjects = new Stack<TypedValue>();
 
 
 	public ExpressionState() {
@@ -65,14 +66,18 @@ public class ExpressionState {
 	/**
 	 * The active context object is what unqualified references to properties/etc are resolved against.
 	 */
-	public Object getActiveContextObject() {
+	public TypedValue getActiveContextObject() {
 		if (this.contextObjects.isEmpty()) {
-			return this.relatedContext.getRootObject();
+			TypedValue rootObject = this.relatedContext.getRootObject();
+			if (rootObject == null) {
+				return new TypedValue(rootObject,TypeDescriptor.NULL_TYPE_DESCRIPTOR);
+			}
+			return rootObject;
 		}
 		return this.contextObjects.peek();
 	}
 
-	public void pushActiveContextObject(Object obj) {
+	public void pushActiveContextObject(TypedValue obj) {
 		this.contextObjects.push(obj);
 	}
 
@@ -80,7 +85,7 @@ public class ExpressionState {
 		this.contextObjects.pop();
 	}
 
-	public Object getRootContextObject() {
+	public TypedValue getRootContextObject() {
 		return this.relatedContext.getRootObject();
 	}
 
@@ -88,8 +93,9 @@ public class ExpressionState {
 		this.relatedContext.setVariable(name, value);
 	}
 
-	public Object lookupVariable(String name) {
-		return this.relatedContext.lookupVariable(name);
+	public TypedValue lookupVariable(String name) {
+		Object value = this.relatedContext.lookupVariable(name);
+		return new TypedValue(value,TypeDescriptor.valueOf((value==null?null:value.getClass())));
 	}
 
 	public TypeComparator getTypeComparator() {
@@ -103,10 +109,14 @@ public class ExpressionState {
 	public <T> T convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value, targetTypeDescriptor);
 	}
-
-	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-		return this.relatedContext.getTypeConverter().convertValue(value, targetType);
+	
+	public <T> T convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+		return this.relatedContext.getTypeConverter().convertValue(value.getValue(), targetTypeDescriptor);
 	}
+
+//	public <T> T convertValue(TypedValue value, Class<T> targetType) throws EvaluationException {
+//		return this.relatedContext.getTypeConverter().convertValue(value, targetType);
+//	}
 
 	/**
 	 * A new scope is entered when a function is invoked
@@ -137,10 +147,11 @@ public class ExpressionState {
 		return null;
 	}
 
-	public Object operate(Operation op, Object left, Object right) throws EvaluationException {
+	public TypedValue operate(Operation op, Object left, Object right) throws EvaluationException {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
-			return overloader.operate(op, left, right);
+			Object returnValue = overloader.operate(op, left, right);
+			return new TypedValue(returnValue,TypeDescriptor.forObject(returnValue));
 		}
 		else {
 			throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, left, right);

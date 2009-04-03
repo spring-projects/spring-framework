@@ -21,9 +21,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.antlr.runtime.Token;
-
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -53,18 +55,18 @@ public class FunctionReference extends SpelNodeImpl {
 
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object o = state.lookupVariable(name);
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue o = state.lookupVariable(name);
 		if (o == null) {
 			throw new SpelException(SpelMessages.FUNCTION_NOT_DEFINED, name);
 		}
 
 		// Two possibilities: a lambda function or a Java static method registered as a function
-		if (!(o instanceof Method)) {
+		if (!(o.getValue() instanceof Method)) {
 			throw new SpelException(SpelMessages.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, name, o.getClass());
 		}
 
-		return executeFunctionJLRMethod(state, (Method) o);
+		return executeFunctionJLRMethod(state, (Method) o.getValue());
 	}
 
 	/**
@@ -75,7 +77,7 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @return the return value of the invoked Java method
 	 * @throws EvaluationException if there is any problem invoking the method
 	 */
-	private Object executeFunctionJLRMethod(ExpressionState state, Method m) throws EvaluationException {
+	private TypedValue executeFunctionJLRMethod(ExpressionState state, Method m) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
 
 		if (!m.isVarArgs() && m.getParameterTypes().length != functionArgs.length) {
@@ -99,7 +101,7 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 
 		try {
-			return m.invoke(m.getClass(), functionArgs);
+			return new TypedValue(m.invoke(m.getClass(), functionArgs),new TypeDescriptor(new MethodParameter(m,-1)));
 		} catch (IllegalArgumentException e) {
 			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());
@@ -139,7 +141,7 @@ public class FunctionReference extends SpelNodeImpl {
 		// Compute arguments to the function
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = getChild(i).getValueInternal(state);
+			arguments[i] = getChild(i).getValueInternal(state).getValue();
 		}
 		return arguments;
 	}
