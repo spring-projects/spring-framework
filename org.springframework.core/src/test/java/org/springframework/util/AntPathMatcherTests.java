@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,6 +335,31 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
+	public void combine() {
+		assertEquals("", pathMatcher.combine(null, null));
+		assertEquals("/hotels", pathMatcher.combine("/hotels", null));
+		assertEquals("/hotels", pathMatcher.combine(null, "/hotels"));
+		assertEquals("/hotels/booking", pathMatcher.combine("/hotels/*", "booking"));
+		assertEquals("/hotels/booking", pathMatcher.combine("/hotels/*", "/booking"));
+		assertEquals("/hotels/**/booking", pathMatcher.combine("/hotels/**", "booking"));
+		assertEquals("/hotels/**/booking", pathMatcher.combine("/hotels/**", "/booking"));
+		assertEquals("/hotels/booking", pathMatcher.combine("/hotels", "/booking"));
+		assertEquals("/hotels/booking", pathMatcher.combine("/hotels", "booking"));
+		assertEquals("/hotels/{hotel}", pathMatcher.combine("/hotels/*", "{hotel}"));
+		assertEquals("/hotels/**/{hotel}", pathMatcher.combine("/hotels/**", "{hotel}"));
+		assertEquals("/hotels/{hotel}", pathMatcher.combine("/hotels", "{hotel}"));
+		assertEquals("/hotels/*/booking/{booking}", pathMatcher.combine("/hotels/*/booking", "{booking}"));
+		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel.html"));
+		try {
+			assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel"));
+			fail("IllegalArgumentException expected");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	@Test
 	public void patternComparator() {
 		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
 
@@ -355,7 +380,7 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
 		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
 
-		assertEquals(-1, comparator.compare("/hotels/*","/hotels/*/**"));
+		assertEquals(-1, comparator.compare("/hotels/*", "/hotels/*/**"));
 		assertEquals(1, comparator.compare("/hotels/*/**", "/hotels/*"));
 	}
 
