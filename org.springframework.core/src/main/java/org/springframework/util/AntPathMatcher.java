@@ -348,8 +348,9 @@ public class AntPathMatcher implements PathMatcher {
 			}
 		}
 		else {
-			int idx = pattern1.indexOf("*.");
+			int idx = pattern1.indexOf(".");
 			if (idx == -1) {
+				// all other cases: simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;
 				}
@@ -359,8 +360,7 @@ public class AntPathMatcher implements PathMatcher {
 			}
 			else {
 				// /*.html + /hotels.html -> /hotels.html
-				String extension = pattern1.substring(idx + 1);
-				if (pattern2.endsWith(extension)) {
+				if (match(pattern1, pattern2)) {
 					return pattern2;
 				}
 				else {
