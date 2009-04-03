@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ public interface PathMatcher {
 	/**
 	 * Given a pattern and a full path, extract the URI template variables. URI template
 	 * variables are expressed through curly brackets ('{' and '}').
-	 *
 	 * <p>For example: For pattern "/hotels/{hotel}" and path "/hotels/1", this method will
 	 * return a map containing "hotel"->"1".
 	 *
@@ -106,7 +105,6 @@ public interface PathMatcher {
 
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
-	 *
 	 * <p>The full algorithm used depends on the underlying implementation, but generally, the returned
 	 * <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List, java.util.Comparator) sort} a
 	 * list so that more specific patterns come before generic patterns.
@@ -115,4 +113,15 @@ public interface PathMatcher {
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */
 	Comparator<String> getPatternComparator(String path);
+
+	/**
+	 * Combines two patterns into a new pattern that is returned.
+	 * <p>The full algorithm used for combining the two pattern depends on the underlying implementation.
+	 *
+	 * @param pattern1 the first pattern
+	 * @param pattern2 the second pattern
+	 * @return the combination of the two patterns
+	 * @throws IllegalArgumentException when the two patterns cannot be combined
+	 */
+	String combine(String pattern1, String pattern2);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,17 +291,95 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
+	 * Combines two patterns into a new pattern that is returned.
+	 * <p>This implementation simply concatenates the two patterns, unless the
+	 * first pattern contains a file extension match (such as {@code *.html}. In
+	 * that case, the second pattern should be included in the first, or an
+	 * {@code IllegalArgumentException} is thrown.
+	 * <p>For example:
+	 * <table>
+	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr>
+	 * <tr><td>/hotels</td><td>{@code null}</td><td>/hotels</td></tr>
+	 * <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
+	 * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels/*</td><td>/bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels/&#42;&#42;</td><td>/bookings</td><td>/hotels/&#42;&#42;/bookings</td></tr>
+	 * <tr><td>/hotels</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
+	 * <tr><td>/hotels/*</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
+	 * <tr><td>/hotels/&#42;&#42;</td><td>{hotel}</td><td>/hotels/&#42;&#42;/{hotel}</td></tr>
+	 * <tr><td>/*.html</td><td>/hotels.html</td><td>/hotels.html</td></tr>
+	 * <tr><td>/*.html</td><td>/hotels</td><td>IllegalArgumentException</td></tr>
+	 * </table>
+	 *
+	 * @param pattern1 the first pattern
+	 * @param pattern2 the second pattern
+	 * @return the combination of the two patterns
+	 * @throws IllegalArgumentException when the two patterns cannot be combined
+	 */
+	public String combine(String pattern1, String pattern2) {
+		if (!StringUtils.hasText(pattern1) && !StringUtils.hasText(pattern2)) {
+			return "";
+		}
+		else if (!StringUtils.hasText(pattern1)) {
+			return pattern2;
+		}
+		else if (!StringUtils.hasText(pattern2)) {
+			return pattern1;
+		}
+		else if (pattern1.endsWith("/*")) {
+			if (pattern2.startsWith("/")) {
+				// /hotels/* + /booking -> /hotels/booking
+				return pattern1.substring(0, pattern1.length() - 1) + pattern2.substring(1);
+			}
+			else {
+				// /hotels/* + booking -> /hotels/booking
+				return pattern1.substring(0, pattern1.length() - 1) + pattern2;
+			}
+		}
+		else if (pattern1.endsWith("/**")) {
+			if (pattern2.startsWith("/")) {
+				// /hotels/** + /booking -> /hotels/**/booking
+				return pattern1 + pattern2;
+			}
+			else {
+				// /hotels/** + booking -> /hotels/**/booking
+				return pattern1 + "/" + pattern2;
+			}
+		}
+		else {
+			int idx = pattern1.indexOf("*.");
+			if (idx == -1) {
+				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
+					return pattern1 + pattern2;
+				}
+				else {
+					return pattern1 + "/" + pattern2;
+				}
+			}
+			else {
+				// /*.html + /hotels.html -> /hotels.html
+				String extension = pattern1.substring(idx + 1);
+				if (pattern2.endsWith(extension)) {
+					return pattern2;
+				}
+				else {
+					// /*.html + /hotels -> exception
+					throw new IllegalArgumentException(
+							"Conflicting paths: \"" + pattern1 + "\" does not include \"" + pattern2 + "\"");
+				}
+			}
+		}
+	}
+
+	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
 	 *
 	 * <p>The returned <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List,
 	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns:
-	 * <ol>
-	 * <li><code>/hotels/new</code></li>
-	 * <li><code>/hotels/{hotel}</code></li>
-	 * <li><code>/hotels/*</code></li>
-	 * </ol>
-	 * the returned comparator will sort this list so that the order will be as indicated. 
+	 * generic patterns. So given a list with the following patterns: <ol> <li><code>/hotels/new</code></li>
+	 * <li><code>/hotels/{hotel}</code></li> <li><code>/hotels/*</code></li> </ol> the returned comparator will sort this
+	 * list so that the order will be as indicated.
 	 *
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
@@ -310,7 +388,7 @@ public class AntPathMatcher implements PathMatcher {
 		return new AntPatternComparator(path);
 	}
 
-	private static class AntPatternComparator implements Comparator<String>{
+	private static class AntPatternComparator implements Comparator<String> {
 
 		private final String path;
 
