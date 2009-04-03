@@ -29,8 +29,16 @@ import org.springframework.util.Assert;
  * Type metadata about a bindable target value.
  * 
  * @author Keith Donald
+ * @author Andy Clement
+ * 
+ * @since 3.0
  */
 public class TypeDescriptor {
+
+    /**
+     * constant value typeDescriptor for the type of a null value
+     */	
+	public final static TypeDescriptor NULL_TYPE_DESCRIPTOR = new TypeDescriptor((Class<?>)null);
 
 	private MethodParameter methodParameter;
 
@@ -79,8 +87,10 @@ public class TypeDescriptor {
 			return type;
 		} else if (field != null) {
 			return field.getType();
-		} else {
+		} else if (methodParameter!=null) {
 			return methodParameter.getParameterType();
+		} else {
+			return null;
 		}
 	}
 
@@ -243,8 +253,23 @@ public class TypeDescriptor {
 	 * @return the type descriptor
 	 */
 	public static TypeDescriptor valueOf(Class<? extends Object> type) {
+		// TODO needs a cache for common type descriptors
 		return new TypeDescriptor(type);
 	}
+
+	/**
+	 * Creates a new type descriptor for the class of the given object.
+	 * @param object the object
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor forObject(Object object) {
+		if (object==null) {
+			return NULL_TYPE_DESCRIPTOR;
+		} else {
+			return valueOf(object.getClass());
+		}
+	}
+
 
 	// internal helpers
 	
