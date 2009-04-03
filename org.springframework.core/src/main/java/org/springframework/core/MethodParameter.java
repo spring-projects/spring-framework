@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Andy Clement
  * @since 2.0
  * @see GenericCollectionTypeResolver
  */
@@ -176,9 +177,13 @@ public class MethodParameter {
 	 */
 	public Class getParameterType() {
 		if (this.parameterType == null) {
-			this.parameterType = (this.method != null ?
+			if (parameterIndex < 0) {
+				this.parameterType = (this.method !=null ? this.method.getReturnType():null);
+			} else {
+				this.parameterType = (this.method != null ?
 					this.method.getParameterTypes()[this.parameterIndex] :
 					this.constructor.getParameterTypes()[this.parameterIndex]);
+			}
 		}
 		return this.parameterType;
 	}
