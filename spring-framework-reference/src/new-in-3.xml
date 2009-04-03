@@ -2,24 +2,43 @@
 <chapter id="new-in-2">
   <title>What's new in Spring 3.0?</title>
 
+  <para>If you have been using the Spring Framework for some time, you will be
+  aware that Spring has undergone two major revisions: Spring 2.0, released in
+  October 2006, and Spring 2.5, released in November 2007. It is now time for
+  a third overhaul resulting in Spring 3.0.</para>
+
+  <sidebar id="new-in-3-intro-java">
+    <title>Java SE and Java EE Support</title>
+
+    <para>The Spring Framework is now based on Java 5 and Java 6 is fully
+    supported.</para>
+
+    <para>Furthermore, Spring is compatible with J2EE 1.4 and Java EE 5, while
+    at the same time introducing some early support for Java EE 6.</para>
+  </sidebar>
+
   <section id="new-in-3-intro">
-    <title>Introduction</title>
+    <title>Java 5</title>
 
-    <para>If you have been using the Spring Framework for some time, you will
-    be aware that Spring has undergone two major revisions: Spring 2.0,
-    released in October 2006, and Spring 2.5, released in November 2007. It is
-    now time for a third overhaul resulting in Spring 3.0.</para>
+    <para>The entire framework code has been revised to take advantage of Java
+    5 features like generics, varargs and other language improvements. We have
+    done our best to still keep the code backwards compatible. We now have
+    consistent use of generic Collections and Maps, consistent use of
+    generified FactoryBeans, and also consistent resolution of bridge methods
+    in the Spring AOP API. Generified ApplicationListeners automatically
+    receive specific event types only. All callback interfaces such as
+    TransactionCallback and HibernateCallback declare a generic result value
+    now. Overall, the Spring core codebase is now freshly revised and
+    optimized for Java 5.</para>
 
-    <sidebar id="new-in-3-intro-java">
-      <title>Java SE and Java EE Support</title>
-
-      <para>The Spring Framework is now based on Java 5 and Java 6 is fully
-      supported.</para>
-
-      <para>Furthermore, Spring is compatible with J2EE 1.4 and Java EE 5,
-      while at the same time introducing some early support for Java EE
-      6.</para>
-    </sidebar>
+    <para>Spring's TaskExecutor abstraction has been updated for close
+    integration with Java 5's java.util.concurrent facilities. We provide
+    first-class support for Callables and Futures now, as well as
+    ExecutorService adapters, ThreadFactory integration, etc. This has been
+    aligned with JSR-236 (Concurrency Utilities for Java EE 6) as far as
+    possible. Furthermore, we provide support for asynchronous method
+    invocations through the use of the new @Async annotation (or EJB 3.1's
+    @Asynchronous annotation).</para>
   </section>
 
   <section id="new-in-3-improved-docs">
@@ -184,28 +203,40 @@
       </listitem>
     </itemizedlist>
   </section>
+
   <section id="new-feature-java-5">
     <title>Java 5+ foundation</title>
+
     <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
+
   <section id="new-feature-el">
     <title>Spring Expression Language</title>
+
     <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
+
   <section id="new-feature-java-config">
     <title>Container enhancements</title>
+
     <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
+
   <section id="new-feature-rest">
     <title>Comprehensive REST support</title>
+
     <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
+
   <section id="new-feature-validation">
     <title>Declarative model validation</title>
+
     <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
+
   <section id="new-feature-jee-6">
     <title>Early support for Java EE 6</title>
+
     <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
 </chapter>
