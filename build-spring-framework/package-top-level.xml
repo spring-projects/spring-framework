@@ -15,21 +15,17 @@
 			<property name="target.dir" value="${package.docs.dir}"/>
 		</ant>
 
-		<!--ant dir="../spring-framework-reference" target="doc" inheritAll="false">
-			<property name="package.output.dir" value="${package.output.dir}"/>
-			<propertyset>
-				<propertyref builtin="commandline"/>
-			</propertyset>
-			<property name="timestamp" value="${timestamp}"/>
-		</ant>
+		<!-- Reference Document START-->
+		<path id="doc.projects">
+			<path location="${basedir}/../spring-framework-reference"/>
+		</path>
 
-		<subant target="package" verbose="true" buildpath="../spring-framework-reference">
+		<all-bundles target="doc" buildpathRef="doc.projects"/>
+
+		<all-bundles target="package" buildpathRef="doc.projects">
 			<property name="package.output.dir" value="${package.output.dir}"/>
-			<propertyset>
-				<propertyref builtin="commandline"/>
-			</propertyset>
-			<property name="timestamp" value="${timestamp}"/>
-		</subant-->
+		</all-bundles>
+		<!-- Reference Document END-->
 
 		<copy todir="${package.output.dir}">
 			<fileset dir="${basedir}/resources"/>
