@@ -20,12 +20,13 @@ import java.lang.reflect.Array;
 import java.util.List;
 
 import org.antlr.runtime.Token;
-
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -67,7 +68,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * Implements getValue() - delegating to the code for building an array or a simple type.
 	 */
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		if (this.isArrayConstructor) {
 			return createArray(state);
 		}
@@ -123,14 +124,14 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @return the new array
 	 * @throws EvaluationException if there is a problem creating the array
 	 */
-	private Object createArray(ExpressionState state) throws EvaluationException {
-		Object intendedArrayType = getChild(0).getValueInternal(state);
-		if (!(intendedArrayType instanceof String)) {
+	private TypedValue createArray(ExpressionState state) throws EvaluationException {
+		TypedValue intendedArrayType = getChild(0).getValueInternal(state);
+		if (!(intendedArrayType.getValue() instanceof String)) {
 			throw new SpelException(getChild(0).getCharPositionInLine(),
 					SpelMessages.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,
 					FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
 		}
-		String type = (String) intendedArrayType;
+		String type = (String) intendedArrayType.getValue();
 		Class<?> componentType = null;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
 		if (arrayTypeCode == TypeCode.OBJECT) {
@@ -140,6 +141,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 
 		Object newArray = null;
+		TypeDescriptor newArrayTypeDescriptor = null;
 
 		if (getChild(1).getChildCount() == 0) { // are the array ranks defined?
 			if (getChildCount() < 3) {
@@ -149,13 +151,14 @@ public class ConstructorReference extends SpelNodeImpl {
 			// no array ranks so use the size of the initializer to determine array size
 			int arraySize = getChild(2).getChildCount();
 			newArray = Array.newInstance(componentType, arraySize);
+			newArrayTypeDescriptor = TypeDescriptor.valueOf(newArray.getClass());
 		}
 		else {
 			// Array ranks are specified but is it a single or multiple dimension array?
 			int dimensions = getChild(1).getChildCount();
 			if (dimensions == 1) {
 				Object o = getChild(1).getValueInternal(state);
-				int arraySize = state.convertValue(o, Integer.class);
+				int arraySize = state.convertValue(o, INTEGER_TYPE_DESCRIPTOR);
 				if (getChildCount() == 3) {
 					// Check initializer length matches array size length
 					int initializerLength = getChild(2).getChildCount();
@@ -165,14 +168,16 @@ public class ConstructorReference extends SpelNodeImpl {
 					}
 				}
 				newArray = Array.newInstance(componentType, arraySize);
+				newArrayTypeDescriptor = TypeDescriptor.valueOf(newArray.getClass());
 			}
 			else {
 				// Multi-dimensional - hold onto your hat !
 				int[] dims = new int[dimensions];
 				for (int d = 0; d < dimensions; d++) {
-					dims[d] = state.convertValue(getChild(1).getChild(d).getValueInternal(state), Integer.class);
+					dims[d] = state.convertValue(getChild(1).getChild(d).getValueInternal(state), INTEGER_TYPE_DESCRIPTOR);
 				}
 				newArray = Array.newInstance(componentType, dims);
+				newArrayTypeDescriptor = TypeDescriptor.valueOf(newArray.getClass());
 				// TODO check any specified initializer for the multidim array matches
 			}
 		}
@@ -195,47 +200,47 @@ public class ConstructorReference extends SpelNodeImpl {
 			} else if (arrayTypeCode == TypeCode.INT) {
 				int[] newIntArray = (int[]) newArray;
 				for (int i = 0; i < newIntArray.length; i++) {
-					newIntArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Integer.class);
+					newIntArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), INTEGER_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.BOOLEAN) {
 				boolean[] newBooleanArray = (boolean[]) newArray;
 				for (int i = 0; i < newBooleanArray.length; i++) {
-					newBooleanArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Boolean.class);
+					newBooleanArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.CHAR) {
 				char[] newCharArray = (char[]) newArray;
 				for (int i = 0; i < newCharArray.length; i++) {
-					newCharArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Character.class);
+					newCharArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), CHARACTER_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.SHORT) {
 				short[] newShortArray = (short[]) newArray;
 				for (int i = 0; i < newShortArray.length; i++) {
-					newShortArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Short.class);
+					newShortArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), SHORT_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.LONG) {
 				long[] newLongArray = (long[]) newArray;
 				for (int i = 0; i < newLongArray.length; i++) {
-					newLongArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Long.class);
+					newLongArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), LONG_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.FLOAT) {
 				float[] newFloatArray = (float[]) newArray;
 				for (int i = 0; i < newFloatArray.length; i++) {
-					newFloatArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Float.class);
+					newFloatArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), FLOAT_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.DOUBLE) {
 				double[] newDoubleArray = (double[]) newArray;
 				for (int i = 0; i < newDoubleArray.length; i++) {
-					newDoubleArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Double.class);
+					newDoubleArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), DOUBLE_TYPE_DESCRIPTOR);
 				}
 			} else if (arrayTypeCode == TypeCode.BYTE) {
 				byte[] newByteArray = (byte[]) newArray;
 				for (int i = 0; i < newByteArray.length; i++) {
-					newByteArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), Byte.class);
+					newByteArray[i] = state.convertValue(initializer.getChild(i).getValueInternal(state), BYTE_TYPE_DESCRIPTOR);
 				}
 			}
 		}
 
-		return newArray;
+		return new TypedValue(newArray, newArrayTypeDescriptor);
 	}
 
 	/**
@@ -244,13 +249,13 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @return the new object
 	 * @throws EvaluationException if there is a problem creating the object
 	 */
-	private Object createNewInstance(ExpressionState state) throws EvaluationException {
+	private TypedValue createNewInstance(ExpressionState state) throws EvaluationException {
 		Object[] arguments = new Object[getChildCount() - 1];
 		Class<?>[] argumentTypes = new Class[getChildCount() - 1];
 		for (int i = 0; i < arguments.length; i++) {
-			Object childValue = getChild(i + 1).getValueInternal(state);
-			arguments[i] = childValue;
-			argumentTypes[i] = childValue.getClass();
+			TypedValue childValue = getChild(i + 1).getValueInternal(state);
+			arguments[i] = childValue.getValue();
+			argumentTypes[i] = childValue.getValue().getClass();
 		}
 
 		ConstructorExecutor executorToUse = this.cachedExecutor;
@@ -266,7 +271,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 
 		// either there was no accessor or it no longer exists
-		String typename = (String) getChild(0).getValueInternal(state);
+		String typename = (String) getChild(0).getValueInternal(state).getValue();
 		executorToUse = findExecutorForConstructor(typename, argumentTypes, state);
 		try {
 			return executorToUse.execute(state.getEvaluationContext(), arguments);

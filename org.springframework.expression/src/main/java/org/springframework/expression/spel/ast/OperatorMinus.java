@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -49,45 +50,45 @@ public class OperatorMinus extends Operator {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 		if (rightOp == null) {// If only one operand, then this is unary minus
-			Object left = leftOp.getValueInternal(state);
+			Object left = leftOp.getValueInternal(state).getValue();
 			if (left instanceof Number) {
 				Number n = (Number) left;
 				if (left instanceof Double) {
-					return 0 - n.doubleValue();
+					return new TypedValue(0 - n.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
 				}
 				else if (left instanceof Float) {
-					return 0 - n.floatValue();
+					return new TypedValue(0 - n.floatValue(),FLOAT_TYPE_DESCRIPTOR);
 				}
 				else if (left instanceof Long) {
-					return 0 - n.longValue();
+					return new TypedValue(0 - n.longValue(),LONG_TYPE_DESCRIPTOR);
 				}
 				else {
-					return 0 - n.intValue();
+					return new TypedValue(0 - n.intValue(),INTEGER_TYPE_DESCRIPTOR);
 				}
 			}
 			throw new SpelException(SpelMessages.CANNOT_NEGATE_TYPE, left.getClass().getName());
 		}
 		else {
-			Object left = leftOp.getValueInternal(state);
-			Object right = rightOp.getValueInternal(state);
+			Object left = leftOp.getValueInternal(state).getValue();
+			Object right = rightOp.getValueInternal(state).getValue();
 			if (left instanceof Number && right instanceof Number) {
 				Number op1 = (Number) left;
 				Number op2 = (Number) right;
 				if (op1 instanceof Double || op2 instanceof Double) {
-					return op1.doubleValue() - op2.doubleValue();
+					return new TypedValue(op1.doubleValue() - op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
 				}
 				else if (op1 instanceof Float || op2 instanceof Float) {
-					return op1.floatValue() - op2.floatValue();
+					return new TypedValue(op1.floatValue() - op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
 				}
 				else if (op1 instanceof Long || op2 instanceof Long) {
-					return op1.longValue() - op2.longValue();
+					return new TypedValue(op1.longValue() - op2.longValue(),LONG_TYPE_DESCRIPTOR);
 				}
 				else {
-					return op1.intValue() - op2.intValue();
+					return new TypedValue(op1.intValue() - op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 				}
 			}
 			return state.operate(Operation.SUBTRACT, left, right);

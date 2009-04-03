@@ -58,10 +58,10 @@ public interface PropertyAccessor {
 	 * @param context the evaluation context in which the access is being attempted
 	 * @param target the target object upon which the property is being accessed
 	 * @param name the name of the property being accessed
-	 * @return Object the value of the property
+	 * @return a TypedValue object wrapping the property value read and a type descriptor for it
 	 * @throws AccessException if there is any problem accessing the property value
 	 */
-	Object read(EvaluationContext context, Object target, String name) throws AccessException;
+	TypedValue read(EvaluationContext context, Object target, String name) throws AccessException;
 
 	/**
 	 * Called to determine if a resolver instance is able to write to a specified property on a specified target object.

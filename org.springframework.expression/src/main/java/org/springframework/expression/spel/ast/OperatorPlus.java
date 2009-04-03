@@ -17,9 +17,9 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
@@ -33,46 +33,46 @@ public class OperatorPlus extends Operator {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 		if (rightOp == null) { // If only one operand, then this is unary plus
-			Object operandOne = leftOp.getValueInternal(state);
+			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
-				return ((Number) operandOne).intValue();
+				return new TypedValue(((Number) operandOne).intValue(),INTEGER_TYPE_DESCRIPTOR);
 			}
 			return state.operate(Operation.ADD, operandOne, null);
 		}
 		else {
-			Object operandOne = leftOp.getValueInternal(state);
-			Object operandTwo = rightOp.getValueInternal(state);
+			Object operandOne = leftOp.getValueInternal(state).getValue();
+			Object operandTwo = rightOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number && operandTwo instanceof Number) {
 				Number op1 = (Number) operandOne;
 				Number op2 = (Number) operandTwo;
 				if (op1 instanceof Double || op2 instanceof Double) {
-					return op1.doubleValue() + op2.doubleValue();
+					return new TypedValue(op1.doubleValue() + op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
 				}
 				else if (op1 instanceof Float || op2 instanceof Float) {
-					return op1.floatValue() + op2.floatValue();
+					return new TypedValue(op1.floatValue() + op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
 				}
 				else if (op1 instanceof Long || op2 instanceof Long) {
-					return op1.longValue() + op2.longValue();
+					return new TypedValue(op1.longValue() + op2.longValue(),LONG_TYPE_DESCRIPTOR);
 				}
 				else { // TODO what about overflow?
-					return op1.intValue() + op2.intValue();
+					return new TypedValue(op1.intValue() + op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 				}
 			}
 			else if (operandOne instanceof String && operandTwo instanceof String) {
-				return new StringBuilder((String) operandOne).append((String) operandTwo).toString();
+				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString(),STRING_TYPE_DESCRIPTOR);
 			}
 			else if (operandOne instanceof String && operandTwo instanceof Integer) {
 				String l = (String) operandOne;
 				Integer i = (Integer) operandTwo;
 				// implements character + int (ie. a + 1 = b)
 				if (l.length() == 1) {
-					return Character.toString((char) (l.charAt(0) + i));
+					return new TypedValue(Character.toString((char) (l.charAt(0) + i)),STRING_TYPE_DESCRIPTOR);
 				}
-				return new StringBuilder(l).append(i).toString();
+				return  new TypedValue(new StringBuilder(l).append(i).toString(),STRING_TYPE_DESCRIPTOR);
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}

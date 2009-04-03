@@ -17,6 +17,8 @@
 package org.springframework.expression.spel;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -77,10 +79,15 @@ public class SetValueTests extends ExpressionTestCase {
 		setValue("placesLivedList[0]", new PlaceOfBirth("Wien"));
 	}
 	
-	public void testSetGenericListElementValueTypeCoersion() {
-		setValue("placesLivedList[0]", "Wien");
+	public void testSetGenericListElementValueTypeCoersionFail() {
+		// no type converter registered for String > PlaceOfBirth
+		setValueExpectError("placesLivedList[0]", "Wien");
 	}
 
+	public void testSetGenericListElementValueTypeCoersionOK() {
+		setValue("booleanList[0]", "true", Boolean.TRUE);
+	}
+	
 	public void testSetListElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
 	}
@@ -104,6 +111,46 @@ public class SetValueTests extends ExpressionTestCase {
 
 	public void testSetPropertyTypeCoersionThroughSetter() {
 		setValue("SomeProperty", "true", Boolean.TRUE);
+	}
+	
+	public void testAssign() throws Exception {	
+		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+		Expression e = parse("publicName='Andy'");
+		assertFalse(e.isWritable(eContext));
+		assertEquals("Andy",e.getValue(eContext));
+	}
+
+	/*
+	 * Testing the coercion of both the keys and the values to the correct type
+	 */
+	public void testSetGenericMapElementRequiresCoercion() throws Exception {
+		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+		Expression e = parse("mapOfStringToBoolean[42]");
+		assertNull(e.getValue(eContext));
+		
+		// Key should be coerced to string representation of 42
+		e.setValue(eContext, "true");
+		
+		// All keys should be strings
+		Set ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext,Set.class);
+		for (Object o: ks) {
+			assertEquals(String.class,o.getClass());
+		}
+		
+		// All values should be booleans
+		Collection vs = parse("mapOfStringToBoolean.values()").getValue(eContext,Collection.class);
+		for (Object o: vs) {
+			assertEquals(Boolean.class,o.getClass());
+		}
+		
+		// One final test check coercion on the key for a map lookup
+		Object o = e.getValue(eContext);
+		assertEquals(Boolean.TRUE,o);
+	}
+	
+
+	private Expression parse(String expressionString) throws Exception {
+		return parser.parseExpression(expressionString);
 	}
 	
 	/**
@@ -167,7 +214,12 @@ public class SetValueTests extends ExpressionTestCase {
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
-			assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
+			Object a = expectedValue;
+			Object b = e.getValue(lContext);
+			if (!a.equals(b)) {
+				fail("Not the same: ["+a+"] type="+a.getClass()+"  ["+b+"] type="+b.getClass());
+//				assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
+			}
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());

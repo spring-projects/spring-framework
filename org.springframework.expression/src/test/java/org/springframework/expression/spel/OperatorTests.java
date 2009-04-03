@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.expression.spel.ast.Operator;
+
 /**
  * Tests the evaluation of expressions using relational operators.
  * 
@@ -46,6 +48,12 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 == 5", false, Boolean.class);
 		evaluate("5 == 3", false, Boolean.class);
 		evaluate("6 == 6", true, Boolean.class);
+	}
+
+	public void testNotEqual() {
+		evaluate("3 != 5", true, Boolean.class);
+		evaluate("5 != 3", true, Boolean.class);
+		evaluate("6 != 6", false, Boolean.class);
 	}
 
 	public void testGreaterThanOrEqual() {
@@ -79,6 +87,10 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 % 2", 1, Integer.class);
 	}
 
+	public void testDivide() {
+		evaluate("4L/2L",2L,Long.class);
+	}
+	
 	public void testMathOperatorDivide_ConvertToDouble() {
 		evaluateAndAskForReturnType("8/4", new Double(2.0), Double.class);
 	}
@@ -92,6 +104,10 @@ public class OperatorTests extends ExpressionTestCase {
 	// }
 
 	public void testDoubles() {
+		evaluate("3.0d == 5.0d", false, Boolean.class);
+		evaluate("3.0d == 3.0d", true, Boolean.class);
+		evaluate("3.0d != 5.0d", true, Boolean.class);
+		evaluate("3.0d != 3.0d", false, Boolean.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
 		evaluate("3.0d - 5.0d", -2.0d, Double.class);
 		evaluate("3.0d * 5.0d", 15.0d, Double.class);
@@ -100,11 +116,26 @@ public class OperatorTests extends ExpressionTestCase {
 	}
 
 	public void testFloats() {
+		evaluate("3.0f == 5.0f", false, Boolean.class);
+		evaluate("3.0f == 3.0f", true, Boolean.class);
+		evaluate("3.0f != 5.0f", true, Boolean.class);
+		evaluate("3.0f != 3.0f", false, Boolean.class);
 		evaluate("3.0f + 5.0f", 8.0d, Double.class);
 		evaluate("3.0f - 5.0f", -2.0d, Double.class);
 		evaluate("3.0f * 5.0f", 15.0d, Double.class);
 		evaluate("3.0f / 5.0f", 0.6d, Double.class);
 		evaluate("5.0f % 3.1f", 1.9d, Double.class);
+	}
+	
+	public void testOperatorStrings() throws Exception {
+		Operator node = getOperatorNode((SpelExpression)parser.parseExpression("1==3"));
+		assertEquals("==",node.getOperatorName());
+
+		node = getOperatorNode((SpelExpression)parser.parseExpression("1!=3"));
+		assertEquals("!=",node.getOperatorName());
+		
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3/3"));
+		assertEquals("/",node.getOperatorName());
 	}
 	
 	public void testMixedOperands_FloatsAndDoubles() {
@@ -123,6 +154,39 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("6.0f / 4", 1.5d, Double.class);
 		evaluate("5.0D % 3", 2.0d, Double.class);		
 		evaluate("5.5D % 3", 2.5, Double.class);		
+	}
+	
+	public void testStrings() {
+		evaluate("'abc' == 'abc'",true,Boolean.class);
+		evaluate("'abc' == 'def'",false,Boolean.class);
+		evaluate("'abc' != 'abc'",false,Boolean.class);
+		evaluate("'abc' != 'def'",true,Boolean.class);
+	}
+	
+	public void testLongs() {
+		evaluate("3L == 4L", false, Boolean.class);
+		evaluate("3L == 3L", true, Boolean.class);
+		evaluate("3L != 4L", true, Boolean.class);
+		evaluate("3L != 3L", false, Boolean.class);
+	}
+	
+	private Operator getOperatorNode(SpelExpression e) {
+		SpelNode node = e.getAST();
+		return (Operator)findNode(node,Operator.class);
+	}
+	
+	private SpelNode findNode(SpelNode node, Class<Operator> clazz) {
+		if (clazz.isAssignableFrom(node.getClass())) {
+			return node;
+		}
+		int childCount = node.getChildCount();
+		for (int i=0;i<childCount;i++) {
+			SpelNode possible = findNode(node.getChild(i),clazz);
+			if (possible!=null) {
+				return possible;
+			}
+		}
+		return null;
 	}
 	
 }

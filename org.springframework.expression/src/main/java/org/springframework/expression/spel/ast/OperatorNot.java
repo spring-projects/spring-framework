@@ -20,6 +20,7 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents a NOT operation.
@@ -34,10 +35,10 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
 			boolean value = state.convertValue(getChild(0).getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
-			return !value;
+			return BooleanTypedValue.forValue(!value);
 		}
 		catch (SpelException see) {
 			see.setPosition(getChild(0).getCharPositionInLine());

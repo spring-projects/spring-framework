@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
-
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -43,9 +44,12 @@ public class Projection extends SpelNodeImpl {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object operand = state.getActiveContextObject();
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue op = state.getActiveContextObject();
 
+		Object operand = op.getValue();
+		TypeDescriptor operandTypeDescriptor = op.getTypeDescriptor();
+		
 		// When the input is a map, we push a special context object on the stack
 		// before calling the specified operation. This special context object
 		// has two fields 'key' and 'value' that refer to the map entries key
@@ -56,21 +60,21 @@ public class Projection extends SpelNodeImpl {
 			List<Object> result = new ArrayList<Object>();
 			for (Object k : mapdata.keySet()) {
 				try {
-					state.pushActiveContextObject(new KeyValuePair(k, mapdata.get(k)));
+					state.pushActiveContextObject(new TypedValue(new KeyValuePair(k, mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class)));
 					result.add(getChild(0).getValueInternal(state));
 				} finally {
 					state.popActiveContextObject();
 				}
 			}
-			return result;
-		} else if (operand instanceof Collection) {
+			return new TypedValue(result,TypeDescriptor.valueOf(Map.class)); // TODO unable to build correct type descriptor
+		} else if (operand instanceof List) {
 			List<Object> data = new ArrayList<Object>();
 			data.addAll((Collection<?>) operand);
 			List<Object> result = new ArrayList<Object>();
 			int idx = 0;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(element);
+					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
 					state.enterScope("index", idx);
 					result.add(getChild(0).getValueInternal(state));
 				} finally {
@@ -79,7 +83,7 @@ public class Projection extends SpelNodeImpl {
 				}
 				idx++;
 			}
-			return result;
+			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
 			throw new SpelException(SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
 		}

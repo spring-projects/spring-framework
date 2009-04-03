@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.TypedValue;
 
 /**
  * Expression language AST node that represents an integer literal.
@@ -26,15 +27,15 @@ import org.antlr.runtime.Token;
  */
 public class IntLiteral extends Literal {
 
-	private final Integer value;
+	private final TypedValue value;
 
 	IntLiteral(Token payload, int value) {
 		super(payload);
-		this.value = value;
+		this.value = new TypedValue(value, INTEGER_TYPE_DESCRIPTOR);
 	}
 
 	@Override
-	public Integer getLiteralValue() {
+	public TypedValue getLiteralValue() {
 		return this.value;
 	}
 

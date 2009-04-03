@@ -21,8 +21,6 @@ import junit.framework.TestCase;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
-import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -31,7 +29,7 @@ import org.springframework.expression.spel.ast.PropertyOrFieldReference;
  */
 public class PerformanceTests extends TestCase {
 
-	public static final int ITERATIONS = 100000;
+	public static final int ITERATIONS = 10000;
 	public static final boolean report = true;
 
 	private static SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
@@ -41,6 +39,15 @@ public class PerformanceTests extends TestCase {
 		long starttime = 0;
 		long endtime = 0;
 
+		// warmup
+		for (int i = 0; i < ITERATIONS; i++) {
+			Expression expr = parser.parseExpression("placeOfBirth.city");
+			if (expr == null) {
+				fail("Parser returned null for expression");
+			}
+			Object value = expr.getValue(eContext);
+		}
+		
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
@@ -74,6 +81,15 @@ public class PerformanceTests extends TestCase {
 	public void testPerformanceOfMethodAccess() throws Exception {
 		long starttime = 0;
 		long endtime = 0;
+		
+		// warmup
+		for (int i = 0; i < ITERATIONS; i++) {
+			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
+			if (expr == null) {
+				fail("Parser returned null for expression");
+			}
+			Object value = expr.getValue(eContext);
+		}
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {

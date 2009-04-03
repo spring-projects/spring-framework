@@ -20,6 +20,7 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents the boolean OR operation.
@@ -39,7 +40,7 @@ public class OperatorOr extends Operator {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
 		try {
@@ -51,7 +52,7 @@ public class OperatorOr extends Operator {
 		}
 
 		if (leftValue == true) {
-			return true; // no need to evaluate right operand
+			return BooleanTypedValue.True; // no need to evaluate right operand
 		}
 
 		try {
@@ -62,7 +63,7 @@ public class OperatorOr extends Operator {
 			throw see;
 		}
 
-		return leftValue || rightValue;
+		return BooleanTypedValue.forValue(leftValue || rightValue);
 	}
 
 }

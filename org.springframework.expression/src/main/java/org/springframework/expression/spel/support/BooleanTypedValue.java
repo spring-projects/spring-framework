@@ -13,32 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.expression.spel.support;
 
-package org.springframework.expression.spel.ast;
-
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.ast.SpelNodeImpl;
 
 /**
  * @author Andy Clement
  * @since 3.0
  */
-public class EmptySpelNode extends SpelNodeImpl {
+public class BooleanTypedValue extends TypedValue {
 
-	public EmptySpelNode(Token payload) {
-		super(payload);
+	public static final BooleanTypedValue True = new BooleanTypedValue(true);
+	public static final BooleanTypedValue False = new BooleanTypedValue(false);
+	
+	private BooleanTypedValue(boolean b) {
+		super(b,SpelNodeImpl.BOOLEAN_TYPE_DESCRIPTOR);
 	}
-
-	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
-		throw new RuntimeException("?");
+	
+	public static BooleanTypedValue forValue(boolean b) {
+		if (b) {
+			return True;
+		} else {
+			return False;
+		}
 	}
-
-	@Override
-	public String toStringAST() {
-		return "<no string form node '" + getTokenName() + "'>";
-	}
-
 }

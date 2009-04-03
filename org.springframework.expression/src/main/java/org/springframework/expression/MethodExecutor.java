@@ -39,6 +39,6 @@ public interface MethodExecutor {
 	 * @return the value returned from execution
 	 * @throws AccessException if there is a problem executing the command or the MethodExecutor is no longer valid
 	 */
-	Object execute(EvaluationContext context, Object target, Object... arguments) throws AccessException;
+	TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException;
 
 }

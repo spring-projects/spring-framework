@@ -21,7 +21,9 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -57,7 +59,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		// any 'default' ones
 		ctx.addPropertyAccessor(new StringyPropertyAccessor());
 		Expression expr = parser.parseExpression("new String('hello').flibbles");
-		Integer i = (Integer) expr.getValue(ctx, Integer.class);
+		Integer i = expr.getValue(ctx, Integer.class);
 		assertEquals((int) i, 7);
 
 		// The reflection one will be used for other properties...
@@ -67,7 +69,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 		expr = parser.parseExpression("new String('hello').flibbles");
 		expr.setValue(ctx, 99);
-		i = (Integer) expr.getValue(ctx, Integer.class);
+		i = expr.getValue(ctx, Integer.class);
 		assertEquals((int) i, 99);
 
 		// Cannot set it to a string value
@@ -103,10 +105,10 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			return (name.equals("flibbles"));
 		}
 
-		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
-			return flibbles;
+			return new TypedValue(flibbles,CommonTypeDescriptors.STRING_TYPE_DESCRIPTOR);
 		}
 
 		public void write(EvaluationContext context, Object target, String name, Object newValue)

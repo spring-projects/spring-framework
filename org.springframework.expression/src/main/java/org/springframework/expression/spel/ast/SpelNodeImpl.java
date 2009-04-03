@@ -20,8 +20,8 @@ import java.io.Serializable;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
@@ -36,10 +36,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  * @author Andy Clement
  * @since 3.0
  */
-public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Serializable {
-
-	protected static TypeDescriptor BOOLEAN_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Boolean.class);
-	protected static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
+public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Serializable, CommonTypeDescriptors {
 	
 	/**
 	 * The Antlr parser uses this constructor to build SpelNodes.
@@ -51,7 +48,7 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
-			return getValueInternal(expressionState);
+			return getValueInternal(expressionState).getValue();
 		}
 		else {
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
@@ -88,7 +85,7 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 
 	@SuppressWarnings("unchecked")
 	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
-		Object result = getValueInternal(state);
+		Object result = getValueInternal(state).getValue();
 		if (result != null && desiredReturnType != null) {
 			Class<?> resultType = result.getClass();
 			if (desiredReturnType.isAssignableFrom(resultType)) {
@@ -105,7 +102,7 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 	}
 
 
-	public abstract Object getValueInternal(ExpressionState expressionState) throws EvaluationException;
+	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
 	public abstract String toStringAST();
 

@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -34,16 +35,16 @@ public abstract class Literal extends SpelNodeImpl {
 		super(payload);
 	}
 
-	public abstract Object getLiteralValue();
+	public abstract TypedValue getLiteralValue();
 
 	@Override
-	public final Object getValueInternal(ExpressionState state) throws SpelException {
+	public final TypedValue getValueInternal(ExpressionState state) throws SpelException {
 		return getLiteralValue();
 	}
 
 	@Override
 	public String toString() {
-		return getLiteralValue().toString();
+		return getLiteralValue().getValue().toString();
 	}
 
 	@Override

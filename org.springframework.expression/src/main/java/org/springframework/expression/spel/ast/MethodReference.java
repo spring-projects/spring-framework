@@ -19,12 +19,12 @@ package org.springframework.expression.spel.ast;
 import java.util.List;
 
 import org.antlr.runtime.Token;
-
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
@@ -48,11 +48,11 @@ public class MethodReference extends SpelNodeImpl {
 
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object currentContext = state.getActiveContextObject();
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue currentContext = state.getActiveContextObject();
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = getChild(i).getValueInternal(state);
+			arguments[i] = getChild(i).getValueInternal(state).getValue();
 		}
 		if (currentContext == null) {
 			throw new SpelException(getCharPositionInLine(), SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,
@@ -63,7 +63,7 @@ public class MethodReference extends SpelNodeImpl {
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(
-						state.getEvaluationContext(), state.getActiveContextObject(), arguments);
+						state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
 			}
 			catch (AccessException ae) {
 				// this is OK - it may have gone stale due to a class change,
@@ -77,7 +77,7 @@ public class MethodReference extends SpelNodeImpl {
 		this.cachedExecutor = executorToUse;
 		try {
 			return executorToUse.execute(
-					state.getEvaluationContext(), state.getActiveContextObject(), arguments);
+					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
 		}
 		catch (AccessException ae) {
 			throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,
@@ -139,7 +139,8 @@ public class MethodReference extends SpelNodeImpl {
 	protected MethodExecutor findAccessorForMethod(String name, Class<?>[] argumentTypes, ExpressionState state)
 			throws SpelException {
 
-		Object contextObject = state.getActiveContextObject();
+		TypedValue context = state.getActiveContextObject();
+		Object contextObject = context.getValue();
 		EvaluationContext eContext = state.getEvaluationContext();
 		if (contextObject == null) {
 			throw new SpelException(SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,

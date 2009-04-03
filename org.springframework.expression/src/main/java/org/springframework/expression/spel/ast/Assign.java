@@ -18,8 +18,9 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents assignment. An alternative to calling setValue() for an expression is to use an assign.
@@ -36,9 +37,9 @@ public class Assign extends SpelNodeImpl {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object newValue = getChild(1).getValueInternal(state);
-		getChild(0).setValue(state, newValue);
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue newValue = getChild(1).getValueInternal(state);
+		getChild(0).setValue(state, newValue.getValue());
 		return newValue;
 	}
 

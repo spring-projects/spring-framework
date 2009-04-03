@@ -17,11 +17,12 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * The operator 'instanceof' checks if an object is of the class specified in the right hand operand,
@@ -49,19 +50,21 @@ public class OperatorInstanceof extends Operator {
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override
-	public Boolean getValueInternal(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValueInternal(state);
-		Object right = getRightOperand().getValueInternal(state);
-		if (left == null) {
-			return false;  // null is not an instanceof anything
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue left = getLeftOperand().getValueInternal(state);
+		TypedValue right = getRightOperand().getValueInternal(state);
+		Object leftValue = left.getValue();
+		Object rightValue = right.getValue();
+		if (leftValue == null) {
+			return BooleanTypedValue.False;  // null is not an instanceof anything
 		}
-		if (right == null || !(right instanceof Class<?>)) {
+		if (rightValue == null || !(rightValue instanceof Class<?>)) {
 			throw new SpelException(getRightOperand().getCharPositionInLine(),
 					SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
-					(right == null ? "null" : right.getClass().getName()));
+					(rightValue == null ? "null" : rightValue.getClass().getName()));
 		}
-		Class<?> rightClass = (Class<?>) right;
-		return rightClass.isAssignableFrom(left.getClass());
+		Class<?> rightClass = (Class<?>) rightValue;
+		return BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
 	}
 
 }

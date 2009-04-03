@@ -17,8 +17,8 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
@@ -39,7 +39,7 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		// Cache the concatenation of child identifiers
 		if (this.value == null) {
 			StringBuilder sb = new StringBuilder();
@@ -47,11 +47,11 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 				if (i > 0) {
 					sb.append(".");
 				}
-				sb.append(getChild(i).getValueInternal(state));
+				sb.append(getChild(i).getValueInternal(state).getValue());
 			}
 			this.value = sb.toString();
 		}
-		return this.value;
+		return new TypedValue(this.value,STRING_TYPE_DESCRIPTOR);
 	}
 
 	@Override

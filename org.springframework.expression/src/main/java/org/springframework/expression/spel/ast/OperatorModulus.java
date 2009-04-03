@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
@@ -39,23 +40,23 @@ public class OperatorModulus extends Operator {
 	}
 
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object operandOne = getLeftOperand().getValueInternal(state);
-		Object operandTwo = getRightOperand().getValueInternal(state);
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		Object operandOne = getLeftOperand().getValueInternal(state).getValue();
+		Object operandTwo = getRightOperand().getValueInternal(state).getValue();
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
-				return op1.doubleValue() % op2.doubleValue();
+				return new TypedValue(op1.doubleValue() % op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
 			}
 			else if (op1 instanceof Float || op2 instanceof Float) {
-				return op1.floatValue() % op2.floatValue();
+				return new TypedValue(op1.floatValue() % op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
 			}
 			else if (op1 instanceof Long || op2 instanceof Long) {
-				return op1.longValue() % op2.longValue();
+				return new TypedValue(op1.longValue() % op2.longValue(),LONG_TYPE_DESCRIPTOR);
 			}
 			else {
-				return op1.intValue() % op2.intValue();
+				return new TypedValue(op1.intValue() % op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 			}
 		}
 		return state.operate(Operation.MODULUS, operandOne, operandTwo);

@@ -17,15 +17,18 @@
 package org.springframework.context.expression;
 
 import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 
 /**
  * EL property accessor that knows how to traverse the beans and contextual objects
  * of a Spring {@link org.springframework.beans.factory.config.BeanExpressionContext}.
  *
  * @author Juergen Hoeller
+ * @author Andy Clement
  * @since 3.0
  */
 public class BeanExpressionContextAccessor implements PropertyAccessor {
@@ -34,8 +37,8 @@ public class BeanExpressionContextAccessor implements PropertyAccessor {
 		return (((BeanExpressionContext) target).containsObject(name));
 	}
 
-	public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-		return ((BeanExpressionContext) target).getObject(name);
+	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		return new TypedValue(((BeanExpressionContext) target).getObject(name));
 	}
 
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

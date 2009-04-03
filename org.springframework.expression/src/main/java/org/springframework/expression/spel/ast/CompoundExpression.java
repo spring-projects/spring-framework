@@ -18,8 +18,9 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
@@ -40,8 +41,8 @@ public class CompoundExpression extends SpelNodeImpl {
 	 * @return the final value from the last piece of the compound expression
 	 */
 	@Override
-	public Object getValueInternal(ExpressionState state) throws EvaluationException {
-		Object result = null;
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue result = null;
 		SpelNodeImpl nextNode = null;
 		try {
 			nextNode = getChild(0);
@@ -69,7 +70,7 @@ public class CompoundExpression extends SpelNodeImpl {
 			getChild(0).setValue(state, value);
 			return;
 		}
-		Object ctx = getChild(0).getValueInternal(state);
+		TypedValue ctx = getChild(0).getValueInternal(state);
 		for (int i = 1; i < getChildCount() - 1; i++) {
 			try {
 				state.pushActiveContextObject(ctx);
@@ -91,7 +92,7 @@ public class CompoundExpression extends SpelNodeImpl {
 		if (getChildCount() == 1) {
 			return getChild(0).isWritable(state);
 		}
-		Object ctx = getChild(0).getValueInternal(state);
+		TypedValue ctx = getChild(0).getValueInternal(state);
 		for (int i = 1; i < getChildCount() - 1; i++) {
 			try {
 				state.pushActiveContextObject(ctx);

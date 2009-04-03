@@ -23,12 +23,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -235,6 +237,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	private static class FruitColourAccessor implements PropertyAccessor {
 
 		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
+		private static TypeDescriptor mapElementTypeDescriptor = TypeDescriptor.valueOf(Color.class);
 
 		static {
 			propertyMap.put("banana",Color.yellow);
@@ -253,8 +256,8 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			return propertyMap.containsKey(name);
 		}
 
-		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-			return propertyMap.get(name);
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			return new TypedValue(propertyMap.get(name),mapElementTypeDescriptor);
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -292,8 +295,8 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			return propertyMap.containsKey(name);
 		}
 
-		public Object read(EvaluationContext context, Object target, String name) throws AccessException {
-			return propertyMap.get(name);
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			return new TypedValue(propertyMap.get(name),TypeDescriptor.valueOf(Color.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

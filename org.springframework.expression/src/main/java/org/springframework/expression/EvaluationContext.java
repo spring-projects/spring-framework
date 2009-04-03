@@ -35,7 +35,7 @@ public interface EvaluationContext {
 	/**
 	 * @return the root context object against which unqualified properties/methods/etc should be resolved
 	 */
-	Object getRootObject();
+	TypedValue getRootObject();
 
 	/**
 	 * Set a named variable within this execution context to a specified value.

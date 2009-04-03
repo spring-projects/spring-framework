@@ -18,9 +18,11 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Constructor;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.TypedValue;
 
 /**
  * A simple ConstructorExecutor implementation that runs a constructor using reflective invocation.
@@ -42,7 +44,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 		this.argsRequiringConversion = argsRequiringConversion;
 	}
 
-	public Object execute(EvaluationContext context, Object... arguments) throws AccessException {
+	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
 			if (argsRequiringConversion != null && arguments != null) {
 				ReflectionHelper.convertArguments(c.getParameterTypes(), c.isVarArgs(),
@@ -54,7 +56,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 			if (!c.isAccessible()) {
 				c.setAccessible(true);
 			}
-			return c.newInstance(arguments);
+			return new TypedValue(c.newInstance(arguments),TypeDescriptor.valueOf(c.getClass()));
 		}
 		catch (Exception ex) {
 			throw new AccessException("Problem invoking constructor: " + c, ex);
