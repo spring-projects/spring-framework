@@ -2,34 +2,39 @@
 <chapter id="introduction">
   <title>Introduction</title>
 
-  <para>Fundamentally, what is Spring? We think of it as a Platform for your Java code. It provides 
-  comprehensive infrastructural support for developing Java applications. Spring deals with the plumbing 
-  so you can focus on solving the domain problem</para>
+  <para>Fundamentally, what is Spring? We think of it as a Platform for your
+  Java code. It provides comprehensive infrastructural support for developing
+  Java applications. Spring deals with the plumbing so you can focus on
+  solving the domain problem</para>
 
-  <para>Spring as a platform allows applications to be built from “plain old Java objects” (POJOs). This is true 
-  for the Java SE programming model as well as within a number of other environments including full and partial Java EE. 
-  Spring allows enterprise services to be applied to POJOs in a non-invasive way</para>
+  <para>Spring as a platform allows applications to be built from “plain old
+  Java objects” (POJOs). This is true for the Java SE programming model as
+  well as within a number of other environments including full and partial
+  Java EE. Spring allows enterprise services to be applied to POJOs in a
+  non-invasive way</para>
 
   <para>Examples of Spring as a platform:</para>
 
   <itemizedlist>
     <listitem>
-      <para>Make a Java method execute in a database transaction; without the implementer dealing with transaction 
-      APIs</para>
+      <para>Make a Java method execute in a database transaction; without the
+      implementer dealing with transaction APIs</para>
     </listitem>
 
     <listitem>
-      <para>Make a local Java method a remote-procedure; without the implementer dealing with remoting APIs</para>
+      <para>Make a local Java method a remote-procedure; without the
+      implementer dealing with remoting APIs</para>
     </listitem>
 
     <listitem>
-      <para>Make a local Java method a management operation; without the implementer dealing with JMX APIs</para>
+      <para>Make a local Java method a management operation; without the
+      implementer dealing with JMX APIs</para>
     </listitem>
 
     <listitem>
-      <para>Make a local Java method a message handler; without the implementer dealing with JMS APIs</para>
+      <para>Make a local Java method a message handler; without the
+      implementer dealing with JMS APIs</para>
     </listitem>
-
   </itemizedlist>
 
   <section id="introduction-dependency-injection">
@@ -39,72 +44,77 @@
       <title>Background</title>
 
       <para>In early 2004, Martin Fowler asked the readers of his site: when
-      talking about Inversion of Control: <quote><emphasis>the question is, what
-      aspect of control are [they] inverting?</emphasis></quote>. Fowler then
-      suggested renaming the principle (or at least giving it a more
-      self-explanatory name), and started to use the term <firstterm>Dependency
-      Injection</firstterm>. His article then continued to explain the ideas
-      underpinning the Inversion of Control (<acronym>IoC</acronym>) and
-      Dependency Injection (<acronym>DI</acronym>) principle.</para>
+      talking about Inversion of Control: <quote><emphasis>the question is,
+      what aspect of control are [they] inverting?</emphasis></quote>. Fowler
+      then suggested renaming the principle (or at least giving it a more
+      self-explanatory name), and started to use the term
+      <firstterm>Dependency Injection</firstterm>. His article then continued
+      to explain the ideas underpinning the Inversion of Control
+      (<acronym>IoC</acronym>) and Dependency Injection
+      (<acronym>DI</acronym>) principle.</para>
 
       <para>If you need a decent insight into IoC and DI, please do refer to
       said article: <ulink
       url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.</para>
     </sidebar>
 
-    <para>Java applications (a loose term which runs the gamut from constrained
-    applets to full-fledged n-tier server-side enterprise applications)
-    typically are composed of a number of objects that collaborate with one
-    another to form the application proper. The objects in an application can
-    thus be said to have <emphasis>dependencies</emphasis> between
-    themselves.</para>
+    <para>Java applications (a loose term which runs the gamut from
+    constrained applets to full-fledged n-tier server-side enterprise
+    applications) typically are composed of a number of objects that
+    collaborate with one another to form the application proper. The objects
+    in an application can thus be said to have
+    <emphasis>dependencies</emphasis> between themselves.</para>
 
-    <para>The Java language and platform provides a wealth of functionality for
-    architecting and building applications, ranging all the way from the very
-    basic building blocks of primitive types and classes (and the means to
-    define new classes), to rich full-featured application servers and web
+    <para>The Java language and platform provides a wealth of functionality
+    for architecting and building applications, ranging all the way from the
+    very basic building blocks of primitive types and classes (and the means
+    to define new classes), to rich full-featured application servers and web
     frameworks. One area that is decidedly conspicuous by its absence is any
-    means of taking the basic building blocks and composing them into a coherent
-    whole; this area has typically been left to the purvey of the architects and
-    developers tasked with building an application (or applications). Now to be
-    fair, there are a number of design patterns devoted to the business of
-    composing the various classes and object instances that makeup an
-    all-singing, all-dancing application. Design patterns such as
-    <firstterm>Factory</firstterm>, <firstterm>Abstract Factory</firstterm>,
-    <firstterm>Builder</firstterm>, <firstterm>Decorator</firstterm>, and
-    <firstterm>Service Locator</firstterm> (to name but a few) have widespread
-    recognition and acceptance within the software development industry
-    (presumably that is why these patterns have been formalized as patterns in
-    the first place). This is all very well, but these patterns are just that:
-    best practices given a name, typically together with a description of what
-    the pattern does, where the pattern is typically best applied, the problems
-    that the application of the pattern addresses, and so forth. Notice that the
-    last paragraph used the phrase <quote>... a <emphasis>description</emphasis>
-    of what the pattern does...</quote>; pattern books and wikis are typically
-    listings of such formalized best practice that you can certainly take away,
-    mull over, and then <emphasis>implement yourself</emphasis> in your
+    means of taking the basic building blocks and composing them into a
+    coherent whole; this area has typically been left to the purvey of the
+    architects and developers tasked with building an application (or
+    applications). Now to be fair, there are a number of design patterns
+    devoted to the business of composing the various classes and object
+    instances that makeup an all-singing, all-dancing application. Design
+    patterns such as <firstterm>Factory</firstterm>, <firstterm>Abstract
+    Factory</firstterm>, <firstterm>Builder</firstterm>,
+    <firstterm>Decorator</firstterm>, and <firstterm>Service
+    Locator</firstterm> (to name but a few) have widespread recognition and
+    acceptance within the software development industry (presumably that is
+    why these patterns have been formalized as patterns in the first place).
+    This is all very well, but these patterns are just that: best practices
+    given a name, typically together with a description of what the pattern
+    does, where the pattern is typically best applied, the problems that the
+    application of the pattern addresses, and so forth. Notice that the last
+    paragraph used the phrase <quote>... a <emphasis>description</emphasis> of
+    what the pattern does...</quote>; pattern books and wikis are typically
+    listings of such formalized best practice that you can certainly take
+    away, mull over, and then <emphasis>implement yourself</emphasis> in your
     application.</para>
 
     <para>The IoC component of the Spring Framework addresses the enterprise
-    concern of taking the classes, objects, and services that are to compose an
-    application, by providing a formalized means of composing these various
+    concern of taking the classes, objects, and services that are to compose
+    an application, by providing a formalized means of composing these various
     disparate components into a fully working application ready for use. The
     Spring Framework takes best practices that have been proven over the years
     in numerous applications and formalized as design patterns, and actually
-    codifies these patterns as first class objects that you as an architect and
-    developer can take away and integrate into your own application(s). This is
-    a <firstterm>Very Good Thing Indeed</firstterm> as attested to by the
-    numerous organizations and institutions that have used the Spring Framework
-    to engineer robust, <emphasis>maintainable</emphasis> applications.</para>
-
+    codifies these patterns as first class objects that you as an architect
+    and developer can take away and integrate into your own application(s).
+    This is a <firstterm>Very Good Thing Indeed</firstterm> as attested to by
+    the numerous organizations and institutions that have used the Spring
+    Framework to engineer robust, <emphasis>maintainable</emphasis>
+    applications.</para>
   </section>
 
   <section id="introduction-modules">
     <title>Modules</title>
 
     <para>The Spring Framework contains a lot of features, which are
-    well-organized in six modules shown in the diagram below. This chapter
-    discusses each of the modules in turn.</para>
+    well-organized in ab out twenty modules. These modules can be grouped
+    together based on their primary features into Core Container, Data
+    Access/Integration, Web, AOP (Aspect Oriented Programming),
+    Instrumentation and Test. These groups are shown in the diagram
+    below.</para>
 
     <para><mediaobject>
         <imageobject role="fo">
@@ -120,68 +130,132 @@
         <caption><para>Overview of the Spring Framework</para></caption>
       </mediaobject></para>
 
-    <para>The <link
-    linkend="beans-introduction"><emphasis>Core</emphasis></link> module is
-    the most fundamental part of the framework and provides the IoC and
-    Dependency Injection features. The basic concept here is the
-    <classname>BeanFactory</classname>, which provides a sophisticated
-    implementation of the factory pattern which removes the need for
-    programmatic singletons and allows you to decouple the configuration and
-    specification of dependencies from your actual program logic.</para>
+    <section>
+      <title>Core Container</title>
 
-    <para>The <link
-    linkend="context-introduction"><emphasis>Context</emphasis></link> package
-    build on the solid base provided by the <link
-    linkend="beans-introduction"><emphasis>Core</emphasis></link> package: it
-    provides a way to access objects in a framework-style manner in a fashion
-    somewhat reminiscent of a JNDI-registry. The context package inherits its
-    features from the beans package and adds support for internationalization
-    (I18N) (using for example resource bundles), event-propagation,
-    resource-loading, and the transparent creation of contexts by, for
-    example, a servlet container.</para>
+      <para>The <link linkend="beans-introduction"><emphasis>Core
+      Container</emphasis></link> consists of the Core, Beans, Context and
+      Expression modules. </para>
 
-    <para>The <link linkend="dao-introduction"><emphasis>DAO</emphasis></link>
-    package provides a JDBC-abstraction layer that removes the need to do
-    tedious JDBC coding and parsing of database-vendor specific error codes.
-    Also, the <link linkend="jdbc-introduction">JDBC</link> package provides a
-    way to do programmatic as well as declarative transaction management, not
-    only for classes implementing special interfaces, but for <emphasis>all
-    your POJOs (plain old Java objects)</emphasis>.</para>
+      <para>The <link linkend="beans-introduction"><emphasis>Core and
+      Beans</emphasis></link> modules provide the most fundamental parts of
+      the framework and provides the IoC and Dependency Injection features.
+      The basic concept here is the <classname>BeanFactory</classname>, which
+      provides a sophisticated implementation of the factory pattern which
+      removes the need for programmatic singletons and allows you to decouple
+      the configuration and specification of dependencies from your actual
+      program logic.</para>
 
-    <para>The <link linkend="orm-introduction"><emphasis>ORM</emphasis></link>
-    package provides integration layers for popular object-relational mapping
-    APIs, including <link linkend="orm-jpa">JPA</link>, <link
-    linkend="orm-jdo">JDO</link>, <link
-    linkend="orm-hibernate">Hibernate</link>, and <link
-    linkend="orm-ibatis">iBatis</link>. Using the ORM package you can use all
-    those O/R-mappers in combination with all the other features Spring
-    offers, such as the simple declarative transaction management feature
-    mentioned previously.</para>
+      <para>The <link
+      linkend="context-introduction"><emphasis>Context</emphasis></link>
+      module build on the solid base provided by the <link
+      linkend="beans-introduction"><emphasis>Core and Beans</emphasis></link>
+      modules: it provides a way to access objects in a framework-style manner
+      in a fashion somewhat reminiscent of a JNDI-registry. The Context module
+      inherits its features from the Beans module and adds support for
+      internationalization (I18N) (using for example resource bundles),
+      event-propagation, resource-loading, and the transparent creation of
+      contexts by, for example, a servlet container. The Context module also
+      contains support for some Java EE features like EJB, JMX and basic
+      remoting support.</para>
 
-    <para>Spring's <link
-    linkend="aop-introduction"><emphasis>AOP</emphasis></link> package
-    provides an <emphasis>AOP Alliance</emphasis>-compliant aspect-oriented
-    programming implementation allowing you to define, for example,
-    method-interceptors and pointcuts to cleanly decouple code implementing
-    functionality that should logically speaking be separated. Using
-    source-level metadata functionality you can also incorporate all kinds of
-    behavioral information into your code, in a manner similar to that of .NET
-    attributes.</para>
+      <para>The <emphasis>Expression Language</emphasis> module provides a
+      powerful expression language for querying and manipulating an object
+      graph at runtime. It can be seen as an extension of the unified
+      expression language (unified EL) as specified in the JSP 2.1
+      specification. The language supports setting and getting of property
+      values, property assignment, method invocation, accessing the context of
+      arrays, collections and indexers, logical and arithmetic operators,
+      named variables, and retrieval of objects by name from Spring's IoC
+      container. It also supports list projection and selection, as well as
+      common list aggregators.</para>
+    </section>
 
-    <para>Spring's <emphasis>Web</emphasis> package provides basic
-    web-oriented integration features, such as multipart file-upload
-    functionality, the initialization of the IoC container using servlet
-    listeners and a web-oriented application context. When using Spring
-    together with WebWork or Struts, this is the package to integrate
-    with.</para>
+    <section>
+      <title>Data Access/Integration</title>
 
-    <para>Spring's <link
-    linkend="mvc-introduction"><emphasis>MVC</emphasis></link> package
-    provides a Model-View-Controller (MVC) implementation for
-    web-applications. Spring's MVC framework is not just any old
-    implementation; it provides a <emphasis>clean</emphasis> separation
-    between domain model code and web forms, and allows you to use all the
-    other features of the Spring Framework.</para>
+      <para>The <emphasis>Data Access/Integration</emphasis> layer consists of
+      the JDBC, ORM, OXM, JMS and Transaction modules.</para>
+
+      <para>The <link linkend="jdbc-introduction">JDBC</link> module provides
+      a JDBC-abstraction layer that removes the need to do tedious JDBC coding
+      and parsing of database-vendor specific error codes. </para>
+
+      <para>The <link
+      linkend="orm-introduction"><emphasis>ORM</emphasis></link> module
+      provides integration layers for popular object-relational mapping APIs,
+      including <link linkend="orm-jpa">JPA</link>, <link
+      linkend="orm-jdo">JDO</link>, <link
+      linkend="orm-hibernate">Hibernate</link>, and <link
+      linkend="orm-ibatis">iBatis</link>. Using the ORM package you can use
+      all those O/R-mappers in combination with all the other features Spring
+      offers, such as the simple declarative transaction management feature
+      mentioned previously.</para>
+
+      <para>The OXM module provides an abstraction layer for using a number of
+      Object/XML mapping implementations. Supported technologies include JAXB,
+      Castor, XMLBeans, JiBX and XStream.</para>
+
+      <para>The Transaction module provides a way to do programmatic as well
+      as declarative transaction management, not only for classes implementing
+      special interfaces, but for <emphasis>all your POJOs (plain old Java
+      objects)</emphasis>.</para>
+    </section>
+
+    <section>
+      <title>Web</title>
+
+      <para>The <emphasis>Web</emphasis> layer consists of the Web, Servlet
+      and Portlet modules.</para>
+
+      <para>Spring's <emphasis>Web</emphasis> module provides basic
+      web-oriented integration features, such as multipart file-upload
+      functionality, the initialization of the IoC container using servlet
+      listeners and a web-oriented application context.</para>
+
+      <para>The <emphasis>Servlet</emphasis> module provides Spring's
+      Model-View-Controller (<link
+      linkend="mvc-introduction"><emphasis>MVC</emphasis></link>)
+      implementation for web-applications. Spring's MVC framework is not just
+      any old implementation; it provides a <emphasis>clean</emphasis>
+      separation between domain model code and web forms, and allows you to
+      use all the other features of the Spring Framework.</para>
+
+      <para>The <emphasis>Portlet</emphasis> module provides the MVC
+      implementation to be used in a portlet environment and mirrors what is
+      provided in the Servlet module.</para>
+    </section>
+
+    <section>
+      <title>AOP and Instrumentation</title>
+
+      <para>Spring's <link
+      linkend="aop-introduction"><emphasis>AOP</emphasis></link> module
+      provides an <emphasis>AOP Alliance</emphasis>-compliant aspect-oriented
+      programming implementation allowing you to define, for example,
+      method-interceptors and pointcuts to cleanly decouple code implementing
+      functionality that should logically speaking be separated. Using
+      source-level metadata functionality you can also incorporate all kinds
+      of behavioral information into your code, in a manner similar to that of
+      .NET attributes.</para>
+
+      <para>There is also a separate <emphasis>Aspects</emphasis> module that
+      provides integration with AspectJ.</para>
+
+      <para>The <emphasis>Instrumentation</emphasis> module provides class
+      instrumentation support and classloader implementations to be used in
+      certain application servers.</para>
+    </section>
+
+    <section>
+      <title>Test</title>
+
+      <para>The <emphasis>Test</emphasis> module contains the Test Framework
+      that supports testing Spring components using JUnit or TestNG. It
+      provides consistent loading of Spring ApplicationContexts and caching of
+      those contexts. It also contains a number of Mock objects that are usful
+      in many testing scenarios to test your code in isolation.</para>
+    </section>
   </section>
 
   <section id="overview-usagescenarios">
