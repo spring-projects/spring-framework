@@ -351,15 +351,22 @@ public class AntPathMatcherTests {
 		assertEquals("/hotels/*/booking/{booking}", pathMatcher.combine("/hotels/*/booking", "{booking}"));
 		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel.html"));
 		try {
-			pathMatcher.combine("/*.html", "/hotel");
-			fail("IllegalArgumentException expected");
+			String result = pathMatcher.combine("/*.html", "/hotel");
+			fail("IllegalArgumentException expected; got " + result);
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
 		try {
-			pathMatcher.combine("/*.html", "/*.txt");
-			fail("IllegalArgumentException expected");
+			String result = pathMatcher.combine("/*.html", "/*.txt");
+			fail("IllegalArgumentException expected; got " + result);
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+		try {
+			String result = pathMatcher.combine("/hotel.html", "/bookings.html");
+			fail("IllegalArgumentException expected; got " + result);
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
