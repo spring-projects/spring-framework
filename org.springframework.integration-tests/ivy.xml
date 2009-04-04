@@ -44,7 +44,7 @@
 		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.3.0" conf="test->compile"/>
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5" conf="test->compile"/>
 		<dependency org="net.sourceforge.jexcelapi" name="com.springsource.jxl" rev="2.6.6" conf="test->compile"/>
-		<dependency org="org.antlr" name="com.springsource.antlr" rev="3.0.1" conf="test->compile"/>
+		<dependency org="org.antlr" name="com.springsource.org.antlr" rev="3.0.1" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" conf="test->runtime"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.pool" rev="1.4.0" conf="test->compile"/>
