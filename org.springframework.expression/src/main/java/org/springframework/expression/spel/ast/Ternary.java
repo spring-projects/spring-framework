@@ -44,17 +44,10 @@ public class Ternary extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Boolean value = getChild(0).getValue(state, Boolean.class);
-		try {
-			if (Boolean.TRUE.equals(value)) {
-				return getChild(1).getValueInternal(state);
-			}
-			else {
-				return getChild(2).getValueInternal(state);
-			}
-		}
-		catch (SpelException ex) {
-			ex.setPosition(getChild(0).getCharPositionInLine());
-			throw ex;
+		if (value.booleanValue()) {
+			return getChild(1).getValueInternal(state);
+		} else {
+			return getChild(2).getValueInternal(state);
 		}
 	}
 

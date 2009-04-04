@@ -346,7 +346,13 @@ public class ParsingTests extends TestCase {
 		parseCheck("#var1='value1'");
 	}
 
+	
 	// ternary operator
+	
+	public void testTernaryOperator01() {
+		parseCheck("1>2?3:4","(1 > 2) ? 3 : 4");
+	}
+	
 	// public void testTernaryOperator01() {
 	// parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
 	// "({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
