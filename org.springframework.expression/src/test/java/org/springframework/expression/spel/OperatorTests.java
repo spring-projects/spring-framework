@@ -36,12 +36,27 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testLessThan() {
 		evaluate("3 < 5", true, Boolean.class);
 		evaluate("5 < 3", false, Boolean.class);
+		evaluate("3L < 5L", true, Boolean.class);
+		evaluate("5L < 3L", false, Boolean.class);
+		evaluate("3.0d < 5.0d", true, Boolean.class);
+		evaluate("5.0d < 3.0d", false, Boolean.class);
+		evaluate("'abc' < 'def'",true,Boolean.class);
+		evaluate("'def' < 'abc'",false,Boolean.class);
 	}
 
 	public void testLessThanOrEqual() {
 		evaluate("3 <= 5", true, Boolean.class);
 		evaluate("5 <= 3", false, Boolean.class);
 		evaluate("6 <= 6", true, Boolean.class);
+		evaluate("3L <= 5L", true, Boolean.class);
+		evaluate("5L <= 3L", false, Boolean.class);
+		evaluate("5L <= 5L", true, Boolean.class);
+		evaluate("3.0d < 5.0d", true, Boolean.class);
+		evaluate("5.0d < 3.0d", false, Boolean.class);
+		evaluate("5.0d <= 5.0d", true, Boolean.class);
+		evaluate("'abc' <= 'def'",true,Boolean.class);
+		evaluate("'def' <= 'abc'",false,Boolean.class);
+		evaluate("'abc' <= 'abc'",true,Boolean.class);
 	}
 
 	public void testEqual() {
@@ -64,7 +79,13 @@ public class OperatorTests extends ExpressionTestCase {
 
 	public void testGreaterThan() {
 		evaluate("3 > 5", false, Boolean.class);
-		evaluate("5 > 3", true, Boolean.class);
+		evaluate("5 > 3", true, Boolean.class);		
+		evaluate("3L > 5L", false, Boolean.class);
+		evaluate("5L > 3L", true, Boolean.class);
+		evaluate("3.0d > 5.0d", false, Boolean.class);
+		evaluate("5.0d > 3.0d", true, Boolean.class);
+		evaluate("'abc' > 'def'",false,Boolean.class);
+		evaluate("'def' > 'abc'",true,Boolean.class);
 	}
 
 	public void testMultiplyStringInt() {
@@ -136,6 +157,18 @@ public class OperatorTests extends ExpressionTestCase {
 		
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3/3"));
 		assertEquals("/",node.getOperatorName());
+		
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3+3"));
+		assertEquals("+",node.getOperatorName());
+		
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3-3"));
+		assertEquals("-",node.getOperatorName());
+
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3<4"));
+		assertEquals("<",node.getOperatorName());
+
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3<=4"));
+		assertEquals("<=",node.getOperatorName());
 	}
 	
 	public void testMixedOperands_FloatsAndDoubles() {

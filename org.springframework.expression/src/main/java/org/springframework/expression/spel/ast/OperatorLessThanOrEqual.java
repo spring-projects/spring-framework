@@ -38,19 +38,14 @@ public class OperatorLessThanOrEqual extends Operator {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		if (left instanceof Number && right instanceof Number) {
-			Number op1 = (Number) left;
-			Number op2 = (Number) right;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return BooleanTypedValue.forValue(op1.doubleValue() <= op2.doubleValue());
-			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return BooleanTypedValue.forValue(op1.floatValue() <= op2.floatValue());
-			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
-				return BooleanTypedValue.forValue(op1.longValue() <= op2.longValue());
-			}
-			else {
-				return BooleanTypedValue.forValue(op1.intValue() <= op2.intValue());
+			Number leftNumber = (Number) left;
+			Number rightNumber = (Number) right;
+			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				return BooleanTypedValue.forValue(leftNumber.doubleValue() <= rightNumber.doubleValue());
+			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				return BooleanTypedValue.forValue(leftNumber.longValue() <= rightNumber.longValue());
+			} else {
+				return BooleanTypedValue.forValue(leftNumber.intValue() <= rightNumber.intValue());
 			}
 		}
 		return BooleanTypedValue.forValue( state.getTypeComparator().compare(left, right) <= 0);
