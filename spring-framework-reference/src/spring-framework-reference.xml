@@ -7,6 +7,7 @@
 <!ENTITY beans				SYSTEM "beans.xml">
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
+<!ENTITY expressions			SYSTEM "expressions.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
 <!ENTITY aop-api			SYSTEM "aop-api.xml">
 <!ENTITY transaction		SYSTEM "transaction.xml">
@@ -197,6 +198,9 @@
 					<para><xref linkend="validation"/></para>
 				</listitem>
 				<listitem>
+					<para><xref linkend="expressions"/></para>
+				</listitem>
+				<listitem>
 					<para><xref linkend="aop"/></para>
 				</listitem>
 				<listitem>
@@ -210,6 +214,7 @@
 		&beans;
 		&resources;
 		&validation;
+		&expressions;
 		&aop;
 		&aop-api;
 		&testing;
