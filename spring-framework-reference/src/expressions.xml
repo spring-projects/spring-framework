@@ -19,26 +19,26 @@
     projects in the Spring portfolio, including tooling requirements for code
     completion support within the eclipse based SpringSource Tool Suite. That
     said, SpEL is based on an technology agnostic API allowing other
-    expression language implementations to be integreatd should the need
+    expression language implementations to be integreated should the need
     arise.</para>
 
     <para>While SpEL serves as the foundation for expression evaluation within
     the Spring portfolio, it is not directly tied to Spring and can be used
-    independently. In order to be self contained many of the examples shown
-    use SpEL as if it was an independent expression language. This requires
-    creating a few boostrapping infrastructure classes such as the parser.
-    Most Spring users will not need to deal with this infrastructure and will
-    instead only be authoring expression strings for evaluation. An example of
-    this typical use is the integration of SpEL into the definition of XML or
-    annotated based bean definitions shown in the section <link
+    independently. In order to be self contained, many of the examples in this
+    chatper use SpEL as if it was an independent expression language. This
+    requires creating a few boostrapping infrastructure classes such as the
+    parser. Most Spring users will not need to deal with this infrastructure
+    and will instead only author expression strings for evaluation. An example
+    of this typical use is the integration of SpEL into creating XML or
+    annotated based bean definitions as shown in the section <link
     linkend="expressions-beandef">Expression support for defining bean
     definitions.</link></para>
 
-    <para>This chapter covers the features of the expression language and its
-    synax. In several places an Inventor and Inventor's Society class are used
-    as the target objects for expression evaluation. These class declarations
-    and the data used to populate them are listed at the end of the chapter.
-    </para>
+    <para>This chapter covers the features of the expression language, its
+    API, and its language sytnax. In several places an Inventor and Inventor's
+    Society class are used as the target objects for expression evaluation.
+    These class declarations and the data used to populate them are listed at
+    the end of the chapter. </para>
   </section>
 
   <section id="expressions-features">
@@ -100,7 +100,7 @@
   <section id="expressions-evaluation">
     <title>Expression Evaluation using Spring's Expression Interface</title>
 
-    <para>This section introduces simple use of SpEL interfaces and its
+    <para>This section introduces the simple use of SpEL interfaces and its
     expression language. The complete language reference can be found in the
     section <link lang="" linkend="expressions-language-ref">Language
     Reference</link></para>
@@ -108,16 +108,21 @@
     <para>The following code introduces the SpEL API to evaluate the literal
     string expression 'Hello World'</para>
 
-    <para><programlisting>ExpressionParser parser = new SpelAntlrExpressionParser();
+    <para><programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'</emphasis>");
 String message = (String) exp.getValue();</programlisting>The value of the
     message variable is simply 'Hello World'. </para>
 
+    <para>The SpEL classes and interfaces you are most likely to use are
+    located in the packages <package>org.springframework.expression</package>
+    and its subpackages <package>spel.antlr</package> and
+    <package>spel.support</package>.</para>
+
     <para>The expression language is based on a grammar and uses ANTLR to
     construct the lexer and parser. The interface
     <interfacename>ExpressionParser</interfacename> is responsible for parsing
-    an expression string, in this case a string literal denoted by the
-    surrounding single quotes. The interface
+    an expression string. In this example the expression string is a string
+    literal denoted by the surrounding single quotes. The interface
     <interfacename>Expression</interfacename> is responsible for evaluating
     the previously defined expression string. There are two exceptions that
     can be thrown, <classname>ParseException</classname> and
@@ -128,10 +133,10 @@ String message = (String) exp.getValue();</programlisting>The value of the
     <para>SpEL supports a wide range of features, such a calling methods,
     accessing properties and calling constructors. </para>
 
-    <para>As an example to method invocation, we call the 'concat' method on
+    <para>As an example of method invocation, we call the 'concat' method on
     the string literal</para>
 
-    <programlisting>ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting lang="" language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.concat(!)</emphasis>");
 String message = (String) exp.getValue();</programlisting>
 
@@ -140,24 +145,24 @@ String message = (String) exp.getValue();</programlisting>
     <para>As an example of calling a JavaBean property, the String property
     'Bytes' can be called as shown below</para>
 
-    <programlisting>ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes</emphasis>");  // invokes 'getBytes()'
 byte[] bytes = (byte[]) exp.getValue();</programlisting>
 
     <para>Upper or lowercase can be used to specify the property name. SpEL
     also supports nested properties using standard 'dot' notation, i.e.
-    prop1.prop2.prop3. </para>
+    prop1.prop2.prop3 and the setting of property values</para>
 
     <para>Public fields may also be accessed</para>
 
-    <programlisting>ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes.length</emphasis>");  // invokes 'getBytes().length'
 int length = (Integer) exp.getValue();</programlisting>
 
-    <para>The String's constructor can be called instead of using the string
+    <para>The String's constructor can be called instead of using a string
     literal</para>
 
-    <programlisting>ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">new String('hello world').toUpperCase()</emphasis>");
 String message = exp.getValue(String.class);</programlisting>
 
@@ -173,47 +178,60 @@ String message = exp.getValue(String.class);</programlisting>
     we retrieve the <literal>Name</literal> property from an instance of the
     Inventor class. </para>
 
-    <para><programlisting>GregorianCalendar c = new GregorianCalendar();
+    <para><programlisting language="java">// Create and set a calendar 
+GregorianCalendar c = new GregorianCalendar();
 c.set(1856, 7, 9);
 
 //  The constructor arguments are name, birthday, and nationaltiy.
 Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 
 ExpressionParser parser = new SpelAntlrExpressionParser();
-Expression exp = parser.parseExpression("Name");
+Expression exp = parser.parseExpression("<emphasis role="bold">name</emphasis>");
 
 EvaluationContext context = new StandardEvaluationContext();
 context.setRootObject(tesla);
 
 String name = (String) exp.getValue(context);</programlisting>In the last
     line, the value of the string variable 'name' will be set to "Nikola
-    Tesla". </para>
+    Tesla". The class StandardEvaluationContext is where you can specify which
+    object the "Name" property will be evaluated against. You can reuse the
+    same expression over and over again and set a new root object on the
+    evaluation context. Expressions are evaluated using reflection. </para>
 
     <para><note>
         <para>In standalone usage of SpEL you will need to create the parser
         as well as provide an evaluation context. However, more common usage
-        would be to provide only the SpEL expression string as part of a
-        configuration file, for example for Spring bean or web flow
-        definitions. The parser, evaluation context and root object will be
-        set up for you implicitly. </para>
-      </note></para>
+        is to provide only the SpEL expression string as part of a
+        configuration file, for example for Spring bean or Spring Web Flow
+        definitions. In this case, the parser, evaluation context, root object
+        and any predefined variables will be set up for you implicitly.</para>
+      </note>As a final introductory example, the use of a boolean operator is
+    shown using the Inventor object in the previous example</para>
+
+    <programlisting language="java">Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
+boolean isEqual = exp.getValue(context, Boolean.class);  // evaluates to true</programlisting>
 
     <section>
       <title>The EvaluationContext interface </title>
 
       <para>The interface <interfacename>EvaluationContext</interfacename> is
       used when evaluating an expression to resolve properties, methods
-      ,fields, and help perform type conversion. The out-of-the-box
+      ,fields, and to help perform type conversion. The out-of-the-box
       implementation, <classname>StandardEvaluationContext</classname> ,uses
-      reflection to manipulate the object, caching java.lang.reflect Method,
-      Fields, and Constructor instances for increased performance.</para>
+      reflection to manipulate the object, caching
+      j<package>ava.lang.reflect</package>'s <classname>Method</classname>,
+      <classname>Field</classname>, and <classname>Constructor</classname>
+      instances for increased performance.</para>
 
       <para>The <classname>StandardEvaluationContext</classname> is where you
       specify the root object to evaluate against via the method
       <methodname>setRootObject</methodname> . You can also specify variables
-      and functions using the methods <methodname>setVariable</methodname>
-      and, <methodname>registerFunction</methodname>. The use of variables and
-      functions are described in the language reference section.</para>
+      and functions that will be used in the expression using the methods
+      <methodname>setVariable</methodname> and
+      <methodname>registerFunction</methodname>. The use of variables and
+      functions are described in the language reference sections <link
+      linkend="expressions-ref-variables">Variables</link> and <link lang=""
+      linkend="expressions-ref-functions">Functions</link>.</para>
 
       <section>
         <title>Type Conversion</title>
@@ -243,7 +261,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       <para>A property or constructor-arg value can be set using expressions
       as shown below</para>
 
-      <programlisting>&lt;bean id="numberGuess" class="org.spring.samples.NumberGuess"&gt;
+      <programlisting language="xml">&lt;bean id="numberGuess" class="org.spring.samples.NumberGuess"&gt;
     &lt;property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/&gt;
 
     &lt;!-- other properties --&gt;
@@ -252,7 +270,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       <para>The variable 'systemProperties' is predefined, so you can use it
       in your expressions as shown below.</para>
 
-      <programlisting>&lt;bean id="taxCalculator" class="org.spring.samples.TaxCalculator"&gt;
+      <programlisting language="xml">&lt;bean id="taxCalculator" class="org.spring.samples.TaxCalculator"&gt;
     &lt;property name="defaultLocale" value="#{ systemProperties['user.region'] }"/&gt;
 
     &lt;!-- other properties --&gt;
@@ -261,7 +279,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       <para>You can also refer to other bean properties by name, for
       example</para>
 
-      <para><programlisting>&lt;bean id="numberGuess" class="org.spring.samples.NumberGuess"&gt;
+      <para><programlisting language="xml">&lt;bean id="numberGuess" class="org.spring.samples.NumberGuess"&gt;
     &lt;property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/&gt;
 
     &lt;!-- other properties --&gt;
@@ -278,13 +296,14 @@ String name = (String) exp.getValue(context);</programlisting>In the last
     <section id="expressions-beandef-annotation-based">
       <title>Annotation-based configuration</title>
 
-      <para>The @Value annotation can be placed on fields, methods and
-      method/constructor parameters to specify a default value.</para>
+      <para>The <literal>@Value</literal> annotation can be placed on fields,
+      methods and method/constructor parameters to specify a default
+      value.</para>
 
       <para>Here is an example to set the default value of a field
       variable</para>
 
-      <programlisting>public static class FieldValueTestBean
+      <programlisting language="java">public static class FieldValueTestBean
 
   @Value("#{ systemProperties['user.region'] }")
   private String defaultLocale;
@@ -306,7 +325,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       <para>The equivalent but on a property setter method is shown
       below</para>
 
-      <programlisting>public static class PropertyValueTestBean
+      <programlisting language="java">public static class PropertyValueTestBean
 
   private String defaultLocale;
 
@@ -326,7 +345,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       <para>Autowired methods and constructors can also use the
       <literal>@Value</literal> annotation.</para>
 
-      <programlisting>public class SimpleMovieLister {
+      <programlisting language="java">public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
     private String defaultLocale;
@@ -341,7 +360,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
     // ...
 }</programlisting>
 
-      <para><programlisting>public class MovieRecommender {
+      <para><programlisting language="java">public class MovieRecommender {
 
     private String defaultLocale;
     
@@ -362,18 +381,55 @@ String name = (String) exp.getValue(context);</programlisting>In the last
   <section id="expressions-language-ref">
     <title>Language Reference</title>
 
-    <para></para>
-
-    <section>
+    <section id="expressions-ref-literal">
       <title>Literal expressions</title>
 
-      <para>blah blah</para>
+      <para>The types of literal expressions supported are strings, dates,
+      numeric values (int, real, and hex), boolean and null. String are
+      delimited by single quotes. To put a single quote itself in a string use
+      the backslash character. The following listing shows simple usage of
+      literals. Typically they would not be used in isolation like this, but
+      as part of a more complex expression, for example using a literal on one
+      side of a logical comparison operator. </para>
+
+      <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+
+String helloWorld = (String) parser.parseExpression("'Hello World'").getValue(); // evals to "Hello World"
+
+double avogadrosNumber  = (Double) parser.parseExpression("6.0221415E+23").getValue();  
+
+int maxValue = (Integer) parser.parseExpression("0x7FFFFFFF").getValue();  // evals to 2147483647
+
+boolean trueValue = (Boolean) parser.parseExpression("true").getValue();
+
+Object nullValue = parser.parseExpression("null").getValue();
+</programlisting>
+
+      <para>Numbers support the use of the negative sign, exponential
+      notation, and decimal points. By default real numbers are parsed using
+      Double.parseDouble().</para>
     </section>
 
     <section>
       <title>Properties, Arrays, Lists, Dictionaries, Indexers</title>
 
-      <para>blah blah</para>
+      <para>Navigating through properties is easy, just use a period to
+      indicate a nested property value. The instances of Inventor class, pupin
+      and tesla, were populated with data listed in section Section <link
+      linkend="expressions-examples-classes">Classes used in the
+      examples</link>. To navigate "down" and get Tesla's year of birth and
+      Pupin's city of birth the following expressions are used </para>
+
+      <programlisting lang="" language="java">int year = (Integer) parser.parseExpression("Birthdate.Year + 1900").getValue(context); // 1856
+
+
+String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);</programlisting>
+
+      <para>Case insensitivty is allowed for the first letter of proprety
+      names. The contents of arrays and lists are obtained using square
+      bracket notation. </para>
+
+      <programlisting></programlisting>
     </section>
 
     <section>
@@ -432,7 +488,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       <para>blah blah</para>
     </section>
 
-    <section>
+    <section id="expressions-ref-variables">
       <title>Variables</title>
 
       <para>blah blah</para>
@@ -444,7 +500,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
       </section>
     </section>
 
-    <section>
+    <section id="expressions-ref-functions">
       <title>Functions</title>
 
       <para>blah blah</para>
@@ -457,7 +513,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
     </section>
   </section>
 
-  <section>
+  <section id="expressions-example-classes">
     <title>Classes used in the examples</title>
 
     <para></para>
