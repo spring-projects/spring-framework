@@ -205,15 +205,16 @@
     <section>
       <title>Web</title>
 
-      <para>The <emphasis>Web</emphasis> layer consists of the Web, Servlet
-      and Portlet modules.</para>
+      <para>The <emphasis>Web</emphasis> layer consists of the Web, Web-Servlet
+      and Web-Portlet modules.</para>
 
       <para>Spring's <emphasis>Web</emphasis> module provides basic
       web-oriented integration features, such as multipart file-upload
       functionality, the initialization of the IoC container using servlet
-      listeners and a web-oriented application context.</para>
+      listeners and a web-oriented application context. It also contains the web
+      related parts of Spring's remoting support.</para>
 
-      <para>The <emphasis>Servlet</emphasis> module provides Spring's
+      <para>The <emphasis>Web-Servlet</emphasis> module provides Spring's
       Model-View-Controller (<link
       linkend="mvc-introduction"><emphasis>MVC</emphasis></link>)
       implementation for web-applications. Spring's MVC framework is not just
@@ -221,9 +222,9 @@
       separation between domain model code and web forms, and allows you to
       use all the other features of the Spring Framework.</para>
 
-      <para>The <emphasis>Portlet</emphasis> module provides the MVC
+      <para>The <emphasis>Web-Portlet</emphasis> module provides the MVC
       implementation to be used in a portlet environment and mirrors what is
-      provided in the Servlet module.</para>
+      provided in the Web-Servlet module.</para>
     </section>
 
     <section>
@@ -268,11 +269,11 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/full.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-full.png" format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/full.gif" format="GIF" />
+          <imagedata align="center" fileref="images/overview-full.png" format="PNG" />
         </imageobject>
 
         <caption><para>Typical full-fledged Spring web
@@ -297,13 +298,13 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/thirdparty-web.png"
+          <imagedata align="center" fileref="images/overview-thirdparty-web.png"
                      format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/thirdparty-web.gif"
-                     format="GIF" />
+          <imagedata align="center" fileref="images/overview-thirdparty-web.png"
+                     format="PNG" />
         </imageobject>
 
         <caption><para>Spring middle-tier using a third-party web
@@ -323,11 +324,11 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/remoting.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-remoting.png" format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/remoting.gif" format="GIF" />
+          <imagedata align="center" fileref="images/overview-remoting.png" format="PNG" />
         </imageobject>
 
         <caption><para>Remoting usage scenario</para></caption>
@@ -341,11 +342,11 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/ejb.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-ejb.png" format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/ejb.gif" format="GIF" />
+          <imagedata align="center" fileref="images/overview-ejb.png" format="PNG" />
         </imageobject>
 
         <caption><para>EJBs - Wrapping existing POJOs</para></caption>
