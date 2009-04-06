@@ -48,14 +48,9 @@ public class OperatorModulus extends Operator {
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(op1.doubleValue() % op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
-			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return new TypedValue(op1.floatValue() % op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
+			} else if (op1 instanceof Long || op2 instanceof Long) {
 				return new TypedValue(op1.longValue() % op2.longValue(),LONG_TYPE_DESCRIPTOR);
-			}
-			else {
+			} else {
 				return new TypedValue(op1.intValue() % op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 			}
 		}

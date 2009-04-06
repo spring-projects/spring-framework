@@ -32,6 +32,8 @@ import org.springframework.expression.spel.ExpressionState;
  * Otherwise, if either operand is of type long, the other is converted to long.<br>
  * Otherwise, both operands are converted to type int.
  *
+ * <p>
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -55,28 +57,22 @@ public class OperatorMultiply extends Operator {
 		Object operandOne = getLeftOperand().getValueInternal(state).getValue();
 		Object operandTwo = getRightOperand().getValueInternal(state).getValue();
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
-			Number op1 = (Number) operandOne;
-			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(op1.doubleValue() * op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
+			Number leftNumber = (Number) operandOne;
+			Number rightNumber = (Number) operandTwo;
+			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue(), DOUBLE_TYPE_DESCRIPTOR);
+			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				return new TypedValue(leftNumber.longValue() * rightNumber.longValue(), LONG_TYPE_DESCRIPTOR);
+			} else {
+				return new TypedValue(leftNumber.intValue() * rightNumber.intValue(), INTEGER_TYPE_DESCRIPTOR);
 			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return new TypedValue(op1.floatValue() * op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
-				return new TypedValue(op1.longValue() * op2.longValue(),LONG_TYPE_DESCRIPTOR);
-			}
-			else {
-				return new TypedValue(op1.intValue() * op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
-			}
-		}
-		else if (operandOne instanceof String && operandTwo instanceof Integer) {
+		} else if (operandOne instanceof String && operandTwo instanceof Integer) {
 			int repeats = (Integer) operandTwo;
 			StringBuilder result = new StringBuilder();
 			for (int i = 0; i < repeats; i++) {
 				result.append(operandOne);
 			}
-			return new TypedValue(result.toString(),STRING_TYPE_DESCRIPTOR);
+			return new TypedValue(result.toString(), STRING_TYPE_DESCRIPTOR);
 		}
 		return state.operate(Operation.MULTIPLY, operandOne, operandTwo);
 	}

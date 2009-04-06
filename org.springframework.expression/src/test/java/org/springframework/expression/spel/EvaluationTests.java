@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel;
 
+import java.util.ArrayList;
+
 import org.springframework.expression.Expression;
 
 /**
@@ -273,9 +275,9 @@ public class EvaluationTests extends ExpressionTestCase {
 	// }
 
 	// projection and selection
-	// public void testProjection01() {
-	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
-	// }
+//	 public void testProjection01() {
+//	 evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
+//	 }
 	//
 	// public void testProjection02() {
 	// evaluate("#{'a':'y','b':'n','c':'y'}.!{value=='y'?key:null}.nonnull().sort()", "[a, c]", ArrayList.class);
@@ -290,10 +292,17 @@ public class EvaluationTests extends ExpressionTestCase {
 	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{$index>5?'y':'n'}", "[n, n, n, n, n, n, y, y, y, y]", ArrayList.class);
 	// }
 
-	// public void testSelection01() {
-	// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
-	// }
-
+	public void testSelection01() {
+		// inline list creation not supported:
+		// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
+	}
+	 
+	public void testSelection02() {
+		 evaluate("testMap.keySet().?{#this matches '.*o.*'}", "[monday]", ArrayList.class);
+		 evaluate("testMap.keySet().?{#this matches '.*r.*'}.contains('saturday')", "true", Boolean.class);
+		 evaluate("testMap.keySet().?{#this matches '.*r.*'}.size()", "3", Integer.class);
+	}
+	 
 	// public void testSelectionError_NonBooleanSelectionCriteria() {
 	// evaluateAndCheckError("{1,2,3,4,5,6,7,8,9,10}.?{'nonboolean'}",
 	// SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);

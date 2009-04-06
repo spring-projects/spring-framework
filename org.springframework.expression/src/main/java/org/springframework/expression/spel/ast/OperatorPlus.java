@@ -23,6 +23,17 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
+ * The plus operator will:
+ * <ul>
+ * <li>add doubles (floats are represented as doubles)
+ * <li>add longs
+ * <li>add integers
+ * <li>add a string of one character and a number (effectively increasing that character), so 'a'+3='d'
+ * </ul>
+ * It can be used as a unary operator for numbers (double/long/int).  The standard promotions are performed
+ * when the operand types vary (double+int=double).
+ * For other options it defers to the registered overloader.
+ * 
  * @author Andy Clement
  * @since 3.0
  */
@@ -39,7 +50,13 @@ public class OperatorPlus extends Operator {
 		if (rightOp == null) { // If only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
-				return new TypedValue(((Number) operandOne).intValue(),INTEGER_TYPE_DESCRIPTOR);
+				if (operandOne instanceof Double) {
+					return new TypedValue(((Double) operandOne).doubleValue(), DOUBLE_TYPE_DESCRIPTOR);
+				} else if (operandOne instanceof Long) {
+					return new TypedValue(((Long) operandOne).longValue(), LONG_TYPE_DESCRIPTOR);
+				} else {
+					return new TypedValue(((Integer) operandOne).intValue(), INTEGER_TYPE_DESCRIPTOR);
+				}
 			}
 			return state.operate(Operation.ADD, operandOne, null);
 		}
@@ -51,28 +68,23 @@ public class OperatorPlus extends Operator {
 				Number op2 = (Number) operandTwo;
 				if (op1 instanceof Double || op2 instanceof Double) {
 					return new TypedValue(op1.doubleValue() + op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
-				}
-				else if (op1 instanceof Float || op2 instanceof Float) {
-					return new TypedValue(op1.floatValue() + op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-				}
-				else if (op1 instanceof Long || op2 instanceof Long) {
+				} else if (op1 instanceof Long || op2 instanceof Long) {
 					return new TypedValue(op1.longValue() + op2.longValue(),LONG_TYPE_DESCRIPTOR);
-				}
-				else { // TODO what about overflow?
+				} else { // TODO what about overflow?
 					return new TypedValue(op1.intValue() + op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 				}
-			}
-			else if (operandOne instanceof String && operandTwo instanceof String) {
+			} else if (operandOne instanceof String && operandTwo instanceof String) {
 				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString(),STRING_TYPE_DESCRIPTOR);
-			}
-			else if (operandOne instanceof String && operandTwo instanceof Integer) {
-				String l = (String) operandOne;
-				Integer i = (Integer) operandTwo;
+			} else if (operandOne instanceof String && operandTwo instanceof Integer && ((String)operandOne).length()==1) {
+				String theString = (String) operandOne;
+				Integer theInteger = (Integer) operandTwo;
 				// implements character + int (ie. a + 1 = b)
-				if (l.length() == 1) {
-					return new TypedValue(Character.toString((char) (l.charAt(0) + i)),STRING_TYPE_DESCRIPTOR);
-				}
-				return  new TypedValue(new StringBuilder(l).append(i).toString(),STRING_TYPE_DESCRIPTOR);
+				return new TypedValue(Character.toString((char) (theString.charAt(0) + theInteger)),STRING_TYPE_DESCRIPTOR);
+			} else if (operandOne instanceof Integer && ((operandTwo instanceof String) && ((String)operandTwo).length()==1)) {
+				String theString = (String) operandTwo;
+				Integer theInteger = (Integer) operandOne;
+				// implements character + int (ie. 1 + a = b)
+				return new TypedValue(Character.toString((char) (theString.charAt(0) + theInteger)),STRING_TYPE_DESCRIPTOR);
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}
@@ -86,7 +98,7 @@ public class OperatorPlus extends Operator {
 	@Override
 	public String toStringAST() {
 		if (getRightOperand() == null) {  // unary plus
-			return new StringBuilder().append("+").append(getLeftOperand()).toString();
+			return new StringBuilder().append("+").append(getLeftOperand().toStringAST()).toString();
 		}
 		return super.toStringAST();
 	}
