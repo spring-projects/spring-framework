@@ -143,5 +143,34 @@ public class ConfigurationPostProcessorTests {
 		final Foo foo;
 		public Bar(Foo foo) { this.foo = foo; }
 	}
-	
+
+	/**
+	 * Tests the fix for SPR-5655, a special workaround that prefers reflection
+	 * over ASM if a bean class is already loaded.
+	 */
+	@Test
+	public void testAlreadyLoadedConfigurationClasses() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("unloadedConfig",
+				rootBeanDefinition(UnloadedConfig.class.getName()).getBeanDefinition());
+		beanFactory.registerBeanDefinition("loadedConfig",
+				rootBeanDefinition(LoadedConfig.class).getBeanDefinition());
+		new ConfigurationClassPostProcessor() .postProcessBeanFactory(beanFactory);
+		beanFactory.getBean("foo");
+		beanFactory.getBean("bar");
+	}
+
+	@Configuration
+	static class UnloadedConfig {
+		public @Bean Foo foo() {
+			return new Foo();
+		}
+	}
+
+	@Configuration
+	static class LoadedConfig {
+		public @Bean Bar bar() {
+			return new Bar(new Foo());
+		}
+	}
 }
