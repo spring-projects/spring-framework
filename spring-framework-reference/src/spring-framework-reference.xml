@@ -16,6 +16,7 @@
 <!ENTITY dao				SYSTEM "dao.xml">
 <!ENTITY jdbc				SYSTEM "jdbc.xml">
 <!ENTITY orm				SYSTEM "orm.xml">
+<!ENTITY oxm				SYSTEM "oxm.xml">
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY view				SYSTEM "view.xml">
 <!ENTITY web-integration		SYSTEM "web-integration.xml">
@@ -221,18 +222,18 @@
 		&aop-api;
 		&testing;
 	</part>
-	<part id="spring-middle-tier">
-		<title>Middle Tier Data Access</title>
-		<partintro id="spring-middle-tier-intro">
+	<part id="spring-data-tier">
+		<title>Data Access</title>
+		<partintro id="spring-data-tier-intro">
 			<para>
 				This part of the reference documentation is concerned
-				with the middle tier, and specifically the data access
-				responsibilities of said tier.
+				with data access and the interaction between the data access
+				layer and the business or service layer.
 			</para>
 			<para>
 				Spring's comprehensive transaction management support is
 				covered in some detail, followed by thorough coverage of
-				the various middle tier data access frameworks and
+				the various data access frameworks and
 				technologies that the Spring Framework integrates with.
 			</para>
 			<itemizedlist>
@@ -248,12 +249,16 @@
 				<listitem>
 					<para><xref linkend="orm"/></para>
 				</listitem>
+				<listitem>
+					<para><xref linkend="oxm"/></para>
+				</listitem>
 			</itemizedlist>
 		</partintro>
 		&transaction;
 		&dao;
 		&jdbc;
 		&orm;
+		&oxm;
 	</part>
 	<part id="spring-web">
 		<title>The Web</title>
