@@ -1,7 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="getting-started">
-  <title>Getting started with Spring 3.0</title>
+  <title>Getting started with Spring</title>
 
-  <para>This is a placeholder, for now ...</para>
+  <para>This chapter will give you a quick introduction and a guide for how to get started
+	in using the Spring Framework for your Java development. We can of course only cover a tiny 
+	subset of the available features in this chapter. You will have to turn  to the rest of this 
+	reference document for more detailed coverage of all features.</para>
+	
+  <section id="start-app-context">
+    <title>Creating an ApplicationContext</title>
+    <para>We ...</para>
+
+  </section>
+
+  <section id="start-the-dao">
+    <title>The Data Access Object</title>
+    <para>We ...</para>
+
+  </section>
+
+  <section id="start-business">
+    <title>The Business Layer</title>
+    <para>We ...</para>
+
+  </section>
+
+  <section id="start-web">
+    <title>The Web UI</title>
+    <para>We ...</para>
+
+  </section>
 
 </chapter>
