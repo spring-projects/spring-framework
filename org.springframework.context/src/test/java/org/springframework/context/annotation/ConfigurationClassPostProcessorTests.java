@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Chris Beams
  */
-public class ConfigurationPostProcessorTests {
+public class ConfigurationClassPostProcessorTests {
 
 	private static final String ORIG_CGLIB_TEST_CLASS = ConfigurationClassPostProcessor.CGLIB_TEST_CLASS;
 	private static final String BOGUS_CGLIB_TEST_CLASS = "a.bogus.class";
