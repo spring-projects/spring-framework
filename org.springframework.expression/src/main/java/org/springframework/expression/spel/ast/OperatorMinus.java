@@ -21,11 +21,18 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
-import org.springframework.expression.spel.SpelMessages;
 
 /**
- * Implements the minus operator. If there is only one operand it is a unary minus.
+ * The minus operator supports:
+ * <ul>
+ * <li>subtraction of doubles (floats are represented as doubles)
+ * <li>subtraction of longs
+ * <li>subtraction of integers
+ * <li>subtraction of an int from a string of one character (effectively decreasing that character), so 'd'-3='a'
+ * </ul>
+ * It can be used as a unary operator for numbers (double/long/int).  The standard promotions are performed
+ * when the operand types vary (double-int=double).
+ * For other options it defers to the registered overloader.
  *
  * @author Andy Clement
  * @since 3.0
@@ -37,42 +44,23 @@ public class OperatorMinus extends Operator {
 	}
 
 	@Override
-	public String getOperatorName() {
-		return "-";
-	}
-
-	@Override
-	public String toStringAST() {
-		if (getRightOperand() == null) { // unary minus
-			return new StringBuilder().append("-").append(getLeftOperand()).toString();
-		}
-		return super.toStringAST();
-	}
-
-	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 		if (rightOp == null) {// If only one operand, then this is unary minus
-			Object left = leftOp.getValueInternal(state).getValue();
-			if (left instanceof Number) {
-				Number n = (Number) left;
-				if (left instanceof Double) {
+			Object operand = leftOp.getValueInternal(state).getValue();
+			if (operand instanceof Number) {
+				Number n = (Number) operand;
+				if (operand instanceof Double) {
 					return new TypedValue(0 - n.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
-				}
-				else if (left instanceof Float) {
-					return new TypedValue(0 - n.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-				}
-				else if (left instanceof Long) {
+				} else if (operand instanceof Long) {
 					return new TypedValue(0 - n.longValue(),LONG_TYPE_DESCRIPTOR);
-				}
-				else {
+				} else {
 					return new TypedValue(0 - n.intValue(),INTEGER_TYPE_DESCRIPTOR);
 				}
 			}
-			throw new SpelException(SpelMessages.CANNOT_NEGATE_TYPE, left.getClass().getName());
-		}
-		else {
+			return state.operate(Operation.SUBTRACT, operand, null);
+		} else {
 			Object left = leftOp.getValueInternal(state).getValue();
 			Object right = rightOp.getValueInternal(state).getValue();
 			if (left instanceof Number && right instanceof Number) {
@@ -80,19 +68,32 @@ public class OperatorMinus extends Operator {
 				Number op2 = (Number) right;
 				if (op1 instanceof Double || op2 instanceof Double) {
 					return new TypedValue(op1.doubleValue() - op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
-				}
-				else if (op1 instanceof Float || op2 instanceof Float) {
-					return new TypedValue(op1.floatValue() - op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-				}
-				else if (op1 instanceof Long || op2 instanceof Long) {
+				} else if (op1 instanceof Long || op2 instanceof Long) {
 					return new TypedValue(op1.longValue() - op2.longValue(),LONG_TYPE_DESCRIPTOR);
-				}
-				else {
+				} else {
 					return new TypedValue(op1.intValue() - op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 				}
+			} else if (left instanceof String && right instanceof Integer && ((String)left).length()==1) {
+				String theString = (String) left;
+				Integer theInteger = (Integer) right;
+				// implements character - int (ie. b - 1 = a)
+				return new TypedValue(Character.toString((char) (theString.charAt(0) - theInteger)),STRING_TYPE_DESCRIPTOR);
 			}
 			return state.operate(Operation.SUBTRACT, left, right);
 		}
+	}
+
+	@Override
+	public String getOperatorName() {
+		return "-";
+	}
+
+	@Override
+	public String toStringAST() {
+		if (getRightOperand() == null) { // unary minus
+			return new StringBuilder().append("-").append(getLeftOperand().toStringAST()).toString();
+		}
+		return super.toStringAST();
 	}
 
 }

@@ -51,8 +51,8 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L <= 5L", true, Boolean.class);
 		evaluate("5L <= 3L", false, Boolean.class);
 		evaluate("5L <= 5L", true, Boolean.class);
-		evaluate("3.0d < 5.0d", true, Boolean.class);
-		evaluate("5.0d < 3.0d", false, Boolean.class);
+		evaluate("3.0d <= 5.0d", true, Boolean.class);
+		evaluate("5.0d <= 3.0d", false, Boolean.class);
 		evaluate("5.0d <= 5.0d", true, Boolean.class);
 		evaluate("'abc' <= 'def'",true,Boolean.class);
 		evaluate("'def' <= 'abc'",false,Boolean.class);
@@ -63,6 +63,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 == 5", false, Boolean.class);
 		evaluate("5 == 3", false, Boolean.class);
 		evaluate("6 == 6", true, Boolean.class);
+		evaluate("'abc' == null", false, Boolean.class);
 	}
 
 	public void testNotEqual() {
@@ -74,7 +75,17 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testGreaterThanOrEqual() {
 		evaluate("3 >= 5", false, Boolean.class);
 		evaluate("5 >= 3", true, Boolean.class);
-		evaluate("6 >= 6", true, Boolean.class);
+		evaluate("6 >= 6", true, Boolean.class);		
+		evaluate("3L >= 5L", false, Boolean.class);
+		evaluate("5L >= 3L", true, Boolean.class);
+		evaluate("5L >= 5L", true, Boolean.class);
+		evaluate("3.0d >= 5.0d", false, Boolean.class);
+		evaluate("5.0d >= 3.0d", true, Boolean.class);
+		evaluate("5.0d <= 5.0d", true, Boolean.class);
+		evaluate("'abc' >= 'def'",false,Boolean.class);
+		evaluate("'def' >= 'abc'",true,Boolean.class);
+		evaluate("'abc' >= 'abc'",true,Boolean.class);
+
 	}
 
 	public void testGreaterThan() {
@@ -104,8 +115,48 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("2 + 4", "6", Integer.class);
 		evaluate("5 - 4", "1", Integer.class);
 		evaluate("3 * 5", 15, Integer.class);
+		evaluate("3.2d * 5", 16.0d, Double.class);
+		evaluate("3 * 5f", 15d, Double.class);
 		evaluate("3 / 1", 3, Integer.class);
 		evaluate("3 % 2", 1, Integer.class);
+	}
+	
+	public void testPlus() throws Exception {
+		evaluate("'a' + 2", "c", String.class);
+		evaluateAndCheckError("'ab' + 2", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluate("2+'a' ", "c", String.class);
+		evaluateAndCheckError("2+'ab'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		SpelExpression expr = (SpelExpression)parser.parseExpression("+3");
+		assertEquals("+3",expr.toStringAST());
+		expr = (SpelExpression)parser.parseExpression("2+3");
+		assertEquals("(2 + 3)",expr.toStringAST());
+		
+		evaluate("+5d",5d,Double.class);
+		evaluate("+5L",5L,Long.class);
+		evaluate("+5",5,Integer.class);
+		evaluateAndCheckError("+'abc'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+	}
+	
+	public void testMinus() throws Exception {
+		evaluate("'c' - 2", "a", String.class);
+		evaluateAndCheckError("'ab' - 2", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("2-'ab'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
+		assertEquals("-3",expr.toStringAST());
+		expr = (SpelExpression)parser.parseExpression("2-3");
+		assertEquals("(2 - 3)",expr.toStringAST());
+		
+		evaluate("-5d",-5d,Double.class);
+		evaluate("-5L",-5L,Long.class);
+		evaluate("-5",-5,Integer.class);
+		evaluateAndCheckError("-'abc'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+	}
+	
+	public void testModulus() {
+		evaluate("3%2",1,Integer.class);
+		evaluate("3L%2L",1L,Long.class);
+		evaluate("3.0d%2.0d",1d,Double.class);
+		evaluateAndCheckError("'abc'%'def'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	public void testDivide() {
@@ -119,10 +170,6 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testMathOperatorDivide04_ConvertToFloat() {
 		evaluateAndAskForReturnType("8/4", new Float(2.0), Float.class);
 	}
-
-	// public void testMathOperatorDivide04() {
-	// evaluateAndAskForReturnType("8.4 / 4", "2", Integer.class);
-	// }
 
 	public void testDoubles() {
 		evaluate("3.0d == 5.0d", false, Boolean.class);
@@ -169,6 +216,19 @@ public class OperatorTests extends ExpressionTestCase {
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3<=4"));
 		assertEquals("<=",node.getOperatorName());
+		
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3*4"));
+		assertEquals("*",node.getOperatorName());
+
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3%4"));
+		assertEquals("%",node.getOperatorName());
+		
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3>=4"));
+		assertEquals(">=",node.getOperatorName());
+	}
+	
+	public void testOperatorOverloading() {
+		evaluateAndCheckError("'a' * '2'", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 	
 	public void testMixedOperands_FloatsAndDoubles() {
@@ -201,6 +261,9 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L == 3L", true, Boolean.class);
 		evaluate("3L != 4L", true, Boolean.class);
 		evaluate("3L != 3L", false, Boolean.class);
+		evaluate("3L * 50L", 150L, Long.class);
+		evaluate("3L + 50L", 53L, Long.class);
+		evaluate("3L - 50L", -47L, Long.class);
 	}
 	
 	private Operator getOperatorNode(SpelExpression e) {
