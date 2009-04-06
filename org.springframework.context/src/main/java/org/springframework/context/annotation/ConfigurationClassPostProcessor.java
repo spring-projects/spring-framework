@@ -26,9 +26,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -122,7 +124,7 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 			if (beanDef.isAbstract() && !includeAbstractBeanDefs)
 				continue;
 
-			if (isConfigurationClassBeanDefinition(beanDef))
+			if (isConfigurationClassBeanDefinition(beanDef, beanFactory.getBeanClassLoader()))
 				configBeanDefs.registerBeanDefinition(beanName, beanDef);
 		}
 
@@ -181,14 +183,20 @@ public class ConfigurationClassPostProcessor extends AbstractConfigurationClassP
 	 * @return whether the BeanDefinition's beanClass (or its ancestry) is
 	 * {@link Configuration}-annotated, false if no beanClass is specified.
 	 */
-	private static boolean isConfigurationClassBeanDefinition(BeanDefinition beanDef) {
+	private static boolean isConfigurationClassBeanDefinition(BeanDefinition beanDef, ClassLoader classLoader) {
+
+		// accommodating SPR-5655
+		Assert.isInstanceOf(AbstractBeanDefinition.class, beanDef);
+		if(((AbstractBeanDefinition) beanDef).hasBeanClass())
+			return AnnotationUtils.findAnnotation(
+					((AbstractBeanDefinition)beanDef).getBeanClass(), Configuration.class) != null;
 
 		String className = beanDef.getBeanClassName();
 
 		while (className != null && !(className.equals(Object.class.getName()))) {
 			try {
 				MetadataReader metadataReader =
-					new SimpleMetadataReaderFactory().getMetadataReader(className);
+					new SimpleMetadataReaderFactory(classLoader).getMetadataReader(className);
 				AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
 				ClassMetadata classMetadata = metadataReader.getClassMetadata();
 
