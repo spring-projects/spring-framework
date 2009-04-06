@@ -4,6 +4,7 @@
 <!ENTITY preface 			SYSTEM "preface.xml">
 <!ENTITY overview			SYSTEM "overview.xml">
 <!ENTITY whats-new-in-3		SYSTEM "new-in-3.xml">
+<!ENTITY getting-started	SYSTEM "getting-started.xml">
 <!ENTITY beans				SYSTEM "beans.xml">
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
@@ -149,6 +150,7 @@
 	&preface;
 	&overview;
 	&whats-new-in-3;
+	&getting-started;
 	<part id="spring-core">
 		<title>Core Technologies</title>
 		<partintro id="spring-core-intro">
