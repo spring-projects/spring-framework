@@ -96,6 +96,10 @@
       </listitem>
 
       <listitem>
+        <para>List projections</para>
+      </listitem>
+
+      <listitem>
         <para>Templated expressions</para>
       </listitem>
     </itemizedlist>
@@ -564,7 +568,7 @@ boolean falseValue = parser.parseExpression(expression).getValue(societyContext,
         supported are modulus (%) and exponential power (^). Standard operator
         precedence is enforced. These operators are demonstrated below </para>
 
-        <para><programlisting>// Addition
+        <para><programlisting language="java">// Addition
 int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
 
 String testString = parser.parseExpression("'test' + ' ' + 'string'").getValue(String.class); // 'test string'
@@ -605,7 +609,7 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
       This would typically be done within a call to SetValue but can also be
       done inside a call to GetValue </para>
 
-      <programlisting>Inventor inventor = new Inventor();		
+      <programlisting language="java">Inventor inventor = new Inventor();		
 StandardEvaluationContext inventorContext = new StandardEvaluationContext();
 inventorContext.setRootObject(inventor);
 
@@ -627,7 +631,7 @@ String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inve
       java.lang.Class (the 'type'). Static methods are invoked using this
       operator as well</para>
 
-      <programlisting>Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
+      <programlisting language="java">Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
 
 
 boolean isEqual = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt; T(java.math.RoundingMode).FLOOR").getValue(Boolean.class);
@@ -641,7 +645,7 @@ boolean isEqual = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt;
       qualified classname should be used for all but the primitive type and
       String (where int, float, etc, can be used).</para>
 
-      <programlisting>Inventor einstein = 
+      <programlisting language="java">Inventor einstein = 
    parser.parseExpression("new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')").getValue(Inventor.class);
 
 //create new inventor instance within add method of List
@@ -656,7 +660,7 @@ parser.parseExpression("Members.add(new org.spring.samples.spel.inventor.Invento
       #variableName. Variables are set using the method setVariable on the
       StandardEvaluationContext. </para>
 
-      <programlisting>Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+      <programlisting language="java">Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 StandardEvaluationContext context = new StandardEvaluationContext();
 context.setVariable("newName", "Mike Tesla");
 context.setRootObject(tesla);
@@ -689,13 +693,14 @@ System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
       <para>In this case, the boolean false results in returning the string
       value 'falseExp'. A less artificial example is shown below.</para>
 
-      <programlisting>parser.parseExpression("Name").setValue(societyContext, "IEEE");
+      <programlisting language="java">parser.parseExpression("Name").setValue(societyContext, "IEEE");
 societyContext.setVariable("queryName", "Nikola Tesla");
 
 expression = "isMember(#queryName)? #queryName + ' is a member of the ' " + 
              "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
 
-String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);</programlisting>
+String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);
+// queryResultString = "Nikola Tesla is a member of the IEEE Society"</programlisting>
     </section>
 
     <section>
@@ -711,7 +716,7 @@ String queryResultString = parser.parseExpression(expression).getValue(societyCo
       original element list. For example, selection would allow us to easily
       get a list of Serbian inventors:</para>
 
-      <programlisting>List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) parser.parseExpression("Members.?{Nationality == 'Serbian'}").getValue(societyContext);</programlisting>
+      <programlisting language="java">List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) parser.parseExpression("Members.?{Nationality == 'Serbian'}").getValue(societyContext);</programlisting>
     </section>
 
     <section>
