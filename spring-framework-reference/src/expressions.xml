@@ -72,7 +72,7 @@
       </listitem>
 
       <listitem>
-        <para>Operators</para>
+        <para>Relational operators</para>
       </listitem>
 
       <listitem>
@@ -81,6 +81,10 @@
 
       <listitem>
         <para>Calling constructors</para>
+      </listitem>
+
+      <listitem>
+        <para>Ternary operator</para>
       </listitem>
 
       <listitem>
@@ -429,49 +433,189 @@ String city = (String) parser.parseExpression("placeOfBirth.City").getValue(cont
       names. The contents of arrays and lists are obtained using square
       bracket notation. </para>
 
-      <programlisting></programlisting>
+      <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+
+// Inventions Array
+StandardEvaluationContext teslaContext = new StandardEvaluationContext();
+teslaContext.setRootObject(tesla);
+
+// evaluates to "Induction motor"
+String invention = parser.parseExpression("inventions[3]").getValue(teslaContext, String.class); 
+
+
+// Members List
+StandardEvaluationContext societyContext = new StandardEvaluationContext();
+societyContext.setRootObject(ieee);
+
+// evaluates to "Nikola Tesla"
+String name = parser.parseExpression("Members[0].Name").getValue(societyContext, String.class);
+
+// List and Array navigation
+// evaluates to "Wireless communication"
+String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(societyContext, String.class);
+</programlisting>
+
+      <para>The contents of dictionaries are obtained by specifying the
+      literal key value within the brackets. In this case, because keys for
+      the Officers dictionary are strings, we can specify string
+      literal.</para>
+
+      <programlisting lang="" language="java">// Officer's Dictionary
+
+Inventor pupin = parser.parseExpression("Officers['president']").getValue(societyContext, Inventor.class);
+
+// evaluates to "Idvor"
+String city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(societyContext, String.class);
+
+// setting values
+parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(societyContext, "Croatia");
+
+</programlisting>
     </section>
 
     <section>
       <title>Methods</title>
 
-      <para>blah blah varargs</para>
+      <para>Methods are invoked using typical Java programming syntax. You may
+      also invoke methods on literals. Varargs are also supported.</para>
+
+      <programlisting language="java">// string literal, evaluates to "bc"
+String c = parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class);
+
+// evaluates to true
+boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(societyContext, Boolean.class);</programlisting>
     </section>
 
     <section>
       <title>Operators</title>
 
-      <para>blah blah</para>
-
       <section>
         <title>Relational operators</title>
 
-        <para>blah blah</para>
+        <para>The relational operators; equal, not equal, less than, less than
+        or equal, greater than, and greater than or equal are supported using
+        standard operator notation. Support is not yet implemented for objects
+        that implement the Comparable interface.</para>
 
-        <para></para>
+        <para><programlisting language="java">// evaluats to true
+boolean isEqual = parser.parseExpression("2 == 2").getValue(Boolean.class);
+
+// evaluates to false
+boolean isEqual = parser.parseExpression("2 &lt; -5.0").getValue(Boolean.class);
+
+// evaluates to true
+boolean isEqual = parser.parseExpression("'black' &lt; 'block'").getValue(Boolean.class);</programlisting>In
+        addition to standard relational operators SpEL supports the
+        'instanceof' and regular expression based 'matches' operator.</para>
+
+        <programlisting language="java">// evaluates to false
+boolean falseValue = parser.parseExpression("'xyz' instanceof T(int)").getValue(Boolean.class);
+
+// evaluates to true
+boolean trueValue = parser.parseExpression("'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+
+//evaluates to false
+boolean falseValue = parser.parseExpression("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+
+</programlisting>
       </section>
 
       <section>
         <title>Logical operators</title>
 
-        <para></para>
+        <para>The logical operators that are supported are and, or, and not.
+        Their use is demonstrated below</para>
 
-        <para></para>
+        <para><programlisting language="java">// -- AND --
+
+// evaluates to false
+boolean falseValue = parser.parseExpression("true and false").getValue(Boolean.class);
+
+// evaluates to true
+String expression =  "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')";
+boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
+
+// -- OR --
+
+// evaluates to false
+boolean falseValue = parser.parseExpression("true or false").getValue(Boolean.class);
+
+// evaluates to true
+String expression =  "isMember('Nikola Tesla') or isMember('Albert Einstien')";
+boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
+
+// -- NOT --
+
+// evaluates to false
+boolean falseValue = parser.parseExpression("!true").getValue(Boolean.class);
+
+
+// -- AND and NOT --
+String expression =  "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
+boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);</programlisting></para>
       </section>
 
       <section>
         <title>Mathematical operators</title>
 
-        <para>blah blah</para>
+        <para>The addition operator can be used on numbers, strings and dates.
+        Subtraction can be used on numbers and dates. Multiplication and
+        division can be used only on numbers. Other mathematical operators
+        supported are modulus (%) and exponential power (^). Standard operator
+        precedence is enforced. These operators are demonstrated below </para>
 
-        <para></para>
+        <para><programlisting>// Addition
+int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
+
+String testString = parser.parseExpression("'test' + ' ' + 'string'").getValue(String.class); // 'test string'
+
+// Subtraction
+int four =  parser.parseExpression("1 - -3").getValue(Integer.class); // 4
+
+double d = parser.parseExpression("1000.00 - 1e4").getValue(Double.class); // -9000
+
+// Multiplication
+int six =  parser.parseExpression("-2 * -3").getValue(Integer.class); // 6
+
+double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double.class); // 24.0
+
+// Division
+int minusTwo =  parser.parseExpression("6 / -3").getValue(Integer.class); // -2
+
+double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double.class); // 1.0
+
+// Modulus
+int three =  parser.parseExpression("7 % 4").getValue(Integer.class); // 3
+
+int one = parser.parseExpression("8 / 5 % 2").getValue(Integer.class); // 1
+
+// Operator precedence
+int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); // -21
+
+
+
+</programlisting></para>
       </section>
     </section>
 
     <section>
       <title>Assignment</title>
 
-      <para>blah blah</para>
+      <para>Setting of a property is done by using the assignment operator.
+      This would typically be done within a call to SetValue but can also be
+      done inside a call to GetValue </para>
+
+      <programlisting>Inventor inventor = new Inventor();		
+StandardEvaluationContext inventorContext = new StandardEvaluationContext();
+inventorContext.setRootObject(inventor);
+
+parser.parseExpression("Name").setValue(inventorContext, "Alexander Seovic2");
+
+// alternatively
+
+String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inventorContext, String.class);
+
+</programlisting>
 
       <para></para>
     </section>
@@ -479,19 +623,47 @@ String city = (String) parser.parseExpression("placeOfBirth.City").getValue(cont
     <section>
       <title>Types</title>
 
-      <para>blah blah</para>
+      <para>The specic 'T' operator can be used to specify an instance of
+      java.lang.Class (the 'type'). Static methods are invoked using this
+      operator as well</para>
+
+      <programlisting>Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
+
+
+boolean isEqual = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt; T(java.math.RoundingMode).FLOOR").getValue(Boolean.class);
+</programlisting>
     </section>
 
     <section>
       <title>Constructors</title>
 
-      <para>blah blah</para>
+      <para>Constructors can be invoked using the new operator. The fully
+      qualified classname should be used for all but the primitive type and
+      String (where int, float, etc, can be used).</para>
+
+      <programlisting>Inventor einstein = 
+   parser.parseExpression("new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')").getValue(Inventor.class);
+
+//create new inventor instance within add method of List
+parser.parseExpression("Members.add(new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German'))").getValue(societyContext);
+</programlisting>
     </section>
 
     <section id="expressions-ref-variables">
       <title>Variables</title>
 
-      <para>blah blah</para>
+      <para>Variables can referenced in the expression using the syntax
+      #variableName. Variables are set using the method setVariable on the
+      StandardEvaluationContext. </para>
+
+      <programlisting>Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+StandardEvaluationContext context = new StandardEvaluationContext();
+context.setVariable("newName", "Mike Tesla");
+context.setRootObject(tesla);
+
+parser.parseExpression("Name = #newName").getValue(context);
+
+System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
       <section>
         <title>The #this and #root variables</title>
@@ -504,6 +676,42 @@ String city = (String) parser.parseExpression("placeOfBirth.City").getValue(cont
       <title>Functions</title>
 
       <para>blah blah</para>
+    </section>
+
+    <section>
+      <title>Ternary Operator (If-Then-Else)</title>
+
+      <para>You can use the ternary operator for performing if-then-else
+      conditional logic inside the expression. A minimal example is; </para>
+
+      <programlisting language="java">String falseString = parser.parseExpression("false ? 'trueExp' : 'falseExp'").getValue(String.class);</programlisting>
+
+      <para>In this case, the boolean false results in returning the string
+      value 'falseExp'. A less artificial example is shown below.</para>
+
+      <programlisting>parser.parseExpression("Name").setValue(societyContext, "IEEE");
+societyContext.setVariable("queryName", "Nikola Tesla");
+
+expression = "isMember(#queryName)? #queryName + ' is a member of the ' " + 
+             "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
+
+String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);</programlisting>
+    </section>
+
+    <section>
+      <title>List Selection</title>
+
+      <para>List selection is a powerful expression language feature that
+      allow you to transform the source list into another list by selecting
+      from its "rows". In other words, selection is comparable to using SQL
+      with a WHERE clause.</para>
+
+      <para>Selection uses the syntax ?{projectionExpression}. This will
+      filter the list and return a new list containing a subset of the
+      original element list. For example, selection would allow us to easily
+      get a list of Serbian inventors:</para>
+
+      <programlisting>List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) parser.parseExpression("Members.?{Nationality == 'Serbian'}").getValue(societyContext);</programlisting>
     </section>
 
     <section>
