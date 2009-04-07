@@ -204,30 +204,30 @@
     <para>Find below an example of the basic structure of XML-based
     configuration metadata.</para>
 
-    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-  &lt;bean id="..." class="..."&gt;
-    <lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation>
-  &lt;/bean&gt;
+  <bean id="..." class="...">
+    <!-- collaborators and configuration for this bean go here -->
+  </bean>
 
-  &lt;bean id="..." class="..."&gt;
-    <lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation>
-  &lt;/bean&gt;
+  <bean id="..." class="...">
+    <!-- collaborators and configuration for this bean go here -->
+  </bean>
 
-  <lineannotation>&lt;!-- more bean definitions go here --&gt;</lineannotation>
+  <!-- more bean definitions go here -->
 
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
     <section id="beans-factory-instantiation">
       <title>Instantiating a container</title>
 
       <para>Instantiating a Spring IoC container is straightforward.</para>
 
-      <programlisting>ApplicationContext context = new ClassPathXmlApplicationContext(
+      <programlisting language="java">ApplicationContext context = new ClassPathXmlApplicationContext(
         new String[] {"services.xml", "daos.xml"});
 
 <lineannotation>// an <interfacename>ApplicationContext</interfacename> is also a <interfacename>BeanFactory</interfacename> (via inheritance)</lineannotation>
@@ -251,7 +251,7 @@ BeanFactory factory = context;</programlisting>
         load bean definitions from another file (or files). Let's look at a
         sample:</para>
 
-        <programlisting>&lt;beans&gt;
+        <programlisting language="xml">&lt;beans&gt;
 
     &lt;import resource="services.xml"/&gt;
     &lt;import resource="resources/messageSource.xml"/&gt;
@@ -531,7 +531,7 @@ BeanFactory factory = context;</programlisting>
           XML-based configuration metadata this may be accomplished via the
           use of the <literal>&lt;alias/&gt;</literal> element.</para>
 
-          <programlisting>&lt;alias name="fromName" alias="toName"/&gt;</programlisting>
+          <programlisting language="xml">&lt;alias name="fromName" alias="toName"/&gt;</programlisting>
 
           <para>In this case, a bean in the same container which is named
           <literal>'fromName'</literal>, may also after the use of this alias
@@ -547,7 +547,7 @@ BeanFactory factory = context;</programlisting>
           easily handled by adding to the MyApp XML fragment the following
           standalone aliases:</para>
 
-          <programlisting>&lt;alias name="componentA-dataSource" alias="componentB-dataSource"/&gt;
+          <programlisting language="xml">&lt;alias name="componentA-dataSource" alias="componentB-dataSource"/&gt;
 &lt;alias name="componentA-dataSource" alias="myApp-dataSource" /&gt;</programlisting>
 
           <para>Now each component and the main application can refer to the
@@ -637,7 +637,7 @@ BeanFactory factory = context;</programlisting>
           <para>When using XML-based configuration metadata you can specify
           your bean class like so:</para>
 
-          <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
+          <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
 
 &lt;bean name="anotherExample" class="examples.ExampleBeanTwo"/&gt;</programlisting>
 
@@ -669,7 +669,7 @@ BeanFactory factory = context;</programlisting>
           this example, the <methodname>createInstance()</methodname> method
           must be a <emphasis>static</emphasis> method.</para>
 
-          <programlisting>&lt;bean id="exampleBean"
+          <programlisting language="xml">&lt;bean id="exampleBean"
       class="examples.ExampleBean2"
       factory-method="createInstance"/&gt;</programlisting>
 
@@ -695,7 +695,7 @@ BeanFactory factory = context;</programlisting>
           name of the factory method itself must be set using the
           <literal>'factory-method'</literal> attribute.</para>
 
-          <programlisting><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation>
+          <programlisting language="xml"><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation>
 &lt;bean id="serviceLocator" class="com.foo.DefaultServiceLocator"&gt;
   <lineannotation>&lt;!-- inject any dependencies required by this locator bean --&gt;</lineannotation>
 &lt;/bean&gt;
@@ -740,7 +740,7 @@ BeanFactory factory = context;</programlisting>
       <interfacename>BeanFactory</interfacename> you would create one and read
       in some bean definitions in the XML format as follows:</para>
 
-      <programlisting>Resource res = new FileSystemResource("beans.xml");
+      <programlisting language="java">Resource res = new FileSystemResource("beans.xml");
 BeanFactory factory = new XmlBeanFactory(res);</programlisting>
 
       <para>Basically that is all there is to it. Using
@@ -806,7 +806,7 @@ BeanFactory factory = new XmlBeanFactory(res);</programlisting>
         constructor injection. Notice that there is nothing
         <emphasis>special</emphasis> about this class.</para>
 
-        <programlisting>public class SimpleMovieLister {
+        <programlisting language="java">public class SimpleMovieLister {
 
     <lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on a <interfacename>MovieFinder</interfacename></lineannotation>
     private MovieFinder movieFinder;
@@ -830,7 +830,7 @@ BeanFactory factory = new XmlBeanFactory(res);</programlisting>
           constructor when it is being instantiated. Consider the following
           class:</para>
 
-          <programlisting>package x.y;
+          <programlisting language="java">package x.y;
 
 public class Foo {
 
@@ -846,7 +846,7 @@ public class Foo {
           specify the constructor argument indexes and / or types
           explicitly.</para>
 
-          <programlisting>&lt;beans&gt;
+          <programlisting language="xml">&lt;beans&gt;
     &lt;bean name="foo" class="x.y.Foo"&gt;
         &lt;constructor-arg&gt;
             &lt;bean class="x.y.Bar"/&gt;
@@ -864,7 +864,7 @@ public class Foo {
           determine the type of the value, and so cannot match by type without
           help. Consider the following class:</para>
 
-          <programlisting>package examples;
+          <programlisting language="java">package examples;
 
 public class ExampleBean {
 
@@ -888,7 +888,7 @@ public class ExampleBean {
             the constructor argument using the <literal>'type'</literal>
             attribute. For example:</para>
 
-            <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+            <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
   &lt;constructor-arg type="int" value="7500000"/&gt;
   &lt;constructor-arg type="java.lang.String" value="42"/&gt;
 &lt;/bean&gt;</programlisting>
@@ -901,7 +901,7 @@ public class ExampleBean {
             explicitly by use of the <literal>index</literal> attribute. For
             example:</para>
 
-            <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+            <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
   &lt;constructor-arg index="0" value="7500000"/&gt;
   &lt;constructor-arg index="1" value="42"/&gt;
 &lt;/bean&gt;</programlisting>
@@ -927,7 +927,7 @@ public class ExampleBean {
         <emphasis>special</emphasis> about this class... it is plain old
         Java.</para>
 
-        <programlisting>public class SimpleMovieLister {
+        <programlisting language="java">public class SimpleMovieLister {
 
     <lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation>
     private MovieFinder movieFinder;
@@ -1099,7 +1099,7 @@ public class ExampleBean {
         setter-based DI. Find below a small part of a Spring XML configuration
         file specifying some bean definitions.</para>
 
-        <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+        <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
 
   <lineannotation>&lt;!-- setter injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation>
   &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
@@ -1112,7 +1112,7 @@ public class ExampleBean {
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
 &lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
 
-        <programlisting>public class ExampleBean {
+        <programlisting language="java">public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
@@ -1135,7 +1135,7 @@ public class ExampleBean {
         properties specified in the XML file. Find below an example of using
         constructor-based DI.</para>
 
-        <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+        <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
 
   <lineannotation>&lt;!-- constructor injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation>
   &lt;constructor-arg&gt;
@@ -1151,7 +1151,7 @@ public class ExampleBean {
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
 &lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
 
-        <programlisting>public class ExampleBean {
+        <programlisting language="java">public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
@@ -1173,7 +1173,7 @@ public class ExampleBean {
         constructor, Spring is told to call a <literal>static</literal>
         factory method to return an instance of the object:</para>
 
-        <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"
+        <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"
       factory-method="createInstance"&gt;
   &lt;constructor-arg ref="anotherExampleBean"/&gt;
   &lt;constructor-arg ref="yetAnotherBean"/&gt;
@@ -1183,7 +1183,7 @@ public class ExampleBean {
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
 &lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
 
-        <programlisting>public class ExampleBean {
+        <programlisting language="java">public class ExampleBean {
 
     <lineannotation>// a private constructor</lineannotation>
     private ExampleBean(...) {
@@ -1240,7 +1240,7 @@ public class ExampleBean {
         <classname>String</classname> to the actual type of the property or
         argument.</para>
 
-        <programlisting>&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+        <programlisting language="xml">&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
   
   <lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation>
   &lt;property name="driverClassName"&gt;
@@ -1264,7 +1264,7 @@ public class ExampleBean {
         <literal>'value'</literal> attribute, the above bean definition reads
         like so:</para>
 
-        <programlisting>&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+        <programlisting language="xml">&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
   
   <lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation>
   &lt;property name="driverClassName" value="com.mysql.jdbc.Driver"/&gt;
@@ -1280,7 +1280,7 @@ public class ExampleBean {
         can also configure a <classname>java.util.Properties</classname>
         instance like so:</para>
 
-        <programlisting>&lt;bean id="mappings" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+        <programlisting language="xml">&lt;bean id="mappings" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
             
    <lineannotation>&lt;!-- typed as a <classname>java.util.Properties</classname> --&gt;</lineannotation>
    &lt;property name="properties"&gt;
@@ -1308,7 +1308,7 @@ public class ExampleBean {
           container (to a <literal>&lt;constructor-arg/&gt;</literal> or
           <literal>&lt;property/&gt;</literal> element).</para>
 
-          <programlisting>&lt;bean id="theTargetBean" class="..."/&gt;
+          <programlisting language="xml">&lt;bean id="theTargetBean" class="..."/&gt;
 
 &lt;bean id="theClientBean" class="..."&gt;
     &lt;property name="targetName"&gt;
@@ -1320,7 +1320,7 @@ public class ExampleBean {
           <emphasis>exactly</emphasis> equivalent (at runtime) to the
           following snippet:</para>
 
-          <programlisting>&lt;bean id="theTargetBean" class="..." /&gt;
+          <programlisting language="xml">&lt;bean id="theTargetBean" class="..." /&gt;
 
 &lt;bean id="client" class="..."&gt;
     &lt;property name="targetName" value="theTargetBean" /&gt;
@@ -1346,7 +1346,7 @@ public class ExampleBean {
           XML parser itself to validate the bean id even earlier, at XML
           document parse time.</para>
 
-          <programlisting>&lt;property name="targetName"&gt;
+          <programlisting language="xml">&lt;property name="targetName"&gt;
    <lineannotation>&lt;!-- a bean with an id of '<literal>theTargetBean</literal>' must exist; otherwise an XML exception will be thrown --&gt;</lineannotation>
    &lt;idref local="theTargetBean"/&gt;
 &lt;/property&gt;</programlisting>
@@ -1387,7 +1387,7 @@ public class ExampleBean {
         bean, or one of the values in the <literal>'name'</literal> attribute
         of the target bean.</para>
 
-        <programlisting>&lt;ref bean="someBean"/&gt;</programlisting>
+        <programlisting language="xml">&lt;ref bean="someBean"/&gt;</programlisting>
 
         <para>Specifying the target bean by using the <literal>local</literal>
         attribute leverages the ability of the XML parser to validate XML id
@@ -1399,7 +1399,7 @@ public class ExampleBean {
         about errors as early as possible) if the target bean is in the same
         XML file.</para>
 
-        <programlisting>&lt;ref local="someBean"/&gt;</programlisting>
+        <programlisting language="xml">&lt;ref local="someBean"/&gt;</programlisting>
 
         <para>Specifying the target bean by using the
         <literal>'parent'</literal> attribute allows a reference to be created
@@ -1413,12 +1413,12 @@ public class ExampleBean {
         in a parent container with some sort of proxy which will have the same
         name as the parent bean.</para>
 
-        <programlisting><lineannotation>&lt;!-- in the parent context --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- in the parent context --&gt;</lineannotation>
 &lt;bean id="accountService" class="com.foo.SimpleAccountService"&gt;
     <lineannotation>&lt;!-- insert dependencies as required as here --&gt;</lineannotation>
 &lt;/bean&gt;</programlisting>
 
-        <programlisting><lineannotation>&lt;!-- in the child (descendant) context --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- in the child (descendant) context --&gt;</lineannotation>
 &lt;bean id="accountService"  <lineannotation>&lt;-- notice that the name of this bean is the <emphasis
               role="bold">same</emphasis> as the name of the <literal>'parent'</literal> bean</lineannotation>
       class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
@@ -1441,7 +1441,7 @@ public class ExampleBean {
         best not to even specify any id or name value because the id or name
         value simply will be ignored by the container.</para>
 
-        <programlisting>&lt;bean id="outer" class="..."&gt;
+        <programlisting language="xml">&lt;bean id="outer" class="..."&gt;
   <lineannotation>&lt;!-- instead of using a reference to a target bean, simply define the target bean inline --&gt;</lineannotation>
   &lt;property name="target"&gt;
     &lt;bean class="com.example.Person"&gt; <lineannotation>&lt;!-- this is the inner bean --&gt;</lineannotation>
@@ -1474,7 +1474,7 @@ public class ExampleBean {
         <interfacename>Properties</interfacename>, respectively, to be defined
         and set.</para>
 
-        <programlisting>&lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
+        <programlisting language="xml">&lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
   <lineannotation>&lt;!-- results in a setAdminEmails(<classname>java.util.Properties</classname>) call --&gt;</lineannotation>
   &lt;property name="adminEmails"&gt;
     &lt;props&gt;
@@ -1525,7 +1525,7 @@ public class ExampleBean {
         value, can also again be any of the following
         elements:</emphasis></para>
 
-        <programlisting>bean | ref | idref | list | set | map | props | value | null</programlisting>
+        <programlisting language="xml">bean | ref | idref | list | set | map | props | value | null</programlisting>
 
         <section id="beans-collection-elements-merging">
           <title>Collection merging</title>
@@ -1554,7 +1554,7 @@ public class ExampleBean {
           <para>Find below an example of the collection merging
           feature:</para>
 
-          <programlisting>&lt;beans&gt;
+          <programlisting language="xml">&lt;beans&gt;
 &lt;bean id="parent" abstract="true" class="example.ComplexObject"&gt;
     &lt;property name="adminEmails"&gt;
         &lt;props&gt;
@@ -1642,7 +1642,7 @@ support=support@example.co.uk</programlisting>
           instances will be converted to the appropriate type prior to being
           added to the <interfacename>Collection</interfacename>.</para>
 
-          <programlisting>public class Foo {
+          <programlisting language="java">public class Foo {
                 
     private Map&lt;String, Float&gt; accounts;
     
@@ -1651,7 +1651,7 @@ support=support@example.co.uk</programlisting>
     }
 }</programlisting>
 
-          <programlisting>&lt;beans&gt;
+          <programlisting language="xml">&lt;beans&gt;
     &lt;bean id="foo" class="x.y.Foo"&gt;
         &lt;property name="accounts"&gt;
             &lt;map&gt;
@@ -1686,7 +1686,7 @@ support=support@example.co.uk</programlisting>
         email property being set to the empty <classname>String</classname>
         value ("")</para>
 
-        <programlisting>&lt;bean class="ExampleBean"&gt;
+        <programlisting language="xml">&lt;bean class="ExampleBean"&gt;
   &lt;property name="email"&gt;&lt;value/&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
@@ -1695,7 +1695,7 @@ support=support@example.co.uk</programlisting>
         <literal>&lt;null&gt;</literal> element may be used to indicate a
         <literal>null</literal> value. For example:</para>
 
-        <programlisting>&lt;bean class="ExampleBean"&gt;
+        <programlisting language="xml">&lt;bean class="ExampleBean"&gt;
   &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
@@ -1724,25 +1724,25 @@ support=support@example.co.uk</programlisting>
           embedding a full <literal>&lt;value/&gt;</literal> element.
           Therefore, the following:</para>
 
-          <programlisting>&lt;property name="myProperty"&gt;
+          <programlisting language="xml">&lt;property name="myProperty"&gt;
   &lt;value&gt;hello&lt;/value&gt;
 &lt;/property&gt;</programlisting>
 
-          <programlisting>&lt;constructor-arg&gt;
+          <programlisting language="xml">&lt;constructor-arg&gt;
   &lt;value&gt;hello&lt;/value&gt;
 &lt;/constructor-arg&gt;</programlisting>
 
-          <programlisting>&lt;entry key="myKey"&gt;
+          <programlisting language="xml">&lt;entry key="myKey"&gt;
   &lt;value&gt;hello&lt;/value&gt;
 &lt;/entry&gt;</programlisting>
 
           <para>are equivalent to:</para>
 
-          <programlisting>&lt;property name="myProperty" value="hello"/&gt;</programlisting>
+          <programlisting language="xml">&lt;property name="myProperty" value="hello"/&gt;</programlisting>
 
-          <programlisting>&lt;constructor-arg value="hello"/&gt;</programlisting>
+          <programlisting language="xml">&lt;constructor-arg value="hello"/&gt;</programlisting>
 
-          <programlisting>&lt;entry key="myKey" value="hello"/&gt;</programlisting>
+          <programlisting language="xml">&lt;entry key="myKey" value="hello"/&gt;</programlisting>
 
           <para>The <literal>&lt;property/&gt;</literal> and
           <literal>&lt;constructor-arg/&gt;</literal> elements support a
@@ -1750,19 +1750,19 @@ support=support@example.co.uk</programlisting>
           used instead of a full nested <literal>&lt;ref/&gt;</literal>
           element. Therefore, the following:</para>
 
-          <programlisting>&lt;property name="myProperty"&gt;
+          <programlisting language="xml">&lt;property name="myProperty"&gt;
   &lt;ref bean="myBean"&gt;
 &lt;/property&gt;</programlisting>
 
-          <programlisting>&lt;constructor-arg&gt;
+          <programlisting language="xml">&lt;constructor-arg&gt;
   &lt;ref bean="myBean"&gt;
 &lt;/constructor-arg&gt;</programlisting>
 
           <para>... are equivalent to:</para>
 
-          <programlisting>&lt;property name="myProperty" ref="myBean"/&gt;</programlisting>
+          <programlisting language="xml">&lt;property name="myProperty" ref="myBean"/&gt;</programlisting>
 
-          <programlisting>&lt;constructor-arg ref="myBean"/&gt;</programlisting>
+          <programlisting language="xml">&lt;constructor-arg ref="myBean"/&gt;</programlisting>
 
           <para>Note however that the shortcut form is equivalent to a
           <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no
@@ -1775,7 +1775,7 @@ support=support@example.co.uk</programlisting>
           <literal>'value'</literal> / <literal>'value-ref'</literal>
           attributes. Therefore, the following:</para>
 
-          <programlisting>&lt;entry&gt;
+          <programlisting language="xml">&lt;entry&gt;
   &lt;key&gt;
     &lt;ref bean="myKeyBean" /&gt;
   &lt;/key&gt;
@@ -1784,7 +1784,7 @@ support=support@example.co.uk</programlisting>
 
           <para>is equivalent to:</para>
 
-          <programlisting>&lt;entry key-ref="myKeyBean" value-ref="myValueBean"/&gt;</programlisting>
+          <programlisting language="xml">&lt;entry key-ref="myKeyBean" value-ref="myValueBean"/&gt;</programlisting>
 
           <para>Again, the shortcut form is equivalent to a <literal>&lt;ref
           bean="xxx"&gt;</literal> element; there is no shortcut for
@@ -1818,7 +1818,7 @@ support=support@example.co.uk</programlisting>
           the end: the first is using the standard XML format whereas the
           second example is using the p-namespace.</para>
 
-          <programlisting>&lt;beans xmlns="http://www.springframework.org/schema/beans"
+          <programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -1842,7 +1842,7 @@ support=support@example.co.uk</programlisting>
           <para>This next example includes two more bean definitions that both
           have a reference to another bean:</para>
 
-          <programlisting>&lt;beans xmlns="http://www.springframework.org/schema/beans"
+          <programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -1899,7 +1899,7 @@ support=support@example.co.uk</programlisting>
         the final property name are not <literal>null</literal>. Consider the
         following bean definition...</para>
 
-        <programlisting>&lt;bean id="foo" class="foo.Bar"&gt;
+        <programlisting language="xml">&lt;bean id="foo" class="foo.Bar"&gt;
   &lt;property name="fred.bob.sammy" value="123" /&gt;
 &lt;/bean&gt;</programlisting>
 
@@ -1933,7 +1933,7 @@ support=support@example.co.uk</programlisting>
       <literal>'depends-on'</literal> attribute to express a dependency on a
       single bean.</para>
 
-      <programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="<emphasis
+      <programlisting language="xml">&lt;bean id="beanOne" class="ExampleBean" depends-on="<emphasis
           role="bold">manager</emphasis>"/&gt;
 
 &lt;bean id="<emphasis role="bold">manager</emphasis>" class="ManagerBean" /&gt;</programlisting>
@@ -1943,7 +1943,7 @@ support=support@example.co.uk</programlisting>
       <literal>'depends-on'</literal> attribute, with commas, whitespace and
       semicolons all valid delimiters, like so:</para>
 
-      <programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao"&gt;
+      <programlisting language="xml">&lt;bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao"&gt;
   &lt;property name="manager" ref="manager" /&gt;
 &lt;/bean&gt;
 
@@ -1990,7 +1990,7 @@ support=support@example.co.uk</programlisting>
       the <literal>'lazy-init'</literal> attribute on the
       <literal>&lt;bean/&gt;</literal> element; for example:</para>
 
-      <programlisting>&lt;bean id="lazy" class="com.foo.ExpensiveToCreateBean" <emphasis
+      <programlisting language="xml">&lt;bean id="lazy" class="com.foo.ExpensiveToCreateBean" <emphasis
           role="bold">lazy-init="true"</emphasis>/&gt;
 
 &lt;bean name="not.lazy" class="com.foo.AnotherBean"/&gt;</programlisting>
@@ -2020,7 +2020,7 @@ support=support@example.co.uk</programlisting>
       attribute on the <literal>&lt;beans/&gt;</literal> element; for
       example:</para>
 
-      <programlisting>&lt;beans default-lazy-init="true"&gt;
+      <programlisting language="xml">&lt;beans default-lazy-init="true"&gt;
     <lineannotation>&lt;!-- no beans will be pre-instantiated... --&gt;</lineannotation>
 &lt;/beans&gt;</programlisting>
     </section>
@@ -2343,7 +2343,7 @@ support=support@example.co.uk</programlisting>
       typically new) bean B instance every time it needs it. Find below an
       admittedly somewhat contrived example of this approach:</para>
 
-      <programlisting><lineannotation>// a class that uses a stateful Command-style class to perform some processing</lineannotation>
+      <programlisting language="java"><lineannotation>// a class that uses a stateful Command-style class to perform some processing</lineannotation>
 package fiona.apple;
 
 <lineannotation>// lots of Spring-API imports</lineannotation>
@@ -2410,7 +2410,7 @@ public class CommandManager implements BeanFactoryAware {
         Spring dependencies, as can be seen in this reworked example
         below:</para>
 
-        <programlisting>package fiona.apple;
+        <programlisting language="java">package fiona.apple;
 
 <lineannotation>// no more Spring imports! </lineannotation>
 
@@ -2433,14 +2433,14 @@ public abstract class CommandManager {
         is to be 'injected' must have a signature of the following
         form:</para>
 
-        <programlisting>&lt;public|protected&gt; [abstract] &lt;return-type&gt; theMethodName(<lineannotation>no-arguments</lineannotation>);</programlisting>
+        <programlisting language="xml">&lt;public|protected&gt; [abstract] &lt;return-type&gt; theMethodName(<lineannotation>no-arguments</lineannotation>);</programlisting>
 
         <para>If the method is <literal>abstract</literal>, the
         dynamically-generated subclass will implement the method. Otherwise,
         the dynamically-generated subclass will override the concrete method
         defined in the original class. Let's look at an example:</para>
 
-        <programlisting><lineannotation>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;</lineannotation>
 &lt;bean id="command" class="fiona.apple.AsyncCommand" scope="prototype"&gt;
   <lineannotation>&lt;!-- inject dependencies here as required --&gt;</lineannotation>
 &lt;/bean&gt;
@@ -2501,7 +2501,7 @@ public abstract class CommandManager {
         Consider the following class, with a method computeValue, which we
         want to override:</para>
 
-        <programlisting>public class MyValueCalculator {
+        <programlisting language="java">public class MyValueCalculator {
 
   public String computeValue(String input) {
     <lineannotation>// some real code...</lineannotation>
@@ -2515,7 +2515,7 @@ public abstract class CommandManager {
         <interfacename>org.springframework.beans.factory.support.MethodReplacer</interfacename>
         interface provides the new method definition.</para>
 
-        <programlisting><lineannotation>/** meant to be used to override the existing <methodname>computeValue(String)</methodname>
+        <programlisting language="java"><lineannotation>/** meant to be used to override the existing <methodname>computeValue(String)</methodname>
     implementation in <classname>MyValueCalculator</classname>
   */</lineannotation>
 public class ReplacementComputeValue implements MethodReplacer {
@@ -2531,7 +2531,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         <para>The bean definition to deploy the original class and specify the
         method override would look like this:</para>
 
-        <programlisting>&lt;bean id="myValueCalculator class="x.y.z.MyValueCalculator"&gt;
+        <programlisting language="xml">&lt;bean id="myValueCalculator class="x.y.z.MyValueCalculator"&gt;
   <lineannotation>&lt;!-- arbitrary method replacement --&gt;</lineannotation>
   &lt;replaced-method name="computeValue" replacer="replacementComputeValue"&gt;
     &lt;arg-type&gt;String&lt;/arg-type&gt;
@@ -2550,7 +2550,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         fully qualified type name. For example, all the following would match
         <classname>java.lang.String</classname>.</para>
 
-        <programlisting>    java.lang.String
+        <programlisting language="java">    java.lang.String
     String
     Str</programlisting>
 
@@ -2724,7 +2724,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       default scope in Spring</emphasis>. To define a bean as a singleton in
       XML, you would write configuration like so:</para>
 
-      <programlisting>&lt;bean id="accountService" class="com.foo.DefaultAccountService"/&gt;
+      <programlisting language="xml">&lt;bean id="accountService" class="com.foo.DefaultAccountService"/&gt;
 
 <lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default); using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
 &lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/&gt;
@@ -2768,7 +2768,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       <para>To define a bean as a prototype in XML, you would write
       configuration like so:</para>
 
-      <programlisting><lineannotation>&lt;!-- using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
+      <programlisting language="xml"><lineannotation>&lt;!-- using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
 &lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/&gt;
 
 <lineannotation>&lt;!-- the following is equivalent and preserved for backward compatibility in <literal>spring-beans.dtd</literal> --&gt;</lineannotation>
@@ -2907,7 +2907,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         the declarations in your web application's
         <literal>'web.xml'</literal> file.</para>
 
-        <programlisting>&lt;web-app&gt;
+        <programlisting language="xml">&lt;web-app&gt;
   ...
   &lt;listener&gt;
     &lt;listener-class&gt;org.springframework.web.context.request.RequestContextListener&lt;/listener-class&gt;
@@ -2925,7 +2925,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         mapping depends on the surrounding web application configuration and
         so you will have to change it as appropriate.)</para>
 
-        <programlisting>&lt;web-app&gt;
+        <programlisting language="xml">&lt;web-app&gt;
   ..
   &lt;filter&gt; 
     &lt;filter-name&gt;requestContextFilter&lt;/filter-name&gt; 
@@ -2952,7 +2952,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Consider the following bean definition:</para>
 
-        <programlisting>&lt;bean id="loginAction" class="com.foo.LoginAction" scope="request"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="loginAction" class="com.foo.LoginAction" scope="request"/&gt;</programlisting>
 
         <para>With the above bean definition in place, the Spring container
         will create a brand new instance of the
@@ -2974,7 +2974,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Consider the following bean definition:</para>
 
-        <programlisting>&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;</programlisting>
 
         <para>With the above bean definition in place, the Spring container
         will create a brand new instance of the
@@ -3001,7 +3001,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Consider the following bean definition:</para>
 
-        <programlisting>&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/&gt;</programlisting>
 
         <para>The <literal>global session</literal> scope is similar to the
         standard HTTP <interfacename>Session</interfacename> scope (<link
@@ -3053,7 +3053,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         it is important to understand the <quote>why</quote> as well as the
         <quote>how</quote> behind it.</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
@@ -3093,7 +3093,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         bean definition as it stands is
         <emphasis>incomplete</emphasis>):</para>
 
-        <programlisting>&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;
+        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;
 
 &lt;bean id="userManager" class="com.foo.UserManager"&gt;
     &lt;property name="userPreferences" ref="userPreferences"/&gt;
@@ -3148,7 +3148,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <literal>globalSession-scoped</literal> beans into collaborating
         objects:</para>
 
-        <programlisting>&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
+        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
     <emphasis role="bold"><literal>&lt;aop:scoped-proxy/&gt;</literal></emphasis>
 &lt;/bean&gt;
 
@@ -3181,7 +3181,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
           collaborators into which the scoped bean is injected must be
           referencing the bean via one of its interfaces.</para>
 
-          <programlisting><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation>
+          <programlisting language="xml"><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation>
 &lt;bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session"&gt;
     &lt;aop:scoped-proxy <emphasis role="bold">proxy-target-class="false"<literal /></emphasis>/&gt;
 &lt;/bean&gt;
@@ -3235,7 +3235,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         of the bean, after having bound it to the session for future
         reference).</para>
 
-        <programlisting>Object get(String name, ObjectFactory objectFactory)</programlisting>
+        <programlisting language="java">Object get(String name, ObjectFactory objectFactory)</programlisting>
 
         <para>The second method should remove the object from the underlying
         scope. The session scope implementation for example, removes the
@@ -3243,20 +3243,20 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         returned (you are allowed to return null if the object with the
         specified name wasn't found)</para>
 
-        <programlisting>Object remove(String name)</programlisting>
+        <programlisting language="java">Object remove(String name)</programlisting>
 
         <para>The third method is used to register callbacks the scope should
         execute when it is destroyed or when the specified object in the scope
         is destroyed. Please refer to the Javadoc or a Spring scope
         implementation for more information on destruction callbacks.</para>
 
-        <programlisting>void registerDestructionCallback(String name, Runnable destructionCallback)</programlisting>
+        <programlisting language="java">void registerDestructionCallback(String name, Runnable destructionCallback)</programlisting>
 
         <para>The last method deals with obtaining the conversation identifier
         for the underlying scope. This identifier is different for each scope.
         For a session for example, this can be the session identifier.</para>
 
-        <programlisting>String getConversationId()</programlisting>
+        <programlisting language="java">String getConversationId()</programlisting>
       </section>
 
       <section id="beans-factory-scopes-custom-using">
@@ -3272,7 +3272,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <interfacename>BeanFactory</interfacename> implementations that ship
         with Spring); this central method is displayed below:</para>
 
-        <programlisting>void registerScope(String scopeName, Scope scope);</programlisting>
+        <programlisting language="java">void registerScope(String scopeName, Scope scope);</programlisting>
 
         <para>The first argument to the
         <methodname>registerScope(..)</methodname> method is the unique name
@@ -3287,7 +3287,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <interfacename>Scope</interfacename> implementation, and you have
         registered it like so:</para>
 
-        <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis
+        <programlisting language="java"><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis
               role="bold">not</emphasis> ship with the Spring Framework</lineannotation>
 Scope customScope = new ThreadScope();
 beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope);</programlisting>
@@ -3296,7 +3296,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         rules of your custom <interfacename>Scope</interfacename> like
         so:</para>
 
-        <programlisting>&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
 
         <para>If you have your own custom <interfacename>Scope</interfacename>
         implementation(s), you are not just limited to only programmatic
@@ -3309,7 +3309,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         <classname>CustomScopeConfigurer</classname> class is shown
         below:</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
@@ -3337,15 +3337,15 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
+
+        <note>
+          <para>Note that, when placing a &lt;aop:scoped-proxy/&gt; in a <interfacename>FactoryBean</interfacename>
+          implementation, it is the factory bean itself that is scoped, not the object returned from
+          <methodname>getObject()</methodname>.</para>
+        </note>
       </section>
     </section>
   </section>
-
-    <note>
-      <para>Note that, when placing a &lt;aop:scoped-proxy/&gt; in a <interfacename>FactoryBean</interfacename>
-      implementation, it is the factory bean itself that is scoped, not the object returned from
-      <methodname>getObject()</methodname>.</para>
-    </note>
 
   <section id="beans-factory-nature">
     <title>Customizing the nature of a bean</title>
@@ -3386,7 +3386,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <interfacename>InitializingBean</interfacename> interface specifies
         exactly one method:</para>
 
-        <programlisting>void afterPropertiesSet() throws Exception;</programlisting>
+        <programlisting language="java">void afterPropertiesSet() throws Exception;</programlisting>
 
         <para>Generally, the use of the
         <interfacename>InitializingBean</interfacename> interface can be
@@ -3397,9 +3397,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <literal>'init-method'</literal> attribute. For example, the following
         definition:</para>
 
-        <programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;</programlisting>
 
-        <programlisting>public class ExampleBean {
+        <programlisting language="java">public class ExampleBean {
     
     public void init() {
         <lineannotation>// do some initialization work</lineannotation>
@@ -3408,9 +3408,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
         <para>...is exactly the same as...</para>
 
-        <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
 
-        <programlisting>public class AnotherExampleBean implements InitializingBean {
+        <programlisting language="java">public class AnotherExampleBean implements InitializingBean {
     
     public void afterPropertiesSet() {
         <lineannotation>// do some initialization work</lineannotation>
@@ -3430,7 +3430,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <interfacename>DisposableBean</interfacename> interface specifies a
         single method:</para>
 
-        <programlisting>void destroy() throws Exception;</programlisting>
+        <programlisting language="java">void destroy() throws Exception;</programlisting>
 
         <para>Generally, the use of the
         <interfacename>DisposableBean</interfacename> callback interface can be
@@ -3442,9 +3442,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <literal>&lt;bean/&gt;</literal>. For example, the following
         definition:</para>
 
-        <programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;</programlisting>
 
-        <programlisting>public class ExampleBean {
+        <programlisting language="java">public class ExampleBean {
 
     public void cleanup() {
         <lineannotation>// do some destruction work (like releasing pooled connections)</lineannotation>
@@ -3453,9 +3453,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
         <para>...is exactly the same as...</para>
 
-        <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
 
-        <programlisting>public class AnotherExampleBean implements DisposableBean {
+        <programlisting language="java">public class AnotherExampleBean implements DisposableBean {
 
     public void destroy() {
         <lineannotation>// do some destruction work (like releasing pooled connections)</lineannotation>
@@ -3499,7 +3499,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         destroy callback methods are to be called
         <literal>destroy()</literal>. This leads to classes like so...</para>
 
-        <programlisting>public class DefaultBlogService implements BlogService {
+        <programlisting language="java">public class DefaultBlogService implements BlogService {
 
     private BlogDao blogDao;
 
@@ -3515,7 +3515,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     }
 }</programlisting>
 
-        <programlisting>&lt;beans <emphasis role="bold">default-init-method="init"</emphasis>&gt;
+        <programlisting language="xml">&lt;beans <emphasis role="bold">default-init-method="init"</emphasis>&gt;
 
     &lt;bean id="blogService" class="com.foo.DefaultBlogService"&gt;
         &lt;property name="blogDao" ref="blogDao" /&gt;
@@ -3662,7 +3662,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         declared on the <classname>AbstractApplicationContext</classname>
         class. To wit...</para>
 
-        <programlisting>import org.springframework.context.support.AbstractApplicationContext;
+        <programlisting language="java">import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public final class Boot {
@@ -3694,7 +3694,7 @@ public final class Boot {
         <interfacename>BeanFactory</interfacename> that created it, when it is
         created by that <interfacename>BeanFactory</interfacename>.</para>
 
-        <programlisting>public interface BeanFactoryAware {
+        <programlisting language="java">public interface BeanFactoryAware {
 
     void setBeanFactory(BeanFactory beanFactory) throws BeansException;
 }</programlisting>
@@ -3740,7 +3740,7 @@ public final class Boot {
         <classname>ObjectFactoryCreatingFactoryBean</classname> with the name
         of the bean that is to be looked up. Let's look at an example:</para>
 
-        <programlisting>package x.y;
+        <programlisting language="java">package x.y;
 
 public class NewsFeed {
     
@@ -3755,7 +3755,7 @@ public class NewsFeed {
     }
 }</programlisting>
 
-        <programlisting>package x.y;
+        <programlisting language="java">package x.y;
 
 import org.springframework.beans.factory.ObjectFactory;
 
@@ -3780,7 +3780,7 @@ public class NewsFeedManager {
         <classname>ObjectFactoryCreatingFactoryBean</classname>
         approach.</para>
 
-        <programlisting>&lt;beans&gt;
+        <programlisting language="xml">&lt;beans&gt;
     &lt;bean id="newsFeedManager" class="x.y.NewsFeedManager"&gt;
         &lt;property name="factory"&gt;
             &lt;bean
@@ -3803,7 +3803,7 @@ class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean
         <classname>NewsFeedManager</classname>'s
         <methodname>printNews()</methodname> method.</para>
 
-        <programlisting>import org.springframework.context.ApplicationContext;
+        <programlisting language="java">import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import x.y.NewsFeedManager;
 
@@ -3821,7 +3821,7 @@ public class Main {
         <para>The output from running the above program will look like so
         (results will of course vary on your machine).</para>
 
-        <programlisting>x.y.NewsFeed@1292d26: '... that's fit to print!'
+        <programlisting language="java">x.y.NewsFeed@1292d26: '... that's fit to print!'
 x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
 
         <para>As of Spring 2.5, you can rely upon autowiring of the
@@ -3883,7 +3883,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
     indicated simply by using the <literal>'parent'</literal> attribute,
     specifying the parent bean as the value of this attribute.</para>
 
-    <programlisting>&lt;bean id="inheritedTestBean" abstract="true"
+    <programlisting language="xml">&lt;bean id="inheritedTestBean" abstract="true"
     class="org.springframework.beans.TestBean"&gt;
   &lt;property name="name" value="parent"/&gt;
   &lt;property name="age" value="1"/&gt;
@@ -3921,7 +3921,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
     class, and so explicitly marking the parent bean definition as
     <literal>abstract</literal> is required:</para>
 
-    <programlisting>&lt;bean id="inheritedTestBeanWithoutClass" abstract="true"&gt;
+    <programlisting language="xml">&lt;bean id="inheritedTestBeanWithoutClass" abstract="true"&gt;
     &lt;property name="name" value="parent"/&gt;
     &lt;property name="age" value="1"/&gt;
 &lt;/bean&gt;
@@ -4052,7 +4052,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
       implementation, bean post-processors explicitly have to be registered,
       with code like this:</para>
 
-      <programlisting>ConfigurableBeanFactory factory = new XmlBeanFactory(...);
+      <programlisting language="java">ConfigurableBeanFactory factory = new XmlBeanFactory(...);
             
 <lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation>
 MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
@@ -4114,7 +4114,7 @@ factory.addBeanPostProcessor(postProcessor);
         <interfacename>BeanPostProcessor</interfacename> implementation class
         definition:</para>
 
-        <programlisting>package scripting;
+        <programlisting language="java">package scripting;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.BeansException;
@@ -4132,7 +4132,7 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
     }
 }</programlisting>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
@@ -4164,7 +4164,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
         <para>Find below a small driver script to exercise the above code and
         configuration;</para>
 
-        <programlisting>import org.springframework.context.ApplicationContext;
+        <programlisting language="java">import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scripting.Messenger;
 
@@ -4262,7 +4262,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       applying a <interfacename>BeanFactoryPostProcessor</interfacename> is
       manual, and will be similar to this:</para>
 
-      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+      <programlisting language="java">XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
 
 <lineannotation>// bring in some property values from a <classname>Properties</classname> file</lineannotation>
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
@@ -4322,7 +4322,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         the metadata which will replace some properties of the
         DataSource:</para>
 
-        <programlisting>&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+        <programlisting language="xml">&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
     &lt;property name="locations"&gt;
         &lt;value&gt;classpath:com/foo/jdbc.properties&lt;/value&gt;
     &lt;/property&gt;
@@ -4339,7 +4339,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         <para>The actual values come from another file in the standard Java
         <classname>Properties</classname> format:</para>
 
-        <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
+        <programlisting language="java">jdbc.driverClassName=org.hsqldb.jdbcDriver
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root</programlisting>
@@ -4349,7 +4349,7 @@ jdbc.password=root</programlisting>
         dedicated configuration element. Multiple locations may be provided as a
         comma-separated list for the <literal>location</literal> attribute.</para>
 
-        <programlisting>&lt;context:property-placeholder location="classpath:com/foo/jdbc.properties"/&gt;</programlisting>
+        <programlisting language="xml">&lt;context:property-placeholder location="classpath:com/foo/jdbc.properties"/&gt;</programlisting>
 
         <para>The <classname>PropertyPlaceholderConfigurer</classname> doesn't
         only look for properties in the <classname>Properties</classname> file
@@ -4372,7 +4372,7 @@ jdbc.password=root</programlisting>
           you have to pick a particular implementation class at runtime. For
           example:</para>
 
-          <programlisting>&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+          <programlisting language="xml">&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
     &lt;property name="locations"&gt;
         &lt;value&gt;classpath:com/foo/strategy.properties&lt;/value&gt;
     &lt;/property&gt;
@@ -4415,11 +4415,11 @@ jdbc.password=root</programlisting>
         <para>Properties file configuration lines are expected to be in the
         format:</para>
 
-        <programlisting>beanName.property=value</programlisting>
+        <programlisting language="java">beanName.property=value</programlisting>
 
         <para>An example properties file might look like this:</para>
 
-        <programlisting>dataSource.driverClassName=com.mysql.jdbc.Driver
+        <programlisting language="java">dataSource.driverClassName=com.mysql.jdbc.Driver
 dataSource.url=jdbc:mysql:mydb</programlisting>
 
         <para>This example file would be usable against a container definition
@@ -4432,7 +4432,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         is already non-null (presumably initialized by the constructors). In
         this example...</para>
 
-        <programlisting>foo.fred.bob.sammy=123</programlisting>
+        <programlisting language="java">foo.fred.bob.sammy=123</programlisting>
 
         <para>... the <literal>sammy</literal> property of the
         <literal>bob</literal> property of the <literal>fred</literal>
@@ -4448,7 +4448,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         Spring 2.5, it is possible to configure property overriding with a
         dedicated configuration element:</para>
 
-        <programlisting>&lt;context:property-override location="classpath:override.properties"/&gt;</programlisting>
+        <programlisting language="xml">&lt;context:property-override location="classpath:override.properties"/&gt;</programlisting>
 
       </section>
     </section>
@@ -4738,7 +4738,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       source. The <classname>ResourceBundleMessageSource</classname> is more
       interesting and is the one we will provide an example for:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
   &lt;bean id="messageSource"
         class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
     &lt;property name="basenames"&gt;
@@ -4759,10 +4759,10 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       example, lets assume the contents of two of the above resource bundle
       files are...</para>
 
-      <programlisting><lineannotation># in 'format.properties'</lineannotation>
+      <programlisting language="java"><lineannotation># in 'format.properties'</lineannotation>
 message=Alligators rock!</programlisting>
 
-      <programlisting><lineannotation># in 'exceptions.properties'</lineannotation>
+      <programlisting language="java"><lineannotation># in 'exceptions.properties'</lineannotation>
 argument.required=The '{0}' argument is required.</programlisting>
 
       <para>Some (admittedly trivial) driver code to exercise the
@@ -4772,7 +4772,7 @@ argument.required=The '{0}' argument is required.</programlisting>
       implementations and so can be cast to the
       <classname>MessageSource</classname> interface.</para>
 
-      <programlisting>public static void main(String[] args) {
+      <programlisting language="java">public static void main(String[] args) {
     MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
     String message = resources.getMessage("message", null, "Default", null);
     System.out.println(message);
@@ -4798,7 +4798,7 @@ argument.required=The '{0}' argument is required.</programlisting>
       converted into Strings and inserted into placeholders in the lookup
       message. This is perhaps best explained with an example:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
     <lineannotation>&lt;!-- this <interfacename>MessageSource</interfacename> is being used in a web application --&gt;</lineannotation>
     &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
@@ -4812,7 +4812,7 @@ argument.required=The '{0}' argument is required.</programlisting>
 
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class Example {
+      <programlisting language="java">public class Example {
 
     private MessageSource messages;
 
@@ -4851,7 +4851,7 @@ argument.required=The '{0}' argument is required.</programlisting>
       <programlisting><lineannotation># in 'exceptions_en_GB.properties'</lineannotation>
 argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</programlisting>
 
-      <programlisting>public static void main(final String[] args) {
+      <programlisting language="java">public static void main(final String[] args) {
     MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
     String message = resources.getMessage("argument.required",
         new Object [] {"userDao"}, "Required", Locale.UK);
@@ -4997,7 +4997,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>Let's look at an example. First, the
       <interfacename>ApplicationContext</interfacename>:</para>
 
-      <programlisting>&lt;bean id="emailer" class="example.EmailBean"&gt;
+      <programlisting language="xml">&lt;bean id="emailer" class="example.EmailBean"&gt;
   &lt;property name="blackList"&gt;
     &lt;list&gt;
       &lt;value&gt;black@list.org&lt;/value&gt;
@@ -5013,7 +5013,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 
       <para>Now, let's look at the actual classes:</para>
 
-      <programlisting>public class EmailBean implements ApplicationContextAware {
+      <programlisting language="java">public class EmailBean implements ApplicationContextAware {
 
     private List blackList;
     private ApplicationContext ctx;
@@ -5036,7 +5036,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     }
 }</programlisting>
 
-      <programlisting>public class BlackListNotifier implements ApplicationListener {
+      <programlisting language="java">public class BlackListNotifier implements ApplicationListener {
 
     private String notificationAddress;
     
@@ -5137,7 +5137,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <interfacename>ApplicationContext</interfacename> using the
       <classname>ContextLoaderListener</classname> as follows:</para>
 
-      <programlisting>&lt;context-param&gt;
+      <programlisting language="xml">&lt;context-param&gt;
   &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
   &lt;param-value&gt;/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml&lt;/param-value&gt;
 &lt;/context-param&gt;
@@ -5313,7 +5313,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     (notice the inclusion of the '<literal>context</literal>'
     namespace):</para>
 
-    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+    <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        <lineannotation>xmlns:context="http://www.springframework.org/schema/context"</lineannotation>
@@ -5350,7 +5350,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>The <interfacename>@Required</interfacename> annotation applies
       to bean property setter methods, as in the following example:</para>
 
-      <programlisting>public class SimpleMovieLister {
+      <programlisting language="java">public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
 
@@ -5378,7 +5378,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>As expected, the <interfacename>@Autowired</interfacename>
       annotation may be applied to "traditional" setter methods:</para>
 
-      <programlisting>public class SimpleMovieLister {
+      <programlisting language="java">public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
 
@@ -5393,7 +5393,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>The annotation may also be applied to methods with arbitrary names
       and/or multiple arguments:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     private MovieCatalog movieCatalog;
     
@@ -5411,7 +5411,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>The <interfacename>@Autowired</interfacename> annotation may even
       be applied on constructors and fields:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     private MovieCatalog movieCatalog;
@@ -5432,7 +5432,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       annotation to a field or method that expects an array of that
       type:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     private MovieCatalog[] movieCatalogs;
@@ -5442,7 +5442,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 
       <para>The same applies for typed collections:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     private Set&lt;MovieCatalog&gt; movieCatalogs;
     
@@ -5459,7 +5459,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       of the expected type, and the keys will contain the corresponding bean
       names:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     private Map&lt;String, MovieCatalog&gt; movieCatalogs;
     
@@ -5477,7 +5477,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       indicating <emphasis>required</emphasis> dependencies. This behavior can
       be changed as demonstrated below.</para>
 
-      <programlisting>public class SimpleMovieLister {
+      <programlisting language="java">public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
 
@@ -5517,7 +5517,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <interfacename>ResourcePatternResolver</interfacename>) will be
       automatically resolved, with no special setup necessary.</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     private ApplicationContext context;
@@ -5540,7 +5540,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       set of type matches so that a specific bean is chosen for each argument.
       In the simplest case, this can be a plain descriptive value:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     <emphasis role="bold">@Qualifier("main")</emphasis>
@@ -5553,7 +5553,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       be specified on individual constructor arguments or method
       parameters:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     private MovieCatalog movieCatalog;
     
@@ -5572,7 +5572,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       The bean with qualifier value "main" would be wired with the
       constructor argument that has been qualified with the same value.</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
@@ -5652,7 +5652,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <interfacename>@Qualifier</interfacename> annotation within your
       definition:</para>
 
-      <programlisting>@Target({ElementType.FIELD, ElementType.PARAMETER})
+      <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 <emphasis role="bold">@Qualifier</emphasis>
 public @interface Genre {
@@ -5663,7 +5663,7 @@ public @interface Genre {
       <para>Then you can provide the custom qualifier on autowired fields and
       parameters:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     <emphasis role="bold">@Genre("Action")</emphasis>
@@ -5689,7 +5689,7 @@ public @interface Genre {
       'short' class name. Both are demonstrated in the following
       example.</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
@@ -5727,7 +5727,7 @@ public @interface Genre {
       Internet connection is available. First define the simple
       annotation:</para>
 
-      <programlisting>@Target({ElementType.FIELD, ElementType.PARAMETER})
+      <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
 public @interface Offline {
@@ -5737,7 +5737,7 @@ public @interface Offline {
       <para>Then add the annotation to the field or property to be
       autowired:</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     <emphasis role="bold">@Offline</emphasis>
@@ -5749,7 +5749,7 @@ public @interface Offline {
       <para>Now the bean definition only needs a qualifier
       <literal>'type'</literal>:</para>
 
-      <programlisting>&lt;bean class="example.SimpleMovieCatalog"&gt;
+      <programlisting language="xml">&lt;bean class="example.SimpleMovieCatalog"&gt;
     <emphasis role="bold">&lt;qualifier type="Offline"/&gt;</emphasis>
     <lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation>
 &lt;/bean&gt;</programlisting>
@@ -5762,7 +5762,7 @@ public @interface Offline {
       be considered an autowire candidate. As an example, consider the
       following annotation definition:</para>
 
-      <programlisting>@Target({ElementType.FIELD, ElementType.PARAMETER})
+      <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
 public @interface MovieQualifier {
@@ -5774,7 +5774,7 @@ public @interface MovieQualifier {
 
       <para>In this case <literal>Format</literal> is an enum:</para>
 
-      <programlisting>public enum Format {
+      <programlisting language="java">public enum Format {
     
     VHS, DVD, BLURAY
 }</programlisting>
@@ -5783,7 +5783,7 @@ public @interface MovieQualifier {
       and include values for both attributes: <literal>'genre'</literal> and
       <literal>'format'</literal>.</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Autowired
     @MovieQualifier(format=Format.VHS, genre="Action")
@@ -5813,7 +5813,7 @@ public @interface MovieQualifier {
       provided within the <literal>&lt;meta/&gt;</literal> tags if no such
       qualifier is present (see the last 2 bean definitions below).</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
@@ -5865,7 +5865,7 @@ public @interface MovieQualifier {
       even if they are not themselves annotated with Spring's
       <interfacename>@Qualifier</interfacename> annotation.</para>
 
-      <programlisting>&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
+      <programlisting language="xml">&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
     &lt;property name="customQualifierTypes"&gt;
         &lt;set&gt;
             &lt;value&gt;example.CustomQualifier&lt;/value&gt;
@@ -5908,7 +5908,7 @@ public @interface MovieQualifier {
       injected. In other words, it follows <emphasis>by-name</emphasis>
       semantics as demonstrated in this example:</para>
 
-      <programlisting>public class SimpleMovieLister {
+      <programlisting language="java">public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
 
@@ -5925,7 +5925,7 @@ public @interface MovieQualifier {
       property name. So the following example is going to have the bean
       with name "movieFinder" injected into its setter method:</para>
 
-      <programlisting>public class SimpleMovieLister {
+      <programlisting language="java">public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
 
@@ -5964,7 +5964,7 @@ public @interface MovieQualifier {
       The "context" field will simply be injected based on the known resolvable dependency
       type <interfacename>ApplicationContext</interfacename>.</para>
 
-      <programlisting>public class MovieRecommender {
+      <programlisting language="java">public class MovieRecommender {
 
     @Resource
     private CustomerPreferenceDao customerPreferenceDao;
@@ -6000,7 +6000,7 @@ public @interface MovieQualifier {
       cache will be pre-populated upon initialization and cleared upon
       destruction.</para>
 
-      <programlisting>public class CachingMovieLister {
+      <programlisting language="java">public class CachingMovieLister {
 
     @PostConstruct
     public void populateMovieCache() {
@@ -6088,7 +6088,7 @@ public @interface MovieQualifier {
       <interfacename>ApplicationContext</interfacename>. For example, the
       following two classes are eligible for such autodetection:</para>
 
-      <programlisting>@Service
+      <programlisting language="java">@Service
 public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
@@ -6099,7 +6099,7 @@ public class SimpleMovieLister {
     }
 }</programlisting>
 
-      <programlisting>@Repository
+      <programlisting language="java">@Repository
 public class JpaMovieFinder implements MovieFinder {
     <lineannotation>// implementation elided for clarity</lineannotation>
 }</programlisting>
@@ -6110,7 +6110,7 @@ public class JpaMovieFinder implements MovieFinder {
       alternatively a comma-separated list could be specified that included
       the parent package of each class).</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
@@ -6211,7 +6211,7 @@ public class JpaMovieFinder implements MovieFinder {
       <interfacename>@Repository</interfacename> annotations and using "stub"
       repositories instead.</para>
 
-      <programlisting>&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans ...&gt;
 
      &lt;context:component-scan base-package="org.example"&gt;
         &lt;context:include-filter type="regex" expression=".*Stub.*Repository"/&gt;
@@ -6251,12 +6251,12 @@ public class JpaMovieFinder implements MovieFinder {
       the following two components were detected, the names would be
       'myMovieLister' and 'movieFinderImpl':</para>
 
-      <programlisting>@Service("myMovieLister")
+      <programlisting language="java">@Service("myMovieLister")
 public class SimpleMovieLister {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
 
-      <programlisting>@Repository
+      <programlisting language="java">@Repository
 public class MovieFinderImpl implements MovieFinder {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -6271,7 +6271,7 @@ public class MovieFinderImpl implements MovieFinder {
         scanner:</para>
       </note>
 
-      <programlisting>&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans ...&gt;
                
      &lt;context:component-scan base-package="org.example"
                              name-generator="org.example.MyNameGenerator" /&gt;
@@ -6293,7 +6293,7 @@ public class MovieFinderImpl implements MovieFinder {
       <interfacename>@Scope</interfacename> annotation as well. Simply provide
       the name of the scope within the annotation, such as:</para>
 
-      <programlisting>@Scope("prototype")
+      <programlisting language="java">@Scope("prototype")
 @Repository
 public class MovieFinderImpl implements MovieFinder {
     <lineannotation>// ...</lineannotation>
@@ -6309,7 +6309,7 @@ public class MovieFinderImpl implements MovieFinder {
         scanner:</para>
       </note>
 
-      <programlisting>&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans ...&gt;
                
      &lt;context:component-scan base-package="org.example"
                              scope-resolver="org.example.MyScopeResolver" /&gt;
@@ -6325,7 +6325,7 @@ public class MovieFinderImpl implements MovieFinder {
       'interfaces', and 'targetClass'. For example, the following
       configuration will result in standard JDK dynamic proxies:</para>
 
-      <programlisting>&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans ...&gt;
                
      &lt;context:component-scan base-package="org.example"
                              scoped-proxy="interfaces" /&gt;
@@ -6351,19 +6351,19 @@ public class MovieFinderImpl implements MovieFinder {
       be provided with type-level annotations on the candidate class.
       The following three examples demonstrate this technique.</para>
 
-      <programlisting>@Component
+      <programlisting language="java">@Component
 <emphasis role="bold">@Qualifier("Action")</emphasis>
 public class ActionMovieCatalog implements MovieCatalog {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
 
-      <programlisting>@Component
+      <programlisting language="java">@Component
 <emphasis role="bold">@Genre("Action")</emphasis>
 public class ActionMovieCatalog implements MovieCatalog {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
 
-      <programlisting>@Component
+      <programlisting language="java">@Component
 <emphasis role="bold">@Offline</emphasis>
 public class CachingMovieCatalog implements MovieCatalog {
     <lineannotation>// ...</lineannotation>
@@ -6384,7 +6384,7 @@ public class CachingMovieCatalog implements MovieCatalog {
     <para>The <literal>context</literal> namespace introduced in Spring 2.5
     provides a <literal>load-time-weaver</literal> element.</para>
 
-    <programlisting>&lt;beans ...&gt;
+    <programlisting language="xml">&lt;beans ...&gt;
      
      &lt;context:load-time-weaver/&gt;
      
