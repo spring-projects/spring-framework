@@ -20,7 +20,6 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
@@ -55,11 +54,6 @@ public class Ternary extends SpelNodeImpl {
 	public String toStringAST() {
 		return new StringBuilder().append(getChild(0).toStringAST()).append(" ? ").append(getChild(1).toStringAST())
 				.append(" : ").append(getChild(2).toStringAST()).toString();
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
 	}
 
 }

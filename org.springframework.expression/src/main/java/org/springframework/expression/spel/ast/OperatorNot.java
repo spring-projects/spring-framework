@@ -53,9 +53,4 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 		return sb.toString();
 	}
 
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
-	}
-
 }

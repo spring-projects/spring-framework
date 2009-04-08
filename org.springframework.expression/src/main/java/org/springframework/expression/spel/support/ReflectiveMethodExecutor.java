@@ -56,8 +56,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 			}
 			ReflectionUtils.makeAccessible(this.method);
 			return new TypedValue(this.method.invoke(target, arguments), new TypeDescriptor(new MethodParameter(method,-1)));
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new AccessException("Problem invoking method: " + this.method, ex);
 		}
 	}

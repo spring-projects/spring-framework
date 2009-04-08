@@ -28,11 +28,10 @@ import org.springframework.expression.spel.ExpressionState;
  * <li>add doubles (floats are represented as doubles)
  * <li>add longs
  * <li>add integers
- * <li>add a string of one character and a number (effectively increasing that character), so 'a'+3='d'
+ * <li>concatenate strings
  * </ul>
  * It can be used as a unary operator for numbers (double/long/int).  The standard promotions are performed
- * when the operand types vary (double+int=double).
- * For other options it defers to the registered overloader.
+ * when the operand types vary (double+int=double). For other options it defers to the registered overloader.
  * 
  * @author Andy Clement
  * @since 3.0
@@ -75,16 +74,6 @@ public class OperatorPlus extends Operator {
 				}
 			} else if (operandOne instanceof String && operandTwo instanceof String) {
 				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString(),STRING_TYPE_DESCRIPTOR);
-			} else if (operandOne instanceof String && operandTwo instanceof Integer && ((String)operandOne).length()==1) {
-				String theString = (String) operandOne;
-				Integer theInteger = (Integer) operandTwo;
-				// implements character + int (ie. a + 1 = b)
-				return new TypedValue(Character.toString((char) (theString.charAt(0) + theInteger)),STRING_TYPE_DESCRIPTOR);
-			} else if (operandOne instanceof Integer && ((operandTwo instanceof String) && ((String)operandTwo).length()==1)) {
-				String theString = (String) operandTwo;
-				Integer theInteger = (Integer) operandOne;
-				// implements character + int (ie. 1 + a = b)
-				return new TypedValue(Character.toString((char) (theString.charAt(0) + theInteger)),STRING_TYPE_DESCRIPTOR);
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}

@@ -20,7 +20,6 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents a reference to a type, for example "T(String)" or "T(com.somewhere.Foo)"
@@ -54,11 +53,6 @@ public class TypeReference extends SpelNodeImpl {
 		sb.append(getChild(0).toStringAST());
 		sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
 	}
 
 }

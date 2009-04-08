@@ -21,7 +21,7 @@ package org.springframework.expression.spel.ast;
  * 
  * @author Andy Clement
  */
-class FormatHelper {
+public class FormatHelper {
 
 	/**
 	 * Produce a nice string for a given method name with specified arguments.
@@ -33,13 +33,11 @@ class FormatHelper {
 		StringBuilder sb = new StringBuilder();
 		sb.append(name);
 		sb.append("(");
-		if (argumentTypes != null) {
-			for (int i = 0; i < argumentTypes.length; i++) {
-				if (i > 0) {
-					sb.append(",");
-				}
-				sb.append(argumentTypes[i].getName());
+		for (int i = 0; i < argumentTypes.length; i++) {
+			if (i > 0) {
+				sb.append(",");
 			}
+			sb.append(formatClassNameForMessage(argumentTypes[i]));
 		}
 		sb.append(")");
 		return sb.toString();

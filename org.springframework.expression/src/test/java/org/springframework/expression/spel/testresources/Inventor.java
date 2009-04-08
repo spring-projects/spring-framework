@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+///CLOVER:OFF
 @SuppressWarnings("unused")
 public class Inventor {
 	private String name;
@@ -26,6 +27,8 @@ public class Inventor {
 	public List<Integer> listOfInteger = new ArrayList<Integer>();
 	public List<Boolean> booleanList = new ArrayList<Boolean>();
 	public Map<String,Boolean> mapOfStringToBoolean = new HashMap<String,Boolean>();
+	public Map<Integer,String> mapOfNumbersUpToTen = new HashMap<Integer,String>();
+	public List<Integer> listOfNumbersUpToTen = new ArrayList<Integer>();
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
@@ -42,6 +45,26 @@ public class Inventor {
 		testMap.put("sunday", "sonntag");
 		booleanList.add(false);
 		booleanList.add(false);
+		listOfNumbersUpToTen.add(1);
+		listOfNumbersUpToTen.add(2);
+		listOfNumbersUpToTen.add(3);
+		listOfNumbersUpToTen.add(4);
+		listOfNumbersUpToTen.add(5);
+		listOfNumbersUpToTen.add(6);
+		listOfNumbersUpToTen.add(7);
+		listOfNumbersUpToTen.add(8);
+		listOfNumbersUpToTen.add(9);
+		listOfNumbersUpToTen.add(10);
+		mapOfNumbersUpToTen.put(1,"one");
+		mapOfNumbersUpToTen.put(2,"two");
+		mapOfNumbersUpToTen.put(3,"three");
+		mapOfNumbersUpToTen.put(4,"four");
+		mapOfNumbersUpToTen.put(5,"five");
+		mapOfNumbersUpToTen.put(6,"six");
+		mapOfNumbersUpToTen.put(7,"seven");
+		mapOfNumbersUpToTen.put(8,"eight");
+		mapOfNumbersUpToTen.put(9,"nine");
+		mapOfNumbersUpToTen.put(10,"ten");
 	}
 
 	public void setPlaceOfBirth(PlaceOfBirth placeOfBirth2) {

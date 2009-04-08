@@ -18,6 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,17 +60,21 @@ public class Selection extends SpelNodeImpl {
 		SpelNodeImpl selectionCriteria = getChild(0);
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
-			List<Object> result = new ArrayList<Object>();
+			// TODO don't lose generic info for the new map
+			Map<Object,Object> result = new HashMap<Object,Object>();
 			for (Object k : mapdata.keySet()) {
 				try {
-					TypedValue kvpair = new TypedValue(new KeyValuePair(k, mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class));
+					KeyValuePair kvp = new KeyValuePair(k,mapdata.get(k));
+					TypedValue kvpair = new TypedValue(kvp,TypeDescriptor.valueOf(KeyValuePair.class));
 					state.pushActiveContextObject(kvpair);
-					Object o = selectionCriteria.getValueInternal(state);
+					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
-							if (variant == FIRST)
-								return kvpair;
-							result.add(kvpair);
+							if (variant == FIRST) {
+								result.put(kvp.key,kvp.value);
+								return new TypedValue(result);
+							}
+							result.put(kvp.key,kvp.value);
 						}
 					} else {
 						throw new SpelException(selectionCriteria.getCharPositionInLine(),
@@ -140,11 +145,6 @@ public class Selection extends SpelNodeImpl {
 			break;
 		}
 		return sb.append(getChild(0).toStringAST()).append("}").toString();
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
 	}
 
 }

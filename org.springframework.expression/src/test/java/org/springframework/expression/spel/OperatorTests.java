@@ -63,6 +63,8 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 == 5", false, Boolean.class);
 		evaluate("5 == 3", false, Boolean.class);
 		evaluate("6 == 6", true, Boolean.class);
+		evaluate("3.0f == 5.0f", false, Boolean.class);
+		evaluate("3.0f == 3.0f", true, Boolean.class);
 		evaluate("'abc' == null", false, Boolean.class);
 	}
 
@@ -70,6 +72,8 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 != 5", true, Boolean.class);
 		evaluate("5 != 3", true, Boolean.class);
 		evaluate("6 != 6", false, Boolean.class);
+		evaluate("3.0f != 5.0f", true, Boolean.class);
+		evaluate("3.0f != 3.0f", false, Boolean.class);
 	}
 
 	public void testGreaterThanOrEqual() {
@@ -122,23 +126,36 @@ public class OperatorTests extends ExpressionTestCase {
 	}
 	
 	public void testPlus() throws Exception {
-		evaluate("'a' + 2", "c", String.class);
+		evaluate("7 + 2", "9", Integer.class);
+		evaluate("3.0f + 5.0f", 8.0d, Double.class);
+		evaluate("3.0d + 5.0d", 8.0d, Double.class);
+
 		evaluateAndCheckError("'ab' + 2", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluate("2+'a' ", "c", String.class);
+		evaluateAndCheckError("2+'a' ", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("2+'ab'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		
+		// AST:
 		SpelExpression expr = (SpelExpression)parser.parseExpression("+3");
 		assertEquals("+3",expr.toStringAST());
 		expr = (SpelExpression)parser.parseExpression("2+3");
 		assertEquals("(2 + 3)",expr.toStringAST());
 		
+		// use as a unary operator
 		evaluate("+5d",5d,Double.class);
 		evaluate("+5L",5L,Long.class);
 		evaluate("+5",5,Integer.class);
 		evaluateAndCheckError("+'abc'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		
+		// string concatenation
+		evaluate("'abc'+'def'","abcdef",String.class);
+		
+		// 
+		evaluate("5 + new Integer('37')",42,Integer.class);
 	}
 	
 	public void testMinus() throws Exception {
 		evaluate("'c' - 2", "a", String.class);
+		evaluate("3.0f - 5.0f", -2.0d, Double.class);
 		evaluateAndCheckError("'ab' - 2", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("2-'ab'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
@@ -156,11 +173,14 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3%2",1,Integer.class);
 		evaluate("3L%2L",1L,Long.class);
 		evaluate("3.0d%2.0d",1d,Double.class);
+		evaluate("5.0f % 3.1f", 1.9d, Double.class);
 		evaluateAndCheckError("'abc'%'def'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	public void testDivide() {
+		evaluate("3.0f / 5.0f", 0.6d, Double.class);
 		evaluate("4L/2L",2L,Long.class);
+		evaluateAndCheckError("'abc'/'def'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 	
 	public void testMathOperatorDivide_ConvertToDouble() {
@@ -182,20 +202,8 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0d / 5.0d", 0.6d, Double.class);
 		evaluate("6.0d % 3.5d", 2.5d, Double.class);
 	}
-
-	public void testFloats() {
-		evaluate("3.0f == 5.0f", false, Boolean.class);
-		evaluate("3.0f == 3.0f", true, Boolean.class);
-		evaluate("3.0f != 5.0f", true, Boolean.class);
-		evaluate("3.0f != 3.0f", false, Boolean.class);
-		evaluate("3.0f + 5.0f", 8.0d, Double.class);
-		evaluate("3.0f - 5.0f", -2.0d, Double.class);
-		evaluate("3.0f * 5.0f", 15.0d, Double.class);
-		evaluate("3.0f / 5.0f", 0.6d, Double.class);
-		evaluate("5.0f % 3.1f", 1.9d, Double.class);
-	}
 	
-	public void testOperatorStrings() throws Exception {
+	public void testOperatorNames() throws Exception {
 		Operator node = getOperatorNode((SpelExpression)parser.parseExpression("1==3"));
 		assertEquals("==",node.getOperatorName());
 
@@ -265,6 +273,8 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L + 50L", 53L, Long.class);
 		evaluate("3L - 50L", -47L, Long.class);
 	}
+	
+	// ---
 	
 	private Operator getOperatorNode(SpelExpression e) {
 		SpelNode node = e.getAST();

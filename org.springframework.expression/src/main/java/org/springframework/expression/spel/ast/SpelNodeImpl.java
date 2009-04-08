@@ -55,6 +55,7 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 		}
 	}
 
+	// by default Ast nodes are not writable
 	public boolean isWritable(ExpressionState expressionState) throws EvaluationException {
 		return false;
 	}

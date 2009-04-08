@@ -78,10 +78,9 @@ public class MethodReference extends SpelNodeImpl {
 		try {
 			return executorToUse.execute(
 					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
-		}
-		catch (AccessException ae) {
+		} catch (AccessException ae) {
 			throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,
-					this.name, state.getActiveContextObject().getClass().getName(), ae.getMessage());
+					this.name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
 		}
 	}
 
@@ -128,11 +127,6 @@ public class MethodReference extends SpelNodeImpl {
 		}
 		sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
 	}
 
 
