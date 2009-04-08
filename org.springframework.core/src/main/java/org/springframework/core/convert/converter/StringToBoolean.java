@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.converter;
 
+import org.springframework.util.Assert;
+
 /**
  * Converts String to a Boolean.  The trueString and falseStrings are configurable.
  * 
@@ -22,10 +24,6 @@ package org.springframework.core.convert.converter;
  * @author Keith Donald
  */
 public class StringToBoolean implements Converter<String, Boolean> {
-
-	private static final String VALUE_TRUE = "true";
-
-	private static final String VALUE_FALSE = "false";
 
 	private String trueString;
 
@@ -35,47 +33,38 @@ public class StringToBoolean implements Converter<String, Boolean> {
 	 * Create a StringToBoolean converter with the default 'true' and 'false' strings.
 	 */
 	public StringToBoolean() {
+		this("true", "false");
 	}
 
 	/**
 	 * Create a StringToBoolean converter configured with specific values for true and false strings.
-	 * @param trueString special true string to use
-	 * @param falseString special false string to use
+	 * @param trueString special true string to use (required)
+	 * @param falseString special false string to use (required)
 	 */
 	public StringToBoolean(String trueString, String falseString) {
+		Assert.hasText(trueString, "The true string is required");
+		Assert.hasText(falseString, "The false string is required");		
 		this.trueString = trueString;
 		this.falseString = falseString;
 	}
 
-	public Boolean convert(String source) throws Exception {
-		if (trueString != null && source.equals(trueString)) {
+	public Boolean convert(String source) {
+		if (source.equals(trueString)) {
 			return Boolean.TRUE;
-		} else if (falseString != null && source.equals(falseString)) {
-			return Boolean.FALSE;
-		} else if (trueString == null && source.equals(VALUE_TRUE)) {
-			return Boolean.TRUE;
-		} else if (falseString == null && source.equals(VALUE_FALSE)) {
+		} else if (source.equals(falseString)) {
 			return Boolean.FALSE;
 		} else {
-			throw new IllegalArgumentException("Invalid boolean value [" + source + "]");
+			throw new IllegalArgumentException("Invalid boolean string '" + source + "'; expected '" + trueString + "' or '" + falseString + "'");
 		}
 	}
 
-	public String convertBack(Boolean target) throws Exception {
+	public String convertBack(Boolean target) {
 		if (Boolean.TRUE.equals(target)) {
-			if (trueString != null) {
-				return trueString;
-			} else {
-				return VALUE_TRUE;
-			}
+			return trueString;
 		} else if (Boolean.FALSE.equals(target)) {
-			if (falseString != null) {
-				return falseString;
-			} else {
-				return VALUE_FALSE;
-			}
+			return falseString;
 		} else {
-			throw new IllegalArgumentException("Invalid boolean value [" + target + "]");
+			throw new IllegalArgumentException("Invalid boolean value " + target);
 		}
 	}
 

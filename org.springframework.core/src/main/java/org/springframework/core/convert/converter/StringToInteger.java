@@ -22,11 +22,11 @@ package org.springframework.core.convert.converter;
  */
 public class StringToInteger implements Converter<String, Integer> {
 
-	public Integer convert(String source) throws Exception {
+	public Integer convert(String source) {
 		return Integer.valueOf(source);
 	}
 
-	public String convertBack(Integer target) throws Exception {
+	public String convertBack(Integer target) {
 		return target.toString();
 	}
 

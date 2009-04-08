@@ -37,7 +37,7 @@ import org.springframework.util.NumberUtils;
  */
 public class NumberToNumber implements SuperConverter<Number, Number> {
 
-	public <RT extends Number> RT convert(Number source, Class<RT> targetClass) throws Exception {
+	public <RT extends Number> RT convert(Number source, Class<RT> targetClass) {
 		return NumberUtils.convertNumberToTargetClass(source, targetClass);
 	}
 

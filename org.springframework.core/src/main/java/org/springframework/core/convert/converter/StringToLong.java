@@ -22,11 +22,11 @@ package org.springframework.core.convert.converter;
  */
 public class StringToLong implements Converter<String, Long> {
 
-	public Long convert(String source) throws Exception {
+	public Long convert(String source) {
 		return Long.valueOf(source);
 	}
 
-	public String convertBack(Long target) throws Exception {
+	public String convertBack(Long target) {
 		return target.toString();
 	}
 

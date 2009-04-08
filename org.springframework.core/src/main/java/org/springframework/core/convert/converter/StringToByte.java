@@ -22,11 +22,11 @@ package org.springframework.core.convert.converter;
  */
 public class StringToByte implements Converter<String, Byte> {
 
-	public Byte convert(String source) throws Exception {
-		return new Byte(source);
+	public Byte convert(String source) {
+		return Byte.valueOf(source);
 	}
 
-	public String convertBack(Byte target) throws Exception {
+	public String convertBack(Byte target) {
 		return target.toString();
 	}
 

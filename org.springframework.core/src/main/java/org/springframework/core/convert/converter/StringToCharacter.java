@@ -22,14 +22,14 @@ package org.springframework.core.convert.converter;
  */
 public class StringToCharacter implements Converter<String, Character> {
 
-	public Character convert(String source) throws Exception {
+	public Character convert(String source) {
 		if (source.length() != 1) {
 			throw new IllegalArgumentException("To be a Character the String '" + source + "' must have a length of 1");
 		}
-		return new Character(source.charAt(0));
+		return Character.valueOf(source.charAt(0));
 	}
 
-	public String convertBack(Character target) throws Exception {
+	public String convertBack(Character target) {
 		return target.toString();
 	}
 

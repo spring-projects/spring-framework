@@ -22,11 +22,11 @@ package org.springframework.core.convert.converter;
  */
 public class StringToFloat implements Converter<String, Float> {
 
-	public Float convert(String source) throws Exception {
+	public Float convert(String source) {
 		return Float.valueOf(source);
 	}
 
-	public String convertBack(Float target) throws Exception {
+	public String convertBack(Float target) {
 		return target.toString();
 	}
 

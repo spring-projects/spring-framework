@@ -22,11 +22,11 @@ package org.springframework.core.convert.converter;
  */
 public class StringToDouble implements Converter<String, Double> {
 
-	public Double convert(String source) throws Exception {
+	public Double convert(String source) {
 		return Double.valueOf(source);
 	}
 
-	public String convertBack(Double target) throws Exception {
+	public String convertBack(Double target) {
 		return target.toString();
 	}
 
