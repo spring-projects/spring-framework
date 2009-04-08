@@ -37,13 +37,13 @@ class CollectionToCollection extends AbstractCollectionConverter {
 	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object source) throws Exception {
 		Collection sourceCollection = (Collection) source;
-		Class targetCollectionType = getTargetType().getType();
+		Class targetCollectionType = getTargetCollectionType();
 		Class implClass = CollectionConversionUtils.getImpl(targetCollectionType);
 		Collection targetCollection = (Collection) implClass.newInstance();
 		ConversionExecutor elementConverter = getElementConverter();
 		Class elementType;
 		if (elementConverter == null) {
-			elementType = getTargetType().getElementType();
+			elementType = getTargetElementType();
 		} else {
 			elementType = null;
 		}
@@ -51,7 +51,7 @@ class CollectionToCollection extends AbstractCollectionConverter {
 		while (it.hasNext()) {
 			Object value = it.next();
 			if (elementConverter == null && elementType != null) {
-				elementConverter = getConversionService().getElementConverter(value.getClass(), elementType); 			
+				elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(elementType)); 			
 			}
 			value = elementConverter.execute(value);
 			targetCollection.add(value);

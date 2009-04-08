@@ -17,40 +17,41 @@ package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.ConversionExecutionException;
 import org.springframework.core.convert.ConversionExecutor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 abstract class AbstractCollectionConverter implements ConversionExecutor {
 
+	private ConversionService conversionService;
+
+	private ConversionExecutor elementConverter;
+	
 	private TypeDescriptor sourceCollectionType;
 	
 	private TypeDescriptor targetCollectionType;
 	
-	private GenericConversionService conversionService;
-
-	private ConversionExecutor elementConverter;
-	
-	public AbstractCollectionConverter(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType, GenericConversionService conversionService) {
+	public AbstractCollectionConverter(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType, ConversionService conversionService) {
+		this.conversionService = conversionService;
 		this.sourceCollectionType = sourceCollectionType;
 		this.targetCollectionType = targetCollectionType;
-		this.conversionService = conversionService;
-		this.elementConverter = createElementConverter();
-	}
-	
-	private ConversionExecutor createElementConverter() {
-		Class<?> sourceElementType = getSourceType().getElementType();
-		Class<?> targetElementType = getTargetType().getElementType();
-		return (sourceElementType != null && targetElementType != null) ? conversionService.getElementConverter(sourceElementType, targetElementType) : null;
-	}
-	
-	protected TypeDescriptor getSourceType() {
-		return sourceCollectionType;
+		Class<?> sourceElementType = sourceCollectionType.getElementType();
+		Class<?> targetElementType = targetCollectionType.getElementType();
+		if (sourceElementType != null && targetElementType != null) {
+			elementConverter = conversionService.getConversionExecutor(sourceElementType, TypeDescriptor.valueOf(targetElementType));
+		} else {
+			elementConverter = NoOpConversionExecutor.INSTANCE;
+		}
 	}
 
-	protected TypeDescriptor getTargetType() {
-		return targetCollectionType;
+	protected Class<?> getTargetCollectionType() {
+		return targetCollectionType.getType();
+	}
+	
+	protected Class<?> getTargetElementType() {
+		return targetCollectionType.getElementType();
 	}
 
-	protected GenericConversionService getConversionService() {
+	protected ConversionService getConversionService() {
 		return conversionService;
 	}
 
@@ -62,7 +63,7 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		try {
 			return doExecute(source);
 		} catch (Exception e) {
-			throw new ConversionExecutionException(source, sourceCollectionType, targetCollectionType, e);
+			throw new ConversionExecutionException(source, sourceCollectionType.getType(), targetCollectionType, e);
 		}
 	}
 

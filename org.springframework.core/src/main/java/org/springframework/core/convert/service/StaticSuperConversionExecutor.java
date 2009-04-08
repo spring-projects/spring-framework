@@ -41,13 +41,13 @@ class StaticSuperConversionExecutor implements ConversionExecutor {
 			return null;
 		}
 		if (!sourceType.isInstance(source)) {
-			throw new ConversionExecutionException(source, sourceType, targetType, "Source object "
+			throw new ConversionExecutionException(source, sourceType.getType(), targetType, "Source object "
 					+ source + " to convert is expected to be an instance of [" + sourceType.getName() + "]");
 		}
 		try {
 			return converter.convert(source, targetType.getType());
 		} catch (Exception e) {
-			throw new ConversionExecutionException(source, sourceType, targetType, e);
+			throw new ConversionExecutionException(source, sourceType.getType(), targetType, e);
 		}
 	}
 

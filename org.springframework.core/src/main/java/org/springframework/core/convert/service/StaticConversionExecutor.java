@@ -30,9 +30,9 @@ class StaticConversionExecutor implements ConversionExecutor {
 
 	private final Converter converter;
 
-	public StaticConversionExecutor(TypeDescriptor sourceClass, TypeDescriptor targetClass, Converter converter) {
-		this.sourceType = sourceClass;
-		this.targetType = targetClass;
+	public StaticConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType, Converter converter) {
+		this.sourceType = sourceType;
+		this.targetType = targetType;
 		this.converter = converter;
 	}
 
@@ -41,13 +41,13 @@ class StaticConversionExecutor implements ConversionExecutor {
 			return null;
 		}
 		if (sourceType != null && !sourceType.isInstance(source)) {
-			throw new ConversionExecutionException(source, sourceType, targetType, "Source object "
+			throw new ConversionExecutionException(source, sourceType.getType(), targetType, "Source object "
 					+ source + " to convert is expected to be an instance of [" + sourceType.getName() + "]");
 		}
 		try {
 			return converter.convert(source);
 		} catch (Exception e) {
-			throw new ConversionExecutionException(source, sourceType, targetType, e);
+			throw new ConversionExecutionException(source, sourceType.getType(), targetType, e);
 		}
 	}
 
