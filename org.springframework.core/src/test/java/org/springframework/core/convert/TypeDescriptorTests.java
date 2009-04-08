@@ -24,20 +24,33 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Andy Clement
  */
 public class TypeDescriptorTests {
 
+	List<String> listOfString;
 	int[] intArray;
 	List<String>[] arrayOfListOfString;
+
+	@Test
+	public void listDescriptors() throws Exception {
+		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("listOfString"));
+		assertFalse(typeDescriptor.isArray());
+		assertEquals(List.class,typeDescriptor.getType());
+		assertEquals(String.class,typeDescriptor.getElementType());
+		// TODO caught shorten these names but it is OK that they are fully qualified for now
+		assertEquals("java.util.List<java.lang.String>",typeDescriptor.asString());
+	}
 	
 	@Test
 	public void arrayTypeDescriptors() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("intArray"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
+		assertEquals("int[]",typeDescriptor.asString());
 	}
 
 	@Test
@@ -52,6 +65,8 @@ public class TypeDescriptorTests {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("arrayOfListOfString"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementType());
+		// TODO asc notice that the type of the list elements is lost: typeDescriptor.getElementType() should return a TypeDescriptor
+		assertEquals("java.util.List[]",typeDescriptor.asString());
 	}
 	
 }
