@@ -32,7 +32,7 @@ public class ConversionExecutionException extends ConversionException {
 	/**
 	 * The source type we tried to convert the value from.
 	 */
-	private TypeDescriptor sourceType;
+	private Class<?> sourceType;
 
 	/**
 	 * The target type we tried to convert the value to.
@@ -46,7 +46,7 @@ public class ConversionExecutionException extends ConversionException {
 	 * @param targetType the value's target type
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionExecutionException(Object value, TypeDescriptor sourceType, TypeDescriptor targetType, Throwable cause) {
+	public ConversionExecutionException(Object value, Class<?> sourceType, TypeDescriptor targetType, Throwable cause) {
 		super(defaultMessage(value, sourceType, targetType, cause), cause);
 		this.value = value;
 		this.sourceType = sourceType;
@@ -60,7 +60,7 @@ public class ConversionExecutionException extends ConversionException {
 	 * @param targetType the value's target type
 	 * @param message a descriptive message of what went wrong.
 	 */
-	public ConversionExecutionException(Object value, TypeDescriptor sourceType, TypeDescriptor targetType, String message) {
+	public ConversionExecutionException(Object value, Class<?> sourceType, TypeDescriptor targetType, String message) {
 		super(message);
 		this.value = value;
 		this.sourceType = sourceType;
@@ -77,7 +77,7 @@ public class ConversionExecutionException extends ConversionException {
 	/**
 	 * Returns the source type we tried to convert the value from.
 	 */
-	public TypeDescriptor getSourceType() {
+	public Class<?> getSourceType() {
 		return sourceType;
 	}
 
@@ -88,7 +88,7 @@ public class ConversionExecutionException extends ConversionException {
 		return targetType;
 	}
 
-	private static String defaultMessage(Object value, TypeDescriptor sourceType, TypeDescriptor targetType, Throwable cause) {
+	private static String defaultMessage(Object value, Class<?> sourceType, TypeDescriptor targetType, Throwable cause) {
 		return "Unable to convert value " + StylerUtils.style(value) + " from type [" + sourceType.getName()
 				+ "] to type [" + targetType.getName() + "]; reason = '" + cause.getMessage() + "'";
 	}

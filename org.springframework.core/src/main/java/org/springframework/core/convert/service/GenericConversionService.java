@@ -158,6 +158,10 @@ public class GenericConversionService implements ConversionService {
 
 	// implementing ConversionService
 
+	public boolean canConvert(Class<?> source, TypeDescriptor targetType) {
+		return false;
+	}
+
 	public boolean canConvert(Object source, TypeDescriptor targetType) {
 		return false;
 	}

@@ -33,9 +33,10 @@ class ArrayToArray extends AbstractCollectionConverter {
 		super(sourceArrayType, targetArrayType, conversionService);
 	}
 
+	@Override
 	public Object doExecute(Object sourceArray) throws Exception {
 		int length = Array.getLength(sourceArray);
-		Object targetArray = Array.newInstance(getTargetType().getElementType(), length);
+		Object targetArray = Array.newInstance(getTargetElementType(), length);
 		for (int i = 0; i < length; i++) {
 			Object value = Array.get(sourceArray, i);
 			Array.set(targetArray, i, getElementConverter().execute(value));

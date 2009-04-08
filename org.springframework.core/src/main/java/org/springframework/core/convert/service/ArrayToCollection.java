@@ -45,16 +45,12 @@ class ArrayToCollection extends AbstractCollectionConverter {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object sourceArray) throws Exception {
-		Class implClass = CollectionConversionUtils.getImpl(getTargetType().getType());
+		Class implClass = CollectionConversionUtils.getImpl(getTargetCollectionType());
 		Collection collection = (Collection) implClass.newInstance();
 		int length = Array.getLength(sourceArray);
-		ConversionExecutor converter = getElementConverter();
+		ConversionExecutor elementConverter = getElementConverter();
 		for (int i = 0; i < length; i++) {
-			Object value = Array.get(sourceArray, i);
-			if (converter != null) {
-				value = converter.execute(value);
-			}
-			collection.add(value);
+			collection.add(elementConverter.execute(Array.get(sourceArray, i)));
 		}
 		return collection;
 	}

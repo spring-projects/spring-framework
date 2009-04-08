@@ -26,6 +26,14 @@ package org.springframework.core.convert;
 public interface ConversionService {
 
 	/**
+	 * Returns true if objects of sourceType can be converted to targetType.
+	 * @param source the source to convert from (may be null)
+	 * @param targetType the target type to convert to
+	 * @return true if a conversion can be performed, false if not
+	 */
+	public boolean canConvert(Class<?> sourceType, TypeDescriptor targetType);
+
+	/**
 	 * Returns true if the source can be converted to targetType.
 	 * @param source the source to convert from (may be null)
 	 * @param targetType the target type to convert to

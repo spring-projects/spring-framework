@@ -46,19 +46,30 @@ class CollectionToArray extends AbstractCollectionConverter {
 	@Override
 	protected Object doExecute(Object source) throws Exception {
 		Collection<?> collection = (Collection<?>) source;
-		Class<?> targetComponentType = getTargetType().getElementType();
-		Object array = Array.newInstance(targetComponentType, collection.size());
+		Object array = Array.newInstance(getTargetElementType(), collection.size());
 		int i = 0;
-		ConversionExecutor converter = getElementConverter();
+		ConversionExecutor elementConverter = getElementConverter(collection);
 		for (Iterator<?> it = collection.iterator(); it.hasNext(); i++) {
 			Object value = it.next();
-			if (converter == null) {
-				converter = getConversionService().getElementConverter(value.getClass(), targetComponentType);
-			}
-			value = converter.execute(value);
+			value = elementConverter.execute(value);
 			Array.set(array, i, value);
 		}
 		return array;
+	}
+	
+	private ConversionExecutor getElementConverter(Collection<?> target) {
+		ConversionExecutor elementConverter = getElementConverter();
+		if (elementConverter == NoOpConversionExecutor.INSTANCE && !target.isEmpty()) {
+			Iterator<?> it = target.iterator();
+			while (it.hasNext()) {
+				Object value = it.next();
+				if (value != null) {
+					elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(getTargetElementType()));
+					break;
+				}
+			}
+		}
+		return elementConverter;
 	}
 
 }

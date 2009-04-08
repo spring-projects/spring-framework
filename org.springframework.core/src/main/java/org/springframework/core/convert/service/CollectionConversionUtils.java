@@ -16,6 +16,7 @@
 package org.springframework.core.convert.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ import java.util.TreeSet;
 
 class CollectionConversionUtils {
 
-	static Class<?> getImpl(Class<?> targetClass) {
+	public static Class<?> getImpl(Class<?> targetClass) {
 		if (targetClass.isInterface()) {
 			if (List.class.equals(targetClass)) {
 				return ArrayList.class;
@@ -32,6 +33,8 @@ class CollectionConversionUtils {
 				return LinkedHashSet.class;
 			} else if (SortedSet.class.equals(targetClass)) {
 				return TreeSet.class;
+			} else if (Collection.class.equals(targetClass)) {
+				return ArrayList.class;
 			} else {
 				throw new IllegalArgumentException("Unsupported collection interface [" + targetClass.getName() + "]");
 			}

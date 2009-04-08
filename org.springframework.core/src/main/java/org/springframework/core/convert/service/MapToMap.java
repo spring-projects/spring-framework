@@ -56,7 +56,7 @@ class MapToMap implements ConversionExecutor {
 			}
 			return targetMap;
 		} catch (Exception e) {
-			throw new ConversionExecutionException(source, sourceType, targetType, e);
+			throw new ConversionExecutionException(source, sourceType.getType(), targetType, e);
 		}
 	}
 
