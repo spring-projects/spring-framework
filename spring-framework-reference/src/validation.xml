@@ -43,7 +43,7 @@
         an <interfacename>Errors</interfacename> object so that while validating, validators can report
         validation failures to the <interfacename>Errors</interfacename> object.</para>
         <para>Let's consider a small data object:</para>
-        <programlisting><![CDATA[
+        <programlisting language="java"><![CDATA[
 public class Person {
 
   private String name;
@@ -71,7 +71,7 @@ public class Person {
 		Implementing a <interfacename>Validator</interfacename> is fairly straightforward,
 		especially when you know of the <classname>ValidationUtils</classname> helper class
 		that the Spring Framework also provides.</para>
-		<programlisting><![CDATA[public class PersonValidator implements Validator {
+		<programlisting language="java"><![CDATA[public class PersonValidator implements Validator {
     
     ]]><lineannotation>/**
     * This <interfacename>Validator</interfacename> validates <emphasis role="bold">just</emphasis> <classname>Person</classname> instances
@@ -109,7 +109,7 @@ public class Person {
         <classname>AddressValidator</classname> class without recourse to copy-n-paste you can
         dependency-inject or instantiate an <classname>AddressValidator</classname> within your
         <classname>CustomerValidator</classname>, and use it like so:</para>
-        <programlisting><![CDATA[public class CustomerValidator implements Validator {
+        <programlisting language="java"><![CDATA[public class CustomerValidator implements Validator {
 
    private final Validator addressValidator;
 
@@ -285,7 +285,7 @@ public class Person {
       <interfacename>PropertyEditors</interfacename>.)</emphasis></para>
 
       <para>Consider the following two classes:</para>
-	  <programlisting><![CDATA[public class Company {
+	  <programlisting language="java"><![CDATA[public class Company {
     private String name;
     private Employee managingDirector;
 
@@ -303,7 +303,7 @@ public class Person {
     }
 }]]></programlisting>
 
-	<programlisting><![CDATA[public class Employee {
+	<programlisting language="java"><![CDATA[public class Employee {
     private String name;
     private float salary;
 
@@ -324,7 +324,7 @@ public class Person {
       <para>The following code snippets show some examples of how to retrieve
       and manipulate some of the properties of instantiated
       <literal>Companies</literal> and <literal>Employees</literal>:</para>
-      <programlisting><![CDATA[BeanWrapper company = BeanWrapperImpl(new Company());
+      <programlisting language="java"><![CDATA[BeanWrapper company = BeanWrapperImpl(new Company());
 ]]><lineannotation>// setting the company name..</lineannotation><![CDATA[
 company.setPropertyValue("name", "Some Company Inc.");
 ]]><lineannotation>// ... can also be done like this:</lineannotation><![CDATA[
@@ -547,7 +547,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
 		would associate a <classname>CustomNumberEditor</classname> with the <literal>age</literal>
 		property of the <classname>Foo</classname> class.
 	  </para>
-	  <programlisting><![CDATA[public class FooBeanInfo extends SimpleBeanInfo {
+	  <programlisting language="java"><![CDATA[public class FooBeanInfo extends SimpleBeanInfo {
       
     public PropertyDescriptor[] getPropertyDescriptors() {
         try {
@@ -602,7 +602,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
 			<para>Consider a user class <classname>ExoticType</classname>, and another class
 			<classname>DependsOnExoticType</classname> which needs <classname>ExoticType</classname> set as a property:</para>
 
-			<programlisting><![CDATA[package example;
+			<programlisting language="java"><![CDATA[package example;
 		
 public class ExoticType {
 
@@ -624,11 +624,11 @@ public class DependsOnExoticType {
 			<para>When things are properly set up, we want to be able to assign the type property as a string, which a
 			<interfacename>PropertyEditor</interfacename> will behind the scenes convert into an actual
 			<classname>ExoticType</classname> instance:</para>
-			<programlisting><![CDATA[<bean id="sample" class="example.DependsOnExoticType">
+			<programlisting language="xml"><![CDATA[<bean id="sample" class="example.DependsOnExoticType">
     <property name="type" value="aNameForExoticType"/>
 </bean>]]></programlisting>
 			<para>The <interfacename>PropertyEditor</interfacename> implementation could look similar to this:</para>
-			<programlisting><lineannotation>// converts string representation to <classname>ExoticType</classname> object</lineannotation><![CDATA[
+			<programlisting language="java"><lineannotation>// converts string representation to <classname>ExoticType</classname> object</lineannotation><![CDATA[
 package example;
 
 public class ExoticTypeEditor extends PropertyEditorSupport {
@@ -650,7 +650,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 			<para>Finally, we use <classname>CustomEditorConfigurer</classname> to register the new
 			<interfacename>PropertyEditor</interfacename> with the <interfacename>ApplicationContext</interfacename>,
 			which will then be able to use it as needed:</para>
-			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+			<programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
   <property name="customEditors">
     <map>
       <entry key="example.ExoticType">
@@ -684,7 +684,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 			example. First off, you need to create your own <interfacename>PropertyEditorRegistrar</interfacename>
 			implementation:</para>
 
-			<programlisting><![CDATA[package com.foo.editors.spring;
+			<programlisting language="java"><![CDATA[package com.foo.editors.spring;
 
 public final class CustomPropertyEditorRegistrar implements PropertyEditorRegistrar {
 
@@ -702,7 +702,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 			of each property editor.</para>
 			<para>Next we configure a <classname>CustomEditorConfigurer</classname> and inject an
 			instance of our <classname>CustomPropertyEditorRegistrar</classname> into it:</para>
-			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+			<programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
     <property name="propertyEditorRegistrars">
         <list>
             <ref bean="customPropertyEditorRegistrar"/>
@@ -719,7 +719,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 			<interfacename>PropertyEditorRegistrar</interfacename> in the implementation of an <methodname>initBinder(..)</methodname>
 			method:</para>
 
-			<programlisting><![CDATA[public final class RegisterUserController extends SimpleFormController {
+			<programlisting language="java"><![CDATA[public final class RegisterUserController extends SimpleFormController {
 
     private final PropertyEditorRegistrar customPropertyEditorRegistrar;
 
