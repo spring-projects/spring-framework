@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter>
+  <title>Spring REST support </title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>The goal of Spring's REST support is to make the development of
+    'RESTful' Web services and applications easier. Client-side access to
+    RESTful resources is greatly simplified using Spring
+    <classname>RestTemplate</classname>. <classname>RestTemplate</classname>
+    follows in the footsteps of other 'Template' classes in Spring such as
+    <classname>JdbcTemplate</classname> and
+    <classname>JmsTemplate</classname>. Instead of dealing with a verbose
+    lower level API such as Apache Commons HttpClient to create RESTful
+    request, RestTemplate provides one liner methods that are purpose built
+    for RESTful programming. On the server-side, Spring's REST support is
+    based upon Spring's existing annotation based MVC framework. (For those
+    interested in the rational for that decision, and say not implenting
+    JAX-RS, read Arjen Putsma's SpringSource TeamBlog <ulink
+    url="http://blog.springsource.com/2009/03/08/rest-in-spring-3-mvc/">entry</ulink>.)
+    With little effort, you can marshall data out of a RESTful request using
+    @RequestMapping and @PathVariable annotations and return different views
+    as determined by the request's Context-Type header. </para>
+
+    <para>In this chapter we describe all the features of Spring's REST
+    support. It is divided into two main two chapters, one for the server-side
+    and one for the client-side. For those new to Spring's <link
+    linkend="mvc">MVC framework</link>, you may want to read through the
+    reference documentation on <link linkend="mvc-annotation">annotation-based
+    controller configuration</link> to undestand the general programming
+    model. </para>
+  </section>
+
+  <section>
+    <title>Creating RESTful services</title>
+
+    <para>Spring's annotation-based MVC framework serves as the basis for
+    creating RESTful Web Services. As such, you configure your servlet
+    container as you would for a Spring MVC application using Spring's <link
+    linkend="mvc-servlet">DispatcherServlet</link>. </para>
+
+    <section>
+      <title>URI templates</title>
+
+      <para>RESTful services use URIs to name resourses. To faciliate
+      accessing the information contained in a URI, its structure follows
+      conventions so that it can easily be described in a parameterized form.
+      The <ulink url="http://bitworking.org/projects/URI-Templates/">proposed
+      RFC</ulink> for URI Templates defines how a URI is parameterized. For
+      example, the URI Template</para>
+
+      <programlisting>http://www.example.com/users/{userid}</programlisting>
+
+      <para>contains the variable 'userid'. If we assign the variable the
+      value "fred", then 'expanding' the URI Template gives.</para>
+
+      <programlisting>http://www.example.com/users/fred</programlisting>
+
+      <para>When processing an request the URI can be compared to an expected
+      URI Template in order to extract a collection of variables. </para>
+
+      <para>Spring uses the <classname>@RequestMapping</classname> annotation
+      to define the URI Template for the request.
+      The<classname>@PathVariable</classname> annotation is used to extract
+      the value of the template variables and assign their value to a method
+      variable. A Spring controller method to process above example is shown
+      below;</para>
+
+      <programlisting language="java">@RequestMapping("/users/{userid}", method=RequestMethod.GET)
+public String getUser(@PathVariable String userId) {
+  // implementation omitted...
+}</programlisting>
+
+      <para>The request <literal>http://www.example.com/users/fred</literal>
+      will bind the userId method parameter to the String value 'fred'.
+      </para>
+
+      <section id="path-variable">
+        <title>Mapping RESTful URLs with the @PathVariable annotation</title>
+
+        <para>The <classname>@PathVariable</classname> method level annotation
+        is used to indicate that a method parameter should be bound to the
+        value of a URI template variable. </para>
+
+        <para>The following code snippet shows the use of a single
+        <classname>@PathVariable</classname> in a controller method:</para>
+
+        <programlisting language="java">@RequestMapping("/owners/{ownerId}", method=RequestMethod.GET)
+public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ownerId, Model model) {
+  Owner owner = ownerService.findOwner(ownerId);  
+  model.addAttribute("owner", owner);  
+  return "displayOwner"; 
+}
+</programlisting>
+
+        <para>The URI Template "<literal>/owners/{ownerId}</literal>"
+        specifies the variable name ownerId. When the controller handles this
+        request, the value of ownerId is set the the value in the request URI.
+        For example, when a request comes in for /owners/fred, the value
+        'fred' is bound to the method parameter <literal>String
+        ownerId</literal>. </para>
+
+        <para>The matching of method parameter names to URI Template variable
+        names can only be done if your code is compiled with debugging
+        enabled. If you do have not debugging enabled, you must specify the
+        name of the URI Template variable name to bind to in the @PathVariable
+        annotation. For example</para>
+
+        <programlisting>@RequestMapping("/owners/{ownerId}", method=RequestMethod.GET)
+public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String ownerId, Model model) {
+  // implementation omitted
+}
+</programlisting>
+
+        <para>The name of the method parameter does not matter in this case,
+        so you may also use create a controlled method with the signature
+        shown below</para>
+
+        <programlisting>@RequestMapping("/owners/{ownerId}", method=RequestMethod.GET)
+public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String theOwner, Model model) {
+  // implementation omitted
+}</programlisting>
+
+        <para>Multiple @PathVariable annotations can be used to bind to
+        multiple URI Template variables as shown below:</para>
+
+        <programlisting language="java">@RequestMapping("/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
+public String findPet(<emphasis role="bold">@PathVariable</emphasis> String ownerId, <emphasis
+            role="bold">@PathVariable</emphasis> String petId, Model model) {
+  Owner owner = ownerService.findOwner(ownderId);  
+  Pet pet = owner.getPet(petId);  
+  model.addAttribute("pet", pet);  
+  return "displayPet"; 
+}
+</programlisting>
+
+        <para>The following code snippet shows the use of path variables on a
+        relative path</para>
+
+        <programlisting language="java">@Controller
+@RequestMapping(<emphasis role="bold">"/owners/{ownerId}/**"</emphasis>)
+public class RelativePathUriTemplateController {
+
+  @RequestMapping(<emphasis role="bold">"/pets/{petId}"</emphasis>)
+  public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {    
+    // implementation omitted
+  }
+}
+</programlisting>
+
+        <tip>
+          <para>method parameters that are decorated with the
+          <interfacename>@PathVariable</interfacename> annotation can be of
+          <emphasis role="bold">any simple type </emphasis>such as int, long,
+          Date... Spring automatically converts to the appropriate type and
+          throws a <classname>TypeMismatchException</classname> if the type is
+          not correct.</para>
+        </tip>
+      </section>
+    </section>
+
+    <section>
+      <title>Content Negotiation</title>
+
+      <para>blah blah</para>
+    </section>
+
+    <section>
+      <title>Views</title>
+
+      <para>blah</para>
+    </section>
+
+    <section>
+      <title>HTTP Method Conversion</title>
+
+      <para>blah blah</para>
+    </section>
+
+    <section>
+      <title>ETag support</title>
+
+      <para>blah blah</para>
+    </section>
+
+    <section>
+      <title>Exception Handling</title>
+
+      <para>@ExceptionHandler</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Accessing RESTful services on the Client</title>
+
+    <para>Spring provides a client-side API blah blah</para>
+
+    <section>
+      <title>RestTemplate</title>
+
+      <para>blah blah</para>
+    </section>
+
+    <section>
+      <title>HTTP Message Conversion</title>
+
+      <para>blah blah</para>
+
+      <section>
+        <title>StringHttpMessageConverter</title>
+
+        <para></para>
+
+        <para></para>
+      </section>
+
+      <section>
+        <title>FormHttpMessageConverter</title>
+
+        <para></para>
+
+        <para></para>
+      </section>
+
+      <section>
+        <title>ByteArrayMessageConverter</title>
+
+        <para></para>
+
+        <para></para>
+      </section>
+
+      <section>
+        <title>MarshallingHttpMessageConverter</title>
+
+        <para></para>
+
+        <para></para>
+      </section>
+
+      <section>
+        <title>SourceHttpMessageConverter</title>
+
+        <para></para>
+      </section>
+    </section>
+  </section>
+</chapter>
