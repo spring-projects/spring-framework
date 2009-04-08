@@ -167,76 +167,76 @@
 
     <itemizedlist>
       <listitem>
-        <para>Java 5+ foundation</para>
-
-        <para>compatible with J2EE 1.4 and Java EE 5</para>
-      </listitem>
-
-      <listitem>
         <para>Spring Expression Language</para>
-
-        <para>Unified EL++</para>
       </listitem>
 
       <listitem>
-        <para>Container enhancements</para>
-
-        <para>Core JavaConfigfeatures added</para>
+        <para>IoC enhancements</para>
       </listitem>
 
       <listitem>
         <para>Comprehensive REST support</para>
+      </listitem>
 
-        <para>and other Spring @MVC additions</para>
+      <listitem>
+        <para>@MVC additions</para>
       </listitem>
 
       <listitem>
         <para>Declarative model validation</para>
-
-        <para>Hibernate Validator, JSR 303</para>
       </listitem>
 
       <listitem>
         <para>Early support for Java EE 6</para>
-
-        <para>JSF 2.0, JPA 2.0, etc</para>
       </listitem>
     </itemizedlist>
-  </section>
-
-  <section id="new-feature-java-5">
-    <title>Java 5+ foundation</title>
-
-    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
   </section>
 
   <section id="new-feature-el">
     <title>Spring Expression Language</title>
 
-    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+    <para>Spring introduces an expression language which is similar to Unified
+    EL in its syntax but offers significantly more feature. The expression
+    language can be used when defining XML and Annotation based bean
+    definitions and also serves as the foundation for expression language
+    support across the Spring portfolio. Details of this new functionality can
+    be found in the chapter <link linkend="expressions">Spring Expression
+    Language (SpEL).</link></para>
   </section>
 
   <section id="new-feature-java-config">
-    <title>Container enhancements</title>
+    <title>The Inversion of Control (IoC) container</title>
 
-    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+    <para>Core JavaConfigfeatures added</para>
   </section>
 
   <section id="new-feature-rest">
-    <title>Comprehensive REST support</title>
+    <title>The Web Tier</title>
 
-    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+    <para>Work in progress</para>
+
+    <section>
+      <title>Comprehensive REST support</title>
+
+      <para>Work in progress</para>
+    </section>
+
+    <section>
+      <title>@MVC additions</title>
+
+      <para>Work in progress</para>
+    </section>
   </section>
 
   <section id="new-feature-validation">
     <title>Declarative model validation</title>
 
-    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+    <para>Hibernate Validator, JSR 303</para>
   </section>
 
   <section id="new-feature-jee-6">
     <title>Early support for Java EE 6</title>
 
-    <para><emphasis>*** WORK IN PROGRESS ***</emphasis></para>
+    <para>JSF 2.0, JPA 2.0, etc</para>
   </section>
 </chapter>
