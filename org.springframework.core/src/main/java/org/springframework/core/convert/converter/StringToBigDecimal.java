@@ -24,11 +24,11 @@ import java.math.BigDecimal;
  */
 public class StringToBigDecimal implements Converter<String, BigDecimal> {
 
-	public BigDecimal convert(String source) throws Exception {
+	public BigDecimal convert(String source) {
 		return new BigDecimal(source);
 	}
 
-	public String convertBack(BigDecimal target) throws Exception {
+	public String convertBack(BigDecimal target) {
 		return target.toString();
 	}
 

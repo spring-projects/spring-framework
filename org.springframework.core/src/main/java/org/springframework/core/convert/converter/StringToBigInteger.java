@@ -24,11 +24,11 @@ import java.math.BigInteger;
  */
 public class StringToBigInteger implements Converter<String, BigInteger> {
 
-	public BigInteger convert(String source) throws Exception {
+	public BigInteger convert(String source) {
 		return new BigInteger(source);
 	}
 
-	public String convertBack(BigInteger target) throws Exception {
+	public String convertBack(BigInteger target) {
 		return target.toString();
 	}
 

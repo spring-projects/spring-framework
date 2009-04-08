@@ -22,11 +22,11 @@ package org.springframework.core.convert.converter;
  */
 public class StringToShort implements Converter<String, Short> {
 
-	public Short convert(String source) throws Exception {
+	public Short convert(String source) {
 		return Short.valueOf(source);
 	}
 
-	public String convertBack(Short target) throws Exception {
+	public String convertBack(Short target) {
 		return target.toString();
 	}
 

@@ -24,11 +24,11 @@ package org.springframework.core.convert.converter;
 @SuppressWarnings("unchecked")
 public class StringToEnum implements SuperTwoWayConverter<String, Enum> {
 
-	public <RT extends Enum> RT convert(String source, Class<RT> targetClass) throws Exception {
+	public <RT extends Enum> RT convert(String source, Class<RT> targetClass) {
 		return (RT) Enum.valueOf(targetClass, source);
 	}
 
-	public <RS extends String> RS convertBack(Enum target, Class<RS> sourceClass) throws Exception {
+	public <RS extends String> RS convertBack(Enum target, Class<RS> sourceClass) {
 		return (RS) target.name();
 	}
 

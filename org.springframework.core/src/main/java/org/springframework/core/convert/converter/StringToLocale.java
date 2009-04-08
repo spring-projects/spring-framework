@@ -26,11 +26,11 @@ import org.springframework.util.StringUtils;
  */
 public class StringToLocale implements Converter<String, Locale> {
 
-	public Locale convert(String source) throws Exception {
+	public Locale convert(String source) {
 		return StringUtils.parseLocaleString(source);
 	}
 
-	public String convertBack(Locale target) throws Exception {
+	public String convertBack(Locale target) {
 		return target.toString();
 	}
 
