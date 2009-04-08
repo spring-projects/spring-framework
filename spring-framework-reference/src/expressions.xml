@@ -239,18 +239,18 @@ boolean isEqual = exp.getValue(context, Boolean.class);  // evaluates to true</p
       <methodname>registerFunction</methodname>. The use of variables and
       functions are described in the language reference sections <link
       linkend="expressions-ref-variables">Variables</link> and <link lang=""
-      linkend="expressions-ref-functions">Functions</link>.</para>
+      linkend="expressions-ref-functions">Functions</link>. The
+      <classname>StandardEvaluationContext</classname> is also where you can
+      register custom <classname>ConstructorResolver</classname>s,
+      <classname>MethodResolver</classname>s, and
+      <classname>PropertyAccessor</classname>s to extend how SpEL evaluates
+      expressions. Please refer to the JavaDoc of these classes for more
+      details.</para>
 
       <section>
         <title>Type Conversion</title>
 
-        <para>The StandardEvaluationContext uses an instance of
-        <classname>org.springframework.expression.TypeConverter</classname>. A
-        simple implementation of this interface,
-        <classname>StandardTypeConverter</classname>, that converts basic
-        types, primitive values, booleans and characters is used but will be
-        replaced with an updated type conversion framework that is to be
-        included as part of Spring 3.0</para>
+        <para>TODO</para>
       </section>
     </section>
   </section>
@@ -276,7 +276,8 @@ boolean isEqual = exp.getValue(context, Boolean.class);  // evaluates to true</p
 &lt;/bean&gt;</programlisting>
 
       <para>The variable 'systemProperties' is predefined, so you can use it
-      in your expressions as shown below.</para>
+      in your expressions as shown below. Note that you do not have to prefix
+      the predefined variable with the '#' symbol in this context.</para>
 
       <programlisting language="xml">&lt;bean id="taxCalculator" class="org.spring.samples.TaxCalculator"&gt;
     &lt;property name="defaultLocale" value="#{ systemProperties['user.region'] }"/&gt;
@@ -376,7 +377,7 @@ boolean isEqual = exp.getValue(context, Boolean.class);  // evaluates to true</p
 
     @Autowired
     public MovieRecommender(CustomerPreferenceDao customerPreferenceDao,
-                            @Value("#{ systemProperties['user.region'] } String defaultLocale) {
+                            @Value("#{ systemProperties['user.country'] } String defaultLocale) {
         this.customerPreferenceDao = customerPreferenceDao;
         this.defaultLocale = defaultLocale;
     }
@@ -433,7 +434,7 @@ Object nullValue = parser.parseExpression("null").getValue();
 
 String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);</programlisting>
 
-      <para>Case insensitivty is allowed for the first letter of proprety
+      <para>Case insensitivity is allowed for the first letter of property
       names. The contents of arrays and lists are obtained using square
       bracket notation. </para>
 
@@ -606,8 +607,9 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
       <title>Assignment</title>
 
       <para>Setting of a property is done by using the assignment operator.
-      This would typically be done within a call to SetValue but can also be
-      done inside a call to GetValue </para>
+      This would typically be done within a call to
+      <literal>SetValue</literal> but can also be done inside a call to
+      <literal>GetValue</literal> </para>
 
       <programlisting language="java">Inventor inventor = new Inventor();		
 StandardEvaluationContext inventorContext = new StandardEvaluationContext();
@@ -627,7 +629,7 @@ String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inve
     <section>
       <title>Types</title>
 
-      <para>The specic 'T' operator can be used to specify an instance of
+      <para>The special 'T' operator can be used to specify an instance of
       java.lang.Class (the 'type'). Static methods are invoked using this
       operator as well</para>
 
@@ -642,7 +644,7 @@ boolean isEqual = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt;
       <title>Constructors</title>
 
       <para>Constructors can be invoked using the new operator. The fully
-      qualified classname should be used for all but the primitive type and
+      qualified class name should be used for all but the primitive type and
       String (where int, float, etc, can be used).</para>
 
       <programlisting language="java">Inventor einstein = 
@@ -663,6 +665,8 @@ parser.parseExpression("Members.add(new org.spring.samples.spel.inventor.Invento
       <programlisting language="java">Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 StandardEvaluationContext context = new StandardEvaluationContext();
 context.setVariable("newName", "Mike Tesla");
+
+
 context.setRootObject(tesla);
 
 parser.parseExpression("Name = #newName").getValue(context);
@@ -670,16 +674,65 @@ parser.parseExpression("Name = #newName").getValue(context);
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
       <section>
-        <title>The #this and #root variables</title>
+        <title>The #this variables</title>
 
-        <para>blah blah </para>
+        <para>The variable #this is always defined and refers to the root
+        object that is currently being evaluated. </para>
+
+        <programlisting language="java">// create an array of integers
+List&lt;Integer&gt; primes = new ArrayList&lt;Integer&gt;();
+primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
+
+// create parser and set variable 'primes' as the array of integers
+ExpressionParser parser = new SpelAntlrExpressionParser();
+StandardEvaluationContext context = new StandardEvaluationContext();
+context.setVariable("primes",primes);
+
+// all prime numbers &gt; 10 from the list (using selection ?{...})
+List&lt;Integer&gt; primesGreaterThanTen = (List&lt;Integer&gt;) parser.parseExpression("#primes.?{#this&gt;10}").getValue(context);
+
+//evaluates to [11, 13, 17]</programlisting>
       </section>
     </section>
 
     <section id="expressions-ref-functions">
       <title>Functions</title>
 
-      <para>blah blah</para>
+      <para>You can extend SpEL by registering user defined functions that can
+      be called within the expression string. The function is registered with
+      the <classname>StandardEvaluationContext</classname> using the
+      method</para>
+
+      <programlisting language="java">public void registerFunction(String name, Method m)</programlisting>
+
+      <para>A reference to a Java Method provides the implementation of the
+      function. For example, a utility method to reverse a string is shown
+      below.</para>
+
+      <programlisting>public abstract class StringUtils {
+
+  public static String reverseString(String input) {
+    StringBuilder backwards = new StringBuilder();
+    for (int i = 0; i &lt; input.length(); i++) {
+      backwards.append(input.charAt(input.length() - 1 - i));
+    }
+    return backwards.toString();
+  }
+}</programlisting>
+
+      <para>This method is then registered with the evaluation context and can
+      be used within an expression string</para>
+
+      <para>used in To register this method with the evaluation context and
+      used in an expression string</para>
+
+      <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+StandardEvaluationContext context = new StandardEvaluationContext();
+
+context.registerFunction("reverseString", 
+                         StringUtils.class.getDeclaredMethod("reverseString", new Class[] { String.class }));
+
+String helloWorldReversed = parser.parseExpression("#reverseString('hello')").getValue(context, String.class);</programlisting>
     </section>
 
     <section>
@@ -722,13 +775,195 @@ String queryResultString = parser.parseExpression(expression).getValue(societyCo
     <section>
       <title>Expression templating</title>
 
-      <para>blah blah</para>
+      <para>Expression templates allow a mixing of literal text with one or
+      more evaluation blocks. Each evaluation block is delimited with a prefix
+      and suffix characters that you can define, a common choice is to use
+      <literal>${} </literal>as the delimiters. For example,</para>
+
+      <programlisting language="java">String randomPhrase = 
+   parser.parseExpression("random number is ${T(java.lang.Math).random()}", new TemplatedParserContext()).getValue(String.class);
+
+// evaluates to "random number is 0.7038186818312008"</programlisting>
+
+      <para>The string is evaluated by concatenating the literal text 'random
+      number is' with the result of evaluating the expression inside the ${}
+      delimiter, in this case the result of calling that random() method. The
+      second argument to the method <literal>parseExpression()</literal> of
+      the type <interfacename>ParserContext</interfacename>. The
+      <interfacename>ParserContext</interfacename> interface is used to
+      influence how the expression is parsed in order to support the
+      expression templating functionality. The definition of
+      <classname>TemplatedParserContext</classname> is shown below</para>
+
+      <programlisting language="java">public class TemplatedParserContext implements ParserContext {
+
+  public String getExpressionPrefix() {
+    return "${";
+  }
+
+  public String getExpressionSuffix() {
+    return "}";
+  }
+  
+  public boolean isTemplate() {
+    return true;
+  }
+}</programlisting>
     </section>
   </section>
 
   <section id="expressions-example-classes">
     <title>Classes used in the examples</title>
 
-    <para></para>
+    <para>Inventor.java</para>
+
+    <programlisting language="java">package org.spring.samples.spel.inventor;
+
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+public class Inventor {
+
+  private String name;
+  private String nationality;
+  private String[] inventions;
+  private Date birthdate;
+  private PlaceOfBirth placeOfBirth;
+  
+  
+  public Inventor(String name, String nationality)
+  {
+    GregorianCalendar c= new GregorianCalendar();
+    this.name = name;
+    this.nationality = nationality;
+    this.birthdate = c.getTime();
+  }
+  public Inventor(String name, Date birthdate, String nationality) {
+    this.name = name;
+    this.nationality = nationality;
+    this.birthdate = birthdate;
+  }
+  
+  public Inventor() {
+  }
+
+  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+  public String getNationality() {
+    return nationality;
+  }
+  public void setNationality(String nationality) {
+    this.nationality = nationality;
+  }
+  public Date getBirthdate() {
+    return birthdate;
+  }
+  public void setBirthdate(Date birthdate) {
+    this.birthdate = birthdate;
+  }
+  public PlaceOfBirth getPlaceOfBirth() {
+    return placeOfBirth;
+  }
+  public void setPlaceOfBirth(PlaceOfBirth placeOfBirth) {
+    this.placeOfBirth = placeOfBirth;
+  }
+  public void setInventions(String[] inventions) {
+    this.inventions = inventions;
+  }
+  public String[] getInventions() {
+    return inventions;
+  }       
+}
+</programlisting>
+
+    <para>PlaceOfBirth.java</para>
+
+    <programlisting language="java">package org.spring.samples.spel.inventor;
+
+public class PlaceOfBirth {
+
+	private String city;
+	private String country;
+	
+	public PlaceOfBirth(String city) {
+		this.city=city;
+	}
+	public PlaceOfBirth(String city, String country)
+	{
+		this(city);
+		this.country = country;
+	}
+	
+	
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String s) {
+		this.city = s;
+	}
+	public String getCountry() {
+		return country;
+	}
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	
+	
+}
+</programlisting>
+
+    <para>Society.java</para>
+
+    <programlisting lang="">package org.spring.samples.spel.inventor;
+
+import java.util.*;
+
+public class Society {
+
+	private String name;
+	
+	public static String Advisors = "advisors";
+	public static String President = "president";
+	
+	private List&lt;Inventor&gt; members = new ArrayList&lt;Inventor&gt;();
+	private Map officers = new HashMap();
+
+	public List getMembers() {
+		return members;
+	}
+
+	public Map getOfficers() {
+		return officers;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public boolean isMember(String name)
+	{
+		boolean found = false;
+		for (Inventor inventor : members) {
+			if (inventor.getName().equals(name))
+			{
+				found = true;
+				break;
+			}
+		}		
+		return found;
+	}
+
+	
+}
+</programlisting>
   </section>
 </chapter>
