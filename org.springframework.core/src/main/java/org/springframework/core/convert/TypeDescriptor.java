@@ -25,6 +25,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 
+// TODO doesn't support more than depth of one (eg. Map<String,List<Foo>> or List<String>[])
 /**
  * Type metadata about a bindable target value.
  * 
@@ -268,6 +269,33 @@ public class TypeDescriptor {
 		} else {
 			return valueOf(object.getClass());
 		}
+	}
+	
+	/**
+	 * @return a textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
+	 */
+	public String asString() {
+		StringBuffer stringValue = new StringBuffer();
+		if (isArray()) {
+			// TODO should properly handle multi dimensional arrays
+			stringValue.append(getArrayComponentType().getName()).append("[]");
+		} else {
+			stringValue.append(getType().getName());
+			if (isCollection()) {
+				Class<?> collectionType = getCollectionElementType();
+				if (collectionType!=null) {
+					stringValue.append("<").append(collectionType.getName()).append(">");
+				}
+			} else if (isMap()) {
+				Class<?> keyType = getMapKeyType();
+				Class<?> valType = getMapValueType();
+				if (keyType!=null && valType!=null) {
+					stringValue.append("<").append(keyType.getName()).append(",");
+					stringValue.append(valType).append(">");
+				}
+			}
+		}
+		return stringValue.toString();
 	}
 
 
