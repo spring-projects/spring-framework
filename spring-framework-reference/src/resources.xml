@@ -27,7 +27,7 @@
     to be a more capable interface for abstracting access to low-level
     resources.</para>
 
-    <programlisting><![CDATA[public interface Resource extends InputStreamSource {
+    <programlisting language="java"><![CDATA[public interface Resource extends InputStreamSource {
 
     boolean exists();
 
@@ -44,7 +44,7 @@
     String getDescription();
 }]]></programlisting>
 
-    <programlisting><![CDATA[public interface InputStreamSource {
+    <programlisting language="java"><![CDATA[public interface InputStreamSource {
 
     InputStream getInputStream() throws IOException;
 }]]></programlisting>
@@ -244,7 +244,7 @@
     to be implemented by objects that can return (i.e. load)
     <interfacename>Resource</interfacename> instances.</para>
 
-    <programlisting>public interface ResourceLoader {
+    <programlisting language="java">public interface ResourceLoader {
     Resource getResource(String location);
 }</programlisting>
 
@@ -261,7 +261,7 @@
     of code was executed against a
     <classname>ClassPathXmlApplicationContext</classname> instance:</para>
 
-    <programlisting>Resource template = ctx.getResource("some/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("some/resource/path/myTemplate.txt);</programlisting>
 
     <para>What would be returned would be a
     <classname>ClassPathResource</classname>; if the same method was executed
@@ -278,15 +278,15 @@
     application context type, by specifying the special
     <literal>classpath:</literal> prefix:</para>
 
-    <programlisting>Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt);</programlisting>
 
     <para>Similarly, one can force a <classname>UrlResource</classname> to be
     used by specifying any of the standard <classname>java.net.URL</classname>
     prefixes:</para>
 
-    <programlisting>Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt);</programlisting>
 
-    <programlisting>Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt);</programlisting>
 
     <para>The following table summarizes the strategy for converting
     <classname>String</classname>s to
@@ -361,7 +361,7 @@
     a special marker interface, identifying objects that expect to be provided
     with a <interfacename>ResourceLoader</interfacename> reference.</para>
 
-    <programlisting><![CDATA[public interface ResourceLoaderAware {
+    <programlisting language="java"><![CDATA[public interface ResourceLoaderAware {
 
    void setResourceLoader(ResourceLoader resourceLoader);
 }]]></programlisting>
@@ -427,7 +427,7 @@
     <interfacename>Resource</interfacename>, it can be configured with a
     simple string for that resource, as follows:</para>
 	  
-	<programlisting><![CDATA[<bean id="myBean" class="...">
+	<programlisting language="xml"><![CDATA[<bean id="myBean" class="...">
   <property name="template" value="some/resource/path/myTemplate.txt"/>
 </bean>]]></programlisting>
 
@@ -446,9 +446,9 @@
     <classname>UrlResource</classname> (the latter being used to access a
     filesystem file).</para>
 
-    <programlisting><![CDATA[<property name="template" value="classpath:some/resource/path/myTemplate.txt">]]></programlisting>
+    <programlisting language="xml"><![CDATA[<property name="template" value="classpath:some/resource/path/myTemplate.txt">]]></programlisting>
 
-    <programlisting><![CDATA[<property name="template" value="file:/some/resource/path/myTemplate.txt"/>]]></programlisting>
+    <programlisting language="xml"><![CDATA[<property name="template" value="file:/some/resource/path/myTemplate.txt"/>]]></programlisting>
   </section>
 
   <section id="resources-app-ctx">
@@ -468,7 +468,7 @@
       specific application context. For example, if you create a
       <classname>ClassPathXmlApplicationContext</classname> as follows:</para>
 
-      <programlisting><![CDATA[ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");]]></programlisting>
+      <programlisting language="java"><![CDATA[ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");]]></programlisting>
 
       <para>The bean definitions will be loaded from the classpath, as a
       <classname></classname><classname>ClassPathResource</classname> will be
@@ -476,7 +476,7 @@
       <classname>FileSystemXmlApplicationContext</classname> as
       follows:</para>
 
-      <programlisting><![CDATA[ApplicationContext ctx =
+      <programlisting language="java"><![CDATA[ApplicationContext ctx =
     new FileSystemXmlApplicationContext("conf/appContext.xml");]]></programlisting>
 
       <para>The bean definition will be loaded from a filesystem location, in
@@ -487,7 +487,7 @@
       <interfacename>Resource</interfacename> created to load the definition.
       So this <classname>FileSystemXmlApplicationContext</classname>...</para>
 
-      <programlisting><![CDATA[ApplicationContext ctx =
+      <programlisting language="java"><![CDATA[ApplicationContext ctx =
     new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");]]></programlisting>
 
       <para>... will actually load its bean definitions from the classpath.
@@ -521,7 +521,7 @@
         and <literal>'daos.xml'</literal> could be instantiated like
         so...</para>
 
-        <programlisting><![CDATA[ApplicationContext ctx = new ClassPathXmlApplicationContext(
+        <programlisting language="java"><![CDATA[ApplicationContext ctx = new ClassPathXmlApplicationContext(
     new String[] {"services.xml", "daos.xml"}, MessengerService.class);]]></programlisting>
 
         <para>Please do consult the Javadocs for the
@@ -617,7 +617,7 @@
         string may use the special <literal>classpath*:</literal>
         prefix:</para>
 
-        <programlisting><![CDATA[ApplicationContext ctx =
+        <programlisting language="java"><![CDATA[ApplicationContext ctx =
     new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");]]></programlisting>
 
         <para>This special prefix specifies that all classpath resources that
@@ -706,19 +706,19 @@
       all location paths as relative, whether they start with a leading slash
       or not. In practice, this means the following are equivalent:</para>
 
-      <programlisting><![CDATA[ApplicationContext ctx =
+      <programlisting language="java"><![CDATA[ApplicationContext ctx =
     new FileSystemXmlApplicationContext("conf/context.xml");]]></programlisting>
 
-      <programlisting><![CDATA[ApplicationContext ctx =
+      <programlisting language="java"><![CDATA[ApplicationContext ctx =
     new FileSystemXmlApplicationContext("/conf/context.xml");]]></programlisting>
 
       <para>As are the following: (Even though it would make sense for them to
       be different, as one case is relative and the other absolute.)</para>
 
-      <programlisting><![CDATA[FileSystemXmlApplicationContext ctx = ...;
+      <programlisting language="java"><![CDATA[FileSystemXmlApplicationContext ctx = ...;
 ctx.getResource("some/resource/path/myTemplate.txt");]]></programlisting>
 
-      <programlisting><![CDATA[FileSystemXmlApplicationContext ctx = ...;
+      <programlisting language="java"><![CDATA[FileSystemXmlApplicationContext ctx = ...;
 ctx.getResource("/some/resource/path/myTemplate.txt");]]></programlisting>
 
       <para>In practice, if true absolute filesystem paths are needed, it is
@@ -728,10 +728,10 @@ ctx.getResource("/some/resource/path/myTemplate.txt");]]></programlisting>
       the use of a <classname>UrlResource</classname>, by using the
       <literal>file:</literal> URL prefix.</para>
 
-      <programlisting><lineannotation>// actual context type doesn't matter, the <interfacename>Resource</interfacename> will always be <classname>UrlResource</classname></lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// actual context type doesn't matter, the <interfacename>Resource</interfacename> will always be <classname>UrlResource</classname></lineannotation><![CDATA[
 ctx.getResource("file:/some/resource/path/myTemplate.txt");]]></programlisting>
 
-      <programlisting><lineannotation>// force this FileSystemXmlApplicationContext to load its definition via a <classname>UrlResource</classname></lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// force this FileSystemXmlApplicationContext to load its definition via a <classname>UrlResource</classname></lineannotation><![CDATA[
 ApplicationContext ctx =
     new FileSystemXmlApplicationContext("file:/conf/context.xml");]]></programlisting>
     </section>

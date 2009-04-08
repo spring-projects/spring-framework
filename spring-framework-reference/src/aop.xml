@@ -327,7 +327,7 @@
       <para>The @AspectJ support is enabled by including the following element
       inside your spring configuration:</para>
 
-      <programlisting>&lt;aop:aspectj-autoproxy/&gt;</programlisting>
+      <programlisting language="xml">&lt;aop:aspectj-autoproxy/&gt;</programlisting>
 
       <para>This assumes that you are using schema support as described in
       <xref linkend="xsd-config" />. See <xref
@@ -338,7 +338,7 @@
       support by adding the following definition to your application
       context:</para>
 
-      <programlisting>&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
+      <programlisting language="xml">&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
 
       <para>You will also need two AspectJ libraries on the classpath of your
       application: <filename class="libraryfile">aspectjweaver.jar</filename>
@@ -364,7 +364,7 @@
       a bean class that has the <interfacename>@Aspect</interfacename>
       annotation:</para>
 
-      <programlisting>&lt;bean id="myAspect" class="org.xyz.NotVeryUsefulAspect"&gt;
+      <programlisting language="xml">&lt;bean id="myAspect" class="org.xyz.NotVeryUsefulAspect"&gt;
    <lineannotation>&lt;!-- configure properties of aspect here as normal --&gt;</lineannotation>
 &lt;/bean&gt;
 </programlisting>
@@ -374,7 +374,7 @@
       <interfacename>org.aspectj.lang.annotation.Aspect</interfacename>
       annotation;</para>
 
-      <programlisting>package org.xyz;
+      <programlisting language="java">package org.xyz;
 import org.aspectj.lang.annotation.Aspect;
 
 @Aspect
@@ -419,7 +419,7 @@ public class NotVeryUsefulAspect {
       a pointcut named <literal>'anyOldTransfer'</literal> that will match the
       execution of any method named <literal>'transfer'</literal>:</para>
 
-      <programlisting>@Pointcut("execution(* transfer(..))")<lineannotation>// the pointcut expression</lineannotation>
+      <programlisting language="java">@Pointcut("execution(* transfer(..))")<lineannotation>// the pointcut expression</lineannotation>
 private void anyOldTransfer() {}<lineannotation>// the pointcut signature</lineannotation></programlisting>
 
       <para>The pointcut expression that forms the value of the
@@ -550,7 +550,7 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         Spring beans (when using wildcards). The '<literal>bean</literal>' PCD
         has the following form:</para>
 
-        <programlisting>bean(idOrNameOfBean)</programlisting>
+        <programlisting language="java">bean(idOrNameOfBean)</programlisting>
 
         <para>The '<literal>idOrNameOfBean</literal>' token can be the name of
         any Spring bean: limited wildcard support using the
@@ -592,7 +592,7 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         matches if a method execution represents any public method in the
         trading module).</para>
 
-        <programlisting>    @Pointcut("execution(public * *(..))")
+        <programlisting language="java">    @Pointcut("execution(public * *(..))")
     private void anyPublicOperation() {}
     
     @Pointcut("within(com.xyz.someapp.trading..*)")
@@ -618,7 +618,7 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         "SystemArchitecture" aspect that captures common pointcut expressions
         for this purpose. A typical such aspect would look as follows:</para>
 
-        <programlisting>package com.xyz.someapp;
+        <programlisting language="java">package com.xyz.someapp;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -681,7 +681,7 @@ public class SystemArchitecture {
         anywhere that you need a pointcut expression. For example, to make the
         service layer transactional, you could write:</para>
 
-        <programlisting>&lt;aop:config&gt;
+        <programlisting language="xml">&lt;aop:config&gt;
   &lt;aop:advisor 
       pointcut="com.xyz.someapp.SystemArchitecture.businessService()"
       advice-ref="tx-advice"/&gt;
@@ -706,7 +706,7 @@ public class SystemArchitecture {
         <literal>execution</literal> pointcut designator the most often. The
         format of an execution expression is:</para>
 
-        <programlisting>execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern)
+        <programlisting language="java">execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern)
           throws-pattern?)</programlisting>
 
         <para>All parts except the returning type pattern (ret-type-pattern in
@@ -736,49 +736,49 @@ public class SystemArchitecture {
           <listitem>
             <para>the execution of any public method:</para>
 
-            <programlisting>execution(public * *(..))</programlisting>
+            <programlisting language="java">execution(public * *(..))</programlisting>
           </listitem>
 
           <listitem>
             <para>the execution of any method with a name beginning with
             "set":</para>
 
-            <programlisting>execution(* set*(..))</programlisting>
+            <programlisting language="java">execution(* set*(..))</programlisting>
           </listitem>
 
           <listitem>
             <para>the execution of any method defined by the
             <interfacename>AccountService</interfacename> interface:</para>
 
-            <programlisting>execution(* com.xyz.service.AccountService.*(..))</programlisting>
+            <programlisting language="java">execution(* com.xyz.service.AccountService.*(..))</programlisting>
           </listitem>
 
           <listitem>
             <para>the execution of any method defined in the service
             package:</para>
 
-            <programlisting>execution(* com.xyz.service.*.*(..))</programlisting>
+            <programlisting language="java">execution(* com.xyz.service.*.*(..))</programlisting>
           </listitem>
 
           <listitem>
             <para>the execution of any method defined in the service package
             or a sub-package:</para>
 
-            <programlisting>execution(* com.xyz.service..*.*(..))</programlisting>
+            <programlisting language="java">execution(* com.xyz.service..*.*(..))</programlisting>
           </listitem>
 
           <listitem>
             <para>any join point (method execution only in Spring AOP) within
             the service package:</para>
 
-            <programlisting>within(com.xyz.service.*)</programlisting>
+            <programlisting language="java">within(com.xyz.service.*)</programlisting>
           </listitem>
 
           <listitem>
             <para>any join point (method execution only in Spring AOP) within
             the service package or a sub-package:</para>
 
-            <programlisting>within(com.xyz.service..*)</programlisting>
+            <programlisting language="java">within(com.xyz.service..*)</programlisting>
           </listitem>
 
           <listitem>
@@ -786,7 +786,7 @@ public class SystemArchitecture {
             the proxy implements the
             <interfacename>AccountService</interfacename> interface:</para>
 
-            <programlisting>this(com.xyz.service.AccountService)</programlisting>
+            <programlisting language="java">this(com.xyz.service.AccountService)</programlisting>
 
             <remark><para>'this' is more commonly used in a binding form :-
             see the following section on advice for how to make the proxy
@@ -798,7 +798,7 @@ public class SystemArchitecture {
             the target object implements the
             <interfacename>AccountService</interfacename> interface:</para>
 
-            <programlisting>target(com.xyz.service.AccountService)</programlisting>
+            <programlisting language="java">target(com.xyz.service.AccountService)</programlisting>
 
             <remark><para>'target' is more commonly used in a binding form :-
             see the following section on advice for how to make the target
@@ -810,7 +810,7 @@ public class SystemArchitecture {
             takes a single parameter, and where the argument passed at runtime
             is <interfacename>Serializable</interfacename>:</para>
 
-            <programlisting>args(java.io.Serializable)</programlisting>
+            <programlisting language="java">args(java.io.Serializable)</programlisting>
 
             <remark>'args' is more commonly used in a binding form :- see the
             following section on advice for how to make the method arguments
@@ -829,7 +829,7 @@ public class SystemArchitecture {
             the target object has an
             <interfacename>@Transactional</interfacename> annotation:</para>
 
-            <programlisting>@target(org.springframework.transaction.annotation.Transactional)</programlisting>
+            <programlisting language="java">@target(org.springframework.transaction.annotation.Transactional)</programlisting>
 
             <remark><para>'@target' can also be used in a binding form :- see
             the following section on advice for how to make the annotation
@@ -841,7 +841,7 @@ public class SystemArchitecture {
             the declared type of the target object has an
             <interfacename>@Transactional</interfacename> annotation:</para>
 
-            <programlisting>@within(org.springframework.transaction.annotation.Transactional)</programlisting>
+            <programlisting language="java">@within(org.springframework.transaction.annotation.Transactional)</programlisting>
 
             <remark><para>'@within' can also be used in a binding form :- see
             the following section on advice for how to make the annotation
@@ -853,7 +853,7 @@ public class SystemArchitecture {
             the executing method has an
             <interfacename>@Transactional</interfacename> annotation:</para>
 
-            <programlisting>@annotation(org.springframework.transaction.annotation.Transactional)</programlisting>
+            <programlisting language="java">@annotation(org.springframework.transaction.annotation.Transactional)</programlisting>
 
             <remark><para>'@annotation' can also be used in a binding form :-
             see the following section on advice for how to make the annotation
@@ -866,7 +866,7 @@ public class SystemArchitecture {
             argument passed has the <interfacename>@Classified</interfacename>
             annotation:</para>
 
-            <programlisting>@args(com.xyz.security.Classified)</programlisting>
+            <programlisting language="java">@args(com.xyz.security.Classified)</programlisting>
 
             <remark><para>'@args' can also be used in a binding form :- see
             the following section on advice for how to make the annotation
@@ -877,7 +877,7 @@ public class SystemArchitecture {
             <para>any join point (method execution only in Spring AOP) on a
             Spring bean named '<literal>tradeService</literal>':</para>
 
-            <programlisting>bean(tradeService)</programlisting>
+            <programlisting language="java">bean(tradeService)</programlisting>
           </listitem>
 
           <listitem>
@@ -885,7 +885,7 @@ public class SystemArchitecture {
             Spring beans having names that match the wildcard expression
             '<literal>*Service</literal>':</para>
 
-            <programlisting>bean(*Service)</programlisting>
+            <programlisting language="java">bean(*Service)</programlisting>
           </listitem>
         </itemizedlist>
       </section>
@@ -905,7 +905,7 @@ public class SystemArchitecture {
         <para>Before advice is declared in an aspect using the
         <interfacename>@Before</interfacename> annotation:</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
 @Aspect
@@ -921,7 +921,7 @@ public class BeforeExample {
         <para>If using an in-place pointcut expression we could rewrite the
         above example as:</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
 @Aspect
@@ -942,7 +942,7 @@ public class BeforeExample {
         returns normally. It is declared using the
         <interfacename>@AfterReturning</interfacename> annotation:</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.AfterReturning;
 
 @Aspect
@@ -965,7 +965,7 @@ public class AfterReturningExample {
         <interfacename>@AfterReturning</interfacename> that binds the return
         value for this:</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.AfterReturning;
 
 @Aspect
@@ -1001,7 +1001,7 @@ public class AfterReturningExample {
         by throwing an exception. It is declared using the
         <interfacename>@AfterThrowing</interfacename> annotation:</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.AfterThrowing;
 
 @Aspect
@@ -1022,7 +1022,7 @@ public class AfterThrowingExample {
         otherwise) and bind the thrown exception to an advice
         parameter.</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.AfterThrowing;
 
 @Aspect
@@ -1055,7 +1055,7 @@ public class AfterThrowingExample {
         exception return conditions. It is typically used for releasing
         resources, etc.</para>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.After;
 
 @Aspect
@@ -1111,7 +1111,7 @@ public class AfterFinallyExample {
         AspectJ, and this is discussed in the following section on advice
         parameters.</remark>
 
-        <programlisting>import org.aspectj.lang.annotation.Aspect;
+        <programlisting language="java">import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.ProceedingJoinPoint;
 
@@ -1184,7 +1184,7 @@ public class AroundExample {
           Account object as the first parameter, and you need access to the
           account in the advice body. You could write the following:</para>
 
-          <programlisting>@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" + 
+          <programlisting language="java">@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" + 
         "args(account,..)")
 public void validateAccount(Account account) {
   <lineannotation>// ...</lineannotation>
@@ -1203,7 +1203,7 @@ public void validateAccount(Account account) {
           matches a join point, and then just refer to the named pointcut from
           the advice. This would look as follows:</para>
 
-          <programlisting>@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" + 
+          <programlisting language="java">@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" + 
           "args(account,..)")
 private void accountDataAccessOperation(Account account) {}
 
@@ -1226,7 +1226,7 @@ public void validateAccount(Account account) {
           <para>First the definition of the
           <interfacename>@Auditable</interfacename> annotation:</para>
 
-          <programlisting>@Retention(RetentionPolicy.RUNTIME)
+          <programlisting language="java">@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Auditable {
 	AuditCode value();
@@ -1235,7 +1235,7 @@ public @interface Auditable {
           <para>And then the advice that matches the execution of
           <interfacename>@Auditable</interfacename> methods:</para>
 
-          <programlisting>@Before("com.xyz.lib.Pointcuts.anyPublicMethod() &amp;&amp; " + 
+          <programlisting language="java">@Before("com.xyz.lib.Pointcuts.anyPublicMethod() &amp;&amp; " + 
         "@annotation(auditable)")
 public void audit(Auditable auditable) {
   AuditCode code = auditable.value();
@@ -1263,7 +1263,7 @@ public void audit(Auditable auditable) {
               <emphasis>are</emphasis> available at runtime. For
               example:</para>
 
-              <programlisting>@Before(
+              <programlisting language="java">@Before(
    value="com.xyz.lib.Pointcuts.anyPublicMethod() &amp;&amp; target(bean) &amp;&amp; @annotation(auditable)",
    argNames="bean,auditable")
 public void audit(Object bean, Auditable auditable) {
@@ -1280,7 +1280,7 @@ public void audit(Object bean, Auditable auditable) {
               advice to receive the join point object, the "argNames"
               attribute need not include it:</para>
 
-              <programlisting>@Before(
+              <programlisting language="java">@Before(
    value="com.xyz.lib.Pointcuts.anyPublicMethod() &amp;&amp; target(bean) &amp;&amp; @annotation(auditable)",
    argNames="bean,auditable")
 public void audit(JoinPoint jp, Object bean, Auditable auditable) {
@@ -1297,7 +1297,7 @@ public void audit(JoinPoint jp, Object bean, Auditable auditable) {
               "argNames" attribute. For example, the following advice need not
               declare the "argNames" attribute:</para>
 
-              <programlisting>@Before(
+              <programlisting language="java">@Before(
    "com.xyz.lib.Pointcuts.anyPublicMethod()")
 public void audit(JoinPoint jp) {
   <lineannotation>// ... use jp</lineannotation>
@@ -1355,7 +1355,7 @@ public void audit(JoinPoint jp) {
           to ensure that the advice signature binds each of the method
           parameters in order. For example:</para>
 
-          <programlisting>@Around("execution(List&lt;Account&gt; find*(..)) &amp;&amp;" +
+          <programlisting language="java">@Around("execution(List&lt;Account&gt; find*(..)) &amp;&amp;" +
         "com.xyz.myapp.SystemArchitecture.inDataAccessLayer() &amp;&amp; " +
         "args(accountHolderNamePattern)")		
 public Object preProcessQueryPattern(ProceedingJoinPoint pjp, String accountHolderNamePattern)
@@ -1423,7 +1423,7 @@ throws Throwable {
       implement the <interfacename>UsageTracked</interfacename> interface. (In
       order to expose statistics via JMX for example.)</para>
 
-      <programlisting>@Aspect
+      <programlisting language="java">@Aspect
 public class UsageTracking {
 
   @DeclareParents(value="com.xzy.myapp.service.*+",
@@ -1447,7 +1447,7 @@ public class UsageTracking {
       <interfacename>UsageTracked</interfacename> interface. If accessing a
       bean programmatically you would write the following:</para>
 
-      <programlisting>UsageTracked usageTracked = (UsageTracked) context.getBean("myService");</programlisting>
+      <programlisting language="java">UsageTracked usageTracked = (UsageTracked) context.getBean("myService");</programlisting>
     </section>
 
     <section id="aop-instantiation-models">
@@ -1469,7 +1469,7 @@ public class UsageTracking {
       <interfacename>@Aspect</interfacename> annotation. Let's look at an
       example, and then we'll explain how it works.</para>
 
-      <programlisting>@Aspect("perthis(com.xyz.myapp.SystemArchitecture.businessService())")
+      <programlisting language="java">@Aspect("perthis(com.xyz.myapp.SystemArchitecture.businessService())")
 public class MyAspect {
 
   private int someState;
@@ -1519,7 +1519,7 @@ public class MyAspect {
       advice so that we can call proceed multiple times. Here's how the basic
       aspect implementation looks:</para>
 
-      <programlisting>@Aspect
+      <programlisting language="java">@Aspect
 public class ConcurrentOperationExecutor implements Ordered {
    
    private static final int DEFAULT_MAX_RETRIES = 2;
@@ -1573,7 +1573,7 @@ public class ConcurrentOperationExecutor implements Ordered {
 
       <para>The corresponding Spring configuration is:</para>
 
-      <programlisting>&lt;aop:aspectj-autoproxy/&gt;
+      <programlisting language="xml">&lt;aop:aspectj-autoproxy/&gt;
 
 &lt;bean id="concurrentOperationExecutor"
   class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor"&gt;
@@ -1585,7 +1585,7 @@ public class ConcurrentOperationExecutor implements Ordered {
       operations, we might define an <interfacename>Idempotent</interfacename>
       annotation:</para>
 
-      <programlisting>@Retention(RetentionPolicy.RUNTIME)
+      <programlisting language="java">@Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
   <lineannotation>// marker annotation</lineannotation>
 }</programlisting>
@@ -1595,7 +1595,7 @@ public @interface Idempotent {
       simply involves refining the pointcut expression so that only
       <interfacename>@Idempotent</interfacename> operations match:</para>
 
-      <programlisting>@Around("com.xyz.myapp.SystemArchitecture.businessService() &amp;&amp; " + 
+      <programlisting language="java">@Around("com.xyz.myapp.SystemArchitecture.businessService() &amp;&amp; " + 
         "@annotation(com.xyz.myapp.service.Idempotent)")
 public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
   ...	
@@ -1653,7 +1653,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       the backing bean is referenced using the <literal>ref</literal>
       attribute:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
     ...
   &lt;/aop:aspect&gt;
@@ -1678,7 +1678,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       <para>A pointcut representing the execution of any business service in
       the service layer could be defined as follows:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:pointcut id="businessService" 
         expression="execution(* com.xyz.myapp.service.*.*(..))"/&gt;
@@ -1694,7 +1694,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       AspectJ reflection APIs). On JDK 1.5 therefore, another way of defining
       the above pointcut would be:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:pointcut id="businessService" 
         expression="com.xyz.myapp.SystemArchitecture.businessService()"/&gt;
@@ -1707,7 +1707,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       <para>Declaring a pointcut inside an aspect is very similar to declaring
       a top-level pointcut:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
 
@@ -1725,7 +1725,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       example, the following pointcut collects the 'this' object as the join
       point context and passes it to advice:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
 
@@ -1741,7 +1741,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       <para>The advice must be declared to receive the collected join point
       context by including parameters of the matching names:</para>
 
-      <programlisting>public void monitor(Object service) {
+      <programlisting language="java">public void monitor(Object service) {
     ...
 }</programlisting>
 
@@ -1750,7 +1750,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       used in place of '&amp;&amp;', '||' and '!' respectively. For example,
       the previous pointcut may be better written as:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
 
@@ -1784,7 +1784,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         declared inside an <literal>&lt;aop:aspect&gt;</literal> using the
         &lt;aop:before&gt; element.</para>
 
-        <programlisting>&lt;aop:aspect id="beforeExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="beforeExample" ref="aBean"&gt;
 
     &lt;aop:before 
       pointcut-ref="dataAccessOperation" 
@@ -1800,7 +1800,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <literal>pointcut-ref</literal> attribute with a
         <literal>pointcut</literal> attribute:</para>
 
-        <programlisting>&lt;aop:aspect id="beforeExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="beforeExample" ref="aBean"&gt;
 
     &lt;aop:before 
       pointcut="execution(* com.xyz.myapp.dao.*.*(..))" 
@@ -1831,7 +1831,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <literal>&lt;aop:aspect&gt;</literal> in the same way as before
         advice. For example:</para>
 
-        <programlisting>&lt;aop:aspect id="afterReturningExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="afterReturningExample" ref="aBean"&gt;
 
     &lt;aop:after-returning 
       pointcut-ref="dataAccessOperation" 
@@ -1846,7 +1846,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         specify the name of the parameter to which the return value should be
         passed:</para>
 
-        <programlisting>&lt;aop:aspect id="afterReturningExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="afterReturningExample" ref="aBean"&gt;
 
     &lt;aop:after-returning 
       pointcut-ref="dataAccessOperation"
@@ -1862,7 +1862,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         matching in the same way as described for @AfterReturning. For
         example, the method signature may be declared as:</para>
 
-        <programlisting>public void doAccessCheck(Object retVal) {...</programlisting>
+        <programlisting language="java">public void doAccessCheck(Object retVal) {...</programlisting>
       </section>
 
       <section id="aop-schema-advice-after-throwing">
@@ -1873,7 +1873,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <literal>&lt;aop:aspect&gt;</literal> using the after-throwing
         element:</para>
 
-        <programlisting>&lt;aop:aspect id="afterThrowingExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="afterThrowingExample" ref="aBean"&gt;
 
     &lt;aop:after-throwing
       pointcut-ref="dataAccessOperation" 
@@ -1888,7 +1888,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         specify the name of the parameter to which the exception should be
         passed:</para>
 
-        <programlisting>&lt;aop:aspect id="afterThrowingExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="afterThrowingExample" ref="aBean"&gt;
 
     &lt;aop:after-throwing 
       pointcut-ref="dataAccessOperation"
@@ -1904,7 +1904,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         matching in the same way as described for @AfterThrowing. For example,
         the method signature may be declared as:</para>
 
-        <programlisting>public void doRecoveryActions(DataAccessException dataAccessEx) {...</programlisting>
+        <programlisting language="java">public void doRecoveryActions(DataAccessException dataAccessEx) {...</programlisting>
       </section>
 
       <section id="aop-schema-advice-after-finally">
@@ -1914,7 +1914,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         exits. It is declared using the <literal>after</literal>
         element:</para>
 
-        <programlisting>&lt;aop:aspect id="afterFinallyExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="afterFinallyExample" ref="aBean"&gt;
 
     &lt;aop:after
       pointcut-ref="dataAccessOperation" 
@@ -1951,7 +1951,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         linkend="aop-ataspectj-around-advice" /> for notes on calling proceed
         with an <classname>Object[]</classname>.</para>
 
-        <programlisting>&lt;aop:aspect id="aroundExample" ref="aBean"&gt;
+        <programlisting language="xml">&lt;aop:aspect id="aroundExample" ref="aBean"&gt;
 
     &lt;aop:around
       pointcut-ref="businessService" 
@@ -1965,7 +1965,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         advice would be exactly the same as in the @AspectJ example (minus the
         annotation of course):</para>
 
-        <programlisting>public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+        <programlisting language="java">public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
     <lineannotation>// start stopwatch</lineannotation>
     Object retVal = pjp.proceed();
     <lineannotation>// stop stopwatch</lineannotation>
@@ -1987,7 +1987,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         attribute in an advice annotation as described in <xref
         linkend="aop-ataspectj-advice-params-names" />. For example:</para>
 
-        <programlisting>&lt;aop:before
+        <programlisting language="xml">&lt;aop:before
   pointcut="com.xyz.lib.Pointcuts.anyPublicMethod() and @annotation(auditable)"
   method="audit"
   arg-names="auditable"/&gt;</programlisting>
@@ -1999,7 +1999,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         approach that illustrates some around advice used in conjunction with
         a number of strongly typed parameters.</para>
 
-        <programlisting>package x.y.service;
+        <programlisting language="java">package x.y.service;
 
 public interface FooService {
 
@@ -2021,7 +2021,7 @@ public class DefaultFooService implements FooService {
         <methodname>profile(..)</methodname> is to be used as
         <literal>around</literal> advice:</para>
 
-        <programlisting>package x.y;
+        <programlisting language="java">package x.y;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.util.StopWatch;
@@ -2045,7 +2045,7 @@ public class SimpleProfiler {
         effect the execution of the above advice for a particular join
         point:</para>
 
-        <programlisting>&lt;beans xmlns="http://www.springframework.org/schema/beans"
+        <programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:aop="http://www.springframework.org/schema/aop"
       xsi:schemaLocation="
@@ -2076,7 +2076,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <para>If we had the following driver script, we would get output
         something like this on standard output:</para>
 
-        <programlisting>import org.springframework.beans.factory.BeanFactory;
+        <programlisting language="java">import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import x.y.service.FooService;
 
@@ -2128,7 +2128,7 @@ ms     %     Task name
       <interfacename>UsageTracked</interfacename> interface. (In order to
       expose statistics via JMX for example.)</para>
 
-      <programlisting>&lt;aop:aspect id="usageTrackerAspect" ref="usageTracking"&gt;
+      <programlisting language="xml">&lt;aop:aspect id="usageTrackerAspect" ref="usageTracking"&gt;
 
   &lt;aop:declare-parents
       types-matching="com.xzy.myapp.service.*+"
@@ -2145,7 +2145,7 @@ ms     %     Task name
       <para>The class backing the <literal>usageTracking</literal> bean would
       contain the method:</para>
 
-      <programlisting>public void recordUsage(UsageTracked usageTracked) {
+      <programlisting language="java">public void recordUsage(UsageTracked usageTracked) {
     usageTracked.incrementUseCount();
 }</programlisting>
 
@@ -2159,7 +2159,7 @@ ms     %     Task name
       interface. If accessing a bean programmatically you would write the
       following:</para>
 
-      <programlisting>UsageTracked usageTracked = (UsageTracked) context.getBean("myService");</programlisting>
+      <programlisting language="java">UsageTracked usageTracked = (UsageTracked) context.getBean("myService");</programlisting>
     </section>
 
     <section id="aop-schema-instatiation-models">
@@ -2186,7 +2186,7 @@ ms     %     Task name
       see it used in conjunction with transactional advice, which also has its
       own namespace support in Spring 2.0. Here's how it looks:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:pointcut id="businessService"
         expression="execution(* com.xyz.myapp.service.*.*(..))"/&gt;
@@ -2235,7 +2235,7 @@ ms     %     Task name
       aspect implementation looks (it's just a regular Java class using the
       schema support):</para>
 
-      <programlisting>public class ConcurrentOperationExecutor implements Ordered {
+      <programlisting language="java">public class ConcurrentOperationExecutor implements Ordered {
    
    private static final int DEFAULT_MAX_RETRIES = 2;
 
@@ -2288,7 +2288,7 @@ ms     %     Task name
 
       <para>The corresponding Spring configuration is:</para>
 
-      <programlisting>&lt;aop:config&gt;
+      <programlisting language="xml">&lt;aop:config&gt;
 
   &lt;aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor"&gt;
 
@@ -2315,7 +2315,7 @@ ms     %     Task name
       introducing an <interfacename>Idempotent</interfacename>
       annotation:</para>
 
-      <programlisting>@Retention(RetentionPolicy.RUNTIME)
+      <programlisting language="java">@Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
   <lineannotation>// marker annotation</lineannotation>
 }</programlisting>
@@ -2325,7 +2325,7 @@ public @interface Idempotent {
       simply involves refining the pointcut expression so that only
       <interfacename>@Idempotent</interfacename> operations match:</para>
 
-      <programlisting>  &lt;aop:pointcut id="idempotentOperation"
+      <programlisting language="xml">  &lt;aop:pointcut id="idempotentOperation"
         expression="execution(* com.xyz.myapp.service.*.*(..)) and
                     @annotation(com.xyz.myapp.service.Idempotent)"/&gt;</programlisting>
     </section>
@@ -2401,7 +2401,7 @@ public @interface Idempotent {
       in XML. For example, in the @AspectJ style you can write something
       like:</para>
 
-      <programlisting>  @Pointcut(execution(* get*()))
+      <programlisting language="java">  @Pointcut(execution(* get*()))
   public void propertyAccess() {}
 
   @Pointcut(execution(org.xyz.Account+ *(..))
@@ -2412,7 +2412,7 @@ public @interface Idempotent {
 
       <para>In the XML style I can declare the first two pointcuts:</para>
 
-      <programlisting>  &lt;aop:pointcut id="propertyAccess"
+      <programlisting language="xml">  &lt;aop:pointcut id="propertyAccess"
       expression="execution(* get*())"/&gt;
 
   &lt;aop:pointcut id="operationReturningAnAccount"
@@ -2492,7 +2492,7 @@ public @interface Idempotent {
     the value of the <literal>proxy-target-class</literal> attribute of the
     <literal>&lt;aop:config&gt;</literal> element to true:</para>
 
-    <programlisting>&lt;aop:config <emphasis role="bold">proxy-target-class="true"</emphasis>&gt;
+    <programlisting language="xml">&lt;aop:config <emphasis role="bold">proxy-target-class="true"</emphasis>&gt;
     <lineannotation>&lt;!-- other beans defined here... --&gt;</lineannotation>
 &lt;/aop:config&gt;</programlisting>
 
@@ -2501,7 +2501,7 @@ public @interface Idempotent {
     <literal>&lt;aop:aspectj-autoproxy&gt;</literal> element to
     <literal>true</literal>:</para>
 
-    <programlisting>&lt;aop:aspectj-autoproxy <emphasis role="bold">proxy-target-class="true"</emphasis>/&gt;</programlisting>
+    <programlisting language="xml">&lt;aop:aspectj-autoproxy <emphasis role="bold">proxy-target-class="true"</emphasis>/&gt;</programlisting>
 
     <note>
       <para>Multiple <literal>&lt;aop:config/&gt;</literal> sections are
@@ -2531,7 +2531,7 @@ public @interface Idempotent {
       un-proxied, nothing-special-about-it, straight object reference, as
       illustrated by the following code snippet.</para>
 
-      <programlisting>public class SimplePojo implements Pojo {
+      <programlisting language="java">public class SimplePojo implements Pojo {
 
    public void foo() {
       <lineannotation>// this next method invocation is a <emphasis
@@ -2562,7 +2562,7 @@ public @interface Idempotent {
           </imageobject>
         </mediaobject></para>
 
-      <programlisting>public class Main {
+      <programlisting language="java">public class Main {
 
    public static void main(String[] args) {
    
@@ -2588,7 +2588,7 @@ public @interface Idempotent {
           </imageobject>
         </mediaobject></para>
 
-      <programlisting>public class Main {
+      <programlisting language="java">public class Main {
 
    public static void main(String[] args) {
    
@@ -2628,7 +2628,7 @@ public @interface Idempotent {
       out precisely because it is so horrendous. You can (choke!) totally tie
       the logic within your class to Spring AOP by doing this:</para>
 
-      <programlisting>public class SimplePojo implements Pojo {
+      <programlisting language="java">public class SimplePojo implements Pojo {
 
    public void foo() {
       <lineannotation>// this works, but... gah!</lineannotation>
@@ -2646,7 +2646,7 @@ public @interface Idempotent {
       It also requires some additional configuration when the proxy is being
       created:</para>
 
-      <programlisting>public class Main {
+      <programlisting language="java">public class Main {
 
    public static void main(String[] args) {
    
@@ -2685,7 +2685,7 @@ public @interface Idempotent {
     or more @AspectJ aspects. Basic usage for this class is very simple, as
     illustrated below. See the Javadocs for full information.</para>
 
-    <programlisting><lineannotation>// create a factory that can generate a proxy for the given target object</lineannotation>
+    <programlisting language="java"><lineannotation>// create a factory that can generate a proxy for the given target object</lineannotation>
 AspectJProxyFactory factory = new AspectJProxyFactory(targetObject); 
 
 <lineannotation>// add an aspect, the class must be an @AspectJ aspect
@@ -2739,7 +2739,7 @@ MyInterfaceType proxy = factory.getProxy();</programlisting>
       a class as eligible for Spring-driven configuration. In the simplest
       case it can be used just as a marker annotation:</para>
 
-      <programlisting>package com.xyz.myapp.domain;
+      <programlisting language="java">package com.xyz.myapp.domain;
 
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -2757,14 +2757,14 @@ public class Account {
       way to declare the prototype definition is simply to omit the
       <literal>id</literal> attribute:</para>
 
-      <programlisting>&lt;bean class="com.xyz.myapp.domain.Account" scope="prototype"&gt;
+      <programlisting language="xml">&lt;bean class="com.xyz.myapp.domain.Account" scope="prototype"&gt;
   &lt;property name="fundsTransferService" ref="fundsTransferService"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>If you want to explicitly specify the name of the prototype bean
       definition to use, you can do so directly in the annotation:</para>
 
-      <programlisting>package com.xyz.myapp.domain;
+      <programlisting language="java">package com.xyz.myapp.domain;
 
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -2827,7 +2827,7 @@ public class Account {
         <interfacename>@Configurable</interfacename> declaration like
         so:</para>
 
-        <programlisting>@Configurable(preConstruction=true)</programlisting>
+        <programlisting language="java">@Configurable(preConstruction=true)</programlisting>
 
         <para>You can find out more information about the language semantics
         of the various pointcut types in AspectJ <ulink
@@ -2850,12 +2850,12 @@ public class Account {
       namespace</link> defines a convenient tag for doing this: just include
       the following in your application context configuration:</para>
 
-      <programlisting>&lt;context:spring-configured/&gt;</programlisting>
+      <programlisting language="xml">&lt;context:spring-configured/&gt;</programlisting>
 
       <para>If you are using the DTD instead of schema, the equivalent
       definition is:</para>
 
-      <programlisting>&lt;bean 
+      <programlisting language="xml">&lt;bean 
       class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"
       factory-method="aspectOf"/&gt;</programlisting>
 
@@ -2868,7 +2868,7 @@ public class Account {
       manually specify that the bean depends on the configuration
       aspect.</para>
 
-      <programlisting>&lt;bean id="myService"
+      <programlisting language="xml">&lt;bean id="myService"
   class="com.xzy.myapp.service.MyService"
   depends-on="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"&gt;
 
@@ -2982,7 +2982,7 @@ public class Account {
       domain model using prototype bean definitions that match the
       fully-qualified class names:</para>
 
-      <programlisting>public aspect DomainObjectConfiguration extends AbstractBeanConfigurerAspect {
+      <programlisting language="java">public aspect DomainObjectConfiguration extends AbstractBeanConfigurerAspect {
 
   public DomainObjectConfiguration() {
     setBeanWiringInfoResolver(new ClassNameBeanWiringInfoResolver());
@@ -3014,7 +3014,7 @@ public class Account {
       ensures that Spring obtains the aspect instance by asking AspectJ for it
       rather than trying to create an instance itself. For example:</para>
 
-      <programlisting>&lt;bean id="profiler" class="com.xyz.profiler.Profiler"
+      <programlisting language="xml">&lt;bean id="profiler" class="com.xyz.profiler.Profiler"
       <emphasis role="bold">factory-method="aspectOf"</emphasis>&gt;
   &lt;property name="profilingStrategy" ref="jamonProfilingStrategy"/&gt;
 &lt;/bean&gt;</programlisting>
@@ -3039,7 +3039,7 @@ public class Account {
       and only beans with names matched by at least one of the patterns will
       be used for Spring AOP autoproxy configuration:</para>
 
-      <programlisting>&lt;aop:aspectj-autoproxy&gt;
+      <programlisting language="xml">&lt;aop:aspectj-autoproxy&gt;
   &lt;aop:include name="thisBean"/&gt;
   &lt;aop:include name="thatBean"/&gt;
 &lt;/aop:aspectj-autoproxy&gt;</programlisting>
@@ -3108,7 +3108,7 @@ public class Account {
         quick-and-dirty time-based profiler, using the @AspectJ-style of
         aspect declaration.</para>
 
-        <programlisting>package foo;
+        <programlisting language="java">package foo;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -3145,7 +3145,7 @@ public class ProfilingAspect {
         classpath called ' <filename>META-INF/aop.xml</filename>' is standard
         AspectJ.</para>
 
-        <programlisting>&lt;!DOCTYPE aspectj PUBLIC
+        <programlisting language="xml">&lt;!DOCTYPE aspectj PUBLIC
         "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd"&gt;
 &lt;aspectj&gt;
 
@@ -3175,7 +3175,7 @@ public class ProfilingAspect {
         are some more options that you can specify, but these are detailed
         later).</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
@@ -3198,7 +3198,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
         <methodname>main(..)</methodname> method to demonstrate the LTW in
         action.</para>
 
-        <programlisting>package foo;
+        <programlisting language="java">package foo;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -3256,7 +3256,7 @@ ms     %     Task name
         on the <classname>Main</classname> program will yield the same
         result.</para>
 
-        <programlisting>package foo;
+        <programlisting language="java">package foo;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -3400,7 +3400,7 @@ public final class Main {
         below a valid <literal>&lt;context:load-time-weaver/&gt;</literal>
         definition that uses default settings.</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
@@ -3493,7 +3493,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
         <literal>&lt;context:load-time-weaver/&gt;</literal> element. Find
         below an example of doing just that:</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
@@ -3601,7 +3601,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
           included in Tomcat's common lib directory in order to make this
           setup work.</para>
 
-          <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+          <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;

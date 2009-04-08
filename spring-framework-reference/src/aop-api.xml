@@ -33,7 +33,7 @@
       is the central interface, used to target advices to particular classes
       and methods. The complete interface is shown below:</para>
 
-      <programlisting><![CDATA[public interface Pointcut {
+      <programlisting language="java"><![CDATA[public interface Pointcut {
 
     ClassFilter getClassFilter();
 
@@ -51,7 +51,7 @@
       <literal>matches()</literal> method always returns true, all target
       classes will be matched:</para>
 
-      <programlisting><![CDATA[public interface ClassFilter {
+      <programlisting language="java"><![CDATA[public interface ClassFilter {
 
     boolean matches(Class clazz);
 }]]></programlisting>
@@ -59,7 +59,7 @@
       <para>The <interfacename>MethodMatcher</interfacename> interface is normally more
       important. The complete interface is shown below:</para>
 
-      <programlisting><![CDATA[public interface MethodMatcher {
+      <programlisting language="java"><![CDATA[public interface MethodMatcher {
 
     boolean matches(Method m, Class targetClass);
 
@@ -170,7 +170,7 @@
 
           <para>The usage is shown below:</para>
 
-          <para><programlisting>&lt;bean id="settersAndAbsquatulatePointcut" 
+          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulatePointcut" 
     class="org.springframework.aop.support.Perl5RegexpMethodPointcut"&gt;
     &lt;property name="patterns"&gt;
         &lt;list&gt;
@@ -189,7 +189,7 @@
           as the one bean encapsulates both pointcut and advice, as shown
           below:</para>
 
-          <para><programlisting>&lt;bean id="settersAndAbsquatulateAdvisor" 
+          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulateAdvisor" 
     class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
     &lt;property name="advice"&gt;
         &lt;ref local="beanNameOfAopAllianceInterceptor"/&gt;
@@ -260,7 +260,7 @@
       just one abstract method (although it's possible to override other
       methods to customize behavior):</para>
 
-      <para><programlisting>class TestStaticPointcut extends StaticMethodMatcherPointcut {
+      <para><programlisting language="java">class TestStaticPointcut extends StaticMethodMatcherPointcut {
 
     public boolean matches(Method m, Class targetClass) {
         // return true if custom criteria match
@@ -332,7 +332,7 @@
         advice using method interception. MethodInterceptors implementing
         around advice should implement the following interface:</para>
 
-        <programlisting>public interface MethodInterceptor extends Interceptor {
+        <programlisting language="java">public interface MethodInterceptor extends Interceptor {
   
     Object invoke(MethodInvocation invocation) throws Throwable;
 }</programlisting>
@@ -346,7 +346,7 @@
         <para>A simple <classname>MethodInterceptor</classname> implementation
         looks as follows:</para>
 
-        <programlisting>public class DebugInterceptor implements MethodInterceptor {
+        <programlisting language="java">public class DebugInterceptor implements MethodInterceptor {
 
     public Object invoke(MethodInvocation invocation) throws Throwable {
         System.out.println("Before: invocation=[" + invocation + "]");
@@ -393,7 +393,7 @@
         although the usual objects apply to field interception and it's
         unlikely that Spring will ever implement it).</para>
 
-        <programlisting>public interface MethodBeforeAdvice extends BeforeAdvice {
+        <programlisting language="java">public interface MethodBeforeAdvice extends BeforeAdvice {
 
     void before(Method m, Object[] args, Object target) throws Throwable;
 }</programlisting>
@@ -410,7 +410,7 @@
         <para>An example of a before advice in Spring, which counts all method
         invocations:</para>
 
-        <programlisting>public class CountingBeforeAdvice implements MethodBeforeAdvice {
+        <programlisting language="java">public class CountingBeforeAdvice implements MethodBeforeAdvice {
 
     private int count;
 
@@ -437,7 +437,7 @@
         given object implements one or more typed throws advice methods. These
         should be in the form of:</para>
 
-        <programlisting>afterThrowing([Method, args, target], subclassOfThrowable) </programlisting>
+        <programlisting language="java">afterThrowing([Method, args, target], subclassOfThrowable) </programlisting>
 
         <para>Only the last argument is required. The method signatures may
         have either one or four arguments, depending on whether the advice
@@ -447,7 +447,7 @@
         <para>The advice below is invoked if a <exceptionname>RemoteException</exceptionname>
     		is thrown (including subclasses):</para>
 
-        <programlisting><![CDATA[public class RemoteThrowsAdvice implements ThrowsAdvice {
+        <programlisting language="java"><![CDATA[public class RemoteThrowsAdvice implements ThrowsAdvice {
 
     public void afterThrowing(RemoteException ex) throws Throwable {
         ]]><lineannotation>// Do something with remote exception</lineannotation><![CDATA[
@@ -459,7 +459,7 @@
         advice, it declares 4 arguments, so that it has access to the invoked
         method, method arguments and target object:</para>
 
-        <programlisting><![CDATA[public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
+        <programlisting language="java"><![CDATA[public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
     public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
         ]]><lineannotation>// Do something with all arguments</lineannotation><![CDATA[
@@ -472,7 +472,7 @@
         <literal>ServletException</literal>. Any number of throws advice
         methods can be combined in a single class.</para>
 
-        <programlisting>public static class CombinedThrowsAdvice implements ThrowsAdvice {
+        <programlisting language="java">public static class CombinedThrowsAdvice implements ThrowsAdvice {
 
     public void afterThrowing(RemoteException ex) throws Throwable {
         // Do something with remote exception
@@ -501,7 +501,7 @@
         <emphasis>org.springframework.aop.AfterReturningAdvice</emphasis>
         interface, shown below:</para>
 
-        <programlisting>public interface AfterReturningAdvice extends Advice {
+        <programlisting language="java">public interface AfterReturningAdvice extends Advice {
 
     void afterReturning(Object returnValue, Method m, Object[] args, Object target) 
             throws Throwable;
@@ -514,7 +514,7 @@
         <para>The following after returning advice counts all successful
         method invocations that have not thrown exceptions:</para>
 
-        <programlisting>public class CountingAfterReturningAdvice implements AfterReturningAdvice {
+        <programlisting language="java">public class CountingAfterReturningAdvice implements AfterReturningAdvice {
 
     private int count;
 
@@ -543,7 +543,7 @@
         and an <literal>IntroductionInterceptor</literal>, implementing the
         following interface:</para>
 
-        <programlisting>public interface IntroductionInterceptor extends MethodInterceptor {
+        <programlisting language="java">public interface IntroductionInterceptor extends MethodInterceptor {
 
     boolean implementsInterface(Class intf);
 }</programlisting>
@@ -563,7 +563,7 @@
 
          
 
-        <programlisting>public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
+        <programlisting language="java">public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
 	ClassFilter getClassFilter();
 
@@ -603,7 +603,7 @@ public interface IntroductionInfo {
          
 
         <para>
-          <programlisting>public interface Lockable {
+          <programlisting language="java">public interface Lockable {
     void lock();
     void unlock();
     boolean locked();
@@ -672,7 +672,7 @@ public interface IntroductionInfo {
          
 
         <para>
-          <programlisting>public class LockMixin extends DelegatingIntroductionInterceptor 
+          <programlisting language="java">public class LockMixin extends DelegatingIntroductionInterceptor 
     implements Lockable {
 
     private boolean locked;
@@ -722,7 +722,7 @@ public interface IntroductionInfo {
          
 
         <para>
-          <programlisting>public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
+          <programlisting language="java">public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
     public LockMixinAdvisor() {
         super(new LockMixin(), Lockable.class);
@@ -1032,7 +1032,7 @@ public interface IntroductionInfo {
         </listitem>
       </itemizedlist>
 
-      <para><programlisting>&lt;bean id="personTarget" class="com.mycompany.PersonImpl"&gt;
+      <para><programlisting language="xml">&lt;bean id="personTarget" class="com.mycompany.PersonImpl"&gt;
     &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
     &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
@@ -1076,12 +1076,12 @@ public interface IntroductionInfo {
       <para>The "person" bean definition above can be used in place of a
       Person implementation, as follows:</para>
 
-      <programlisting>Person person = (Person) factory.getBean("person");</programlisting>
+      <programlisting language="java">Person person = (Person) factory.getBean("person");</programlisting>
 
       <para>Other beans in the same IoC context can express a strongly typed
       dependency on it, as with an ordinary Java object:</para>
 
-      <para><programlisting>&lt;bean id="personUser" class="com.mycompany.PersonUser"&gt;
+      <para><programlisting language="xml">&lt;bean id="personUser" class="com.mycompany.PersonUser"&gt;
   &lt;property name="person"&gt;&lt;ref local="person" /&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
@@ -1097,7 +1097,7 @@ public interface IntroductionInfo {
       <literal>ProxyFactoryBean</literal> definition is different; the advice
       is included only for completeness:</para>
 
-      <para><programlisting>&lt;bean id="myAdvisor" class="com.mycompany.MyAdvisor"&gt;
+      <para><programlisting language="xml">&lt;bean id="myAdvisor" class="com.mycompany.MyAdvisor"&gt;
   &lt;property name="someProperty"&gt;&lt;value&gt;Custom string property value&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
@@ -1184,7 +1184,7 @@ public interface IntroductionInfo {
       <para>By appending an asterisk to an interceptor name, all advisors with
       bean names matching the part before the asterisk, will be added to the
       advisor chain. This can come in handy if you need to add a standard set
-      of 'global' advisors: <programlisting>
+      of 'global' advisors: <programlisting language="xml">
 &lt;bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
   &lt;property name="target" ref="service"/&gt;
   &lt;property name="interceptorNames"&gt;
@@ -1211,7 +1211,7 @@ public interface IntroductionInfo {
     <para>First a parent, <emphasis>template</emphasis>, bean definition is
     created for the proxy:</para>
 
-    <para><programlisting>&lt;bean id="txProxyTemplate" abstract="true"
+    <para><programlisting language="xml">&lt;bean id="txProxyTemplate" abstract="true"
         class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
   &lt;property name="transactionManager" ref="transactionManager"/&gt;
   &lt;property name="transactionAttributes"&gt;
@@ -1225,7 +1225,7 @@ public interface IntroductionInfo {
     incomplete. Then each proxy which needs to be created is just a child bean
     definition, which wraps the target of the proxy as an inner bean
     definition, since the target will never be used on its own
-    anyway.<programlisting>&lt;bean id="myService" parent="txProxyTemplate"&gt;
+    anyway.<programlisting language="xml">&lt;bean id="myService" parent="txProxyTemplate"&gt;
   &lt;property name="target"&gt;
     &lt;bean class="org.springframework.samples.MyServiceImpl"&gt;
     &lt;/bean&gt;
@@ -1234,7 +1234,7 @@ public interface IntroductionInfo {
 
     <para>It is of course possible to override properties from the parent
     template, such as in this case, the transaction propagation
-    settings:<programlisting>&lt;bean id="mySpecialService" parent="txProxyTemplate"&gt;
+    settings:<programlisting language="xml">&lt;bean id="mySpecialService" parent="txProxyTemplate"&gt;
   &lt;property name="target"&gt;
     &lt;bean class="org.springframework.samples.MySpecialServiceImpl"&gt;
     &lt;/bean&gt;
@@ -1273,7 +1273,7 @@ public interface IntroductionInfo {
     with one interceptor and one advisor. The interfaces implemented by the
     target object will automatically be proxied:</para>
 
-    <para><programlisting>ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
+    <para><programlisting language="java">ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
 factory.addInterceptor(myMethodInterceptor);
 factory.addAdvisor(myAdvisor);
 MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisting></para>
@@ -1308,7 +1308,7 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     Any AOP proxy can be cast to this interface, whichever other interfaces it
     implements. This interface includes the following methods:</para>
 
-    <programlisting>Advisor[] getAdvisors();
+    <programlisting language="java">Advisor[] getAdvisors();
 
 void addAdvice(Advice advice) throws AopConfigException;
 
@@ -1355,7 +1355,7 @@ boolean isFrozen();</programlisting>
     <literal>Advised</literal> interface and examining and manipulating its
     advice:</para>
 
-    <para><programlisting>Advised advised = (Advised) myObject;
+    <para><programlisting language="java">Advised advised = (Advised) myObject;
 Advisor[] advisors = advised.getAdvisors();
 int oldAdvisorCount = advisors.length;
 System.out.println(oldAdvisorCount + " advisors");
@@ -1438,7 +1438,7 @@ assertEquals("Added two advisors",
         <literal>BeanPostProcessor</literal> that automatically creates AOP proxies
         for beans with names matching literal values or wildcards.</para>
 
-        <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
+        <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
   &lt;property name="beanNames"&gt;&lt;value&gt;jdk*,onlyJdk&lt;/value&gt;&lt;/property&gt;
   &lt;property name="interceptorNames"&gt;
     &lt;list&gt;
@@ -1513,7 +1513,7 @@ assertEquals("Added two advisors",
         return an AOP proxy, not the target business object. (The "inner bean"
         idiom shown earlier also offers this benefit.)</para>
 
-        <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+        <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
 &lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
   &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
@@ -1586,7 +1586,7 @@ assertEquals("Added two advisors",
       following code, in <literal>/WEB-INF/declarativeServices.xml</literal>.
       Note that this is generic, and can be used outside the JPetStore:</para>
 
-      <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+      <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
 &lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
   &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
@@ -1627,7 +1627,7 @@ assertEquals("Added two advisors",
       annotation, leading to implicit proxies for beans containing that
       annotation:</para>
 
-      <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+      <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
 &lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
   &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
@@ -1647,7 +1647,7 @@ assertEquals("Added two advisors",
       be specific to the application's transaction requirements (typically
       JTA, as in this example, or Hibernate, JDO or JDBC):</para>
 
-      <programlisting>&lt;bean id="transactionManager" 
+      <programlisting language="xml">&lt;bean id="transactionManager" 
     class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
 
 			<tip>
@@ -1684,7 +1684,7 @@ assertEquals("Added two advisors",
       generic <literal>DefaultPointcutAdvisor</literal>, configured using
       JavaBean properties:</para>
 
-      <para><programlisting>&lt;bean id="lockMixin" class="org.springframework.aop.LockMixin"
+      <para><programlisting language="xml">&lt;bean id="lockMixin" class="org.springframework.aop.LockMixin"
     scope="prototype"/&gt;
 
 &lt;bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"
@@ -1748,13 +1748,13 @@ assertEquals("Added two advisors",
       <para>You can change the target via the <literal>swap()</literal> method
       on HotSwappableTargetSource as follows:</para>
 
-      <para><programlisting>HotSwappableTargetSource swapper = 
+      <para><programlisting language="java">HotSwappableTargetSource swapper = 
     (HotSwappableTargetSource) beanFactory.getBean("swapper");
 Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para>The XML definitions required look as follows:</para>
 
-      <para><programlisting>&lt;bean id="initialTarget" class="mycompany.OldTarget"/&gt;
+      <para><programlisting language="xml">&lt;bean id="initialTarget" class="mycompany.OldTarget"/&gt;
 
 &lt;bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource"&gt;
   &lt;constructor-arg ref="initialTarget"/&gt;
@@ -1796,7 +1796,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para>Sample configuration is shown below:</para>
 
-      <para><programlisting>&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject" 
+      <para><programlisting language="xml">&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject" 
     scope="prototype"&gt;
   ... properties omitted
 &lt;/bean&gt;
@@ -1832,7 +1832,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       size of the pool through an introduction. You'll need to define an
       advisor like this:</para>
 
-      <para><programlisting>&lt;bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+      <para><programlisting language="xml">&lt;bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
   &lt;property name="targetObject" ref="poolTargetSource"/&gt;
   &lt;property name="targetMethod" value="getPoolingConfigMixin"/&gt;
 &lt;/bean&gt;</programlisting></para>
@@ -1845,7 +1845,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para>The cast will look as follows:</para>
 
-      <programlisting><![CDATA[PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
+      <programlisting language="java"><![CDATA[PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
 
 			<note>
@@ -1873,7 +1873,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
       <literal>poolTargetSource</literal> definition shown above as follows.
       (I've also changed the name, for clarity.)</para>
 
-      <programlisting><![CDATA[<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">
+      <programlisting language="xml"><![CDATA[<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">
   <property name="targetBeanName" ref="businessObjectTarget"/>
 </bean>]]></programlisting>
 
@@ -1893,7 +1893,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
       <classname>ThreadLocalTargetSource</classname> is pretty much the same as was explained for the
       other types of target source:</para>
 
-      <programlisting><![CDATA[<bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource">
+      <programlisting language="xml"><![CDATA[<bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource">
   <property name="targetBeanName" value="businessObjectTarget"/>
 </bean>]]></programlisting>
 

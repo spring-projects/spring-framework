@@ -468,7 +468,7 @@
           the test will be enabled. This annotation can be applied to an
           entire class or individual methods.</para>
 
-          <programlisting>@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
+          <programlisting language="java">@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
 public void testProcessWhichRunsOnlyOnSunJvm() {
     <lineannotation>// some logic that should run only on Java VMs from Sun Microsystems</lineannotation>
 }</programlisting>
@@ -479,7 +479,7 @@ public void testProcessWhichRunsOnlyOnSunJvm() {
           for <emphasis>test groups</emphasis> in a JUnit environment.
           Consider the following example:</para>
 
-          <programlisting>@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
+          <programlisting language="java">@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
 public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
     <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
 }</programlisting>
@@ -498,7 +498,7 @@ public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
           <classname>SystemProfileValueSource</classname> will be used by
           default.</para>
 
-          <programlisting>@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
+          <programlisting language="java">@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
 public class CustomProfileValueSourceTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -514,7 +514,7 @@ public class CustomProfileValueSourceTests {
           test method finishes execution (regardless of whether the test
           passed or not).</para>
 
-          <programlisting>@DirtiesContext
+          <programlisting language="java">@DirtiesContext
 public void testProcessWhichDirtiesAppCtx() {
     <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
 }</programlisting>
@@ -531,7 +531,7 @@ public void testProcessWhichDirtiesAppCtx() {
           Likewise if an instance of the exception is <emphasis>not</emphasis>
           thrown during the test method execution then the test fails.</para>
 
-          <programlisting>@ExpectedException(SomeBusinessException.class)
+          <programlisting language="java">@ExpectedException(SomeBusinessException.class)
 public void testProcessRainyDayScenario() {
     <lineannotation>// some logic that should result in an <classname>Exception</classname> being thrown</lineannotation>
 }</programlisting>
@@ -552,7 +552,7 @@ public void testProcessRainyDayScenario() {
           <emphasis>set up</emphasis> or <emphasis>tear down</emphasis> of the
           test fixture.</para>
 
-          <programlisting>@Timed(millis=1000)
+          <programlisting language="java">@Timed(millis=1000)
 public void testProcessWithOneSecondTimeout() {
     <lineannotation>// some logic that should not take longer than 1 second to execute</lineannotation>
 }</programlisting>
@@ -571,7 +571,7 @@ public void testProcessWithOneSecondTimeout() {
           up</emphasis> or <emphasis>tear down</emphasis> of the test
           fixture.</para>
 
-          <programlisting>@Repeat(10)
+          <programlisting language="java">@Repeat(10)
 public void testProcessRepeatedly() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -588,7 +588,7 @@ public void testProcessRepeatedly() {
           committed. Use <interfacename>@Rollback</interfacename> to override
           the default rollback flag configured at the class level.</para>
 
-          <programlisting>@Rollback(false)
+          <programlisting language="java">@Rollback(false)
 public void testProcessWithoutRollback() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -602,7 +602,7 @@ public void testProcessWithoutRollback() {
           test method must <emphasis>not</emphasis> execute in a transactional
           context.</para>
 
-          <programlisting>@NotTransactional 
+          <programlisting language="java">@NotTransactional 
 public void testProcessWithoutTransaction() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -659,7 +659,7 @@ public void testProcessWithoutTransaction() {
         and exposes a <literal>protected</literal> method that subclasses can
         override to provide the location of context definition files:</para>
 
-        <programlisting>protected String[] getConfigLocations()</programlisting>
+        <programlisting language="java">protected String[] getConfigLocations()</programlisting>
 
         <para>Implementations of this method must provide an array containing
         the resource locations of XML configuration metadata - typically on
@@ -669,9 +669,9 @@ public void testProcessWithoutTransaction() {
         configuration. As an alternative you may choose to override one of the
         following. See the respective JavaDoc for further details.</para>
 
-        <programlisting>protected String[] getConfigPaths()</programlisting>
+        <programlisting language="java">protected String[] getConfigPaths()</programlisting>
 
-        <programlisting>protected String getConfigPath()</programlisting>
+        <programlisting language="java">protected String getConfigPath()</programlisting>
 
         <para>By default, once loaded, the configuration file set will be
         reused for each test case. Thus the setup cost will be incurred only
@@ -710,7 +710,7 @@ public void testProcessWithoutTransaction() {
         at a JUnit 3.8 based implementation of the test class itself (we will
         look at the configuration immediately afterwards).</para>
 
-        <programlisting>public final class HibernateTitleDaoTests <emphasis
+        <programlisting language="java">public final class HibernateTitleDaoTests <emphasis
             role="bold">extends AbstractDependencyInjectionSpringContextTests</emphasis>  {
 
     <lineannotation>// this instance will be (automatically) dependency injected</lineannotation>    
@@ -738,7 +738,7 @@ public void testProcessWithoutTransaction() {
         <literal>"classpath:com/foo/daos.xml"</literal>) looks like
         this:</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
@@ -785,7 +785,7 @@ public void testProcessWithoutTransaction() {
           configuration does not need to change, merely the test
           fixture).</para>
 
-          <programlisting>public final class HibernateTitleDaoTests <emphasis
+          <programlisting language="java">public final class HibernateTitleDaoTests <emphasis
               role="bold">extends AbstractDependencyInjectionSpringContextTests</emphasis>  {
 
     public HibernateTitleDaoTests() {
@@ -1096,7 +1096,7 @@ public void testProcessWithoutTransaction() {
         application context from
         <literal>"classpath:/com/example/MyTest-context.xml"</literal>.</para>
 
-        <programlisting>package com.example;
+        <programlisting language="java">package com.example;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"classpath:/com/example/MyTest-context.xml"</literal></lineannotation>
@@ -1118,7 +1118,7 @@ public class MyTest {
         configure your own custom
         <interfacename>ContextLoader</interfacename>.</para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"/applicationContext.xml"</literal> and <literal>"/applicationContext-test.xml"</literal></lineannotation>
 <lineannotation>// in the root of the classpath</lineannotation>
 <emphasis role="bold">@ContextConfiguration(locations={"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
@@ -1144,7 +1144,7 @@ public class MyTest {
         "/extended-context.xml" may therefore override those defined in
         "/base-context.xml".</para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> in the root of the classpath</lineannotation>
 <emphasis role="bold">@ContextConfiguration(locations={"/base-context.xml"})</emphasis>
 public class BaseTest {
@@ -1245,7 +1245,7 @@ public class ExtendedTest extends BaseTest {
         JUnit 4.4. The same DI techniques can be used in conjunction with any
         testing framework.</emphasis></para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
 <emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
 public final class HibernateTitleDaoTests {
@@ -1266,7 +1266,7 @@ public final class HibernateTitleDaoTests {
         <para>Alternatively, we can configure the class to use
         <interfacename>@Autowired</interfacename> for setter injection.</para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
 <emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
 public final class HibernateTitleDaoTests {
@@ -1291,7 +1291,7 @@ public final class HibernateTitleDaoTests {
         <para>Now let's take a look at an example using
         <interfacename>@Resource</interfacename> for field injection.</para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
 <emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
 public final class HibernateTitleDaoTests {
@@ -1312,7 +1312,7 @@ public final class HibernateTitleDaoTests {
         <para>Finally, here is an example using
         <interfacename>@Resource</interfacename> for setter injection.</para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
 <emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
 public final class HibernateTitleDaoTests {
@@ -1338,7 +1338,7 @@ public final class HibernateTitleDaoTests {
         by the <interfacename>@ContextConfiguration</interfacename> annotation
         (i.e., <literal>"daos.xml"</literal>) which looks like this:</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
@@ -1364,7 +1364,7 @@ public final class HibernateTitleDaoTests {
           you may override the setter and use the <interfacename>@Qualifier</interfacename>
           annotation to indicate a specific target bean as follows:</para>
 
-          <programlisting>...
+          <programlisting language="java">...
     @Override @Autowired
     public void setDataSource(<emphasis role="bold">@Qualifier("myDataSource")</emphasis> DataSource dataSource) {
         super.setDataSource(dataSource);
@@ -1389,7 +1389,7 @@ public final class HibernateTitleDaoTests {
           Note that this always points to a bean with that specific name,
           no matter whether there is one or more beans of the given type.</para>
 
-          <programlisting>...
+          <programlisting language="java">...
     @Override <emphasis role="bold">@Resource("myDataSource")</emphasis>
     public void setDataSource(DataSource dataSource) {
         super.setDataSource(dataSource);
@@ -1479,7 +1479,7 @@ public final class HibernateTitleDaoTests {
         support</link> section of the reference manual for further information
         and configuration examples.</para>
 
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 <emphasis role="bold">@TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)</emphasis>
 <emphasis role="bold">@Transactional</emphasis>
@@ -1695,7 +1695,7 @@ public class FictitiousTransactionalTest {
           <interfacename>ApplicationContext</interfacename> be configured via
           <interfacename>@ContextConfiguration</interfacename>.</emphasis></para>
 
-          <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({})
 public class SimpleTest {
 
@@ -1913,7 +1913,7 @@ public class SimpleTest {
             <interfacename>ContextLoader</interfacename> strategy to use for
             loading the context.</para>
 
-            <programlisting>@ContextConfiguration(locations={"example/test-context.xml"}, loader=CustomContextLoader.class)
+            <programlisting language="java">@ContextConfiguration(locations={"example/test-context.xml"}, loader=CustomContextLoader.class)
 public class CustomConfiguredApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1937,7 +1937,7 @@ public class CustomConfiguredApplicationContextTests {
             will be used in conjunction with
             <interfacename>@ContextConfiguration</interfacename>.</para>
 
-            <programlisting>@ContextConfiguration
+            <programlisting language="java">@ContextConfiguration
 @TestExecutionListeners({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
 public class CustomTestExecutionListenerTests {
     <lineannotation>// class body...</lineannotation>
@@ -1965,7 +1965,7 @@ public class CustomTestExecutionListenerTests {
             used in conjunction with
             <interfacename>@ContextConfiguration</interfacename>.</para>
 
-            <programlisting>@ContextConfiguration
+            <programlisting language="java">@ContextConfiguration
 @TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)
 public class CustomConfiguredTransactionalTests {
     <lineannotation>// class body...</lineannotation>
@@ -1982,7 +1982,7 @@ public class CustomConfiguredTransactionalTests {
             transaction via the <interfacename>@Transactional</interfacename>
             annotation.</para>
 
-            <programlisting>@BeforeTransaction
+            <programlisting language="java">@BeforeTransaction
 public void beforeTransaction() {
     <lineannotation>// logic to be executed before a transaction is started</lineannotation>
 }</programlisting>
@@ -1998,7 +1998,7 @@ public void beforeTransaction() {
             transaction via the <interfacename>@Transactional</interfacename>
             annotation.</para>
 
-            <programlisting>@AfterTransaction
+            <programlisting language="java">@AfterTransaction
 public void afterTransaction() {
     <lineannotation>// logic to be executed after a transaction has ended</lineannotation>
 }</programlisting>
@@ -2019,7 +2019,7 @@ public void afterTransaction() {
       <classname>AbstractClinicTests</classname>, for which a partial listing
       is shown below:</para>
 
-      <programlisting><emphasis role="bold">@ContextConfiguration</emphasis>
+      <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>
 public abstract class AbstractClinicTests <emphasis role="bold">extends AbstractTransactionalJUnit4SpringContextTests</emphasis> {
 
     <emphasis role="bold">@Autowired</emphasis>
@@ -2106,7 +2106,7 @@ public abstract class AbstractClinicTests <emphasis role="bold">extends Abstract
       overriding beans defined in
       <literal>"AbstractClinicTests-context.xml"</literal>.</para>
 
-      <programlisting><emphasis role="bold">@ContextConfiguration</emphasis>
+      <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>
 public class HibernateClinicTests extends AbstractClinicTests { }
 </programlisting>
 
