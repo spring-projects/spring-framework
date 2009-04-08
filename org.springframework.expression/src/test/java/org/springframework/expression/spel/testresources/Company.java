@@ -3,6 +3,7 @@
  */
 package org.springframework.expression.spel.testresources;
 
+///CLOVER:OFF
 public class Company {
 	String address;
 	

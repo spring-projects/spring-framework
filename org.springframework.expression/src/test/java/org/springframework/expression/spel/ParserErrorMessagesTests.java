@@ -29,6 +29,7 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		// will not fit into an int, needs L suffix
 		parseAndCheckError("0xCAFEBABE", SpelMessages.NOT_AN_INTEGER);
 		evaluate("0xCAFEBABEL", 0xCAFEBABEL, Long.class);
+		parseAndCheckError("0xCAFEBABECAFEBABEL", SpelMessages.NOT_A_LONG);
 	}
 
 	public void testBrokenExpression02() {

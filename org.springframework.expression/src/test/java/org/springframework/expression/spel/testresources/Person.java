@@ -1,6 +1,6 @@
 package org.springframework.expression.spel.testresources;
 
-
+///CLOVER:OFF
 public class Person {
 	private String privateName;
 	Company company;

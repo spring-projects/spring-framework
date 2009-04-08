@@ -1,5 +1,6 @@
 package org.springframework.expression.spel.testresources;
 
+///CLOVER:OFF
 public class PlaceOfBirth {
 	private String city;
 	

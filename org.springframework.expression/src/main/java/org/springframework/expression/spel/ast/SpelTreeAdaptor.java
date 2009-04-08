@@ -18,7 +18,6 @@ package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTreeAdaptor;
-
 import org.springframework.expression.spel.generated.SpringExpressionsLexer;
 
 /**
@@ -95,7 +94,7 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new CompoundExpression(payload);
 
 			case SpringExpressionsLexer.CONSTRUCTOR:
-				return new ConstructorReference(payload, false);
+				return new ConstructorReference(payload);
 			case SpringExpressionsLexer.VARIABLEREF:
 				return new VariableReference(payload);
 			case SpringExpressionsLexer.FUNCTIONREF:
@@ -122,11 +121,6 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new OperatorMatches(payload);
 			case SpringExpressionsLexer.INSTANCEOF:
 				return new OperatorInstanceof(payload);
-
-			case SpringExpressionsLexer.RPAREN:
-				return new Placeholder(payload);
-			case SpringExpressionsLexer.COLON:
-				return new Placeholder(payload);
 
 			case SpringExpressionsLexer.DOT:
 				return new Dot(payload);

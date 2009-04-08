@@ -5,6 +5,7 @@ package org.springframework.expression.spel.testresources;
 
 import java.awt.Color;
 
+///CLOVER:OFF
 public class Fruit {
 	public String name; // accessible as property field
 	public Color color; // accessible as property through getter/setter

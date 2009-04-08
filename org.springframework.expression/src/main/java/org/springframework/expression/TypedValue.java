@@ -57,5 +57,11 @@ public class TypedValue {
 	public TypeDescriptor getTypeDescriptor() {
 		return this.typeDescriptor;
 	}
-	
+
+	@Override
+	public String toString() {
+		StringBuffer str = new StringBuffer();
+		str.append("TypedValue: ").append(value).append(" of type "+typeDescriptor.asString());
+		return str.toString();
+	}
 }

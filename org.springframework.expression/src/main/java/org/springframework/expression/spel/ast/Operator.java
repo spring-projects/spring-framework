@@ -17,8 +17,6 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-import org.springframework.expression.spel.SpelException;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Common supertype for operators that operate on either one or two operands. In the case of multiply or divide there
@@ -32,15 +30,7 @@ public abstract class Operator extends SpelNodeImpl {
 	public Operator(Token payload) {
 		super(payload);
 	}
-
-	/**
-	 * Operator expressions can never be written to
-	 */
-	@Override
-	public final boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
-	}
-
+	
 	public SpelNodeImpl getLeftOperand() {
 		return getChild(0);
 	}
@@ -57,17 +47,13 @@ public abstract class Operator extends SpelNodeImpl {
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
-		if (getChildCount() > 0) {
-			sb.append("(");
-		}
+		sb.append("(");
 		sb.append(getChild(0).toStringAST());
 		for (int i = 1; i < getChildCount(); i++) {
 			sb.append(" ").append(getOperatorName()).append(" ");
 			sb.append(getChild(i).toStringAST());
 		}
-		if (getChildCount() > 0) {
-			sb.append(")");
-		}
+		sb.append(")");
 		return sb.toString();
 	}
 

@@ -61,7 +61,7 @@ public class Projection extends SpelNodeImpl {
 			for (Object k : mapdata.keySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(new KeyValuePair(k, mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class)));
-					result.add(getChild(0).getValueInternal(state));
+					result.add(getChild(0).getValueInternal(state).getValue());
 				} finally {
 					state.popActiveContextObject();
 				}
@@ -76,7 +76,7 @@ public class Projection extends SpelNodeImpl {
 				try {
 					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
 					state.enterScope("index", idx);
-					result.add(getChild(0).getValueInternal(state));
+					result.add(getChild(0).getValueInternal(state).getValue());
 				} finally {
 					state.exitScope();
 					state.popActiveContextObject();
@@ -93,11 +93,6 @@ public class Projection extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		return sb.append("!{").append(getChild(0).toStringAST()).append("}").toString();
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
 	}
 
 }

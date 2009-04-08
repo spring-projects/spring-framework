@@ -128,10 +128,6 @@ public class FunctionReference extends SpelNodeImpl {
 	}
 
 	// to 'assign' to a function don't use the () suffix and so it is just a variable reference
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws EvaluationException {
-		return false;
-	}
 
 	/**
 	 * Compute the arguments to the function, they are the children of this expression node.

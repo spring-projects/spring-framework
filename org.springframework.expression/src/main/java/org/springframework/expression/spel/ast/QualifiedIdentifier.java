@@ -31,7 +31,7 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class QualifiedIdentifier extends SpelNodeImpl {
 
-	private String value;
+	private TypedValue value;
 
 	public QualifiedIdentifier(Token payload) {
 		super(payload);
@@ -49,18 +49,17 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 				}
 				sb.append(getChild(i).getValueInternal(state).getValue());
 			}
-			this.value = sb.toString();
+			this.value = new TypedValue(sb.toString(),STRING_TYPE_DESCRIPTOR);
 		}
-		return new TypedValue(this.value,STRING_TYPE_DESCRIPTOR);
+		return this.value;
 	}
 
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		if (this.value != null) {
-			sb.append(this.value);
-		}
-		else {
+			sb.append(this.value.getValue());
+		} else {
 			for (int i = 0; i < getChildCount(); i++) {
 				if (i > 0) {
 					sb.append(".");

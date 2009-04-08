@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
  * 
@@ -26,9 +27,14 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class VariableAndFunctionTests extends ExpressionTestCase {
 
-	public void testVariableAccess() {
+	public void testVariableAccess01() {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
+	}
+	
+	public void testVariableAccess_WellKnownVariables() {
+		evaluate("#this.getName()","Nikola Tesla",String.class);
+		evaluate("#root.getName()","Nikola Tesla",String.class);
 	}
 
 	public void testFunctionAccess01() {
@@ -71,7 +77,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 			}
 		}
 	}
-
+	// this method is used by the test above
 	public void nonStatic() {
 	}
 

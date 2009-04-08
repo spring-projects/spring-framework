@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date
  * 
@@ -133,5 +135,14 @@ public class LiteralTests extends ExpressionTestCase {
 		// getting the expression type to be what we want - either:
 		evaluate("new Integer(37).byteValue()", (byte) 37, Byte.class); // calling byteValue() on Integer.class
 		evaluateAndAskForReturnType("new Integer(37)", (byte) 37, Byte.class); // relying on registered type converters
+	}
+	
+	public void testNotWritable() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("37");
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		expr = (SpelExpression)parser.parseExpression("37L");
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		expr = (SpelExpression)parser.parseExpression("true");
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 }

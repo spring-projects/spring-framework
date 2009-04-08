@@ -20,7 +20,6 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
 
 /**
  * Represents assignment. An alternative to calling setValue() for an expression is to use an assign.
@@ -47,11 +46,6 @@ public class Assign extends SpelNodeImpl {
 	public String toStringAST() {
 		return new StringBuilder().append(getChild(0).toStringAST()).append("=").append(getChild(1).toStringAST())
 				.toString();
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
-		return false;
 	}
 
 }

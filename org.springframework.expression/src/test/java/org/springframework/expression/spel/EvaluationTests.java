@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 
 import org.springframework.expression.Expression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -208,6 +209,22 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testConstructorInvocation05() {
 		evaluate("new java.lang.String('foobar')", "foobar", String.class);
 	}
+	
+	public void testConstructorInvocation06() throws Exception {
+		// repeated evaluation to drive use of cached executor
+		SpelExpression expr = (SpelExpression)parser.parseExpression("new String('wibble')");
+		String newString = expr.getValue(String.class);
+		assertEquals("wibble",newString);
+		newString = expr.getValue(String.class);
+		assertEquals("wibble",newString);
+		
+		// not writable
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		
+		// ast
+		assertEquals("new String('wibble')",expr.toStringAST());
+	}
+
 
 	// array construction
 	// public void testArrayConstruction01() {
@@ -275,14 +292,18 @@ public class EvaluationTests extends ExpressionTestCase {
 	// }
 
 	// projection and selection
-//	 public void testProjection01() {
-//	 evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
-//	 }
-	//
-	// public void testProjection02() {
-	// evaluate("#{'a':'y','b':'n','c':'y'}.!{value=='y'?key:null}.nonnull().sort()", "[a, c]", ArrayList.class);
-	// }
-	//
+	public void testProjection01() {
+		evaluate("listOfNumbersUpToTen.!{#this<5?'y':'n'}","[y, y, y, y, n, n, n, n, n, n]",ArrayList.class);
+		// inline list creation not supported at the moment
+        // evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
+	}
+	
+	public void testProjection02() {
+		// inline map creation not supported at the moment
+		// evaluate("#{'a':'y','b':'n','c':'y'}.!{value=='y'?key:null}.nonnull().sort()", "[a, c]", ArrayList.class);
+		evaluate("mapOfNumbersUpToTen.!{key>5?value:null}", "[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
+	}
+	
 	// public void testProjection03() {
 	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#this>5}",
 	// "[false, false, false, false, false, true, true, true, true, true]", ArrayList.class);
@@ -291,11 +312,21 @@ public class EvaluationTests extends ExpressionTestCase {
 	// public void testProjection04() {
 	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{$index>5?'y':'n'}", "[n, n, n, n, n, n, y, y, y, y]", ArrayList.class);
 	// }
-
-	public void testSelection01() {
-		// inline list creation not supported:
-		// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
+	
+	public void testProjection05() {
+		evaluateAndCheckError("'abc'.!{true}", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
 	}
+	
+	public void testProjection06() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.!{true}");
+		assertEquals("'abc'.!{true}",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+	}
+
+	//public void testSelection01() {
+	//    inline list creation not supported:
+	//    evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
+	//}
 	 
 	public void testSelection02() {
 		 evaluate("testMap.keySet().?{#this matches '.*o.*'}", "[monday]", ArrayList.class);
@@ -303,23 +334,40 @@ public class EvaluationTests extends ExpressionTestCase {
 		 evaluate("testMap.keySet().?{#this matches '.*r.*'}.size()", "3", Integer.class);
 	}
 	 
-	// public void testSelectionError_NonBooleanSelectionCriteria() {
-	// evaluateAndCheckError("{1,2,3,4,5,6,7,8,9,10}.?{'nonboolean'}",
-	// SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
-	// }
+	 public void testSelectionError_NonBooleanSelectionCriteria() {
+		 evaluateAndCheckError("listOfNumbersUpToTen.?{'nonboolean'}",
+				 SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	 }
 
 	// public void testSelectionUsingIndex() {
 	// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
 	// }
+	 
+	 public void testSelection03() {
+		evaluate("mapOfNumbersUpToTen.?{key>5}.size()", "5", Integer.class);
+	 }
 
-	// public void testSelectionFirst01() {
-	// evaluate("{1,2,3,4,5,6,7,8,9,10}.^{#isEven(#this) == 'y'}", "2", Integer.class);
-	// }
-	//
-	// public void testSelectionLast01() {
-	// evaluate("{1,2,3,4,5,6,7,8,9,10}.${#isEven(#this) == 'y'}", "10", Integer.class);
-	// }
+	public void testSelectionFirst01() {
+		evaluate("listOfNumbersUpToTen.^{#isEven(#this) == 'y'}", "2", Integer.class);
+	}
+	
+	public void testSelectionLast01() {
+		evaluate("listOfNumbersUpToTen.${#isEven(#this) == 'y'}", "10", Integer.class);
+	}
 
+	public void testSelectionAST() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.^{true}");
+		assertEquals("'abc'.^{true}",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		expr = (SpelExpression)parser.parseExpression("'abc'.?{true}");
+		assertEquals("'abc'.?{true}",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		expr = (SpelExpression)parser.parseExpression("'abc'.${true}");
+		assertEquals("'abc'.${true}",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+	}
+
+	
 	// assignment
 	public void testAssignmentToVariables01() {
 		evaluate("#var1='value1'", "value1", String.class);
@@ -450,6 +498,16 @@ public class EvaluationTests extends ExpressionTestCase {
 	// type references
 	public void testTypeReferences01() {
 		evaluate("T(java.lang.String)", "class java.lang.String", Class.class);
+	}
+	
+	public void testTypeReferencesAndQualifiedIdentifierCaching() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("T(java.lang.String)");
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertEquals("T(java.lang.String)",expr.toStringAST());
+		assertEquals(String.class,expr.getValue(Class.class));
+		// use cached QualifiedIdentifier:
+		assertEquals("T(java.lang.String)",expr.toStringAST());
+		assertEquals(String.class,expr.getValue(Class.class));
 	}
 
 	public void testTypeReferencesPrimitive() {
