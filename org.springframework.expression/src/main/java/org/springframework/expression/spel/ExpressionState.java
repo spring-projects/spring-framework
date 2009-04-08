@@ -154,7 +154,9 @@ public class ExpressionState {
 			return new TypedValue(returnValue,TypeDescriptor.forObject(returnValue));
 		}
 		else {
-			throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, left, right);
+			String leftType = (left==null?"null":left.getClass().getName());
+			String rightType = (right==null?"null":right.getClass().getName());
+			throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
 		}
 	}
 
