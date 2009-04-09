@@ -94,11 +94,11 @@
       <listitem>
         <para>User defined functions</para>
       </listitem>
-
+<!--
       <listitem>
         <para>List projections</para>
       </listitem>
-
+-->
       <listitem>
         <para>Templated expressions</para>
       </listitem>
@@ -157,8 +157,8 @@ String message = (String) exp.getValue();</programlisting>
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes</emphasis>");  // invokes 'getBytes()'
 byte[] bytes = (byte[]) exp.getValue();</programlisting>
 
-    <para>Upper or lowercase can be used to specify the property name. SpEL
-    also supports nested properties using standard 'dot' notation, i.e.
+    <para>
+    SpEL also supports nested properties using standard 'dot' notation, i.e.
     prop1.prop2.prop3 and the setting of property values</para>
 
     <para>Public fields may also be accessed</para>
@@ -217,7 +217,7 @@ String name = (String) exp.getValue(context);</programlisting>In the last
     shown using the Inventor object in the previous example</para>
 
     <programlisting language="java">Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
-boolean isEqual = exp.getValue(context, Boolean.class);  // evaluates to true</programlisting>
+boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</programlisting>
 
     <section>
       <title>The EvaluationContext interface </title>
@@ -420,9 +420,9 @@ Object nullValue = parser.parseExpression("null").getValue();
     </section>
 
     <section>
-      <title>Properties, Arrays, Lists, Dictionaries, Indexers</title>
+      <title>Properties, Arrays, Lists, Maps, Indexers</title>
 
-      <para>Navigating through properties is easy, just use a period to
+      <para>Navigating with property references is easy, just use a period to
       indicate a nested property value. The instances of Inventor class, pupin
       and tesla, were populated with data listed in section Section <link
       linkend="expressions-examples-classes">Classes used in the
@@ -460,9 +460,9 @@ String name = parser.parseExpression("Members[0].Name").getValue(societyContext,
 String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(societyContext, String.class);
 </programlisting>
 
-      <para>The contents of dictionaries are obtained by specifying the
+      <para>The contents of maps are obtained by specifying the
       literal key value within the brackets. In this case, because keys for
-      the Officers dictionary are strings, we can specify string
+      the Officers map are strings, we can specify string
       literal.</para>
 
       <programlisting lang="" language="java">// Officer's Dictionary
@@ -669,6 +669,7 @@ parser.parseExpression("Name = #newName").getValue(context);
 
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
+<!--
       <section>
         <title>The #this variable</title>
 
@@ -689,6 +690,7 @@ List&lt;Integer&gt; primesGreaterThanTen = (List&lt;Integer&gt;) parser.parseExp
 
 //evaluates to [11, 13, 17]</programlisting>
       </section>
+-->
     </section>
 
     <section id="expressions-ref-functions">
@@ -749,6 +751,7 @@ String queryResultString = parser.parseExpression(expression).getValue(societyCo
 // queryResultString = "Nikola Tesla is a member of the IEEE Society"</programlisting>
     </section>
 
+<!--
     <section>
       <title>List Selection</title>
 
@@ -764,6 +767,7 @@ String queryResultString = parser.parseExpression(expression).getValue(societyCo
 
       <programlisting language="java">List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) parser.parseExpression("Members.?{Nationality == 'Serbian'}").getValue(societyContext);</programlisting>
     </section>
+-->
 
     <section>
       <title>Expression templating</title>
