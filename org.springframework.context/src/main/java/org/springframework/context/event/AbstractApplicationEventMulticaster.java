@@ -68,6 +68,11 @@ public abstract class AbstractApplicationEventMulticaster
 		this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
 	}
 
+	public void removeAllListeners() {
+		this.defaultRetriever.applicationListeners.clear();
+		this.defaultRetriever.applicationListenerBeans.clear();
+	}
+
 	public final void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

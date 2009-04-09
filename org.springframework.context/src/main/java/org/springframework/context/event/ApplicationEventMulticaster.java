@@ -44,6 +44,13 @@ public interface ApplicationEventMulticaster {
 	void addApplicationListenerBean(String listenerBeanName);
 
 	/**
+	 * Remove all listeners registered with this multicaster.
+	 * <p>After a remove call, the multicaster will perform no action
+	 * on event notification until new listeners are being registered.
+	 */
+	void removeAllListeners();
+
+	/**
 	 * Multicast the given application event to appropriate listeners.
 	 * @param event the event to multicast
 	 */
