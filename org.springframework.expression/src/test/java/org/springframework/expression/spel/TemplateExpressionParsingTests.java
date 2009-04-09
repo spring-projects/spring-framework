@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -63,6 +64,21 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		assertEquals("The quick brown fox jumped over the lazy dog", o.toString());
 	}
 
+	public void testParsingSimpleTemplateExpression04() throws Exception {
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		Expression expr = parser.parseExpression("${'hello'} world", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		Object o = expr.getValue();
+		assertEquals("hello world", o.toString());
+		
+		expr = parser.parseExpression("", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		o = expr.getValue();
+		assertEquals("", o.toString());
+
+		expr = parser.parseExpression("abc", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		o = expr.getValue();
+		assertEquals("abc", o.toString());
+	}
+
 	public void testCompositeStringExpression() throws Exception {
 		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		Expression ex = parser.parseExpression("hello ${'world'}", DEFAULT_TEMPLATE_PARSER_CONTEXT);
@@ -73,6 +89,36 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		checkString("hello world", ex.getValue(ctx, String.class));
 		assertEquals("hello ${'world'}", ex.getExpressionString());
 		assertFalse(ex.isWritable(new StandardEvaluationContext()));
+	}
+	
+	public void testParsingNormalExpressionThroughTemplateParser() throws Exception {
+		Expression expr = parser.parseExpression("1+2+3");
+		assertEquals(6,expr.getValue());
+		expr = parser.parseExpression("1+2+3",null);
+		assertEquals(6,expr.getValue());
+	}
+	
+	public void testErrorCases() throws Exception {
+		try {
+			parser.parseExpression("hello ${'world'", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			fail("Should have failed");
+		} catch (ParseException pe) {
+			assertEquals("No ending suffix '}' for expression starting at character 6: ${'world'",pe.getMessage());
+			assertEquals("hello ${'world'",pe.getExpressionString());
+		}
+		try {
+			parser.parseExpression("hello ${'wibble'${'world'}", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			fail("Should have failed");
+		} catch (ParseException pe) {
+			assertEquals("No ending suffix '}' for expression starting at character 6: ${'wibble'${'world'}",pe.getMessage());
+		}
+		try {
+			parser.parseExpression("hello ${} world", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			fail("Should have failed");
+		} catch (ParseException pe) {
+			assertEquals("No expression defined within delimiter '${}' at character 6",pe.getMessage());
+		}
+		
 	}
 
 	private void checkString(String expectedString, Object value) {

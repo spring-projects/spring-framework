@@ -17,7 +17,6 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.TypedValue;
 
 /**
@@ -26,20 +25,18 @@ import org.springframework.expression.TypedValue;
  */
 public class NullLiteral extends Literal {
 
-    private static final TypedValue NULL_TYPED_VALUE = new TypedValue(null,TypeDescriptor.NULL_TYPE_DESCRIPTOR);
-    
 	public NullLiteral(Token payload) {
 		super(payload);
 	}
 
 	@Override
 	public TypedValue getLiteralValue() {
-		return NULL_TYPED_VALUE;
+		return TypedValue.NULL_TYPED_VALUE;
 	}
 
 	@Override
 	public String toString() {
-		return null;
+		return "null";
 	}
 
 }

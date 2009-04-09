@@ -23,57 +23,8 @@ package org.springframework.expression.spel;
  */
 public class ConstructorInvocationTests extends ExpressionTestCase {
 
-	// Some tests commented out as language support has been removed for now
-	
-	// public void testPrimitiveTypeArrayConstructors() {
-	// evaluate("new int[]{1,2,3,4}.count()", 4, Integer.class);
-	// evaluate("new boolean[]{true,false,true}.count()", 3, Integer.class);
-	// evaluate("new char[]{'a','b','c'}.count()", 3, Integer.class);
-	// evaluate("new long[]{1,2,3,4,5}.count()", 5, Integer.class);
-	// evaluate("new short[]{2,3,4,5,6}.count()", 5, Integer.class);
-	// evaluate("new double[]{1d,2d,3d,4d}.count()", 4, Integer.class);
-	// evaluate("new float[]{1f,2f,3f,4f}.count()", 4, Integer.class);
-	// evaluate("new byte[]{1,2,3,4}.count()", 4, Integer.class);
-	// }
-
-	// public void testPrimitiveTypeArrayConstructorsElements() {
-	// evaluate("new int[]{1,2,3,4}[0]", 1, Integer.class);
-	// evaluate("new boolean[]{true,false,true}[0]", true, Boolean.class);
-	// evaluate("new char[]{'a','b','c'}[0]", 'a', Character.class);
-	// evaluate("new long[]{1,2,3,4,5}[0]", 1L, Long.class);
-	// evaluate("new short[]{2,3,4,5,6}[0]", (short) 2, Short.class);
-	// evaluate("new double[]{1d,2d,3d,4d}[0]", (double) 1, Double.class);
-	// evaluate("new float[]{1f,2f,3f,4f}[0]", (float) 1, Float.class);
-	// evaluate("new byte[]{1,2,3,4}[0]", (byte) 1, Byte.class);
-	// }
-
-	// public void testErrorCases() {
-	// evaluateAndCheckError("new char[7]{'a','c','d','e'}", SpelMessages.INITIALIZER_LENGTH_INCORRECT);
-	// evaluateAndCheckError("new char[3]{'a','c','d','e'}", SpelMessages.INITIALIZER_LENGTH_INCORRECT);
-	// evaluateAndCheckError("new char[2]{'hello','world'}", SpelMessages.TYPE_CONVERSION_ERROR);
-	// evaluateAndCheckError("new String('a','c','d')", SpelMessages.CONSTRUCTOR_NOT_FOUND);
-	// }
-
-	// public void testTypeArrayConstructors() {
-	// evaluate("new String[]{'a','b','c','d'}[1]", "b", String.class);
-	// evaluateAndCheckError("new String[]{'a','b','c','d'}.size()", SpelMessages.METHOD_NOT_FOUND, 30, "size()",
-	// "java.lang.String[]");
-	// evaluateAndCheckError("new String[]{'a','b','c','d'}.juggernaut", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 30,
-	// "juggernaut", "java.lang.String[]");
-	// evaluate("new String[]{'a','b','c','d'}.length", 4, Integer.class);
-	// }
-
-	// public void testMultiDimensionalArrays() {
-	// evaluate(
-	// "new String[3,4]",
-	// "[Ljava.lang.String;[3]{java.lang.String[4]{null,null,null,null},java.lang.String[4]{null,null,null,null},java.lang.String[4]{null,null,null,null}}"
-	// ,
-	// new String[3][4].getClass());
-	// }
-
 	public void testTypeConstructors() {
 		evaluate("new String('hello world')", "hello world", String.class);
-		// evaluate("new String(new char[]{'h','e','l','l','o'})", "hello", String.class);
 	}
 	
 	public void testNonExistentType() {

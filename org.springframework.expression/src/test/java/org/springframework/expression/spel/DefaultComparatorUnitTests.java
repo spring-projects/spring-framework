@@ -43,5 +43,55 @@ public class DefaultComparatorUnitTests extends TestCase {
 		assertTrue(comparator.compare(1.0f, 1) == 0);
 		assertTrue(comparator.compare(2.0f, 1) > 0);
 
+		assertTrue(comparator.compare(1L, 2) < 0);
+		assertTrue(comparator.compare(1L, 1) == 0);
+		assertTrue(comparator.compare(2L, 1) > 0);
+
+		assertTrue(comparator.compare(1, 2L) < 0);
+		assertTrue(comparator.compare(1, 1L) == 0);
+		assertTrue(comparator.compare(2, 1L) > 0);
+		
+		assertTrue(comparator.compare(1L, 2L) < 0);
+		assertTrue(comparator.compare(1L, 1L) == 0);
+		assertTrue(comparator.compare(2L, 1L) > 0);
+	}
+	
+	public void testNulls() throws EvaluationException {
+		TypeComparator comparator = new StandardTypeComparator();
+		assertTrue(comparator.compare(null,"abc")>0);
+		assertTrue(comparator.compare(null,null)==0);
+		assertTrue(comparator.compare("abc",null)<0);
+	}
+
+	public void testObjects() throws EvaluationException {
+		TypeComparator comparator = new StandardTypeComparator();
+		assertTrue(comparator.compare("a","a")==0);
+		assertTrue(comparator.compare("a","b")<0);
+		assertTrue(comparator.compare("b","a")>0);
+
+		try {
+			comparator.compare("a",3);
+			fail("Should have failed");
+		} catch (EvaluationException ee) {
+			SpelException sEx = (SpelException)ee;
+			assertEquals(SpelMessages.NOT_COMPARABLE,sEx.getMessageUnformatted());
+		}
+		try {
+			comparator.compare(2,"b");
+			fail("Should have failed");
+		} catch (EvaluationException ee) {
+			SpelException sEx = (SpelException)ee;
+			assertEquals(SpelMessages.NOT_COMPARABLE,sEx.getMessageUnformatted());
+		}
+	}
+	
+	public void testCanCompare() throws EvaluationException {
+		TypeComparator comparator = new StandardTypeComparator();
+		assertTrue(comparator.canCompare(null,1));
+		assertTrue(comparator.canCompare(1,null));
+
+		assertTrue(comparator.canCompare(2,1));
+		assertTrue(comparator.canCompare("abc","def"));
+		assertFalse(comparator.canCompare("abc",3));
 	}
 }

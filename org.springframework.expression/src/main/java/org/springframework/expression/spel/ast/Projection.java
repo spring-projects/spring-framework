@@ -48,7 +48,7 @@ public class Projection extends SpelNodeImpl {
 		TypedValue op = state.getActiveContextObject();
 
 		Object operand = op.getValue();
-		TypeDescriptor operandTypeDescriptor = op.getTypeDescriptor();
+		// TypeDescriptor operandTypeDescriptor = op.getTypeDescriptor();
 		
 		// When the input is a map, we push a special context object on the stack
 		// before calling the specified operation. This special context object
@@ -58,9 +58,10 @@ public class Projection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
-			for (Object k : mapdata.keySet()) {
+			mapdata.entrySet();
+			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
-					state.pushActiveContextObject(new TypedValue(new KeyValuePair(k, mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class)));
+					state.pushActiveContextObject(new TypedValue(new KeyValuePair(entry.getKey(), entry.getValue()),TypeDescriptor.valueOf(KeyValuePair.class)));
 					result.add(getChild(0).getValueInternal(state).getValue());
 				} finally {
 					state.popActiveContextObject();
