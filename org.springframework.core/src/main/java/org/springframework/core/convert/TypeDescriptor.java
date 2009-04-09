@@ -137,7 +137,8 @@ public class TypeDescriptor {
 	 * Is this type an array type?
 	 */
 	public boolean isArray() {
-		return getType().isArray();
+		Class<?> type = getType();
+		return (type==null?false:type.isArray());
 	}
 
 	/**
@@ -280,7 +281,11 @@ public class TypeDescriptor {
 			// TODO should properly handle multi dimensional arrays
 			stringValue.append(getArrayComponentType().getName()).append("[]");
 		} else {
-			stringValue.append(getType().getName());
+			Class<?> clazz = getType();
+			if (clazz==null) {
+				return "null";
+			}
+			stringValue.append(clazz.getName());
 			if (isCollection()) {
 				Class<?> collectionType = getCollectionElementType();
 				if (collectionType!=null) {
