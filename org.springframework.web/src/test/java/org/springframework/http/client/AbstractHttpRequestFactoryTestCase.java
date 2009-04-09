@@ -48,18 +48,22 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	private static Server jettyServer;
 
+	private static final String BASE_URL = "http://localhost:8889";
+
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
 		jettyServer = new Server(8889);
 		Context jettyContext = new Context(jettyServer, "/");
 		jettyContext.addServlet(new ServletHolder(new EchoServlet()), "/echo");
-		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
+		jettyContext.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
+		jettyContext.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("GET")), "/methods/get");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("HEAD")), "/methods/head");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("POST")), "/methods/post");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
+		jettyContext.addServlet(new ServletHolder(new RedirectServlet("/status/ok")), "/redirect");
 		jettyServer.start();
 	}
 
@@ -80,7 +84,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 	@Test
 	public void status() throws Exception {
 		ClientHttpRequest request =
-				factory.createRequest(new URI("http://localhost:8889/errors/notfound"), HttpMethod.GET);
+				factory.createRequest(new URI(BASE_URL + "/status/notfound"), HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		ClientHttpResponse response = request.execute();
 		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -88,7 +92,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	@Test
 	public void echo() throws Exception {
-		ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/echo"), HttpMethod.PUT);
+		ClientHttpRequest request = factory.createRequest(new URI(BASE_URL + "/echo"), HttpMethod.PUT);
 		assertEquals("Invalid HTTP method", HttpMethod.PUT, request.getMethod());
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
@@ -108,7 +112,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	@Test(expected = IllegalStateException.class)
 	public void multipleWrites() throws Exception {
-		ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/echo"), HttpMethod.POST);
+		ClientHttpRequest request = factory.createRequest(new URI(BASE_URL + "/echo"), HttpMethod.POST);
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
 		ClientHttpResponse response = request.execute();
@@ -122,7 +126,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	@Test(expected = IllegalStateException.class)
 	public void headersAfterExecute() throws Exception {
-		ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/echo"), HttpMethod.POST);
+		ClientHttpRequest request = factory.createRequest(new URI(BASE_URL + "/echo"), HttpMethod.POST);
 		request.getHeaders().add("MyHeader", "value");
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
@@ -148,7 +152,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 	private void assertHttpMethod(String path, HttpMethod method) throws Exception {
 		ClientHttpResponse response = null;
 		try {
-			ClientHttpRequest request = factory.createRequest(new URI("http://localhost:8889/methods/" + path), method);
+			ClientHttpRequest request = factory.createRequest(new URI(BASE_URL + "/methods/" + path), method);
 			response = request.execute();
 			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
 		}
@@ -158,19 +162,45 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 			}
 		}
 	}
+	
+	@Test
+	public void redirect() throws Exception {
+		ClientHttpResponse response = null;
+		try {
+			ClientHttpRequest request = factory.createRequest(new URI(BASE_URL + "/redirect"), HttpMethod.PUT);
+			response = request.execute();
+			assertEquals("Invalid Location value", new URI(BASE_URL + "/status/ok"), response.getHeaders().getLocation());
 
-	/** Servlet that returns and error message for a given status code. */
-	private static class ErrorServlet extends GenericServlet {
+		} finally {
+			if (response != null) {
+				response.close();
+				response = null;
+			}
+		}
+		try {
+			ClientHttpRequest request = factory.createRequest(new URI(BASE_URL + "/redirect"), HttpMethod.GET);
+			response = request.execute();
+			assertNull("Invalid Location value", response.getHeaders().getLocation());
+
+		} finally {
+			if (response != null) {
+				response.close();
+			}
+		}
+	}
+	
+	/** Servlet that sets a given status code. */
+	private static class StatusServlet extends GenericServlet {
 
 		private final int sc;
 
-		private ErrorServlet(int sc) {
+		private StatusServlet(int sc) {
 			this.sc = sc;
 		}
 
 		@Override
 		public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-			((HttpServletResponse) response).sendError(sc);
+			((HttpServletResponse) response).setStatus(sc);
 		}
 	}
 
@@ -213,6 +243,27 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 				}
 			}
 			FileCopyUtils.copy(request.getInputStream(), response.getOutputStream());
+		}
+	}
+
+	private static class RedirectServlet extends GenericServlet {
+
+		private final String location;
+
+		private RedirectServlet(String location) {
+			this.location = location;
+		}
+
+		@Override
+		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+			HttpServletRequest request = (HttpServletRequest) req;
+			HttpServletResponse response = (HttpServletResponse) res;
+			response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+			StringBuilder builder = new StringBuilder();
+			builder.append(request.getScheme()).append("://");
+			builder.append(request.getServerName()).append(':').append(request.getServerPort());
+			builder.append(location);
+			response.addHeader("Location", builder.toString());
 		}
 	}
 
