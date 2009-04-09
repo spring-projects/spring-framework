@@ -145,7 +145,6 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					}
 				}
 			} catch (AccessException ae) {
-				ae.printStackTrace();
 				throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,
 						name, ae.getMessage());
 			}

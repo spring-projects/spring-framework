@@ -47,7 +47,11 @@ public class SetValueTests extends ExpressionTestCase {
 	public void testSetArrayElementValue() {
 		setValue("inventions[0]", "Just the telephone");
 	}
-	
+
+	public void testSetElementOfNull() {
+		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+	}
+
 	public void testSetArrayElementValueAllPrimitiveTypes() {
 		setValue("arrayContainer.ints[1]", 3);
 		setValue("arrayContainer.floats[1]", 3.0f);

@@ -37,7 +37,7 @@ public class TypeReference extends SpelNodeImpl {
 		// TODO possible optimization here if we cache the discovered type reference, but can we do that?
 		String typename = (String) getChild(0).getValueInternal(state).getValue();
 		if (typename.indexOf(".") == -1 && Character.isLowerCase(typename.charAt(0))) {
-			TypeCode tc = TypeCode.forName(typename);
+			TypeCode tc = TypeCode.valueOf(typename.toUpperCase());
 			if (tc != TypeCode.OBJECT) {
 				// it is a primitive type
 				return new TypedValue(tc.getType(),CLASS_TYPE_DESCRIPTOR);

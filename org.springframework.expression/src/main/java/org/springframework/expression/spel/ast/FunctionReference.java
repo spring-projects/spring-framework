@@ -30,6 +30,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.support.ReflectionHelper;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in the context prior to the
@@ -101,7 +102,9 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 
 		try {
-			return new TypedValue(m.invoke(m.getClass(), functionArgs),new TypeDescriptor(new MethodParameter(m,-1)));
+			ReflectionUtils.makeAccessible(m);
+			Object result = m.invoke(m.getClass(), functionArgs);
+			return new TypedValue(result, new TypeDescriptor(new MethodParameter(m,-1)));
 		} catch (IllegalArgumentException e) {
 			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());

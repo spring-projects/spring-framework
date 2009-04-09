@@ -54,9 +54,9 @@ public class MethodReference extends SpelNodeImpl {
 		for (int i = 0; i < arguments.length; i++) {
 			arguments[i] = getChild(i).getValueInternal(state).getValue();
 		}
-		if (currentContext == null) {
+		if (currentContext.getValue() == null) {
 			throw new SpelException(getCharPositionInLine(), SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,
-					formatMethodForMessage(name, getTypes(arguments)));
+					FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
 		}
 
 		MethodExecutor executorToUse = this.cachedExecutor;
@@ -85,12 +85,9 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 	private Class<?>[] getTypes(Object... arguments) {
-		if (arguments == null) {
-			return null;
-		}
 		Class<?>[] argumentTypes = new Class[arguments.length];
 		for (int i = 0; i < arguments.length; i++) {
-			argumentTypes[i] = arguments[i].getClass();
+			argumentTypes[i] = (arguments[i]==null?Object.class:arguments[i].getClass());
 		}
 		return argumentTypes;
 	}
@@ -108,38 +105,13 @@ public class MethodReference extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	/**
-	 * Produce a nice string for a given method name with specified arguments.
-	 * @param name the name of the method
-	 * @param argumentTypes the types of the arguments to the method
-	 * @return nicely formatted string, eg. foo(String,int)
-	 */
-	private String formatMethodForMessage(String name, Class<?>... argumentTypes) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(name);
-		sb.append("(");
-		if (argumentTypes != null) {
-			for (int i = 0; i < argumentTypes.length; i++) {
-				if (i > 0)
-					sb.append(",");
-				sb.append(argumentTypes[i].getClass());
-			}
-		}
-		sb.append(")");
-		return sb.toString();
-	}
-
-
 	protected MethodExecutor findAccessorForMethod(String name, Class<?>[] argumentTypes, ExpressionState state)
 			throws SpelException {
 
 		TypedValue context = state.getActiveContextObject();
 		Object contextObject = context.getValue();
 		EvaluationContext eContext = state.getEvaluationContext();
-		if (contextObject == null) {
-			throw new SpelException(SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,
-					FormatHelper.formatMethodForMessage(name, argumentTypes));
-		}
+
 		List<MethodResolver> mResolvers = eContext.getMethodResolvers();
 		if (mResolvers != null) {
 			for (MethodResolver methodResolver : mResolvers) {

@@ -37,4 +37,9 @@ public class HelperTests extends ExpressionTestCase {
 		assertEquals("goo(java.lang.String,int[])",FormatHelper.formatMethodForMessage("goo", String.class,new int[1].getClass()));
 		assertEquals("boo()",FormatHelper.formatMethodForMessage("boo"));
 	}
+	
+//	public void testReflectionHelper01() {
+//		ReflectionHelper.convertArguments(parameterTypes, isVarargs, converter, arguments)
+////		ReflectionHelper.setupArgumentsForVarargsInvocation(;, args)
+//	}
 }

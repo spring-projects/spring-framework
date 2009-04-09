@@ -27,6 +27,7 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+///CLOVER:OFF
 /**
  * Common superclass for expression tests.
  *

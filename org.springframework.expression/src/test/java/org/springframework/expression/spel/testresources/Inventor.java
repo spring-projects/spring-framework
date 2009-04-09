@@ -12,7 +12,7 @@ public class Inventor {
 	private String name;
 	public String publicName;
 	private PlaceOfBirth placeOfBirth;
-	Date birthdate;
+	private Date birthdate;
 	private int sinNumber;
 	private String nationality;
 	private String[] inventions;
@@ -29,6 +29,9 @@ public class Inventor {
 	public Map<String,Boolean> mapOfStringToBoolean = new HashMap<String,Boolean>();
 	public Map<Integer,String> mapOfNumbersUpToTen = new HashMap<Integer,String>();
 	public List<Integer> listOfNumbersUpToTen = new ArrayList<Integer>();
+	public List<Integer> listOneFive = new ArrayList<Integer>();
+	public String[] stringArrayOfThreeItems = new String[]{"1","2","3"};
+	private String foo;
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
@@ -43,6 +46,8 @@ public class Inventor {
 		testMap.put("friday", "freitag");
 		testMap.put("saturday", "samstag");
 		testMap.put("sunday", "sonntag");
+		listOneFive.add(1);
+		listOneFive.add(5);
 		booleanList.add(false);
 		booleanList.add(false);
 		listOfNumbersUpToTen.add(1);
@@ -148,4 +153,11 @@ public class Inventor {
 	public void setSomeProperty(boolean b) {
 		this.accessedThroughGetSet = b;
 	}
+	
+	public Date getBirthdate() { return birthdate;}
+
+	public String getFoo() { return foo; }
+	public void setFoo(String s) { foo = s; }
+
+	public String getNationality() { return nationality; }
 }

@@ -62,8 +62,10 @@ public class Selection extends SpelNodeImpl {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			// TODO don't lose generic info for the new map
 			Map<Object,Object> result = new HashMap<Object,Object>();
+			Object lastKey = null;
 			for (Object k : mapdata.keySet()) {
 				try {
+					lastKey = k;
 					KeyValuePair kvp = new KeyValuePair(k,mapdata.get(k));
 					TypedValue kvpair = new TypedValue(kvp,TypeDescriptor.valueOf(KeyValuePair.class));
 					state.pushActiveContextObject(kvpair);
@@ -83,12 +85,15 @@ public class Selection extends SpelNodeImpl {
 				} finally {
 					state.popActiveContextObject();
 				}
-				if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-					return null;
-				}
-				if (variant == LAST) {
-					return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
-				}
+			}
+			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+				return new TypedValue(null,TypeDescriptor.NULL_TYPE_DESCRIPTOR);
+			}
+			if (variant == LAST) {
+				Object lastValue = result.get(lastKey);
+				Map resultMap = new HashMap();
+				resultMap.put(lastKey,result.get(lastKey));
+				return new TypedValue(resultMap,TypeDescriptor.valueOf(Map.class));
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else if (operand instanceof Collection) {

@@ -22,6 +22,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
+///CLOVER:OFF
 /**
  * Builds an evaluation context for test expressions. Features of the test evaluation context are:
  * <ul>

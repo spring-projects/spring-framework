@@ -70,11 +70,9 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 				if (matchInfo != null) {
 					if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
 						return new ReflectiveConstructorExecutor(ctor, null);
-					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
+					} else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
 						closeMatch = ctor;
-					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
+					} else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
 						argsToConvert = matchInfo.argsRequiringConversion;
 						matchRequiringConversion = ctor;
 					}
@@ -82,11 +80,9 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			}
 			if (closeMatch != null) {
 				return new ReflectiveConstructorExecutor(closeMatch, null);
-			}
-			else if (matchRequiringConversion != null) {
+			} else if (matchRequiringConversion != null) {
 				return new ReflectiveConstructorExecutor(matchRequiringConversion, argsToConvert);
-			}
-			else {
+			} else {
 				return null;
 			}
 		}

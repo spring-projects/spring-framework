@@ -233,6 +233,9 @@ public class OperatorTests extends ExpressionTestCase {
 		
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3>=4"));
 		assertEquals(">=",node.getOperatorName());
+
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3 between 4"));
+		assertEquals("between",node.getOperatorName());
 	}
 	
 	public void testOperatorOverloading() {

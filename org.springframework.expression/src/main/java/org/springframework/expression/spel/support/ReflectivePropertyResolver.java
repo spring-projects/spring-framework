@@ -72,7 +72,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		Method method = findGetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			this.readerCache.put(cacheKey, method);
-			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,0)));
+			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,-1)));
 			return true;
 		}
 		else {

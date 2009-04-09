@@ -85,5 +85,9 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluate("aVarargsMethod2(2,'a',3.0d)", 4, Integer.class);
 		// evaluate("aVarargsMethod2(8,new String[]{'a','b','c'})", 11, Integer.class);
 	}
+	
+	public void testInvocationOnNullContextObject() {
+		evaluateAndCheckError("null.toString()",SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT);
+	}
 
 }

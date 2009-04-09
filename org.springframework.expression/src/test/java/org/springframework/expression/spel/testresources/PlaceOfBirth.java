@@ -4,6 +4,8 @@ package org.springframework.expression.spel.testresources;
 public class PlaceOfBirth {
 	private String city;
 	
+	public String Country;
+	
 	@Override
 	public String toString() {return "PlaceOfBirth("+city+")";}
 

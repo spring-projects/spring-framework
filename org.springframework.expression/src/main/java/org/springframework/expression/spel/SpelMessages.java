@@ -113,10 +113,10 @@ public enum SpelMessages {
 			"The value ''{0}'' cannot be parsed as a long"), PARSE_PROBLEM(Kind.ERROR, 1066,
 			"Error occurred during expression parse: {0}"), INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR(Kind.ERROR,
 			1067, "First operand to matches operator must be a string.  ''{0}'' is not"), INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR(
-			Kind.ERROR, 1068, "Second operand to matches operator must be a string. ''{0}'' is not"), FUNCTION_MUST_BE_STATIC(
-			Kind.ERROR,
-			1069,
-			"Only static methods can be called via function references. The method ''{0}'' referred to by name ''{1}'' is not static.");
+			Kind.ERROR, 1068, "Second operand to matches operator must be a string. ''{0}'' is not"), //
+			FUNCTION_MUST_BE_STATIC(Kind.ERROR, 1069,
+			"Only static methods can be called via function references. The method ''{0}'' referred to by name ''{1}'' is not static."),//
+			CANNOT_INDEX_INTO_NULL_VALUE(Kind.ERROR, 1070, "Cannot index into a null value");
 
 	private Kind kind;
 	private int code;
