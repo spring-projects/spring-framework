@@ -48,7 +48,7 @@ public interface TypeConverter {
 	 * @return the converted value
 	 * @throws EvaluationException if conversion is not possible
 	 */
-	<T> T convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException;
+	Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException;
 
 	/**
 	 * Return true if the type converter can convert the specified type to the desired target type.

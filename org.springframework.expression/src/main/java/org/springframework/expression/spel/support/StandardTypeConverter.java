@@ -86,7 +86,7 @@ public class StandardTypeConverter implements TypeConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
+	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 // For activation when conversion service available - this replaces the rest of the method (probably...)
 //		try {
 //			return (T)conversionService.executeConversion(value, typeDescriptor);
@@ -95,7 +95,7 @@ public class StandardTypeConverter implements TypeConverter {
 //		} catch (ConversionException ce) {
 //			throw new SpelException(ce, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 //		}
-		return (T)convertValue(value,typeDescriptor.getType());
+		return convertValue(value,typeDescriptor.getType());
 	}
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {

@@ -100,11 +100,11 @@ public class ExpressionState {
 		return this.relatedContext.getTypeLocator().findType(type);
 	}
 
-	public <T> T convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value, targetTypeDescriptor);
 	}
 	
-	public <T> T convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value.getValue(), targetTypeDescriptor);
 	}
 
