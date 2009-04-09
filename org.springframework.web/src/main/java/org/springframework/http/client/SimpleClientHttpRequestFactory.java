@@ -28,9 +28,9 @@ import org.springframework.util.Assert;
  * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
  *
  * @author Arjen Poutsma
- * @since 3.0
  * @see java.net.HttpURLConnection
  * @see CommonsClientHttpRequestFactory
+ * @since 3.0
  */
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
@@ -43,17 +43,25 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
-	 * Template method for preparing the given {@link HttpURLConnection}.
-	 * <p>The default implementation prepares the connection for input and output, and sets the HTTP method.
+	 * Template method for preparing the given {@link HttpURLConnection}. <p>The default implementation prepares the
+	 * connection for input and output, and sets the HTTP method.
+	 *
 	 * @param connection the connection to prepare
 	 * @param httpMethod the HTTP request method ({@code GET}, {@code POST}, etc.)
 	 * @throws IOException in case of I/O errors
 	 */
 	protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
 		connection.setDoInput(true);
+		if ("GET".equals(httpMethod)) {
+			connection.setInstanceFollowRedirects(true);
+		}
+		else {
+			connection.setInstanceFollowRedirects(false);
+		}
 		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod)) {
 			connection.setDoOutput(true);
-		} else {
+		}
+		else {
 			connection.setDoOutput(false);
 		}
 		connection.setRequestMethod(httpMethod);
