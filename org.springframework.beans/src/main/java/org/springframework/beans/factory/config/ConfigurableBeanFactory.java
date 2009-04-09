@@ -188,6 +188,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
 	/**
+	 * Resolve the given embedded value, e.g. an annotation attribute.
+	 * @param value the value to resolve
+	 * @return the resolved value (may be the original value as-is)
+	 */
+	String resolveEmbeddedValue(String value);
+
+	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
 	 * <p>Note: Post-processors submitted here will be applied in the order of

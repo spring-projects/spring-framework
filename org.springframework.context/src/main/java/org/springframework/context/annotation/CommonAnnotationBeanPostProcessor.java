@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -422,8 +421,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	protected Object autowireResource(BeanFactory factory, LookupElement element, String requestingBeanName)
 			throws BeansException {
 
-		Object resource = null;
-		Set<String> autowiredBeanNames = null;
+		Object resource;
+		Set<String> autowiredBeanNames;
 		String name = element.name;
 
 		if (this.fallbackToDefaultTypeMatch && element.isDefaultName &&
@@ -521,6 +520,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
+			else if (beanFactory instanceof ConfigurableBeanFactory){
+				resourceName = ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(resourceName);
+			}
 			if (resourceType != null && !Object.class.equals(resourceType)) {
 				checkResourceType(resourceType);
 			}
@@ -588,7 +590,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			Service service = null;
+			Service service;
 			try {
 				service = (Service) getResource(this, requestingBeanName);
 			}

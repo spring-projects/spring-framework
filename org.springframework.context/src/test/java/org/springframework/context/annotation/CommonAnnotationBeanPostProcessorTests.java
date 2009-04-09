@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Properties;
+
 import static org.junit.Assert.*;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +33,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -171,9 +174,15 @@ public class CommonAnnotationBeanPostProcessorTests {
 	public void testExtendedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
-		bpp.setResourceFactory(bf);
+		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		bf.registerResolvableDependency(BeanFactory.class, bf);
+
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.setProperty("tb", "testBean3");
+		ppc.setProperties(props);
+		ppc.postProcessBeanFactory(bf);
 
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class));
 		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(NamedResourceInjectionBean.class));
@@ -212,9 +221,15 @@ public class CommonAnnotationBeanPostProcessorTests {
 	public void testExtendedResourceInjectionWithOverriding() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
-		bpp.setResourceFactory(bf);
+		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		bf.registerResolvableDependency(BeanFactory.class, bf);
+
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.setProperty("tb", "testBean3");
+		ppc.setProperties(props);
+		ppc.postProcessBeanFactory(bf);
 
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
 		TestBean tb5 = new TestBean();
@@ -387,7 +402,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.setTestBean2(testBean2);
 		}
 
-		@Resource(name="testBean3", type=ITestBean.class)
+		@Resource(name="${tb}", type=ITestBean.class)
 		private void setTestBean4(ITestBean testBean4) {
 			this.testBean4 = testBean4;
 		}
