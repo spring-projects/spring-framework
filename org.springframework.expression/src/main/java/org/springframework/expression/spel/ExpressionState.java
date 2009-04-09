@@ -52,9 +52,10 @@ public class ExpressionState {
 		this.relatedContext = context;
 		createVariableScope();
 	}
-
+	
+	// create an empty top level VariableScope
 	private void createVariableScope() {
-		this.variableScopes.add(new VariableScope()); // create an empty top level VariableScope
+		this.variableScopes.add(new VariableScope()); 
 	}
 
 	/**
@@ -64,9 +65,10 @@ public class ExpressionState {
 		if (this.contextObjects.isEmpty()) {
 			TypedValue rootObject = this.relatedContext.getRootObject();
 			if (rootObject == null) {
-				return new TypedValue(rootObject,TypeDescriptor.NULL_TYPE_DESCRIPTOR);
+				return TypedValue.NULL_TYPED_VALUE;
+			} else {
+				return rootObject;
 			}
-			return rootObject;
 		}
 		return this.contextObjects.peek();
 	}
@@ -80,7 +82,12 @@ public class ExpressionState {
 	}
 
 	public TypedValue getRootContextObject() {
-		return this.relatedContext.getRootObject();
+		TypedValue root = this.relatedContext.getRootObject();
+		if (root == null) {
+			return TypedValue.NULL_TYPED_VALUE;
+		} else {
+			return root;
+		}
 	}
 
 	public void setVariable(String name, Object value) {
@@ -89,7 +96,11 @@ public class ExpressionState {
 
 	public TypedValue lookupVariable(String name) {
 		Object value = this.relatedContext.lookupVariable(name);
-		return new TypedValue(value,TypeDescriptor.forObject(value));
+		if (value==null) {
+			return TypedValue.NULL_TYPED_VALUE;
+		} else {
+			return new TypedValue(value,TypeDescriptor.forObject(value));
+		}
 	}
 
 	public TypeComparator getTypeComparator() {
@@ -108,13 +119,10 @@ public class ExpressionState {
 		return this.relatedContext.getTypeConverter().convertValue(value.getValue(), targetTypeDescriptor);
 	}
 
-//	public <T> T convertValue(TypedValue value, Class<T> targetType) throws EvaluationException {
-//		return this.relatedContext.getTypeConverter().convertValue(value, targetType);
-//	}
-
-	/**
+	/*
 	 * A new scope is entered when a function is invoked
 	 */
+	
 	public void enterScope(Map<String, Object> argMap) {
 		this.variableScopes.push(new VariableScope(argMap));
 	}
@@ -167,7 +175,6 @@ public class ExpressionState {
 	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
 	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
 	 * the function is executing.  When the function returns the scope is exited.
-	 *
 	 */
 	private static class VariableScope {
 

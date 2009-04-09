@@ -29,6 +29,8 @@ public class TypedValue {
 
 	private Object value;
 	private TypeDescriptor typeDescriptor;
+	
+	public static final TypedValue NULL_TYPED_VALUE = new TypedValue(null, TypeDescriptor.NULL_TYPE_DESCRIPTOR);
 
 	/**
 	 * Create a TypedValue for a simple object.  The type descriptor is inferred 

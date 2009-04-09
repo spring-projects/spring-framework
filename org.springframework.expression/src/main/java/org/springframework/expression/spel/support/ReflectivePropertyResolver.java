@@ -333,6 +333,9 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (this == other) {
 				return true;
 			}
+			if (!(other instanceof CacheKey)) {
+				return false;
+			}
 			CacheKey otherKey = (CacheKey) other;
 			return (this.clazz.equals(otherKey.clazz) && this.name.equals(otherKey.name));
 		}

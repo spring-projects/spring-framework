@@ -34,9 +34,8 @@ public class StandardTypeComparator implements TypeComparator {
 		// If one is null, check if the other is
 		if (left == null) {
 			return right == null ? 0 : 1;
-		}
-		else if (right == null) {
-			return left == null ? 0 : -1;
+		} else if (right == null) {
+			return -1; // left cannot be null
 		}
 
 		// Basic number comparisons

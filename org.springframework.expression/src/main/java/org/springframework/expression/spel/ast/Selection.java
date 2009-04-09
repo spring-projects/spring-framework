@@ -63,10 +63,10 @@ public class Selection extends SpelNodeImpl {
 			// TODO don't lose generic info for the new map
 			Map<Object,Object> result = new HashMap<Object,Object>();
 			Object lastKey = null;
-			for (Object k : mapdata.keySet()) {
+			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
-					lastKey = k;
-					KeyValuePair kvp = new KeyValuePair(k,mapdata.get(k));
+					lastKey = entry.getKey();
+					KeyValuePair kvp = new KeyValuePair(entry.getKey(),entry.getValue());
 					TypedValue kvpair = new TypedValue(kvp,TypeDescriptor.valueOf(KeyValuePair.class));
 					state.pushActiveContextObject(kvpair);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
@@ -90,9 +90,9 @@ public class Selection extends SpelNodeImpl {
 				return new TypedValue(null,TypeDescriptor.NULL_TYPE_DESCRIPTOR);
 			}
 			if (variant == LAST) {
-				Object lastValue = result.get(lastKey);
 				Map resultMap = new HashMap();
-				resultMap.put(lastKey,result.get(lastKey));
+				Object lastValue = result.get(lastKey);
+				resultMap.put(lastKey,lastValue);
 				return new TypedValue(resultMap,TypeDescriptor.valueOf(Map.class));
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
