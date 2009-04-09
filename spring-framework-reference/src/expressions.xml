@@ -25,7 +25,7 @@
     <para>While SpEL serves as the foundation for expression evaluation within
     the Spring portfolio, it is not directly tied to Spring and can be used
     independently. In order to be self contained, many of the examples in this
-    chatper use SpEL as if it was an independent expression language. This
+    chapter use SpEL as if it was an independent expression language. This
     requires creating a few boostrapping infrastructure classes such as the
     parser. Most Spring users will not need to deal with this infrastructure
     and will instead only author expression strings for evaluation. An example
@@ -136,7 +136,7 @@ String message = (String) exp.getValue();</programlisting>The value of the
     can be thrown, <classname>ParseException</classname> and
     <classname>EvaluationException</classname> when calling
     '<literal>parser.parseExpression</literal>' and
-    '<literal>exp.getValue</literal>' respectfully.</para>
+    '<literal>exp.getValue</literal>' respectedly.</para>
 
     <para>SpEL supports a wide range of features, such a calling methods,
     accessing properties and calling constructors. </para>
@@ -145,7 +145,7 @@ String message = (String) exp.getValue();</programlisting>The value of the
     the string literal</para>
 
     <programlisting lang="" language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
-Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.concat(!)</emphasis>");
+Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.concat('!')</emphasis>");
 String message = (String) exp.getValue();</programlisting>
 
     <para>The value of message is now 'Hello World!'. </para>
@@ -223,9 +223,9 @@ boolean isEqual = exp.getValue(context, Boolean.class);  // evaluates to true</p
       <title>The EvaluationContext interface </title>
 
       <para>The interface <interfacename>EvaluationContext</interfacename> is
-      used when evaluating an expression to resolve properties, methods
-      ,fields, and to help perform type conversion. The out-of-the-box
-      implementation, <classname>StandardEvaluationContext</classname> ,uses
+      used when evaluating an expression to resolve properties, methods, 
+      fields, and to help perform type conversion. The out-of-the-box
+      implementation, <classname>StandardEvaluationContext</classname>, uses
       reflection to manipulate the object, caching
       j<package>ava.lang.reflect</package>'s <classname>Method</classname>,
       <classname>Field</classname>, and <classname>Constructor</classname>
@@ -502,14 +502,14 @@ boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
         standard operator notation. Support is not yet implemented for objects
         that implement the Comparable interface.</para>
 
-        <para><programlisting language="java">// evaluats to true
-boolean isEqual = parser.parseExpression("2 == 2").getValue(Boolean.class);
+        <para><programlisting language="java">// evaluates to true
+boolean trueValue = parser.parseExpression("2 == 2").getValue(Boolean.class);
 
 // evaluates to false
-boolean isEqual = parser.parseExpression("2 &lt; -5.0").getValue(Boolean.class);
+boolean falseValue = parser.parseExpression("2 &lt; -5.0").getValue(Boolean.class);
 
 // evaluates to true
-boolean isEqual = parser.parseExpression("'black' &lt; 'block'").getValue(Boolean.class);</programlisting>In
+boolean trueValue = parser.parseExpression("'black' &lt; 'block'").getValue(Boolean.class);</programlisting>In
         addition to standard relational operators SpEL supports the
         'instanceof' and regular expression based 'matches' operator.</para>
 
@@ -542,8 +542,8 @@ boolean trueValue = parser.parseExpression(expression).getValue(societyContext, 
 
 // -- OR --
 
-// evaluates to false
-boolean falseValue = parser.parseExpression("true or false").getValue(Boolean.class);
+// evaluates to true
+boolean trueValue = parser.parseExpression("true or false").getValue(Boolean.class);
 
 // evaluates to true
 String expression =  "isMember('Nikola Tesla') or isMember('Albert Einstien')";
@@ -596,9 +596,6 @@ int one = parser.parseExpression("8 / 5 % 2").getValue(Integer.class); // 1
 
 // Operator precedence
 int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); // -21
-
-
-
 </programlisting></para>
       </section>
     </section>
@@ -608,8 +605,8 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
 
       <para>Setting of a property is done by using the assignment operator.
       This would typically be done within a call to
-      <literal>SetValue</literal> but can also be done inside a call to
-      <literal>GetValue</literal> </para>
+      <literal>setValue</literal> but can also be done inside a call to
+      <literal>getValue</literal> </para>
 
       <programlisting language="java">Inventor inventor = new Inventor();		
 StandardEvaluationContext inventorContext = new StandardEvaluationContext();
@@ -620,7 +617,6 @@ parser.parseExpression("Name").setValue(inventorContext, "Alexander Seovic2");
 // alternatively
 
 String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inventorContext, String.class);
-
 </programlisting>
 
       <para></para>
@@ -636,7 +632,7 @@ String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inve
       <programlisting language="java">Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
 
 
-boolean isEqual = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt; T(java.math.RoundingMode).FLOOR").getValue(Boolean.class);
+boolean trueValue = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt; T(java.math.RoundingMode).FLOOR").getValue(Boolean.class);
 </programlisting>
     </section>
 
@@ -674,10 +670,10 @@ parser.parseExpression("Name = #newName").getValue(context);
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
       <section>
-        <title>The #this variables</title>
+        <title>The #this variable</title>
 
-        <para>The variable #this is always defined and refers to the root
-        object that is currently being evaluated. </para>
+        <para>The variable #this is always defined and refers to the
+        current evaluation object (the object against which unqualified references will be resolved). </para>
 
         <programlisting language="java">// create an array of integers
 List&lt;Integer&gt; primes = new ArrayList&lt;Integer&gt;();
@@ -722,9 +718,6 @@ List&lt;Integer&gt; primesGreaterThanTen = (List&lt;Integer&gt;) parser.parseExp
 
       <para>This method is then registered with the evaluation context and can
       be used within an expression string</para>
-
-      <para>used in To register this method with the evaluation context and
-      used in an expression string</para>
 
       <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
 StandardEvaluationContext context = new StandardEvaluationContext();
