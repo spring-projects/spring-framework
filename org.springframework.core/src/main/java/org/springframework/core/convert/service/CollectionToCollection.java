@@ -37,26 +37,29 @@ class CollectionToCollection extends AbstractCollectionConverter {
 	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object source) throws Exception {
 		Collection sourceCollection = (Collection) source;
-		Class targetCollectionType = getTargetCollectionType();
-		Class implClass = CollectionConversionUtils.getImpl(targetCollectionType);
+		Class implClass = CollectionConversionUtils.getImpl(getTargetCollectionType());
 		Collection targetCollection = (Collection) implClass.newInstance();
-		ConversionExecutor elementConverter = getElementConverter();
-		Class elementType;
-		if (elementConverter == null) {
-			elementType = getTargetElementType();
-		} else {
-			elementType = null;
-		}
+		ConversionExecutor elementConverter = getElementConverter(sourceCollection);
 		Iterator it = sourceCollection.iterator();
 		while (it.hasNext()) {
-			Object value = it.next();
-			if (elementConverter == null && elementType != null) {
-				elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(elementType)); 			
-			}
-			value = elementConverter.execute(value);
-			targetCollection.add(value);
+			targetCollection.add(elementConverter.execute(it.next()));
 		}
 		return targetCollection;
+	}
+	
+	private ConversionExecutor getElementConverter(Collection<?> source) {
+		ConversionExecutor elementConverter = getElementConverter();
+		if (elementConverter == NoOpConversionExecutor.INSTANCE && !source.isEmpty() && getTargetElementType() != null) {
+			Iterator<?> it = source.iterator();
+			while (it.hasNext()) {
+				Object value = it.next();
+				if (value != null) {
+					elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(getTargetElementType()));
+					break;
+				}
+			}
+		}
+		return elementConverter;
 	}
 	
 }

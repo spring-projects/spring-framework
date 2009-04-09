@@ -50,17 +50,15 @@ class CollectionToArray extends AbstractCollectionConverter {
 		int i = 0;
 		ConversionExecutor elementConverter = getElementConverter(collection);
 		for (Iterator<?> it = collection.iterator(); it.hasNext(); i++) {
-			Object value = it.next();
-			value = elementConverter.execute(value);
-			Array.set(array, i, value);
+			Array.set(array, i, elementConverter.execute(it.next()));
 		}
 		return array;
 	}
 	
-	private ConversionExecutor getElementConverter(Collection<?> target) {
+	private ConversionExecutor getElementConverter(Collection<?> source) {
 		ConversionExecutor elementConverter = getElementConverter();
-		if (elementConverter == NoOpConversionExecutor.INSTANCE && !target.isEmpty()) {
-			Iterator<?> it = target.iterator();
+		if (elementConverter == NoOpConversionExecutor.INSTANCE && !source.isEmpty()) {
+			Iterator<?> it = source.iterator();
 			while (it.hasNext()) {
 				Object value = it.next();
 				if (value != null) {
