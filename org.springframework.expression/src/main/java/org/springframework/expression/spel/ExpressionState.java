@@ -48,16 +48,10 @@ public class ExpressionState {
 
 	private final Stack<TypedValue> contextObjects = new Stack<TypedValue>();
 
-
-	public ExpressionState() {
-		this(null);
-	}
-
 	public ExpressionState(EvaluationContext context) {
 		this.relatedContext = context;
 		createVariableScope();
 	}
-
 
 	private void createVariableScope() {
 		this.variableScopes.add(new VariableScope()); // create an empty top level VariableScope
@@ -95,7 +89,7 @@ public class ExpressionState {
 
 	public TypedValue lookupVariable(String name) {
 		Object value = this.relatedContext.lookupVariable(name);
-		return new TypedValue(value,TypeDescriptor.valueOf((value==null?null:value.getClass())));
+		return new TypedValue(value,TypeDescriptor.forObject(value));
 	}
 
 	public TypeComparator getTypeComparator() {

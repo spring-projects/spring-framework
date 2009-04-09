@@ -41,6 +41,10 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		evaluate("placeOfBirth.city", "SmilJan", String.class);
 	}
 
+	public void testSimpleAccess03() {
+		evaluate("stringArrayOfThreeItems.length", "3", Integer.class);
+	}
+
 	public void testNonExistentPropertiesAndMethods() {
 		// madeup does not exist as a property
 		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 0);
@@ -79,7 +83,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		} catch (EvaluationException e) {
 			// success - message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
 			// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
-			System.out.println(e.getMessage());
+			// System.out.println(e.getMessage());
 		}
 	}
 

@@ -85,8 +85,8 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.variables.put(name, value);
 	}
 
-	public void registerFunction(String name, Method m) {
-		this.variables.put(name, m);
+	public void registerFunction(String name, Method method) {
+		this.variables.put(name, method);
 	}
 
 	public Object lookupVariable(String name) {

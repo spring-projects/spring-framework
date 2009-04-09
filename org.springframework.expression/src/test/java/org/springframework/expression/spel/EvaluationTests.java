@@ -61,21 +61,25 @@ public class EvaluationTests extends ExpressionTestCase {
 	// evaluate("name in {null, \"Anonymous\"}", "false", Boolean.class);
 	// }
 	//
-	// public void testRelOperatorsBetween01() {
-	// evaluate("1 between {1, 5}", "true", Boolean.class);
-	// }
+	public void testRelOperatorsBetween01() {
+		evaluate("1 between listOneFive", "true", Boolean.class);
+		// evaluate("1 between {1, 5}", "true", Boolean.class); // no inline list building at the moment
+	}
 	//
 	// public void testRelOperatorsBetween02() {
 	// evaluate("'efg' between {'abc', 'xyz'}", "true", Boolean.class);
 	// }
 	//
-	// public void testRelOperatorsBetweenErrors01() {
-	// evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 12);
-	// }
+	public void testRelOperatorsBetweenErrors01() {
+		 evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 12);
+	}
 	//
 	// public void testRelOperatorsBetweenErrors02() {
 	// evaluateAndCheckError("'abc' between {5,7}", SpelMessages.NOT_COMPARABLE, 6);
 	// }
+	public void testRelOperatorsBetweenErrors03() {
+		 evaluateAndCheckError("1 between listOfNumbersUpToTen", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+	}
 
 	public void testRelOperatorsIs01() {
 		evaluate("'xyz' instanceof T(int)", "false", Boolean.class);
@@ -343,16 +347,28 @@ public class EvaluationTests extends ExpressionTestCase {
 	// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
 	// }
 	 
-	 public void testSelection03() {
+	public void testSelection03() {
 		evaluate("mapOfNumbersUpToTen.?{key>5}.size()", "5", Integer.class);
-	 }
+	}
+
+	public void testSelection04() {
+		evaluateAndCheckError("mapOfNumbersUpToTen.?{'hello'}.size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	}
 
 	public void testSelectionFirst01() {
 		evaluate("listOfNumbersUpToTen.^{#isEven(#this) == 'y'}", "2", Integer.class);
 	}
-	
+
+	public void testSelectionFirst02() {
+		evaluate("mapOfNumbersUpToTen.^{key>5}.size()", "1", Integer.class);
+	}
+
 	public void testSelectionLast01() {
 		evaluate("listOfNumbersUpToTen.${#isEven(#this) == 'y'}", "10", Integer.class);
+	}
+
+	public void testSelectionLast02() {
+		evaluate("mapOfNumbersUpToTen.${key>5}.size()", "1", Integer.class);
 	}
 
 	public void testSelectionAST() throws Exception {
@@ -410,6 +426,10 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	public void testIndexer03() {
 		evaluate("'christian'[8]", "n", String.class);
+	}
+	
+	public void testIndexerError() {
+		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	// Bean references

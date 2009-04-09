@@ -16,16 +16,14 @@
 
 package org.springframework.expression.spel.ast;
 
-enum TypeCode {
+public enum TypeCode {
 
-	OBJECT(0, Object.class), BOOLEAN(1, Boolean.TYPE), BYTE(1, Byte.TYPE), CHAR(1, Character.TYPE), SHORT(2, Short.TYPE), INT(
-			3, Integer.TYPE), LONG(4, Long.TYPE), FLOAT(5, Float.TYPE), DOUBLE(6, Double.TYPE);
+	OBJECT(Object.class), BOOLEAN(Boolean.TYPE), BYTE(Byte.TYPE), CHAR(Character.TYPE), //
+	SHORT(Short.TYPE), INT(Integer.TYPE), LONG(Long.TYPE), FLOAT(Float.TYPE), DOUBLE(Double.TYPE);
 
-	private int code;
 	private Class<?> type;
 
-	TypeCode(int code, Class<?> type) {
-		this.code = code;
+	TypeCode(Class<?> type) {
 		this.type = type;
 	}
 
@@ -33,72 +31,15 @@ enum TypeCode {
 		return type;
 	}
 
-	public static TypeCode forClass(Class<?> c) {
-		TypeCode[] allValues = TypeCode.values();
-		for (int i = 0; i < allValues.length; i++) {
-			TypeCode typeCode = allValues[i];
-			if (c == typeCode.getType()) {
-				return typeCode;
-			}
-		}
-		return OBJECT;
-	}
+//	public static TypeCode forClass(Class<?> c) {
+//		TypeCode[] allValues = TypeCode.values();
+//		for (int i = 0; i < allValues.length; i++) {
+//			TypeCode typeCode = allValues[i];
+//			if (c == typeCode.getType()) {
+//				return typeCode;
+//			}
+//		}
+//		return OBJECT;
+//	}
 
-	/**
-	 * For a primitive name this will determine the typecode value - supports
-	 * int,byte,char,short,long,double,float,boolean
-	 */
-	public static TypeCode forName(String name) {
-		if (name.equals("int"))
-			return TypeCode.INT;
-		else if (name.equals("boolean"))
-			return TypeCode.BOOLEAN;
-		else if (name.equals("char"))
-			return TypeCode.CHAR;
-		else if (name.equals("long"))
-			return TypeCode.LONG;
-		else if (name.equals("float"))
-			return TypeCode.FLOAT;
-		else if (name.equals("double"))
-			return TypeCode.DOUBLE;
-		else if (name.equals("short"))
-			return TypeCode.SHORT;
-		else if (name.equals("byte"))
-			return TypeCode.BYTE;
-		return TypeCode.OBJECT;
-	}
-
-	public int getCode() {
-		return code;
-	}
-
-	public Object coerce(TypeCode fromTypeCode, Object fromObject) {
-		if (this == TypeCode.INT) {
-			switch (fromTypeCode) {
-			case BOOLEAN:
-				return ((Boolean) fromObject).booleanValue() ? 1 : 0;
-			}
-		}
-		//			
-		// return Integer.valueOf
-		// } else if (this==TypeCode.BOOLEAN) {
-		// return new Boolean(left).intValue();
-		return null;
-	}
-
-	public static TypeCode forValue(Number op1) {
-		return forClass(op1.getClass());
-	}
-
-	public boolean isDouble() {
-		return this == DOUBLE;
-	}
-
-	public boolean isFloat() {
-		return this == FLOAT;
-	}
-
-	public boolean isLong() {
-		return this == LONG;
-	}
 }

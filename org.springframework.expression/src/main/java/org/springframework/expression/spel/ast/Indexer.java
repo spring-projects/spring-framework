@@ -60,9 +60,13 @@ public class Indexer extends SpelNodeImpl {
 
 		int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
-		if (targetObjectTypeDescriptor.isArray()) {
+		if (targetObject == null) {
+			throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+		}
+		
+		if (targetObject.getClass().isArray()) {
 			return new TypedValue(accessArrayElement(targetObject, idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
-		} else if (targetObjectTypeDescriptor.isCollection()) {
+		} else if (targetObject instanceof Collection) {
 			Collection<?> c = (Collection<?>) targetObject;
 			if (idx >= c.size()) {
 				throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
@@ -81,7 +85,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 			return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
 		}
-		throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor);
+		throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
 	}
 
 
@@ -98,6 +102,9 @@ public class Indexer extends SpelNodeImpl {
 		TypeDescriptor targetObjectTypeDescriptor = contextObject.getTypeDescriptor();
 		TypedValue index = getChild(0).getValueInternal(state);
 
+		if (targetObject == null) {
+			throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+		}
 		// Indexing into a Map
 		if (targetObjectTypeDescriptor.isMap()) {
 			Map map = (Map)targetObject;

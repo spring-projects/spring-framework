@@ -20,7 +20,6 @@ import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelException;
-import org.springframework.expression.spel.SpelMessages;
 
 /**
  * Represents a variable reference, eg. #someVar. Note this is different to a *local* variable like $someVar
@@ -52,9 +51,7 @@ public class VariableReference extends SpelNodeImpl {
 			return state.getRootContextObject();
 		}
 		TypedValue result = state.lookupVariable(this.name);
-		if (result == null) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.VARIABLE_NOT_FOUND, this.name);
-		}
+		// a null value will mean either the value was null or the variable was not found
 		return result;
 	}
 
@@ -64,7 +61,7 @@ public class VariableReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public String toStringAST() {
+	public String toStringAST() { 
 		return "#" + this.name;
 	}
 
