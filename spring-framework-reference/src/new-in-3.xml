@@ -196,7 +196,7 @@
     <title>Spring Expression Language</title>
 
     <para>Spring introduces an expression language which is similar to Unified
-    EL in its syntax but offers significantly more feature. The expression
+    EL in its syntax but offers significantly more features. The expression
     language can be used when defining XML and Annotation based bean
     definitions and also serves as the foundation for expression language
     support across the Spring portfolio. Details of this new functionality can
