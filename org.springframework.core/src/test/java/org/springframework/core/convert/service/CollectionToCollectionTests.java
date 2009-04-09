@@ -1,6 +1,7 @@
 package org.springframework.core.convert.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,6 +70,15 @@ public class CollectionToCollectionTests {
 		assertEquals(new Integer(2), result.get(2));
 		assertEquals(null, result.get(3));
 		assertEquals(new Integer(3), result.get(4));
+	}
+	
+	@Test
+	public void testCollectionToCollectionConversionNoGenericInfoSourceEmpty() throws Exception {
+		DefaultConversionService service = new DefaultConversionService();
+		CollectionToCollection c = new CollectionToCollection(TypeDescriptor.valueOf(Collection.class),
+				new TypeDescriptor(getClass().getField("integerTarget")), service);
+		List result = (List) c.execute(bindTarget);
+		assertTrue(result.isEmpty());
 	}
 
 

@@ -49,7 +49,7 @@ class CollectionToCollection extends AbstractCollectionConverter {
 	
 	private ConversionExecutor getElementConverter(Collection<?> source) {
 		ConversionExecutor elementConverter = getElementConverter();
-		if (elementConverter == NoOpConversionExecutor.INSTANCE && !source.isEmpty() && getTargetElementType() != null) {
+		if (elementConverter == NoOpConversionExecutor.INSTANCE && getTargetElementType() != null) {
 			Iterator<?> it = source.iterator();
 			while (it.hasNext()) {
 				Object value = it.next();
