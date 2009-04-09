@@ -660,12 +660,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		this.embeddedValueResolvers.add(valueResolver);
 	}
 
-	/**
-	 * Resolve the given embedded value, e.g. an annotation attribute.
-	 * @param value the value to resolve
-	 * @return the resolved value (may be the original value as-is)
-	 */
-	protected String resolveEmbeddedValue(String value) {
+	public String resolveEmbeddedValue(String value) {
 		String result = value;
 		for (StringValueResolver resolver : this.embeddedValueResolvers) {
 			result = resolver.resolveStringValue(result);
