@@ -46,7 +46,7 @@ public class OperatorAnd extends Operator {
 		boolean rightValue;
 
 		try {
-			leftValue = state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelException ee) {
 			ee.setPosition(getLeftOperand().getCharPositionInLine());
@@ -58,7 +58,7 @@ public class OperatorAnd extends Operator {
 		}
 
 		try {
-			rightValue = state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelException ee) {
 			ee.setPosition(getRightOperand().getCharPositionInLine());

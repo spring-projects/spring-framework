@@ -111,9 +111,9 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		}
 
 		@SuppressWarnings("unchecked")
-		public <T> T convertValue(Object value, TypeDescriptor typeDescriptor)
+		public Object convertValue(Object value, TypeDescriptor typeDescriptor)
 				throws EvaluationException {
-			return (T)super.executeConversion(value, typeDescriptor);
+			return super.executeConversion(value, typeDescriptor);
 		}
 		
 	}

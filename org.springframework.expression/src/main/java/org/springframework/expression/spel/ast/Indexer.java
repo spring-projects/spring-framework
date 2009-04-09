@@ -58,7 +58,7 @@ public class Indexer extends SpelNodeImpl {
 			return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
 		}
 
-		int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
+		int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
 		if (targetObject == null) {
 			throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
@@ -115,10 +115,10 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		if (targetObjectTypeDescriptor.isArray()) {
-			int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
+			int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 			setArrayElement(state, contextObject.getValue(), idx, newValue, targetObjectTypeDescriptor.getElementType());
 		} else if (targetObjectTypeDescriptor.isCollection()) {
-			int idx = state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
+			int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
 				throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
@@ -153,35 +153,35 @@ public class Indexer extends SpelNodeImpl {
 		if (arrayComponentType == Integer.TYPE) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, INTEGER_TYPE_DESCRIPTOR);
+			array[idx] = (Integer)state.convertValue(newValue, INTEGER_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Boolean.TYPE) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, BOOLEAN_TYPE_DESCRIPTOR);
+			array[idx] = (Boolean)state.convertValue(newValue, BOOLEAN_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Character.TYPE) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, CHARACTER_TYPE_DESCRIPTOR);
+			array[idx] = (Character)state.convertValue(newValue, CHARACTER_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Long.TYPE) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, LONG_TYPE_DESCRIPTOR);
+			array[idx] = (Long)state.convertValue(newValue, LONG_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Short.TYPE) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, SHORT_TYPE_DESCRIPTOR);
+			array[idx] = (Short)state.convertValue(newValue, SHORT_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Double.TYPE) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, DOUBLE_TYPE_DESCRIPTOR);
+			array[idx] = (Double)state.convertValue(newValue, DOUBLE_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Float.TYPE) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, FLOAT_TYPE_DESCRIPTOR);
+			array[idx] = (Float)state.convertValue(newValue, FLOAT_TYPE_DESCRIPTOR);
 		} else if (arrayComponentType == Byte.TYPE) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, BYTE_TYPE_DESCRIPTOR);
+			array[idx] = (Byte)state.convertValue(newValue, BYTE_TYPE_DESCRIPTOR);
 		} else {
 			Object[] array = (Object[]) ctx;
 			checkAccess(array.length, idx);

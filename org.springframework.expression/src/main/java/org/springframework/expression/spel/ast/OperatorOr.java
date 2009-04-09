@@ -43,8 +43,8 @@ public class OperatorOr extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
-		try {
-			leftValue = state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+		try { 
+			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelException see) {
 			see.setPosition(getLeftOperand().getCharPositionInLine());
@@ -56,7 +56,7 @@ public class OperatorOr extends Operator {
 		}
 
 		try {
-			rightValue = state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelException see) {
 			see.setPosition(getRightOperand().getCharPositionInLine());
