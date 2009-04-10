@@ -51,21 +51,15 @@ public class GenericConversionService implements ConversionService {
 
 	/**
 	 * An indexed map of Converters. Each Map.Entry key is a source class (S) that can be converted from. Each Map.Entry
-	 * value is a Map that defines the targetClass-to-Converter mappings for that source.
+	 * value is a Map that defines the targetType-to-Converter mappings for that source.
 	 */
-	private final Map sourceClassConverters = new HashMap();
+	private final Map sourceTypeConverters = new HashMap();
 
 	/**
 	 * An indexed map of SuperConverters. Each Map.Entry key is a source class (S) that can be converted from. Each
-	 * Map.Entry value is a Map that defines the targetClass-to-SuperConverter mappings for that source.
+	 * Map.Entry value is a Map that defines the targetType-to-SuperConverter mappings for that source.
 	 */
-	private final Map sourceClassSuperConverters = new HashMap();
-
-	/**
-	 * A map of custom converters. Custom converters are assigned a unique identifier that can be used to lookup the
-	 * converter. This allows multiple converters for the same source->target class to be registered.
-	 */
-	private final Map customConverters = new HashMap();
+	private final Map sourceTypeSuperConverters = new HashMap();
 
 	/**
 	 * Indexes classes by well-known aliases.
@@ -97,14 +91,14 @@ public class GenericConversionService implements ConversionService {
 	 */
 	public void addConverter(Converter converter) {
 		List typeInfo = getRequiredTypeInfo(converter);
-		Class sourceClass = (Class) typeInfo.get(0);
-		Class targetClass = (Class) typeInfo.get(1);
+		Class sourceType = (Class) typeInfo.get(0);
+		Class targetType = (Class) typeInfo.get(1);
 		// index forward
-		Map sourceMap = getSourceMap(sourceClass);
-		sourceMap.put(targetClass, converter);
+		Map sourceMap = getSourceMap(sourceType);
+		sourceMap.put(targetType, converter);
 		// index reverse
-		sourceMap = getSourceMap(targetClass);
-		sourceMap.put(sourceClass, new ReverseConverter(converter));
+		sourceMap = getSourceMap(targetType);
+		sourceMap.put(sourceType, new ReverseConverter(converter));
 	}
 
 	/**
@@ -113,38 +107,29 @@ public class GenericConversionService implements ConversionService {
 	 */
 	public void addConverter(SuperConverter converter) {
 		List typeInfo = getRequiredTypeInfo(converter);
-		Class sourceClass = (Class) typeInfo.get(0);
-		Class targetClass = (Class) typeInfo.get(1);
+		Class sourceType = (Class) typeInfo.get(0);
+		Class targetType = (Class) typeInfo.get(1);
 		// index forward
-		Map sourceMap = getSourceSuperConverterMap(sourceClass);
-		sourceMap.put(targetClass, converter);
+		Map sourceMap = getSourceSuperConverterMap(sourceType);
+		sourceMap.put(targetType, converter);
 		if (converter instanceof SuperTwoWayConverter) {
 			// index reverse
-			sourceMap = getSourceSuperConverterMap(targetClass);
-			sourceMap.put(sourceClass, new ReverseSuperConverter((SuperTwoWayConverter) converter));
+			sourceMap = getSourceSuperConverterMap(targetType);
+			sourceMap.put(sourceType, new ReverseSuperConverter((SuperTwoWayConverter) converter));
 		}
-	}
-
-	/**
-	 * Register the converter as a custom converter with this conversion service.
-	 * @param id the id to assign the converter
-	 * @param converter the converter to use a custom converter
-	 */
-	public void addConverter(String id, Converter converter) {
-		customConverters.put(id, converter);
 	}
 
 	/**
 	 * Adapts a {@link SuperTwoWayConverter} that converts between BS and BT class hierarchies to a {@link Converter}
 	 * that converts between the specific BS/BT sub types S and T.
-	 * @param sourceClass the source class S to convert from, which must be equal or extend BS
-	 * @param targetClass the target type T to convert to, which must equal or extend BT
+	 * @param sourceType the source class S to convert from, which must be equal or extend BS
+	 * @param targetType the target type T to convert to, which must equal or extend BT
 	 * @param converter the super two way converter
 	 * @return a converter that converts from S to T by delegating to the super converter
 	 */
-	public static <S, T> Converter<S, T> converterFor(Class<S> sourceClass, Class<T> targetClass,
+	public static <S, T> Converter<S, T> converterFor(Class<S> sourceType, Class<T> targetType,
 			SuperTwoWayConverter converter) {
-		return new SuperTwoWayConverterConverter(converter, sourceClass, targetClass);
+		return new SuperTwoWayConverterConverter(converter, sourceType, targetType);
 	}
 
 	/**
@@ -158,12 +143,25 @@ public class GenericConversionService implements ConversionService {
 
 	// implementing ConversionService
 
-	public boolean canConvert(Class<?> source, TypeDescriptor targetType) {
-		return false;
+	public boolean canConvert(Class<?> sourceType, TypeDescriptor targetType) {
+		try {
+			getConversionExecutor(sourceType, targetType);
+			return true;
+		} catch (ConversionExecutorNotFoundException e) {
+			return false;
+		}
 	}
 
 	public boolean canConvert(Object source, TypeDescriptor targetType) {
-		return false;
+		if (source == null) {
+			return true;
+		}
+		try {
+			getConversionExecutor(source.getClass(), targetType);
+			return true;
+		} catch (ConversionExecutorNotFoundException e) {
+			return false;
+		}
 	}
 
 	public Object executeConversion(Object source, TypeDescriptor targetType)
@@ -172,14 +170,6 @@ public class GenericConversionService implements ConversionService {
 			return null;
 		}
 		return getConversionExecutor(source.getClass(), targetType).execute(source);
-	}
-
-	public Object executeConversion(String converterId, Object source, TypeDescriptor targetType)
-			throws ConversionExecutorNotFoundException, ConversionException {
-		if (source == null) {
-			return null;
-		}
-		return getConversionExecutor(converterId, source.getClass(), targetType).execute(source);
 	}
 
 	public ConversionExecutor getConversionExecutor(Class sourceClass, TypeDescriptor targetType)
@@ -220,11 +210,11 @@ public class GenericConversionService implements ConversionService {
 				throw new UnsupportedOperationException("Object to Map conversion not yet supported");				
 			}
 		}
-		Converter converter = findRegisteredConverter(sourceType, targetType);
+		Converter converter = findRegisteredConverter(sourceClass, targetType.getType());
 		if (converter != null) {
 			return new StaticConversionExecutor(sourceType, targetType, converter);
 		} else {
-			SuperConverter superConverter = findRegisteredSuperConverter(sourceType, targetType);
+			SuperConverter superConverter = findRegisteredSuperConverter(sourceClass, targetType.getType());
 			if (superConverter != null) {
 				return new StaticSuperConversionExecutor(sourceType, targetType, superConverter);
 			}
@@ -239,11 +229,6 @@ public class GenericConversionService implements ConversionService {
 								+ "] to targetType [" + targetType.getName() + "]");
 			}
 		}
-	}
-
-	public ConversionExecutor getConversionExecutor(String converterId, Class sourceType,
-			TypeDescriptor targetType) throws ConversionExecutorNotFoundException {
-		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
 	public Class getType(String name) throws IllegalArgumentException {
@@ -305,34 +290,32 @@ public class GenericConversionService implements ConversionService {
 				+ "] on Converter [" + converterClass.getName() + "]");
 	}
 
-	private Map getSourceMap(Class sourceClass) {
-		Map sourceMap = (Map) sourceClassConverters.get(sourceClass);
+	private Map getSourceMap(Class sourceType) {
+		Map sourceMap = (Map) sourceTypeConverters.get(sourceType);
 		if (sourceMap == null) {
 			sourceMap = new HashMap();
-			sourceClassConverters.put(sourceClass, sourceMap);
+			sourceTypeConverters.put(sourceType, sourceMap);
 		}
 		return sourceMap;
 	}
 
-	private Map getSourceSuperConverterMap(Class sourceClass) {
-		Map sourceMap = (Map) sourceClassSuperConverters.get(sourceClass);
+	private Map getSourceSuperConverterMap(Class sourceType) {
+		Map sourceMap = (Map) sourceTypeSuperConverters.get(sourceType);
 		if (sourceMap == null) {
 			sourceMap = new HashMap();
-			sourceClassSuperConverters.put(sourceClass, sourceMap);
+			sourceTypeSuperConverters.put(sourceType, sourceMap);
 		}
 		return sourceMap;
 	}
 
-	private Converter findRegisteredConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
-		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();
-		if (sourceClass.isInterface()) {
+	private Converter findRegisteredConverter(Class<?> sourceType, Class<?> targetType) {
+		if (sourceType.isInterface()) {
 			LinkedList classQueue = new LinkedList();
-			classQueue.addFirst(sourceClass);
+			classQueue.addFirst(sourceType);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				Map converters = getConvertersForSource(currentClass);
-				Converter converter = getConverter(converters, targetClass);
+				Converter converter = getConverter(converters, targetType);
 				if (converter != null) {
 					return converter;
 				}
@@ -342,14 +325,14 @@ public class GenericConversionService implements ConversionService {
 				}
 			}
 			Map objectConverters = getConvertersForSource(Object.class);
-			return getConverter(objectConverters, targetClass);
+			return getConverter(objectConverters, targetType);
 		} else {
 			LinkedList classQueue = new LinkedList();
-			classQueue.addFirst(sourceClass);
+			classQueue.addFirst(sourceType);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				Map converters = getConvertersForSource(currentClass);
-				Converter converter = getConverter(converters, targetClass);
+				Converter converter = getConverter(converters, targetType);
 				if (converter != null) {
 					return converter;
 				}
@@ -365,25 +348,23 @@ public class GenericConversionService implements ConversionService {
 		}
 	}
 
-	private Map getConvertersForSource(Class sourceClass) {
-		Map converters = (Map) sourceClassConverters.get(sourceClass);
+	private Map getConvertersForSource(Class sourceType) {
+		Map converters = (Map) sourceTypeConverters.get(sourceType);
 		return converters != null ? converters : Collections.emptyMap();
 	}
 
-	private Converter getConverter(Map converters, Class targetClass) {
-		return (Converter) converters.get(targetClass);
+	private Converter getConverter(Map converters, Class targetType) {
+		return (Converter) converters.get(targetType);
 	}
 
-	private SuperConverter findRegisteredSuperConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class<?> sourceClass = sourceType.getWrapperTypeIfPrimitive();
-		Class<?> targetClass = targetType.getWrapperTypeIfPrimitive();
-		if (sourceClass.isInterface()) {
+	private SuperConverter findRegisteredSuperConverter(Class<?> sourceType, Class<?> targetType) {
+		if (sourceType.isInterface()) {
 			LinkedList classQueue = new LinkedList();
-			classQueue.addFirst(sourceClass);
+			classQueue.addFirst(sourceType);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				Map converters = getSuperConvertersForSource(currentClass);
-				SuperConverter converter = findSuperConverter(converters, targetClass);
+				SuperConverter converter = findSuperConverter(converters, targetType);
 				if (converter != null) {
 					return converter;
 				}
@@ -393,14 +374,14 @@ public class GenericConversionService implements ConversionService {
 				}
 			}
 			Map objectConverters = getSuperConvertersForSource(Object.class);
-			return findSuperConverter(objectConverters, targetClass);
+			return findSuperConverter(objectConverters, targetType);
 		} else {
 			LinkedList classQueue = new LinkedList();
-			classQueue.addFirst(sourceClass);
+			classQueue.addFirst(sourceType);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				Map converters = getSuperConvertersForSource(currentClass);
-				SuperConverter converter = findSuperConverter(converters, targetClass);
+				SuperConverter converter = findSuperConverter(converters, targetType);
 				if (converter != null) {
 					return converter;
 				}
@@ -416,18 +397,18 @@ public class GenericConversionService implements ConversionService {
 		}
 	}
 
-	private Map getSuperConvertersForSource(Class sourceClass) {
-		Map converters = (Map) sourceClassSuperConverters.get(sourceClass);
+	private Map getSuperConvertersForSource(Class sourceType) {
+		Map converters = (Map) sourceTypeSuperConverters.get(sourceType);
 		return converters != null ? converters : Collections.emptyMap();
 	}
 
-	private SuperConverter findSuperConverter(Map converters, Class targetClass) {
+	private SuperConverter findSuperConverter(Map converters, Class targetType) {
 		if (converters.isEmpty()) {
 			return null;
 		}
-		if (targetClass.isInterface()) {
+		if (targetType.isInterface()) {
 			LinkedList classQueue = new LinkedList();
-			classQueue.addFirst(targetClass);
+			classQueue.addFirst(targetType);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				SuperConverter converter = (SuperConverter) converters.get(currentClass);
@@ -442,7 +423,7 @@ public class GenericConversionService implements ConversionService {
 			return (SuperConverter) converters.get(Object.class);
 		} else {
 			LinkedList classQueue = new LinkedList();
-			classQueue.addFirst(targetClass);
+			classQueue.addFirst(targetType);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				SuperConverter converter = (SuperConverter) converters.get(currentClass);
@@ -459,11 +440,6 @@ public class GenericConversionService implements ConversionService {
 			}
 			return null;
 		}
-	}
-
-	public ConversionExecutor getElementConverter(Class<?> sourceElementType, Class<?> targetElementType) {
-		return getConversionExecutor(sourceElementType, TypeDescriptor
-				.valueOf(targetElementType));
 	}
 
 }
