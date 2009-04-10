@@ -18,12 +18,14 @@ package org.springframework.expression.spel.support;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionExecutorNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.service.DefaultConversionService;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelException;
 import org.springframework.expression.spel.SpelMessages;
+import org.springframework.util.Assert;
 
 /**
  * @author Juergen Hoeller
@@ -32,12 +34,17 @@ import org.springframework.expression.spel.SpelMessages;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	DefaultConversionService conversionService;
+	private ConversionService conversionService;
 	
-	StandardTypeConverter() {
+	public StandardTypeConverter() {
 		conversionService = new DefaultConversionService();
 	}
-	
+
+	public StandardTypeConverter(ConversionService conversionService) {
+		Assert.notNull(conversionService, "The conversionService must not be null");
+		this.conversionService = conversionService;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
 		return (T) convertValue(value,TypeDescriptor.valueOf(targetType));
