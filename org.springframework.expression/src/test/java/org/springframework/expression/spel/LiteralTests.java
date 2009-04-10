@@ -55,6 +55,7 @@ public class LiteralTests extends ExpressionTestCase {
 
 	public void testLiteralString04() {
 		evaluate("'Tony''s Pizza'", "Tony's Pizza", String.class);
+		evaluate("'Tony\\r''s Pizza'", "Tony\\r's Pizza", String.class);
 	}
 
 	public void testLiteralString05() {
