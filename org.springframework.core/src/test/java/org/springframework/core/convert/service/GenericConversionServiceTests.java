@@ -53,7 +53,18 @@ public class GenericConversionServiceTests {
 	public void executeConversionNullSource() {
 		assertEquals(null, service.executeConversion(null, type(Integer.class)));
 	}
+	
+	@Test
+	public void executeCompatibleSource() {
+		assertEquals(false, service.executeConversion(false, type(boolean.class)));
+	}
 
+	@Test
+	public void executeCompatibleSource2() {
+		assertEquals(3, service.getConversionExecutor(Integer.class, TypeDescriptor.valueOf(int.class)).execute(new Integer(3)));
+		assertEquals(3, service.getConversionExecutor(int.class, TypeDescriptor.valueOf(Integer.class)).execute(3));
+	}
+	
 	@Test
 	public void converterConvertForwardIndex() {
 		service.addConverter(new StringToInteger());

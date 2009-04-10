@@ -15,16 +15,13 @@
  */
 package org.springframework.core.convert;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 
 import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertSame;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static org.junit.Assert.assertFalse;
 
 /**
  * @author Andy Clement
@@ -35,6 +32,12 @@ public class TypeDescriptorTests {
 	int[] intArray;
 	List<String>[] arrayOfListOfString;
 
+	@Test
+	public void testWrapperType() {
+		TypeDescriptor desc = TypeDescriptor.valueOf(int.class);
+		assertEquals(Integer.class, desc.getType());
+	}
+	
 	@Test
 	public void listDescriptors() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("listOfString"));
