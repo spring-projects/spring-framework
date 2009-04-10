@@ -31,13 +31,11 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  * @author Andy Clement
- * 
- * @since 3.0
  */
 public class TypeDescriptor {
 
 	/**
-	 * constant value typeDescriptor for the type of a null value
+	 * Constant value typeDescriptor for the type of a null value
 	 */
 	public final static TypeDescriptor NULL_TYPE_DESCRIPTOR = new TypeDescriptor((Class<?>) null);
 
@@ -84,47 +82,13 @@ public class TypeDescriptor {
 	 */
 	public Class<?> getType() {
 		if (type != null) {
-			return type;
+			return wrapperType(type);
 		} else if (field != null) {
-			return field.getType();
+			return wrapperType(field.getType());
 		} else if (methodParameter != null) {
-			return methodParameter.getParameterType();
+			return wrapperType(methodParameter.getParameterType());
 		} else {
 			return null;
-		}
-	}
-
-	/**
-	 * If the actual type is a primitive, returns its wrapper type, else just returns {@link #getType()}.
-	 * @return the wrapper type if the underlying type is a primitive, else the actual type as-is
-	 */
-	public Class<?> getWrapperTypeIfPrimitive() {
-		Class<?> type = getType();
-		if (type == null) {
-			return null;
-		}
-		if (type.isPrimitive()) {
-			if (type.equals(int.class)) {
-				return Integer.class;
-			} else if (type.equals(short.class)) {
-				return Short.class;
-			} else if (type.equals(long.class)) {
-				return Long.class;
-			} else if (type.equals(float.class)) {
-				return Float.class;
-			} else if (type.equals(double.class)) {
-				return Double.class;
-			} else if (type.equals(byte.class)) {
-				return Byte.class;
-			} else if (type.equals(boolean.class)) {
-				return Boolean.class;
-			} else if (type.equals(char.class)) {
-				return Character.class;
-			} else {
-				throw new IllegalStateException("Should never happen - primitive type is not a primitive?");
-			}
-		} else {
-			return type;
 		}
 	}
 
@@ -343,7 +307,33 @@ public class TypeDescriptor {
 	}
 
 	// internal helpers
-
+	
+	private Class<?> wrapperType(Class<?> type) {
+		if (type.isPrimitive()) {
+			if (type.equals(int.class)) {
+				return Integer.class;
+			} else if (type.equals(short.class)) {
+				return Short.class;
+			} else if (type.equals(long.class)) {
+				return Long.class;
+			} else if (type.equals(float.class)) {
+				return Float.class;
+			} else if (type.equals(double.class)) {
+				return Double.class;
+			} else if (type.equals(byte.class)) {
+				return Byte.class;
+			} else if (type.equals(boolean.class)) {
+				return Boolean.class;
+			} else if (type.equals(char.class)) {
+				return Character.class;
+			} else {
+				throw new IllegalStateException("Should never happen - primitive type is not a primitive?");
+			}
+		} else {
+			return type;
+		}
+	}
+	
 	private Class<?> getArrayComponentType() {
 		return getType().getComponentType();
 	}

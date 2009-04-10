@@ -55,21 +55,6 @@ public interface ConversionService {
 			ConversionException;
 
 	/**
-	 * Convert the source to targetType using a custom converter.
-	 * @param converterId the id of the custom converter, which must be registered with this conversion service and
-	 * capable of converting to the targetType
-	 * @param source the source to convert from (may be null)
-	 * @param targetType the target type to convert to
-	 * @return the converted object, an instance of the <code>targetType</code>, or <code>null</code> if a null source
-	 * was provided
-	 * @throws ConversionExecutorNotFoundException if no suitable conversion executor could be found to convert the
-	 * source to an instance of targetType
-	 * @throws ConversionException if an exception occurred during the conversion process
-	 */
-	public Object executeConversion(String converterId, Object source, TypeDescriptor targetType)
-			throws ConversionExecutorNotFoundException, ConversionException;
-
-	/**
 	 * Get a ConversionExecutor that converts objects from sourceType to targetType.
 	 * The returned ConversionExecutor is thread-safe and may safely be cached for later use by client code.
 	 * @param sourceType the source type to convert from (required)
@@ -79,19 +64,6 @@ public interface ConversionService {
 	 */
 	public ConversionExecutor getConversionExecutor(Class<?> sourceType, TypeDescriptor targetType)
 			throws ConversionExecutorNotFoundException;
-
-	/**
-	 * Get a ConversionExecutor that converts objects from from sourceType to targetType using a custom converter.
-	 * The returned ConversionExecutor is thread-safe and may safely be cached for use in client code.
-	 * @param converterId the id of the custom converter, which must be registered with this conversion service and
-	 * capable of converting from sourceType to targetType (required)
-	 * @param sourceType the source type to convert from (required)
-	 * @param targetType the target type to convert to (required)
-	 * @return the executor that can execute instance type conversion, never null
-	 * @throws ConversionExecutorNotFoundException when no suitable conversion executor could be found
-	 */
-	public ConversionExecutor getConversionExecutor(String converterId, Class<?> sourceType,
-			 TypeDescriptor targetType) throws ConversionExecutorNotFoundException;
 
 	/**
 	 * Get a type by its name; may be the fully-qualified class name or a registered type alias such as 'int'.
