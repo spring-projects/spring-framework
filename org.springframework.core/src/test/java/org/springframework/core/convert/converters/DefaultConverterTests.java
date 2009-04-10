@@ -8,7 +8,9 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 import org.junit.Test;
+import org.springframework.core.convert.converter.NumberToCharacter;
 import org.springframework.core.convert.converter.NumberToNumber;
+import org.springframework.core.convert.converter.ObjectToString;
 import org.springframework.core.convert.converter.StringToBigDecimal;
 import org.springframework.core.convert.converter.StringToBigInteger;
 import org.springframework.core.convert.converter.StringToBoolean;
@@ -152,6 +154,19 @@ public class DefaultConverterTests {
 		} catch (IllegalArgumentException e) {
 			
 		}
+	}
+	
+	@Test
+	public void testNumberToCharacter() {
+		NumberToCharacter n = new NumberToCharacter();
+		assertEquals(Character.valueOf('A'), n.convert(Integer.valueOf(65), Character.class));
+		assertEquals(Integer.valueOf(65), n.convertBack(Character.valueOf('A'), Integer.class));
+	}
+	
+	@Test
+	public void testObjectToString() {
+		ObjectToString o = new ObjectToString();
+		assertEquals("3", o.convert(3, String.class));
 	}
 	
 	public static class CustomNumber extends Number {
