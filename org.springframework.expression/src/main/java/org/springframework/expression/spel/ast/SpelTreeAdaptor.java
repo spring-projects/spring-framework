@@ -72,6 +72,9 @@ public class SpelTreeAdaptor extends CommonTreeAdaptor {
 				return new OperatorDivide(payload);
 			case SpringExpressionsLexer.MOD:
 				return new OperatorModulus(payload);
+			case SpringExpressionsLexer.POWER:
+				return new OperatorPower(payload);
+
 
 			case SpringExpressionsLexer.STRING_LITERAL:
 			case SpringExpressionsLexer.DQ_STRING_LITERAL:

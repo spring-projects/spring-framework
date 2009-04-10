@@ -18,7 +18,6 @@ package org.springframework.expression.spel.support;
 
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.SpelException;
-import org.springframework.expression.spel.SpelMessages;
 
 /**
  * A simple basic TypeComparator implementation. It supports comparison of numbers and types implementing Comparable.
@@ -64,12 +63,15 @@ public class StandardTypeComparator implements TypeComparator {
 			}
 		}
 
-		if (left.getClass() == right.getClass() && left instanceof Comparable) {
-			return ((Comparable) left).compareTo(right);
+		boolean sameType = left.getClass() == right.getClass();
+		
+		if (sameType) {
+			if (left instanceof Comparable) {
+				return ((Comparable) left).compareTo(right);
+			}
 		}
-		else {
-			throw new SpelException(SpelMessages.NOT_COMPARABLE, left.getClass(), right.getClass());
-		}
+		// TODO coerce one to be like the other?
+		return left==right?0:1; // identity comparison
 	}
 
 	public boolean canCompare(Object left, Object right) {

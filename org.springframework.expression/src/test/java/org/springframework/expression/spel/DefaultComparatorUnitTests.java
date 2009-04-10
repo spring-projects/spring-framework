@@ -68,21 +68,6 @@ public class DefaultComparatorUnitTests extends TestCase {
 		assertTrue(comparator.compare("a","a")==0);
 		assertTrue(comparator.compare("a","b")<0);
 		assertTrue(comparator.compare("b","a")>0);
-
-		try {
-			comparator.compare("a",3);
-			fail("Should have failed");
-		} catch (EvaluationException ee) {
-			SpelException sEx = (SpelException)ee;
-			assertEquals(SpelMessages.NOT_COMPARABLE,sEx.getMessageUnformatted());
-		}
-		try {
-			comparator.compare(2,"b");
-			fail("Should have failed");
-		} catch (EvaluationException ee) {
-			SpelException sEx = (SpelException)ee;
-			assertEquals(SpelMessages.NOT_COMPARABLE,sEx.getMessageUnformatted());
-		}
 	}
 	
 	public void testCanCompare() throws EvaluationException {

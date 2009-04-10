@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -236,6 +237,26 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndAskForReturnType("65", 'A', Character.class);
 		evaluateAndAskForReturnType("3*4+5", (short) 17, Short.class);
 		evaluateAndAskForReturnType("3*4+5", "17", String.class);
+	}
+
+	
+	public void testAdvancedNumerics() throws Exception {
+		int twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Integer.class);
+		assertEquals(24,twentyFour);
+		double one = parser.parseExpression("8.0 / 5e0 % 2").getValue(Double.class);
+		assertEquals(1.6d,one);
+		int o = parser.parseExpression("8.0 / 5e0 % 2").getValue(Integer.class);
+		assertEquals(1,o);
+		int sixteen = parser.parseExpression("-2 ^ 4").getValue(Integer.class);
+		assertEquals(16,sixteen);
+		int minusFortyFive = parser.parseExpression("1+2-3*8^2/2/2").getValue(Integer.class);
+		assertEquals(-45,minusFortyFive);
+	}
+	
+	public void testComparison() throws Exception {
+		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
+		boolean trueValue = parser.parseExpression("T(java.util.Date) == Birthdate.Class").getValue(context, Boolean.class);
+		assertTrue(trueValue);
 	}
 	
 }
