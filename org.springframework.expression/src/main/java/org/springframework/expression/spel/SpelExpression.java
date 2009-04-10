@@ -19,6 +19,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.common.ExpressionUtils;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * A SpelExpressions represents a parsed (valid) expression that is ready to be evaluated in a specified context. An
@@ -54,7 +55,8 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Object getValue() throws EvaluationException {
-		return this.ast.getValue(null);
+		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+		return this.ast.getValue(expressionState);
 	}
 
 	/**
@@ -134,11 +136,10 @@ public class SpelExpression implements Expression {
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
-		Object result = getValue();
-		// TODO propagate generic-ness into convert
-		return (T) ExpressionUtils.convert(null, result, expectedResultType);
+		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+		Object result = this.ast.getValue(expressionState);
+		return ExpressionUtils.convert(expressionState.getEvaluationContext(), result, expectedResultType);
 	}
 
 }

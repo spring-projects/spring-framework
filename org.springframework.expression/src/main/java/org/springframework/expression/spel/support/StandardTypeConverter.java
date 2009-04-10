@@ -40,8 +40,8 @@ public class StandardTypeConverter implements TypeConverter {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-		// For activation when conversion service available - this replaces the rest of the method (probably...)
-		// return (T)convertValue(value,TypeDescriptor.valueOf(targetType));
+//		 For activation when conversion service available - this replaces the rest of the method (probably...)
+//		return (T)convertValue(value,TypeDescriptor.valueOf(targetType));
 		if (ClassUtils.isAssignableValue(targetType, value)) {
 			return (T) value;
 		}
@@ -89,7 +89,7 @@ public class StandardTypeConverter implements TypeConverter {
 	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 // For activation when conversion service available - this replaces the rest of the method (probably...)
 //		try {
-//			return (T)conversionService.executeConversion(value, typeDescriptor);
+//			return conversionService.executeConversion(value, typeDescriptor);
 //		} catch (ConversionExecutorNotFoundException cenfe) {
 //			throw new SpelException(cenfe, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 //		} catch (ConversionException ce) {
@@ -100,7 +100,7 @@ public class StandardTypeConverter implements TypeConverter {
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		// For activation when conversion service available - this replaces the rest of the method (probably...)
-		// return canConvert(sourceType,TypeDescriptor.valueOf(targetType));
+//		return canConvert(sourceType,TypeDescriptor.valueOf(targetType));
 		if (ClassUtils.isAssignable(targetType, sourceType) || String.class.equals(targetType)) {
 			return true;
 		}

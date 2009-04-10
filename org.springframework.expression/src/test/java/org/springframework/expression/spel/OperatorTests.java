@@ -236,10 +236,21 @@ public class OperatorTests extends ExpressionTestCase {
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3 between 4"));
 		assertEquals("between",node.getOperatorName());
+		
+		node = getOperatorNode((SpelExpression)parser.parseExpression("3 ^ 4"));
+		assertEquals("^",node.getOperatorName());
 	}
 	
 	public void testOperatorOverloading() {
 		evaluateAndCheckError("'a' * '2'", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'a' ^ '2'", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+	}
+	
+	public void testPower() {
+		evaluate("3^2",9,Integer.class);
+		evaluate("3.0d^2.0d",9.0d,Double.class);
+		evaluate("3L^2L",9L,Long.class);
+		evaluate("(2^32)^2",9223372036854775807L,Long.class);
 	}
 	
 	public void testMixedOperands_FloatsAndDoubles() {

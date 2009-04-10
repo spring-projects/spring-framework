@@ -68,6 +68,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.constructorResolvers.add(new ReflectiveConstructorResolver());
 		this.propertyAccessors.add(new ReflectivePropertyResolver());
 	}
+	
+	public StandardEvaluationContext(Object rootObject) {
+		this();
+		setRootObject(rootObject);
+	}
 
 	public void setRootObject(Object rootObject) {
 		this.rootObject = new TypedValue(rootObject,TypeDescriptor.forObject(rootObject));
@@ -83,6 +88,10 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public void setVariable(String name, Object value) {
 		this.variables.put(name, value);
+	}
+	
+	public void setVariables(Map<String,Object> variables) {
+		this.variables.putAll(variables);
 	}
 
 	public void registerFunction(String name, Method method) {
