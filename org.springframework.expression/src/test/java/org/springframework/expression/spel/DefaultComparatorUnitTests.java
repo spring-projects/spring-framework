@@ -77,6 +77,8 @@ public class DefaultComparatorUnitTests extends TestCase {
 
 		assertTrue(comparator.canCompare(2,1));
 		assertTrue(comparator.canCompare("abc","def"));
-		assertFalse(comparator.canCompare("abc",3));
+		assertTrue(comparator.canCompare("abc",3));
+		assertFalse(comparator.canCompare(String.class,3));
 	}
+	
 }

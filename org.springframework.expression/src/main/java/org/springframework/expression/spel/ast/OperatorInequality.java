@@ -53,7 +53,12 @@ public class OperatorInequality extends Operator {
 				return BooleanTypedValue.forValue(op1.intValue() != op2.intValue());
 			}
 		}
-		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) != 0);
+
+		if (left!=null && (left instanceof Comparable)) {
+			return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) != 0);
+		} else {
+			return BooleanTypedValue.forValue(left!=right);
+		}
 	}
 
 }

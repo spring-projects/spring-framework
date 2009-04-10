@@ -18,6 +18,7 @@ package org.springframework.expression.spel.support;
 
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelMessages;
 
 /**
  * A simple basic TypeComparator implementation. It supports comparison of numbers and types implementing Comparable.
@@ -42,36 +43,30 @@ public class StandardTypeComparator implements TypeComparator {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				Double d1 = leftNumber.doubleValue();
-				Double d2 = rightNumber.doubleValue();
-				return d1.compareTo(d2);
-			}
-			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
-				Float f1 = leftNumber.floatValue();
-				Float f2 = rightNumber.floatValue();
-				return f1.compareTo(f2);
-			}
-			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				double d1 = leftNumber.doubleValue();
+				double d2 = rightNumber.doubleValue();
+				return Double.compare(d1,d2);
+			} else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				float f1 = leftNumber.floatValue();
+				float f2 = rightNumber.floatValue();
+				return Float.compare(f1,f2);
+			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				Long l1 = leftNumber.longValue();
 				Long l2 = rightNumber.longValue();
 				return l1.compareTo(l2);
-			}
-			else {
+			} else {
 				Integer i1 = leftNumber.intValue();
 				Integer i2 = rightNumber.intValue();
 				return i1.compareTo(i2);
 			}
 		}
 
-		boolean sameType = left.getClass() == right.getClass();
-		
-		if (sameType) {
-			if (left instanceof Comparable) {
-				return ((Comparable) left).compareTo(right);
-			}
+		if (left instanceof Comparable) {
+			return ((Comparable) left).compareTo(right);
 		}
-		// TODO coerce one to be like the other?
-		return left==right?0:1; // identity comparison
+		
+		// How do we get to this line...?
+		throw new SpelException(SpelMessages.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 
 	public boolean canCompare(Object left, Object right) {
@@ -81,7 +76,7 @@ public class StandardTypeComparator implements TypeComparator {
 		if (left instanceof Number && right instanceof Number) {
 			return true;
 		}
-		if (left.getClass() == right.getClass() && left instanceof Comparable) {
+		if (left instanceof Comparable) {
 			return true;
 		}
 		return false;
