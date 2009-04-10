@@ -122,8 +122,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private TypeConverter typeConverter;
 
 	/** Custom PropertyEditors to apply to the beans of this factory */
-	private final Map<Class, Class<PropertyEditor>> customEditors =
-			new HashMap<Class, Class<PropertyEditor>>(4);
+	private final Map<Class, Class<? extends PropertyEditor>> customEditors =
+			new HashMap<Class, Class<? extends PropertyEditor>>(4);
 
 	/** String resolvers to apply e.g. to annotation attribute values */
 	private final List<StringValueResolver> embeddedValueResolvers = new LinkedList<StringValueResolver>();
@@ -213,7 +213,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			throws BeansException {
 
 		final String beanName = transformedBeanName(name);
-		Object bean = null;
+		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = getSingleton(beanName);
@@ -613,7 +613,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.propertyEditorRegistrars;
 	}
 
-	public void registerCustomEditor(Class requiredType, Class<PropertyEditor> propertyEditorClass) {
+	public void registerCustomEditor(Class requiredType, Class<? extends PropertyEditor> propertyEditorClass) {
 		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.isAssignable(PropertyEditor.class, propertyEditorClass);
 		this.customEditors.put(requiredType, propertyEditorClass);
@@ -626,7 +626,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Return the map of custom editors, with Classes as keys and PropertyEditor classes as values.
 	 */
-	public Map<Class, Class<PropertyEditor>> getCustomEditors() {
+	public Map<Class, Class<? extends PropertyEditor>> getCustomEditors() {
 		return this.customEditors;
 	}
 
@@ -795,6 +795,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the prototype about to be created
 	 * @see #isPrototypeCurrentlyInCreation
 	 */
+	@SuppressWarnings("unchecked")
 	protected void beforePrototypeCreation(String beanName) {
 		Object curVal = this.prototypesCurrentlyInCreation.get();
 		if (curVal == null) {
@@ -818,6 +819,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the prototype that has been created
 	 * @see #isPrototypeCurrentlyInCreation
 	 */
+	@SuppressWarnings("unchecked")
 	protected void afterPrototypeCreation(String beanName) {
 		Object curVal = this.prototypesCurrentlyInCreation.get();
 		if (curVal instanceof String) {
@@ -957,7 +959,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 		if (!this.customEditors.isEmpty()) {
-			for (Map.Entry<Class, Class<PropertyEditor>> entry : this.customEditors.entrySet()) {
+			for (Map.Entry<Class, Class<? extends PropertyEditor>> entry : this.customEditors.entrySet()) {
 				Class requiredType = entry.getKey();
 				Class editorClass = entry.getValue();
 				registry.registerCustomEditor(requiredType,
@@ -1027,7 +1029,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 				else {
 					// Child bean definition: needs to be merged with parent.
-					BeanDefinition pbd = null;
+					BeanDefinition pbd;
 					try {
 						String parentBeanName = transformedBeanName(bd.getParentName());
 						if (!beanName.equals(parentBeanName)) {
