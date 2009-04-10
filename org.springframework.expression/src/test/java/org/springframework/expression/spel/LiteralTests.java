@@ -82,7 +82,7 @@ public class LiteralTests extends ExpressionTestCase {
 		// ask for the result to be made into an Integer
 		evaluateAndAskForReturnType("0x20 * 2L", 64, Integer.class);
 		// ask for the result to be made into an Integer knowing that it will not fit
-		evaluateAndCheckError("0x1220 * 0xffffffffL", Integer.class, SpelMessages.PROBLEM_DURING_TYPE_CONVERSION, -1);
+		evaluateAndCheckError("0x1220 * 0xffffffffL", Integer.class, SpelMessages.TYPE_CONVERSION_ERROR, -1);
 	}
 
 	public void testSignedIntLiterals() {

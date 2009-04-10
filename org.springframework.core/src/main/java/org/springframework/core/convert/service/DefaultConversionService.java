@@ -20,7 +20,9 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Locale;
 
+import org.springframework.core.convert.converter.NumberToCharacter;
 import org.springframework.core.convert.converter.NumberToNumber;
+import org.springframework.core.convert.converter.ObjectToString;
 import org.springframework.core.convert.converter.StringToBigDecimal;
 import org.springframework.core.convert.converter.StringToBigInteger;
 import org.springframework.core.convert.converter.StringToBoolean;
@@ -67,6 +69,8 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverter(new StringToLocale());
 		addConverter(new StringToEnum());
 		addConverter(new NumberToNumber());
+		addConverter(new NumberToCharacter());
+		addConverter(new ObjectToString());
 	}
 
 	protected void addDefaultAliases() {

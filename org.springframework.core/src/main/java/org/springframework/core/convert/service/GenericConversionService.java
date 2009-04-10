@@ -193,21 +193,21 @@ public class GenericConversionService implements ConversionService {
 			if (sourceType.isCollection()) {
 				return new CollectionToArray(sourceType, targetType, this);
 			} else {
-				throw new UnsupportedOperationException("Object to Array conversion not yet supported");
+				throw new ConversionExecutorNotFoundException(sourceType, targetType, "Object to Array conversion not yet supported");
 			}
 		}
 		if (sourceType.isCollection()) {
 			if (targetType.isCollection()) {
 				return new CollectionToCollection(sourceType, targetType, this);
 			} else {
-				throw new UnsupportedOperationException("Object to Collection conversion not yet supported");
+				throw new ConversionExecutorNotFoundException(sourceType, targetType, "Object to Collection conversion not yet supported");
 			}
 		}
 		if (sourceType.isMap()) {
 			if (targetType.isMap()) {
 				return new MapToMap(sourceType, targetType, this);
 			} else {
-				throw new UnsupportedOperationException("Object to Map conversion not yet supported");				
+				throw new ConversionExecutorNotFoundException(sourceType, targetType, "Object to Map conversion not yet supported");
 			}
 		}
 		Converter converter = findRegisteredConverter(sourceClass, targetType.getType());
