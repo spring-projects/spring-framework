@@ -499,8 +499,7 @@ boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
 
         <para>The relational operators; equal, not equal, less than, less than
         or equal, greater than, and greater than or equal are supported using
-        standard operator notation. Support is not yet implemented for objects
-        that implement the Comparable interface.</para>
+        standard operator notation. </para>
 
         <para><programlisting language="java">// evaluates to true
 boolean trueValue = parser.parseExpression("2 == 2").getValue(Boolean.class);
@@ -627,10 +626,16 @@ String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inve
 
       <para>The special 'T' operator can be used to specify an instance of
       java.lang.Class (the 'type'). Static methods are invoked using this
-      operator as well</para>
+      operator as well.  The <classname>StandardEvaluationContext</classname>
+      uses a <classname>TypeLocator</classname> to find types and
+      the <classname>StandardTypeLocator</classname> (which can be replaced)
+      is built with an understanding of the java.lang package.  This means T()
+      references to types within java.lang do not need to be fully qualified, 
+      but all other type references must be.</para>
 
       <programlisting language="java">Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
 
+Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
 
 boolean trueValue = parser.parseExpression("T(java.math.RoundingMode).CEILING &lt; T(java.math.RoundingMode).FLOOR").getValue(Boolean.class);
 </programlisting>

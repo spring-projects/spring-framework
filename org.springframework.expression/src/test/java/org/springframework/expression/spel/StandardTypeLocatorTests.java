@@ -29,18 +29,19 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
  */
 public class StandardTypeLocatorTests extends TestCase {
 
-	public void testPrimitives() throws EvaluationException {
+	public void testImports() throws EvaluationException {
 		StandardTypeLocator locator = new StandardTypeLocator();
 		assertEquals(Integer.class,locator.findType("java.lang.Integer"));
 		assertEquals(String.class,locator.findType("java.lang.String"));
 		
 		List<String> prefixes = locator.getImportPrefixes();
-		assertEquals(2,prefixes.size());
+		assertEquals(1,prefixes.size());
 		assertTrue(prefixes.contains("java.lang"));
-		assertTrue(prefixes.contains("java.util"));
+		assertFalse(prefixes.contains("java.util"));
 
 		assertEquals(Boolean.class,locator.findType("Boolean"));
-		assertEquals(java.util.List.class,locator.findType("List"));
+		// currently does not know about java.util by default
+//		assertEquals(java.util.List.class,locator.findType("List"));
 		
 		try {
 			locator.findType("URL");
@@ -51,5 +52,7 @@ public class StandardTypeLocatorTests extends TestCase {
 		}
 		locator.registerImport("java.net");
 		assertEquals(java.net.URL.class,locator.findType("URL"));
+		
 	}
+
 }

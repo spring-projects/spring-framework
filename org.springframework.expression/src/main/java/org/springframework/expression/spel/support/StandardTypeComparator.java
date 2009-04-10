@@ -65,7 +65,6 @@ public class StandardTypeComparator implements TypeComparator {
 			return ((Comparable) left).compareTo(right);
 		}
 		
-		// How do we get to this line...?
 		throw new SpelException(SpelMessages.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 
