@@ -23,23 +23,31 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * Util code shared by collection converters extending from {@link AbstractCollectionConverter}.
+ */
 class CollectionConversionUtils {
 
-	public static Class<?> getImpl(Class<?> targetClass) {
-		if (targetClass.isInterface()) {
-			if (List.class.equals(targetClass)) {
+	/**
+	 * Get the java.util.Collection implementation class that should be used for the given target collection type.
+	 * @param targetCollectionType the target collection type, may be an interface
+	 * @return the collection impl to use
+	 */
+	public static Class<?> getImpl(Class<?> targetCollectionType) {
+		if (targetCollectionType.isInterface()) {
+			if (List.class.equals(targetCollectionType)) {
 				return ArrayList.class;
-			} else if (Set.class.equals(targetClass)) {
+			} else if (Set.class.equals(targetCollectionType)) {
 				return LinkedHashSet.class;
-			} else if (SortedSet.class.equals(targetClass)) {
+			} else if (SortedSet.class.equals(targetCollectionType)) {
 				return TreeSet.class;
-			} else if (Collection.class.equals(targetClass)) {
+			} else if (Collection.class.equals(targetCollectionType)) {
 				return ArrayList.class;
 			} else {
-				throw new IllegalArgumentException("Unsupported collection interface [" + targetClass.getName() + "]");
+				throw new IllegalArgumentException("Unsupported collection interface [" + targetCollectionType.getName() + "]");
 			}
 		} else {
-			return targetClass;
+			return targetCollectionType;
 		}
 	}
 

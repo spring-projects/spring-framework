@@ -21,6 +21,10 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.style.ToStringCreator;
 
+/**
+ * Default conversion executor implementation for super converters.
+ * @author Keith Donald
+ */
 @SuppressWarnings("unchecked")
 class StaticSuperConversionExecutor implements ConversionExecutor {
 

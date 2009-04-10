@@ -20,6 +20,10 @@ import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
+/**
+ * Base class for converters that convert to and from collection types (arrays and java.util.Collection types)
+ * @author Keith Donald
+ */
 abstract class AbstractCollectionConverter implements ConversionExecutor {
 
 	private ConversionService conversionService;
@@ -43,10 +47,16 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		}
 	}
 
+	/**
+	 * The collection type to convert to.
+	 */
 	protected Class<?> getTargetCollectionType() {
 		return targetCollectionType.getType();
 	}
-	
+
+	/**
+	 * The type of elements in the target collection.
+	 */
 	protected Class<?> getTargetElementType() {
 		return targetCollectionType.getElementType();
 	}
@@ -55,6 +65,10 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		return conversionService;
 	}
 
+	/**
+	 * The converter to use to convert elements to the {@link #getTargetElementType()}.
+	 * Returns {@link NoOpConversionExecutor#INSTANCE} if no converter could be eagerly resolved from type descriptor metadata.
+	 */
 	protected ConversionExecutor getElementConverter() {
 		return elementConverter;
 	}
@@ -67,6 +81,12 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		}
 	}
 
+	/**
+	 * Override to perform collection conversion 
+	 * @param sourceCollection the source collection to convert from, an instance of sourceCollectionType, which must be either an array or java.util.Collection type
+	 * @return the converted target collection, an instance of targetCollectionType
+	 * @throws Exception an exception occurred during the conversion
+	 */
 	protected abstract Object doExecute(Object sourceCollection) throws Exception;
 	
 }

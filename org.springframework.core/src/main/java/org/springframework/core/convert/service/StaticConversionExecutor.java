@@ -21,6 +21,10 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;
 
+/**
+ * Default conversion executor implementation for converters.
+ * @author Keith Donald
+ */
 @SuppressWarnings("unchecked")
 class StaticConversionExecutor implements ConversionExecutor {
 

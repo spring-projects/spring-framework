@@ -17,6 +17,10 @@ package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.converter.Converter;
 
+/**
+ * A converter that does nothing.  Access singleton at {@link #INSTANCE}.
+ * @author Keith Donald
+ */
 @SuppressWarnings("unchecked")
 class NoOpConverter implements Converter {
 

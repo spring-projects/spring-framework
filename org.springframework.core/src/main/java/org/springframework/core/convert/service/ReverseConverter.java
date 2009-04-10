@@ -17,6 +17,10 @@ package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.converter.Converter;
 
+/**
+ * A converter that reverses another converter.
+ * @author Keith Donald
+ */
 @SuppressWarnings("unchecked")
 class ReverseConverter implements Converter {
 

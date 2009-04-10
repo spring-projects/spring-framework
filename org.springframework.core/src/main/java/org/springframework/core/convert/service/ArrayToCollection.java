@@ -19,19 +19,12 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 
 import org.springframework.core.convert.ConversionExecutor;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special converter that converts from a source array to a target collection. Supports the selection of an
  * "approximate" collection implementation when a target collection interface such as <code>List.class</code> is
- * specified. Supports type conversion of array elements when a concrete parameterized collection class is provided,
- * such as <code>IntegerList<Integer>.class</code>.
- * 
- * Note that type erasure prevents arbitrary access to generic collection element type information at runtime,
- * preventing the ability to convert elements for collections declared as properties.
- * 
- * Mainly used internally by {@link ConversionService} implementations.
+ * specified. Supports type conversion of array elements when a parameterized target collection type descriptor is provided.
  * 
  * @author Keith Donald
  */
