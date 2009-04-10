@@ -18,6 +18,10 @@ package org.springframework.core.convert.service;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.convert.converter.SuperTwoWayConverter;
 
+/**
+ * A super converter that reverses another super converter.
+ * @author Keith Donald
+ */
 @SuppressWarnings("unchecked")
 class ReverseSuperConverter implements SuperConverter {
 

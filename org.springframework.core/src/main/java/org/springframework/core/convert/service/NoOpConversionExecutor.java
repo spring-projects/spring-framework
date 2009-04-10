@@ -18,6 +18,9 @@ package org.springframework.core.convert.service;
 import org.springframework.core.convert.ConversionExecutionException;
 import org.springframework.core.convert.ConversionExecutor;
 
+/**
+ * Conversion executor that does nothing.  Access singleton at {@link #INSTANCE}.s
+ */
 class NoOpConversionExecutor implements ConversionExecutor {
 
 	public static final ConversionExecutor INSTANCE = new NoOpConversionExecutor();
