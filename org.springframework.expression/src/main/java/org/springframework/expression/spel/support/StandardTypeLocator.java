@@ -47,8 +47,8 @@ public class StandardTypeLocator implements TypeLocator {
 
 	public StandardTypeLocator(ClassLoader loader) {
 		this.loader = loader;
+		// Similar to when writing Java, it only knows about java.lang by default
 		registerImport("java.lang");
-		registerImport("java.util");
 	}
 
 
@@ -94,6 +94,10 @@ public class StandardTypeLocator implements TypeLocator {
 	 */
 	public List<String> getImportPrefixes() {
 		return Collections.unmodifiableList(this.knownPackagePrefixes);
+	}
+	
+	public void removeImport(String prefix) {
+		this.knownPackagePrefixes.remove(prefix);		
 	}
 
 }

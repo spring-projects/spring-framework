@@ -17,8 +17,10 @@
 package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeLocator;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -259,4 +261,20 @@ public class EvaluationTests extends ExpressionTestCase {
 		assertTrue(trueValue);
 	}
 	
+	public void testResolvingList() throws Exception {
+		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
+		try {
+			assertFalse(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
+			fail("should have failed to find List");
+		} catch (EvaluationException ee) {
+			// success - List not found
+		}
+		((StandardTypeLocator)context.getTypeLocator()).registerImport("java.util");
+		assertTrue(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
+	}
+	
+	public void testResolvingString() throws Exception {
+		Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
+		assertEquals(String.class,stringClass);
+	}
 }
