@@ -425,7 +425,7 @@ Object nullValue = parser.parseExpression("null").getValue();
       <para>Navigating with property references is easy, just use a period to
       indicate a nested property value. The instances of Inventor class, pupin
       and tesla, were populated with data listed in section Section <link
-      linkend="expressions-examples-classes">Classes used in the
+      linkend="expressions-example-classes">Classes used in the
       examples</link>. To navigate "down" and get Tesla's year of birth and
       Pupin's city of birth the following expressions are used </para>
 
