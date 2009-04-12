@@ -20,11 +20,12 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
 /**
- * Interface to be implemented by objects that can manage a number
- * of ApplicationListeners, and publish events to them. An example
- * of such an object is an ApplicationEventPublisher, typically
- * the ApplicationContext, which can use an ApplicationEventMulticaster
- * as a helper to publish events to listeners.
+ * Interface to be implemented by objects that can manage a number of
+ * {@link ApplicationListener} objects, and publish events to them.
+ *
+ * <p>An {@link org.springframework.context.ApplicationEventPublisher}, typically
+ * a Spring {@link org.springframework.context.ApplicationContext}, can use an
+ * ApplicationEventMulticaster as a delegate for actually publishing events.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -38,10 +39,22 @@ public interface ApplicationEventMulticaster {
 	void addApplicationListener(ApplicationListener listener);
 
 	/**
-	 * Add a listener to be notified of all events.
+	 * Add a listener bean to be notified of all events.
 	 * @param listenerBeanName the name of the listener bean to add
 	 */
 	void addApplicationListenerBean(String listenerBeanName);
+
+	/**
+	 * Remove a listener from the notification list.
+	 * @param listener the listener to remove
+	 */
+	void removeApplicationListener(ApplicationListener listener);
+
+	/**
+	 * Remove a listener bean from the notification list.
+	 * @param listenerBeanName the name of the listener bean to add
+	 */
+	void removeApplicationListenerBean(String listenerBeanName);
 
 	/**
 	 * Remove all listeners registered with this multicaster.
