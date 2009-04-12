@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
 import org.springframework.instrument.classloading.ResourceOverridingShadowingClassLoader;
 
 /**
- * Subclass of AbstractJpaTests that activates AspectJ load-time weaving
- * and allows the ability to specify a custom location for AspectJ's
- * <code>aop.xml</code> file.
+ * Subclass of {@link AbstractJpaTests} that activates AspectJ load-time weaving and
+ * allows for specifying a custom location for AspectJ's <code>aop.xml</code> file.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class AbstractAspectjJpaTests extends AbstractJpaTests {
 
 	/**
