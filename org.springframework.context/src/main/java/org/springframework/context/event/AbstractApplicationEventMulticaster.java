@@ -45,12 +45,10 @@ import org.springframework.core.OrderComparator;
  *
  * @author Juergen Hoeller
  * @since 1.2.3
- * @see #setCollectionClass
  * @see #getApplicationListeners()
  * @see SimpleApplicationEventMulticaster
  */
-public abstract class AbstractApplicationEventMulticaster
-		implements ApplicationEventMulticaster, BeanFactoryAware {
+public abstract class AbstractApplicationEventMulticaster implements ApplicationEventMulticaster, BeanFactoryAware {
 
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever();
 
@@ -66,6 +64,14 @@ public abstract class AbstractApplicationEventMulticaster
 
 	public void addApplicationListenerBean(String listenerBeanName) {
 		this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
+	}
+
+	public void removeApplicationListener(ApplicationListener listener) {
+		this.defaultRetriever.applicationListeners.remove(listener);
+	}
+
+	public void removeApplicationListenerBean(String listenerBeanName) {
+		this.defaultRetriever.applicationListenerBeans.remove(listenerBeanName);
 	}
 
 	public void removeAllListeners() {
