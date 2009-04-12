@@ -47,10 +47,41 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 	public void testNonExistentPropertiesAndMethods() {
 		// madeup does not exist as a property
-		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 0);
+		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 0);
 
 		// name is ok but foobar does not exist:
-		evaluateAndCheckError("name.foobar", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 5);
+		evaluateAndCheckError("name.foobar", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 5);
+	}
+	
+	/**
+	 * The standard reflection resolver cannot find properties on null objects but some 
+	 * supplied resolver might be able to - so null shouldn't crash the reflection resolver.
+	 */
+	public void testAccessingOnNullObject() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("madeup");
+		EvaluationContext context = new StandardEvaluationContext(null);
+		try {
+			expr.getValue(context);
+			fail("Should have failed - default property resolver cannot resolve on null");
+		} catch (Exception e) {
+			checkException(e,SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
+		}
+			assertFalse(expr.isWritable(context));
+		try {
+			expr.setValue(context,"abc");
+			fail("Should have failed - default property resolver cannot resolve on null");
+		} catch (Exception e) {
+			checkException(e,SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+		}
+	}
+
+	private void checkException(Exception e, SpelMessages expectedMessage) {
+		if (e instanceof SpelException) {
+			SpelMessages sm = ((SpelException)e).getMessageUnformatted();
+			assertEquals("Expected exception type did not occur",expectedMessage,sm);
+		} else {
+			fail("Should be a SpelException "+e);
+		}
 	}
 
 	// Adding a new property accessor just for a particular type

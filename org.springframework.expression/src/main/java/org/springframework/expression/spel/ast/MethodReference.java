@@ -55,7 +55,7 @@ public class MethodReference extends SpelNodeImpl {
 			arguments[i] = getChild(i).getValueInternal(state).getValue();
 		}
 		if (currentContext.getValue() == null) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,
+			throw new SpelException(getCharPositionInLine(), SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
 					FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
 		}
 
@@ -105,7 +105,7 @@ public class MethodReference extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	protected MethodExecutor findAccessorForMethod(String name, Class<?>[] argumentTypes, ExpressionState state)
+	private MethodExecutor findAccessorForMethod(String name, Class<?>[] argumentTypes, ExpressionState state)
 			throws SpelException {
 
 		TypedValue context = state.getActiveContextObject();

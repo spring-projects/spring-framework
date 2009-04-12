@@ -49,7 +49,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	/**
 	 * The cached executor that may be reused on subsequent evaluations.
 	 */
-	private ConstructorExecutor cachedExecutor;
+	private volatile ConstructorExecutor cachedExecutor;
 
 	public ConstructorReference(Token payload) {
 		super(payload);
@@ -112,7 +112,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelException if there is a problem locating the constructor
 	 */
-	protected ConstructorExecutor findExecutorForConstructor(
+	private ConstructorExecutor findExecutorForConstructor(
 			String typename, Class<?>[] argumentTypes, ExpressionState state) throws SpelException {
 
 		EvaluationContext eContext = state.getEvaluationContext();

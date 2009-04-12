@@ -19,7 +19,6 @@ package org.springframework.expression.spel.antlr;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
@@ -67,12 +66,10 @@ public class SpelAntlrExpressionParser extends TemplateAwareExpressionParser {
 			this.parser.setTokenStream(tokens);
 			expr_return exprReturn = this.parser.expr();
 			return new SpelExpression(expressionString, (SpelNode) exprReturn.getTree());
-		}
-		catch (RecognitionException re) {
+		} catch (RecognitionException re) {
 			throw new ParseException(expressionString,
 					"Recognition error at position: " + re.charPositionInLine + ": " + re.getMessage(), re);
-		}
-		catch (WrappedSpelException ex) {
+		} catch (WrappedSpelException ex) {
 			SpelException wrappedException = ex.getCause();
 			throw new ParseException(expressionString,
 					"Parsing problem: " + wrappedException.getMessage(), wrappedException);
