@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,10 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
