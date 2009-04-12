@@ -94,7 +94,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testPropertyField01() {
 		evaluate("name", "Nikola Tesla", String.class, false); 
 		// not writable because (1) name is private (2) there is no setter, only a getter
-		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, 0, "madeup",
+		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
 				"org.springframework.expression.spel.testresources.Inventor");
 	}
 

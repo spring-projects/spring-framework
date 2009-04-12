@@ -203,9 +203,8 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		try {
 			expr.setValue(ctx, Color.blue);
 			fail("Should not be allowed to set oranges to be blue !");
-		}
-		catch (SpelException ee) {
-			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
+		} catch (SpelException ee) {
+			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 
@@ -225,7 +224,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			fail("Should not be allowed to set peas to be blue !");
 		}
 		catch (SpelException ee) {
-			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
+			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 

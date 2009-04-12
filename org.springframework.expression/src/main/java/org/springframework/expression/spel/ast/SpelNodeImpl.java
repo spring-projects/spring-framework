@@ -49,8 +49,7 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState).getValue();
-		}
-		else {
+		} else {
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
 	}

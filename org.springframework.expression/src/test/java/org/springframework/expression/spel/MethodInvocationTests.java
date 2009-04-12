@@ -87,7 +87,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 	}
 	
 	public void testInvocationOnNullContextObject() {
-		evaluateAndCheckError("null.toString()",SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT);
+		evaluateAndCheckError("null.toString()",SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
 	}
 
 }

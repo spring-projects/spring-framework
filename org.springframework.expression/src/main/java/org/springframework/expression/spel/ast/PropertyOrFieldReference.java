@@ -111,8 +111,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				throw new SpelException(ae, SpelMessages.EXCEPTION_DURING_PROPERTY_READ, name, ae.getMessage());
 			}
 		}
-		throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND, name,
-				FormatHelper.formatClassNameForMessage(contextObjectClass));
+		if (contextObject.getValue() == null) {
+			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
+		} else {
+			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, name,
+					FormatHelper.formatClassNameForMessage(contextObjectClass));
+		}
 	}
 
 	private void writeProperty(ExpressionState state, String name, Object newValue) throws SpelException {
@@ -149,18 +153,20 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 						name, ae.getMessage());
 			}
 		}
-		throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND, name, FormatHelper
-				.formatClassNameForMessage(contextObjectClass));
+		if (contextObject.getValue()==null) {
+			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
+		} else {
+			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE, name, FormatHelper
+					.formatClassNameForMessage(contextObjectClass));
+		}
 	}
 
 	public boolean isWritableProperty(String name, ExpressionState state) throws SpelException {
 		Object contextObject = state.getActiveContextObject().getValue();
 		EvaluationContext eContext = state.getEvaluationContext();
-		if (contextObject == null) {
-			throw new SpelException(SpelMessages.ATTEMPTED_PROPERTY_FIELD_REF_ON_NULL_CONTEXT_OBJECT, name);
-		}
-		List<PropertyAccessor> resolversToTry = getPropertyAccessorsToTry(
-				(contextObject instanceof Class) ? ((Class<?>) contextObject) : contextObject.getClass(), state);
+
+		List<PropertyAccessor> resolversToTry = getPropertyAccessorsToTry(getObjectClass(contextObject),state);
+
 		if (resolversToTry != null) {
 			for (PropertyAccessor pfResolver : resolversToTry) {
 				try {
