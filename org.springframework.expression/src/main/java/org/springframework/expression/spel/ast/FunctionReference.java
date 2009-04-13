@@ -95,7 +95,7 @@ public class FunctionReference extends SpelNodeImpl {
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			ReflectionHelper.convertArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
+			ReflectionHelper.convertAllArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
 		}
 		if (m.isVarArgs()) {
 			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(), functionArgs);
