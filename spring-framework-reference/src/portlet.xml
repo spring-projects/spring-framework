@@ -140,7 +140,7 @@
     <classname>DispatcherPortlet</classname> is declared in the
     <literal>portlet.xml</literal> of your web application:</para>
 
-    <programlisting><![CDATA[<portlet>
+    <programlisting language="xml"><![CDATA[<portlet>
     <portlet-name>sample</portlet-name>
     <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
     <supports>
@@ -353,7 +353,7 @@
     <literal>web.xml</literal> file for your web application as
     follows:</para>
 
-    <programlisting><![CDATA[<servlet>
+    <programlisting language="xml"><![CDATA[<servlet>
     <servlet-name>ViewRendererServlet</servlet-name>
     <servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
 </servlet>
@@ -407,7 +407,7 @@
     <interfacename>org.springframework.web.portlet.mvc.Controller</interfacename>
     interface, which is listed below.</para>
 
-    <programlisting><![CDATA[public interface Controller {
+    <programlisting language="java"><![CDATA[public interface Controller {
 
     /**
      * Process the render request and return a ModelAndView object which the
@@ -530,7 +530,7 @@
       <para>Here is short example consisting of a class and a declaration
       in the web application context.</para>
 
-      <programlisting><![CDATA[package samples;
+      <programlisting language="java"><![CDATA[package samples;
 
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -647,7 +647,7 @@ public class SampleController extends AbstractController {
       instantiate an existing <interfacename>Portlet</interfacename> as a
       <interfacename>Controller</interfacename> as follows:</para>
 
-      <programlisting><![CDATA[<bean id="myPortlet" class="org.springframework.web.portlet.mvc.PortletWrappingController">
+      <programlisting language="xml"><![CDATA[<bean id="myPortlet" class="org.springframework.web.portlet.mvc.PortletWrappingController">
     <property name="portletClass" value="sample.MyPortlet"/>
     <property name="portletName" value="my-portlet"/>
     <property name="initParameters">
@@ -745,7 +745,7 @@ public class SampleController extends AbstractController {
       based on the current mode of the portlet (e.g. ‘view’, ‘edit’,
       ‘help’). An example:</para>
 
-      <programlisting><![CDATA[<bean class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+      <programlisting language="xml"><![CDATA[<bean class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
     <property name="portletModeMap">
         <map>
             <entry key="view" value-ref="viewHandler"/>
@@ -771,7 +771,7 @@ public class SampleController extends AbstractController {
       <para>The bean configuration for this mapping will look something
       like this:</para>
 
-      <programlisting><![CDATA[<bean class="org.springframework.web.portlet.handler.ParameterHandlerMapping”>
+      <programlisting language="xml"><![CDATA[<bean class="org.springframework.web.portlet.handler.ParameterHandlerMapping”>
     <property name="parameterMap">
         <map>
             <entry key="add" value-ref="addItemHandler"/>
@@ -804,7 +804,7 @@ public class SampleController extends AbstractController {
       <para>The bean configuration for this mapping will look something
       like this:</para>
 
-      <programlisting><![CDATA[<bean class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping">
+      <programlisting language="xml"><![CDATA[<bean class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping">
     <property name="portletModeParameterMap">
         <map>
             <entry key="view"> ]]><lineannotation>&lt;!-- 'view' portlet mode --&gt;</lineannotation><![CDATA[
@@ -992,7 +992,7 @@ public class SampleController extends AbstractController {
       <para>The following example shows how to use the
       <classname>CommonsPortletMultipartResolver</classname>:</para>
 
-      <programlisting><![CDATA[<bean id="portletMultipartResolver"
+      <programlisting language="xml"><![CDATA[<bean id="portletMultipartResolver"
         class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver">
 
     ]]><lineannotation>&lt;!-- one of the properties available; the maximum file size in bytes --&gt;</lineannotation><![CDATA[
@@ -1035,7 +1035,7 @@ public class SampleController extends AbstractController {
       actually let the user upload a file, we have to create a (JSP/HTML)
       form:</para>
 
-      <programlisting><![CDATA[<h1>Please upload a file</h1>
+      <programlisting language="xml"><![CDATA[<h1>Please upload a file</h1>
 <form method="post" action="<portlet:actionURL/>" enctype="multipart/form-data">
     <input type="file" name="file"/>
     <input type="submit"/>
@@ -1064,7 +1064,7 @@ public class SampleController extends AbstractController {
       resolver, a mapping to a controller that will process the bean, and
       the controller itself.</para>
 
-      <programlisting><![CDATA[<bean id="portletMultipartResolver"
+      <programlisting language="xml"><![CDATA[<bean id="portletMultipartResolver"
         class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver"/>
 
 <bean class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
@@ -1084,7 +1084,7 @@ public class SampleController extends AbstractController {
       <para>After that, create the controller and the actual class to hold
       the file property.</para>
 
-      <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+      <programlisting language="java"><![CDATA[public class FileUploadController extends SimpleFormController {
 
     public void onSubmitAction(ActionRequest request, ActionResponse response,
             Object command, BindException errors) throws Exception {
@@ -1136,7 +1136,7 @@ public class FileUploadBean {
       String-typed property on a (form backing) object might look like
       this:</para>
 
-      <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+      <programlisting language="java"><![CDATA[public class FileUploadController extends SimpleFormController {
 
     public void onSubmitAction(ActionRequest request, ActionResponse response,
             Object command, BindException errors) throws Exception {
@@ -1187,7 +1187,7 @@ public class FileUploadBean {
       register any custom property editor because there is no type
       conversion to be performed.</para>
 
-      <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+      <programlisting language="java"><![CDATA[public class FileUploadController extends SimpleFormController {
 
     public void onSubmitAction(ActionRequest request, ActionResponse response,
             Object command, BindException errors) throws Exception {
@@ -1273,7 +1273,7 @@ public class FileUploadBean {
       and/or <classname>AnnotationMethodHandlerAdapter</classname> is defined as well
       - provided that you intend to use <interfacename>@RequestMapping</interfacename>.</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -1322,7 +1322,7 @@ public class FileUploadBean {
       the <emphasis>spring-context</emphasis> schema as shown in the following
       XML snippet:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
@@ -1371,7 +1371,7 @@ public class FileUploadBean {
       <para>The following is an example of a form controller from the
       PetPortal sample application using this annotation:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 <emphasis role="bold">@RequestMapping("EDIT")</emphasis>
 @SessionAttributes("site")
 public class PetSitesEditController {
@@ -1580,7 +1580,7 @@ public class PetSitesEditController {
       <para>The following code snippet from the PetPortal sample application
       shows the usage:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 @RequestMapping("EDIT")
 @SessionAttributes("site")
 public class PetSitesEditController {
@@ -1636,7 +1636,7 @@ public class PetSitesEditController {
       <para>The following code snippet shows these two usages of this
       annotation:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 @RequestMapping("EDIT")
 @SessionAttributes("site")
 public class PetSitesEditController {
@@ -1676,7 +1676,7 @@ public class PetSitesEditController {
       <para>The following code snippet shows the usage of this
       annotation:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 @RequestMapping("EDIT")
 <emphasis role="bold">@SessionAttributes("site")</emphasis>
 public class PetSitesEditController {
@@ -1722,7 +1722,7 @@ public class PetSitesEditController {
         <classname>CustomDateEditor</classname> for all
         <classname>java.util.Date</classname> form properties.</para>
 
-        <programlisting>@Controller
+        <programlisting language="java">@Controller
 public class MyFormController {
 
     <emphasis role="bold">@InitBinder</emphasis>

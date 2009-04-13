@@ -33,7 +33,7 @@
       <classname>ResourceBundleViewResolver</classname>. Both are declared in the
       <interfacename>WebApplicationContext</interfacename>:</para>
 
-      <programlisting><lineannotation>&lt;!-- the <classname>ResourceBundleViewResolver</classname> --&gt;</lineannotation><![CDATA[
+      <programlisting language="xml"><lineannotation>&lt;!-- the <classname>ResourceBundleViewResolver</classname> --&gt;</lineannotation><![CDATA[
 <bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
   <property name="basename" value="views"/>
 </bean>
@@ -50,7 +50,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       <classname>ResourceBundleViewResolver</classname> you can mix different types of views using
       only one resolver.</para>
 
-      <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+      <programlisting language="xml"><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
   <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
   <property name="prefix" value="/WEB-INF/jsp/"/>
   <property name="suffix" value=".jsp"/>
@@ -115,7 +115,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>To use the tags from this library, add the following directive to
         the top of your JSP page:</para>
 
-        <programlisting>&lt;%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %&gt;</programlisting>
+        <programlisting language="xml">&lt;%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %&gt;</programlisting>
 
         <para>... where <literal>form</literal> is the tag name prefix you want
         to use for the tags from this library.</para>
@@ -137,7 +137,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <literal>form.jsp</literal>. Below is an example of what
         <literal>form.jsp</literal> would look like:</para>
 
-        <programlisting>&lt;form:form&gt;
+        <programlisting language="xml">&lt;form:form&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;First Name:&lt;/td&gt;
@@ -163,7 +163,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 
         <para>The generated HTML looks like a standard form:</para>
 
-        <programlisting>&lt;form method="POST"&gt;
+        <programlisting language="xml">&lt;form method="POST"&gt;
       &lt;table&gt;
         &lt;tr&gt;
             &lt;td&gt;First Name:&lt;/td&gt;
@@ -187,7 +187,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         practice), then you can bind the form to the named variable like
         so:</para>
 
-        <programlisting>&lt;form:form <lineannotation><emphasis role="bold">commandName="user"</emphasis></lineannotation>&gt;
+        <programlisting language="xml">&lt;form:form <lineannotation><emphasis role="bold">commandName="user"</emphasis></lineannotation>&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;First Name:&lt;/td&gt;
@@ -224,7 +224,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         the <classname>Preferences</classname> class:</para>
       </section>
 
-      <programlisting>public class Preferences {
+      <programlisting language="java">public class Preferences {
 
       private boolean receiveNewsletter;
 
@@ -259,7 +259,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 
       <para>The <literal>form.jsp</literal> would look like:</para>
 
-      <programlisting>&lt;form:form&gt;
+      <programlisting language="xml">&lt;form:form&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;Subscribe to newsletter?:&lt;/td&gt;
@@ -318,7 +318,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       <para>Note that regardless of the approach, the same HTML structure is
       generated. Below is an HTML snippet of some checkboxes:</para>
 
-      <programlisting>&lt;tr&gt;
+      <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Interests:&lt;/td&gt;
       &lt;td&gt;
           Quidditch: &lt;input name="preferences.interests" type="checkbox" value="Quidditch"/&gt;
@@ -363,7 +363,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         user. Below is an example of the JSP using this tag:</para>
       </section>
 
-      <programlisting>&lt;form:form&gt;
+      <programlisting language="xml">&lt;form:form&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;Interests:&lt;/td&gt;
@@ -391,7 +391,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>A typical usage pattern will involve multiple tag instances bound
         to the same property but with different values.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Sex:&lt;/td&gt;
       &lt;td&gt;Male: &lt;form:radiobutton path="sex" value="M"/&gt; &lt;br/&gt;
           Female: &lt;form:radiobutton path="sex" value="F"/&gt; &lt;/td&gt;
@@ -415,7 +415,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         custom object where you can provide the property names for the value
         using "itemValue" and the label using "itemLabel".</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Sex:&lt;/td&gt;
       &lt;td&gt;&lt;form:radiobuttons path="sex" items="${sexOptions}"/&gt;&lt;/td&gt;
   &lt;/tr&gt;</programlisting>
@@ -427,7 +427,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>This tag renders an HTML 'input' tag with type 'password' using
         the bound value.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Password:&lt;/td&gt;
       &lt;td&gt;
           &lt;form:password path="password" /&gt;
@@ -439,7 +439,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         shown, then set the value of the <literal>'showPassword'</literal>
         attribute to true, like so.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Password:&lt;/td&gt;
       &lt;td&gt;
           &lt;form:password path="password" value="^76525bvHGq" showPassword="true" /&gt;
@@ -457,7 +457,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>Let's assume a <classname>User</classname> has a list of
         skills.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Skills:&lt;/td&gt;
       &lt;td&gt;&lt;form:select path="skills" items="${skills}"/&gt;&lt;/td&gt;
   &lt;/tr&gt;</programlisting>
@@ -465,7 +465,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>If the <literal>User's</literal> skill were in Herbology, the HTML
         source of the 'Skills' row would look like:</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Skills:&lt;/td&gt;
       &lt;td&gt;&lt;select name="skills" multiple="true"&gt;
           &lt;option value="Potions"&gt;Potions&lt;/option&gt;
@@ -481,7 +481,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>This tag renders an HTML 'option'. It sets 'selected' as
         appropriate based on the bound value.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;House:&lt;/td&gt;
       &lt;td&gt;
           &lt;form:select path="house"&gt;
@@ -496,7 +496,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>If the <literal>User's</literal> house was in Gryffindor, the HTML
         source of the 'House' row would look like:</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;House:&lt;/td&gt;
       &lt;td&gt;
           &lt;select name="house"&gt;
@@ -515,7 +515,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>This tag renders a list of HTML 'option' tags. It sets the
         'selected' attribute as appropriate based on the bound value.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Country:&lt;/td&gt;
       &lt;td&gt;
           &lt;form:select path="country"&gt;
@@ -528,7 +528,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>If the <classname>User</classname> lived in the UK, the HTML
         source of the 'Country' row would look like:</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Country:&lt;/td&gt;
       &lt;td&gt;
           &lt;select name="country"&gt;
@@ -563,7 +563,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 
         <para>This tag renders an HTML 'textarea'.</para>
 
-        <programlisting>&lt;tr&gt;
+        <programlisting language="xml">&lt;tr&gt;
       &lt;td&gt;Notes:&lt;/td&gt;
       &lt;td&gt;&lt;form:textarea path="notes" rows="3" cols="20" /&gt;&lt;/td&gt;
       &lt;td&gt;&lt;form:errors path="notes" /&gt;&lt;/td&gt;
@@ -577,13 +577,13 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         bound value. To submit an unbound hidden value, use the HTML
         <literal>input</literal> tag with type 'hidden'.</para>
 
-        <programlisting>&lt;form:hidden path="house" /&gt;
+        <programlisting language="xml">&lt;form:hidden path="house" /&gt;
   </programlisting>
 
         <para>If we choose to submit the 'house' value as a hidden one, the HTML
         would look like:</para>
 
-        <programlisting>&lt;input name="house" type="hidden" value="Gryffindor"/&gt;
+        <programlisting language="xml">&lt;input name="house" type="hidden" value="Gryffindor"/&gt;
   </programlisting>
       </section>
 
@@ -600,7 +600,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <classname>User</classname> class called
         <classname>UserValidator</classname>.</para>
 
-        <programlisting>public class UserValidator implements Validator {
+        <programlisting language="java">public class UserValidator implements Validator {
 
       public boolean supports(Class candidate) {
           return User.class.isAssignableFrom(candidate);
@@ -614,7 +614,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 
         <para>The <literal>form.jsp</literal> would look like:</para>
 
-        <programlisting>&lt;form:form&gt;
+        <programlisting language="xml">&lt;form:form&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;First Name:&lt;/td&gt;
@@ -641,7 +641,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <literal>firstName</literal> and <literal>lastName</literal> fields,
         this is what the HTML would look like:</para>
 
-        <programlisting>&lt;form method="POST"&gt;
+        <programlisting language="xml">&lt;form method="POST"&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;First Name:&lt;/td&gt;
@@ -682,7 +682,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>The example below will display a list of errors at the top of the
         page, followed by field-specific errors next to the fields:</para>
 
-        <programlisting>&lt;form:form&gt;
+        <programlisting language="xml">&lt;form:form&gt;
       &lt;form:errors path="*" cssClass="errorBox" /&gt;
       &lt;table&gt;
           &lt;tr&gt;
@@ -705,7 +705,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 
         <para>The HTML would look like:</para>
 
-        <programlisting>&lt;form method="POST"&gt;
+        <programlisting language="xml">&lt;form method="POST"&gt;
       &lt;span name="*.errors" class="errorBox"&gt;Field is required.&lt;br/&gt;Field is required.&lt;/span&gt;
       &lt;table&gt;
           &lt;tr&gt;
@@ -779,7 +779,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       using the <classname>TilesConfigurer</classname>. Have a look at the
       following piece of example ApplicationContext configuration:</para>
       
-      <programlisting><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+      <programlisting language="xml"><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
   <property name="definitions">
     <list>
       <value>/WEB-INF/defs/general.xml</value>
@@ -808,7 +808,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         <para>The <classname>UrlBasedViewResolver</classname> instantiates the given
         <literal>viewClass</literal> for each view it has to resolve.</para>
         
-        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <programlisting language="xml"><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
   <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
 </bean>]]></programlisting>
         
@@ -821,11 +821,11 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         property file containing viewnames and viewclasses the resolver can
         use:</para>
         
-        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+        <programlisting language="xml"><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
   <property name="basename" value="views"/>
 </bean>]]></programlisting>
 
-        <programlisting><![CDATA[...
+        <programlisting language="java"><![CDATA[...
 welcomeView.class=org.springframework.web.servlet.view.tiles2.TilesView
 welcomeView.url=welcome ]]><lineannotation>(this is the name of a Tiles definition)</lineannotation><![CDATA[
 
@@ -868,7 +868,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         scoped beans etc. Note that you need to define one Spring bean definition per
         preparer name (as used in your Tiles definitions).</para>
 
-        <programlisting><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+        <programlisting language="xml"><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
   <property name="definitions">
     <list>
       <value>/WEB-INF/defs/general.xml</value>
@@ -927,7 +927,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       <para>A suitable configuration is initialized by adding the relevant
       configurer bean definition to your <filename>'*-servlet.xml'</filename> as shown below:</para>
 
-      <programlisting><lineannotation>&lt;!-- 
+      <programlisting language="xml"><lineannotation>&lt;!-- 
   This bean sets up the Velocity environment for us based on a root path for templates.
   Optionally, a properties file can be specified for more control over the Velocity
   environment, but the defaults are pretty sane for file based template loading.
@@ -1003,7 +1003,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         need this file, specify its location on the
         <literal>VelocityConfigurer</literal> bean definition above.</para>
 
-        <programlisting>&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
+        <programlisting language="xml">&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
   &lt;property name="configLocation value="/WEB-INF/velocity.properties"/&gt;
 &lt;/bean&gt;</programlisting>
 
@@ -1011,7 +1011,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         the bean definition for the Velocity config bean by replacing the
         "configLocation" property with the following inline properties.</para>
 
-        <programlisting><![CDATA[<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+        <programlisting language="xml"><![CDATA[<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
   <property name="velocityProperties">
     <props>
       <prop key="resource.loader">file</prop>
@@ -1043,7 +1043,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <literal>freemarkerVariables</literal> property requires a
         <literal>java.util.Map</literal>.</para>
 
-        <programlisting><![CDATA[<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <programlisting language="xml"><![CDATA[<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
   <property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
   <property name="freemarkerVariables">
     <map>
@@ -1104,7 +1104,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <literal>personFormV</literal> and <literal>personFormF</literal>
         views configured earlier;</para>
 
-        <programlisting>&lt;!-- velocity macros are automatically available --&gt;
+        <programlisting language="xml">&lt;!-- velocity macros are automatically available --&gt;
 &lt;html&gt;
 ...
 &lt;form action="" method="POST"&gt;
@@ -1121,7 +1121,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 ...
 &lt;/html&gt;</programlisting>
 
-        <programlisting>&lt;!-- freemarker macros have to be imported into a namespace.  We strongly
+        <programlisting language="xml">&lt;!-- freemarker macros have to be imported into a namespace.  We strongly
 recommend sticking to 'spring' --&gt;
 &lt;#import "spring.ftl" as spring /&gt;
 &lt;html&gt;
@@ -1389,7 +1389,7 @@ recommend sticking to 'spring' --&gt;
         <section id="views-form-macros-input">
           <title>Input Fields</title>
 
-          <para><programlisting>&lt;!-- the Name field example from above using form macros in VTL --&gt;
+          <para><programlisting language="xml">&lt;!-- the Name field example from above using form macros in VTL --&gt;
 ...
     Name:
     #springFormInput("command.name" "")&lt;br&gt;
@@ -1410,7 +1410,7 @@ recommend sticking to 'spring' --&gt;
           values for the attributes parameter, unlike Velocity, and the two
           macro calls above could be expressed as follows in FTL:</para>
 
-          <programlisting>&lt;@spring.formInput "command.name"/&gt;
+          <programlisting language="xml">&lt;@spring.formInput "command.name"/&gt;
 &lt;@spring.showErrors "&lt;br&gt;"/&gt;</programlisting>
 
           <para>Output is shown below of the form fragment generating the name
@@ -1500,7 +1500,7 @@ New York</programlisting>
           for example, the map of codes would be created with suitable keys
           like the example below.</para>
 
-          <programlisting>protected Map referenceData(HttpServletRequest request) throws Exception {
+          <programlisting language="java">protected Map referenceData(HttpServletRequest request) throws Exception {
   Map cityMap = new LinkedHashMap();
   cityMap.put("LDN", "London");
   cityMap.put("PRS", "Paris");
@@ -1559,7 +1559,7 @@ New York</programlisting>
         <para>In similar fashion, HTML escaping can be specified per
         field:</para>
 
-        <programlisting>&lt;#-- until this point, default HTML escaping is used --&gt;
+        <programlisting language="xml">&lt;#-- until this point, default HTML escaping is used --&gt;
 
 &lt;#assign htmlEscape = true in spring&gt;
 &lt;#-- next field will use HTML escaping --&gt;
@@ -1598,7 +1598,7 @@ New York</programlisting>
         dispatcher servlet config file contains a reference to a
         <interfacename>ViewResolver</interfacename>, URL mappings and a single controller
         bean...</para>
-        <programlisting><![CDATA[<bean id="homeController"class="xslt.HomeController"/>]]></programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="homeController"class="xslt.HomeController"/>]]></programlisting>
         <para>... that encapsulates our word generation logic.</para>
       </section>
 
@@ -1608,7 +1608,7 @@ New York</programlisting>
         <para>The controller logic is encapsulated in a subclass of
         <classname>AbstractController</classname>, with the handler method being defined like so...</para>
         
-        <programlisting><![CDATA[protected ModelAndView handleRequestInternal(
+        <programlisting language="java"><![CDATA[protected ModelAndView handleRequestInternal(
     HttpServletRequest request,
     HttpServletResponse response) throws Exception {
         
@@ -1649,7 +1649,7 @@ New York</programlisting>
         <methodname>createXsltSource(..)</methodname> method. The first parameter passed
         to this method is our model map. Here's the complete listing of the
         <classname>HomePage</classname> class in our trivial word application:</para>
-        <programlisting><![CDATA[
+        <programlisting language="java"><![CDATA[
 package xslt;
 
 ]]><lineannotation>// imports omitted for brevity</lineannotation><![CDATA[
@@ -1717,7 +1717,7 @@ home.root=words]]></programlisting>
         <filename>'home.xslt'</filename> and it lives in the war file in the
         <filename class="directory">'WEB-INF/xsl'</filename> directory.</para>
         
-        <programlisting><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     <xsl:output method="html" omit-xml-declaration="yes"/>
@@ -1847,7 +1847,7 @@ pdf.class=pdf.HomePage</programlisting> <emphasis>If you want to start with a
 
         <para>Here's the complete listing for our POI Excel view which displays
         the word list from the model map in consecutive rows of the first
-        column of a new spreadsheet.. <programlisting>package excel;
+        column of a new spreadsheet.. <programlisting language="java">package excel;
 
 // imports omitted for brevity
 
@@ -1883,7 +1883,7 @@ public class HomePage extends AbstractExcelView {
     }
 }</programlisting></para>
 		  
-		<para>And this a view generating the same Excel file, now using JExcelApi: <programlisting>package excel;
+		<para>And this a view generating the same Excel file, now using JExcelApi: <programlisting language="java">package excel;
 			
 // imports omitted for brevity
 
@@ -1927,7 +1927,7 @@ public class HomePage extends AbstractExcelView {
         class extends
         <literal>org.springframework.web.servlet.view.document.AbstractPdfView</literal>
         and implements the <literal>buildPdfDocument()</literal> method as
-        follows.. <programlisting>package pdf;
+        follows.. <programlisting language="java">package pdf;
 
 // imports omitted for brevity
 
@@ -2012,7 +2012,7 @@ public class PDFPage extends AbstractPdfView {
         <para>Typically, you will use the <classname>ResourceBundleViewResolver</classname>
         to map view names to view classes and files in a properties file.</para>
         
-        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+        <programlisting language="xml"><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
     <property name="basename" value="views"/>
 </bean>]]></programlisting>
 
@@ -2117,7 +2117,7 @@ simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper]]></programlisting>
         entry to your model with the formay key as the key and the mapping key
         as the value, for example:</para>
 
-        <programlisting><![CDATA[public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
+        <programlisting language="java"><![CDATA[public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
 HttpServletResponse response) throws Exception {
 
   String uri = request.getRequestURI();
@@ -2208,7 +2208,7 @@ HttpServletResponse response) throws Exception {
       locate this object in the model and treat it as the report datasource.
       For example, you may populate your model like so:</para>
       
-      <programlisting><![CDATA[private Map getModel() {
+      <programlisting language="java"><![CDATA[private Map getModel() {
   Map model = new HashMap();
   Collection beanData = getBeanData();
   model.put("myBeanData", beanData);
@@ -2222,7 +2222,7 @@ HttpServletResponse response) throws Exception {
       cases Spring will instances of <literal>Collection</literal> in a
       <literal>JRBeanCollectionDataSource</literal> instance. For example:</para>
       
-      <programlisting><![CDATA[private Map getModel() {
+      <programlisting language="java"><![CDATA[private Map getModel() {
   Map model = new HashMap();
   Collection beanData = getBeanData();
   Collection someData = getSomeData();
@@ -2268,10 +2268,10 @@ simpleReport.reportDataKey=myBeanData]]></programlisting>
         sub-reports from an external source. To do this you declare a
         parameter in your report file like so:</para>
         
-        <programlisting><![CDATA[<parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/>]]></programlisting>
+        <programlisting language="xml"><![CDATA[<parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/>]]></programlisting>
         
         <para>Then, you define your sub-report to use this sub-report parameter:</para>
-        <programlisting>&lt;subreport&gt;
+        <programlisting language="xml">&lt;subreport&gt;
     &lt;reportElement isPrintRepeatedValues="false" x="5" y="25" width="325"
         height="20" isRemoveLineWhenBlank="true" backcolor="#ffcc99"/&gt;
     &lt;subreportParameter name="City"&gt;
@@ -2290,7 +2290,7 @@ simpleReport.reportDataKey=myBeanData]]></programlisting>
         pass into the JasperReports engine as a sub-report using the
         <literal>subReportUrls</literal> property:</para>
         
-        <programlisting><![CDATA[<property name="subReportUrls">
+        <programlisting language="xml"><![CDATA[<property name="subReportUrls">
     <map>
         <entry key="ProductsSubReport" value="/WEB-INF/reports/subReportChild.jrxml"/>
     </map>
@@ -2314,7 +2314,7 @@ simpleReport.reportDataKey=myBeanData]]></programlisting>
         which of the parameters in your <literal>ModelAndView</literal> Spring
         should convert. To do this configure the list of parameter names using
         the <literal>subReportDataKeys</literal> property of the your chosen
-        view class: <programlisting>&lt;property name="subReportDataKeys"
+        view class: <programlisting language="xml">&lt;property name="subReportDataKeys"
     value="SubReportData"/&gt;</programlisting> Here, the key you supply MUST
         correspond to both the key used in your <literal>ModelAndView</literal>
         and the key used in your report design file.</para>
@@ -2335,7 +2335,7 @@ simpleReport.reportDataKey=myBeanData]]></programlisting>
       entry should be the value you want to assign to the parameter. An
       example of this is shown below:</para>
       
-      <programlisting>&lt;bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView"&gt;
+      <programlisting language="xml">&lt;bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView"&gt;
   &lt;property name="url" value="/WEB-INF/reports/simpleReport.jrxml"/&gt;
   &lt;property name="exporterParameters"&gt;
     &lt;map&gt;

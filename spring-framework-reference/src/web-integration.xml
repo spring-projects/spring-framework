@@ -88,7 +88,7 @@
     <para>
       Find below the &lt;listener/&gt; configuration:
     </para>
-    <programlisting><![CDATA[<listener>
+    <programlisting language="xml"><![CDATA[<listener>
   <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 </listener>]]></programlisting>
     <note>
@@ -102,7 +102,7 @@
     <para>
       Find below the &lt;context-param/&gt; configuration:
     </para>
-    <programlisting><![CDATA[<context-param>
+    <programlisting language="xml"><![CDATA[<context-param>
   <param-name>contextConfigLocation</param-name>
   <param-value>/WEB-INF/applicationContext*.xml</param-value>
 </context-param>]]></programlisting>
@@ -121,7 +121,7 @@
       <interface>ApplicationContext</interface> created by the
       <classname>ContextLoaderListener</classname>.
     </para>
-    <programlisting><![CDATA[WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);]]></programlisting>
+    <programlisting language="java"><![CDATA[WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);]]></programlisting>
     <para>
       The <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></ulink>
       class is for convenience, so you don't have to remember the name of the
@@ -188,7 +188,7 @@
         element and a <literal>&lt;variable-resolver/&gt;</literal> element within it.
         The value of the variable resolver should reference Spring's
         <classname>DelegatingVariableResolver</classname>; for example:</para>
-      <programlisting><![CDATA[<faces-config>
+      <programlisting language="xml"><![CDATA[<faces-config>
   <application>
     <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
     <locale-config>
@@ -210,7 +210,7 @@
         file. Find below an example where <literal>#{userManager}</literal> is a bean
         that is retrieved from the Spring 'business context'.
       </para>
-      <programlisting><![CDATA[<managed-bean>
+      <programlisting language="xml"><![CDATA[<managed-bean>
   <managed-bean-name>userList</managed-bean-name>
   <managed-bean-class>com.whatever.jsf.UserList</managed-bean-class>
   <managed-bean-scope>request</managed-bean-scope>
@@ -235,7 +235,7 @@
         Configuration-wise, simply define <classname>SpringBeanVariableResolver</classname>
         in your <emphasis>faces-context.xml</emphasis> file:
       </para>
-      <programlisting><![CDATA[<faces-config>
+      <programlisting language="xml"><![CDATA[<faces-config>
   <application>
     <variable-resolver>org.springframework.web.jsf.SpringBeanVariableResolver</variable-resolver>
     ...
@@ -257,7 +257,7 @@
         Configuration-wise, simply define <classname>SpringBeanFacesELResolver</classname>
         in your JSF 1.2 <emphasis>faces-context.xml</emphasis> file:
       </para>
-      <programlisting><![CDATA[<faces-config>
+      <programlisting language="xml"><![CDATA[<faces-config>
   <application>
     <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
     ...
@@ -276,7 +276,7 @@
         takes a <classname>FacesContext</classname> parameter rather than a
         <interface>ServletContext</interface> parameter.
       </para>
-      <programlisting><![CDATA[ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());]]></programlisting>
+      <programlisting language="java"><![CDATA[ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());]]></programlisting>
     </section>
   </section>
 
@@ -344,12 +344,12 @@
         To configure this plug-in, add the following XML to the plug-ins section near
         the bottom of your <emphasis>struts-config.xml</emphasis> file:
       </para>
-      <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/>]]></programlisting>
+      <programlisting language="xml"><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/>]]></programlisting>
       <para>
         The location of the context configuration files can be customized using the
         '<literal>contextConfigLocation</literal>' property.
       </para>
-      <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
+      <programlisting language="xml"><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
   <set-property property="contextConfigLocation"
       value="/WEB-INF/action-servlet.xml,/WEB-INF/applicationContext.xml"/>
 </plug-in>]]></programlisting>
@@ -389,12 +389,12 @@
         action-mapping's "path" and the bean's "name". If you have the
         following in your <emphasis>struts-config.xml</emphasis> file:
       </para>
-      <programlisting><![CDATA[<action path="/users" .../>]]></programlisting>
+      <programlisting language="xml"><![CDATA[<action path="/users" .../>]]></programlisting>
       <para>
         You must define that Action's bean with the "/users" name in
         <emphasis>action-servlet.xml</emphasis>:
       </para>
-      <programlisting><![CDATA[<bean name="/users" .../>]]></programlisting>
+      <programlisting language="xml"><![CDATA[<bean name="/users" .../>]]></programlisting>
       <section id="struts-delegatingrequestprocessor">
         <title>DelegatingRequestProcessor</title>
         <para>
@@ -404,7 +404,7 @@
           property in the &lt;controller&gt; element. These lines follow the
           &lt;action-mapping&gt; element.
         </para>
-        <programlisting><![CDATA[<controller>
+        <programlisting language="xml"><![CDATA[<controller>
   <set-property property="processorClass"
       value="org.springframework.web.struts.DelegatingRequestProcessor"/>
 </controller>]]></programlisting>
@@ -414,7 +414,7 @@
           you don't even need to specify a type. Both of the following snippets
           will work:
         </para>
-        <programlisting><![CDATA[<action path="/user" type="com.whatever.struts.UserAction"/>
+        <programlisting language="xml"><![CDATA[<action path="/user" type="com.whatever.struts.UserAction"/>
 <action path="/user"/>]]></programlisting>
         <para>
           If you're using Struts' <emphasis>modules</emphasis> feature,
@@ -442,7 +442,7 @@
           <classname>DelegatingActionProxy</classname></ulink> as the type in your
           action-mapping.
         </para>
-        <programlisting><![CDATA[<action path="/user" type="org.springframework.web.struts.DelegatingActionProxy"
+        <programlisting language="xml"><![CDATA[<action path="/user" type="org.springframework.web.struts.DelegatingActionProxy"
     name="userForm" scope="request" validate="false" parameter="method">
   <forward name="list" path="/userList.jsp"/>
   <forward name="edit" path="/userForm.jsp"/>
@@ -459,7 +459,7 @@
           <classname>Action</classname> instance for each request. To activate the latter,
           add <emphasis>scope="prototype"</emphasis> to your Action's bean definition.
         </para>
-        <programlisting><![CDATA[<bean name="/user" scope="prototype" autowire="byName"
+        <programlisting language="xml"><![CDATA[<bean name="/user" scope="prototype" autowire="byName"
     class="org.example.web.UserAction"/>]]></programlisting>
       </section>
     </section>
@@ -480,7 +480,7 @@
         convenience methods, like <emphasis>getWebApplicationContext()</emphasis>.
         Below is an example of how you might use this in an Action:
       </para>
-    <programlisting><![CDATA[public class UserAction extends DispatchActionSupport {
+    <programlisting language="java"><![CDATA[public class UserAction extends DispatchActionSupport {
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -627,7 +627,7 @@
         Assume we have the following simple Spring container definition (in the
         ubiquitous XML format):
       </para>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" 
         "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
  
@@ -703,7 +703,7 @@
         a page to get an instance of the <interfacename>UserService</interfacename>,
         for example, would be with code such as:
       </para>
-      <programlisting><![CDATA[WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
+      <programlisting language="java"><![CDATA[WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
     getRequestCycle().getRequestContext().getServlet().getServletContext());
 UserService userService = (UserService) appContext.getBean("userService");
 ]]><lineannotation>... some code which uses UserService</lineannotation></programlisting>
@@ -744,7 +744,7 @@ UserService userService = (UserService) appContext.getBean("userService");
           directly. One way is by defining a custom version of the Tapestry
           <interfacename>IEngine</interfacename> which exposes this for us:
         </para>
-        <programlisting><![CDATA[package com.whatever.web.xportal;
+        <programlisting language="java"><![CDATA[package com.whatever.web.xportal;
 
 import ...
 
@@ -776,7 +776,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
           instance should be used for this Tapestry application, with an entry
           in the Tapestry application definition file. For example:
         </para>
-        <programlisting><lineannotation>file: xportal.application:</lineannotation><![CDATA[
+        <programlisting language="xml"><lineannotation>file: xportal.application:</lineannotation><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE application PUBLIC 
     "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
@@ -794,7 +794,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
           need out of the <interfacename>ApplicationContext</interfacename>,
           and create page or component properties for them. For example:
         </para>
-        <programlisting><![CDATA[    <property-specification name="userService"
+        <programlisting language="xml"><![CDATA[    <property-specification name="userService"
                             type="com.whatever.services.service.user.UserService">
         global.appContext.getBean("userService")
     </property-specification>
@@ -807,7 +807,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
           initial value for the property, as a bean obtained from the context.
           The entire page definition might look like this:
         </para>
-        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE page-specification PUBLIC 
     "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
     "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
@@ -857,7 +857,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
           for the properties we have defined (in order to be able to
           access the properties).
         </para>
-        <programlisting><![CDATA[// our UserService implementation; will come from page definition
+        <programlisting language="java"><![CDATA[// our UserService implementation; will come from page definition
 public abstract UserService getUserService();
 // our AuthenticationService implementation; will come from page definition
 public abstract AuthenticationService getAuthenticationService();]]></programlisting>
@@ -865,7 +865,7 @@ public abstract AuthenticationService getAuthenticationService();]]></programlis
           For the sake of completeness, the entire Java class, for a
           login page in this example, might look like this:
         </para>
-        <programlisting><![CDATA[package com.whatever.web.xportal.pages;
+        <programlisting language="java"><![CDATA[package com.whatever.web.xportal.pages;
  
 /**
  *  Allows the user to login, by providing username and password.
@@ -1001,7 +1001,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
           and <literal>authenticationService</literal> objects (lots of the class
           definition has been elided for clarity)...
         </para>
-        <programlisting><![CDATA[package com.whatever.web.xportal.pages;
+        <programlisting language="java"><![CDATA[package com.whatever.web.xportal.pages;
 
 public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
     
@@ -1016,7 +1016,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         We are almost done... all that remains is the HiveMind configuration that exposes the
         Spring container stored in the <interfacename>ServletContext</interfacename> as a
         HiveMind service; for example:</para>
-      <programlisting><![CDATA[<?xml version="1.0"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0"?>
 <module id="com.javaforge.tapestry.spring" version="0.1.1">
 
     <service-point id="SpringApplicationInitializer"
@@ -1049,7 +1049,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
           inside the <literal>.page</literal> or <literal>.jwc</literal> file
           for the <classname>Login</classname> page (or component):
         </para>
-        <programlisting><![CDATA[<inject property="userService" object="spring:userService"/>
+        <programlisting language="xml"><![CDATA[<inject property="userService" object="spring:userService"/>
 <inject property="authenticationService" object="spring:authenticationService"/>]]></programlisting>
       </section>
     </section>
