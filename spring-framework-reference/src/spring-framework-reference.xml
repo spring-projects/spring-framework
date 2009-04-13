@@ -19,8 +19,8 @@
 <!ENTITY oxm				SYSTEM "oxm.xml">
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY view				SYSTEM "view.xml">
+<!ENTITY rest                           SYSTEM "rest.xml">
 <!ENTITY web-integration		SYSTEM "web-integration.xml">
-<!ENTITY rest               SYSTEM "rest.xml">
 <!ENTITY portlet            SYSTEM "portlet.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
@@ -290,6 +290,9 @@
 					<para><xref linkend="view"/></para>
 				</listitem>
 				<listitem>
+					<para><xref linkend="rest"/></para>
+				</listitem>
+				<listitem>
 					<para><xref linkend="web-integration"/></para>
 				</listitem>
 				<listitem>
@@ -299,6 +302,7 @@
 		</partintro>
 		&mvc;
 		&view;
+		&rest;
 		&web-integration;
 		&rest;
 		&portlet;
