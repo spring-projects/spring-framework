@@ -278,7 +278,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 					Method m = HasRoleExecutor.class.getMethod("hasRole", String[].class);
 					Object[] args = arguments;
 					if (args != null) {
-						ReflectionHelper.convertArguments(m.getParameterTypes(), m.isVarArgs(), tc, args);
+						ReflectionHelper.convertAllArguments(m.getParameterTypes(), m.isVarArgs(), tc, args);
 					}
 					if (m.isVarArgs()) {
 						args = ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(), args);

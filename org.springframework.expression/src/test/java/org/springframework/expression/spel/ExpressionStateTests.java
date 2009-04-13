@@ -115,6 +115,10 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		
 		state = new ExpressionState(new StandardEvaluationContext());
 		assertEquals(TypedValue.NULL_TYPED_VALUE,state.getRootContextObject());
+		
+
+		((StandardEvaluationContext)state.getEvaluationContext()).setRootObject(null,TypeDescriptor.NULL_TYPE_DESCRIPTOR);
+		assertEquals(null,state.getRootContextObject().getValue());
 	}
 	
 	public void testActiveContextObject() {

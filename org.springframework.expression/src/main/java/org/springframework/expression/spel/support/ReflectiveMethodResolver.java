@@ -62,8 +62,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 					if (method.isVarArgs() && argumentTypes.length >= (method.getParameterTypes().length - 1)) {
 						// *sigh* complicated
 						matchInfo = ReflectionHelper.compareArgumentsVarargs(method.getParameterTypes(), argumentTypes, typeConverter);
-					}
-					else if (method.getParameterTypes().length == argumentTypes.length) {
+					} else if (method.getParameterTypes().length == argumentTypes.length) {
 						// name and parameter number match, check the arguments
 						matchInfo = ReflectionHelper.compareArguments(method.getParameterTypes(), argumentTypes, typeConverter);
 					}
