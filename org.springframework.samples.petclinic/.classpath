@@ -38,5 +38,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-3.3.1.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.ejb/3.4.0.GA/com.springsource.org.hibernate.ejb-3.4.0.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.annotations/3.4.0.GA/com.springsource.org.hibernate.annotations-3.4.0.GA.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-1.5.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

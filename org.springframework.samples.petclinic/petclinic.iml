@@ -76,6 +76,18 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-1.5.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-sources-1.5.3.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
