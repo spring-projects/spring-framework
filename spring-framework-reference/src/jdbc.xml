@@ -228,23 +228,23 @@
           <para>A simple query for getting the number of rows in a
           relation.</para>
 
-          <programlisting>int rowCount = this.jdbcTemplate.queryForInt("select count(0) from t_accrual");</programlisting>
+          <programlisting language="java">int rowCount = this.jdbcTemplate.queryForInt("select count(0) from t_accrual");</programlisting>
 
           <para>A simple query using a bind variable.</para>
 
-          <programlisting>int countOfActorsNamedJoe = this.jdbcTemplate.queryForInt(
+          <programlisting language="java">int countOfActorsNamedJoe = this.jdbcTemplate.queryForInt(
         "select count(0) from t_actors where first_name = ?", new Object[]{"Joe"});</programlisting>
 
           <para>Querying for a <classname>String</classname>.</para>
 
-          <programlisting>String surname = (String) this.jdbcTemplate.queryForObject(
+          <programlisting language="java">String surname = (String) this.jdbcTemplate.queryForObject(
         "select surname from t_actor where id = ?", 
         new Object[]{new Long(1212)}, String.class);</programlisting>
 
           <para>Querying and populating a <emphasis>single</emphasis> domain
           object.</para>
 
-          <programlisting>Actor actor = (Actor) this.jdbcTemplate.queryForObject(
+          <programlisting language="java">Actor actor = (Actor) this.jdbcTemplate.queryForObject(
     "select first_name, surname from t_actor where id = ?",
     new Object[]{new Long(1212)},
     new RowMapper() {
@@ -259,7 +259,7 @@
 
           <para>Querying and populating a number of domain objects.</para>
 
-          <programlisting>Collection actors = this.jdbcTemplate.query(
+          <programlisting language="java">Collection actors = this.jdbcTemplate.query(
     "select first_name, surname from t_actor",
     new RowMapper() {
 
@@ -279,7 +279,7 @@
           by DAO methods as needed. For example, the last code snippet might
           be better off written like so:</para>
 
-          <programlisting>public Collection findAllActors() {
+          <programlisting language="java">public Collection findAllActors() {
     return this.jdbcTemplate.query( "select first_name, surname from t_actor", new ActorMapper());
 }
 
@@ -297,15 +297,15 @@ private static final class ActorMapper implements RowMapper {
         <section id="jdbc-JdbcTemplate-examples-update">
           <title>Updating (INSERT/UPDATE/DELETE)</title>
 
-          <programlisting>this.jdbcTemplate.update(
+          <programlisting language="java">this.jdbcTemplate.update(
         "insert into t_actor (first_name, surname) values (?, ?)", 
         new Object[] {"Leonor", "Watling"});</programlisting>
 
-          <programlisting>this.jdbcTemplate.update(
+          <programlisting language="java">this.jdbcTemplate.update(
         "update t_actor set weapon = ? where id = ?", 
         new Object[] {"Banjo", new Long(5276)});</programlisting>
 
-          <programlisting>this.jdbcTemplate.update(
+          <programlisting language="java">this.jdbcTemplate.update(
         "delete from actor where id = ?",
         new Object[] {new Long.valueOf(actorId)});</programlisting>
         </section>
@@ -318,13 +318,13 @@ private static final class ActorMapper implements RowMapper {
           statements. It is heavily overloaded with variants taking callback
           interfaces, binding variable arrays, and suchlike.</para>
 
-          <programlisting>this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");</programlisting>
+          <programlisting language="java">this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");</programlisting>
 
           <para>Invoking a simple stored procedure (more sophisticated stored
           procedure support is <link linkend="jdbc-StoredProcedure">covered
           later</link>).</para>
 
-          <programlisting>this.jdbcTemplate.update(
+          <programlisting language="java">this.jdbcTemplate.update(
         "call SUPPORT.REFRESH_ACTORS_SUMMARY(?)", 
         new Object[]{Long.valueOf(unionId)});</programlisting>
         </section>
@@ -356,7 +356,7 @@ private static final class ActorMapper implements RowMapper {
         setter for the <interfacename>DataSource</interfacename>. This leads
         to DAOs that look in part like this:</para>
 
-        <programlisting>public class JdbcCorporateEventDao implements CorporateEventDao {
+        <programlisting language="java">public class JdbcCorporateEventDao implements CorporateEventDao {
 
     private JdbcTemplate jdbcTemplate;
 
@@ -369,7 +369,7 @@ private static final class ActorMapper implements RowMapper {
 
         <para>The attendant configuration might look like this.</para>
 
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
@@ -428,7 +428,7 @@ private static final class ActorMapper implements RowMapper {
       the <classname>JdbcTemplate</classname> itself; namely, programming JDBC
       statements using named parameters.</para>
 
-      <programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation>
+      <programlisting language="java"><lineannotation>// some JDBC-backed DAO class...</lineannotation>
 private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -458,7 +458,7 @@ public int countOfActorsByFirstName(String firstName) {
       implemented by the <classname>NamedParameterJdbcTemplate</classname>
       class) follow a similar pattern and will not be covered here.)</para>
 
-      <programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation>
+      <programlisting language="java"><lineannotation>// some JDBC-backed DAO class...</lineannotation>
 private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -498,7 +498,7 @@ public int countOfActorsByFirstName(String firstName) {
       conventions</ulink>), and uses the properties of the wrapped JavaBean as
       the source of named parameter values.</para>
 
-      <programlisting>public class Actor {
+      <programlisting language="java">public class Actor {
 
     private Long id;
     private String firstName;
@@ -520,7 +520,7 @@ public int countOfActorsByFirstName(String firstName) {
 
 }</programlisting>
 
-      <programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation>
+      <programlisting language="java"><lineannotation>// some JDBC-backed DAO class...</lineannotation>
 private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -581,7 +581,7 @@ public int countOfActors(Actor exampleActor) {
       a code snippet that does the same job, only this time using the
       <classname>SimpleJdbcTemplate</classname>.</para>
 
-      <programlisting><lineannotation>// classic <classname>JdbcTemplate</classname>-style...</lineannotation>
+      <programlisting language="java"><lineannotation>// classic <classname>JdbcTemplate</classname>-style...</lineannotation>
 private JdbcTemplate jdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -611,7 +611,7 @@ public Actor findActor(long id) {
       <classname>SimpleJdbcTemplate</classname>; notice how much 'cleaner' the
       code is.</para>
 
-      <programlisting><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation>
+      <programlisting language="java"><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation>
 private SimpleJdbcTemplate simpleJdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -690,7 +690,7 @@ public Actor findActor(long id) {
       used to connect to the database. Here is an example of how to configure
       a <classname>DriverManagerDataSource</classname>:</para>
 
-      <programlisting>DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      <programlisting language="java">DriverManagerDataSource dataSource = new DriverManagerDataSource();
 dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
 dataSource.setUrl("jdbc:hsqldb:hsql://localhost:");
 dataSource.setUsername("sa");
@@ -749,7 +749,7 @@ dataSource.setPassword("");</programlisting>
       <para><classname>SQLErrorCodeSQLExceptionTranslator</classname> can be
       extended the following way:</para>
 
-      <programlisting>public class MySQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
+      <programlisting language="java">public class MySQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
 
     protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
         if (sqlex.getErrorCode() == -12345) {
@@ -769,7 +769,7 @@ dataSource.setPassword("");</programlisting>
       processing where this translator is needed. Here is an example of how
       this custom translator can be used:</para>
 
-      <programlisting><lineannotation>// create a <classname>JdbcTemplate</classname> and set data source</lineannotation> 
+      <programlisting language="java"><lineannotation>// create a <classname>JdbcTemplate</classname> and set data source</lineannotation> 
 JdbcTemplate jt = new JdbcTemplate(); 
 jt.setDataSource(dataSource); 
 <lineannotation>// create a custom translator and set the <interfacename>DataSource</interfacename> for the default translation lookup</lineannotation> 
@@ -799,7 +799,7 @@ su.update();</programlisting>
       what you need to include for a minimal but fully functional class that
       creates a new table.</para>
 
-      <programlisting>import javax.sql.DataSource;
+      <programlisting language="java">import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAStatement {
@@ -833,7 +833,7 @@ public class ExecuteAStatement {
       an <classname>int</classname> and one that queries for a
       <classname>String</classname>.</para>
 
-      <programlisting>import javax.sql.DataSource;
+      <programlisting language="java">import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RunAQuery {
@@ -867,7 +867,7 @@ public class RunAQuery {
       above example to retrieve a list of all the rows, it would look like
       this:</para>
 
-      <programlisting>
+      <programlisting language="java">
 private JdbcTemplate jdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -893,7 +893,7 @@ public List getList() {
       objects (and thus primitives have to be wrapped in the primitive wrapper
       classes).</para>
 
-      <programlisting>import javax.sql.DataSource;
+      <programlisting language="java">import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -929,7 +929,7 @@ public class ExecuteAnUpdate {
       signature is the way it is). An example that works on Oracle and may not
       work on other platforms is:</para>
 
-      <programlisting>final String INSERT_SQL = "insert into my_test (name) values(?)";
+      <programlisting language="java">final String INSERT_SQL = "insert into my_test (name) values(?)";
 final String name = "Rob";
 
 KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -1169,7 +1169,7 @@ jdbcTemplate.update(
       where we update the actor table based on entries in a list. The entire
       list is used as the batch in his example.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
@@ -1220,7 +1220,7 @@ jdbcTemplate.update(
 
       <para>This example shows a batch update using named parameters:</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
@@ -1244,7 +1244,7 @@ jdbcTemplate.update(
 
       <para>The same example using classic JDBC "?" place holders:</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
@@ -1301,7 +1301,7 @@ jdbcTemplate.update(
       configuration methods. In this case there is only one configuration
       method used but we will see examples of multiple ones soon.</para>
 
-      <programlisting>public class JdbcActorDao implements ActorDao {
+      <programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1340,7 +1340,7 @@ jdbcTemplate.update(
       generated key column using the
       <classname>usingGeneratedKeyColumns</classname> method.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1381,7 +1381,7 @@ jdbcTemplate.update(
       specifying a list of column names to be used. This is accomplished using
       the <classname>usingColumns</classname> method.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1419,7 +1419,7 @@ jdbcTemplate.update(
       contains your values. It will use the corresponding getter method to
       extract the parameter values. Here is an example:</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1443,7 +1443,7 @@ jdbcTemplate.update(
       provides a more convenient <classname>addValue</classname> method that
       can be chained.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1507,7 +1507,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       subclass and we declare it in the initialization method. For this
       example, all we need to specify is the name of the procedure.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall procReadActor;
 
@@ -1562,7 +1562,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <classname>commons-collections.jar</classname> on your classpath for
       this to work. Here is an example of this configuration:</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcCall procReadActor;
 
     public void setDataSource(DataSource dataSource) {
@@ -1603,7 +1603,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <para>This is what a fully declared procedure call declaration of our
       earlier example would look like:</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcCall procReadActor;
 
     public void setDataSource(DataSource dataSource) {
@@ -1644,7 +1644,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <classname>java.sql.Types</classname> constants. We have already seen
       declarations like:</para>
 
-      <para><programlisting>   new SqlParameter("in_id", Types.NUMERIC),
+      <para><programlisting language="java">   new SqlParameter("in_id", Types.NUMERIC),
    new SqlOutParameter("out_first_name", Types.VARCHAR),</programlisting></para>
 
       <para>The first line with the <classname>SqlParameter</classname>
@@ -1710,7 +1710,7 @@ END;</programlisting></para>
       <classname>SimpleJdbcCall</classname> in the initialization
       method.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall funcGetActorName;
 
@@ -1768,7 +1768,7 @@ END;</programlisting>In order to call this procedure we need to declare the
       created by passing in the required class to map to in the
       <classname>newInstance</classname> method.</para>
 
-      <para><programlisting>public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall procReadAllActors;
 
@@ -1852,7 +1852,7 @@ END;</programlisting>In order to call this procedure we need to declare the
       customer relation to an instance of the <classname>Customer</classname>
       class.</para>
 
-      <programlisting>private class CustomerMappingQuery extends MappingSqlQuery {
+      <programlisting language="java">private class CustomerMappingQuery extends MappingSqlQuery {
 
     public CustomerMappingQuery(DataSource ds) {
         super(ds, "SELECT id, name FROM customer WHERE id = ?");
@@ -1883,7 +1883,7 @@ END;</programlisting>In order to call this procedure we need to declare the
       have been defined we call the <literal>compile()</literal> method so the
       statement can be prepared and later be executed.</para>
 
-      <programlisting>public Customer getCustomer(Integer id) {
+      <programlisting language="java">public Customer getCustomer(Integer id) {
     CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
     Object[] parms = new Object[1];
     parms[0] = id;
@@ -1921,7 +1921,7 @@ END;</programlisting>In order to call this procedure we need to declare the
       custom update method) it can easily be parameterized by setting SQL and
       declaring parameters.</para>
 
-      <programlisting>import java.sql.Types;
+      <programlisting language="java">import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -1972,7 +1972,7 @@ public class UpdateCreditRating extends SqlUpdate {
       SQL type is specified using the <classname>java.sql.Types</classname>
       constants. We have already seen declarations like:</para>
 
-      <para><programlisting>   new SqlParameter("in_id", Types.NUMERIC),
+      <para><programlisting language="java">   new SqlParameter("in_id", Types.NUMERIC),
    new SqlOutParameter("out_first_name", Types.VARCHAR),</programlisting></para>
 
       <para>The first line with the <classname>SqlParameter</classname>
@@ -2012,7 +2012,7 @@ public class UpdateCreditRating extends SqlUpdate {
       <literal>execute()</literal> method returns a map with an entry for each
       declared output parameter using the parameter name as the key.</para>
 
-      <programlisting>import java.sql.Types;
+      <programlisting language="java">import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -2071,7 +2071,7 @@ public class TestStoredProcedure {
       <para>Find below an example of a <classname>StoredProcedure</classname>
       that has two output parameters (in this case Oracle REF cursors).</para>
 
-      <programlisting>import oracle.jdbc.driver.OracleTypes;
+      <programlisting language="java">import oracle.jdbc.driver.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.object.StoredProcedure;
 
@@ -2110,7 +2110,7 @@ public class TitlesAndGenresStoredProcedure extends StoredProcedure {
       <classname>Title</classname> domain object for each row in the supplied
       <interfacename>ResultSet</interfacename>.</para>
 
-      <programlisting>import com.foo.sprocs.domain.Title;
+      <programlisting language="java">import com.foo.sprocs.domain.Title;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -2131,7 +2131,7 @@ public final class TitleMapper implements RowMapper {
       <classname>Genre</classname> domain object for each row in the supplied
       <interfacename>ResultSet</interfacename>.</para>
 
-      <programlisting>import org.springframework.jdbc.core.RowMapper;
+      <programlisting language="java">import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -2152,7 +2152,7 @@ public final class GenreMapper implements RowMapper {
       superclass' (untyped) <literal>execute(Map parameters)</literal> (which
       has <literal>protected</literal> access); for example:</para>
 
-      <programlisting>import oracle.jdbc.driver.OracleTypes;
+      <programlisting language="java">import oracle.jdbc.driver.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.object.StoredProcedure;
 
@@ -2208,7 +2208,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       the appropriate run method repeatedly to execute the function. Here is
       an example of retrieving the count of rows from a table:</para>
 
-      <programlisting>public int countRows() {
+      <programlisting language="java">public int countRows() {
     SqlFunction sf = new SqlFunction(dataSource, "select count(*) from mytable");
     sf.compile();
     return sf.run();
@@ -2343,7 +2343,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
           <area coords="13" id="jdbc.lobhandler.setBlob" />
         </areaspec>
 
-        <programlisting>final File blobIn = new File("spring2004.jpg");
+        <programlisting language="java">final File blobIn = new File("spring2004.jpg");
 final InputStream blobIs = new FileInputStream(blobIn);
 final File clobIn = new File("large.txt");
 final InputStream clobIs = new FileInputStream(clobIn);
@@ -2392,7 +2392,7 @@ clobReader.close();</programlisting>
             <area coords="7" id="jdbc.lobhandler.getBlob" />
           </areaspec>
 
-          <programlisting>List l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
+          <programlisting language="java">List l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
     new RowMapper() {
       public Object mapRow(ResultSet rs, int i) throws SQLException {
         Map results = new HashMap();
@@ -2471,7 +2471,7 @@ clobReader.close();</programlisting>
       interface is used as part of the declaration of an
       <classname>SqlOutParameter</classname>.</para>
 
-      <para><programlisting>declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+      <para><programlisting language="java">declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
     new SqlReturnType() {
       public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) 
           throws SQLException {
@@ -2492,7 +2492,7 @@ clobReader.close();</programlisting>
       specific objects like <classname>StructDescriptor</classname>s or
       <classname>ArrayDescriptor</classname>s</para>
 
-      <para><programlisting>SqlTypeValue value = new AbstractSqlTypeValue() {
+      <para><programlisting language="java">SqlTypeValue value = new AbstractSqlTypeValue() {
   protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
     StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
     Struct item = new STRUCT(itemDescriptor, conn,

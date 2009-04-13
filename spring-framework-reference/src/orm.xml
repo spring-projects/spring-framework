@@ -192,7 +192,7 @@
       JDBC <classname>DataSource</classname> and a Hibernate
       <interfacename>SessionFactory</interfacename> on top of it:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
     &lt;property name="driverClassName" value="org.hsqldb.jdbcDriver"/&gt;
@@ -222,7 +222,7 @@
       <interfacename>DataSource</interfacename> (usually managed by an
       application server) is just a matter of configuration:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
     &lt;property name="jndiName" value="java:comp/env/jdbc/myds"/&gt;
@@ -251,7 +251,7 @@
       <interfacename>SessionFactory</interfacename>, and an example for a DAO
       method implementation.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
@@ -259,7 +259,7 @@
 
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private HibernateTemplate hibernateTemplate;
 
@@ -280,7 +280,7 @@
       that are not exposed on the <classname>HibernateTemplate</classname>,
       you can always drop down to a callback-based approach like so.</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private HibernateTemplate hibernateTemplate;
 
@@ -319,7 +319,7 @@
       combination, this allows for very simple DAO implementations for typical
       requirements:</para>
 
-      <programlisting>public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
 
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         return this.getHibernateTemplate().find(
@@ -349,7 +349,7 @@
       <interfacename>Session</interfacename>, as its lifecycle is managed by
       the transaction).</para>
 
-      <programlisting>public class HibernateProductDao extends HibernateDaoSupport implements ProductDao {
+      <programlisting language="java">public class HibernateProductDao extends HibernateDaoSupport implements ProductDao {
 
     public Collection loadProductsByCategory(String category) throws DataAccessException, MyException {
         Session session = getSession(false);
@@ -391,7 +391,7 @@
       DAO implementation looks like as follows, based on the plain Hibernate
       API:</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private SessionFactory sessionFactory;
 
@@ -424,7 +424,7 @@
       with the desired factory reference. As a Spring bean definition, it
       would look as follows:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
@@ -480,7 +480,7 @@
       a Spring application context, and an example for a business method
       implementation.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
@@ -493,7 +493,7 @@
 
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class ProductServiceImpl implements ProductService {
+      <programlisting language="java">public class ProductServiceImpl implements ProductService {
 
     private TransactionTemplate transactionTemplate;
     private ProductDao productDao;
@@ -533,7 +533,7 @@
       configuration file and do not affect the business service
       implementations.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
@@ -555,7 +555,7 @@
 
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class ProductServiceImpl implements ProductService {
+      <programlisting language="java">public class ProductServiceImpl implements ProductService {
 
     private ProductDao productDao;
 
@@ -593,7 +593,7 @@
         have not done so already prior to continuing.</para>
       </note>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
@@ -663,7 +663,7 @@
       factories without special regard, as long as it is using
       <classname>JtaTransactionManager</classname> as the strategy.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myDataSource1" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
     &lt;property name="jndiName value="java:comp/env/jdbc/myds1"/&gt;
@@ -963,7 +963,7 @@
       <interfacename>PersistenceManagerFactory</interfacename> within a Spring
       application context:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myPmf" class="org.springframework.orm.jdo.LocalPersistenceManagerFactoryBean"&gt;
     &lt;property name="configLocation" value="classpath:kodo.properties"/&gt;
@@ -984,7 +984,7 @@
       "connectionFactory" property. For example, for the open source JDO
       implementation JPOX (<ulink url="http://www.jpox.org"></ulink>):</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
  &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
@@ -1025,7 +1025,7 @@
       usually rather be used with the Spring Framework's
       <classname>JdoTemplate</classname>:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
   
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
@@ -1033,7 +1033,7 @@
   
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
   
     private JdoTemplate jdoTemplate;
 
@@ -1073,7 +1073,7 @@
       combination, this allows for very simple DAO implementations for typical
       requirements:</para>
 
-      <programlisting>public class ProductDaoImpl extends JdoDaoSupport implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl extends JdoDaoSupport implements ProductDao {
   
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         return getJdoTemplate().find(
@@ -1101,7 +1101,7 @@
       <interfacename>PersistenceManagerFactory</interfacename>. A
       corresponding DAO implementation looks like as follows:</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private PersistenceManagerFactory persistenceManagerFactory;
 
@@ -1126,7 +1126,7 @@
       it still fits nicely into a Spring container, just like it would if
       coded against Spring's <classname>JdoTemplate</classname>:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
@@ -1143,7 +1143,7 @@
       <interfacename>PersistenceManagerFactory</interfacename>, passing the
       proxy into your DAOs.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myPmfProxy"
       class="org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy"&gt;
@@ -1173,7 +1173,7 @@
       call and thus the entire <literal>finally</literal> block, which you
       might prefer to keep your DAO implementations concise:</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private PersistenceManagerFactory persistenceManagerFactory;
 
@@ -1194,7 +1194,7 @@
       <classname>TransactionAwarePersistenceManagerFactoryProxy</classname>'s
       "allowCreate" flag off:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myPmfProxy"
       class="org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy"&gt;
@@ -1238,7 +1238,7 @@
       <para>To execute service operations within transactions, you can use
       Spring's common declarative transaction facilities. For example:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans
         xmlns="http://www.springframework.org/schema/beans"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1375,7 +1375,7 @@
       Spring-managed JDBC <interfacename>DataSource</interfacename> to
       use.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
     &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
@@ -1391,7 +1391,7 @@
     
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>&lt;toplink-configuration&gt;
+      <programlisting language="xml">&lt;toplink-configuration&gt;
 
   &lt;session&gt;
     &lt;name&gt;Session&lt;/name&gt;
@@ -1428,7 +1428,7 @@
       <interfacename>SessionFactory</interfacename>, but will usually rather
       be used with Spring's <literal>TopLinkTemplate</literal>:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
   
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
@@ -1436,7 +1436,7 @@
   
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class TopLinkProductDao implements ProductDao {
+      <programlisting language="java">public class TopLinkProductDao implements ProductDao {
   
     private TopLinkTemplate tlTemplate;
 
@@ -1482,7 +1482,7 @@
       combination, this allows for simple DAO implementations for typical
       requirements:</para>
 
-      <programlisting>public class ProductDaoImpl extends TopLinkDaoSupport implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl extends TopLinkDaoSupport implements ProductDao {
   
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
@@ -1535,7 +1535,7 @@
 
       <para>A corresponding DAO implementation looks like as follows:</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private Session session;
 
@@ -1564,7 +1564,7 @@
       bean reference of type <interfacename>Session</interfacename>, to be
       passed into the DAO:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="mySessionAdapter"
       class="org.springframework.orm.toplink.support.TransactionAwareSessionAdapter"&gt;
@@ -1627,7 +1627,7 @@
       <para>To execute service operations within transactions, you can use
       Spring's common declarative transaction facilities. For example:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans
         xmlns="http://www.springframework.org/schema/beans"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1730,7 +1730,7 @@
       need to create the following SQL map
       <filename>'Account.xml'</filename>:</para>
 
-      <programlisting>&lt;sqlMap namespace="Account"&gt;
+      <programlisting language="xml">&lt;sqlMap namespace="Account"&gt;
 
   &lt;resultMap id="result" class="examples.Account"&gt;
     &lt;result property="name" column="NAME" columnIndex="1"/&gt;
@@ -1751,7 +1751,7 @@
 
       <para>The configuration file for iBATIS 2 looks like this:</para>
 
-      <programlisting>&lt;sqlMapConfig&gt;
+      <programlisting language="xml">&lt;sqlMapConfig&gt;
 
   &lt;sqlMap resource="example/Account.xml"/&gt;
 
@@ -1767,7 +1767,7 @@
       <classname>SqlMapClientFactoryBean</classname>, which enables lazy
       loading.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
     &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
@@ -1792,7 +1792,7 @@
       supporting class similar to the <classname>SqlMapDaoSupport</classname>.
       We extend it to implement our DAO:</para>
 
-      <programlisting>public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
+      <programlisting language="java">public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
 
     public Account getAccount(String email) throws DataAccessException {
         return (Account) getSqlMapClientTemplate().queryForObject("getAccountByEmail", email);
@@ -1809,7 +1809,7 @@
       application context and wiring it with our
       <literal>SqlMapClient</literal> instance:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
     &lt;property name="sqlMapClient" ref="sqlMapClient"/&gt;
@@ -1828,7 +1828,7 @@
       <literal>SqlMapClientCallback</literal> implementation as argument. This
       can, for example, be used for batching:</para>
 
-      <programlisting>public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
+      <programlisting language="java">public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
 
     public void insertAccount(Account account) throws DataAccessException {
         getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
@@ -1857,7 +1857,7 @@
       <literal>SqlMapClient</literal>. A corresponding DAO implementation
       looks like as follows:</para>
 
-      <programlisting>public class SqlMapAccountDao implements AccountDao {
+      <programlisting language="java">public class SqlMapAccountDao implements AccountDao {
         
     private SqlMapClient sqlMapClient;
     
@@ -1891,7 +1891,7 @@
       that the plain iBATIS-based DAO still follows the Dependency Injection
       pattern:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
     &lt;property name="sqlMapClient" ref="sqlMapClient"/&gt;
@@ -1929,7 +1929,7 @@
         and, in most cases, requires only the persistence unit name to be
         specified:</para>
 
-        <programlisting>&lt;beans&gt;
+        <programlisting language="xml">&lt;beans&gt;
 
    &lt;bean id="myEmf" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean"&gt;
       &lt;property name="persistenceUnitName" value="myPersistenceUnit"/&gt;
@@ -1959,7 +1959,7 @@
         from JNDI (for example in a Java EE 5 environment), is just a matter
         of changing the XML configuration:</para>
 
-        <programlisting>&lt;beans&gt;
+        <programlisting language="xml">&lt;beans&gt;
 
     &lt;jee:jndi-lookup id="myEmf" jndi-name="persistence/myPersistenceUnit"/&gt;
 
@@ -2013,7 +2013,7 @@
         custom DataSources outside of JNDI and to control the weaving
         process.</para>
 
-        <programlisting>&lt;beans&gt;
+        <programlisting language="xml">&lt;beans&gt;
         
  &lt;bean id="myEmf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="dataSource" ref="someDataSource"/&gt;
@@ -2026,7 +2026,7 @@
 
         <para>A typical <literal>persistence.xml</literal> file looks as follows:</para>
 
-        <programlisting>&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0"&gt;
+        <programlisting language="xml">&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0"&gt;
 
   &lt;persistence-unit name="myUnit" transaction-type="RESOURCE_LOCAL">
     &lt;mapping-file>META-INF/orm.xml&lt;/mapping-file&gt;
@@ -2144,7 +2144,7 @@
                 of the default one) by editing the web application context
                 file:</para>
 
-                <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+                <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
@@ -2175,7 +2175,7 @@
 
                 <para>If you are using Tomcat 5.5.20+ you can set
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
-                <literal>false</literal> to fix the problem: <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+                <literal>false</literal> to fix the problem: <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;</programlisting></para>
@@ -2199,7 +2199,7 @@
                 of the default one) by editing the web application context
                 file:</para>
 
-                <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+                <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
@@ -2227,7 +2227,7 @@
           configuring
           <classname>LocalContainerEntityManagerFactoryBean</classname>:</para>
 
-          <programlisting>&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+          <programlisting language="xml">&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/&gt;
   &lt;/property&gt;
@@ -2258,7 +2258,7 @@
           a Spring-specific (but very general) VM agent (<filename
           class="libraryfile">spring-agent.jar</filename>):</para>
 
-          <programlisting>&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+          <programlisting language="xml">&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/&gt;
   &lt;/property&gt;
@@ -2282,7 +2282,7 @@
           autodetection of the platform (WebLogic, OC4J, GlassFish, Tomcat, Resin, VM agent)
           as well as automatic propagation of the weaver to all weaver-aware beans.</para>
 
-          <programlisting>&lt;context:load-time-weaver/&gt;
+          <programlisting language="xml">&lt;context:load-time-weaver/&gt;
 
 &lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
     ...
@@ -2309,7 +2309,7 @@
         parsed and later on retrieved through the persistence unit
         name:</para>
 
-        <programlisting>&lt;bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager"&gt;
+        <programlisting language="xml">&lt;bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager"&gt;
   &lt;property name="persistenceXmlLocation"&gt;
     &lt;list&gt;
      &lt;value&gt;org/springframework/orm/jpa/domain/persistence-multi.xml&lt;/value&gt;
@@ -2353,7 +2353,7 @@
       given <interfacename>EntityManagerFactory</interfacename> or through
       Spring's <classname>JpaTemplate</classname>:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="entityManagerFactory" ref="myEmf"/&gt;
@@ -2361,7 +2361,7 @@
 
 &lt;/beans&gt;</programlisting>
 
-      <programlisting>public class JpaProductDao implements ProductDao {
+      <programlisting language="java">public class JpaProductDao implements ProductDao {
   
     private JpaTemplate jpaTemplate;
 
@@ -2401,7 +2401,7 @@
       <methodname>getJpaTemplate()</methodname> to be used by
       subclasses:</para>
 
-      <programlisting>public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
   
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
@@ -2457,7 +2457,7 @@
       <classname>PersistenceAnnotationBeanPostProcessor</classname> is
       enabled. A corresponding DAO implementation might look like this:</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     private EntityManagerFactory emf;
 
@@ -2487,7 +2487,7 @@
       advantage of annotations to require the injection of the default
       <interfacename>EntityManagerFactory</interfacename>:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   <lineannotation>&lt;!-- bean post-processor for JPA annotations --&gt;</lineannotation>
   &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/&gt;
@@ -2505,7 +2505,7 @@
       (including <classname>CommonAnnotationBeanPostProcessor</classname>
       etc).</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   <lineannotation>&lt;!-- post-processors for all standard config annotations --&gt;</lineannotation>
   &lt;context:annotation-config/&gt;
@@ -2522,7 +2522,7 @@
       transactional EntityManager) to be injected instead of the
       factory:</para>
 
-      <programlisting>public class ProductDaoImpl implements ProductDao {
+      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
 
     @PersistenceContext
     private EntityManager em;
@@ -2597,14 +2597,14 @@
       exception translation to be applied transparently through the
       <interfacename>@Repository</interfacename> annotation:</para>
 
-      <programlisting>@Repository
+      <programlisting language="java">@Repository
 public class ProductDaoImpl implements ProductDao {
 
     <lineannotation>// class body here...</lineannotation>
 
 }</programlisting>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
   <lineannotation>&lt;!-- <classname>Exception</classname> translation bean post processor --&gt;</lineannotation>
   &lt;bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/&gt;
@@ -2635,7 +2635,7 @@ public class ProductDaoImpl implements ProductDao {
     <para>To execute service operations within transactions, you can use
     Spring's common declarative transaction facilities. For example:</para>
 
-    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+    <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"

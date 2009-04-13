@@ -58,7 +58,7 @@
                 Spring abstracts all marshalling operations behind the 
                 <interfacename>org.springframework.oxm.Marshaller</interfacename> interface, the main methods of which 
                 is listed below.
-                <programlisting><![CDATA[
+                <programlisting language="java"><![CDATA[
 public interface Marshaller {
 
     /**
@@ -115,7 +115,7 @@ public interface Marshaller {
             <para>
                 Similar to the <interfacename>Marshaller</interfacename>, there is the 
                 <interfacename>org.springframework.oxm.Unmarshaller</interfacename> interface.
-                <programlisting><![CDATA[
+                <programlisting language="java"><![CDATA[
 public interface Unmarshaller {
 
     /**
@@ -205,7 +205,7 @@ public interface Unmarshaller {
             Spring's OXM can be used for a wide variety of situations. In the following example, we will use it to
             marshal the settings of a Spring-managed application as an XML file. We will use a simple JavaBean to
             represent the settings:
-            <programlisting><![CDATA[
+            <programlisting language="java"><![CDATA[
 public class Settings {
     private boolean fooEnabled;
 
@@ -223,7 +223,7 @@ public class Settings {
             methods: <methodname>saveSettings</methodname> saves the settings bean to a file named
             <filename>settings.xml</filename>, and <methodname>loadSettings</methodname> loads these settings again. A
             <methodname>main</methodname> method constructs a Spring application context, and calls these two methods.
-            <programlisting><![CDATA[
+            <programlisting language="java"><![CDATA[
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -284,7 +284,7 @@ public class Application {
             The <classname>Application</classname> requires both a <property>marshaller</property>
             and <property>unmarshaller</property> property to be set. We can do so using the following
             <filename>applicationContext.xml</filename>:
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
     <bean id="application" class="Application">
         <property name="marshaller" ref="castorMarshaller" />
@@ -302,7 +302,7 @@ public class Application {
         </para>
         <para>
             This sample application produces the following <filename>settings.xml</filename> file:
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <settings foo-enabled="false"/>
 ]]></programlisting>
@@ -315,7 +315,7 @@ public class Application {
        		To make these tags available, the appropriate schema has to be referenced first in the preamble of the XML configuration file.
        		The emboldened text	in the below snippet references the OXM schema:
        	</para>
-       	<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+       	<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     ]]><emphasis role="bold"><![CDATA[xmlns:oxm="http://www.springframework.org/schema/oxm"]]></emphasis>
@@ -342,7 +342,7 @@ public class Application {
 			Each tag will be explained in its respective marshaller's section. As an example though, here is how
 			the configuration of a JAXB2 marshaller might look like:
 		</para>
-		<programlisting><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
+		<programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
     </section>    
     <section id="oxm-jaxb">
         <title>JAXB</title>
@@ -368,7 +368,7 @@ public class Application {
                 classes to be supported by the marshaller. Schema validation is performed by specifying one or more 
                 schema resource to the bean, like so:
             </para>
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
 
     <bean id="jaxb2Marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
@@ -389,11 +389,11 @@ public class Application {
 	        		The <literal>jaxb2-marshaller</literal> tag configures a <classname>org.springframework.oxm.jaxb.Jaxb2Marshaller</classname>.
 	        		Here is an example:
 	        	</para>
-	        	<programlisting><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
+	        	<programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
 	        	<para>
 	        		Alternatively, the list of classes to bind can be provided to the marshaller via the <literal>class-to-be-bound</literal> child tag:
 	        	</para>
-	        	<programlisting><![CDATA[<oxm:jaxb2-marshaller id="marshaller">
+	        	<programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller">
     <oxm:class-to-be-bound name="org.springframework.ws.samples.airline.schema.Airport"/>
     <oxm:class-to-be-bound name="org.springframework.ws.samples.airline.schema.Flight"/>
     ...
@@ -450,7 +450,7 @@ public class Application {
                 <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface. 
                 It can be wired up as follows:
             </para>
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
 
     <bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller" />
@@ -469,7 +469,7 @@ public class Application {
                 The mapping can be set using the <property>mappingLocation</property> resource property, indicated
                 below with a classpath resource.
             </para>
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
     <bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller" >
         <property name="mappingLocation" value="classpath:mapping.xml" />
@@ -500,7 +500,7 @@ public class Application {
                 and <interfacename>Unmarshaller</interfacename>
                 interfaces. It can be configured as follows:
             </para>
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
 
     <bean id="xmlBeansMarshaller" class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller" />
@@ -520,7 +520,7 @@ public class Application {
 	        		The <literal>xmlbeans-marshaller</literal> tag configures a <classname>org.springframework.oxm.xmlbeans.XmlBeansMarshaller</classname>.
 	        		Here is an example:
 	        	</para>
-	        	<programlisting><![CDATA[<oxm:xmlbeans-marshaller id="marshaller"/>]]></programlisting>
+	        	<programlisting language="xml"><![CDATA[<oxm:xmlbeans-marshaller id="marshaller"/>]]></programlisting>
 	        	<para>
 	        		Available attributes are:
                     <informaltable>
@@ -580,7 +580,7 @@ public class Application {
                 <property>bindingName</property> property. In the next sample, we bind the 
                 <classname>Flights</classname> class:
             </para>
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
 
     <bean id="jibxFlightsMarshaller" class="org.springframework.oxm.jibx.JibxMarshaller">
@@ -600,7 +600,7 @@ public class Application {
 	        		The <literal>jibx-marshaller</literal> tag configures a <classname>org.springframework.oxm.jibx.JibxMarshaller</classname>.
 	        		Here is an example:
 	        	</para>
-	        	<programlisting><![CDATA[<oxm:jibx-marshaller id="marshaller" target-class="org.springframework.ws.samples.airline.schema.Flight"/>]]></programlisting>
+	        	<programlisting language="xml"><![CDATA[<oxm:jibx-marshaller id="marshaller" target-class="org.springframework.ws.samples.airline.schema.Flight"/>]]></programlisting>
 	        	<para>
 	        		Available attributes are:
                     <informaltable>
@@ -656,7 +656,7 @@ public class Application {
                 in an application context directly. To further customize the XML, you can set an 
                 <emphasis>alias map</emphasis>, which consists of string aliases mapped to classes:
             </para>
-            <programlisting><![CDATA[
+            <programlisting language="xml"><![CDATA[
 <beans>
 
     <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
