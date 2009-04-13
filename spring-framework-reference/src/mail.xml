@@ -48,7 +48,7 @@
 	<section id="mail-usage">
 		<title>Usage</title>
 		<para>Let's assume there is a business interface called <interfacename>OrderManager</interfacename>:</para>
-		<programlisting><![CDATA[public interface OrderManager {
+		<programlisting language="java"><![CDATA[public interface OrderManager {
 
     void placeOrder(Order order);
 }]]></programlisting>
@@ -59,7 +59,7 @@
 		
 		<section id="mail-usage-simple">
 			<title>Basic <interfacename>MailSender</interfacename> and <classname>SimpleMailMessage</classname> usage</title>
-			<programlisting><![CDATA[import org.springframework.mail.MailException;
+			<programlisting langauge="java"><![CDATA[import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -101,7 +101,7 @@ public class SimpleOrderManager implements OrderManager {
 }]]></programlisting>
     
 			<para>Find below the bean definitions for the above code:</para>
-    		<programlisting><![CDATA[<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    		<programlisting langauge="xml"><![CDATA[<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
   <property name="host" value="mail.mycompany.com"/>
 </bean>
 
@@ -126,7 +126,7 @@ public class SimpleOrderManager implements OrderManager {
 			<interfacename>JavaMailSender</interfacename> so that we are able to use the JavaMail
 			<classname>MimeMessage</classname> class:</para>
 			
-			<programlisting><![CDATA[import javax.mail.Message;
+			<programlisting langauge="java"><![CDATA[import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -199,7 +199,7 @@ public class SimpleOrderManager implements OrderManager {
 		which shields you from having to use the verbose JavaMail API. Using
 		the <classname>MimeMessageHelper</classname> it is pretty easy to
 		create a <classname>MimeMessage</classname>:</para>
-		<programlisting><lineannotation>// of course you would use DI in any real-world cases</lineannotation><![CDATA[
+		<programlisting langauge="java"><lineannotation>// of course you would use DI in any real-world cases</lineannotation><![CDATA[
 JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
@@ -220,7 +220,7 @@ sender.send(message);]]></programlisting>
 				<para>The following example shows you how to use the
 				<classname>MimeMessageHelper</classname> to send an email along with a
 				single JPEG image attachment.</para>
-				<programlisting><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
+				<programlisting langauge="java"><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
 MimeMessage message = sender.createMimeMessage();
@@ -242,7 +242,7 @@ sender.send(message);]]></programlisting>
 				<para>The following example shows you how to use the
 				<classname>MimeMessageHelper</classname> to send an email along with an
 				inline image.</para>
-				<programlisting><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
+				<programlisting langauge="java"><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
 MimeMessage message = sender.createMimeMessage();
@@ -309,7 +309,7 @@ sender.send(message);]]></programlisting>
 				template that this example will be using... as you can see it is HTML-based,
 				and since it is plain text it can be created using your favorite HTML editor
 				without recourse to having to know Java.</para>
-				<programlisting><lineannotation># in the <literal>com/foo/package</literal></lineannotation><![CDATA[
+				<programlisting langauge="xml"><lineannotation># in the <literal>com/foo/package</literal></lineannotation><![CDATA[
 <html>
 <body>
 <h3>Hi ${user.userName}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
@@ -323,7 +323,7 @@ sender.send(message);]]></programlisting>
 				<para>Find below some simple code and Spring XML configuration that
 				makes use of the above Velocity template to create email content and
 				send email(s).</para>
-				<programlisting><![CDATA[package com.foo;
+				<programlisting langauge="java"><![CDATA[package com.foo;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -371,7 +371,7 @@ public class SimpleRegistrationService implements RegistrationService {
       this.mailSender.send(preparator);
    }
 }]]></programlisting>
-				<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+				<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans

@@ -119,7 +119,7 @@ class GroovyMessenger implements Messenger {
       </para>
       <para>For more information on schema-based configuration, see <xref linkend="xsd-config"/>.</para>
     </note>
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
@@ -288,7 +288,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
           in this chapter, here's what we would change in the Spring XML configuration
           to effect refreshable beans:
         </para>
-        <programlisting><![CDATA[<beans>
+        <programlisting language="xml"><![CDATA[<beans>
 
     ]]><lineannotation>&lt;!-- this bean is now 'refreshable' due to the presence of the 'refresh-check-delay' attribute --&gt;</lineannotation><![CDATA[
     <lang:groovy id="messenger"
@@ -403,7 +403,7 @@ class GroovyMessenger implements Messenger {
           inside a Spring configuration file. An example will perhaps make the
           inline script feature crystal clear:
         </para>
-        <programlisting><![CDATA[<lang:groovy id="messenger">
+        <programlisting language="xml"><![CDATA[<lang:groovy id="messenger">
     <lang:inline-script>
 package org.springframework.scripting.groovy;
 
@@ -433,7 +433,7 @@ class GroovyMessenger implements Messenger {
           characters to denote a <literal>'&lt;'</literal> character. In such a case
           surrounding the inline source in a <literal>&lt;![CDATA[]]&gt;</literal> region might be better.)
         </para>
-        <programlisting><![CDATA[<lang:jruby id="messenger" script-interfaces="org.springframework.scripting.Messenger">
+        <programlisting language="xml"><![CDATA[<lang:jruby id="messenger" script-interfaces="org.springframework.scripting.Messenger">
     <lang:inline-script>
 require 'java'
 
@@ -484,7 +484,7 @@ class GroovyMessenger implements Messenger {
 
     String anotherMessage
 }]]></programlisting>
-        <programlisting><![CDATA[<lang:groovy id="badMessenger"
+        <programlisting language="xml"><![CDATA[<lang:groovy id="badMessenger"
     script-source="classpath:Messenger.groovy">
 ]]>
     <lineannotation>&lt;!-- this next constructor argument will *not* be injected into the <classname>GroovyMessenger</classname> --&gt;</lineannotation>
@@ -579,7 +579,7 @@ RubyMessenger.new]]></programlisting>
         And here is the Spring XML that defines an instance of the
         <classname>RubyMessenger</classname> JRuby bean.
       </para>
-      <programlisting><![CDATA[<lang:jruby id="messageService"
+      <programlisting language="xml"><![CDATA[<lang:jruby id="messageService"
             script-interfaces="org.springframework.scripting.Messenger"
             script-source="classpath:RubyMessenger.rb">
     
@@ -683,7 +683,7 @@ class GroovyCalculator implements Calculator {
         x + y
     }
 }]]></programlisting>
-      <programlisting><lineannotation>&lt;-- from the file 'beans.xml' --&gt;</lineannotation><![CDATA[
+      <programlisting language="xml"><lineannotation>&lt;-- from the file 'beans.xml' --&gt;</lineannotation><![CDATA[
 <beans>
     <lang:groovy id="calculator" script-source="classpath:calculator.groovy"/>
 </beans>]]></programlisting>
@@ -765,7 +765,7 @@ public class Main {
           Actually making use of a <interfacename>GroovyObjectCustomizer</interfacename>
           is easy if you are using the Spring 2.0 namespace support.
         </para>
-        <programlisting><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> just like any other bean --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> just like any other bean --&gt;</lineannotation>
 <![CDATA[<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
 
    ]]><lineannotation>&lt;!-- ... and plug it into the desired Groovy bean via the '<literal>customizer-ref</literal>' attribute --&gt;</lineannotation><![CDATA[
@@ -776,7 +776,7 @@ public class Main {
           If you are not using the Spring 2.0 namespace support, you can still
           use the <interfacename>GroovyObjectCustomizer</interfacename> functionality.
         </para>
-        <programlisting><![CDATA[<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+        <programlisting language="xml"><![CDATA[<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
       <constructor-arg value="classpath:org/springframework/scripting/groovy/Calculator.groovy"/>
       ]]><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> (as an inner bean) --&gt;</lineannotation><![CDATA[
       <constructor-arg>
@@ -857,7 +857,7 @@ void setMessage(String aMessage) {
         And here is the Spring XML that defines an 'instance' of the above 'class'
         (again, the term is used very loosely here).
       </para>
-      <programlisting><![CDATA[<lang:bsh id="messageService" script-source="classpath:BshMessenger.bsh"
+      <programlisting language="xml"><![CDATA[<lang:bsh id="messageService" script-source="classpath:BshMessenger.bsh"
     script-interfaces="org.springframework.scripting.Messenger">
 
     <lang:property name="message" value="Hello World!" />
@@ -935,7 +935,7 @@ class FortuneController implements Controller {
         return new ModelAndView("tell", "fortune", this.fortuneService.tellFortune())
     }
 }]]></programlisting>
-      <programlisting><![CDATA[<lang:groovy id="fortune"
+      <programlisting language="xml"><![CDATA[<lang:groovy id="fortune"
              refresh-check-delay="3000"
              script-source="/WEB-INF/groovy/FortuneController.groovy">
     <lang:property name="fortuneService" ref="fortuneService"/>
@@ -1037,7 +1037,7 @@ class TestBeanValidator implements Validator {
         to define a Groovy bean scoped as a
         <link linkend="beans-factory-scopes-prototype">prototype</link>.
       </para>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="

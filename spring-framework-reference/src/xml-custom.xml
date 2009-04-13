@@ -37,7 +37,7 @@
     	<classname>SimpleDateFormat</classname> (from the <literal>java.text</literal> package)
     	in an easy manner. When we are done, we will be able to define bean definitions of type
     	<classname>SimpleDateFormat</classname> like this:</para>
-		<programlisting><![CDATA[<myns:dateformat id="dateFormat" 
+		<programlisting language="xml"><![CDATA[<myns:dateformat id="dateFormat" 
     pattern="yyyy-MM-dd HH:mm"
     lenient="true"/>
 ]]></programlisting>
@@ -51,7 +51,7 @@
     	starts with authoring an XML Schema to describe the extension. What follows
     	is the schema we'll use to configure <classname>SimpleDateFormat</classname>
     	objects.</para>
-    	<programlisting><lineannotation>&lt;!-- myns.xsd (inside package org/springframework/samples/xml) --&gt;</lineannotation><![CDATA[
+    	<programlisting language="xml"><lineannotation>&lt;!-- myns.xsd (inside package org/springframework/samples/xml) --&gt;</lineannotation><![CDATA[
 
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns="http://www.mycompany.com/schema/myns"
@@ -83,7 +83,7 @@
 		<para>The above schema will be used to configure <classname>SimpleDateFormat</classname>
 		objects, directly in an XML application context file using the
 		<literal>&lt;myns:dateformat/&gt;</literal> element.</para>
-		<programlisting><![CDATA[<myns:dateformat id="dateFormat" 
+		<programlisting language="xml"><![CDATA[<myns:dateformat id="dateFormat" 
     pattern="yyyy-MM-dd HH:mm"
     lenient="true"/>
 ]]></programlisting>
@@ -92,7 +92,7 @@
 		we're just creating a bean in the container, identified by the name
 		<literal>'dateFormat'</literal> of type <classname>SimpleDateFormat</classname>, with a
 		couple of properties set.</para>
-		<programlisting><![CDATA[<bean id="dateFormat" class="java.text.SimpleDateFormat">
+		<programlisting language="xml"><![CDATA[<bean id="dateFormat" class="java.text.SimpleDateFormat">
     <constructor-arg value="yyyy-HH-dd HH:mm"/>
     <property name="lenient" value="true"/>
 </bean>]]></programlisting>
@@ -142,7 +142,7 @@
 		results in a single <classname>SimpleDateFormat</classname> bean definition).
 		Spring features a number of convenience classes that support this scenario.
 		In this example, we'll make use the <classname>NamespaceHandlerSupport</classname> class:</para>
-		<programlisting><![CDATA[package org.springframework.samples.xml;
+		<programlisting language="java"><![CDATA[package org.springframework.samples.xml;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
@@ -172,7 +172,7 @@ public class MyNamespaceHandler extends NamespaceHandlerSupport {
 		responsible for parsing <emphasis>one</emphasis> distinct top-level XML element defined in the
 		schema. In the parser, we'll have access to the XML element (and thus its subelements too)
 		so that we can parse our custom XML content, as can be seen in the following example:</para>
-		<programlisting><![CDATA[package org.springframework.samples.xml;
+		<programlisting language="java"><![CDATA[package org.springframework.samples.xml;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
@@ -258,7 +258,7 @@ public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefi
 		using one of the 'custom' extensions that Spring provides straight out of the box. Find below
 		an example of using the custom <literal>&lt;dateformat/&gt;</literal> element developed in the
 		previous steps in a Spring XML configuration file.</para>
-		<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+		<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:myns="http://www.mycompany.com/schema/myns"
@@ -285,7 +285,7 @@ http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.x
 		    <title>Nesting custom tags within custom tags</title>
 		    <para>This example illustrates how you might go about writing the various artifacts
 		    required to satisfy a target of the following configuration:</para>
-		    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+		    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:foo="http://www.foo.com/schema/component"
@@ -306,7 +306,7 @@ http://www.foo.com/schema/component http://www.foo.com/schema/component/componen
             a setter method for the <literal>'components'</literal> property; this makes it hard
             (or rather impossible) to configure a bean definition for the <classname>Component</classname>
             class using setter injection.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -335,7 +335,7 @@ public class Component {
 }]]></programlisting>
             <para>The typical solution to this issue is to create a custom <interfacename>FactoryBean</interfacename>
             that exposes a setter property for the <literal>'components'</literal> property.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.beans.factory.FactoryBean;
 
@@ -378,7 +378,7 @@ public class ComponentFactoryBean implements FactoryBean {
             Spring plumbing. If we stick to <link linkend="extensible-xml-introduction">the steps described
             previously</link>, we'll start off by creating the XSD schema to define the structure of
             our custom tag.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.foo.com/schema/component"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -399,7 +399,7 @@ public class ComponentFactoryBean implements FactoryBean {
 </xsd:schema>
 ]]></programlisting>
             <para>We'll then create a custom <interfacename>NamespaceHandler</interfacename>.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
@@ -412,7 +412,7 @@ public class ComponentNamespaceHandler extends NamespaceHandlerSupport {
             <para>Next up is the custom <interfacename>BeanDefinitionParser</interfacename>. Remember
             that what we are creating is a <interfacename>BeanDefinition</interfacename> describing
             a <classname>ComponentFactoryBean</classname>.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -471,7 +471,7 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></pro
 		    definition for a service object that will (unknown to it) be accessing a clustered
 		    <ulink url="http://jcp.org/en/jsr/detail?id=107">JCache</ulink>, and you want to ensure that
 		    the named JCache instance is eagerly started within the surrounding cluster:</para>
-		    <programlisting><![CDATA[<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
+		    <programlisting language="xml"><![CDATA[<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
       ]]><lineannotation><emphasis role="bold">jcache:cache-name="checking.account"&gt;</emphasis></lineannotation><![CDATA[
    ]]><lineannotation>&lt;!-- other dependencies here... --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
@@ -481,7 +481,7 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></pro
             for us. We will also modify the existing <interfacename>BeanDefinition</interfacename> for the
             <literal>'checkingAccountService'</literal> so that it will have a dependency on this
             new JCache-initializing <interfacename>BeanDefinition</interfacename>.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 public class JCacheInitializer {
 
@@ -497,7 +497,7 @@ public class JCacheInitializer {
 }]]></programlisting>
             <para>Now onto the custom extension. Firstly, the authoring of the XSD schema describing the
             custom attribute (quite easy in this case).</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.foo.com/schema/jcache"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -509,7 +509,7 @@ public class JCacheInitializer {
 </xsd:schema>
 ]]></programlisting>
             <para>Next, the associated <interfacename>NamespaceHandler</interfacename>.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
@@ -524,7 +524,7 @@ public class JCacheNamespaceHandler extends NamespaceHandlerSupport {
             <para>Next, the parser. Note that in this case, because we are going to be parsing an XML
             attribute, we write a <interfacename>BeanDefinitionDecorator</interfacename> rather than a
             <interfacename>BeanDefinitionParser</interfacename>.</para>
-            <programlisting><![CDATA[package com.foo;
+            <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

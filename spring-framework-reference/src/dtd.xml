@@ -2,7 +2,7 @@
 <appendix id="springbeansdtd">
   <title><literal>spring-beans-2.0.dtd</literal></title>
 
-  <para><programlisting>&lt;!--
+  <para><programlisting language="xml">&lt;!--
 	Spring XML Beans DTD, version 2.0
 	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 

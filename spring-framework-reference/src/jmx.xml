@@ -60,7 +60,7 @@
     <interfacename>MBeanServer</interfacename>. For example, consider the following
     class:</para>
 
-    <programlisting><![CDATA[package org.springframework.jmx;
+    <programlisting language="java"><![CDATA[package org.springframework.jmx;
 
 public class JmxTestBean implements IJmxTestBean {
 
@@ -98,7 +98,7 @@ public class JmxTestBean implements IJmxTestBean {
     <classname>MBeanExporter</classname> class in your configuration file and
     pass in the bean as shown below:</para>
 
-    <programlisting><![CDATA[<beans>
+    <programlisting language="xml"><![CDATA[<beans>
 
   ]]><lineannotation>&lt;!-- this bean must <emphasis role="bold">not</emphasis> be lazily initialized if the exporting is to happen --&gt;</lineannotation><![CDATA[
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"]]> <emphasis
@@ -159,7 +159,7 @@ public class JmxTestBean implements IJmxTestBean {
       property to the <interfacename>MBeanServer</interfacename> value returned by an
       <classname>MBeanServerFactoryBean</classname>; for example:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
 
@@ -204,7 +204,7 @@ public class JmxTestBean implements IJmxTestBean {
       cases, one should use the <interfacename>MBeanServer</interfacename>
       <literal>agentId</literal> to indicate which instance to be used:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
    <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
      ]]><lineannotation>&lt;!-- indicate to first look for a server --&gt;</lineannotation><![CDATA[
      <property name="locateExistingServerIfPossible" value="true"/>
@@ -222,7 +222,7 @@ public class JmxTestBean implements IJmxTestBean {
       has a dynamic (or unknown) <literal>agentId</literal> which is retrieved through lookup
       methods, one should use <link linkend="beans-factory-class-static-factory-method">factory-method</link>:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
      <property name="server">
        ]]><lineannotation>&lt;!-- Custom <literal>MBeanServerLocator</literal> --&gt;</lineannotation><![CDATA[
@@ -257,7 +257,7 @@ public class JmxTestBean implements IJmxTestBean {
       by the <classname>MBeanExporter</classname> by setting the
       <literal>autodetect</literal> property to <literal>true</literal>:</para>
 
-      <programlisting><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+      <programlisting language="xml"><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
   <property name="autodetect" value="true"/>
 </bean>
 
@@ -369,7 +369,7 @@ public class JmxTestBean implements IJmxTestBean {
       default registration behavior to the
       <literal>REGISTRATION_REPLACE_EXISTING</literal> behavior:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
     <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
         <property name="beans">
@@ -455,7 +455,7 @@ public class JmxTestBean implements IJmxTestBean {
       class that you saw earlier marked with Commons Attributes
       metadata:</para>
 
-      <programlisting><![CDATA[package org.springframework.jmx;
+      <programlisting language="java"><![CDATA[package org.springframework.jmx;
 
 /**
  * @@org.springframework.jmx.export.metadata.ManagedResource
@@ -540,7 +540,7 @@ public class JmxTestBean implements IJmxTestBean {
       <classname>MBeanExporter</classname> to use the
       <classname>MetadataMBeanInfoAssembler</classname>:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -592,7 +592,7 @@ public class JmxTestBean implements IJmxTestBean {
       <para>The example below shows a bean where the management interface is defined
       by the presence of JDK 5.0 annotation types:</para>
 
-      <programlisting><![CDATA[package org.springframework.jmx;
+      <programlisting language="java"><![CDATA[package org.springframework.jmx;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -644,7 +644,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <para>As you can see little has changed, other than the basic syntax of
       the metadata definitions.</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
     <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
         <property name="assembler" ref="assembler"/>
         <property name="namingStrategy" ref="namingStrategy"/>
@@ -910,7 +910,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <classname>ObjectName</classname> which results in a configuration like
       this:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     ]]><lineannotation>&lt;!-- notice how no <literal>'beans'</literal> are explicitly configured here --&gt;</lineannotation><![CDATA[
@@ -975,7 +975,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       interface for the <classname>JmxTestBean</classname> class that you saw
       earlier:</para>
 
-      <programlisting><![CDATA[public interface IJmxTestBean {
+      <programlisting language="java"><![CDATA[public interface IJmxTestBean {
 
   public int add(int x, int y);
 
@@ -995,7 +995,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       shows how to configure Spring JMX to use this interface as the
       definition for the management interface:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1055,7 +1055,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       as attributes and operations. The code below shows a sample
       configuration for this:</para>
 
-      <programlisting><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+      <programlisting language="xml"><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
       <map>
         <entry key="bean:name=testBean5" value-ref="testBean"/>
@@ -1120,7 +1120,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <para>The code below shows a sample configuration for the
       <classname>KeyNamingStrategy</classname>:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1174,7 +1174,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       configuration for the
       <classname>MetadataNamingStrategy</classname>:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1208,7 +1208,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       following bean would be: <emphasis>com.foo:type=MyClass,name=myBean</emphasis>.
       </para>
 
-      <programlisting><![CDATA[<bean id="myBean" class="com.foo.MyClass"/>]]></programlisting>
+      <programlisting language="xml"><![CDATA[<bean id="myBean" class="com.foo.MyClass"/>]]></programlisting>
 
     </section>
 
@@ -1225,7 +1225,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       '<literal>context</literal>' namespace in Spring 2.5. Rather than defining an
       <classname>MBeanExporter</classname> bean, provide this single element:</para>
 
-      <programlisting><![CDATA[<context:mbean-export/>]]></programlisting>
+      <programlisting language="xml"><![CDATA[<context:mbean-export/>]]></programlisting>
 
       <para>You can provide a reference to a particular MBean server if
       necessary, and the <literal>defaultDomain</literal> attribute
@@ -1237,7 +1237,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <link linkend="jmx-naming-metadata"><classname>MetadataNamingStrategy</classname></link>.
       </para>
 
-      <programlisting><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>.
+      <programlisting language="xml"><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>.
 
       <note>
         <para>Do not use interface-based AOP proxies in combination with autodetection of
@@ -1266,7 +1266,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <classname>JMXConnectorServer</classname> use the following
       configuration:</para>
 
-      <programlisting>&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/&gt;</programlisting>
+      <programlisting language="xml">&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/&gt;</programlisting>
 
       <para>By default <literal>ConnectorServerFactoryBean</literal> creates a
       <classname>JMXConnectorServer</classname> bound to
@@ -1283,7 +1283,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <interfacename>MBeanServer</interfacename> use the <literal>serviceUrl</literal>
       and <classname>ObjectName</classname> properties respectively:</para>
 
-      <programlisting><![CDATA[<bean id="serverConnector"
+      <programlisting language="xml"><![CDATA[<bean id="serverConnector"
       class="org.springframework.jmx.support.ConnectorServerFactoryBean">
   <property name="objectName" value="connector:name=rmi"/>
   <property name="serviceUrl" 
@@ -1298,7 +1298,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <classname>ConnectorServerFactoryBean</classname> when creating a
       JMXConnector:</para>
 
-      <programlisting><![CDATA[<bean id="serverConnector"
+      <programlisting language="xml"><![CDATA[<bean id="serverConnector"
       class="org.springframework.jmx.support.ConnectorServerFactoryBean">
   <property name="objectName" value="connector:name=iiop"/>
   <property name="serviceUrl" 
@@ -1319,7 +1319,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       RMI registry. If not, you can easily start a registry using the
       following snippet of configuration:</para>
 
-      <programlisting><![CDATA[<bean id="registry" class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="registry" class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
   <property name="port" value="1099"/>
 </bean>]]></programlisting>
     </section>
@@ -1332,7 +1332,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <classname>MBeanServerConnectionFactoryBean</classname> as shown
       below:</para>
 
-      <programlisting><![CDATA[<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
   <property name="serviceUrl" value="service:jmx:rmi://localhost:9875"/>
 </bean>]]></programlisting>
     </section>
@@ -1349,7 +1349,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       of protocols like SOAP, Hessian, Burlap over simple HTTP or SSL and
       others:</para>
 
-      <programlisting><![CDATA[<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
   <property name="objectName" value="connector:name=burlap"/>
   <property name="serviceUrl" value="service:jmx:burlap://localhost:9874"/>
 </bean>]]></programlisting>
@@ -1369,7 +1369,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     proxy for an MBean running in a local
     <interfacename>MBeanServer</interfacename>:</para>
 
-    <programlisting><![CDATA[<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+    <programlisting language="xml"><![CDATA[<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
     <property name="objectName" value="bean:name=testBean"/>
     <property name="proxyInterface" value="org.springframework.jmx.IJmxTestBean"/>
 </bean>]]></programlisting>
@@ -1391,7 +1391,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     pointing to a remote <interfacename>MBeanServer</interfacename> to cater for
     proxies pointing to remote MBeans:</para>
 
-    <programlisting><![CDATA[<bean id="clientConnector"
+    <programlisting language="xml"><![CDATA[<bean id="clientConnector"
       class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
   <property name="serviceUrl" value="service:jmx:rmi://remotehost:9875"/>
 </bean>
@@ -1429,7 +1429,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 	  would like to be informed (via a <classname>Notification</classname>)
 	  each and every time an attribute of a target MBean changes.</para>
 
-      <programlisting><![CDATA[package com.example;
+      <programlisting language="java"><![CDATA[package com.example;
 
 import javax.management.AttributeChangeNotification;
 import javax.management.Notification;
@@ -1449,7 +1449,7 @@ public class ConsoleLoggingNotificationListener
     }
 }]]></programlisting>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1486,7 +1486,7 @@ public class ConsoleLoggingNotificationListener
 		<para>You can also use straight bean names as the link between exported beans
 		and listeners:</para>
 
-		<programlisting><![CDATA[<beans>
+		<programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1516,7 +1516,7 @@ public class ConsoleLoggingNotificationListener
 		as the key for an entry in the <literal>notificationListenerMappings</literal>
 		property map; for example:</para>
 
-		<programlisting><![CDATA[<property name="notificationListenerMappings">
+		<programlisting language="xml"><![CDATA[<property name="notificationListenerMappings">
   <map>
     <entry key="*">
       <bean class="com.example.ConsoleLoggingNotificationListener"/>
@@ -1545,7 +1545,7 @@ public class ConsoleLoggingNotificationListener
       <classname>NotificationListenerBean</classname> instances is not wildly
       different to what was presented previously:</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1586,7 +1586,7 @@ public class ConsoleLoggingNotificationListener
       section of the JMX specification (1.2) entitled <literal>'The JMX
       Notification Model'</literal>.)</para>
 
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1689,7 +1689,7 @@ public class ConsoleLoggingNotificationListener
       a <classname>NotificationEvent</classname> every time the
       <literal>add(int, int)</literal> operation is invoked.</para>
 
-      <programlisting><![CDATA[package org.springframework.jmx;
+      <programlisting language="java"><![CDATA[package org.springframework.jmx;
 			
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.export.notification.NotificationPublisher;

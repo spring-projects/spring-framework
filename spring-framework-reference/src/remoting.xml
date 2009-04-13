@@ -54,7 +54,7 @@
     </itemizedlist></para>
     <para>While discussing the remoting capabilities of Spring, we'll use the following domain
     model and corresponding services:</para>
-    <programlisting><![CDATA[public class Account implements Serializable{
+    <programlisting language="java"><![CDATA[public class Account implements Serializable{
 
     private String name;
 
@@ -64,19 +64,19 @@
       this.name = name;
     }
 }]]></programlisting>
-    <programlisting><![CDATA[public interface AccountService {
+    <programlisting language="java"><![CDATA[public interface AccountService {
 
     public void insertAccount(Account account);
 
     public List getAccounts(String name);
 }]]></programlisting>
-    <programlisting><![CDATA[public interface RemoteAccountService extends Remote {
+    <programlisting language="java"><![CDATA[public interface RemoteAccountService extends Remote {
 
     public void insertAccount(Account account) throws RemoteException;
 
     public List getAccounts(String name) throws RemoteException;
 }]]></programlisting>
-    <programlisting><lineannotation>// the implementation doing nothing at the moment</lineannotation><![CDATA[
+    <programlisting language="java"><lineannotation>// the implementation doing nothing at the moment</lineannotation><![CDATA[
 public class AccountServiceImpl implements AccountService {
 
     public void insertAccount(Account acc) {
@@ -110,11 +110,11 @@ public class AccountServiceImpl implements AccountService {
       exposing of any non-RMI services via RMI invokers.
       </para>
       <para>Of course, we first have to set up our service in the Spring container:</para>
-      <programlisting><![CDATA[<bean id="accountService" class="example.AccountServiceImpl">
+      <programlisting language="xml"><![CDATA[<bean id="accountService" class="example.AccountServiceImpl">
     ]]><lineannotation>&lt;!-- any additional properties, maybe a DAO? --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
       <para>Next we'll have to expose our service using the <classname>RmiServiceExporter</classname>:</para>
-      <programlisting><![CDATA[<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+      <programlisting language="xml"><![CDATA[<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
     ]]><lineannotation>&lt;!-- does not necessarily have to be the same name as the bean to be exported --&gt;</lineannotation><![CDATA[
     <property name="serviceName" value="AccountService"/>
     <property name="service" ref="accountService"/>
@@ -138,7 +138,7 @@ public class AccountServiceImpl implements AccountService {
       <title>Linking in the service at the client</title>
       <para>Our client is a simple object using the <interfacename>AccountService</interfacename>
       to manage accounts:</para>
-      <programlisting><![CDATA[public class SimpleObject {
+      <programlisting language="java"><![CDATA[public class SimpleObject {
 
     private AccountService accountService;
 
@@ -148,7 +148,7 @@ public class AccountServiceImpl implements AccountService {
 }]]></programlisting>
 			<para>To link in the service on the client, we'll create a separate Spring container,
 			containing the simple object and the service linking configuration bits:</para>
-			<programlisting><![CDATA[<bean class="example.SimpleObject">
+			<programlisting language="xml"><![CDATA[<bean class="example.SimpleObject">
     <property name="accountService" ref="accountService"/>
 </bean>
 
@@ -176,7 +176,7 @@ public class AccountServiceImpl implements AccountService {
       from Spring Web MVC usage, you can easily  wire up such a servlet exposing
       your services. First we'll have to create a new servlet in your application
       (this an excerpt from <filename>'web.xml'</filename>):</para>
-			<programlisting><![CDATA[<servlet>
+			<programlisting language="xml"><![CDATA[<servlet>
     <servlet-name>remoting</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
@@ -203,7 +203,7 @@ public class AccountServiceImpl implements AccountService {
       <title>Exposing your beans by using the <classname>HessianServiceExporter</classname></title>
       <para>In the newly created application context called <literal>remoting-servlet.xml</literal>,
       we'll create a <classname>HessianServiceExporter</classname> exporting your services:</para>
-      <programlisting><![CDATA[<bean id="accountService" class="example.AccountServiceImpl">
+      <programlisting language="xml"><![CDATA[<bean id="accountService" class="example.AccountServiceImpl">
     ]]><lineannotation>&lt;!-- any additional properties, maybe a DAO? --&gt;</lineannotation><![CDATA[
 </bean>
 
@@ -219,7 +219,7 @@ public class AccountServiceImpl implements AccountService {
       </para>
       <para>Alternatively, create a <classname>HessianServiceExporter</classname> in your
       root application context (e.g. in <filename>'WEB-INF/applicationContext.xml'</filename>):</para>
-      <programlisting><![CDATA[<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
+      <programlisting language="xml"><![CDATA[<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
     <property name="service" ref="accountService"/>
     <property name="serviceInterface" value="example.AccountService"/>
 </bean>]]></programlisting>
@@ -227,7 +227,7 @@ public class AccountServiceImpl implements AccountService {
       in <filename>'web.xml'</filename>, with the same end result: The exporter
       getting mapped to the request path <literal>/remoting/AccountService</literal>.
       Note that the servlet name needs to match the bean name of the target exporter.</para>
-      <programlisting><![CDATA[<servlet>
+      <programlisting language="xml"><![CDATA[<servlet>
     <servlet-name>accountExporter</servlet-name>
     <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
 </servlet>
@@ -245,7 +245,7 @@ public class AccountServiceImpl implements AccountService {
       a separate bean factory or application context and mention the following beans
       where the <classname>SimpleObject</classname> is using the
       <interfacename>AccountService</interfacename> to manage accounts:</para>
-			<programlisting><![CDATA[<bean class="example.SimpleObject">
+			<programlisting language="xml"><![CDATA[<bean class="example.SimpleObject">
     <property name="accountService" ref="accountService"/>
 </bean>
 
@@ -271,7 +271,7 @@ public class AccountServiceImpl implements AccountService {
       features, for example. Usually, you don't use per-user security credentials here, but
       rather shared credentials defined at the <literal>Hessian/BurlapProxyFactoryBean</literal> level
       (similar to a JDBC <interfacename>DataSource</interfacename>).</para>
-      <programlisting><![CDATA[<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+      <programlisting language="xml"><![CDATA[<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
     <property name="interceptors" ref="authorizationInterceptor"/>
 </bean>
 
@@ -315,7 +315,7 @@ public class AccountServiceImpl implements AccountService {
       <para>To expose the <literal>AccountService</literal> (mentioned above) within a
       Spring Web MVC <classname>DispatcherServlet</classname>, the following configuration
       needs to be in place in the dispatcher's application context:</para>
-<programlisting><![CDATA[<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+<programlisting language="xml"><![CDATA[<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
     <property name="service" ref="accountService"/>
     <property name="serviceInterface" value="example.AccountService"/>
 </bean>
@@ -325,14 +325,14 @@ public class AccountServiceImpl implements AccountService {
       as explained in the section on Hessian.</para>
       <para>Alternatively, create an <classname>HttpInvokerServiceExporter</classname> in your
       root application context (e.g. in <filename>'WEB-INF/applicationContext.xml'</filename>):</para>
-      <programlisting><![CDATA[<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+      <programlisting language="xml"><![CDATA[<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
     <property name="service" ref="accountService"/>
     <property name="serviceInterface" value="example.AccountService"/>
 </bean>]]></programlisting>
       <para>In addition, define a corresponding servlet for this exporter in
       <filename>'web.xml'</filename>, with the servlet name matching the bean
       name of the target exporter:</para>
-      <programlisting><![CDATA[<servlet>
+      <programlisting language="xml"><![CDATA[<servlet>
     <servlet-name>accountExporter</servlet-name>
     <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
 </servlet>
@@ -349,7 +349,7 @@ public class AccountServiceImpl implements AccountService {
       do it when using Hessian or Burlap. Using a proxy, Spring will be able to
       translate your calls to HTTP POST requests to the URL pointing to the exported
       service.</para>
-       <programlisting><![CDATA[<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+       <programlisting language="xml"><![CDATA[<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
     <property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
     <property name="serviceInterface" value="example.AccountService"/>
 </bean>
@@ -358,7 +358,7 @@ public class AccountServiceImpl implements AccountService {
       By default, the <classname>HttpInvokerProxy</classname> uses the J2SE HTTP functionality, but
       you can also use the Commons <classname>HttpClient</classname> by setting the
       <literal>httpInvokerRequestExecutor</literal> property:</para>
-<programlisting><![CDATA[<property name="httpInvokerRequestExecutor">
+<programlisting language="xml"><![CDATA[<property name="httpInvokerRequestExecutor">
     <bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
 </property>
 ]]></programlisting>
@@ -404,7 +404,7 @@ public class AccountServiceImpl implements AccountService {
       <interfacename>AccountService</interfacename> we extend Spring's
       <classname>ServletEndpointSupport</classname> class and implement our business
       logic here, usually delegating the call to the business layer.</para>
-      <programlisting><lineannotation>/**
+      <programlisting langauge="java"><lineannotation>/**
  * JAX-RPC compliant RemoteAccountService implementation that simply delegates
  * to the AccountService implementation in the root web application context.
  *
@@ -455,7 +455,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       in the previous section. You will see that Spring has great support for web services
       requiring little coding efforts - most of the setup is done in the Spring configuration
       file as usual:</para>
-      <programlisting><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
     <property name="serviceInterface" value="example.RemoteAccountService"/>
     <property name="wsdlDocumentUrl" value="http://localhost:8080/account/services/accountService?WSDL"/>
     <property name="namespaceUri" value="http://localhost:8080/account/services/accountService"/>
@@ -470,13 +470,13 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       </para>
       <para>Accessing the web service is now very easy as we have a bean factory for it that will expose it
       as <literal>RemoteAccountService</literal> interface. We can wire this up in Spring:</para>
-      <programlisting><![CDATA[<bean id="client" class="example.AccountClientImpl">
+      <programlisting language="xml"><![CDATA[<bean id="client" class="example.AccountClientImpl">
     ...
     <property name="service" ref="accountWebService"/>
 </bean>]]></programlisting>
       <para>From the client code we can access the web service just as if it
       was a normal class, except that it throws <exceptionname>RemoteException</exceptionname>.</para>
-<programlisting><![CDATA[public class AccountClientImpl {
+<programlisting language="java"><![CDATA[public class AccountClientImpl {
 
     private RemoteAccountService service;
     
@@ -498,14 +498,14 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       Spring supports automatic conversion to its corresponding unchecked
       <exceptionname>RemoteException</exceptionname>. This requires that we provide a non-RMI
       interface also. Our configuration is now:</para>
-      <programlisting><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
     <property name="serviceInterface" value="example.AccountService"/>
     <property name="portInterface" value="example.RemoteAccountService"/>
 </bean>]]></programlisting>
       <para>Where <literal>serviceInterface</literal> is changed to our non RMI interface. Our RMI
       interface is now defined using the property	<literal>portInterface</literal>. Our client
       code can now avoid handling <exceptionname>java.rmi.RemoteException</exceptionname>:</para>
-      <programlisting><![CDATA[public class AccountClientImpl {
+      <programlisting language="java"><![CDATA[public class AccountClientImpl {
 
     private AccountService service;
     
@@ -538,7 +538,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       </note>
       <para>We will use Axis to register bean mappings on the client side. To do this we need to
       register the bean mappings programmatically:</para>
-      <programlisting><![CDATA[public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
+      <programlisting language="java"><![CDATA[public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 
     protected void postProcessJaxRpcService(Service service) {
         TypeMappingRegistry registry = service.getTypeMappingRegistry();
@@ -564,7 +564,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       The <interfacename>Handler</interfacename> is a callback interface. There is a convenience
       base class provided in <filename class="libraryfile">jaxrpc.jar</filename>, namely
       <classname>javax.rpc.xml.handler.GenericHandler</classname> that we will extend:</para>
-      <programlisting><![CDATA[public class AccountHandler extends GenericHandler {
+      <programlisting language="java"><![CDATA[public class AccountHandler extends GenericHandler {
 
     public QName[] getHeaders() {
         return null;
@@ -590,7 +590,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       use the programmatic approach. However Spring has made it very easy for us to do this as we can
       override the <methodname>postProcessJaxRpcService(..)</methodname> method that is designed for
       this:</para>
-      <programlisting><![CDATA[public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
+      <programlisting language="java"><![CDATA[public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 
     protected void postProcessJaxRpcService(Service service) {
         QName port = new QName(this.getNamespaceUri(), this.getPortName());
@@ -601,7 +601,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
 }]]></programlisting>
       <para>The last thing we must remember to do is to change the Spring configuration to use our
       factory bean:</para>
-<programlisting><![CDATA[<bean id="accountWebService" class="example.AccountHandlerJaxRpcPortProxyFactoryBean">
+<programlisting language="xml"><![CDATA[<bean id="accountWebService" class="example.AccountHandlerJaxRpcPortProxyFactoryBean">
     ...
 </bean>]]></programlisting>
 		</section>
@@ -615,7 +615,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       logic here, usually delegating the call to the business layer.
       We'll simply use Spring 2.5's <literal>@Autowired</literal>
       annotation for expressing such dependencies on Spring-managed beans.</para>
-      <programlisting><lineannotation>/**
+      <programlisting langauge="java"><lineannotation>/**
  * JAX-WS compliant AccountService implementation that simply delegates
  * to the AccountService implementation in the root web application context.
  *
@@ -669,7 +669,7 @@ public class AccountServiceEndpoint extends SpringBeanAutowiringSupport {
       Of course, annotation-driven injection through <literal>@Autowired</literal>
       will work as well.
       </para>
-      <programlisting><![CDATA[<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
+      <programlisting language="xml"><![CDATA[<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
     <property name="baseAddress" value="http://localhost:9999/"/>
 </bean>
 
@@ -684,7 +684,7 @@ public class AccountServiceEndpoint extends SpringBeanAutowiringSupport {
       This means that the endpoint implementation may look like as follows,
       without any superclass declared - and Spring's <literal>@Autowired</literal>
 			configuration annotation still being honored:</para>
-      <programlisting><![CDATA[@WebService(serviceName="AccountService")
+      <programlisting langauge="java"><![CDATA[@WebService(serviceName="AccountService")
 public class AccountServiceEndpoint {
 
     @Autowired
@@ -730,7 +730,7 @@ public class AccountServiceEndpoint {
       a proxy that implements our business service interface. In this example we use the latter
       to create a proxy for the <interfacename>AccountService</interfacename> endpoint (again):
       </para>
-      <programlisting><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
     <property name="serviceInterface" value="example.AccountService"/>
     <property name="wsdlDocumentUrl" value="http://localhost:8080/account/services/accountService?WSDL"/>
     <property name="namespaceUri" value="http://localhost:8080/account/services/accountService"/>
@@ -745,13 +745,13 @@ public class AccountServiceEndpoint {
       </para>
       <para>Accessing the web service is now very easy as we have a bean factory for it that will expose it
       as <literal>AccountService</literal> interface. We can wire this up in Spring:</para>
-      <programlisting><![CDATA[<bean id="client" class="example.AccountClientImpl">
+      <programlisting language="xml"><![CDATA[<bean id="client" class="example.AccountClientImpl">
     ...
     <property name="service" ref="accountWebService"/>
 </bean>]]></programlisting>
       <para>From the client code we can access the web service just as if it
       was a normal class:</para>
-      <programlisting><![CDATA[public class AccountClientImpl {
+      <programlisting language="java"><![CDATA[public class AccountClientImpl {
 
     private AccountService service;
 
@@ -780,7 +780,7 @@ public class AccountServiceEndpoint {
       <classname>DispatcherServlet</classname> with a corresponding
       <interfacename>WebApplicationContext</interfacename> containing the services you will be
       exposing:</para>
-      <programlisting><![CDATA[<servlet>
+      <programlisting language="xml"><![CDATA[<servlet>
     <servlet-name>xfire</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 </servlet>]]></programlisting>
@@ -788,7 +788,7 @@ public class AccountServiceEndpoint {
       file to the <literal>contextConfigLocations</literal> context parameter picked up by the
       <classname>ContextLoaderListener</classname> (or <classname>ContextLoaderServlet</classname>
       for that matter).</para>
-      <programlisting><![CDATA[<context-param>
+      <programlisting language="xml"><![CDATA[<context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>classpath:org/codehaus/xfire/spring/xfire.xml</param-value>
 </context-param>
@@ -801,7 +801,7 @@ public class AccountServiceEndpoint {
       declared above) you only have to add one extra bean to expose the service using XFire.
       Add for example the following configuration in your <filename>'xfire-servlet.xml'</filename>
       file:</para>
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
 
     <bean name="/Echo" class="org.codehaus.xfire.spring.remoting.XFireExporter">
         <property name="serviceInterface" value="org.codehaus.xfire.spring.Echo"/>
@@ -828,14 +828,14 @@ public class AccountServiceEndpoint {
     <emphasis>same non-transactional</emphasis> <interfacename>Session</interfacename>, and as
     such throughput will be very implementation dependent.</para>
     <para>The following interface is used on both the server and the client side.</para>
-    <programlisting><![CDATA[package com.foo;
+    <programlisting langauge="java"><![CDATA[package com.foo;
 
 public interface CheckingAccountService {
 
     public void cancelAccount(Long accountId);
 }]]></programlisting>
     <para>The following simple implementation of the above interface is used on the server-side.</para>
-    <programlisting><![CDATA[package com.foo;
+    <programlisting langauge="java"><![CDATA[package com.foo;
 
 public class SimpleCheckingAccountService implements CheckingAccountService {
 
@@ -845,7 +845,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
 }]]></programlisting>
     <para>This configuration file contains the JMS-infrastructure beans that are shared on both
     the client and server.</para>
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -865,7 +865,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
       <title>Server-side configuration</title>
       <para>On the server, you just need to expose the service object using the
       <classname>JmsInvokerServiceExporter</classname>.</para>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -887,7 +887,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
    </bean>
 
 </beans>]]></programlisting>
-      <programlisting><![CDATA[package com.foo;
+      <programlisting langauge="java"><![CDATA[package com.foo;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -906,7 +906,7 @@ public class Server {
       object created off the back of the following bean definition can be injected into other
       client side objects, and the proxy will take care of forwarding the call to the
       server-side object via JMS.</para>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -920,7 +920,7 @@ public class Server {
     </bean>
 
 </beans>]]></programlisting>
-      <programlisting><![CDATA[package com.foo;
+      <programlisting langauge="java"><![CDATA[package com.foo;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

@@ -1015,6 +1015,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             </tbody>
           </tgroup>
         </table>
+      </para>
 	</section>
 
     <section id="transaction-declarative-annotations">
