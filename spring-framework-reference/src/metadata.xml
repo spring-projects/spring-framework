@@ -7,7 +7,7 @@
 		<emphasis>annotations</emphasis> to program elements - usually, classes
 		and/or methods.</para>
 		<para>For example, we might add metadata to a class as follows:</para>
-		<programlisting><![CDATA[/**
+		<programlisting language="java"><![CDATA[/**
  * Normal comments here
  * @@org.springframework.transaction.interceptor.DefaultTransactionAttribute()
  */
@@ -112,7 +112,7 @@ public void echoException(Exception ex) throws Exception {
 			</listitem>
 		</itemizedlist>
 		<para>The Spring <interfacename>Attributes</interfacename> interface looks like this:</para>
-		<programlisting><![CDATA[public interface Attributes {
+		<programlisting language="java"><![CDATA[public interface Attributes {
 
     Collection getAttributes(Class targetClass);
 
@@ -164,7 +164,7 @@ public void echoException(Exception ex) throws Exception {
 			at runtime.</para>
 			<para>The best way to illustrate the usage of this annotation is to
 			show an example:</para>
-			<programlisting><![CDATA[public class SimpleMovieLister {
+			<programlisting language="java"><![CDATA[public class SimpleMovieLister {
 
     ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     private MovieFinder movieFinder;
@@ -187,7 +187,7 @@ public void echoException(Exception ex) throws Exception {
 				Let's look at an example of some XML configuration that will
 				<emphasis role="bold">not</emphasis> pass validation.
 			</para>
-			<programlisting><![CDATA[<bean id="movieLister" class="x.y.SimpleMovieLister">
+			<programlisting language="xml"><![CDATA[<bean id="movieLister" class="x.y.SimpleMovieLister">
     ]]><lineannotation>&lt;!-- whoops, no MovieFinder is set (and this property is <interfacename>@Required</interfacename>) --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
 			<para>
@@ -213,7 +213,7 @@ public void echoException(Exception ex) throws Exception {
 				to configure; simply drop the following bean definition into your Spring
 				XML configuration.
 			</para>
-			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/>]]></programlisting>
+			<programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/>]]></programlisting>
 			<para>
 				Finally, one can configure an instance of the
 				<classname>RequiredAnnotationBeanPostProcessor</classname> class to look
@@ -229,7 +229,7 @@ public void echoException(Exception ex) throws Exception {
 				You can make a <classname>RequiredAnnotationBeanPostProcessor</classname>
 				instance <interfacename>@Mandatory</interfacename>-aware like so:
 			</para>
-			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor">
+			<programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor">
     <property name="requiredAnnotationType" value="your.company.package.Mandatory"/>
 </bean>]]></programlisting>
 			<para>
@@ -238,7 +238,7 @@ public void echoException(Exception ex) throws Exception {
 				is itself annotated with appropriate annotations for its target
 				and runtime retention policy.
 			</para>
-			<programlisting><![CDATA[package your.company.package;
+			<programlisting language="java"><![CDATA[package your.company.package;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -351,7 +351,7 @@ public @interface Mandatory {
 			2. Import the Commons Attributes ant tasks into your project build
 			script, as follows:
 		</para>
-		<programlisting><![CDATA[<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>]]></programlisting>
+		<programlisting language="xml"><![CDATA[<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>]]></programlisting>
 		<para>
 			3. Next, define an attribute compilation task, which will use the
 			Commons Attributes attribute-compiler task to "compile" the attributes in
@@ -359,7 +359,7 @@ public @interface Mandatory {
 			to a location specified by the <literal>destdir</literal> attribute. Here we show the use of
 			a temporary directory for storing the generated files:
 		</para>
-		<programlisting><![CDATA[<target name="compileAttributes">
+		<programlisting language="xml"><![CDATA[<target name="compileAttributes">
 
   <attribute-compiler destdir="${commons.attributes.tempdir}">
     <fileset dir="${src.dir}" includes="**/*.java"/>
@@ -397,7 +397,7 @@ public @interface Mandatory {
 			create an index of all the attributes defined on your sources, for
 			efficient lookup at runtime. The step looks like this:
 		</para>
-		<programlisting><![CDATA[<attribute-indexer jarFile="myCompiledSources.jar">
+		<programlisting language="xml"><![CDATA[<attribute-indexer jarFile="myCompiledSources.jar">
     
   <classpath refid="master-classpath"/>
 
@@ -432,7 +432,7 @@ public @interface Mandatory {
 				This builds on the Spring AOP autoproxy functionality.
 				Configuration might look like this:
 			</para>
-			<programlisting><![CDATA[<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+			<programlisting language="xml"><![CDATA[<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
 <bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
   <property name="transactionInterceptor" ref="txInterceptor" />

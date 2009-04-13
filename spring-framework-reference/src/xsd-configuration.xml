@@ -49,7 +49,7 @@
             <title>Referencing the schemas</title>
             <para>To switch over from the DTD-style to the new XML Schema-style, you need
             to make the following change.</para>
-            <programlisting>
+            <programlisting language="xml">
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
     "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
@@ -60,7 +60,7 @@
 
 </beans>]]></programlisting>
             <para>The equivalent file in the XML Schema-style would be...</para>
-            <programlisting>
+            <programlisting language="xml">
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -98,7 +98,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             the following preamble at the top of your Spring XML configuration file;
             the emboldened text in the snippet below references the correct schema so that
             the tags in the <literal>util</literal> namespace are available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:util="http://www.springframework.org/schema/util"</emphasis><![CDATA[
@@ -112,7 +112,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <section id="xsd-config-body-schemas-util-constant">
                 <title><literal>&lt;util:constant/&gt;</literal></title>
                 <para>Before...</para>    
-                <programlisting><![CDATA[<bean id="..." class="...">
+                <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="isolation">
     <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
     class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
@@ -129,7 +129,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 and clearly expresses the developer's intent (<emphasis>'inject this constant
                 value'</emphasis>), and it just reads better.
                 </para>
-                <programlisting><![CDATA[<bean id="..." class="...">
+                <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="isolation">
     <util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
   </property>
@@ -149,13 +149,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			            using the <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></ulink>
 			            property:
 		            </para>
-                    <programlisting><![CDATA[<bean id="myField"
+                    <programlisting language="xml"><![CDATA[<bean id="myField"
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
   <property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
 </bean>]]></programlisting>
                     <para>There is also a convenience usage form where the <literal>static</literal>
                     field is specified as the bean name:</para>
-                    <programlisting><![CDATA[<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+                    <programlisting language="xml"><![CDATA[<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
     class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>]]></programlisting>
                     <para>
 			            This does mean that there is no longer any choice in what the bean id is (so
@@ -164,7 +164,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			            inner bean since the id doesn't have to be specified for the bean
 			            reference:
 		            </para>
-                    <programlisting><![CDATA[<bean id="..." class="...">
+                    <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="isolation">
     <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
           class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
@@ -183,7 +183,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			            as the <classname>FieldRetrievingFactoryBean</classname>). Let's look at an example
 			            to see how easy injecting an enum value is; consider this JDK 5 enum:
 		            </para>
-                    <programlisting><![CDATA[package javax.persistence;
+                    <programlisting language="java"><![CDATA[package javax.persistence;
      
 public enum PersistenceContextType {
 
@@ -192,7 +192,7 @@ public enum PersistenceContextType {
 
 }]]></programlisting>
                     <para>Now consider a setter of type <classname>PersistenceContextType</classname>:</para>
-                    <programlisting><![CDATA[package example;
+                    <programlisting language="java"><![CDATA[package example;
 
 public class Client {
 
@@ -203,7 +203,7 @@ public class Client {
     }
 }]]></programlisting>
                     <para>.. and the corresponding bean definition:</para>
-                    <programlisting><![CDATA[<bean class="example.Client">
+                    <programlisting language="xml"><![CDATA[<bean class="example.Client">
     <property name="persistenceContextType" value="TRANSACTION" />
 </bean>]]></programlisting>
                     <para>
@@ -216,7 +216,7 @@ public class Client {
             <section id="xsd-config-body-schemas-util-property-path">
                 <title><literal>&lt;util:property-path/&gt;</literal></title>
                 <para>Before...</para>    
-                <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
 <bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
   <property name="spouse">
@@ -235,7 +235,7 @@ public class Client {
                 property of the <literal>'testBean'</literal> bean.
                 </para>
                 <para>After...</para>
-                <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
 <bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
   <property name="spouse">
@@ -257,7 +257,7 @@ public class Client {
 			        name. This value may then be used in another bean definition as a property
 			        value or constructor argument.</para>
                     <para>Here's an example where a path is used against another bean, by name:</para>
-		            <programlisting><![CDATA[// target bean to be referenced by name
+		            <programlisting language="xml"><![CDATA[// target bean to be referenced by name
 <bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
   <property name="spouse">
@@ -274,7 +274,7 @@ public class Client {
   <property name="propertyPath" value="spouse.age"/>
 </bean>]]></programlisting>
                     <para>In this example, a path is evaluated against an inner bean:</para>
-                    <programlisting><lineannotation>&lt;!-- will result in 12, which is the value of property 'age' of the inner bean --&gt;</lineannotation><![CDATA[
+                    <programlisting language="xml"><lineannotation>&lt;!-- will result in 12, which is the value of property 'age' of the inner bean --&gt;</lineannotation><![CDATA[
 <bean id="theAge"
     class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
   <property name="targetObject">
@@ -285,14 +285,14 @@ public class Client {
   <property name="propertyPath" value="age"/>
 </bean>]]></programlisting>
 		            <para>There is also a shortcut form, where the bean name is the property path.</para>
-		            <programlisting><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'person' --&gt;</lineannotation><![CDATA[
+		            <programlisting language="xml"><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'person' --&gt;</lineannotation><![CDATA[
 <bean id="person.age"
     class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
                 <para>This form does mean that there is no choice in the name of the bean.
 		            Any reference to it will also have to use the same id, which is the path.
 		            Of course, if used as an inner bean, there is no need to refer to it at
 		            all:</para>
-                    <programlisting><![CDATA[<bean id="..." class="...">
+                    <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="age">
     <bean id="person.age"
         class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
@@ -306,7 +306,7 @@ public class Client {
             <section id="xsd-config-body-schemas-util-properties">
                 <title><literal>&lt;util:properties/&gt;</literal></title>
                 <para>Before...</para>    
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
 <bean id="jdbcConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
   <property name="location" value="classpath:com/foo/jdbc-production.properties"/>
 </bean>]]></programlisting>
@@ -316,13 +316,13 @@ public class Client {
                 the supplied <link linkend="resources"><interfacename>Resource</interfacename></link> location).
                 </para>
                 <para>After...</para>
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
 <util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>]]></programlisting>
             </section>
             <section id="xsd-config-body-schemas-util-list">
                 <title><literal>&lt;util:list/&gt;</literal></title>
                 <para>Before...</para>    
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
 <bean id="emails" class="org.springframework.beans.factory.config.ListFactoryBean">
   <property name="sourceList">
       <list>
@@ -339,7 +339,7 @@ public class Client {
                 with values taken from the supplied <literal>'sourceList'</literal>.
                 </para>
                 <para>After...</para>
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
 <util:list id="emails">
     <value>pechorin@hero.org</value>
     <value>raskolnikov@slums.org</value>
@@ -351,7 +351,7 @@ public class Client {
                 attribute on the <literal>&lt;util:list/&gt;</literal> element. For example, if we
                 really need a <classname>java.util.LinkedList</classname> to be instantiated, we could
                 use the following configuration:</para>
-                <programlisting><![CDATA[<util:list id="emails" list-class="java.util.LinkedList">
+                <programlisting language="xml"><![CDATA[<util:list id="emails" list-class="java.util.LinkedList">
     <value>jackshaftoe@vagabond.org</value>
     <value>eliza@thinkingmanscrumpet.org</value>
     <value>vanhoek@pirate.org</value>
@@ -367,7 +367,7 @@ public class Client {
             <section id="xsd-config-body-schemas-util-map">
                 <title><literal>&lt;util:map/&gt;</literal></title>
                 <para>Before...</para>    
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
 <bean id="emails" class="org.springframework.beans.factory.config.MapFactoryBean">
   <property name="sourceMap">
       <map>
@@ -384,7 +384,7 @@ public class Client {
                 with key-value pairs taken from the supplied <literal>'sourceMap'</literal>.
                 </para>
                 <para>After...</para>
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
 <util:map id="emails">
     <entry key="pechorin" value="pechorin@hero.org"/>
     <entry key="raskolnikov" value="raskolnikov@slums.org"/>
@@ -396,7 +396,7 @@ public class Client {
                 attribute on the <literal>&lt;util:map/&gt;</literal> element. For example, if we
                 really need a <classname>java.util.TreeMap</classname> to be instantiated, we could
                 use the following configuration:</para>
-                <programlisting><![CDATA[<util:map id="emails" map-class="java.util.TreeMap">
+                <programlisting language="xml"><![CDATA[<util:map id="emails" map-class="java.util.TreeMap">
     <entry key="pechorin" value="pechorin@hero.org"/>
     <entry key="raskolnikov" value="raskolnikov@slums.org"/>
     <entry key="stavrogin" value="stavrogin@gov.org"/>
@@ -412,7 +412,7 @@ public class Client {
             <section id="xsd-config-body-schemas-util-set">
                 <title><literal>&lt;util:set/&gt;</literal></title>
                 <para>Before...</para>    
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
 <bean id="emails" class="org.springframework.beans.factory.config.SetFactoryBean">
   <property name="sourceSet">
       <set>
@@ -429,7 +429,7 @@ public class Client {
                 with values taken from the supplied <literal>'sourceSet'</literal>.
                 </para>
                 <para>After...</para>
-                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
 <util:set id="emails">
     <value>pechorin@hero.org</value>
     <value>raskolnikov@slums.org</value>
@@ -441,7 +441,7 @@ public class Client {
                 attribute on the <literal>&lt;util:set/&gt;</literal> element. For example, if we
                 really need a <classname>java.util.TreeSet</classname> to be instantiated, we could
                 use the following configuration:</para>
-                <programlisting><![CDATA[<util:set id="emails" set-class="java.util.TreeSet">
+                <programlisting language="xml"><![CDATA[<util:set id="emails" set-class="java.util.TreeSet">
     <value>pechorin@hero.org</value>
     <value>raskolnikov@slums.org</value>
     <value>stavrogin@gov.org</value>
@@ -463,7 +463,7 @@ public class Client {
             the following preamble at the top of your Spring XML configuration file;
             the emboldened text in the following snippet references the correct schema so that
             the tags in the <literal>jee</literal> namespace are available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis><![CDATA[
@@ -477,7 +477,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <section id="xsd-config-body-schemas-jee-jndi-lookup">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (simple)</title>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="]]><emphasis role="bold"><![CDATA[dataSource]]></emphasis><![CDATA[" class="org.springframework.jndi.JndiObjectFactoryBean">
+                <programlisting language="xml"><![CDATA[<bean id="]]><emphasis role="bold"><![CDATA[dataSource]]></emphasis><![CDATA[" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
 </bean>
 
@@ -486,7 +486,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="dataSource" ref="]]><emphasis role="bold">dataSource</emphasis>"/><![CDATA[
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:jndi-lookup id="]]><emphasis role="bold"><![CDATA[dataSource]]></emphasis><![CDATA[" jndi-name="jdbc/MyDataSource"/>
+                <programlisting language="xml"><![CDATA[<jee:jndi-lookup id="]]><emphasis role="bold"><![CDATA[dataSource]]></emphasis><![CDATA[" jndi-name="jdbc/MyDataSource"/>
 
 <bean id="userDao" class="com.foo.JdbcUserDao">
     ]]><lineannotation>&lt;!-- Spring will do the cast automatically (as usual) --&gt;</lineannotation><![CDATA[
@@ -496,7 +496,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <section id="xsd-config-body-schemas-jee-jndi-lookup-environment-single">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with single JNDI environment setting)</title>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+                <programlisting language="xml"><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
     <property name="jndiEnvironment">
         <props>
@@ -505,14 +505,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </property>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+                <programlisting language="xml"><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
     <jee:environment>foo=bar</jee:environment>
 </jee:jndi-lookup>]]></programlisting>
             </section>
             <section id="xsd-config-body-schemas-jee-jndi-lookup-evironment-multiple">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with multiple JNDI environment settings)</title>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+                <programlisting language="xml"><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
     <property name="jndiEnvironment">
         <props>
@@ -522,7 +522,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </property>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+                <programlisting language="xml"><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
     ]]><lineannotation>&lt;!-- newline-separated, key-value pairs for the environment (standard <classname>Properties</classname> format) --&gt;</lineannotation><![CDATA[
     <jee:environment>
         foo=bar
@@ -533,7 +533,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <section id="xsd-config-body-schemas-jee-jndi-lookup-complex">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (complex)</title>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+                <programlisting language="xml"><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
     <property name="cache" value="true"/>
     <property name="resourceRef" value="true"/>
@@ -542,7 +542,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="proxyInterface" value="com.myapp.Foo"/>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:jndi-lookup id="simple"
+                <programlisting language="xml"><![CDATA[<jee:jndi-lookup id="simple"
              jndi-name="jdbc/MyDataSource"
              cache="true"
              resource-ref="true"
@@ -555,18 +555,18 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <para>The <literal>&lt;jee:local-slsb/&gt;</literal> tag configures a
                 reference to an EJB Stateless SessionBean.</para>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="simple"
+                <programlisting language="xml"><![CDATA[<bean id="simple"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
   <property name="jndiName" value="ejb/RentalServiceBean"/>
   <property name="businessInterface" value="com.foo.service.RentalService"/>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
+                <programlisting language="xml"><![CDATA[<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
     business-interface="com.foo.service.RentalService"/>]]></programlisting>
             </section>
             <section id="xsd-config-body-schemas-jee-local-slsb-complex">
                 <title><literal>&lt;jee:local-slsb/&gt;</literal> (complex)</title>
-                <programlisting><![CDATA[<bean id="complexLocalEjb"
+                <programlisting language="xml"><![CDATA[<bean id="complexLocalEjb"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
   <property name="jndiName" value="ejb/RentalServiceBean"/>
   <property name="businessInterface" value="com.foo.service.RentalService"/>
@@ -575,7 +575,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <property name="resourceRef" value="true"/>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:local-slsb id="complexLocalEjb"
+                <programlisting language="xml"><![CDATA[<jee:local-slsb id="complexLocalEjb"
     jndi-name="ejb/RentalServiceBean"
     business-interface="com.foo.service.RentalService"
     cache-home="true"
@@ -587,7 +587,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <para>The <literal>&lt;jee:remote-slsb/&gt;</literal> tag configures a
                 reference to a <literal>remote</literal> EJB Stateless SessionBean.</para>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="complexRemoteEjb"
+                <programlisting language="xml"><![CDATA[<bean id="complexRemoteEjb"
       class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
   <property name="jndiName" value="ejb/MyRemoteBean"/>
   <property name="businessInterface" value="com.foo.service.RentalService"/>
@@ -598,7 +598,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <property name="refreshHomeOnConnectFailure" value="true"/>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:remote-slsb id="complexRemoteEjb"
+                <programlisting language="xml"><![CDATA[<jee:remote-slsb id="complexRemoteEjb"
     jndi-name="ejb/MyRemoteBean"
     business-interface="com.foo.service.RentalService"
     cache-home="true"
@@ -622,7 +622,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>lang</literal> namespace are
             available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
@@ -647,7 +647,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>jms</literal> namespace are
             available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis><![CDATA[
@@ -679,7 +679,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>tx</literal> namespace are
             available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:aop="http://www.springframework.org/schema/aop"
@@ -710,7 +710,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>aop</literal> namespace are
             available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
@@ -730,7 +730,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			but rather beans that do a lot of grunt work in Spring, such as <interfacename>BeanfactoryPostProcessors</interfacename>.
             The following snippet references the correct schema so that the tags in the <literal>context</literal>
 			namespace are available to you.</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   ]]><emphasis role="bold">xmlns:context="http://www.springframework.org/schema/context"</emphasis><![CDATA[
@@ -819,7 +819,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <para>Find below an example of the <literal>&lt;meta/&gt;</literal> tag in the context
             of a surrounding <literal>&lt;bean/&gt;</literal> (please note that without any logic
             to interpret it the metadata is effectively useless as-is).</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
@@ -862,7 +862,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <para>Create a new XML file. You can name this file whatever you want. In the
                 example below, the file is named <literal>'context.xml'</literal>.
                 Copy and paste the following text into the file so that it matches the screenshot.</para>
-                <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
@@ -984,7 +984,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <para>Create a new XML file (you can name this file whatever you want). In the
                 example below, the file is named <literal>'context.xml'</literal>. Copy and paste
                 the following text into the file so that it matches the screenshot.</para>
-                <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"

@@ -88,7 +88,7 @@
 				EJB-specific business methods interface. Let’s call this business
 				methods interface <classname>MyComponent</classname>.
 			</para>
-			<programlisting><![CDATA[public interface MyComponent {
+			<programlisting langauge="java"><![CDATA[public interface MyComponent {
     ...
 }]]></programlisting>
 			<para>
@@ -105,7 +105,7 @@
 				on the controller. This will save the reference as an instance variable in the
 				controller:
 			</para>
-			<programlisting><![CDATA[private MyComponent myComponent;
+			<programlisting langauge="java"><![CDATA[private MyComponent myComponent;
 
 public void setMyComponent(MyComponent myComponent) {
     this.myComponent = myComponent;
@@ -119,7 +119,7 @@ public void setMyComponent(MyComponent myComponent) {
 				the <literal>myComponent</literal> property of the controller is done
 				with a configuration entry such as:
 			</para>
-			<programlisting><![CDATA[<bean id="myComponent"
+			<programlisting language="xml"><![CDATA[<bean id="myComponent"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
   <property name="jndiName" value="ejb/myBean"/>
   <property name="businessInterface" value="com.mycom.MyComponent"/>
@@ -148,7 +148,7 @@ public void setMyComponent(MyComponent myComponent) {
         consider using the <literal>&lt;jee:local-slsb&gt;</literal>
         configuration element in Spring's "jee" namespace:
       </para>
-      <programlisting><![CDATA[<jee:local-slsb id="myComponent" jndi-name="ejb/myBean"
+      <programlisting language="xml"><![CDATA[<jee:local-slsb id="myComponent" jndi-name="ejb/myBean"
       business-interface="com.mycom.MyComponent"/>
 
 <bean id="myController" class="com.mycom.myController">
@@ -278,19 +278,19 @@ public void setMyComponent(MyComponent myComponent) {
         Consider an example Stateless Session bean which actually delegates
         the implementation to a plain java service object. We have the business	interface:
       </para>
-      <programlisting><![CDATA[public interface MyComponent {
+      <programlisting language="java"><![CDATA[public interface MyComponent {
     public void myMethod(...);
     ...
 }]]></programlisting>
       <para>We also have the plain Java implementation object:</para>
-      <programlisting><![CDATA[public class MyComponentImpl implements MyComponent {
+      <programlisting language="java"><![CDATA[public class MyComponentImpl implements MyComponent {
     public String myMethod(...) {
         ...
     }
     ...
 }]]></programlisting>
       <para>And finally the Stateless Session Bean itself:</para>
-      <programlisting><![CDATA[public class MyFacadeEJB extends AbstractStatelessSessionBean
+      <programlisting language="java"><![CDATA[public class MyFacadeEJB extends AbstractStatelessSessionBean
         implements MyFacadeLocal {
 
     private MyComponent myComp;
@@ -351,7 +351,7 @@ public void setMyComponent(MyComponent myComponent) {
         shared container to be used by multiple EJBs or other clients. Doing this is relatively
         simple, by adding code similar to this to the EJB:
       </para>
-      <programlisting><![CDATA[   /**
+      <programlisting langauge="java"><![CDATA[   /**
     * Override default BeanFactoryLocator implementation
     * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
     */
@@ -367,7 +367,7 @@ public void setMyComponent(MyComponent myComponent) {
         <literal>businessApplicationContext.xml</literal> contains the bean	definitions for all business
         service POJOs):
       </para>
-      <programlisting><![CDATA[<beans>
+      <programlisting language="xml"><![CDATA[<beans>
     <bean id="businessBeanFactory" class="org.springframework.context.support.ClassPathXmlApplicationContext">
         <constructor-arg value="businessApplicationContext.xml" />
     </bean>
@@ -376,7 +376,7 @@ public void setMyComponent(MyComponent myComponent) {
         In the above example, the <literal>ServicesConstants.PRIMARY_CONTEXT_ID</literal> constant
         would be defined as follows:
         </para>
-        <programlisting><![CDATA[public static final String ServicesConstants.PRIMARY_CONTEXT_ID = "businessBeanFactory";]]></programlisting>
+        <programlisting language="java"><![CDATA[public static final String ServicesConstants.PRIMARY_CONTEXT_ID = "businessBeanFactory";]]></programlisting>
         <para>
         Please see the respective Javadocs for the <classname>BeanFactoryLocator</classname> and
         <classname>ContextSingletonBeanFactoryLocator</classname> classes for more information on
@@ -395,7 +395,7 @@ public void setMyComponent(MyComponent myComponent) {
         in the EJB component class, or through an <literal>interceptor-binding</literal>
         XML element in the EJB deployment descriptor.
       </para>
-      <programlisting><![CDATA[@Stateless
+      <programlisting langauge="java"><![CDATA[@Stateless
 @Interceptors(SpringBeanAutowiringInterceptor.class)
 public class MyFacadeEJB implements MyFacadeLocal {
 

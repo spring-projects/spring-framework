@@ -33,7 +33,7 @@
 			that makes the <classname>JobDetail</classname> more of an actual JavaBean
 			with sensible defaults. Let's have a look at an example:
 			</para>
-			<programlisting><![CDATA[
+			<programlisting langauge="xml"><![CDATA[
 <bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
   <property name="jobClass" value="example.ExampleJob" />
   <property name="jobDataAsMap">
@@ -50,7 +50,7 @@
 			So in this case, if the <classname>ExampleJob</classname> contains a property
 			named <literal>timeout</literal>, the <classname>JobDetailBean</classname> will
 			automatically apply it:</para>
-			<programlisting><![CDATA[package example;
+			<programlisting language="java"><![CDATA[package example;
 
 public class ExampleJob extends QuartzJobBean {
 
@@ -78,13 +78,13 @@ public class ExampleJob extends QuartzJobBean {
 			<title>Using the <classname>MethodInvokingJobDetailFactoryBean</classname></title>
 			<para>Often you just need to invoke a method on a specific object. Using the
 			<classname>MethodInvokingJobDetailFactoryBean</classname> you can do exactly this:</para>
-			<programlisting><![CDATA[<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+			<programlisting language="xml"><![CDATA[<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
   <property name="targetObject" ref="exampleBusinessObject" />
   <property name="targetMethod" value="doIt" />
 </bean>]]></programlisting>
 			<para>The above example will result in the <literal>doIt</literal> method being called on the
 			<literal>exampleBusinessObject</literal> method (see below):</para>
-			<programlisting><![CDATA[public class ExampleBusinessObject {
+			<programlisting language="java"><![CDATA[public class ExampleBusinessObject {
   
   ]]><lineannotation>// properties and collaborators</lineannotation><![CDATA[
   
@@ -93,7 +93,7 @@ public class ExampleJob extends QuartzJobBean {
   }
 }]]></programlisting>
 
-			<programlisting><![CDATA[
+			<programlisting langauge="xml"><![CDATA[
 <bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>]]></programlisting>
 			<para>Using the <classname>MethodInvokingJobDetailFactoryBean</classname>, you don't need to
 			create one-line jobs that just invoke a method, and you only need to create the actual
@@ -106,7 +106,7 @@ public class ExampleJob extends QuartzJobBean {
 			will not start before the first one has finished. To make jobs resulting from the
 			<classname>MethodInvokingJobDetailFactoryBean</classname> non-concurrent, set the
 			<literal>concurrent</literal> flag to <literal>false</literal>.</para>
-			<programlisting><![CDATA[
+			<programlisting language="xml"><![CDATA[
 <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
   <property name="targetObject" ref="exampleBusinessObject" />
   <property name="targetMethod" value="doIt" />
@@ -132,7 +132,7 @@ public class ExampleJob extends QuartzJobBean {
 				schedules the actual jobs with those triggers.
 			</para>
 			<para>Find below a couple of examples:</para>
-			<programlisting><![CDATA[<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+			<programlisting language="xml"><![CDATA[<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
     <!-- see the example of method invoking job above -->
     <property name="jobDetail" ref="jobDetail" />
     <!-- 10 seconds -->
@@ -149,7 +149,7 @@ public class ExampleJob extends QuartzJobBean {
 			<para>Now we've set up two triggers, one running every 50 seconds with a starting delay of
 			10 seconds and one every morning at 6 AM. To finalize everything, we need to set up the
 			<classname>SchedulerFactoryBean</classname>:</para>
-			<programlisting><![CDATA[<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+			<programlisting language="xml"><![CDATA[<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
     <property name="triggers">
         <list>
             <ref bean="cronTrigger" />
@@ -180,7 +180,7 @@ public class ExampleJob extends QuartzJobBean {
   				Using the <classname>TimerTask</classname> you can create customer
 				timer tasks, similar to Quartz jobs:
 			</para>
-  			<programlisting><![CDATA[public class CheckEmailAddresses extends TimerTask {
+  			<programlisting language="java"><![CDATA[public class CheckEmailAddresses extends TimerTask {
 
   private List emailAddresses;
   
@@ -195,7 +195,7 @@ public class ExampleJob extends QuartzJobBean {
 			<para>
 				Wiring it up is simple:
 			</para>
-			<programlisting><![CDATA[<bean id="checkEmail" class="examples.CheckEmailAddress">
+			<programlisting language="xml"><![CDATA[<bean id="checkEmail" class="examples.CheckEmailAddress">
     <property name="emailAddresses">
         <list>
             <value>test@springframework.org</value>
@@ -225,7 +225,7 @@ public class ExampleJob extends QuartzJobBean {
 				Similar to the Quartz support, the <classname>Timer</classname> support also features
 				a component that allows you to periodically invoke a method:
 			</para>
-			<programlisting><![CDATA[<bean id="doIt" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+			<programlisting language="xml"><![CDATA[<bean id="doIt" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
     <property name="targetObject" ref="exampleBusinessObject" />
     <property name="targetMethod" value="doIt" />
 </bean>]]></programlisting>
@@ -233,7 +233,7 @@ public class ExampleJob extends QuartzJobBean {
 				The above example will result in the <literal>doIt</literal> method being called on the
 				<literal>exampleBusinessObject</literal> (see below):
 			</para>
-			<programlisting><![CDATA[public class BusinessObject {
+			<programlisting language="java"><![CDATA[public class BusinessObject {
   
   ]]><lineannotation>// properties and collaborators</lineannotation><![CDATA[
   
@@ -252,7 +252,7 @@ public class ExampleJob extends QuartzJobBean {
 			purpose: setting up the actual scheduling. The <classname>TimerFactoryBean</classname>
 			sets up an actual <classname>Timer</classname> and schedules the tasks it has
 			references to. You can specify whether or not daemon threads should be used.</para>
-			<programlisting><![CDATA[<bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
+			<programlisting language="xml"><![CDATA[<bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
     <property name="scheduledTimerTasks">
         <list>
             ]]><lineannotation>&lt;!-- see the example above --&gt;</lineannotation><![CDATA[
@@ -445,7 +445,7 @@ public class ExampleJob extends QuartzJobBean {
 			a bean that uses the <classname>ThreadPoolTaskExecutor</classname>
 			to asynchronously print out a set of messages.</para>
 
-			<programlisting><![CDATA[import org.springframework.core.task.TaskExecutor;
+			<programlisting language="java"><![CDATA[import org.springframework.core.task.TaskExecutor;
 
 public class TaskExecutorExample {
 
@@ -484,7 +484,7 @@ public class TaskExecutorExample {
 			<para>To configure the rules that the <interfacename>TaskExecutor</interfacename>
 			will use, simple bean properties have been exposed.</para>
 			
-			<programlisting><![CDATA[<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+			<programlisting language="xml"><![CDATA[<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
   <property name="corePoolSize" value="5" />
   <property name="maxPoolSize" value="10" />
   <property name="queueCapacity" value="25" />
