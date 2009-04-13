@@ -230,26 +230,26 @@ public class RelativePathUriTemplateController {
       <para>Here is an example configuration of a
       <classname>ContentNegotiatingViewResolver</classname></para>
 
-      <programlisting language="xml">	&lt;bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"&gt;
-		&lt;property name="mediaTypes"&gt;
-			&lt;map&gt;
-				&lt;entry key="atom" value="application/atom+xml"/&gt;
-				&lt;entry key="html" value="text/html"/&gt;
-			&lt;/map&gt;
-		&lt;/property&gt;
-		&lt;property name="viewResolvers"&gt;
-			&lt;list&gt;
-				&lt;bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/&gt;
-				&lt;bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
-					&lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
-					&lt;property name="suffix" value=".jsp"/&gt;
-				&lt;/bean&gt;
-			&lt;/list&gt;
-		&lt;/property&gt;
-	&lt;/bean&gt;
-	
-	
-	&lt;bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/&gt;</programlisting>
+      <programlisting language="xml">    &lt;bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"&gt;
+        &lt;property name="mediaTypes"&gt;
+            &lt;map&gt;
+                &lt;entry key="atom" value="application/atom+xml"/&gt;
+                &lt;entry key="html" value="text/html"/&gt;
+            &lt;/map&gt;
+        &lt;/property&gt;
+        &lt;property name="viewResolvers"&gt;
+            &lt;list&gt;
+                &lt;bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/&gt;
+                &lt;bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+                    &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+                    &lt;property name="suffix" value=".jsp"/&gt;
+                &lt;/bean&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+    
+    
+    &lt;bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/&gt;</programlisting>
 
       <para>The <classname>InternalResourceViewResolver</classname> handles
       the translation of view names and JSP pages while the
@@ -290,16 +290,16 @@ public class RelativePathUriTemplateController {
 
       <programlisting language="java">@Controller
 public class ContentController {
-	
-	private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
-	
-	@RequestMapping(value="/content", method=RequestMethod.GET)
-	public ModelAndView getContent() {
-		ModelAndView mav = new ModelAndView();
-		mav.setViewName("content");
-		mav.addObject("sampleContentList", contentList);
-		return mav;
-	}
+    
+    private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
+    
+    @RequestMapping(value="/content", method=RequestMethod.GET)
+    public ModelAndView getContent() {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("content");
+        mav.addObject("sampleContentList", contentList);
+        return mav;
+    }
 
 }</programlisting>
 
@@ -340,7 +340,7 @@ public class ContentController {
         updated to support setting the HTTP method. For example, the following
         snippet taken from the updated Petclinic sample</para>
 
-        <programlisting language="html">&lt;form:form method="delete"&gt;
+        <programlisting language="xml">&lt;form:form method="delete"&gt;
     &lt;p class="submit"&gt;&lt;input type="submit" value="Delete Pet"/&gt;&lt;/p&gt;
 &lt;/form:form&gt;</programlisting>
 

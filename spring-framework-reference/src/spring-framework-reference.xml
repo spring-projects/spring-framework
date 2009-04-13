@@ -20,6 +20,7 @@
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY view				SYSTEM "view.xml">
 <!ENTITY web-integration		SYSTEM "web-integration.xml">
+<!ENTITY rest               SYSTEM "rest.xml">
 <!ENTITY portlet            SYSTEM "portlet.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
@@ -299,6 +300,7 @@
 		&mvc;
 		&view;
 		&web-integration;
+		&rest;
 		&portlet;
 	</part>
 	<part id="spring-integration">
