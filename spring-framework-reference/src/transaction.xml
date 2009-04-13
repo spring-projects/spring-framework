@@ -149,7 +149,7 @@
     defined by the
     <interfacename>org.springframework.transaction.PlatformTransactionManager</interfacename>
     interface, shown below:</para>
-    <programlisting><![CDATA[public interface PlatformTransactionManager {
+    <programlisting language="java"><![CDATA[public interface PlatformTransactionManager {
 
   TransactionStatus getTransaction(TransactionDefinition definition)
     throws TransactionException;
@@ -223,7 +223,7 @@
     way for transactional code to control transaction execution and query
     transaction status. The concepts should be familiar, as they are common to
     all transaction APIs:</para>
-    <programlisting><![CDATA[public interface TransactionStatus {
+    <programlisting language="java"><![CDATA[public interface TransactionStatus {
 
   boolean isNewTransaction();
 
@@ -246,7 +246,7 @@
     <para>We must define a JDBC <interfacename>DataSource</interfacename>, and
     then use the Spring <classname>DataSourceTransactionManager</classname>, giving
     it a reference to the <interfacename>DataSource</interfacename>.</para>
-    <programlisting><![CDATA[<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <programlisting language="xml"><![CDATA[<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
   <property name="driverClassName" value="${jdbc.driverClassName}" />
   <property name="url" value="${jdbc.url}" />
   <property name="username" value="${jdbc.username}" />
@@ -254,7 +254,7 @@
 </bean>]]></programlisting>
     <para>The related <interfacename>PlatformTransactionManager</interfacename> bean
     definition will look like this:</para>
-    <programlisting><![CDATA[<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <programlisting language="xml"><![CDATA[<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
   <property name="dataSource" ref="dataSource"/>
 </bean>]]></programlisting>
     <para>If we use JTA in a J2EE container, as in the <filename>'dataAccessContext-jta.xml'</filename>
@@ -263,7 +263,7 @@
     The <classname>JtaTransactionManager</classname> doesn't need to know about the
     <interfacename>DataSource</interfacename>, or any other specific resources, as
     it will use the container's global transaction management infrastructure.</para>
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:jee="http://www.springframework.org/schema/jee"
@@ -301,7 +301,7 @@ xsi:schemaLocation="
     <interfacename>DataSource</interfacename>, the
     <classname>HibernateTransactionManager</classname> needs a reference to the
     <interfacename>SessionFactory</interfacename>.</para>
-    <programlisting><![CDATA[<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <programlisting language="xml"><![CDATA[<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
   <property name="dataSource" ref="dataSource" />
   <property name="mappingResources">
   <list>
@@ -320,7 +320,7 @@ xsi:schemaLocation="
 </bean>]]></programlisting>
     <para>With Hibernate and JTA transactions, we can simply use the
     <classname>JtaTransactionManager</classname> as with JDBC or any other resource strategy.</para>
-    <programlisting><![CDATA[<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>]]></programlisting>
+    <programlisting language="xml"><![CDATA[<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>]]></programlisting>
     <para>Note that this is identical to JTA configuration for any resource,
     as these are global transactions, which can enlist any transactional
     resource.</para>
@@ -377,7 +377,7 @@ xsi:schemaLocation="
       <interfacename>DataSource</interfacename>, you would instead use Spring's
       <classname>org.springframework.jdbc.datasource.DataSourceUtils</classname>
       class as follows:</para>
-      <programlisting><![CDATA[Connection conn = DataSourceUtils.getConnection(dataSource);]]></programlisting>
+      <programlisting language="java"><![CDATA[Connection conn = DataSourceUtils.getConnection(dataSource);]]></programlisting>
       <para>If an existing transaction exists, and already has a connection
       synchronized (linked) to it, that instance will be returned. Otherwise,
       the method call will trigger the creation of a new connection, which
@@ -543,7 +543,7 @@ xsi:schemaLocation="
       (The intent is to convey the concepts, and using the rote <classname>Foo</classname> and
       <classname>Bar</classname> tropes means that you can concentrate on the transaction
       usage and not have to worry about the domain model.)</para>
-      <programlisting><lineannotation>// the service interface that we want to make transactional</lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// the service interface that we want to make transactional</lineannotation><![CDATA[
 
 package x.y.service;
 
@@ -558,7 +558,7 @@ public interface FooService {
   void updateFoo(Foo foo);
 
 }]]></programlisting>
-      <programlisting><lineannotation>// an implementation of the above interface</lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// an implementation of the above interface</lineannotation><![CDATA[
 
 package x.y.service;
 
@@ -594,7 +594,7 @@ public class DefaultFooService implements FooService {
       <literal>updateFoo(Foo)</literal>) have to execute in the context of a transaction
 			with read-write semantics. Don't worry about taking the following configuration in
 			all at once; everything will be explained in detail in the next few paragraphs.</para>
-      <programlisting><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
+      <programlisting language="xml"><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -678,7 +678,7 @@ public class DefaultFooService implements FooService {
       <para>A common requirement is to make an entire service layer transactional.
       The best way to do this is simply to change the pointcut expression to match
       any operation in your service layer. For example:</para>
-      <programlisting><![CDATA[<aop:config>
+      <programlisting language="xml"><![CDATA[<aop:config>
   <aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.*.*(..))"/>
   <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>
   </aop:config>]]></programlisting>
@@ -696,7 +696,7 @@ public class DefaultFooService implements FooService {
       be started, suspended, be marked as read-only, etc., depending on the
       transaction configuration associated with that method. Consider the following
 			program that test drives the above configuration.</para>
-      <programlisting><![CDATA[public final class Boot {
+      <programlisting language="java"><![CDATA[public final class Boot {
 
   public static void main(final String[] args) throws Exception {
     ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml", Boot.class);
@@ -710,7 +710,7 @@ public class DefaultFooService implements FooService {
       <methodname>insertFoo(..)</methodname> method of the
       <classname>DefaultFooService</classname> class have been truncated in
       the interest of clarity.)</emphasis></para>
-      <programlisting>  <lineannotation><emphasis role="bold">&lt;!-- the Spring container is starting up... --&gt;</emphasis></lineannotation><![CDATA[
+      <programlisting language="xml">  <lineannotation><emphasis role="bold">&lt;!-- the Spring container is starting up... --&gt;</emphasis></lineannotation><![CDATA[
 [AspectJInvocationContextExposingAdvisorAutoProxyCreator] - Creating implicit proxy
     for bean 'fooService' with 0 common interceptors and 1 specific interceptors
   ]]><lineannotation><emphasis role="bold">&lt;!-- the <classname>DefaultFooService</classname> is actually proxied --&gt;</emphasis></lineannotation><![CDATA[
@@ -767,7 +767,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 			for rollback can be configured. Find below a snippet of XML configuration that
 			demonstrates how one would configure rollback for a checked, application-specific
 			<exceptionname>Exception</exceptionname> type.</para>
-      <programlisting><![CDATA[<tx:advice id="txAdvice" transaction-manager="txManager">
+      <programlisting language="xml"><![CDATA[<tx:advice id="txAdvice" transaction-manager="txManager">
   <tx:attributes>
   <tx:method name="get*" read-only="true" ]]><lineannotation><emphasis role="bold">rollback-for="NoProductInStockException"</emphasis></lineannotation><![CDATA[/>
   <tx:method name="*"/>
@@ -778,7 +778,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 			In the example configuration below, we effectively are telling the Spring Framework's transaction
 			infrastructure to commit the attendant transaction even in the face of an unhandled
 			<exceptionname>InstrumentNotFoundException</exceptionname>.</para>
-      <programlisting><![CDATA[<tx:advice id="txAdvice">
+      <programlisting language="xml"><![CDATA[<tx:advice id="txAdvice">
   <tx:attributes>
   <tx:method name="updateStock" ]]><lineannotation><emphasis role="bold">no-rollback-for="InstrumentNotFoundException"</emphasis></lineannotation><![CDATA[/>
   <tx:method name="*"/>
@@ -789,7 +789,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 			<emphasis>strongest</emphasis> matching rule wins. So in the case of the following configuration,
 			any exception other than an <exceptionname>InstrumentNotFoundException</exceptionname> would result in the
 			attendant transaction being marked for rollback.</para>
-      <programlisting><![CDATA[<tx:advice id="txAdvice">
+      <programlisting language="xml"><![CDATA[<tx:advice id="txAdvice">
   <tx:attributes>
   <tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
   </tx:attributes>
@@ -797,7 +797,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 			<para>The second way to indicate that a rollback is required is to do so
 			<emphasis>programmatically</emphasis>. Although very simple, this way is quite invasive, and tightly couples
 			your code to the Spring Framework's transaction infrastructure, as can be seen below:</para>
-      <programlisting><![CDATA[public void resolvePosition() {
+      <programlisting language="java"><![CDATA[public void resolvePosition() {
   try {
     ]]><lineannotation>// some business logic...</lineannotation><![CDATA[
   } catch (NoProductInStockException ex) {
@@ -822,7 +822,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
       defined in that package (or in subpackages) and that have names ending in
       <literal>'Service'</literal> have the default transactional configuration, you would write
       the following:</para>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:aop="http://www.springframework.org/schema/aop"
@@ -863,7 +863,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
     <para>Find below an example of configuring two distinct beans with totally different
     transactional settings.</para>
 
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:aop="http://www.springframework.org/schema/aop"
@@ -1015,15 +1015,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             </tbody>
           </tgroup>
         </table>
-      </para>
-			<para>At the time of writing it is not possible to have explicit control over the
-			name of a transaction, where 'name' means the transaction name that will be shown
-			in a transaction monitor, if applicable (for example, WebLogic's transaction
-			monitor), and in logging output. For declarative transactions, the transaction
-			name is always the fully-qualified class name + "." + method name of the
-			transactionally-advised class. For example
-			<literal>'com.foo.BusinessService.handlePayment'</literal>.</para>
-		</section>
+	</section>
 
     <section id="transaction-declarative-annotations">
       <title>Using <interfacename>@Transactional</interfacename></title>
@@ -1041,7 +1033,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
       <para>The ease-of-use afforded by the use of the <interfacename>@Transactional</interfacename>
       annotation is best illustrated with an example, after which all of the details
       will be explained. Consider the following class definition:</para>
-      <programlisting><lineannotation>// the service class that we want to make transactional</lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// the service class that we want to make transactional</lineannotation><![CDATA[
 ]]><emphasis role="bold">@Transactional</emphasis><![CDATA[
 public class DefaultFooService implements FooService {
 
@@ -1056,7 +1048,7 @@ public class DefaultFooService implements FooService {
       <para>When the above POJO is defined as a bean in a Spring IoC container, the bean
       instance can be made transactional by adding merely <emphasis>one</emphasis> line of
       XML configuration, like so:</para>
-      <programlisting><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
+      <programlisting language="xml"><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1231,7 +1223,7 @@ public class DefaultFooService implements FooService {
       <methodname>updateFoo(Foo)</methodname> method in the same class takes precedence
       over the transactional settings defined at the class level.</para>
 
-      <programlisting><![CDATA[@Transactional(readOnly = true)
+      <programlisting language="java"><![CDATA[@Transactional(readOnly = true)
 public class DefaultFooService implements FooService {
 
   public Foo getFoo(String fooName) {
@@ -1362,8 +1354,7 @@ public class DefaultFooService implements FooService {
 				transaction name is always the fully-qualified class name + "." + method name of the
 				transactionally-advised class. For example, if the <methodname>handlePayment(..)</methodname>
 				method of the <classname>BusinessService</classname> class started a transaction, the name of the
-				transaction would be:</para>
-				<programlisting><![CDATA[com.foo.BusinessService.handlePayment]]></programlisting>
+				transaction would be: <literal>com.foo.BusinessService.handlePayment</literal>.</para>
 			</section>
     </section>
 
@@ -1476,7 +1467,7 @@ public class DefaultFooService implements FooService {
       <para>Here is the code for a simple profiling aspect. The
       ordering of advice is controlled via the <interfacename>Ordered</interfacename>
       interface. For full details on advice ordering, see <xref linkend="aop-ataspectj-advice-ordering"/>.</para>
-      <programlisting><![CDATA[package x.y;
+      <programlisting language="java"><![CDATA[package x.y;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.util.StopWatch;
@@ -1510,7 +1501,7 @@ public class SimpleProfiler implements Ordered {
   }
 }
 ]]></programlisting>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:aop="http://www.springframework.org/schema/aop"
@@ -1557,7 +1548,7 @@ public class SimpleProfiler implements Ordered {
       aspects is effected in a similar fashion.</para>
       <para>Finally, find below some example configuration for effecting the same
       setup as above, but using the purely XML declarative approach.</para>
-      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:aop="http://www.springframework.org/schema/aop"
@@ -1640,7 +1631,7 @@ public class SimpleProfiler implements Ordered {
         <xref linkend="transaction-declarative-annotations"/> and <xref linkend="aop"/>
         respectively.</para>
       </note>
-      <programlisting><lineannotation>// construct an appropriate transaction manager </lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// construct an appropriate transaction manager </lineannotation><![CDATA[
 DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
 
 ]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it; this must be done before executing any transactional methods</lineannotation><![CDATA[
@@ -1709,7 +1700,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
 			pass an instance of your custom <interfacename>TransactionCallback</interfacename>
 			to the <methodname>execute(..)</methodname> method exposed on the
 			<classname>TransactionTemplate</classname>. </para>
-      <programlisting><![CDATA[public class SimpleService implements Service {
+      <programlisting language="java"><![CDATA[public class SimpleService implements Service {
 
   ]]><lineannotation>// single <classname>TransactionTemplate</classname> shared amongst all methods in this instance</lineannotation><![CDATA[
   private final TransactionTemplate transactionTemplate;
@@ -1734,7 +1725,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
       <para>If there is no return value, use the convenient
       <classname>TransactionCallbackWithoutResult</classname> class via an
       anonymous class like so:</para>
-      <programlisting><![CDATA[transactionTemplate.execute(new ]]><emphasis role="bold">TransactionCallbackWithoutResult</emphasis><![CDATA[() {
+      <programlisting language="java"><![CDATA[transactionTemplate.execute(new ]]><emphasis role="bold">TransactionCallbackWithoutResult</emphasis><![CDATA[() {
 
   protected void doInTransactionWithoutResult(TransactionStatus status) {
     updateOperation1();
@@ -1744,7 +1735,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
       <para>Code within the callback can roll the transaction back by calling
       the <literal>setRollbackOnly()</literal> method on the supplied
       <interfacename>TransactionStatus</interfacename> object.</para>
-      <programlisting><![CDATA[transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+      <programlisting language="java"><![CDATA[transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
   protected void doInTransactionWithoutResult(TransactionStatus status) {
     try {
@@ -1765,7 +1756,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
 				Find below an example of programmatically customizing the
 				transactional settings for a specific <classname>TransactionTemplate</classname>.
 				</para>
-      	<programlisting><![CDATA[public class SimpleService implements Service {
+      	<programlisting language="java"><![CDATA[public class SimpleService implements Service {
 
   private final TransactionTemplate transactionTemplate;
 
@@ -1782,7 +1773,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
 				<para>Find below an example of defining a <classname>TransactionTemplate</classname> with some custom
 				transactional settings, using Spring XML configuration. The '<literal>sharedTransactionTemplate</literal>'
 				can then be injected into as many services as are required.</para>
-				<programlisting><![CDATA[<bean id="sharedTransactionTemplate"
+				<programlisting language="xml"><![CDATA[<bean id="sharedTransactionTemplate"
     class="org.springframework.transaction.support.TransactionTemplate">
   <property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
   <property name="timeout" value="30"/>
@@ -1811,7 +1802,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
       <interfacename>TransactionDefinition</interfacename> and
       <interfacename>TransactionStatus</interfacename> objects you can
       initiate transactions, rollback and commit.</para>
-       <programlisting><![CDATA[DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+       <programlisting language="java"><![CDATA[DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 ]]><lineannotation>// explicitly setting the transaction name is something that can only be done programmatically</lineannotation><![CDATA[
 def.setName("SomeTxName");
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
