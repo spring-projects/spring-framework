@@ -70,10 +70,10 @@
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12" conf="test->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.2.6.ga" conf="test->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.3.0.ga" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.4.0.GA" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations.common" rev="3.3.0.ga" conf="test->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.1.ga" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.2.0" conf="optional, runtime->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="test->runtime"/>
