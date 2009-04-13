@@ -341,7 +341,7 @@
     <para>Consider the following <classname>DispatcherServlet</classname>
     servlet configuration (in the <literal>'web.xml'</literal> file.)</para>
 
-    <programlisting>&lt;web-app&gt;
+    <programlisting language="xml">&lt;web-app&gt;
 
     &lt;servlet&gt;
         &lt;servlet-name&gt;<emphasis role="bold">golfing</emphasis>&lt;/servlet-name&gt;
@@ -613,7 +613,7 @@
     <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
     interface, the source code for which is listed below.</para>
 
-    <programlisting>public interface Controller {
+    <programlisting language="java">public interface Controller {
 
     /**
      * Process the request and return a ModelAndView object which the DispatcherServlet
@@ -731,7 +731,7 @@
       consisting of a class and a declaration in the web application
       context.</para>
 
-      <programlisting>package samples;
+      <programlisting language="java">package samples;
 
 public class SampleController extends AbstractController {
 
@@ -745,7 +745,7 @@ public class SampleController extends AbstractController {
     }
 }</programlisting>
 
-      <programlisting>&lt;bean id="sampleController" class="samples.SampleController"&gt;
+      <programlisting language="xml">&lt;bean id="sampleController" class="samples.SampleController"&gt;
     &lt;property name="cacheSeconds" value="120"/&gt;
 &lt;/bean&gt;</programlisting>
 
@@ -843,18 +843,18 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       <para>The standard signature (mirrors the
       <interfacename>Controller</interfacename> interface method).</para>
 
-      <programlisting>public ModelAndView displayCatalog(HttpServletRequest, HttpServletResponse)</programlisting>
+      <programlisting language="java">public ModelAndView displayCatalog(HttpServletRequest, HttpServletResponse)</programlisting>
 
       <para>This signature accepts a <classname>Login</classname> argument
       that will be populated (bound) with parameters retrieved from the
       request.</para>
 
-      <programlisting>public ModelAndView login(HttpServletRequest, HttpServletResponse, Login)</programlisting>
+      <programlisting language="java">public ModelAndView login(HttpServletRequest, HttpServletResponse, Login)</programlisting>
 
       <para>This signature requires that the request already have a valid
       session.</para>
 
-      <programlisting>public ModelAndView viewCart(HttpServletRequest, HttpServletResponse, HttpSession)</programlisting>
+      <programlisting language="java">public ModelAndView viewCart(HttpServletRequest, HttpServletResponse, HttpSession)</programlisting>
 
       <para>This signature accepts a <classname>Product</classname> argument
       that will be populated (bound) with parameters retrieved from the
@@ -864,13 +864,13 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       always be the final argument (fourth when a session is specified, or
       third otherwise).</para>
 
-      <programlisting>public ModelAndView updateCart(HttpServletRequest, HttpServletResponse, HttpSession, Product)</programlisting>
+      <programlisting language="java">public ModelAndView updateCart(HttpServletRequest, HttpServletResponse, HttpSession, Product)</programlisting>
 
       <para>This signature has a <literal>void</literal> return type
       indicating that the handler method assumes the responsibility of writing
       the response.</para>
 
-      <programlisting>public void home(HttpServletRequest, HttpServletResponse)</programlisting>
+      <programlisting language="java">public void home(HttpServletRequest, HttpServletResponse)</programlisting>
 
       <para>This signature has a <interfacename>Map</interfacename> return
       type indicating that a view name translator will be responsible for
@@ -878,7 +878,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       consist of the <interfacename>Map's</interfacename> entries (see the
       section entitled <xref linkend="mvc-coc" /> below).</para>
 
-      <programlisting>public Map list(HttpServletRequest, HttpServletResponse)</programlisting>
+      <programlisting language="java">public Map list(HttpServletRequest, HttpServletResponse)</programlisting>
 
       <para>The <interfacename>MethodNameResolver</interfacename> is
       responsible for resolving method names based on the specifics of the
@@ -944,13 +944,13 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       <classname>Exception</classname>. Here is an example signature for one
       such <classname>Exception</classname> handling method.</para>
 
-      <programlisting>public ModelAndView processException(HttpServletRequest, HttpServletResponse, IllegalArgumentException)</programlisting>
+      <programlisting language="java">public ModelAndView processException(HttpServletRequest, HttpServletResponse, IllegalArgumentException)</programlisting>
 
       <para>Let's look at an example showing the delegate-style of
       <classname>MultiActionController</classname> usage in conjunction with
       the <classname>ParameterMethodNameResolver</classname>.</para>
 
-      <programlisting>&lt;bean id="paramMultiController"
+      <programlisting language="xml">&lt;bean id="paramMultiController"
       class="org.springframework.web.servlet.mvc.multiaction.MultiActionController"&gt;
 
     &lt;property name="methodNameResolver"&gt;
@@ -966,7 +966,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
 &lt;/bean&gt;
 }</programlisting>
 
-      <programlisting>public class SampleDelegate {
+      <programlisting language="java">public class SampleDelegate {
 
     public ModelAndView retrieveIndex(HttpServletRequest req, HttpServletResponse resp) {
         return new ModelAndView("index", "date", new Long(System.currentTimeMillis()));
@@ -977,7 +977,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       <classname>PropertiesMethodNameResolver</classname> to match any number
       couple of URLs to the method we defined:</para>
 
-      <programlisting>&lt;bean id="propsResolver"
+      <programlisting language="xml">&lt;bean id="propsResolver"
       class="org....mvc.multiaction.PropertiesMethodNameResolver"&gt;
     &lt;property name="mappings"&gt;
         &lt;value&gt;
@@ -1204,7 +1204,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       appropriate form <interfacename>Controller</interfacename> as
       follows:</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
   &lt;bean id="handlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/&gt;
 
   &lt;bean name="/editaccount.form" class="org.springframework.web.servlet.mvc.SimpleFormController"&gt;
@@ -1222,7 +1222,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       <literal>web.xml</literal> as well, to let through all the requests
       ending with <literal>.form</literal>.</para>
 
-      <programlisting>&lt;web-app&gt;
+      <programlisting language="xml">&lt;web-app&gt;
     ...
     &lt;servlet&gt;
         &lt;servlet-name&gt;sample&lt;/servlet-name&gt;
@@ -1258,7 +1258,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       <classname>org.springframework.util.PathMatcher</classname> class). Here
       is an example:</para>
 
-      <programlisting>&lt;web-app&gt;
+      <programlisting language="xml">&lt;web-app&gt;
     ...
     &lt;servlet&gt;
         &lt;servlet-name&gt;sample&lt;/servlet-name&gt;
@@ -1284,7 +1284,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       all requests ending with .html and <literal>.form</literal> to be
       handled by the sample dispatcher servlet.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
         
     <lineannotation>&lt;!-- no <literal>'id'</literal> required, <interfacename>HandlerMapping</interfacename> beans are automatically detected by the <classname>DispatcherServlet</classname> --&gt;</lineannotation>
     &lt;bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
@@ -1354,7 +1354,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       requests and reroutes the user to a specific page if the time is not
       between 9 a.m. and 6 p.m.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
     &lt;bean id="handlerMapping"
           class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
         &lt;property name="interceptors"&gt;
@@ -1377,7 +1377,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
     &lt;/bean&gt;
 &lt;beans&gt;</programlisting>
 
-      <programlisting>package samples;
+      <programlisting language="java">package samples;
 
 public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
@@ -1542,7 +1542,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       translates a view name to a URL and hands the request over to the
       RequestDispatcher to render the view.</para>
 
-      <programlisting>&lt;bean id="viewResolver"
+      <programlisting language="xml">&lt;bean id="viewResolver"
       class="org.springframework.web.servlet.view.UrlBasedViewResolver"&gt;
     &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
     &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
@@ -1557,7 +1557,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>When mixing different view technologies in a web application, you
       can use the <classname>ResourceBundleViewResolver</classname>:</para>
 
-      <programlisting>&lt;bean id="viewResolver"
+      <programlisting language="xml">&lt;bean id="viewResolver"
       class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
     &lt;property name="basename" value="views"/&gt;
     &lt;property name="defaultParentView" value="parentView"/&gt;
@@ -1601,7 +1601,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       Excel views (which are not supported by the
       <classname>InternalResourceViewResolver</classname>):</para>
 
-      <programlisting>&lt;bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+      <programlisting language="xml">&lt;bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
   &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
   &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
   &lt;property name="suffix" value=".jsp"/&gt;
@@ -1801,7 +1801,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       below an example of defining a
       <classname>CookieLocaleResolver</classname>.</para>
 
-      <programlisting>&lt;bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"&gt;
+      <programlisting language="xml">&lt;bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"&gt;
 
     &lt;property name="cookieName" value="clientlanguage"/&gt;
     
@@ -1884,7 +1884,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       on the <interfacename>LocaleResolver</interfacename> that also exists in
       the context).</para>
 
-      <programlisting>&lt;bean id="localeChangeInterceptor"
+      <programlisting language="xml">&lt;bean id="localeChangeInterceptor"
       class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"&gt;
     &lt;property name="paramName" value="siteLanguage"/&gt;
 &lt;/bean&gt;
@@ -1959,7 +1959,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       fragment uses the theme defined above to customize the look and
       feel:</para>
 
-      <programlisting>&lt;%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%&gt;
+      <programlisting language="xml">&lt;%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%&gt;
 &lt;html&gt;
    &lt;head&gt;
       &lt;link rel="stylesheet" href="&lt;spring:theme code="styleSheet"/&gt;" type="text/css"/&gt;
@@ -2079,7 +2079,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <para>The following example shows how to use the
       <classname>CommonsMultipartResolver</classname>:</para>
 
-      <programlisting>&lt;bean id="multipartResolver"
+      <programlisting language="xml">&lt;bean id="multipartResolver"
     class="org.springframework.web.multipart.commons.CommonsMultipartResolver"&gt;
 
     <lineannotation>&lt;!-- one of the properties available; the maximum file size in bytes --&gt;</lineannotation>
@@ -2089,7 +2089,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <para>This is an example using the
       <classname>CosMultipartResolver</classname>:</para>
 
-      <programlisting>&lt;bean id="multipartResolver" class="org.springframework.web.multipart.cos.CosMultipartResolver"&gt;
+      <programlisting language="xml">&lt;bean id="multipartResolver" class="org.springframework.web.multipart.cos.CosMultipartResolver"&gt;
 
     <lineannotation>&lt;!-- one of the properties available; the maximum file size in bytes --&gt;</lineannotation>
     &lt;property name="maxUploadSize" value="100000"/&gt;
@@ -2124,7 +2124,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       Spring bind the file onto your form (backing object). To actually let
       the user upload a file, we have to create a (HTML) form:</para>
 
-      <programlisting>&lt;html&gt;
+      <programlisting language="xml">&lt;html&gt;
     &lt;head&gt;
         &lt;title&gt;Upload a file please&lt;/title&gt;
     &lt;/head&gt;
@@ -2159,7 +2159,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       resolver, a url mapping to a controller that will process the bean, and
       the controller itself.</para>
 
-      <programlisting>&lt;beans&gt;
+      <programlisting language="xml">&lt;beans&gt;
   <lineannotation>&lt;!-- lets use the Commons-based implementation of the MultipartResolver interface --&gt;</lineannotation>
     &lt;bean id="multipartResolver"
         class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/&gt;
@@ -2183,7 +2183,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <para>After that, create the controller and the actual class to hold the
       file property.</para>
 
-      <programlisting>public class FileUploadController extends SimpleFormController {
+      <programlisting language="java">public class FileUploadController extends SimpleFormController {
 
     protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
             Object command, BindException errors) throws ServletException, IOException {
@@ -2235,7 +2235,7 @@ public class FileUploadBean {
       <para>An equivalent example in which a file is bound straight to a
       String-typed property on a (form backing) object might look like:</para>
 
-      <programlisting>public class FileUploadController extends SimpleFormController {
+      <programlisting language="java">public class FileUploadController extends SimpleFormController {
 
     protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
             Object command, BindException errors) throws ServletException, IOException {
@@ -2286,7 +2286,7 @@ public class FileUploadBean {
       register any custom <interfacename>PropertyEditor</interfacename>
       because there is no type conversion to be performed.</para>
 
-      <programlisting>public class FileUploadController extends SimpleFormController {
+      <programlisting language="java">public class FileUploadController extends SimpleFormController {
 
     protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
             Object command, BindException errors) throws ServletException, IOException {
@@ -2379,7 +2379,7 @@ public class FileUploadBean {
       <interfacename>Controller</interfacename> implementation. Take especial
       notice of the <emphasis>name</emphasis> of the class.</para>
 
-      <programlisting>public class <emphasis role="bold">ViewShoppingCartController</emphasis> implements Controller {
+      <programlisting language="java">public class <emphasis role="bold">ViewShoppingCartController</emphasis> implements Controller {
 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
         <lineannotation>// the implementation is not hugely important for this example...</lineannotation>
@@ -2389,7 +2389,7 @@ public class FileUploadBean {
       <para>Here is a snippet from the attendent Spring Web MVC configuration
       file...</para>
 
-      <programlisting>&lt;bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/&gt;
+      <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/&gt;
                 
 &lt;bean id="<emphasis role="bold">viewShoppingCart</emphasis>" class="x.y.z.ViewShoppingCartController"&gt;
     <lineannotation>&lt;!-- inject dependencies as required... --&gt;</lineannotation>
@@ -2484,7 +2484,7 @@ public class FileUploadBean {
       objects are added to the <classname>ModelAndView</classname> without any
       associated name being specified.</para>
 
-      <programlisting>public class DisplayShoppingCartController implements Controller {
+      <programlisting language="java">public class DisplayShoppingCartController implements Controller {
 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
         
@@ -2612,7 +2612,7 @@ public class FileUploadBean {
       request URLs to logical view names in a fashion that is probably best
       explained by recourse to an example.</para>
 
-      <programlisting>public class RegistrationController implements Controller {
+      <programlisting language="java">public class RegistrationController implements Controller {
                 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
         <lineannotation>// process the request...</lineannotation>
@@ -2623,7 +2623,7 @@ public class FileUploadBean {
     }
 }</programlisting>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
         "http://www.springframework.org/dtd/spring-beans-2.0.dtd"&gt;
 &lt;beans&gt;
@@ -2734,7 +2734,7 @@ public class FileUploadBean {
       and/or <classname>AnnotationMethodHandlerAdapter</classname> is defined as well
       - provided that you intend to use <interfacename>@RequestMapping</interfacename>.</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -2784,7 +2784,7 @@ public class FileUploadBean {
       the <emphasis>spring-context</emphasis> schema as shown in the following
       XML snippet:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p" 
@@ -2832,7 +2832,7 @@ public class FileUploadBean {
       <para>The following is an example of a form controller from the
       PetClinic sample application using this annotation:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 <emphasis role="bold">@RequestMapping("/editPet.do")</emphasis>
 @SessionAttributes("pet")
 public class EditPetForm {
@@ -2878,7 +2878,7 @@ public class EditPetForm {
       PetClinic sample application using
       <classname>@RequestMapping</classname>:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 public class ClinicController {
 
     private final Clinic clinic;
@@ -3125,7 +3125,7 @@ public class ClinicController {
       <para>The following code snippet from the PetClinic sample application
       shows the usage:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 @RequestMapping("/editPet.do")
 @SessionAttributes("pet")
 public class EditPetForm {
@@ -3182,7 +3182,7 @@ public class EditPetForm {
       <para>The following code snippet shows these two usages of this
       annotation:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 @RequestMapping("/editPet.do")
 @SessionAttributes("pet")
 public class EditPetForm {
@@ -3224,7 +3224,7 @@ public class EditPetForm {
       <para>The following code snippet shows the usage of this
       annotation:</para>
 
-      <programlisting>@Controller
+      <programlisting language="java">@Controller
 @RequestMapping("/editPet.do")
 <emphasis role="bold">@SessionAttributes("pet")</emphasis>
 public class EditPetForm {
@@ -3241,7 +3241,7 @@ public class EditPetForm {
     <para>Let us consider that the following cookie has been received with an http request: </para>
     <programlisting>JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84</programlisting>		
     <para>The following code sample allows you to easily get the value of the "JSESSIONID"cookie:</para>
-    <programlisting>@RequestMapping("/displayHeaderInfo.do")
+    <programlisting language="java">@RequestMapping("/displayHeaderInfo.do")
 public void displayHeaderInfo(<emphasis role="bold">@CookieValue("JSESSIONID")</emphasis> String cookie)  {
 
   //...
@@ -3266,7 +3266,7 @@ Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
 Keep-Alive              300
 ]]></programlisting>		
       <para>The following code sample allows you to easily get the value of the "Accept-Encoding" and "Keep-Alive" headers:</para>
-      <programlisting>@RequestMapping("/displayHeaderInfo.do")
+      <programlisting language="java">@RequestMapping("/displayHeaderInfo.do")
   public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encoding")</emphasis> String encoding, 
                                 <emphasis role="bold">@RequestHeader("Keep-Alive")</emphasis> long keepAlive)  {
 
@@ -3314,7 +3314,7 @@ Keep-Alive              300
         <classname>CustomDateEditor</classname> for all
         <classname>java.util.Date</classname> form properties.</para>
 
-        <programlisting>@Controller
+        <programlisting language="java">@Controller
 public class MyFormController {
 
     <emphasis role="bold">@InitBinder</emphasis>
@@ -3346,7 +3346,7 @@ public class MyFormController {
         which configures PropertyEditors required by several of the PetClinic
         controllers.</para>
 
-        <programlisting>&lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
+        <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
     &lt;property name="cacheSeconds" value="0" /&gt;
     &lt;property name="webBindingInitializer"&gt;
         &lt;bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" /&gt;
