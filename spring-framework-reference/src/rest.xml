@@ -261,7 +261,7 @@ public class RelativePathUriTemplateController {
       bean is a class that inherits from
       <classname>AbstractAtomFeedView</classname> which returns an Atom RSS
       feed. For more information on creating an Atom Feed representation see
-      the section 'Atom Views'. </para>
+      the section 'Atom Views'.</para>
 
       <para>In this configuration, if a request is made with a .html extension
       the view resolver will look for a view that matches the text/html media
@@ -309,7 +309,94 @@ public class ContentController {
     <section id="rest-views">
       <title>Views</title>
 
-      <para>blah</para>
+      <para>Several views were added to Spring 3 to help support creating
+      RESTful services. They are:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><classname>AbstractAtomFeedView</classname> - return an Atom
+          feed</para>
+        </listitem>
+
+        <listitem>
+          <para><classname>AbstractRssFeedView</classname> - returns a RSS
+          feed</para>
+        </listitem>
+
+        <listitem>
+          <para><classname>MarshallingView</classname> - returns an XML
+          representation using Spring's Objecct/XML mapping (OXM)
+          functionality</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Available separately is the <classname>JacksonJsonView</classname>
+      included as part of the Spring JavaScript project.</para>
+
+      <section id="rest-feedview">
+        <title>Feed Views</title>
+
+        <para>Both <classname>AbstractAtomFeedView</classname> and
+        <classname>AbstractRssFeedView</classname> inherit from the base class
+        <classname>AbstractFeedView&lt;T&gt;</classname> and are used to
+        provide Atom and RSS Feed views respectfully. They are based on
+        java.net's <ulink url="https://rome.dev.java.net">ROME</ulink> project
+        and located in the package org.springframework.web.servlet.view.feed.
+        The <classname>AbstractAtomFeedView</classname> requires you to
+        implement the <methodname>buildFeedEntries</methodname> method and
+        optionally override the <methodname>buildFeedMetadata</methodname>
+        method (the default implementation is empty), as shown below</para>
+
+        <programlisting>public class SampleContentAtomView extends AbstractAtomFeedView {
+
+  @Override
+  protected void buildFeedMetadata(Map&lt;String, Object&gt; model, Feed feed, HttpServletRequest request) {
+    // implementation omitted
+  }
+
+  @Override
+  protected List&lt;Entry&gt; buildFeedEntries(Map&lt;String, Object&gt; model,
+                                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+   // implementation omitted
+  }
+}</programlisting>
+
+        <para>Similar requirements apply for implementing
+        <classname>AbstractRssFeedView</classname>, as shown below</para>
+
+        <programlisting>public class SampleContentAtomView extends AbstractRssFeedView {
+
+  @Override   
+  protected void buildFeedMetadata(Map&lt;String, Object&gt; model, Channel feed, HttpServletRequest request) {
+    // implementation omitted
+  }
+
+  @Override
+  protected List&lt;Item&gt; buildFeedItems(Map&lt;String, Object&gt; model,
+                                      HttpServletRequest request, HttpServletResponse response) throws Exception {
+    // implementation omitted
+  }
+
+}</programlisting>
+
+        <para>The <methodname>buildFeedItems</methodname> and
+        <methodname>buildFeedEntires</methodname> pass in the HTTP request in
+        case you need to access the Locale. The HTTP response in passed in
+        only for the setting of cookies or other HTTP headers. The feed will
+        automatically be written to the response object after the method
+        returns. </para>
+
+        <para>For an example implementation of creating a Atom view please
+        refer to Alef Arendsen's SpringSource TeamBlog <ulink
+        url="http://blog.springsource.com/2009/03/16/adding-an-atom-view-to-an-application-using-springs-rest-support/">entry</ulink>.</para>
+      </section>
+
+      <section>
+        <title>XML Marshalling View</title>
+
+        <para>The MarhsallingView</para>
+      </section>
     </section>
 
     <section id="rest-method-conversion">
@@ -443,7 +530,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
         <para></para>
       </section>
 
-      <section label="rest-marhsalling-converter">
+      <section id="rest-marhsalling-converter">
         <title>MarshallingHttpMessageConverter</title>
 
         <para></para>
