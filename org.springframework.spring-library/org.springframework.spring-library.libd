@@ -9,6 +9,7 @@ Import-Bundle:
  org.springframework.context;version="[@bundle.version@, @bundle.version@]",
  org.springframework.context.support;version="[@bundle.version@, @bundle.version@]",
  org.springframework.core;version="[@bundle.version@, @bundle.version@]",
+ org.springframework.expression;version="[@bundle.version@, @bundle.version@]",
  org.springframework.jdbc;version="[@bundle.version@, @bundle.version@]",
  org.springframework.jms;version="[@bundle.version@, @bundle.version@]",
  org.springframework.orm;version="[@bundle.version@, @bundle.version@]",
