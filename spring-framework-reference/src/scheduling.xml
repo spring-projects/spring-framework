@@ -33,7 +33,7 @@
 			that makes the <classname>JobDetail</classname> more of an actual JavaBean
 			with sensible defaults. Let's have a look at an example:
 			</para>
-			<programlisting langauge="xml"><![CDATA[
+			<programlisting language="xml"><![CDATA[
 <bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
   <property name="jobClass" value="example.ExampleJob" />
   <property name="jobDataAsMap">
@@ -93,7 +93,7 @@ public class ExampleJob extends QuartzJobBean {
   }
 }]]></programlisting>
 
-			<programlisting langauge="xml"><![CDATA[
+			<programlisting language="xml"><![CDATA[
 <bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>]]></programlisting>
 			<para>Using the <classname>MethodInvokingJobDetailFactoryBean</classname>, you don't need to
 			create one-line jobs that just invoke a method, and you only need to create the actual

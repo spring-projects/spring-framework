@@ -350,7 +350,7 @@
     default destination. Here is an example that sends a message to a queue
     using the 1.0.2 implementation.</para>
 
-    <programlisting langauge="java"><![CDATA[import javax.jms.ConnectionFactory;
+    <programlisting language="java"><![CDATA[import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
@@ -448,7 +448,7 @@ public class JmsQueueSender {
       example below demonstrates how to modify a message header and a property after
       a <interfacename>java.util.Map</interfacename> is converted to a message.</para>
 
-      <programlisting langauge="java"><![CDATA[public void sendWithConversion() {
+      <programlisting language="java"><![CDATA[public void sendWithConversion() {
     Map map = new HashMap();
     map.put("Name", "Mark");
     map.put("Age", new Integer(47));
@@ -520,7 +520,7 @@ public class JmsQueueSender {
   		receiving messages on multiple threads, it is important to ensure that your
   		implementation is thread-safe.</para>
 		<para>Below is a simple implementation of an MDP:</para>
-		<programlisting langauge="java"><![CDATA[import javax.jms.JMSException;
+		<programlisting language="java"><![CDATA[import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -546,7 +546,7 @@ public class ExampleListener implements MessageListener {
 		<para>Find below an example of how to define and configure one of the message listener
 		containers that ships with Spring (in this case the 
 		<classname>DefaultMessageListenerContainer</classname>).</para>
-		<programlisting langauge="xml"><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
+		<programlisting language="xml"><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
 <![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
 
 ]]><lineannotation>&lt;!-- and this is the message listener container --&gt;</lineannotation><![CDATA[
@@ -566,7 +566,7 @@ public class ExampleListener implements MessageListener {
   	    <interfacename>MessageListener</interfacename> interface, but also provides
   	    the message handling method with access to the JMS <interfacename>Session</interfacename>
   	    from which the <interfacename>Message</interfacename> was received.</para>
-  	    <programlisting langauge="java"><![CDATA[package org.springframework.jms.listener;
+  	    <programlisting language="java"><![CDATA[package org.springframework.jms.listener;
 
 public interface SessionAwareMessageListener {
 
@@ -609,7 +609,7 @@ public interface SessionAwareMessageListener {
         Notice also how the various message handling methods are strongly typed according to
         the <emphasis>contents</emphasis> of the various <interfacename>Message</interfacename>
         types that they can receive and handle.</para>
-        <programlisting langauge="java"><![CDATA[public interface MessageDelegate {
+        <programlisting language="java"><![CDATA[public interface MessageDelegate {
 
     void handleMessage(String message);
 
@@ -619,14 +619,14 @@ public interface SessionAwareMessageListener {
 
     void handleMessage(Serializable message);
 }]]></programlisting>
-        <programlisting langauge="java"><![CDATA[public class DefaultMessageDelegate implements MessageDelegate {
+        <programlisting language="java"><![CDATA[public class DefaultMessageDelegate implements MessageDelegate {
     ]]><lineannotation>// implementation elided for clarity...</lineannotation><![CDATA[
 }]]></programlisting>
         <para>In particular, note how the above implementation of the <interfacename>MessageDelegate</interfacename>
         interface (the above <classname>DefaultMessageDelegate</classname> class) has
         <emphasis>no</emphasis> JMS dependencies at all. It truly is a POJO that we will
         make into an MDP via the following configuration.</para>
-		<programlisting langauge="xml"><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
+		<programlisting language="xml"><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
 <emphasis role="bold"><![CDATA[<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
     <constructor-arg>
         <bean class="jmsexample.DefaultMessageDelegate"/>
@@ -646,16 +646,16 @@ public interface SessionAwareMessageListener {
         <literal>'handleMessage'</literal>), but it is configurable (as you will see below).
         Notice also how the <literal>'receive(..)'</literal> method is strongly typed to
         receive and respond only to JMS <interfacename>TextMessage</interfacename> messages.</para>
-        <programlisting langauge="java"><![CDATA[public interface TextMessageDelegate {
+        <programlisting language="java"><![CDATA[public interface TextMessageDelegate {
 
     void receive(TextMessage message);
 }]]></programlisting>
-        <programlisting langauge="java"><![CDATA[public class DefaultTextMessageDelegate implements TextMessageDelegate {
+        <programlisting language="java"><![CDATA[public class DefaultTextMessageDelegate implements TextMessageDelegate {
     ]]><lineannotation>// implementation elided for clarity...</lineannotation><![CDATA[
 }]]></programlisting>
         <para>The configuration of the attendant <classname>MessageListenerAdapter</classname> would
         look like this:</para>
-        <programlisting langauge="xml"><![CDATA[<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+        <programlisting language="xml"><![CDATA[<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
     <constructor-arg>
         <bean class="jmsexample.DefaultTextMessageDelegate"/>
     </constructor-arg>
@@ -673,12 +673,12 @@ public interface SessionAwareMessageListener {
         class is the ability to automatically send back a response <interfacename>Message</interfacename>
         if a handler method returns a non-void value.
         Consider the interface and class:</para>
-        <programlisting langauge="java"><![CDATA[public interface ResponsiveTextMessageDelegate {
+        <programlisting language="java"><![CDATA[public interface ResponsiveTextMessageDelegate {
 
     ]]><lineannotation><emphasis role="bold">// notice the return type...</emphasis></lineannotation><![CDATA[
     String receive(TextMessage message);
 }]]></programlisting>
-        <programlisting langauge="java"><![CDATA[public class DefaultResponsiveTextMessageDelegate implements ResponsiveTextMessageDelegate {
+        <programlisting language="java"><![CDATA[public class DefaultResponsiveTextMessageDelegate implements ResponsiveTextMessageDelegate {
     ]]><lineannotation>// implementation elided for clarity...</lineannotation><![CDATA[
 }]]></programlisting>
         <para>If the above <classname>DefaultResponsiveTextMessageDelegate</classname> is used in
@@ -714,7 +714,7 @@ public interface SessionAwareMessageListener {
 			implementation, covering the case where database processing has
 			committed but message processing failed to commit.</para>
 
-			<programlisting langauge="xml"><![CDATA[<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<programlisting language="xml"><![CDATA[<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
     <property name="connectionFactory" ref="connectionFactory"/>
     <property name="destination" ref="destination"/>
     <property name="messageListener" ref="messageListener"/>
@@ -736,7 +736,7 @@ public interface SessionAwareMessageListener {
 			part of the same transaction (with unified commit semantics,
 			at the expense of XA transaction log overhead).</para>
 
-  		<programlisting langauge="xml"><![CDATA[<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+  		<programlisting language="xml"><![CDATA[<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ]]></programlisting>
 
 			<para>Then you just need to add it to our earlier container configuration. The
