@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="mvc">
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+
+<chapter id="mvc" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Web MVC framework</title>
 
   <section id="mvc-introduction">
@@ -150,7 +153,7 @@
       <title>Features of Spring Web MVC</title>
 
       <!-- insert some content about Spring Web Flow here -->
-      &swf-sidebar;
+      <xi:include href="swf-sidebar.xml"/>
 
       <para>Spring's web module provides a wealth of unique web support
       features, including:</para>
