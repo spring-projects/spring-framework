@@ -192,14 +192,14 @@
       offers, such as the simple declarative transaction management feature
       mentioned previously.</para>
 
-      <para>The <emphasis>OXM</emphasis> module provides an abstraction layer for using a number of
+      <para>The <link linkend="oxm">OXM</link> module provides an abstraction layer for using a number of
       Object/XML mapping implementations. Supported technologies include JAXB,
       Castor, XMLBeans, JiBX and XStream.</para>
 
-      <para>The <emphasis>JMS</emphasis> module provides Spring's support for the Java Messaging Service. It 
+      <para>The <link linkend="jms">JMS</link> module provides Spring's support for the Java Messaging Service. It 
       contains features for both producing and consuming messages. </para>
 
-      <para>The Transaction module provides a way to do programmatic as well
+      <para>The <link linkend="transaction">Transaction</link> module provides a way to do programmatic as well
       as declarative transaction management, not only for classes implementing
       special interfaces, but for <emphasis>all your POJOs (plain old Java
       objects)</emphasis>.</para>
