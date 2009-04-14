@@ -163,7 +163,7 @@
     <title>Overview of new features</title>
 
     <para>This is a list of new features for Spring 3.0. We will cover these
-    features in more detail in the following sections.</para>
+    features in more detail later in this section.</para>
 
     <itemizedlist>
       <listitem>
@@ -190,7 +190,6 @@
         <para>Early support for Java EE 6</para>
       </listitem>
     </itemizedlist>
-  </section>
 
   <section id="new-feature-java5">
     <title>Core APIs updated for Java 5</title>
@@ -198,24 +197,22 @@
     <para>BeanFactoryinterface returns typed bean 
 	instancesas far as possible
 	<itemizedlist>
-		<listitem>T getBean(Stringname, Class&lt;T&gt; requiredType)</listitem> 
-		<listitem>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt; type)</listitem> 
+		<listitem><para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para></listitem> 
+		<listitem><para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt; type)</para></listitem> 
 	</itemizedlist>
 	</para>
 	
 	<para>Spring's TaskExecutorinterface extends 
 	<classname>java.util.concurrent.Executor</classname> now
 	<itemizedlist>
-		<listitem>extended AsyncTaskExecutor supports standard Callables with Futures</listitem> 
+		<listitem><para>extended AsyncTaskExecutor supports standard Callables with Futures</para></listitem> 
 	</itemizedlist>
 	</para>
 	
 	<para>New Java 5 based converter API and SPI 
 	<itemizedlist>
-		<listitem>stateless ConversionService and Converters</listitem> 
-	</itemizedlist>
-	<itemizedlist>
-		<listitem>superseding standard JDK PropertyEditors</listitem> 
+		<listitem><para>stateless ConversionService and Converters</para></listitem> 
+		<listitem><para>superseding standard JDK PropertyEditors</para></listitem> 
 	</itemizedlist>
 	</para>
 	
@@ -242,13 +239,25 @@
 	
 	<para>The following is an example of how the Expression Language can be used to configure some properties 
 	of a database setup
-	<programlisting language="xml"><![CDATA[
-<bean class="mycompany.RewardsTestDatabase">
-    <property name="databaseName" 
-        value="“#{systemProperties.databaseName}”/> 
-    <property name="keyGenerator" 
-        value="“#{strategyBean.databaseKeyGenerator}”/> 
+	<programlisting language="xml"><![CDATA[<bean class="mycompany.RewardsTestDatabase">
+    <property name="databaseName"
+        value="#{systemProperties.databaseName}"/>
+    <property name="keyGenerator"
+        value="#{strategyBean.databaseKeyGenerator}"/>
 </bean>
+]]></programlisting>
+	</para>
+	<para>This functionality is also available if you prefer to configure your components using
+	annotations:
+	<programlisting language="java"><![CDATA[@Repository 
+public class RewardsTestDatabase {
+
+    @Value("#{systemProperties.databaseName}")
+    public void setDatabaseName(String dbName) { … }
+
+    @Value("#{strategyBean.databaseKeyGenerator}")
+    public voidsetKeyGenerator(KeyGenerator kg) { … }
+}
 ]]></programlisting>
 	</para>
   </section>
@@ -256,24 +265,78 @@
   <section id="new-feature-java-config">
     <title>The Inversion of Control (IoC) container</title>
 
-    <para>Core JavaConfig features added</para>
+    <para>Some core JavaConfig features have been added to the Spring Framework now. This means that the following
+	annotations are now directly supported:
+	
+	<itemizedlist>
+		<listitem><para>@Configuration</para></listitem> 
+		<listitem><para>@Bean</para></listitem> 
+		<listitem><para>@Primary</para></listitem> 
+		<listitem><para>@Lazy</para></listitem> 
+		<listitem><para>@Import</para></listitem> 
+		<listitem><para>@Value</para></listitem> 
+	</itemizedlist>
+	</para>
+
+	<para>
+	Here is an example of a Java class providing basic configuration using the new JavaConfig features:
+	<programlisting language="java"><![CDATA[@Configuration 
+public class AppConfig{ 
+    @Value("#{jdbcProperties.url}") String jdbcUrl; 
+    @Value("#{jdbcProperties.username}") String username; 
+    @Value("#{jdbcProperties.password}") String password; 
+
+    @Bean 
+    public FooServicefooService() { 
+        return new FooServiceImpl(fooRepository()); 
+    }
+
+    @Bean 
+    public FooRepositoryfooRepository() { 
+        return new HibernateFooRepository(sessionFactory()); 
+    }
+
+    @Bean 
+    public SessionFactorysessionFactory() { 
+        // wire up a session factory using 
+        // AnnotationSessionFactoryBean 
+        asFactoryBean.setDataSource(dataSource()); 
+        return (SessionFactory) asFactoryBean.getObject(); 
+    } 
+
+    @Bean 
+    public DataSourcedataSource() { 
+        return new DriverManagerDataSource(jdbcUrl, 
+        username, password); 
+    } 
+}
+]]></programlisting>
+
+	To get this to work you need to add the following component scanning entry in your minimal
+	application context XML file.
+	
+	<programlisting language="java"><![CDATA[<context:component-scan 
+    base-package="com.myco.config"/>]]></programlisting>
+	
+	</para>
+
   </section>
 
   <section id="new-feature-rest">
     <title>The Web Tier</title>
 
-    <para>Work in progress</para>
+    <para>Work in progress ...</para>
 
     <section>
       <title>Comprehensive REST support</title>
 
-      <para>Work in progress</para>
+      <para>Work in progress ...</para>
     </section>
 
     <section>
       <title>@MVC additions</title>
 
-      <para>Work in progress</para>
+      <para>Work in progress ...</para>
     </section>
   </section>
 
@@ -288,4 +351,6 @@
 
     <para>JSF 2.0, JPA 2.0, etc</para>
   </section>
+  </section>
+
 </chapter>
