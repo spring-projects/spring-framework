@@ -375,9 +375,7 @@ public class AppConfig{
         <literal>org.springframework.oxm</literal> package. This functionality
         had previously been part of Spring Web Services. More information on
         the use of the <literal>org.springframework.oxm</literal> can be found
-        in that projects <ulink
-        url="http://static.springframework.org/spring-ws/sites/1.5/reference/html/oxm.html">reference
-        documentation.</ulink></para>
+        in the  <link linkend="oxm">Marshalling XML using O/X Mappers</link> chapter.</para>
 
         <para>Refer to the section on <link linkend="rest">REST support</link>
         for more information.</para>
