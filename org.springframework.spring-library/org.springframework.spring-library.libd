@@ -4,7 +4,7 @@ Library-Name: Spring Framework
 Import-Bundle: 
  org.springframework.aop;version="[@bundle.version@, @bundle.version@]",
  org.springframework.asm;version="[@bundle.version@, @bundle.version@]",
- org.springframework.aspects;version="[@bundle.version@, @bundle.version@]";import-scope:=application,
+ org.springframework.aspects;version="[@bundle.version@, @bundle.version@]",
  org.springframework.beans;version="[@bundle.version@, @bundle.version@]",
  org.springframework.context;version="[@bundle.version@, @bundle.version@]",
  org.springframework.context.support;version="[@bundle.version@, @bundle.version@]",
