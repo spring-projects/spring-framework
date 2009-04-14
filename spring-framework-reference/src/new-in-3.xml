@@ -171,7 +171,7 @@
       </listitem>
 
       <listitem>
-        <para>IoC enhancements/Spring JavaConfig</para>
+        <para>IoC enhancements/Java based bean metadata</para>
       </listitem>
 
       <listitem>
@@ -191,65 +191,72 @@
       </listitem>
     </itemizedlist>
 
-  <section id="new-feature-java5">
-    <title>Core APIs updated for Java 5</title>
+    <section id="new-feature-java5">
+      <title>Core APIs updated for Java 5</title>
 
-    <para>BeanFactoryinterface returns typed bean 
-	instancesas far as possible
-	<itemizedlist>
-		<listitem><para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para></listitem> 
-		<listitem><para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt; type)</para></listitem> 
-	</itemizedlist>
-	</para>
-	
-	<para>Spring's TaskExecutorinterface extends 
-	<classname>java.util.concurrent.Executor</classname> now
-	<itemizedlist>
-		<listitem><para>extended AsyncTaskExecutor supports standard Callables with Futures</para></listitem> 
-	</itemizedlist>
-	</para>
-	
-	<para>New Java 5 based converter API and SPI 
-	<itemizedlist>
-		<listitem><para>stateless ConversionService and Converters</para></listitem> 
-		<listitem><para>superseding standard JDK PropertyEditors</para></listitem> 
-	</itemizedlist>
-	</para>
-	
-	<para>Typed ApplicationListener&lt;E&gt;
-	</para>
-	
-  </section>
+      <para>BeanFactoryinterface returns typed bean instancesas far as
+      possible <itemizedlist>
+          <listitem>
+            <para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para>
+          </listitem>
 
-  <section id="new-feature-el">
-    <title>Spring Expression Language</title>
+          <listitem>
+            <para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt;
+            type)</para>
+          </listitem>
+        </itemizedlist></para>
 
-    <para>Spring introduces an expression language which is similar to Unified
-    EL in its syntax but offers significantly more features. The expression
-    language can be used when defining XML and Annotation based bean
-    definitions and also serves as the foundation for expression language
-    support across the Spring portfolio. Details of this new functionality can
-    be found in the chapter <link linkend="expressions">Spring Expression
-    Language (SpEL).</link></para>
+      <para>Spring's TaskExecutorinterface extends
+      <classname>java.util.concurrent.Executor</classname> now <itemizedlist>
+          <listitem>
+            <para>extended AsyncTaskExecutor supports standard Callables with
+            Futures</para>
+          </listitem>
+        </itemizedlist></para>
 
-	<para>The Spring Expression Language was created to provide the Spring community with a single well 
-	supported expression language that can used across all the products in the Spring portfolio. Its language 
-	features are driven by the requirements of the projects in the Spring portfolio, including tooling 
-	requirements for code completion support within the eclipse based SpringSource Tool Suite.</para>
-	
-	<para>The following is an example of how the Expression Language can be used to configure some properties 
-	of a database setup
-	<programlisting language="xml"><![CDATA[<bean class="mycompany.RewardsTestDatabase">
-    <property name="databaseName"
-        value="#{systemProperties.databaseName}"/>
-    <property name="keyGenerator"
-        value="#{strategyBean.databaseKeyGenerator}"/>
-</bean>
-]]></programlisting>
-	</para>
-	<para>This functionality is also available if you prefer to configure your components using
-	annotations:
-	<programlisting language="java"><![CDATA[@Repository 
+      <para>New Java 5 based converter API and SPI <itemizedlist>
+          <listitem>
+            <para>stateless ConversionService and Converters</para>
+          </listitem>
+
+          <listitem>
+            <para>superseding standard JDK PropertyEditors</para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>Typed ApplicationListener&lt;E&gt;</para>
+    </section>
+
+    <section id="new-feature-el">
+      <title>Spring Expression Language</title>
+
+      <para>Spring introduces an expression language which is similar to
+      Unified EL in its syntax but offers significantly more features. The
+      expression language can be used when defining XML and Annotation based
+      bean definitions and also serves as the foundation for expression
+      language support across the Spring portfolio. Details of this new
+      functionality can be found in the chapter <link
+      linkend="expressions">Spring Expression Language (SpEL).</link></para>
+
+      <para>The Spring Expression Language was created to provide the Spring
+      community with a single well supported expression language that can used
+      across all the products in the Spring portfolio. Its language features
+      are driven by the requirements of the projects in the Spring portfolio,
+      including tooling requirements for code completion support within the
+      eclipse based SpringSource Tool Suite.</para>
+
+      <para>The following is an example of how the Expression Language can be
+      used to configure some properties of a database setup <programlisting
+      language="xml">&lt;bean class="mycompany.RewardsTestDatabase"&gt;
+    &lt;property name="databaseName"
+        value="#{systemProperties.databaseName}"/&gt;
+    &lt;property name="keyGenerator"
+        value="#{strategyBean.databaseKeyGenerator}"/&gt;
+&lt;/bean&gt;
+</programlisting></para>
+
+      <para>This functionality is also available if you prefer to configure
+      your components using annotations: <programlisting language="java">@Repository 
 public class RewardsTestDatabase {
 
     @Value("#{systemProperties.databaseName}")
@@ -258,29 +265,47 @@ public class RewardsTestDatabase {
     @Value("#{strategyBean.databaseKeyGenerator}")
     public voidsetKeyGenerator(KeyGenerator kg) { … }
 }
-]]></programlisting>
-	</para>
-  </section>
+</programlisting></para>
+    </section>
 
-  <section id="new-feature-java-config">
-    <title>The Inversion of Control (IoC) container</title>
+    <section id="new-feature-java-config">
+      <title>The Inversion of Control (IoC) container</title>
 
-    <para>Some core JavaConfig features have been added to the Spring Framework now. This means that the following
-	annotations are now directly supported:
-	
-	<itemizedlist>
-		<listitem><para>@Configuration</para></listitem> 
-		<listitem><para>@Bean</para></listitem> 
-		<listitem><para>@Primary</para></listitem> 
-		<listitem><para>@Lazy</para></listitem> 
-		<listitem><para>@Import</para></listitem> 
-		<listitem><para>@Value</para></listitem> 
-	</itemizedlist>
-	</para>
+      <section id="new-java-configuration">
+        <title>Java based bean metadata</title>
 
-	<para>
-	Here is an example of a Java class providing basic configuration using the new JavaConfig features:
-	<programlisting language="java"><![CDATA[@Configuration 
+        <para>Some core features from the <ulink
+        url="http://www.springsource.org/javaconfig"><link
+        linkend="???">JavaConfig</link></ulink> project have been added to the
+        Spring Framework now. This means that the following annotations are
+        now directly supported: <itemizedlist>
+            <listitem>
+              <para>@Configuration</para>
+            </listitem>
+
+            <listitem>
+              <para>@Bean</para>
+            </listitem>
+
+            <listitem>
+              <para>@Primary</para>
+            </listitem>
+
+            <listitem>
+              <para>@Lazy</para>
+            </listitem>
+
+            <listitem>
+              <para>@Import</para>
+            </listitem>
+
+            <listitem>
+              <para>@Value</para>
+            </listitem>
+          </itemizedlist></para>
+
+        <para>Here is an example of a Java class providing basic configuration
+        using the new JavaConfig features: <programlisting language="java">@Configuration 
 public class AppConfig{ 
     @Value("#{jdbcProperties.url}") String jdbcUrl; 
     @Value("#{jdbcProperties.username}") String username; 
@@ -310,47 +335,83 @@ public class AppConfig{
         username, password); 
     } 
 }
-]]></programlisting>
+</programlisting> To get this to work you need to add the following component
+        scanning entry in your minimal application context XML file.
+        <programlisting language="java">&lt;context:component-scan 
+    base-package="com.myco.config"/&gt;</programlisting></para>
+      </section>
 
-	To get this to work you need to add the following component scanning entry in your minimal
-	application context XML file.
-	
-	<programlisting language="java"><![CDATA[<context:component-scan 
-    base-package="com.myco.config"/>]]></programlisting>
-	
-	</para>
+      <section>
+        <title>Factory Bean definitions using annotations</title>
 
-  </section>
-
-  <section id="new-feature-rest">
-    <title>The Web Tier</title>
-
-    <para>Work in progress ...</para>
-
-    <section>
-      <title>Comprehensive REST support</title>
-
-      <para>Work in progress ...</para>
+        <para>FactoryBeans can be defined within a Spring component definition
+        and registered using standard component-scanning techniques. See <link
+        linkend="beans-factorybeans-annotations">Factory Bean Definitions
+        using annotations</link> for more information</para>
+      </section>
     </section>
 
-    <section>
-      <title>@MVC additions</title>
+    <section id="new-feature-rest">
+      <title>The Web Tier</title>
 
       <para>Work in progress ...</para>
+
+      <section>
+        <title>Comprehensive REST support</title>
+
+        <para>Server-side support for building RESTful applications has been
+        provided as an extension of the existing annotation driven MVC web
+        framework. Client-side support is provided by the
+        <classname>RestTemplate</classname> class in the spirit of other
+        template classes such as <classname>JdbcTemplate</classname> and
+        <classname>JmsTemplate</classname>. Both server and client side REST
+        functionality make use of
+        <interfacename>HttpConverter</interfacename>s to facilitate the
+        conversion between objects and their representation in HTTP request
+        and replies. </para>
+
+        <para>The <classname>MarhsallingHttpMessageConverter</classname> uses
+        the Object to XML mapping functionality in the
+        <literal>org.springframework.oxm</literal> package. This functionality
+        had previously been part of Spring Web Services. More information on
+        the use of the <literal>org.springframework.oxm</literal> can be found
+        in that projects <ulink
+        url="http://static.springframework.org/spring-ws/sites/1.5/reference/html/oxm.html">reference
+        documentation.</ulink></para>
+
+        <para>Refer to the section on <link linkend="rest">REST support</link>
+        for more information.</para>
+      </section>
+
+      <section>
+        <title>@MVC additions</title>
+
+        <para>Additional annotations such as
+        <classname>@CookieValue</classname> and
+        <classname>@RequestHeaders</classname> have been added. See <link
+        linkend="mvc-ann-cookievalue">Mapping cookie values with the
+        @CookieValue annotation</link> and <link
+        linkend="mvc-ann-requestheader">Mapping request header attributes with
+        the @RequestHeader annotation</link> for more information.</para>
+
+        <para>Work in progress ...</para>
+      </section>
+    </section>
+
+    <section id="new-feature-validation">
+      <title>Declarative model validation</title>
+
+      <para>Hibernate Validator, JSR 303</para>
+
+      <para>Work in progress...</para>
+    </section>
+
+    <section id="new-feature-jee-6">
+      <title>Early support for Java EE 6</title>
+
+      <para>JSF 2.0, JPA 2.0, etc</para>
+
+      <para>Work in progress...</para>
     </section>
   </section>
-
-  <section id="new-feature-validation">
-    <title>Declarative model validation</title>
-
-    <para>Hibernate Validator, JSR 303</para>
-  </section>
-
-  <section id="new-feature-jee-6">
-    <title>Early support for Java EE 6</title>
-
-    <para>JSF 2.0, JPA 2.0, etc</para>
-  </section>
-  </section>
-
 </chapter>

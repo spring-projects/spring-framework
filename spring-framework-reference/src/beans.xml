@@ -6411,6 +6411,57 @@ public class CachingMovieCatalog implements MovieCatalog {
         per-class.</para>
       </note>
     </section>
+<section id="beans-factorybeans-annotations">
+  <title>Defining FactoryBeans with annotations</title>
+
+  <para>FactoryBeans can be defined in code using the
+  <classname>@FactoryMethod </classname>method level annotation. Factory bean
+  definiton supports using standard as well as custom qualifiers using
+  annotations. The scope of the object produces and if it should be a scoped
+  AOP proxy are determined by the presence of <classname>@Scope</classname>
+  and <classname>@ScopedProxy</classname> annotations. The default scope for
+  methods with <classname>@FactoryMethod</classname> can also be inherited
+  from the class level. The following example shows a variety of usages of the
+  <classname>@FactoryMethod</classname> annotation.</para>
+
+  <programlisting language="java">@Component
+public class FactoryMethodComponent {
+
+	private static TestBean staticTestBean = new TestBean("staticInstance",1);
+	
+	@Autowired @Qualifier("public")
+	public TestBean autowiredTestBean;
+	
+	private static int i;
+
+	@FactoryMethod @Qualifier("static")
+	public static TestBean staticInstance()
+	{
+		return staticTestBean;
+	}
+	
+	@FactoryMethod @Qualifier("public")
+	public TestBean getPublicInstance() {
+		return new TestBean("publicInstance");
+	}
+
+	@FactoryMethod @BeanAge(1)
+	protected TestBean getProtectedInstance() {
+		return new TestBean("protectedInstance", 1);
+	}
+	
+	@FactoryMethod @Scope("prototype")
+	private TestBean getPrivateInstance() {
+		return new TestBean("privateInstance", i++);
+	}
+
+ @FactoryMethod @Scope("request") @ScopedProxy
+	private TestBean getPrivateInstance() {
+		return new TestBean("privateInstance", i++);
+	}
+}
+</programlisting>
+</section>
   </section>
 
   <section id="context-load-time-weaver">
