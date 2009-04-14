@@ -352,6 +352,7 @@ public class InProgressTests extends ExpressionTestCase {
 	 
 	public void testSelection03() {
 		evaluate("mapOfNumbersUpToTen.?{key>5}.size()", "5", Integer.class);
+//		evaluate("listOfNumbersUpToTen.?{#this>5}", "5", ArrayList.class);
 	}
 
 	public void testSelection04() {
@@ -385,11 +386,5 @@ public class InProgressTests extends ExpressionTestCase {
 		assertEquals("'abc'.${true}",expr.toStringAST());
 		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
-
-
-
-
-
-
 
 }
