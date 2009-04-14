@@ -404,7 +404,7 @@ public class AccountServiceImpl implements AccountService {
       <interfacename>AccountService</interfacename> we extend Spring's
       <classname>ServletEndpointSupport</classname> class and implement our business
       logic here, usually delegating the call to the business layer.</para>
-      <programlisting langauge="java"><lineannotation>/**
+      <programlisting language="java"><lineannotation>/**
  * JAX-RPC compliant RemoteAccountService implementation that simply delegates
  * to the AccountService implementation in the root web application context.
  *
@@ -615,7 +615,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
       logic here, usually delegating the call to the business layer.
       We'll simply use Spring 2.5's <literal>@Autowired</literal>
       annotation for expressing such dependencies on Spring-managed beans.</para>
-      <programlisting langauge="java"><lineannotation>/**
+      <programlisting language="java"><lineannotation>/**
  * JAX-WS compliant AccountService implementation that simply delegates
  * to the AccountService implementation in the root web application context.
  *
@@ -684,7 +684,7 @@ public class AccountServiceEndpoint extends SpringBeanAutowiringSupport {
       This means that the endpoint implementation may look like as follows,
       without any superclass declared - and Spring's <literal>@Autowired</literal>
 			configuration annotation still being honored:</para>
-      <programlisting langauge="java"><![CDATA[@WebService(serviceName="AccountService")
+      <programlisting language="java"><![CDATA[@WebService(serviceName="AccountService")
 public class AccountServiceEndpoint {
 
     @Autowired
@@ -828,14 +828,14 @@ public class AccountServiceEndpoint {
     <emphasis>same non-transactional</emphasis> <interfacename>Session</interfacename>, and as
     such throughput will be very implementation dependent.</para>
     <para>The following interface is used on both the server and the client side.</para>
-    <programlisting langauge="java"><![CDATA[package com.foo;
+    <programlisting language="java"><![CDATA[package com.foo;
 
 public interface CheckingAccountService {
 
     public void cancelAccount(Long accountId);
 }]]></programlisting>
     <para>The following simple implementation of the above interface is used on the server-side.</para>
-    <programlisting langauge="java"><![CDATA[package com.foo;
+    <programlisting language="java"><![CDATA[package com.foo;
 
 public class SimpleCheckingAccountService implements CheckingAccountService {
 
@@ -887,7 +887,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
    </bean>
 
 </beans>]]></programlisting>
-      <programlisting langauge="java"><![CDATA[package com.foo;
+      <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -920,7 +920,7 @@ public class Server {
     </bean>
 
 </beans>]]></programlisting>
-      <programlisting langauge="java"><![CDATA[package com.foo;
+      <programlisting language="java"><![CDATA[package com.foo;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

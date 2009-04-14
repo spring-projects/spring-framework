@@ -432,7 +432,7 @@
       property must be directly specified on the <classname>CciTemplate</classname>.
       This could be done in the application code like so:</para>
 
-      <programlisting langauge="java"><![CDATA[cciTemplate.setOutputRecordCreator(new EciOutputRecordCreator());]]></programlisting>
+      <programlisting language="java"><![CDATA[cciTemplate.setOutputRecordCreator(new EciOutputRecordCreator());]]></programlisting>
 
       <para>Or (recommended) in the Spring configuration, if the <classname>CciTemplate</classname>
       is configured as a dedicated bean instance:</para>
@@ -628,7 +628,7 @@
       <interfacename>InteractionSpec</interfacename> must be done to specify which CICS
       program to access and how to interact with it.</para>
 
-      <programlisting langauge="java"><![CDATA[ECIInteractionSpec interactionSpec = new ECIInteractionSpec();
+      <programlisting language="java"><![CDATA[ECIInteractionSpec interactionSpec = new ECIInteractionSpec();
 interactionSpec.setFunctionName("MYPROG");
 interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);]]></programlisting>
 
@@ -808,7 +808,7 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);]]></pr
 			The following constructor must be used to instantiate an operation
       object with a specific <interfacename>InteractionSpec</interfacename>:</para>
 
-      <programlisting langauge="java"><![CDATA[InteractionSpec spec = ...;
+      <programlisting language="java"><![CDATA[InteractionSpec spec = ...;
 MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnectionFactory(), spec);
 ...]]></programlisting>
     </section>

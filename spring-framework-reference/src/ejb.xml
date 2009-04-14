@@ -88,7 +88,7 @@
 				EJB-specific business methods interface. Let’s call this business
 				methods interface <classname>MyComponent</classname>.
 			</para>
-			<programlisting langauge="java"><![CDATA[public interface MyComponent {
+			<programlisting language="java"><![CDATA[public interface MyComponent {
     ...
 }]]></programlisting>
 			<para>
@@ -105,7 +105,7 @@
 				on the controller. This will save the reference as an instance variable in the
 				controller:
 			</para>
-			<programlisting langauge="java"><![CDATA[private MyComponent myComponent;
+			<programlisting language="java"><![CDATA[private MyComponent myComponent;
 
 public void setMyComponent(MyComponent myComponent) {
     this.myComponent = myComponent;
@@ -351,7 +351,7 @@ public void setMyComponent(MyComponent myComponent) {
         shared container to be used by multiple EJBs or other clients. Doing this is relatively
         simple, by adding code similar to this to the EJB:
       </para>
-      <programlisting langauge="java"><![CDATA[   /**
+      <programlisting language="java"><![CDATA[   /**
     * Override default BeanFactoryLocator implementation
     * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
     */
@@ -395,7 +395,7 @@ public void setMyComponent(MyComponent myComponent) {
         in the EJB component class, or through an <literal>interceptor-binding</literal>
         XML element in the EJB deployment descriptor.
       </para>
-      <programlisting langauge="java"><![CDATA[@Stateless
+      <programlisting language="java"><![CDATA[@Stateless
 @Interceptors(SpringBeanAutowiringInterceptor.class)
 public class MyFacadeEJB implements MyFacadeLocal {
 
