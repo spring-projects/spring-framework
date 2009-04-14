@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="web-integration">
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+
+<chapter id="web-integration" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Integrating with other web frameworks</title>
 
   <section id="intro">
@@ -13,7 +16,7 @@
     </para>
 
     <!-- insert some content about Spring Web Flow here -->
-    &swf-sidebar;
+    <xi:include href="swf-sidebar.xml"/>
 
     <para>
       One of the core value propositions of the Spring Framework is that of

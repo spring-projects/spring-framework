@@ -1,44 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
-"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
-<!ENTITY preface 			SYSTEM "preface.xml">
-<!ENTITY overview			SYSTEM "overview.xml">
-<!ENTITY whats-new-in-3		SYSTEM "new-in-3.xml">
-<!ENTITY getting-started	SYSTEM "getting-started.xml">
-<!ENTITY beans				SYSTEM "beans.xml">
-<!ENTITY resources			SYSTEM "resources.xml">
-<!ENTITY validation			SYSTEM "validation.xml">
-<!ENTITY expressions			SYSTEM "expressions.xml">
-<!ENTITY aop				SYSTEM "aop.xml">
-<!ENTITY aop-api			SYSTEM "aop-api.xml">
-<!ENTITY transaction		SYSTEM "transaction.xml">
-<!ENTITY metadata			SYSTEM "metadata.xml">
-<!ENTITY dao				SYSTEM "dao.xml">
-<!ENTITY jdbc				SYSTEM "jdbc.xml">
-<!ENTITY orm				SYSTEM "orm.xml">
-<!ENTITY oxm				SYSTEM "oxm.xml">
-<!ENTITY mvc				SYSTEM "mvc.xml">
-<!ENTITY view				SYSTEM "view.xml">
-<!ENTITY rest               SYSTEM "rest.xml">
-<!ENTITY web-integration		SYSTEM "web-integration.xml">
-<!ENTITY portlet            SYSTEM "portlet.xml">
-<!ENTITY remoting			SYSTEM "remoting.xml">
-<!ENTITY ejb				SYSTEM "ejb.xml">
-<!ENTITY jms				SYSTEM "jms.xml">
-<!ENTITY jmx                SYSTEM "jmx.xml">
-<!ENTITY cci				SYSTEM "cci.xml">
-<!ENTITY mail				SYSTEM "mail.xml">
-<!ENTITY scheduling			SYSTEM "scheduling.xml">
-<!ENTITY testing			SYSTEM "testing.xml">
-<!ENTITY dynamic-languages  SYSTEM "dynamic-languages.xml">
-<!ENTITY xsd-configuration  SYSTEM "xsd-configuration.xml">
-<!ENTITY xml-custom         SYSTEM "xml-custom.xml">
-<!ENTITY dtd				SYSTEM "dtd.xml">
-<!ENTITY spring-tld         SYSTEM "spring.tld.xml">
-<!ENTITY spring-form-tld    SYSTEM "spring-form.tld.xml">
-<!ENTITY swf-sidebar        SYSTEM "swf-sidebar.xml">
-]>
-<book>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+
+<book xmlns:xi="http://www.w3.org/2001/XInclude">
 	<bookinfo>
 		<title>Reference Documentation</title>
 		<subtitle>(Work in progress)</subtitle>
@@ -135,8 +99,8 @@
 		<copyright>
 			<year>2004-2009</year>
 			<holder>Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop, Thomas Risberg, Darren Davison, 
-				Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, Costin Leau, 
-				Mark Fisher, Sam Brannen, Ramnivas Laddad, Arjen Poutsma
+				Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, 
+				Costin Leau, Mark Fisher, Sam Brannen, Ramnivas Laddad, Arjen Poutsma
 			</holder>
 		</copyright>
 		<legalnotice>
@@ -149,10 +113,10 @@
 	</bookinfo>
 	<!-- front matter -->
 	<toc/>
-	&preface;
-	&overview;
-	&whats-new-in-3;
-	&getting-started;
+    <xi:include href="preface.xml"/>
+    <xi:include href="overview.xml"/>
+	<xi:include href="new-in-3.xml"/>
+	<xi:include href="getting-started.xml"/>
 	<part id="spring-core">
 		<title>Core Technologies</title>
 		<partintro id="spring-core-intro">
@@ -215,13 +179,13 @@
 				</listitem>
 			</itemizedlist>
 		</partintro>
-		&beans;
-		&resources;
-		&validation;
-		&expressions;
-		&aop;
-		&aop-api;
-		&testing;
+		<xi:include href="beans.xml"/>
+		<xi:include href="resources.xml"/>
+		<xi:include href="validation.xml"/>
+		<xi:include href="expressions.xml"/>
+		<xi:include href="aop.xml"/>
+		<xi:include href="aop-api.xml"/>
+		<xi:include href="testing.xml"/>
 	</part>
 	<part id="spring-data-tier">
 		<title>Data Access</title>
@@ -255,11 +219,11 @@
 				</listitem>
 			</itemizedlist>
 		</partintro>
-		&transaction;
-		&dao;
-		&jdbc;
-		&orm;
-		&oxm;
+		<xi:include href="transaction.xml"/>
+		<xi:include href="dao.xml"/>
+		<xi:include href="jdbc.xml"/>
+		<xi:include href="orm.xml"/>
+		<xi:include href="oxm.xml"/>
 	</part>
 	<part id="spring-web">
 		<title>The Web</title>
@@ -300,11 +264,11 @@
 				</listitem>
 			</itemizedlist>
 		</partintro>
-		&mvc;
-		&view;
-		&rest;
-		&web-integration;
-		&portlet;
+		<xi:include href="mvc.xml"/>
+		<xi:include href="view.xml"/>
+		<xi:include href="rest.xml"/>
+		<xi:include href="web-integration.xml"/>
+		<xi:include href="portlet.xml"/>
 	</part>
 	<part id="spring-integration">
 		<title>Integration</title>
@@ -344,20 +308,20 @@
 				</listitem>
 			</itemizedlist>
 		</partintro>
-		&remoting;
-		&ejb;
-		&jms;
-		&jmx;
-		&cci;
-		&mail;
-		&scheduling;
-		&dynamic-languages;
-		&metadata;
+		<xi:include href="remoting.xml"/>
+		<xi:include href="ejb.xml"/>
+		<xi:include href="jms.xml"/>
+		<xi:include href="jmx.xml"/>
+		<xi:include href="cci.xml"/>
+		<xi:include href="mail.xml"/>
+		<xi:include href="scheduling.xml"/>
+		<xi:include href="dynamic-languages.xml"/>
+		<xi:include href="metadata.xml"/>
 	</part>
 	<!-- back matter -->
-	&xsd-configuration;
-	&xml-custom;
-	&dtd;
-	&spring-tld;
-	&spring-form-tld;
+	<xi:include href="xsd-configuration.xml"/>
+	<xi:include href="xml-custom.xml"/>
+	<xi:include href="dtd.xml"/>
+	<xi:include href="spring.tld.xml"/>
+	<xi:include href="spring-form.tld.xml"/>
 </book>

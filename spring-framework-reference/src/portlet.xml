@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<chapter id="portlet">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+
+<chapter id="portlet" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Portlet MVC Framework</title>
 
   <section id="portlet-introduction">
@@ -40,7 +43,7 @@
     activities that generate what is displayed to the user.</para>
 
     <!-- insert some content about Spring Web Flow here -->
-    &swf-sidebar;
+    <xi:include href="swf-sidebar.xml"/>
 
     <para>The dual phases of portlet requests are one of the real strengths
     of the JSR-168 specification. For example, dynamic search results can be
