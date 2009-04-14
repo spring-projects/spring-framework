@@ -123,7 +123,7 @@ public class Selection extends SpelNodeImpl {
 				}
 			}
 			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-				return null;
+				return TypedValue.NULL_TYPED_VALUE;
 			}
 			if (variant == LAST) {
 				return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));

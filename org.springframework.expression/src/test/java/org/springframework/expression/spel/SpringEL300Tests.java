@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+
 /**
  * Tests based on Jiras up to the release of Spring 3.0.0
  * 
@@ -25,6 +28,15 @@ public class SpringEL300Tests extends ExpressionTestCase {
 
 	public void testNPE_5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
+	}
+	
+	public void testNPE_5673() throws Exception {
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		Expression ex = parser.parseExpression("#{'Unable to render embedded object: File ({#this == 2\\}'}", TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT);
+		assertEquals("Unable to render embedded object: File ({#this == 2}",ex.getValue());
+//		ex = parser.parseExpression("Unable to render embedded object: File (#{#this}) not found", TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT);
+//		assertEquals()
+//		System.out.println(ex.getValue(new StandardEvaluationContext(new File("C:/temp"))));
 	}
 
 }

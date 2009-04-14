@@ -41,6 +41,17 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		}
 	};
 
+	public static final ParserContext HASH_DELIMITED_PARSER_CONTEXT = new ParserContext() {
+		public String getExpressionPrefix() {
+			return "#{";
+		}
+		public String getExpressionSuffix() {
+			return "}";
+		}
+		public boolean isTemplate() {
+			return true;
+		}
+	};
 
 	public void testParsingSimpleTemplateExpression01() throws Exception {
 		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
@@ -91,6 +102,52 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		assertFalse(ex.isWritable(new StandardEvaluationContext()));
 	}
 	
+	public void testNestedExpressions() throws Exception {
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		// treat the nested ${..} as a part of the expression
+		Expression ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#this<5}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
+		assertEquals("hello 4 world",s);
+
+		// not a useful expression but tests nested expression syntax that clashes with template prefix/suffix
+		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#root.listOfNumbersUpToTen.${#this%2==1}==3}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
+		assertEquals("hello  world",s);
+
+		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#this<5}} ${listOfNumbersUpToTen.${#this>5}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
+		assertEquals("hello 4 10 world",s);
+		
+		try {
+			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#this<5}} ${listOfNumbersUpToTen.${#this>5} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			fail("Should have failed");
+		} catch (ParseException pe) {
+			assertEquals("No ending suffix '}' for expression starting at character 41: ${listOfNumbersUpToTen.${#this>5} world",pe.getMessage());
+		}	
+		
+		try {
+			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#root.listOfNumbersUpToTen.${#this%2==1==3}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			fail("Should have failed");
+		} catch (ParseException pe) {
+			assertEquals("No ending suffix '}' for expression starting at character 6: ${listOfNumbersUpToTen.${#root.listOfNumbersUpToTen.${#this%2==1==3}} world",pe.getMessage());
+		}	
+	}
+	
+	public void testClashingWithSuffixes() throws Exception {
+		// Just wanting to use the prefix or suffix within the template:
+		Expression ex = parser.parseExpression("hello ${3+4} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
+		assertEquals("hello 7 world",s);
+
+		ex = parser.parseExpression("hello ${3+4} wo\\${rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
+		assertEquals("hello 7 wo${rld",s);
+
+		ex = parser.parseExpression("hello ${3+4} wo\\}rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
+		assertEquals("hello 7 wo}rld",s);
+	}
+	
 	public void testParsingNormalExpressionThroughTemplateParser() throws Exception {
 		Expression expr = parser.parseExpression("1+2+3");
 		assertEquals(6,expr.getValue());
@@ -117,10 +174,12 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 			fail("Should have failed");
 		} catch (ParseException pe) {
 			assertEquals("No expression defined within delimiter '${}' at character 6",pe.getMessage());
-		}
-		
+		}		
 	}
 
+
+	// ---
+	
 	private void checkString(String expectedString, Object value) {
 		if (!(value instanceof String)) {
 			fail("Result was not a string, it was of type " + value.getClass() + "  (value=" + value + ")");
@@ -129,16 +188,5 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 			fail("Did not get expected result.  Should have been '" + expectedString + "' but was '" + value + "'");
 		}
 	}
-
-	// TODO need to support this case but what is the neatest way? Escape the clashing delimiters in the expression
-	// string?
-	// public void testParsingTemplateExpressionThatEmbedsTheDelimiters() throws Exception {
-	// SpelExpressionParser parser = new SpelExpressionParser();
-	// Expression expr = parser.parseExpression("The quick ${{'green','brown'}.${true}} fox jumped over the ${'lazy'}
-	// dog",DefaultTemplateParserContext.INSTANCE);
-	// Object o = expr.getValue();
-	// System.out.println(o);
-	// assertEquals("The quick brown fox jumped over the lazy dog",o.toString());
-	// }
 
 }
