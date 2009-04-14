@@ -175,6 +175,10 @@
       </listitem>
 
       <listitem>
+        <para>Object to XML mapping functionality (OXM) moved from Spring Web Services project</para>
+    </listitem>
+
+      <listitem>
         <para>Comprehensive REST support</para>
       </listitem>
 
@@ -349,12 +353,25 @@ public class AppConfig{
         linkend="beans-factorybeans-annotations">Factory Bean Definitions
         using annotations</link> for more information</para>
       </section>
-    </section>
+  </section>
+
+  <section id="new-feature-oxm">
+    <title>The Data Tier</title>
+
+    <para>Object to XML mapping functionality (OXM) from the Spring Web Services project have
+	been moved to the core Spring Framework now. The functionality is found in the
+    <literal>org.springframework.oxm</literal> package. More information on
+    the use of the <literal>OXM</literal> can be found
+    in the  <link linkend="oxm">Marshalling XML using O/X Mappers</link> chapter.</para>
+
+   </section>
 
     <section id="new-feature-rest">
       <title>The Web Tier</title>
 
-      <para>Work in progress ...</para>
+      <para>The most exciting new feature for the Web Tier is the support for building 
+	RESTful web services and web applications. There are also some new annotations that
+	can be used in any web application.</para>
 
       <section>
         <title>Comprehensive REST support</title>
@@ -371,14 +388,11 @@ public class AppConfig{
         and replies. </para>
 
         <para>The <classname>MarhsallingHttpMessageConverter</classname> uses
-        the Object to XML mapping functionality in the
-        <literal>org.springframework.oxm</literal> package. This functionality
-        had previously been part of Spring Web Services. More information on
-        the use of the <literal>org.springframework.oxm</literal> can be found
-        in the  <link linkend="oxm">Marshalling XML using O/X Mappers</link> chapter.</para>
+        the <emphasis>Object to XML mapping</emphasis> functionality mentioned earlier.</para>
 
         <para>Refer to the section on <link linkend="rest">REST support</link>
         for more information.</para>
+
       </section>
 
       <section>
@@ -392,7 +406,6 @@ public class AppConfig{
         linkend="mvc-ann-requestheader">Mapping request header attributes with
         the @RequestHeader annotation</link> for more information.</para>
 
-        <para>Work in progress ...</para>
       </section>
     </section>
 
@@ -401,15 +414,18 @@ public class AppConfig{
 
       <para>Hibernate Validator, JSR 303</para>
 
-      <para>Work in progress...</para>
+      <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
 
     <section id="new-feature-jee-6">
       <title>Early support for Java EE 6</title>
 
-      <para>JSF 2.0, JPA 2.0, etc</para>
+      <para>We provide support for asynchronous method invocations through the use of 
+      the new @Async annotation (or EJB 3.1's @Asynchronous annotation).</para>
 
-      <para>Work in progress...</para>
+     <para>JSF 2.0, JPA 2.0, etc</para>
+
+      <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
   </section>
 </chapter>
