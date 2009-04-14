@@ -171,7 +171,7 @@
       </listitem>
 
       <listitem>
-        <para>IoC enhancements</para>
+        <para>IoC enhancements/Spring JavaConfig</para>
       </listitem>
 
       <listitem>
@@ -192,6 +192,38 @@
     </itemizedlist>
   </section>
 
+  <section id="new-feature-java5">
+    <title>Core APIs updated for Java 5</title>
+
+    <para>BeanFactoryinterface returns typed bean 
+	instancesas far as possible
+	<itemizedlist>
+		<listitem>T getBean(Stringname, Class&lt;T&gt; requiredType)</listitem> 
+		<listitem>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt; type)</listitem> 
+	</itemizedlist>
+	</para>
+	
+	<para>Spring's TaskExecutorinterface extends 
+	<classname>java.util.concurrent.Executor</classname> now
+	<itemizedlist>
+		<listitem>extended AsyncTaskExecutor supports standard Callables with Futures</listitem> 
+	</itemizedlist>
+	</para>
+	
+	<para>New Java 5 based converter API and SPI 
+	<itemizedlist>
+		<listitem>stateless ConversionService and Converters</listitem> 
+	</itemizedlist>
+	<itemizedlist>
+		<listitem>superseding standard JDK PropertyEditors</listitem> 
+	</itemizedlist>
+	</para>
+	
+	<para>Typed ApplicationListener&lt;E&gt;
+	</para>
+	
+  </section>
+
   <section id="new-feature-el">
     <title>Spring Expression Language</title>
 
@@ -202,12 +234,29 @@
     support across the Spring portfolio. Details of this new functionality can
     be found in the chapter <link linkend="expressions">Spring Expression
     Language (SpEL).</link></para>
+
+	<para>The Spring Expression Language was created to provide the Spring community with a single well 
+	supported expression language that can used across all the products in the Spring portfolio. Its language 
+	features are driven by the requirements of the projects in the Spring portfolio, including tooling 
+	requirements for code completion support within the eclipse based SpringSource Tool Suite.</para>
+	
+	<para>The following is an example of how the Expression Language can be used to configure some properties 
+	of a database setup
+	<programlisting language="xml"><![CDATA[
+<bean class="mycompany.RewardsTestDatabase">
+    <property name="databaseName" 
+        value="“#{systemProperties.databaseName}”/> 
+    <property name="keyGenerator" 
+        value="“#{strategyBean.databaseKeyGenerator}”/> 
+</bean>
+]]></programlisting>
+	</para>
   </section>
 
   <section id="new-feature-java-config">
     <title>The Inversion of Control (IoC) container</title>
 
-    <para>Core JavaConfigfeatures added</para>
+    <para>Core JavaConfig features added</para>
   </section>
 
   <section id="new-feature-rest">

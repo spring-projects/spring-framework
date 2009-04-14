@@ -19,7 +19,7 @@
 <!ENTITY oxm				SYSTEM "oxm.xml">
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY view				SYSTEM "view.xml">
-<!ENTITY rest                           SYSTEM "rest.xml">
+<!ENTITY rest               SYSTEM "rest.xml">
 <!ENTITY web-integration		SYSTEM "web-integration.xml">
 <!ENTITY portlet            SYSTEM "portlet.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
@@ -304,7 +304,6 @@
 		&view;
 		&rest;
 		&web-integration;
-		&rest;
 		&portlet;
 	</part>
 	<part id="spring-integration">
