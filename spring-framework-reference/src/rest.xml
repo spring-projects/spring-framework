@@ -66,9 +66,9 @@
       URI Template in order to extract a collection of variables.</para>
 
       <para>Spring uses the <classname>@RequestMapping</classname> method
-      annotation to define the URI Template for the request.
-      The<classname>@PathVariable</classname> annotation is used to extract
-      the value of the template variables and assign their value to a method
+      annotation to define the URI Template for the request. The
+      <classname>@PathVariable</classname> annotation is used to extract the
+      value of the template variables and assign their value to a method
       variable. A Spring controller method to process above example is shown
       below;</para>
 
@@ -239,9 +239,11 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
     &lt;/property
 &lt;/bean&gt;
 
-&lt;bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter"/&gt;
+&lt;bean id="stringHttpMessageConverter" 
+       class="org.springframework.http.converter.StringHttpMessageConverter"/&gt;
 
-&lt;bean id="marshallingHttpMessageConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter"&gt;
+&lt;bean id="marshallingHttpMessageConverter" 
+      class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter"&gt;
   &lt;property name="marshaller" ref="castorMarshaller" /&gt;
   &lt;property name="unmarshaller" ref="castorMarshaller" /&gt;
 &lt;/bean&gt;
@@ -447,13 +449,15 @@ public class ContentController {
         <programlisting language="java">public class SampleContentAtomView extends AbstractAtomFeedView {
 
   @Override
-  protected void buildFeedMetadata(Map&lt;String, Object&gt; model, Feed feed, HttpServletRequest request) {
+  protected void buildFeedMetadata(Map&lt;String, Object&gt; model, Feed feed, 
+                                   HttpServletRequest request) {
     // implementation omitted
   }
 
   @Override
   protected List&lt;Entry&gt; buildFeedEntries(Map&lt;String, Object&gt; model,
-                                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+                                         HttpServletRequest request, 
+                                         HttpServletResponse response) throws Exception {
 
    // implementation omitted
   }
@@ -465,13 +469,15 @@ public class ContentController {
         <programlisting language="java">public class SampleContentAtomView extends AbstractRssFeedView {
 
   @Override   
-  protected void buildFeedMetadata(Map&lt;String, Object&gt; model, Channel feed, HttpServletRequest request) {
+  protected void buildFeedMetadata(Map&lt;String, Object&gt; model, Channel feed, 
+                                   HttpServletRequest request) {
     // implementation omitted
   }
 
   @Override
   protected List&lt;Item&gt; buildFeedItems(Map&lt;String, Object&gt; model,
-                                      HttpServletRequest request, HttpServletResponse response) throws Exception {
+                                      HttpServletRequest request, 
+                                      HttpServletResponse response) throws Exception {
     // implementation omitted
   }
 
@@ -781,7 +787,8 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       <para>using variable length arguments and </para>
 
       <programlisting language="java">Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", 42);
-String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+String result = 
+  restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
 </programlisting>
 
       <para>using a <literal>Map&lt;String,String&gt;</literal>. </para>
@@ -858,10 +865,12 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
   List&lt;MediaType&gt; getSupportedMediaTypes();
 
   // Read an object of the given type form the given input message, and returns it.
-  T read(Class&lt;T&gt; clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException;
+  T read(Class&lt;T&gt; clazz, HttpInputMessage inputMessage) throws IOException, 
+                                                               HttpMessageNotReadableException;
 
   // Write an given object to the given output message.
-  void write(T t, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException;
+  void write(T t, HttpOutputMessage outputMessage) throws IOException, 
+                                                          HttpMessageNotWritableException;
 
 }</programlisting>
 
