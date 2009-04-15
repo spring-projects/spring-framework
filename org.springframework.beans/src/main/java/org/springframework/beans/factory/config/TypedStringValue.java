@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ public class TypedStringValue implements BeanMetadataElement {
 	private Object targetType;
 
 	private Object source;
+
+	private String specifiedTypeName;
 
 
 	/**
@@ -167,6 +169,20 @@ public class TypedStringValue implements BeanMetadataElement {
 
 	public Object getSource() {
 		return this.source;
+	}
+
+	/**
+	 * Set the type name as actually specified for this particular value, if any.
+	 */
+	public void setSpecifiedTypeName(String specifiedTypeName) {
+		this.specifiedTypeName = specifiedTypeName;
+	}
+
+	/**
+	 * Return the type name as actually specified for this particular value, if any.
+	 */
+	public String getSpecifiedTypeName() {
+		return this.specifiedTypeName;
 	}
 
 

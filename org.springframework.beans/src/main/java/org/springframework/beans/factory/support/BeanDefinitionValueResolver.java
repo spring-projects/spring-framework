@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -36,6 +37,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class for use in bean factory implementations,
@@ -120,6 +123,30 @@ class BeanDefinitionValueResolver {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
 			return resolveInnerBean(argName, "(inner bean)", bd);
+		}
+		else if (value instanceof ManagedArray) {
+			// May need to resolve contained runtime references.
+			ManagedArray array = (ManagedArray) value;
+			Class elementType = array.resolvedElementType;
+			if (elementType == null) {
+				String elementTypeName = array.getElementTypeName();
+				if (StringUtils.hasText(elementTypeName)) {
+					try {
+						elementType = ClassUtils.forName(elementTypeName, this.beanFactory.getBeanClassLoader());
+						array.resolvedElementType = elementType;
+					}
+					catch (Throwable ex) {
+						// Improve the message by showing the context.
+						throw new BeanCreationException(
+								this.beanDefinition.getResourceDescription(), this.beanName,
+								"Error resolving array type for " + argName, ex);
+					}
+				}
+				else {
+					elementType = Object.class;
+				}
+			}
+			return resolveManagedArray(argName, (List<?>) value, elementType);
 		}
 		else if (value instanceof ManagedList) {
 			// May need to resolve contained runtime references.
@@ -292,7 +319,21 @@ class BeanDefinitionValueResolver {
 	}
 
 	/**
-	 * For each element in the ManagedList, resolve reference if necessary.
+	 * For each element in the managed array, resolve reference if necessary.
+	 */
+	private Object resolveManagedArray(Object argName, List<?> ml, Class elementType) {
+		Object resolved = Array.newInstance(elementType, ml.size());
+		for (int i = 0; i < ml.size(); i++) {
+			Array.set(resolved, i,
+			    resolveValueIfNecessary(
+							argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
+							ml.get(i)));
+		}
+		return resolved;
+	}
+
+	/**
+	 * For each element in the managed list, resolve reference if necessary.
 	 */
 	private List resolveManagedList(Object argName, List<?> ml) {
 		List<Object> resolved = new ArrayList<Object>(ml.size());
@@ -306,7 +347,7 @@ class BeanDefinitionValueResolver {
 	}
 
 	/**
-	 * For each element in the ManagedList, resolve reference if necessary.
+	 * For each element in the managed set, resolve reference if necessary.
 	 */
 	private Set resolveManagedSet(Object argName, Set<?> ms) {
 		Set<Object> resolved = new LinkedHashSet<Object>(ms.size());
@@ -320,7 +361,7 @@ class BeanDefinitionValueResolver {
 	}
 
 	/**
-	 * For each element in the ManagedMap, resolve reference if necessary.
+	 * For each element in the managed map, resolve reference if necessary.
 	 */
 	private Map resolveManagedMap(Object argName, Map<?, ?> mm) {
 		Map<Object, Object> resolved = new LinkedHashMap<Object, Object>(mm.size());

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="jenny" class="test.beans.TestBean">	
 		<property name="name"><value>Jenny</value></property>
@@ -74,13 +74,17 @@
 		</property>
 	</bean>
 	
-	<bean id="jumble" class="org.springframework.beans.factory.xml.MixedCollectionBean">	
+	<bean id="jumble" class="org.springframework.beans.factory.xml.MixedCollectionBean">
 		<property name="jumble">
 			<list>
 				<ref local="david"/>
 				<value>literal</value>
 				<ref local="jenny"/>
 				<idref local="rod"/>
+				<array>
+					<ref local="david"/>
+					<value>literal2</value>
+				</array>
 			</list>
 		</property>
 	</bean>

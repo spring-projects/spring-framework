@@ -78,7 +78,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'lazy-init' value; see the documentation for the
-	'lazy-init' attribute of the '<bean>/' element.
+	'lazy-init' attribute of the '<bean>' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -94,7 +94,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'autowire' value; see the documentation for the
-	'autowire' attribute of the '<bean>/' element.
+	'autowire' attribute of the '<bean>' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -111,7 +111,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'dependency-check' value; see the documentation for the
-	'dependency-check' attribute of the '<bean>/' element.
+	'dependency-check' attribute of the '<bean>' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -138,7 +138,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'init-method' value; see the documentation for the
-	'init-method' attribute of the '<bean>/' element.
+	'init-method' attribute of the '<bean>' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -146,7 +146,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'destroy-method' value; see the documentation for the
-	'destroy-method' attribute of the '<bean>/' element.
+	'destroy-method' attribute of the '<bean>' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -336,7 +336,7 @@
 	more explicit.
 
 	2. "byName"
-	Autowiring by property name. If a bean of class Cat exposes a dog
+	Autowiring by property name. If a bean of class Cat exposes a "dog"
 	property, Spring will try to set this to the value of the bean "dog"
 	in the current container. If there is no matching bean by name, nothing
 	special happens; use dependency-check="objects" to raise an error in
