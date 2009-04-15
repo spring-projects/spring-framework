@@ -105,24 +105,24 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 	public void testNestedExpressions() throws Exception {
 		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		// treat the nested ${..} as a part of the expression
-		Expression ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#this<5}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		Expression ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#this<5]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello 4 world",s);
 
 		// not a useful expression but tests nested expression syntax that clashes with template prefix/suffix
-		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#root.listOfNumbersUpToTen.${#this%2==1}==3}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#root.listOfNumbersUpToTen.$[#this%2==1]==3]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello  world",s);
 
-		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#this<5}} ${listOfNumbersUpToTen.${#this>5}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#this<5]} ${listOfNumbersUpToTen.$[#this>5]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello 4 10 world",s);
 		
 		try {
-			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#this<5}} ${listOfNumbersUpToTen.${#this>5} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#this<5]} ${listOfNumbersUpToTen.$[#this>5] world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 			fail("Should have failed");
 		} catch (ParseException pe) {
-			assertEquals("No ending suffix '}' for expression starting at character 41: ${listOfNumbersUpToTen.${#this>5} world",pe.getMessage());
+			assertEquals("No ending suffix '}' for expression starting at character 41: ${listOfNumbersUpToTen.$[#this>5] world",pe.getMessage());
 		}	
 		
 		try {

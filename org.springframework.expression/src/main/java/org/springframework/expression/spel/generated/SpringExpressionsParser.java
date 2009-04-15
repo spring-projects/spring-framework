@@ -1,101 +1,93 @@
-// $ANTLR 3.0.1 /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g 2008-09-16 19:06:07
+// $ANTLR 3.0.1 F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g 2009-04-15 13:33:58
 package org.springframework.expression.spel.generated;
 
-import java.util.HashMap;
+import org.antlr.runtime.*;
 import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.EarlyExitException;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-import org.antlr.runtime.tree.CommonTreeAdaptor;
-import org.antlr.runtime.tree.RewriteRuleSubtreeStream;
-import org.antlr.runtime.tree.RewriteRuleTokenStream;
-import org.antlr.runtime.tree.TreeAdaptor;
+import org.antlr.runtime.tree.*;
 
 public class SpringExpressionsParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "INTEGER_LITERAL", "EXPRESSION", "QUALIFIED_IDENTIFIER", "PROPERTY_OR_FIELD", "INDEXER", "CONSTRUCTOR", "HOLDER", "NAMED_ARGUMENT", "FUNCTIONREF", "TYPEREF", "VARIABLEREF", "METHOD", "ADD", "SUBTRACT", "NUMBER", "ASSIGN", "DEFAULT", "QMARK", "COLON", "LPAREN", "RPAREN", "OR", "AND", "PLUS", "MINUS", "STAR", "DIV", "MOD", "POWER", "BANG", "DOT", "POUND", "ID", "COMMA", "LBRACKET", "RBRACKET", "PROJECT", "RCURLY", "SELECT", "SELECT_FIRST", "SELECT_LAST", "TYPE", "STRING_LITERAL", "DQ_STRING_LITERAL", "NULL_LITERAL", "HEXADECIMAL_INTEGER_LITERAL", "REAL_LITERAL", "TRUE", "FALSE", "DECIMAL_DIGIT", "INTEGER_TYPE_SUFFIX", "HEX_DIGIT", "EQUAL", "NOT_EQUAL", "LESS_THAN", "LESS_THAN_OR_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL", "INSTANCEOF", "BETWEEN", "MATCHES", "SEMI", "LCURLY", "PIPE", "APOS", "DOT_ESCAPED", "WS", "DOLLAR", "AT", "UPTO", "EXPONENT_PART", "REAL_TYPE_SUFFIX", "SIGN", "'new'"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "INTEGER_LITERAL", "EXPRESSION", "QUALIFIED_IDENTIFIER", "PROPERTY_OR_FIELD", "INDEXER", "CONSTRUCTOR", "HOLDER", "NAMED_ARGUMENT", "FUNCTIONREF", "TYPEREF", "VARIABLEREF", "METHOD", "ADD", "SUBTRACT", "NUMBER", "ASSIGN", "DEFAULT", "QMARK", "COLON", "LPAREN", "RPAREN", "OR", "AND", "PLUS", "MINUS", "STAR", "DIV", "MOD", "POWER", "BANG", "DOT", "POUND", "ID", "COMMA", "LBRACKET", "RBRACKET", "PROJECT", "SELECT", "SELECT_FIRST", "SELECT_LAST", "TYPE", "STRING_LITERAL", "DQ_STRING_LITERAL", "NULL_LITERAL", "HEXADECIMAL_INTEGER_LITERAL", "REAL_LITERAL", "TRUE", "FALSE", "DECIMAL_DIGIT", "INTEGER_TYPE_SUFFIX", "HEX_DIGIT", "EQUAL", "NOT_EQUAL", "LESS_THAN", "LESS_THAN_OR_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL", "INSTANCEOF", "BETWEEN", "MATCHES", "SEMI", "LCURLY", "RCURLY", "PIPE", "APOS", "DOT_ESCAPED", "WS", "DOLLAR", "AT", "UPTO", "EXPONENT_PART", "REAL_TYPE_SUFFIX", "SIGN", "'new'"
     };
-    public static final int GREATER_THAN_OR_EQUAL=61;
-    public static final int HOLDER=10;
-    public static final int COMMA=37;
-    public static final int SELECT_FIRST=43;
-    public static final int GREATER_THAN=60;
-    public static final int TYPE=45;
-    public static final int MINUS=28;
-    public static final int SELECT_LAST=44;
-    public static final int NUMBER=18;
-    public static final int LESS_THAN=58;
-    public static final int BANG=33;
-    public static final int FALSE=52;
-    public static final int METHOD=15;
-    public static final int PROPERTY_OR_FIELD=7;
-    public static final int LBRACKET=38;
-    public static final int INDEXER=8;
-    public static final int MOD=31;
-    public static final int FUNCTIONREF=12;
-    public static final int NULL_LITERAL=48;
-    public static final int NAMED_ARGUMENT=11;
-    public static final int OR=25;
-    public static final int PIPE=67;
-    public static final int DOT=34;
-    public static final int RCURLY=41;
-    public static final int EXPRESSION=5;
-    public static final int AND=26;
-    public static final int LCURLY=66;
-    public static final int REAL_TYPE_SUFFIX=75;
-    public static final int STRING_LITERAL=46;
-    public static final int QUALIFIED_IDENTIFIER=6;
-    public static final int SELECT=42;
-    public static final int ASSIGN=19;
-    public static final int SUBTRACT=17;
-    public static final int RBRACKET=39;
-    public static final int INSTANCEOF=62;
-    public static final int BETWEEN=63;
-    public static final int RPAREN=24;
     public static final int SIGN=76;
-    public static final int LPAREN=23;
-    public static final int HEX_DIGIT=55;
-    public static final int PLUS=27;
-    public static final int APOS=68;
-    public static final int INTEGER_LITERAL=4;
-    public static final int AT=72;
-    public static final int ID=36;
-    public static final int NOT_EQUAL=57;
-    public static final int POWER=32;
-    public static final int TYPEREF=13;
-    public static final int DECIMAL_DIGIT=53;
-    public static final int WS=70;
     public static final int DOLLAR=71;
-    public static final int LESS_THAN_OR_EQUAL=59;
-    public static final int DQ_STRING_LITERAL=47;
-    public static final int HEXADECIMAL_INTEGER_LITERAL=49;
-    public static final int SEMI=65;
-    public static final int CONSTRUCTOR=9;
-    public static final int INTEGER_TYPE_SUFFIX=54;
-    public static final int EQUAL=56;
-    public static final int MATCHES=64;
-    public static final int DOT_ESCAPED=69;
-    public static final int UPTO=73;
-    public static final int EOF=-1;
-    public static final int QMARK=21;
-    public static final int DEFAULT=20;
-    public static final int COLON=22;
-    public static final int PROJECT=40;
-    public static final int DIV=30;
+    public static final int DECIMAL_DIGIT=52;
+    public static final int APOS=68;
+    public static final int TYPEREF=13;
+    public static final int HEXADECIMAL_INTEGER_LITERAL=48;
     public static final int STAR=29;
-    public static final int REAL_LITERAL=50;
+    public static final int MOD=31;
     public static final int VARIABLEREF=14;
-    public static final int EXPONENT_PART=74;
-    public static final int TRUE=51;
+    public static final int AND=26;
+    public static final int ID=36;
+    public static final int SUBTRACT=17;
+    public static final int EOF=-1;
+    public static final int UPTO=73;
+    public static final int LPAREN=23;
+    public static final int TYPE=44;
+    public static final int HOLDER=10;
+    public static final int AT=72;
+    public static final int LBRACKET=38;
+    public static final int QUALIFIED_IDENTIFIER=6;
+    public static final int RPAREN=24;
+    public static final int STRING_LITERAL=45;
+    public static final int MATCHES=63;
+    public static final int REAL_LITERAL=49;
+    public static final int NOT_EQUAL=56;
+    public static final int COMMA=37;
+    public static final int FUNCTIONREF=12;
+    public static final int EQUAL=55;
+    public static final int PIPE=67;
+    public static final int PLUS=27;
+    public static final int RBRACKET=39;
+    public static final int DOT=34;
+    public static final int SELECT=41;
+    public static final int EXPRESSION=5;
     public static final int ADD=16;
+    public static final int LESS_THAN_OR_EQUAL=58;
+    public static final int GREATER_THAN=59;
     public static final int POUND=35;
+    public static final int PROJECT=40;
+    public static final int SELECT_LAST=43;
+    public static final int DEFAULT=20;
+    public static final int NUMBER=18;
+    public static final int REAL_TYPE_SUFFIX=75;
+    public static final int HEX_DIGIT=54;
+    public static final int POWER=32;
+    public static final int LCURLY=65;
+    public static final int NULL_LITERAL=47;
+    public static final int PROPERTY_OR_FIELD=7;
+    public static final int BANG=33;
+    public static final int INSTANCEOF=61;
+    public static final int MINUS=28;
+    public static final int SEMI=64;
+    public static final int TRUE=50;
+    public static final int COLON=22;
+    public static final int GREATER_THAN_OR_EQUAL=60;
+    public static final int WS=70;
+    public static final int DOT_ESCAPED=69;
+    public static final int DQ_STRING_LITERAL=46;
+    public static final int INTEGER_LITERAL=4;
+    public static final int RCURLY=66;
+    public static final int INDEXER=8;
+    public static final int OR=25;
+    public static final int LESS_THAN=57;
+    public static final int ASSIGN=19;
+    public static final int NAMED_ARGUMENT=11;
+    public static final int SELECT_FIRST=42;
+    public static final int DIV=30;
+    public static final int FALSE=51;
+    public static final int EXPONENT_PART=74;
+    public static final int BETWEEN=62;
+    public static final int INTEGER_TYPE_SUFFIX=53;
+    public static final int METHOD=15;
+    public static final int CONSTRUCTOR=9;
+    public static final int QMARK=21;
 
         public SpringExpressionsParser(TokenStream input) {
             super(input);
@@ -112,9 +104,9 @@ public class SpringExpressionsParser extends Parser {
     }
 
     public String[] getTokenNames() { return tokenNames; }
-    public String getGrammarFileName() { return "/Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g"; }
+    public String getGrammarFileName() { return "F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g"; }
 
-
+    
       // For collecting info whilst processing rules that can be used in messages
       protected Stack<String> paraphrase = new Stack<String>();
 
@@ -125,7 +117,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start expr
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:45:1: expr : expression EOF ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:45:1: expr : expression EOF ;
     public final expr_return expr() throws RecognitionException {
         expr_return retval = new expr_return();
         retval.start = input.LT(1);
@@ -139,8 +131,8 @@ public class SpringExpressionsParser extends Parser {
         Object EOF2_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:45:5: ( expression EOF )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:45:7: expression EOF
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:45:5: ( expression EOF )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:45:7: expression EOF
             {
             root_0 = (Object)adaptor.nil();
 
@@ -161,7 +153,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -178,7 +170,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start expression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:47:1: expression : logicalOrExpression ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )? ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:47:1: expression : logicalOrExpression ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )? ;
     public final expression_return expression() throws RecognitionException {
         expression_return retval = new expression_return();
         retval.start = input.LT(1);
@@ -206,8 +198,8 @@ public class SpringExpressionsParser extends Parser {
         Object COLON10_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:47:12: ( logicalOrExpression ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )? )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:48:5: logicalOrExpression ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:47:12: ( logicalOrExpression ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )? )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:48:5: logicalOrExpression ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )?
             {
             root_0 = (Object)adaptor.nil();
 
@@ -216,7 +208,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, logicalOrExpression3.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:49:5: ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:49:5: ( ( ASSIGN logicalOrExpression ) | ( DEFAULT logicalOrExpression ) | ( QMARK expression COLON expression ) )?
             int alt1=4;
             switch ( input.LA(1) ) {
                 case ASSIGN:
@@ -238,10 +230,10 @@ public class SpringExpressionsParser extends Parser {
 
             switch (alt1) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:49:7: ( ASSIGN logicalOrExpression )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:49:7: ( ASSIGN logicalOrExpression )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:49:7: ( ASSIGN logicalOrExpression )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:49:8: ASSIGN logicalOrExpression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:49:7: ( ASSIGN logicalOrExpression )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:49:8: ASSIGN logicalOrExpression
                     {
                     ASSIGN4=(Token)input.LT(1);
                     match(input,ASSIGN,FOLLOW_ASSIGN_in_expression161); if (failed) return retval;
@@ -261,10 +253,10 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:50:6: ( DEFAULT logicalOrExpression )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:50:6: ( DEFAULT logicalOrExpression )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:50:6: ( DEFAULT logicalOrExpression )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:50:7: DEFAULT logicalOrExpression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:50:6: ( DEFAULT logicalOrExpression )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:50:7: DEFAULT logicalOrExpression
                     {
                     DEFAULT6=(Token)input.LT(1);
                     match(input,DEFAULT,FOLLOW_DEFAULT_in_expression174); if (failed) return retval;
@@ -284,10 +276,10 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:51:6: ( QMARK expression COLON expression )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:51:6: ( QMARK expression COLON expression )
                     {
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:51:6: ( QMARK expression COLON expression )
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:51:7: QMARK expression COLON expression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:51:6: ( QMARK expression COLON expression )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:51:7: QMARK expression COLON expression
                     {
                     QMARK8=(Token)input.LT(1);
                     match(input,QMARK,FOLLOW_QMARK_in_expression187); if (failed) return retval;
@@ -326,7 +318,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -343,7 +335,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start parenExpr
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:53:1: parenExpr : LPAREN expression RPAREN ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:53:1: parenExpr : LPAREN expression RPAREN ;
     public final parenExpr_return parenExpr() throws RecognitionException {
         parenExpr_return retval = new parenExpr_return();
         retval.start = input.LT(1);
@@ -359,8 +351,8 @@ public class SpringExpressionsParser extends Parser {
         Object RPAREN14_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:53:11: ( LPAREN expression RPAREN )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:53:13: LPAREN expression RPAREN
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:53:11: ( LPAREN expression RPAREN )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:53:13: LPAREN expression RPAREN
             {
             root_0 = (Object)adaptor.nil();
 
@@ -383,7 +375,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -400,7 +392,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start logicalOrExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:55:1: logicalOrExpression : logicalAndExpression ( OR logicalAndExpression )* ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:55:1: logicalOrExpression : logicalAndExpression ( OR logicalAndExpression )* ;
     public final logicalOrExpression_return logicalOrExpression() throws RecognitionException {
         logicalOrExpression_return retval = new logicalOrExpression_return();
         retval.start = input.LT(1);
@@ -416,8 +408,8 @@ public class SpringExpressionsParser extends Parser {
         Object OR16_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:56:1: ( logicalAndExpression ( OR logicalAndExpression )* )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:56:3: logicalAndExpression ( OR logicalAndExpression )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:56:1: ( logicalAndExpression ( OR logicalAndExpression )* )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:56:3: logicalAndExpression ( OR logicalAndExpression )*
             {
             root_0 = (Object)adaptor.nil();
 
@@ -426,7 +418,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, logicalAndExpression15.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:56:24: ( OR logicalAndExpression )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:56:24: ( OR logicalAndExpression )*
             loop2:
             do {
                 int alt2=2;
@@ -439,7 +431,7 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt2) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:56:25: OR logicalAndExpression
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:56:25: OR logicalAndExpression
             	    {
             	    OR16=(Token)input.LT(1);
             	    match(input,OR,FOLLOW_OR_in_logicalOrExpression225); if (failed) return retval;
@@ -471,7 +463,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -488,7 +480,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start logicalAndExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:58:1: logicalAndExpression : relationalExpression ( AND relationalExpression )* ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:58:1: logicalAndExpression : relationalExpression ( AND relationalExpression )* ;
     public final logicalAndExpression_return logicalAndExpression() throws RecognitionException {
         logicalAndExpression_return retval = new logicalAndExpression_return();
         retval.start = input.LT(1);
@@ -504,8 +496,8 @@ public class SpringExpressionsParser extends Parser {
         Object AND19_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:59:1: ( relationalExpression ( AND relationalExpression )* )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:59:3: relationalExpression ( AND relationalExpression )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:59:1: ( relationalExpression ( AND relationalExpression )* )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:59:3: relationalExpression ( AND relationalExpression )*
             {
             root_0 = (Object)adaptor.nil();
 
@@ -514,7 +506,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, relationalExpression18.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:59:24: ( AND relationalExpression )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:59:24: ( AND relationalExpression )*
             loop3:
             do {
                 int alt3=2;
@@ -527,7 +519,7 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt3) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:59:25: AND relationalExpression
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:59:25: AND relationalExpression
             	    {
             	    AND19=(Token)input.LT(1);
             	    match(input,AND,FOLLOW_AND_in_logicalAndExpression266); if (failed) return retval;
@@ -559,7 +551,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -576,7 +568,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start relationalExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:61:1: relationalExpression : sumExpression ( relationalOperator sumExpression )? ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:61:1: relationalExpression : sumExpression ( relationalOperator sumExpression )? ;
     public final relationalExpression_return relationalExpression() throws RecognitionException {
         relationalExpression_return retval = new relationalExpression_return();
         retval.start = input.LT(1);
@@ -592,8 +584,8 @@ public class SpringExpressionsParser extends Parser {
 
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:61:22: ( sumExpression ( relationalOperator sumExpression )? )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:61:24: sumExpression ( relationalOperator sumExpression )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:61:22: ( sumExpression ( relationalOperator sumExpression )? )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:61:24: sumExpression ( relationalOperator sumExpression )?
             {
             root_0 = (Object)adaptor.nil();
 
@@ -602,7 +594,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, sumExpression21.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:61:38: ( relationalOperator sumExpression )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:61:38: ( relationalOperator sumExpression )?
             int alt4=2;
             int LA4_0 = input.LA(1);
 
@@ -611,7 +603,7 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt4) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:61:39: relationalOperator sumExpression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:61:39: relationalOperator sumExpression
                     {
                     pushFollow(FOLLOW_relationalOperator_in_relationalExpression283);
                     relationalOperator22=relationalOperator();
@@ -639,7 +631,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -656,7 +648,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start sumExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:63:1: sumExpression : productExpression ( ( PLUS | MINUS ) productExpression )* ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:63:1: sumExpression : productExpression ( ( PLUS | MINUS ) productExpression )* ;
     public final sumExpression_return sumExpression() throws RecognitionException {
         sumExpression_return retval = new sumExpression_return();
         retval.start = input.LT(1);
@@ -674,8 +666,8 @@ public class SpringExpressionsParser extends Parser {
         Object MINUS26_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:2: ( productExpression ( ( PLUS | MINUS ) productExpression )* )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:4: productExpression ( ( PLUS | MINUS ) productExpression )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:2: ( productExpression ( ( PLUS | MINUS ) productExpression )* )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:4: productExpression ( ( PLUS | MINUS ) productExpression )*
             {
             root_0 = (Object)adaptor.nil();
 
@@ -684,7 +676,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, productExpression24.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:22: ( ( PLUS | MINUS ) productExpression )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:22: ( ( PLUS | MINUS ) productExpression )*
             loop6:
             do {
                 int alt6=2;
@@ -697,9 +689,9 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt6) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:24: ( PLUS | MINUS ) productExpression
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:24: ( PLUS | MINUS ) productExpression
             	    {
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:24: ( PLUS | MINUS )
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:24: ( PLUS | MINUS )
             	    int alt5=2;
             	    int LA5_0 = input.LA(1);
 
@@ -718,7 +710,7 @@ public class SpringExpressionsParser extends Parser {
             	    }
             	    switch (alt5) {
             	        case 1 :
-            	            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:25: PLUS
+            	            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:25: PLUS
             	            {
             	            PLUS25=(Token)input.LT(1);
             	            match(input,PLUS,FOLLOW_PLUS_in_sumExpression302); if (failed) return retval;
@@ -730,7 +722,7 @@ public class SpringExpressionsParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:64:33: MINUS
+            	            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:64:33: MINUS
             	            {
             	            MINUS26=(Token)input.LT(1);
             	            match(input,MINUS,FOLLOW_MINUS_in_sumExpression307); if (failed) return retval;
@@ -768,7 +760,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -785,7 +777,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start productExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:66:1: productExpression : powerExpr ( ( STAR | DIV | MOD ) powerExpr )* ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:66:1: productExpression : powerExpr ( ( STAR | DIV | MOD ) powerExpr )* ;
     public final productExpression_return productExpression() throws RecognitionException {
         productExpression_return retval = new productExpression_return();
         retval.start = input.LT(1);
@@ -805,8 +797,8 @@ public class SpringExpressionsParser extends Parser {
         Object MOD31_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:2: ( powerExpr ( ( STAR | DIV | MOD ) powerExpr )* )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:4: powerExpr ( ( STAR | DIV | MOD ) powerExpr )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:2: ( powerExpr ( ( STAR | DIV | MOD ) powerExpr )* )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:4: powerExpr ( ( STAR | DIV | MOD ) powerExpr )*
             {
             root_0 = (Object)adaptor.nil();
 
@@ -815,7 +807,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, powerExpr28.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:14: ( ( STAR | DIV | MOD ) powerExpr )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:14: ( ( STAR | DIV | MOD ) powerExpr )*
             loop8:
             do {
                 int alt8=2;
@@ -828,9 +820,9 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt8) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:15: ( STAR | DIV | MOD ) powerExpr
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:15: ( STAR | DIV | MOD ) powerExpr
             	    {
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:15: ( STAR | DIV | MOD )
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:15: ( STAR | DIV | MOD )
             	    int alt7=3;
             	    switch ( input.LA(1) ) {
             	    case STAR:
@@ -858,7 +850,7 @@ public class SpringExpressionsParser extends Parser {
 
             	    switch (alt7) {
             	        case 1 :
-            	            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:16: STAR
+            	            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:16: STAR
             	            {
             	            STAR29=(Token)input.LT(1);
             	            match(input,STAR,FOLLOW_STAR_in_productExpression326); if (failed) return retval;
@@ -870,7 +862,7 @@ public class SpringExpressionsParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:24: DIV
+            	            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:24: DIV
             	            {
             	            DIV30=(Token)input.LT(1);
             	            match(input,DIV,FOLLOW_DIV_in_productExpression331); if (failed) return retval;
@@ -882,7 +874,7 @@ public class SpringExpressionsParser extends Parser {
             	            }
             	            break;
             	        case 3 :
-            	            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:67:30: MOD
+            	            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:67:30: MOD
             	            {
             	            MOD31=(Token)input.LT(1);
             	            match(input,MOD,FOLLOW_MOD_in_productExpression335); if (failed) return retval;
@@ -920,7 +912,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -937,7 +929,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start powerExpr
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:69:1: powerExpr : unaryExpression ( POWER unaryExpression )? ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:69:1: powerExpr : unaryExpression ( POWER unaryExpression )? ;
     public final powerExpr_return powerExpr() throws RecognitionException {
         powerExpr_return retval = new powerExpr_return();
         retval.start = input.LT(1);
@@ -953,8 +945,8 @@ public class SpringExpressionsParser extends Parser {
         Object POWER34_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:69:12: ( unaryExpression ( POWER unaryExpression )? )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:69:14: unaryExpression ( POWER unaryExpression )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:69:12: ( unaryExpression ( POWER unaryExpression )? )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:69:14: unaryExpression ( POWER unaryExpression )?
             {
             root_0 = (Object)adaptor.nil();
 
@@ -963,7 +955,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, unaryExpression33.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:69:30: ( POWER unaryExpression )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:69:30: ( POWER unaryExpression )?
             int alt9=2;
             int LA9_0 = input.LA(1);
 
@@ -972,7 +964,7 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt9) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:69:31: POWER unaryExpression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:69:31: POWER unaryExpression
                     {
                     POWER34=(Token)input.LT(1);
                     match(input,POWER,FOLLOW_POWER_in_powerExpr354); if (failed) return retval;
@@ -1001,7 +993,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1018,7 +1010,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start unaryExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:71:1: unaryExpression : ( ( PLUS | MINUS | BANG ) unaryExpression | primaryExpression );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:71:1: unaryExpression : ( ( PLUS | MINUS | BANG ) unaryExpression | primaryExpression );
     public final unaryExpression_return unaryExpression() throws RecognitionException {
         unaryExpression_return retval = new unaryExpression_return();
         retval.start = input.LT(1);
@@ -1038,14 +1030,14 @@ public class SpringExpressionsParser extends Parser {
         Object BANG38_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:72:2: ( ( PLUS | MINUS | BANG ) unaryExpression | primaryExpression )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:72:2: ( ( PLUS | MINUS | BANG ) unaryExpression | primaryExpression )
             int alt11=2;
             int LA11_0 = input.LA(1);
 
             if ( ((LA11_0>=PLUS && LA11_0<=MINUS)||LA11_0==BANG) ) {
                 alt11=1;
             }
-            else if ( (LA11_0==INTEGER_LITERAL||LA11_0==LPAREN||(LA11_0>=POUND && LA11_0<=ID)||LA11_0==LBRACKET||LA11_0==PROJECT||(LA11_0>=SELECT && LA11_0<=FALSE)||LA11_0==77) ) {
+            else if ( (LA11_0==INTEGER_LITERAL||LA11_0==LPAREN||(LA11_0>=POUND && LA11_0<=ID)||LA11_0==LBRACKET||(LA11_0>=PROJECT && LA11_0<=FALSE)||LA11_0==77) ) {
                 alt11=2;
             }
             else {
@@ -1057,11 +1049,11 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt11) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:72:4: ( PLUS | MINUS | BANG ) unaryExpression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:72:4: ( PLUS | MINUS | BANG ) unaryExpression
                     {
                     root_0 = (Object)adaptor.nil();
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:72:4: ( PLUS | MINUS | BANG )
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:72:4: ( PLUS | MINUS | BANG )
                     int alt10=3;
                     switch ( input.LA(1) ) {
                     case PLUS:
@@ -1089,7 +1081,7 @@ public class SpringExpressionsParser extends Parser {
 
                     switch (alt10) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:72:5: PLUS
+                            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:72:5: PLUS
                             {
                             PLUS36=(Token)input.LT(1);
                             match(input,PLUS,FOLLOW_PLUS_in_unaryExpression371); if (failed) return retval;
@@ -1101,7 +1093,7 @@ public class SpringExpressionsParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:72:13: MINUS
+                            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:72:13: MINUS
                             {
                             MINUS37=(Token)input.LT(1);
                             match(input,MINUS,FOLLOW_MINUS_in_unaryExpression376); if (failed) return retval;
@@ -1113,7 +1105,7 @@ public class SpringExpressionsParser extends Parser {
                             }
                             break;
                         case 3 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:72:22: BANG
+                            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:72:22: BANG
                             {
                             BANG38=(Token)input.LT(1);
                             match(input,BANG,FOLLOW_BANG_in_unaryExpression381); if (failed) return retval;
@@ -1136,7 +1128,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:73:4: primaryExpression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:73:4: primaryExpression
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1157,7 +1149,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1174,7 +1166,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start primaryExpression
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:75:1: primaryExpression : startNode ( node )? -> ^( EXPRESSION startNode ( node )? ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:75:1: primaryExpression : startNode ( node )? -> ^( EXPRESSION startNode ( node )? ) ;
     public final primaryExpression_return primaryExpression() throws RecognitionException {
         primaryExpression_return retval = new primaryExpression_return();
         retval.start = input.LT(1);
@@ -1189,15 +1181,15 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleSubtreeStream stream_node=new RewriteRuleSubtreeStream(adaptor,"rule node");
         RewriteRuleSubtreeStream stream_startNode=new RewriteRuleSubtreeStream(adaptor,"rule startNode");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:76:5: ( startNode ( node )? -> ^( EXPRESSION startNode ( node )? ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:76:7: startNode ( node )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:76:5: ( startNode ( node )? -> ^( EXPRESSION startNode ( node )? ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:76:7: startNode ( node )?
             {
             pushFollow(FOLLOW_startNode_in_primaryExpression405);
             startNode41=startNode();
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) stream_startNode.add(startNode41.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:76:17: ( node )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:76:17: ( node )?
             int alt12=2;
             int LA12_0 = input.LA(1);
 
@@ -1206,7 +1198,7 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt12) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:76:18: node
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:76:18: node
                     {
                     pushFollow(FOLLOW_node_in_primaryExpression408);
                     node42=node();
@@ -1221,7 +1213,7 @@ public class SpringExpressionsParser extends Parser {
 
 
             // AST REWRITE
-            // elements: node, startNode
+            // elements: startNode, node
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1233,13 +1225,13 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 76:25: -> ^( EXPRESSION startNode ( node )? )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:76:28: ^( EXPRESSION startNode ( node )? )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:76:28: ^( EXPRESSION startNode ( node )? )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(EXPRESSION, "EXPRESSION"), root_1);
 
                 adaptor.addChild(root_1, stream_startNode.next());
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:76:51: ( node )?
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:76:51: ( node )?
                 if ( stream_node.hasNext() ) {
                     adaptor.addChild(root_1, stream_node.next());
 
@@ -1262,7 +1254,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1279,7 +1271,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start startNode
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:78:1: startNode : ( parenExpr | methodOrProperty | functionOrVar | indexer | literal | type | constructor | projection | selection | firstSelection | lastSelection );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:78:1: startNode : ( parenExpr | methodOrProperty | functionOrVar | indexer | literal | type | constructor | projection | selection | firstSelection | lastSelection );
     public final startNode_return startNode() throws RecognitionException {
         startNode_return retval = new startNode_return();
         retval.start = input.LT(1);
@@ -1311,7 +1303,7 @@ public class SpringExpressionsParser extends Parser {
 
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:79:5: ( parenExpr | methodOrProperty | functionOrVar | indexer | literal | type | constructor | projection | selection | firstSelection | lastSelection )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:79:5: ( parenExpr | methodOrProperty | functionOrVar | indexer | literal | type | constructor | projection | selection | firstSelection | lastSelection )
             int alt13=11;
             switch ( input.LA(1) ) {
             case LPAREN:
@@ -1386,7 +1378,7 @@ public class SpringExpressionsParser extends Parser {
 
             switch (alt13) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:80:5: parenExpr
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:80:5: parenExpr
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1399,7 +1391,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:81:7: methodOrProperty
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:81:7: methodOrProperty
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1412,7 +1404,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:82:7: functionOrVar
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:82:7: functionOrVar
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1425,7 +1417,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:83:7: indexer
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:83:7: indexer
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1438,7 +1430,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:84:7: literal
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:84:7: literal
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1451,7 +1443,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:85:7: type
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:85:7: type
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1464,7 +1456,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 7 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:86:7: constructor
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:86:7: constructor
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1477,7 +1469,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 8 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:87:7: projection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:87:7: projection
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1490,7 +1482,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 9 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:88:7: selection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:88:7: selection
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1503,7 +1495,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 10 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:89:7: firstSelection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:89:7: firstSelection
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1516,7 +1508,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 11 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:90:7: lastSelection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:90:7: lastSelection
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1537,7 +1529,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1554,7 +1546,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start node
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:93:1: node : ( ( DOT dottedNode ) | nonDottedNode )+ ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:93:1: node : ( ( DOT dottedNode ) | nonDottedNode )+ ;
     public final node_return node() throws RecognitionException {
         node_return retval = new node_return();
         retval.start = input.LT(1);
@@ -1570,12 +1562,12 @@ public class SpringExpressionsParser extends Parser {
         Object DOT54_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:2: ( ( ( DOT dottedNode ) | nonDottedNode )+ )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:4: ( ( DOT dottedNode ) | nonDottedNode )+
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:2: ( ( ( DOT dottedNode ) | nonDottedNode )+ )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:4: ( ( DOT dottedNode ) | nonDottedNode )+
             {
             root_0 = (Object)adaptor.nil();
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:4: ( ( DOT dottedNode ) | nonDottedNode )+
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:4: ( ( DOT dottedNode ) | nonDottedNode )+
             int cnt14=0;
             loop14:
             do {
@@ -1592,10 +1584,10 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt14) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:5: ( DOT dottedNode )
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:5: ( DOT dottedNode )
             	    {
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:5: ( DOT dottedNode )
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:6: DOT dottedNode
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:5: ( DOT dottedNode )
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:6: DOT dottedNode
             	    {
             	    DOT54=(Token)input.LT(1);
             	    match(input,DOT,FOLLOW_DOT_in_node544); if (failed) return retval;
@@ -1615,7 +1607,7 @@ public class SpringExpressionsParser extends Parser {
             	    }
             	    break;
             	case 2 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:94:24: nonDottedNode
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:94:24: nonDottedNode
             	    {
             	    pushFollow(FOLLOW_nonDottedNode_in_node551);
             	    nonDottedNode56=nonDottedNode();
@@ -1646,7 +1638,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1663,7 +1655,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start nonDottedNode
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:96:1: nonDottedNode : indexer ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:96:1: nonDottedNode : indexer ;
     public final nonDottedNode_return nonDottedNode() throws RecognitionException {
         nonDottedNode_return retval = new nonDottedNode_return();
         retval.start = input.LT(1);
@@ -1675,8 +1667,8 @@ public class SpringExpressionsParser extends Parser {
 
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:97:2: ( indexer )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:97:4: indexer
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:97:2: ( indexer )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:97:4: indexer
             {
             root_0 = (Object)adaptor.nil();
 
@@ -1695,7 +1687,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1712,7 +1704,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start dottedNode
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:99:1: dottedNode : ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:99:1: dottedNode : ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) ) ;
     public final dottedNode_return dottedNode() throws RecognitionException {
         dottedNode_return retval = new dottedNode_return();
         retval.start = input.LT(1);
@@ -1734,15 +1726,15 @@ public class SpringExpressionsParser extends Parser {
 
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:100:2: ( ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:101:2: ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:100:2: ( ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:101:2: ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) )
             {
             root_0 = (Object)adaptor.nil();
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:101:2: ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:101:3: ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:101:2: ( ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:101:3: ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection )
             {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:101:3: ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:101:3: ( methodOrProperty | functionOrVar | projection | selection | firstSelection | lastSelection )
             int alt15=6;
             switch ( input.LA(1) ) {
             case ID:
@@ -1785,7 +1777,7 @@ public class SpringExpressionsParser extends Parser {
 
             switch (alt15) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:101:4: methodOrProperty
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:101:4: methodOrProperty
                     {
                     pushFollow(FOLLOW_methodOrProperty_in_dottedNode576);
                     methodOrProperty58=methodOrProperty();
@@ -1796,7 +1788,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:102:4: functionOrVar
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:102:4: functionOrVar
                     {
                     pushFollow(FOLLOW_functionOrVar_in_dottedNode582);
                     functionOrVar59=functionOrVar();
@@ -1807,7 +1799,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:103:7: projection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:103:7: projection
                     {
                     pushFollow(FOLLOW_projection_in_dottedNode590);
                     projection60=projection();
@@ -1818,7 +1810,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:104:7: selection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:104:7: selection
                     {
                     pushFollow(FOLLOW_selection_in_dottedNode599);
                     selection61=selection();
@@ -1829,7 +1821,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:105:7: firstSelection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:105:7: firstSelection
                     {
                     pushFollow(FOLLOW_firstSelection_in_dottedNode608);
                     firstSelection62=firstSelection();
@@ -1840,7 +1832,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:106:7: lastSelection
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:106:7: lastSelection
                     {
                     pushFollow(FOLLOW_lastSelection_in_dottedNode617);
                     lastSelection63=lastSelection();
@@ -1866,7 +1858,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1883,7 +1875,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start functionOrVar
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:110:1: functionOrVar : ( ( POUND ID LPAREN )=> function | var );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:110:1: functionOrVar : ( ( POUND ID LPAREN )=> function | var );
     public final functionOrVar_return functionOrVar() throws RecognitionException {
         functionOrVar_return retval = new functionOrVar_return();
         retval.start = input.LT(1);
@@ -1897,7 +1889,7 @@ public class SpringExpressionsParser extends Parser {
 
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:111:5: ( ( POUND ID LPAREN )=> function | var )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:111:5: ( ( POUND ID LPAREN )=> function | var )
             int alt16=2;
             int LA16_0 = input.LA(1);
 
@@ -1938,7 +1930,7 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt16) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:111:7: ( POUND ID LPAREN )=> function
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:111:7: ( POUND ID LPAREN )=> function
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1951,7 +1943,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:112:7: var
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:112:7: var
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -1972,7 +1964,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -1989,7 +1981,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start function
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:115:1: function : POUND id= ID methodArgs -> ^( FUNCTIONREF[$id] methodArgs ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:115:1: function : POUND id= ID methodArgs -> ^( FUNCTIONREF[$id] methodArgs ) ;
     public final function_return function() throws RecognitionException {
         function_return retval = new function_return();
         retval.start = input.LT(1);
@@ -2007,8 +1999,8 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_ID=new RewriteRuleTokenStream(adaptor,"token ID");
         RewriteRuleSubtreeStream stream_methodArgs=new RewriteRuleSubtreeStream(adaptor,"rule methodArgs");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:115:10: ( POUND id= ID methodArgs -> ^( FUNCTIONREF[$id] methodArgs ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:115:12: POUND id= ID methodArgs
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:115:10: ( POUND id= ID methodArgs -> ^( FUNCTIONREF[$id] methodArgs ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:115:12: POUND id= ID methodArgs
             {
             POUND66=(Token)input.LT(1);
             match(input,POUND,FOLLOW_POUND_in_function676); if (failed) return retval;
@@ -2037,7 +2029,7 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 115:35: -> ^( FUNCTIONREF[$id] methodArgs )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:115:38: ^( FUNCTIONREF[$id] methodArgs )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:115:38: ^( FUNCTIONREF[$id] methodArgs )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(FUNCTIONREF, id), root_1);
@@ -2060,7 +2052,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2077,7 +2069,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start var
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:117:1: var : POUND id= ID -> ^( VARIABLEREF[$id] ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:117:1: var : POUND id= ID -> ^( VARIABLEREF[$id] ) ;
     public final var_return var() throws RecognitionException {
         var_return retval = new var_return();
         retval.start = input.LT(1);
@@ -2093,8 +2085,8 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_ID=new RewriteRuleTokenStream(adaptor,"token ID");
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:117:5: ( POUND id= ID -> ^( VARIABLEREF[$id] ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:117:7: POUND id= ID
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:117:5: ( POUND id= ID -> ^( VARIABLEREF[$id] ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:117:7: POUND id= ID
             {
             POUND68=(Token)input.LT(1);
             match(input,POUND,FOLLOW_POUND_in_var703); if (failed) return retval;
@@ -2118,7 +2110,7 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 117:19: -> ^( VARIABLEREF[$id] )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:117:22: ^( VARIABLEREF[$id] )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:117:22: ^( VARIABLEREF[$id] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(VARIABLEREF, id), root_1);
@@ -2139,7 +2131,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2156,7 +2148,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start methodOrProperty
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:120:1: methodOrProperty : ( ( ID LPAREN )=>id= ID methodArgs -> ^( METHOD[$id] methodArgs ) | property );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:120:1: methodOrProperty : ( ( ID LPAREN )=>id= ID methodArgs -> ^( METHOD[$id] methodArgs ) | property );
     public final methodOrProperty_return methodOrProperty() throws RecognitionException {
         methodOrProperty_return retval = new methodOrProperty_return();
         retval.start = input.LT(1);
@@ -2173,18 +2165,18 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_ID=new RewriteRuleTokenStream(adaptor,"token ID");
         RewriteRuleSubtreeStream stream_methodArgs=new RewriteRuleSubtreeStream(adaptor,"rule methodArgs");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:121:2: ( ( ID LPAREN )=>id= ID methodArgs -> ^( METHOD[$id] methodArgs ) | property )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:121:2: ( ( ID LPAREN )=>id= ID methodArgs -> ^( METHOD[$id] methodArgs ) | property )
             int alt17=2;
             int LA17_0 = input.LA(1);
 
             if ( (LA17_0==ID) ) {
                 int LA17_1 = input.LA(2);
 
-                if ( (LA17_1==EOF||(LA17_1>=ASSIGN && LA17_1<=COLON)||(LA17_1>=RPAREN && LA17_1<=POWER)||LA17_1==DOT||(LA17_1>=COMMA && LA17_1<=RBRACKET)||LA17_1==RCURLY||(LA17_1>=EQUAL && LA17_1<=MATCHES)) ) {
-                    alt17=2;
-                }
-                else if ( (LA17_1==LPAREN) && (synpred2())) {
+                if ( (LA17_1==LPAREN) && (synpred2())) {
                     alt17=1;
+                }
+                else if ( (LA17_1==EOF||(LA17_1>=ASSIGN && LA17_1<=COLON)||(LA17_1>=RPAREN && LA17_1<=POWER)||LA17_1==DOT||(LA17_1>=COMMA && LA17_1<=RBRACKET)||(LA17_1>=EQUAL && LA17_1<=MATCHES)) ) {
+                    alt17=2;
                 }
                 else {
                     if (backtracking>0) {failed=true; return retval;}
@@ -2203,7 +2195,7 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt17) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:121:4: ( ID LPAREN )=>id= ID methodArgs
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:121:4: ( ID LPAREN )=>id= ID methodArgs
                     {
                     id=(Token)input.LT(1);
                     match(input,ID,FOLLOW_ID_in_methodOrProperty735); if (failed) return retval;
@@ -2228,7 +2220,7 @@ public class SpringExpressionsParser extends Parser {
                     root_0 = (Object)adaptor.nil();
                     // 121:36: -> ^( METHOD[$id] methodArgs )
                     {
-                        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:121:39: ^( METHOD[$id] methodArgs )
+                        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:121:39: ^( METHOD[$id] methodArgs )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(adaptor.create(METHOD, id), root_1);
@@ -2245,7 +2237,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:122:4: property
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:122:4: property
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -2266,7 +2258,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2283,7 +2275,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start methodArgs
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:1: methodArgs : LPAREN ( argument ( COMMA argument )* ( COMMA )? )? RPAREN ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:1: methodArgs : LPAREN ( argument ( COMMA argument )* ( COMMA )? )? RPAREN ;
     public final methodArgs_return methodArgs() throws RecognitionException {
         methodArgs_return retval = new methodArgs_return();
         retval.start = input.LT(1);
@@ -2305,30 +2297,30 @@ public class SpringExpressionsParser extends Parser {
         Object RPAREN76_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:12: ( LPAREN ( argument ( COMMA argument )* ( COMMA )? )? RPAREN )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:15: LPAREN ( argument ( COMMA argument )* ( COMMA )? )? RPAREN
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:12: ( LPAREN ( argument ( COMMA argument )* ( COMMA )? )? RPAREN )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:15: LPAREN ( argument ( COMMA argument )* ( COMMA )? )? RPAREN
             {
             root_0 = (Object)adaptor.nil();
 
             LPAREN71=(Token)input.LT(1);
             match(input,LPAREN,FOLLOW_LPAREN_in_methodArgs766); if (failed) return retval;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:23: ( argument ( COMMA argument )* ( COMMA )? )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:23: ( argument ( COMMA argument )* ( COMMA )? )?
             int alt20=2;
             int LA20_0 = input.LA(1);
 
-            if ( (LA20_0==INTEGER_LITERAL||LA20_0==LPAREN||(LA20_0>=PLUS && LA20_0<=MINUS)||LA20_0==BANG||(LA20_0>=POUND && LA20_0<=ID)||LA20_0==LBRACKET||LA20_0==PROJECT||(LA20_0>=SELECT && LA20_0<=FALSE)||LA20_0==77) ) {
+            if ( (LA20_0==INTEGER_LITERAL||LA20_0==LPAREN||(LA20_0>=PLUS && LA20_0<=MINUS)||LA20_0==BANG||(LA20_0>=POUND && LA20_0<=ID)||LA20_0==LBRACKET||(LA20_0>=PROJECT && LA20_0<=FALSE)||LA20_0==77) ) {
                 alt20=1;
             }
             switch (alt20) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:24: argument ( COMMA argument )* ( COMMA )?
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:24: argument ( COMMA argument )* ( COMMA )?
                     {
                     pushFollow(FOLLOW_argument_in_methodArgs770);
                     argument72=argument();
                     _fsp--;
                     if (failed) return retval;
                     if ( backtracking==0 ) adaptor.addChild(root_0, argument72.getTree());
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:33: ( COMMA argument )*
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:33: ( COMMA argument )*
                     loop18:
                     do {
                         int alt18=2;
@@ -2337,7 +2329,7 @@ public class SpringExpressionsParser extends Parser {
                         if ( (LA18_0==COMMA) ) {
                             int LA18_1 = input.LA(2);
 
-                            if ( (LA18_1==INTEGER_LITERAL||LA18_1==LPAREN||(LA18_1>=PLUS && LA18_1<=MINUS)||LA18_1==BANG||(LA18_1>=POUND && LA18_1<=ID)||LA18_1==LBRACKET||LA18_1==PROJECT||(LA18_1>=SELECT && LA18_1<=FALSE)||LA18_1==77) ) {
+                            if ( (LA18_1==INTEGER_LITERAL||LA18_1==LPAREN||(LA18_1>=PLUS && LA18_1<=MINUS)||LA18_1==BANG||(LA18_1>=POUND && LA18_1<=ID)||LA18_1==LBRACKET||(LA18_1>=PROJECT && LA18_1<=FALSE)||LA18_1==77) ) {
                                 alt18=1;
                             }
 
@@ -2347,7 +2339,7 @@ public class SpringExpressionsParser extends Parser {
 
                         switch (alt18) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:34: COMMA argument
+                    	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:34: COMMA argument
                     	    {
                     	    COMMA73=(Token)input.LT(1);
                     	    match(input,COMMA,FOLLOW_COMMA_in_methodArgs773); if (failed) return retval;
@@ -2365,7 +2357,7 @@ public class SpringExpressionsParser extends Parser {
                         }
                     } while (true);
 
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:52: ( COMMA )?
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:52: ( COMMA )?
                     int alt19=2;
                     int LA19_0 = input.LA(1);
 
@@ -2374,7 +2366,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     switch (alt19) {
                         case 1 :
-                            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:128:53: COMMA
+                            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:128:53: COMMA
                             {
                             COMMA75=(Token)input.LT(1);
                             match(input,COMMA,FOLLOW_COMMA_in_methodArgs781); if (failed) return retval;
@@ -2402,7 +2394,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2419,7 +2411,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start property
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:133:1: property : id= ID -> ^( PROPERTY_OR_FIELD[$id] ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:133:1: property : id= ID -> ^( PROPERTY_OR_FIELD[$id] ) ;
     public final property_return property() throws RecognitionException {
         property_return retval = new property_return();
         retval.start = input.LT(1);
@@ -2432,8 +2424,8 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_ID=new RewriteRuleTokenStream(adaptor,"token ID");
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:133:9: (id= ID -> ^( PROPERTY_OR_FIELD[$id] ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:133:11: id= ID
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:133:9: (id= ID -> ^( PROPERTY_OR_FIELD[$id] ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:133:11: id= ID
             {
             id=(Token)input.LT(1);
             match(input,ID,FOLLOW_ID_in_property801); if (failed) return retval;
@@ -2453,7 +2445,7 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 133:17: -> ^( PROPERTY_OR_FIELD[$id] )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:133:20: ^( PROPERTY_OR_FIELD[$id] )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:133:20: ^( PROPERTY_OR_FIELD[$id] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(PROPERTY_OR_FIELD, id), root_1);
@@ -2474,7 +2466,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2491,7 +2483,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start indexer
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:1: indexer : LBRACKET r1= argument ( COMMA r2= argument )* RBRACKET -> ^( INDEXER $r1 ( $r2)* ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:1: indexer : LBRACKET r1= argument ( COMMA r2= argument )* RBRACKET -> ^( INDEXER $r1 ( $r2)* ) ;
     public final indexer_return indexer() throws RecognitionException {
         indexer_return retval = new indexer_return();
         retval.start = input.LT(1);
@@ -2509,13 +2501,13 @@ public class SpringExpressionsParser extends Parser {
         Object LBRACKET77_tree=null;
         Object COMMA78_tree=null;
         Object RBRACKET79_tree=null;
-        RewriteRuleTokenStream stream_COMMA=new RewriteRuleTokenStream(adaptor,"token COMMA");
         RewriteRuleTokenStream stream_LBRACKET=new RewriteRuleTokenStream(adaptor,"token LBRACKET");
         RewriteRuleTokenStream stream_RBRACKET=new RewriteRuleTokenStream(adaptor,"token RBRACKET");
+        RewriteRuleTokenStream stream_COMMA=new RewriteRuleTokenStream(adaptor,"token COMMA");
         RewriteRuleSubtreeStream stream_argument=new RewriteRuleSubtreeStream(adaptor,"rule argument");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:8: ( LBRACKET r1= argument ( COMMA r2= argument )* RBRACKET -> ^( INDEXER $r1 ( $r2)* ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:10: LBRACKET r1= argument ( COMMA r2= argument )* RBRACKET
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:8: ( LBRACKET r1= argument ( COMMA r2= argument )* RBRACKET -> ^( INDEXER $r1 ( $r2)* ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:10: LBRACKET r1= argument ( COMMA r2= argument )* RBRACKET
             {
             LBRACKET77=(Token)input.LT(1);
             match(input,LBRACKET,FOLLOW_LBRACKET_in_indexer816); if (failed) return retval;
@@ -2526,7 +2518,7 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) stream_argument.add(r1.getTree());
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:31: ( COMMA r2= argument )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:31: ( COMMA r2= argument )*
             loop21:
             do {
                 int alt21=2;
@@ -2539,7 +2531,7 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt21) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:32: COMMA r2= argument
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:32: COMMA r2= argument
             	    {
             	    COMMA78=(Token)input.LT(1);
             	    match(input,COMMA,FOLLOW_COMMA_in_indexer823); if (failed) return retval;
@@ -2565,27 +2557,27 @@ public class SpringExpressionsParser extends Parser {
 
 
             // AST REWRITE
-            // elements: r2, r1
+            // elements: r1, r2
             // token labels: 
-            // rule labels: r2, retval, r1
+            // rule labels: retval, r1, r2
             // token list labels: 
             // rule list labels: 
             if ( backtracking==0 ) {
             retval.tree = root_0;
-            RewriteRuleSubtreeStream stream_r2=new RewriteRuleSubtreeStream(adaptor,"token r2",r2!=null?r2.tree:null);
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
             RewriteRuleSubtreeStream stream_r1=new RewriteRuleSubtreeStream(adaptor,"token r1",r1!=null?r1.tree:null);
+            RewriteRuleSubtreeStream stream_r2=new RewriteRuleSubtreeStream(adaptor,"token r2",r2!=null?r2.tree:null);
 
             root_0 = (Object)adaptor.nil();
             // 136:61: -> ^( INDEXER $r1 ( $r2)* )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:64: ^( INDEXER $r1 ( $r2)* )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:64: ^( INDEXER $r1 ( $r2)* )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(INDEXER, "INDEXER"), root_1);
 
                 adaptor.addChild(root_1, stream_r1.next());
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:136:78: ( $r2)*
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:136:78: ( $r2)*
                 while ( stream_r2.hasNext() ) {
                     adaptor.addChild(root_1, stream_r2.next());
 
@@ -2608,7 +2600,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2625,7 +2617,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start projection
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:140:1: projection : PROJECT expression RCURLY ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:140:1: projection : PROJECT expression RBRACKET ;
     public final projection_return projection() throws RecognitionException {
         projection_return retval = new projection_return();
         retval.start = input.LT(1);
@@ -2633,16 +2625,16 @@ public class SpringExpressionsParser extends Parser {
         Object root_0 = null;
 
         Token PROJECT80=null;
-        Token RCURLY82=null;
+        Token RBRACKET82=null;
         expression_return expression81 = null;
 
 
         Object PROJECT80_tree=null;
-        Object RCURLY82_tree=null;
+        Object RBRACKET82_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:140:11: ( PROJECT expression RCURLY )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:140:13: PROJECT expression RCURLY
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:140:11: ( PROJECT expression RBRACKET )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:140:13: PROJECT expression RBRACKET
             {
             root_0 = (Object)adaptor.nil();
 
@@ -2657,8 +2649,8 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, expression81.getTree());
-            RCURLY82=(Token)input.LT(1);
-            match(input,RCURLY,FOLLOW_RCURLY_in_projection862); if (failed) return retval;
+            RBRACKET82=(Token)input.LT(1);
+            match(input,RBRACKET,FOLLOW_RBRACKET_in_projection862); if (failed) return retval;
 
             }
 
@@ -2669,7 +2661,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2686,7 +2678,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start selection
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:142:1: selection : SELECT expression RCURLY ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:142:1: selection : SELECT expression RBRACKET ;
     public final selection_return selection() throws RecognitionException {
         selection_return retval = new selection_return();
         retval.start = input.LT(1);
@@ -2694,16 +2686,16 @@ public class SpringExpressionsParser extends Parser {
         Object root_0 = null;
 
         Token SELECT83=null;
-        Token RCURLY85=null;
+        Token RBRACKET85=null;
         expression_return expression84 = null;
 
 
         Object SELECT83_tree=null;
-        Object RCURLY85_tree=null;
+        Object RBRACKET85_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:142:10: ( SELECT expression RCURLY )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:142:12: SELECT expression RCURLY
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:142:10: ( SELECT expression RBRACKET )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:142:12: SELECT expression RBRACKET
             {
             root_0 = (Object)adaptor.nil();
 
@@ -2718,8 +2710,8 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, expression84.getTree());
-            RCURLY85=(Token)input.LT(1);
-            match(input,RCURLY,FOLLOW_RCURLY_in_selection875); if (failed) return retval;
+            RBRACKET85=(Token)input.LT(1);
+            match(input,RBRACKET,FOLLOW_RBRACKET_in_selection875); if (failed) return retval;
 
             }
 
@@ -2730,7 +2722,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2747,7 +2739,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start firstSelection
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:144:1: firstSelection : SELECT_FIRST expression RCURLY ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:144:1: firstSelection : SELECT_FIRST expression RBRACKET ;
     public final firstSelection_return firstSelection() throws RecognitionException {
         firstSelection_return retval = new firstSelection_return();
         retval.start = input.LT(1);
@@ -2755,16 +2747,16 @@ public class SpringExpressionsParser extends Parser {
         Object root_0 = null;
 
         Token SELECT_FIRST86=null;
-        Token RCURLY88=null;
+        Token RBRACKET88=null;
         expression_return expression87 = null;
 
 
         Object SELECT_FIRST86_tree=null;
-        Object RCURLY88_tree=null;
+        Object RBRACKET88_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:144:15: ( SELECT_FIRST expression RCURLY )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:144:17: SELECT_FIRST expression RCURLY
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:144:15: ( SELECT_FIRST expression RBRACKET )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:144:17: SELECT_FIRST expression RBRACKET
             {
             root_0 = (Object)adaptor.nil();
 
@@ -2779,8 +2771,8 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, expression87.getTree());
-            RCURLY88=(Token)input.LT(1);
-            match(input,RCURLY,FOLLOW_RCURLY_in_firstSelection888); if (failed) return retval;
+            RBRACKET88=(Token)input.LT(1);
+            match(input,RBRACKET,FOLLOW_RBRACKET_in_firstSelection888); if (failed) return retval;
 
             }
 
@@ -2791,7 +2783,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2808,7 +2800,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start lastSelection
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:146:1: lastSelection : SELECT_LAST expression RCURLY ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:146:1: lastSelection : SELECT_LAST expression RBRACKET ;
     public final lastSelection_return lastSelection() throws RecognitionException {
         lastSelection_return retval = new lastSelection_return();
         retval.start = input.LT(1);
@@ -2816,16 +2808,16 @@ public class SpringExpressionsParser extends Parser {
         Object root_0 = null;
 
         Token SELECT_LAST89=null;
-        Token RCURLY91=null;
+        Token RBRACKET91=null;
         expression_return expression90 = null;
 
 
         Object SELECT_LAST89_tree=null;
-        Object RCURLY91_tree=null;
+        Object RBRACKET91_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:146:14: ( SELECT_LAST expression RCURLY )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:146:16: SELECT_LAST expression RCURLY
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:146:14: ( SELECT_LAST expression RBRACKET )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:146:16: SELECT_LAST expression RBRACKET
             {
             root_0 = (Object)adaptor.nil();
 
@@ -2840,8 +2832,8 @@ public class SpringExpressionsParser extends Parser {
             _fsp--;
             if (failed) return retval;
             if ( backtracking==0 ) adaptor.addChild(root_0, expression90.getTree());
-            RCURLY91=(Token)input.LT(1);
-            match(input,RCURLY,FOLLOW_RCURLY_in_lastSelection901); if (failed) return retval;
+            RBRACKET91=(Token)input.LT(1);
+            match(input,RBRACKET,FOLLOW_RBRACKET_in_lastSelection901); if (failed) return retval;
 
             }
 
@@ -2852,7 +2844,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2869,7 +2861,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start type
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:149:1: type : TYPE qualifiedId RPAREN -> ^( TYPEREF qualifiedId ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:149:1: type : TYPE qualifiedId RPAREN -> ^( TYPEREF qualifiedId ) ;
     public final type_return type() throws RecognitionException {
         type_return retval = new type_return();
         retval.start = input.LT(1);
@@ -2887,8 +2879,8 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_TYPE=new RewriteRuleTokenStream(adaptor,"token TYPE");
         RewriteRuleSubtreeStream stream_qualifiedId=new RewriteRuleSubtreeStream(adaptor,"rule qualifiedId");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:149:5: ( TYPE qualifiedId RPAREN -> ^( TYPEREF qualifiedId ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:149:7: TYPE qualifiedId RPAREN
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:149:5: ( TYPE qualifiedId RPAREN -> ^( TYPEREF qualifiedId ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:149:7: TYPE qualifiedId RPAREN
             {
             TYPE92=(Token)input.LT(1);
             match(input,TYPE,FOLLOW_TYPE_in_type910); if (failed) return retval;
@@ -2917,7 +2909,7 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 149:31: -> ^( TYPEREF qualifiedId )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:149:34: ^( TYPEREF qualifiedId )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:149:34: ^( TYPEREF qualifiedId )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(TYPEREF, "TYPEREF"), root_1);
@@ -2940,7 +2932,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -2957,7 +2949,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start constructor
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:153:1: constructor : ( 'new' qualifiedId LPAREN )=> 'new' qualifiedId ctorArgs -> ^( CONSTRUCTOR qualifiedId ctorArgs ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:153:1: constructor : ( 'new' qualifiedId LPAREN )=> 'new' qualifiedId ctorArgs -> ^( CONSTRUCTOR qualifiedId ctorArgs ) ;
     public final constructor_return constructor() throws RecognitionException {
         constructor_return retval = new constructor_return();
         retval.start = input.LT(1);
@@ -2975,8 +2967,8 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleSubtreeStream stream_qualifiedId=new RewriteRuleSubtreeStream(adaptor,"rule qualifiedId");
         RewriteRuleSubtreeStream stream_ctorArgs=new RewriteRuleSubtreeStream(adaptor,"rule ctorArgs");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:154:2: ( ( 'new' qualifiedId LPAREN )=> 'new' qualifiedId ctorArgs -> ^( CONSTRUCTOR qualifiedId ctorArgs ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:154:4: ( 'new' qualifiedId LPAREN )=> 'new' qualifiedId ctorArgs
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:154:2: ( ( 'new' qualifiedId LPAREN )=> 'new' qualifiedId ctorArgs -> ^( CONSTRUCTOR qualifiedId ctorArgs ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:154:4: ( 'new' qualifiedId LPAREN )=> 'new' qualifiedId ctorArgs
             {
             string_literal95=(Token)input.LT(1);
             match(input,77,FOLLOW_77_in_constructor945); if (failed) return retval;
@@ -3006,7 +2998,7 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 154:61: -> ^( CONSTRUCTOR qualifiedId ctorArgs )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:154:64: ^( CONSTRUCTOR qualifiedId ctorArgs )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:154:64: ^( CONSTRUCTOR qualifiedId ctorArgs )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(CONSTRUCTOR, "CONSTRUCTOR"), root_1);
@@ -3030,7 +3022,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3047,7 +3039,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start ctorArgs
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:157:1: ctorArgs : LPAREN ( namedArgument ( COMMA namedArgument )* )? RPAREN ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:157:1: ctorArgs : LPAREN ( namedArgument ( COMMA namedArgument )* )? RPAREN ;
     public final ctorArgs_return ctorArgs() throws RecognitionException {
         ctorArgs_return retval = new ctorArgs_return();
         retval.start = input.LT(1);
@@ -3067,30 +3059,30 @@ public class SpringExpressionsParser extends Parser {
         Object RPAREN102_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:158:2: ( LPAREN ( namedArgument ( COMMA namedArgument )* )? RPAREN )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:158:4: LPAREN ( namedArgument ( COMMA namedArgument )* )? RPAREN
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:158:2: ( LPAREN ( namedArgument ( COMMA namedArgument )* )? RPAREN )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:158:4: LPAREN ( namedArgument ( COMMA namedArgument )* )? RPAREN
             {
             root_0 = (Object)adaptor.nil();
 
             LPAREN98=(Token)input.LT(1);
             match(input,LPAREN,FOLLOW_LPAREN_in_ctorArgs971); if (failed) return retval;
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:158:12: ( namedArgument ( COMMA namedArgument )* )?
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:158:12: ( namedArgument ( COMMA namedArgument )* )?
             int alt23=2;
             int LA23_0 = input.LA(1);
 
-            if ( (LA23_0==INTEGER_LITERAL||LA23_0==LPAREN||(LA23_0>=PLUS && LA23_0<=MINUS)||LA23_0==BANG||(LA23_0>=POUND && LA23_0<=ID)||LA23_0==LBRACKET||LA23_0==PROJECT||(LA23_0>=SELECT && LA23_0<=FALSE)||LA23_0==77) ) {
+            if ( (LA23_0==INTEGER_LITERAL||LA23_0==LPAREN||(LA23_0>=PLUS && LA23_0<=MINUS)||LA23_0==BANG||(LA23_0>=POUND && LA23_0<=ID)||LA23_0==LBRACKET||(LA23_0>=PROJECT && LA23_0<=FALSE)||LA23_0==77) ) {
                 alt23=1;
             }
             switch (alt23) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:158:13: namedArgument ( COMMA namedArgument )*
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:158:13: namedArgument ( COMMA namedArgument )*
                     {
                     pushFollow(FOLLOW_namedArgument_in_ctorArgs975);
                     namedArgument99=namedArgument();
                     _fsp--;
                     if (failed) return retval;
                     if ( backtracking==0 ) adaptor.addChild(root_0, namedArgument99.getTree());
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:158:27: ( COMMA namedArgument )*
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:158:27: ( COMMA namedArgument )*
                     loop22:
                     do {
                         int alt22=2;
@@ -3103,7 +3095,7 @@ public class SpringExpressionsParser extends Parser {
 
                         switch (alt22) {
                     	case 1 :
-                    	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:158:28: COMMA namedArgument
+                    	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:158:28: COMMA namedArgument
                     	    {
                     	    COMMA100=(Token)input.LT(1);
                     	    match(input,COMMA,FOLLOW_COMMA_in_ctorArgs978); if (failed) return retval;
@@ -3139,7 +3131,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3156,7 +3148,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start argument
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:160:1: argument : expression ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:160:1: argument : expression ;
     public final argument_return argument() throws RecognitionException {
         argument_return retval = new argument_return();
         retval.start = input.LT(1);
@@ -3168,8 +3160,8 @@ public class SpringExpressionsParser extends Parser {
 
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:160:10: ( expression )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:160:12: expression
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:160:10: ( expression )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:160:12: expression
             {
             root_0 = (Object)adaptor.nil();
 
@@ -3188,7 +3180,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3205,7 +3197,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start namedArgument
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:162:1: namedArgument : ( ( ID ASSIGN )=>id= ID ASSIGN expression -> ^( NAMED_ARGUMENT[$id] expression ) | argument );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:162:1: namedArgument : ( ( ID ASSIGN )=>id= ID ASSIGN expression -> ^( NAMED_ARGUMENT[$id] expression ) | argument );
     public final namedArgument_return namedArgument() throws RecognitionException {
         namedArgument_return retval = new namedArgument_return();
         retval.start = input.LT(1);
@@ -3221,11 +3213,11 @@ public class SpringExpressionsParser extends Parser {
 
         Object id_tree=null;
         Object ASSIGN104_tree=null;
-        RewriteRuleTokenStream stream_ASSIGN=new RewriteRuleTokenStream(adaptor,"token ASSIGN");
         RewriteRuleTokenStream stream_ID=new RewriteRuleTokenStream(adaptor,"token ID");
+        RewriteRuleTokenStream stream_ASSIGN=new RewriteRuleTokenStream(adaptor,"token ASSIGN");
         RewriteRuleSubtreeStream stream_expression=new RewriteRuleSubtreeStream(adaptor,"rule expression");
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:163:5: ( ( ID ASSIGN )=>id= ID ASSIGN expression -> ^( NAMED_ARGUMENT[$id] expression ) | argument )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:163:5: ( ( ID ASSIGN )=>id= ID ASSIGN expression -> ^( NAMED_ARGUMENT[$id] expression ) | argument )
             int alt24=2;
             int LA24_0 = input.LA(1);
 
@@ -3260,7 +3252,7 @@ public class SpringExpressionsParser extends Parser {
                     throw nvae;
                 }
             }
-            else if ( (LA24_0==INTEGER_LITERAL||LA24_0==LPAREN||(LA24_0>=PLUS && LA24_0<=MINUS)||LA24_0==BANG||LA24_0==POUND||LA24_0==LBRACKET||LA24_0==PROJECT||(LA24_0>=SELECT && LA24_0<=FALSE)||LA24_0==77) ) {
+            else if ( (LA24_0==INTEGER_LITERAL||LA24_0==LPAREN||(LA24_0>=PLUS && LA24_0<=MINUS)||LA24_0==BANG||LA24_0==POUND||LA24_0==LBRACKET||(LA24_0>=PROJECT && LA24_0<=FALSE)||LA24_0==77) ) {
                 alt24=2;
             }
             else {
@@ -3272,7 +3264,7 @@ public class SpringExpressionsParser extends Parser {
             }
             switch (alt24) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:163:7: ( ID ASSIGN )=>id= ID ASSIGN expression
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:163:7: ( ID ASSIGN )=>id= ID ASSIGN expression
                     {
                     id=(Token)input.LT(1);
                     match(input,ID,FOLLOW_ID_in_namedArgument1019); if (failed) return retval;
@@ -3301,7 +3293,7 @@ public class SpringExpressionsParser extends Parser {
                     root_0 = (Object)adaptor.nil();
                     // 164:19: -> ^( NAMED_ARGUMENT[$id] expression )
                     {
-                        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:164:22: ^( NAMED_ARGUMENT[$id] expression )
+                        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:164:22: ^( NAMED_ARGUMENT[$id] expression )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(adaptor.create(NAMED_ARGUMENT, id), root_1);
@@ -3318,7 +3310,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:165:7: argument
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:165:7: argument
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3339,7 +3331,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3356,7 +3348,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start qualifiedId
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:1: qualifiedId : ID ( DOT ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:1: qualifiedId : ID ( DOT ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) ;
     public final qualifiedId_return qualifiedId() throws RecognitionException {
         qualifiedId_return retval = new qualifiedId_return();
         retval.start = input.LT(1);
@@ -3374,14 +3366,14 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_DOT=new RewriteRuleTokenStream(adaptor,"token DOT");
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:13: ( ID ( DOT ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:15: ID ( DOT ID )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:13: ( ID ( DOT ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:15: ID ( DOT ID )*
             {
             ID107=(Token)input.LT(1);
             match(input,ID,FOLLOW_ID_in_qualifiedId1071); if (failed) return retval;
             if ( backtracking==0 ) stream_ID.add(ID107);
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:18: ( DOT ID )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:18: ( DOT ID )*
             loop25:
             do {
                 int alt25=2;
@@ -3394,7 +3386,7 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt25) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:19: DOT ID
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:19: DOT ID
             	    {
             	    DOT108=(Token)input.LT(1);
             	    match(input,DOT,FOLLOW_DOT_in_qualifiedId1074); if (failed) return retval;
@@ -3427,12 +3419,12 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 167:28: -> ^( QUALIFIED_IDENTIFIER ( ID )* )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:31: ^( QUALIFIED_IDENTIFIER ( ID )* )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:31: ^( QUALIFIED_IDENTIFIER ( ID )* )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(QUALIFIED_IDENTIFIER, "QUALIFIED_IDENTIFIER"), root_1);
 
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:167:54: ( ID )*
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:167:54: ( ID )*
                 while ( stream_ID.hasNext() ) {
                     adaptor.addChild(root_1, stream_ID.next());
 
@@ -3455,7 +3447,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3472,7 +3464,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start contextName
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:1: contextName : ID ( DIV ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) ;
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:1: contextName : ID ( DIV ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) ;
     public final contextName_return contextName() throws RecognitionException {
         contextName_return retval = new contextName_return();
         retval.start = input.LT(1);
@@ -3490,14 +3482,14 @@ public class SpringExpressionsParser extends Parser {
         RewriteRuleTokenStream stream_ID=new RewriteRuleTokenStream(adaptor,"token ID");
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:13: ( ID ( DIV ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:15: ID ( DIV ID )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:13: ( ID ( DIV ID )* -> ^( QUALIFIED_IDENTIFIER ( ID )* ) )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:15: ID ( DIV ID )*
             {
             ID110=(Token)input.LT(1);
             match(input,ID,FOLLOW_ID_in_contextName1095); if (failed) return retval;
             if ( backtracking==0 ) stream_ID.add(ID110);
 
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:18: ( DIV ID )*
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:18: ( DIV ID )*
             loop26:
             do {
                 int alt26=2;
@@ -3510,7 +3502,7 @@ public class SpringExpressionsParser extends Parser {
 
                 switch (alt26) {
             	case 1 :
-            	    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:19: DIV ID
+            	    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:19: DIV ID
             	    {
             	    DIV111=(Token)input.LT(1);
             	    match(input,DIV,FOLLOW_DIV_in_contextName1098); if (failed) return retval;
@@ -3543,12 +3535,12 @@ public class SpringExpressionsParser extends Parser {
             root_0 = (Object)adaptor.nil();
             // 169:28: -> ^( QUALIFIED_IDENTIFIER ( ID )* )
             {
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:31: ^( QUALIFIED_IDENTIFIER ( ID )* )
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:31: ^( QUALIFIED_IDENTIFIER ( ID )* )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(adaptor.create(QUALIFIED_IDENTIFIER, "QUALIFIED_IDENTIFIER"), root_1);
 
-                // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:169:54: ( ID )*
+                // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:169:54: ( ID )*
                 while ( stream_ID.hasNext() ) {
                     adaptor.addChild(root_1, stream_ID.next());
 
@@ -3571,7 +3563,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3588,7 +3580,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start literal
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:171:1: literal : ( INTEGER_LITERAL | STRING_LITERAL | DQ_STRING_LITERAL | boolLiteral | NULL_LITERAL | HEXADECIMAL_INTEGER_LITERAL | REAL_LITERAL );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:171:1: literal : ( INTEGER_LITERAL | STRING_LITERAL | DQ_STRING_LITERAL | boolLiteral | NULL_LITERAL | HEXADECIMAL_INTEGER_LITERAL | REAL_LITERAL );
     public final literal_return literal() throws RecognitionException {
         literal_return retval = new literal_return();
         retval.start = input.LT(1);
@@ -3612,7 +3604,7 @@ public class SpringExpressionsParser extends Parser {
         Object REAL_LITERAL119_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:172:2: ( INTEGER_LITERAL | STRING_LITERAL | DQ_STRING_LITERAL | boolLiteral | NULL_LITERAL | HEXADECIMAL_INTEGER_LITERAL | REAL_LITERAL )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:172:2: ( INTEGER_LITERAL | STRING_LITERAL | DQ_STRING_LITERAL | boolLiteral | NULL_LITERAL | HEXADECIMAL_INTEGER_LITERAL | REAL_LITERAL )
             int alt27=7;
             switch ( input.LA(1) ) {
             case INTEGER_LITERAL:
@@ -3661,7 +3653,7 @@ public class SpringExpressionsParser extends Parser {
 
             switch (alt27) {
                 case 1 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:172:4: INTEGER_LITERAL
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:172:4: INTEGER_LITERAL
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3675,7 +3667,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:173:4: STRING_LITERAL
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:173:4: STRING_LITERAL
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3689,7 +3681,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:174:4: DQ_STRING_LITERAL
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:174:4: DQ_STRING_LITERAL
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3703,7 +3695,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:175:4: boolLiteral
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:175:4: boolLiteral
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3716,7 +3708,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:176:4: NULL_LITERAL
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:176:4: NULL_LITERAL
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3730,7 +3722,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:177:4: HEXADECIMAL_INTEGER_LITERAL
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:177:4: HEXADECIMAL_INTEGER_LITERAL
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3744,7 +3736,7 @@ public class SpringExpressionsParser extends Parser {
                     }
                     break;
                 case 7 :
-                    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:178:4: REAL_LITERAL
+                    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:178:4: REAL_LITERAL
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -3766,7 +3758,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3783,7 +3775,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start boolLiteral
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:181:1: boolLiteral : ( TRUE | FALSE );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:181:1: boolLiteral : ( TRUE | FALSE );
     public final boolLiteral_return boolLiteral() throws RecognitionException {
         boolLiteral_return retval = new boolLiteral_return();
         retval.start = input.LT(1);
@@ -3795,8 +3787,8 @@ public class SpringExpressionsParser extends Parser {
         Object set120_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:181:12: ( TRUE | FALSE )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:181:12: ( TRUE | FALSE )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:
             {
             root_0 = (Object)adaptor.nil();
 
@@ -3823,7 +3815,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3840,7 +3832,7 @@ public class SpringExpressionsParser extends Parser {
     };
 
     // $ANTLR start relationalOperator
-    // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:188:1: relationalOperator : ( EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | INSTANCEOF | BETWEEN | MATCHES );
+    // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:188:1: relationalOperator : ( EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | INSTANCEOF | BETWEEN | MATCHES );
     public final relationalOperator_return relationalOperator() throws RecognitionException {
         relationalOperator_return retval = new relationalOperator_return();
         retval.start = input.LT(1);
@@ -3852,8 +3844,8 @@ public class SpringExpressionsParser extends Parser {
         Object set121_tree=null;
 
         try {
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:189:5: ( EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | INSTANCEOF | BETWEEN | MATCHES )
-            // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:189:5: ( EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN | GREATER_THAN_OR_EQUAL | INSTANCEOF | BETWEEN | MATCHES )
+            // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:
             {
             root_0 = (Object)adaptor.nil();
 
@@ -3880,7 +3872,7 @@ public class SpringExpressionsParser extends Parser {
                 adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
             }
         }
-
+        
                 catch(RecognitionException e) {
                         reportError(e);
                         throw e;
@@ -3893,8 +3885,8 @@ public class SpringExpressionsParser extends Parser {
 
     // $ANTLR start synpred1
     public final void synpred1_fragment() throws RecognitionException {   
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:111:7: ( POUND ID LPAREN )
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:111:8: POUND ID LPAREN
+        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:111:7: ( POUND ID LPAREN )
+        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:111:8: POUND ID LPAREN
         {
         match(input,POUND,FOLLOW_POUND_in_synpred1642); if (failed) return ;
         match(input,ID,FOLLOW_ID_in_synpred1644); if (failed) return ;
@@ -3906,8 +3898,8 @@ public class SpringExpressionsParser extends Parser {
 
     // $ANTLR start synpred2
     public final void synpred2_fragment() throws RecognitionException {   
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:121:4: ( ID LPAREN )
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:121:5: ID LPAREN
+        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:121:4: ( ID LPAREN )
+        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:121:5: ID LPAREN
         {
         match(input,ID,FOLLOW_ID_in_synpred2726); if (failed) return ;
         match(input,LPAREN,FOLLOW_LPAREN_in_synpred2728); if (failed) return ;
@@ -3918,8 +3910,8 @@ public class SpringExpressionsParser extends Parser {
 
     // $ANTLR start synpred4
     public final void synpred4_fragment() throws RecognitionException {   
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:163:7: ( ID ASSIGN )
-        // /Users/aclement/el2/spring-framework/trunk/org.springframework.expression/src/main/java/org/springframework/expression/spel/generated/SpringExpressions.g:163:8: ID ASSIGN
+        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:163:7: ( ID ASSIGN )
+        // F:\\svn\\sfw2\\org.springframework.expression\\src\\main\\java\\org\\springframework\\expression\\spel\\generated\\SpringExpressions.g:163:8: ID ASSIGN
         {
         match(input,ID,FOLLOW_ID_in_synpred41010); if (failed) return ;
         match(input,ASSIGN,FOLLOW_ASSIGN_in_synpred41012); if (failed) return ;
@@ -3928,11 +3920,11 @@ public class SpringExpressionsParser extends Parser {
     }
     // $ANTLR end synpred4
 
-    public final boolean synpred4() {
+    public final boolean synpred1() {
         backtracking++;
         int start = input.mark();
         try {
-            synpred4_fragment(); // can never throw exception
+            synpred1_fragment(); // can never throw exception
         } catch (RecognitionException re) {
             System.err.println("impossible: "+re);
         }
@@ -3956,11 +3948,11 @@ public class SpringExpressionsParser extends Parser {
         failed=false;
         return success;
     }
-    public final boolean synpred1() {
+    public final boolean synpred4() {
         backtracking++;
         int start = input.mark();
         try {
-            synpred1_fragment(); // can never throw exception
+            synpred4_fragment(); // can never throw exception
         } catch (RecognitionException re) {
             System.err.println("impossible: "+re);
         }
@@ -3977,41 +3969,41 @@ public class SpringExpressionsParser extends Parser {
     public static final BitSet FOLLOW_expression_in_expr130 = new BitSet(new long[]{0x0000000000000000L});
     public static final BitSet FOLLOW_EOF_in_expr132 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_logicalOrExpression_in_expression152 = new BitSet(new long[]{0x0000000000380002L});
-    public static final BitSet FOLLOW_ASSIGN_in_expression161 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_ASSIGN_in_expression161 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_logicalOrExpression_in_expression164 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_DEFAULT_in_expression174 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_DEFAULT_in_expression174 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_logicalOrExpression_in_expression177 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_QMARK_in_expression187 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_QMARK_in_expression187 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_expression_in_expression190 = new BitSet(new long[]{0x0000000000400000L});
-    public static final BitSet FOLLOW_COLON_in_expression192 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_COLON_in_expression192 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_expression_in_expression195 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_parenExpr206 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_LPAREN_in_parenExpr206 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_expression_in_parenExpr209 = new BitSet(new long[]{0x0000000001000000L});
     public static final BitSet FOLLOW_RPAREN_in_parenExpr211 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_logicalAndExpression_in_logicalOrExpression222 = new BitSet(new long[]{0x0000000002000002L});
-    public static final BitSet FOLLOW_OR_in_logicalOrExpression225 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_OR_in_logicalOrExpression225 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_logicalAndExpression_in_logicalOrExpression228 = new BitSet(new long[]{0x0000000002000002L});
     public static final BitSet FOLLOW_relationalExpression_in_logicalAndExpression263 = new BitSet(new long[]{0x0000000004000002L});
-    public static final BitSet FOLLOW_AND_in_logicalAndExpression266 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_AND_in_logicalAndExpression266 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_relationalExpression_in_logicalAndExpression269 = new BitSet(new long[]{0x0000000004000002L});
-    public static final BitSet FOLLOW_sumExpression_in_relationalExpression280 = new BitSet(new long[]{0xFF00000000000002L,0x0000000000000001L});
-    public static final BitSet FOLLOW_relationalOperator_in_relationalExpression283 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_sumExpression_in_relationalExpression280 = new BitSet(new long[]{0xFF80000000000002L});
+    public static final BitSet FOLLOW_relationalOperator_in_relationalExpression283 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_sumExpression_in_relationalExpression286 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_productExpression_in_sumExpression297 = new BitSet(new long[]{0x0000000018000002L});
-    public static final BitSet FOLLOW_PLUS_in_sumExpression302 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_MINUS_in_sumExpression307 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_PLUS_in_sumExpression302 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_MINUS_in_sumExpression307 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_productExpression_in_sumExpression311 = new BitSet(new long[]{0x0000000018000002L});
     public static final BitSet FOLLOW_powerExpr_in_productExpression322 = new BitSet(new long[]{0x00000000E0000002L});
-    public static final BitSet FOLLOW_STAR_in_productExpression326 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_DIV_in_productExpression331 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_MOD_in_productExpression335 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_STAR_in_productExpression326 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_DIV_in_productExpression331 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_MOD_in_productExpression335 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_powerExpr_in_productExpression339 = new BitSet(new long[]{0x00000000E0000002L});
     public static final BitSet FOLLOW_unaryExpression_in_powerExpr351 = new BitSet(new long[]{0x0000000100000002L});
-    public static final BitSet FOLLOW_POWER_in_powerExpr354 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_POWER_in_powerExpr354 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_unaryExpression_in_powerExpr357 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PLUS_in_unaryExpression371 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_MINUS_in_unaryExpression376 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_BANG_in_unaryExpression381 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_PLUS_in_unaryExpression371 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_MINUS_in_unaryExpression376 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_BANG_in_unaryExpression381 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_unaryExpression_in_unaryExpression385 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_primaryExpression_in_unaryExpression391 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_startNode_in_primaryExpression405 = new BitSet(new long[]{0x0000004400000002L});
@@ -4027,7 +4019,7 @@ public class SpringExpressionsParser extends Parser {
     public static final BitSet FOLLOW_selection_in_startNode507 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_firstSelection_in_startNode516 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_lastSelection_in_startNode524 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_DOT_in_node544 = new BitSet(new long[]{0x00001D1800000000L});
+    public static final BitSet FOLLOW_DOT_in_node544 = new BitSet(new long[]{0x00000F1800000000L});
     public static final BitSet FOLLOW_dottedNode_in_node546 = new BitSet(new long[]{0x0000004400000002L});
     public static final BitSet FOLLOW_nonDottedNode_in_node551 = new BitSet(new long[]{0x0000004400000002L});
     public static final BitSet FOLLOW_indexer_in_nonDottedNode563 = new BitSet(new long[]{0x0000000000000002L});
@@ -4047,44 +4039,44 @@ public class SpringExpressionsParser extends Parser {
     public static final BitSet FOLLOW_ID_in_methodOrProperty735 = new BitSet(new long[]{0x0000000000800000L});
     public static final BitSet FOLLOW_methodArgs_in_methodOrProperty737 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_property_in_methodOrProperty751 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_methodArgs766 = new BitSet(new long[]{0x001FFD5A19800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_LPAREN_in_methodArgs766 = new BitSet(new long[]{0x000FFF5A19800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_argument_in_methodArgs770 = new BitSet(new long[]{0x0000002001000000L});
-    public static final BitSet FOLLOW_COMMA_in_methodArgs773 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_COMMA_in_methodArgs773 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_argument_in_methodArgs776 = new BitSet(new long[]{0x0000002001000000L});
     public static final BitSet FOLLOW_COMMA_in_methodArgs781 = new BitSet(new long[]{0x0000000001000000L});
     public static final BitSet FOLLOW_RPAREN_in_methodArgs788 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_ID_in_property801 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LBRACKET_in_indexer816 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_LBRACKET_in_indexer816 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_argument_in_indexer820 = new BitSet(new long[]{0x000000A000000000L});
-    public static final BitSet FOLLOW_COMMA_in_indexer823 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_COMMA_in_indexer823 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_argument_in_indexer827 = new BitSet(new long[]{0x000000A000000000L});
     public static final BitSet FOLLOW_RBRACKET_in_indexer831 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PROJECT_in_projection857 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_expression_in_projection860 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_RCURLY_in_projection862 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SELECT_in_selection870 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_expression_in_selection873 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_RCURLY_in_selection875 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SELECT_FIRST_in_firstSelection883 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_expression_in_firstSelection886 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_RCURLY_in_firstSelection888 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SELECT_LAST_in_lastSelection896 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
-    public static final BitSet FOLLOW_expression_in_lastSelection899 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_RCURLY_in_lastSelection901 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_PROJECT_in_projection857 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_expression_in_projection860 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_RBRACKET_in_projection862 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SELECT_in_selection870 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_expression_in_selection873 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_RBRACKET_in_selection875 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SELECT_FIRST_in_firstSelection883 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_expression_in_firstSelection886 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_RBRACKET_in_firstSelection888 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SELECT_LAST_in_lastSelection896 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_expression_in_lastSelection899 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_RBRACKET_in_lastSelection901 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_TYPE_in_type910 = new BitSet(new long[]{0x0000001000000000L});
     public static final BitSet FOLLOW_qualifiedId_in_type912 = new BitSet(new long[]{0x0000000001000000L});
     public static final BitSet FOLLOW_RPAREN_in_type914 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_77_in_constructor945 = new BitSet(new long[]{0x0000001000000000L});
     public static final BitSet FOLLOW_qualifiedId_in_constructor947 = new BitSet(new long[]{0x0000000000800000L});
     public static final BitSet FOLLOW_ctorArgs_in_constructor949 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_ctorArgs971 = new BitSet(new long[]{0x001FFD5A19800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_LPAREN_in_ctorArgs971 = new BitSet(new long[]{0x000FFF5A19800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_namedArgument_in_ctorArgs975 = new BitSet(new long[]{0x0000002001000000L});
-    public static final BitSet FOLLOW_COMMA_in_ctorArgs978 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_COMMA_in_ctorArgs978 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_namedArgument_in_ctorArgs981 = new BitSet(new long[]{0x0000002001000000L});
     public static final BitSet FOLLOW_RPAREN_in_ctorArgs987 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_expression_in_argument996 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_ID_in_namedArgument1019 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_ASSIGN_in_namedArgument1021 = new BitSet(new long[]{0x001FFD5A18800010L,0x0000000000002000L});
+    public static final BitSet FOLLOW_ASSIGN_in_namedArgument1021 = new BitSet(new long[]{0x000FFF5A18800010L,0x0000000000002000L});
     public static final BitSet FOLLOW_expression_in_namedArgument1023 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_argument_in_namedArgument1059 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_ID_in_qualifiedId1071 = new BitSet(new long[]{0x0000000400000002L});

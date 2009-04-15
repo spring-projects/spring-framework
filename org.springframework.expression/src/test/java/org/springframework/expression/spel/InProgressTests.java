@@ -318,72 +318,72 @@ public class InProgressTests extends ExpressionTestCase {
 
 	// projection and selection
 	public void testProjection01() {
-		evaluate("listOfNumbersUpToTen.!{#this<5?'y':'n'}","[y, y, y, y, n, n, n, n, n, n]",ArrayList.class);
+		evaluate("listOfNumbersUpToTen.![#this<5?'y':'n']","[y, y, y, y, n, n, n, n, n, n]",ArrayList.class);
 		// inline list creation not supported at the moment
         // evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
 	}
 	
 	public void testProjection02() {
 		// inline map creation not supported at the moment
-		// evaluate("#{'a':'y','b':'n','c':'y'}.!{value=='y'?key:null}.nonnull().sort()", "[a, c]", ArrayList.class);
-		evaluate("mapOfNumbersUpToTen.!{key>5?value:null}", "[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
+		// evaluate("#{'a':'y','b':'n','c':'y'}.![value=='y'?key:null].nonnull().sort()", "[a, c]", ArrayList.class);
+		evaluate("mapOfNumbersUpToTen.![key>5?value:null]", "[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
 	}
 	
 	public void testProjection05() {
-		evaluateAndCheckError("'abc'.!{true}", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
+		evaluateAndCheckError("'abc'.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
 	}
 	
 	public void testProjection06() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.!{true}");
-		assertEquals("'abc'.!{true}",expr.toStringAST());
+		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.![true]");
+		assertEquals("'abc'.![true]",expr.toStringAST());
 		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 	 
 	public void testSelection02() {
-		 evaluate("testMap.keySet().?{#this matches '.*o.*'}", "[monday]", ArrayList.class);
-		 evaluate("testMap.keySet().?{#this matches '.*r.*'}.contains('saturday')", "true", Boolean.class);
-		 evaluate("testMap.keySet().?{#this matches '.*r.*'}.size()", "3", Integer.class);
+		 evaluate("testMap.keySet().?[#this matches '.*o.*']", "[monday]", ArrayList.class);
+		 evaluate("testMap.keySet().?[#this matches '.*r.*'].contains('saturday')", "true", Boolean.class);
+		 evaluate("testMap.keySet().?[#this matches '.*r.*'].size()", "3", Integer.class);
 	}
 	 
 	 public void testSelectionError_NonBooleanSelectionCriteria() {
-		 evaluateAndCheckError("listOfNumbersUpToTen.?{'nonboolean'}",
+		 evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']",
 				 SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	 }
 	 
 	public void testSelection03() {
-		evaluate("mapOfNumbersUpToTen.?{key>5}.size()", "5", Integer.class);
+		evaluate("mapOfNumbersUpToTen.?[key>5].size()", "5", Integer.class);
 //		evaluate("listOfNumbersUpToTen.?{#this>5}", "5", ArrayList.class);
 	}
 
 	public void testSelection04() {
-		evaluateAndCheckError("mapOfNumbersUpToTen.?{'hello'}.size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	}
 
 	public void testSelectionFirst01() {
-		evaluate("listOfNumbersUpToTen.^{#isEven(#this) == 'y'}", "2", Integer.class);
+		evaluate("listOfNumbersUpToTen.^[#isEven(#this) == 'y']", "2", Integer.class);
 	}
 
 	public void testSelectionFirst02() {
-		evaluate("mapOfNumbersUpToTen.^{key>5}.size()", "1", Integer.class);
+		evaluate("mapOfNumbersUpToTen.^[key>5].size()", "1", Integer.class);
 	}
 
 	public void testSelectionLast01() {
-		evaluate("listOfNumbersUpToTen.${#isEven(#this) == 'y'}", "10", Integer.class);
+		evaluate("listOfNumbersUpToTen.$[#isEven(#this) == 'y']", "10", Integer.class);
 	}
 
 	public void testSelectionLast02() {
-		evaluate("mapOfNumbersUpToTen.${key>5}.size()", "1", Integer.class);
+		evaluate("mapOfNumbersUpToTen.$[key>5].size()", "1", Integer.class);
 	}
 
 	public void testSelectionAST() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.^{true}");
-		assertEquals("'abc'.^{true}",expr.toStringAST());
+		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.^[true]");
+		assertEquals("'abc'.^[true]",expr.toStringAST());
 		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		expr = (SpelExpression)parser.parseExpression("'abc'.?{true}");
-		assertEquals("'abc'.?{true}",expr.toStringAST());
+		expr = (SpelExpression)parser.parseExpression("'abc'.?[true]");
+		assertEquals("'abc'.?[true]",expr.toStringAST());
 		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		expr = (SpelExpression)parser.parseExpression("'abc'.${true}");
-		assertEquals("'abc'.${true}",expr.toStringAST());
+		expr = (SpelExpression)parser.parseExpression("'abc'.$[true]");
+		assertEquals("'abc'.$[true]",expr.toStringAST());
 		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 
