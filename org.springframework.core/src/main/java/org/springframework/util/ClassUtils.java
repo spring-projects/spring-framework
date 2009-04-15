@@ -194,7 +194,10 @@ public abstract class ClassUtils {
 	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 * @see #getDefaultClassLoader()
+	 * @deprecated as of Spring 3.0, in favor of specifying a ClassLoader explicitly:
+	 * see {@link #forName(String, ClassLoader)}
 	 */
+	@Deprecated
 	public static Class forName(String name) throws ClassNotFoundException, LinkageError {
 		return forName(name, getDefaultClassLoader());
 	}
@@ -298,7 +301,7 @@ public abstract class ClassUtils {
 	 * according to the JVM's naming rules for primitive classes.
 	 * <p>Also supports the JVM's internal class names for primitive arrays.
 	 * Does <i>not</i> support the "[]" suffix notation for primitive arrays;
-	 * this is only supported by {@link #forName}.
+	 * this is only supported by {@link #forName(String, ClassLoader)}.
 	 * @param name the name of the potentially primitive class
 	 * @return the primitive class, or <code>null</code> if the name does not denote
 	 * a primitive class or primitive array class
@@ -673,7 +676,6 @@ public abstract class ClassUtils {
 	 * May be <code>null</code> or may not even implement the method.
 	 * @return the specific target method, or the original method if the
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
-	 * @see org.springframework.aop.support.AopUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
 		if (method != null && targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
