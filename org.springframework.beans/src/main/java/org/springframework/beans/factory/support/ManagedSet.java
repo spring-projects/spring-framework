@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 
 	private Object source;
 
+	private String elementTypeName;
+
 	private boolean mergeEnabled;
 
 
@@ -58,6 +60,20 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 	}
 
 	/**
+	 * Set the default element type name (class name) to be used for this set.
+	 */
+	public void setElementTypeName(String elementTypeName) {
+		this.elementTypeName = elementTypeName;
+	}
+
+	/**
+	 * Return the default element type name (class name) to be used for this set.
+	 */
+	public String getElementTypeName() {
+		return this.elementTypeName;
+	}
+
+	/**
 	 * Set whether merging should be enabled for this collection,
 	 * in case of a 'parent' collection value being present.
 	 */
@@ -69,7 +85,8 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		return this.mergeEnabled;
 	}
 
-	public Object merge(Object parent) {
+	@SuppressWarnings("unchecked")
+	public Set<E> merge(Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}
@@ -79,7 +96,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		if (!(parent instanceof Set)) {
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
-		Set merged = new ManagedSet();
+		Set<E> merged = new ManagedSet<E>();
 		merged.addAll((Set) parent);
 		merged.addAll(this);
 		return merged;

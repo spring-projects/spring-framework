@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 
 	private Object source;
 
+	private String keyTypeName;
+
+	private String valueTypeName;
+
 	private boolean mergeEnabled;
 
 
@@ -58,6 +62,34 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 	}
 
 	/**
+	 * Set the default key type name (class name) to be used for this map.
+	 */
+	public void setKeyTypeName(String keyTypeName) {
+		this.keyTypeName = keyTypeName;
+	}
+
+	/**
+	 * Return the default key type name (class name) to be used for this map.
+	 */
+	public String getKeyTypeName() {
+		return this.keyTypeName;
+	}
+
+	/**
+	 * Set the default value type name (class name) to be used for this map.
+	 */
+	public void setValueTypeName(String valueTypeName) {
+		this.valueTypeName = valueTypeName;
+	}
+
+	/**
+	 * Return the default value type name (class name) to be used for this map.
+	 */
+	public String getValueTypeName() {
+		return this.valueTypeName;
+	}
+
+	/**
 	 * Set whether merging should be enabled for this collection,
 	 * in case of a 'parent' collection value being present.
 	 */
@@ -69,6 +101,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 		return this.mergeEnabled;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object merge(Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
@@ -79,7 +112,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 		if (!(parent instanceof Map)) {
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
-		Map merged = new ManagedMap();
+		Map<K, V> merged = new ManagedMap<K, V>();
 		merged.putAll((Map) parent);
 		merged.putAll(this);
 		return merged;

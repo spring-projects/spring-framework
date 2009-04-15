@@ -744,7 +744,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Determine the primary autowire candidate in the given set of beans.
 	 * @param candidateBeans a Map of candidate names and candidate instances
 	 * that match the required type, as returned by {@link #findAutowireCandidates}
-	 * @param type the required type
+	 * @param descriptor the target dependency to match against
 	 * @return the name of the primary candidate, or <code>null</code> if none found
 	 */
 	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {

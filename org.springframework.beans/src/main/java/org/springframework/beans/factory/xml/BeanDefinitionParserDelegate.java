@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.beans.BeanMetadataAttribute;
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.PropertyValue;
@@ -45,6 +51,7 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.LookupOverride;
+import org.springframework.beans.factory.support.ManagedArray;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedProperties;
@@ -58,10 +65,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Stateful delegate class used to parse XML bean definitions.
@@ -184,6 +187,8 @@ public class BeanDefinitionParserDelegate {
 	public static final String VALUE_ELEMENT = "value";
 
 	public static final String NULL_ELEMENT = "null";
+
+	public static final String ARRAY_ELEMENT = "array";
 
 	public static final String LIST_ELEMENT = "list";
 
@@ -424,7 +429,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Validate that the specified bean name and aliases have not been used already.
 	 */
-	protected void checkNameUniqueness(String beanName, List aliases, Element beanElement) {
+	protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
 		String foundName = null;
 
 		if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
@@ -651,18 +656,18 @@ public class BeanDefinitionParserDelegate {
 		if (DEFAULT_VALUE.equals(att)) {
 			att = this.defaults.getDependencyCheck();
 		}
-		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
 		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
-		}
-		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+			return AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
 		}
 		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+			return AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
 		}
-		// Else leave default value.
-		return dependencyCheckCode;
+		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
+			return AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+		}
+		else {
+			return AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
+		}
 	}
 
 	/**
@@ -928,10 +933,10 @@ public class BeanDefinitionParserDelegate {
 	 * Parse a value, ref or collection sub-element of a property or
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
-	 * @param defaultTypeClassName the default type (class name) for any
+	 * @param defaultValueType the default type (class name) for any
 	 * <code>&lt;value&gt;</code> tag that might be created
 	 */
-	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultTypeClassName) {
+	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType) {
 		if (!isDefaultNamespace(ele.getNamespaceURI())) {
 			return parseNestedCustomElement(ele, bd);
 		}
@@ -971,7 +976,7 @@ public class BeanDefinitionParserDelegate {
 			return parseIdRefElement(ele);
 		}
 		else if (DomUtils.nodeNameEquals(ele, VALUE_ELEMENT)) {
-			return parseValueElement(ele, defaultTypeClassName);
+			return parseValueElement(ele, defaultValueType);
 		}
 		else if (DomUtils.nodeNameEquals(ele, NULL_ELEMENT)) {
 			// It's a distinguished null value. Let's wrap it in a TypedStringValue
@@ -979,6 +984,9 @@ public class BeanDefinitionParserDelegate {
 			TypedStringValue nullHolder = new TypedStringValue(null);
 			nullHolder.setSource(extractSource(ele));
 			return nullHolder;
+		}
+		else if (DomUtils.nodeNameEquals(ele, ARRAY_ELEMENT)) {
+			return parseArrayElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, LIST_ELEMENT)) {
 			return parseListElement(ele, bd);
@@ -1024,18 +1032,22 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Return a typed String value Object for the given value element.
 	 */
-	public Object parseValueElement(Element ele, String defaultTypeClassName) {
+	public Object parseValueElement(Element ele, String defaultTypeName) {
 		// It's a literal value.
 		String value = DomUtils.getTextValue(ele);
-		String typeClassName = ele.getAttribute(TYPE_ATTRIBUTE);
-		if (!StringUtils.hasText(typeClassName)) {
-			typeClassName = defaultTypeClassName;
+		String specifiedTypeName = ele.getAttribute(TYPE_ATTRIBUTE);
+		String typeName = specifiedTypeName;
+		if (!StringUtils.hasText(typeName)) {
+			typeName = defaultTypeName;
 		}
 		try {
-			return buildTypedStringValue(value, typeClassName, ele);
+			TypedStringValue typedValue = buildTypedStringValue(value, typeName);
+			typedValue.setSource(extractSource(ele));
+			typedValue.setSpecifiedTypeName(specifiedTypeName);
+			return typedValue;
 		}
 		catch (ClassNotFoundException ex) {
-			error("Type class [" + typeClassName + "] not found for <value> element", ele, ex);
+			error("Type class [" + typeName + "] not found for <value> element", ele, ex);
 			return value;
 		}
 	}
@@ -1044,11 +1056,11 @@ public class BeanDefinitionParserDelegate {
 	 * Build a typed String value Object for the given raw value.
 	 * @see org.springframework.beans.factory.config.TypedStringValue
 	 */
-	protected Object buildTypedStringValue(String value, String targetTypeName, Element ele)
+	protected TypedStringValue buildTypedStringValue(String value, String targetTypeName)
 			throws ClassNotFoundException {
 
 		ClassLoader classLoader = this.readerContext.getBeanClassLoader();
-		TypedStringValue typedValue = null;
+		TypedStringValue typedValue;
 		if (!StringUtils.hasText(targetTypeName)) {
 			typedValue = new TypedStringValue(value);
 		}
@@ -1059,57 +1071,75 @@ public class BeanDefinitionParserDelegate {
 		else {
 			typedValue = new TypedStringValue(value, targetTypeName);
 		}
-		typedValue.setSource(extractSource(ele));
 		return typedValue;
+	}
+
+	/**
+	 * Parse an array element.
+	 */
+	public Object parseArrayElement(Element arrayEle, BeanDefinition bd) {
+		String elementType = arrayEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+		NodeList nl = arrayEle.getChildNodes();
+		ManagedArray target = new ManagedArray(elementType, nl.getLength());
+		target.setSource(extractSource(arrayEle));
+		target.setElementTypeName(elementType);
+		target.setMergeEnabled(parseMergeAttribute(arrayEle));
+		parseCollectionElements(nl, target, bd, elementType);
+		return target;
 	}
 
 	/**
 	 * Parse a list element.
 	 */
-	public List<?> parseListElement(Element collectionEle, BeanDefinition bd) {
-		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+	public List parseListElement(Element collectionEle, BeanDefinition bd) {
+		String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
-		ManagedList list = new ManagedList(nl.getLength());
-		list.setSource(extractSource(collectionEle));
-		list.setMergeEnabled(parseMergeAttribute(collectionEle));
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
-				list.add(parsePropertySubElement((Element) node, bd, defaultTypeClassName));
-			}
-		}
-		return list;
+		ManagedList<Object> target = new ManagedList<Object>(nl.getLength());
+		target.setSource(extractSource(collectionEle));
+		target.setElementTypeName(defaultElementType);
+		target.setMergeEnabled(parseMergeAttribute(collectionEle));
+		parseCollectionElements(nl, target, bd, defaultElementType);
+		return target;
 	}
 
 	/**
 	 * Parse a set element.
 	 */
 	public Set parseSetElement(Element collectionEle, BeanDefinition bd) {
-		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+		String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
-		ManagedSet set = new ManagedSet(nl.getLength());
-		set.setSource(extractSource(collectionEle));
-		set.setMergeEnabled(parseMergeAttribute(collectionEle));
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
+		ManagedSet<Object> target = new ManagedSet<Object>(nl.getLength());
+		target.setSource(extractSource(collectionEle));
+		target.setElementTypeName(defaultElementType);
+		target.setMergeEnabled(parseMergeAttribute(collectionEle));
+		parseCollectionElements(nl, target, bd, defaultElementType);
+		return target;
+	}
+
+	protected void parseCollectionElements(
+			NodeList elementNodes, Collection<Object> target, BeanDefinition bd, String defaultElementType) {
+
+		for (int i = 0; i < elementNodes.getLength(); i++) {
+			Node node = elementNodes.item(i);
 			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
-				set.add(parsePropertySubElement((Element) node, bd, defaultTypeClassName));
+				target.add(parsePropertySubElement((Element) node, bd, defaultElementType));
 			}
 		}
-		return set;
 	}
 
 	/**
 	 * Parse a map element.
 	 */
 	public Map parseMapElement(Element mapEle, BeanDefinition bd) {
-		String defaultKeyTypeClassName = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
-		String defaultValueTypeClassName = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+		String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+		String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 
 		List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
-		ManagedMap map = new ManagedMap(entryEles.size());
-		map.setMergeEnabled(parseMergeAttribute(mapEle));
+		ManagedMap<Object, Object> map = new ManagedMap<Object, Object>(entryEles.size());
 		map.setSource(extractSource(mapEle));
+		map.setKeyTypeName(defaultKeyType);
+		map.setValueTypeName(defaultValueType);
+		map.setMergeEnabled(parseMergeAttribute(mapEle));
 
 		for (Element entryEle : entryEles) {
 			// Should only have one value child element: ref, value, list, etc.
@@ -1151,8 +1181,7 @@ public class BeanDefinitionParserDelegate {
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
-				key = buildTypedStringValueForMap(
-						entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName, entryEle);
+				key = buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyType, entryEle);
 			}
 			else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
@@ -1164,7 +1193,7 @@ public class BeanDefinitionParserDelegate {
 				key = ref;
 			}
 			else if (keyEle != null) {
-				key = parseKeyElement(keyEle, bd, defaultKeyTypeClassName);
+				key = parseKeyElement(keyEle, bd, defaultKeyType);
 			}
 			else {
 				error("<entry> element must specify a key", entryEle);
@@ -1180,8 +1209,7 @@ public class BeanDefinitionParserDelegate {
 						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
-				value = buildTypedStringValueForMap(
-						entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName, entryEle);
+				value = buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueType, entryEle);
 			}
 			else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
@@ -1193,7 +1221,7 @@ public class BeanDefinitionParserDelegate {
 				value = ref;
 			}
 			else if (valueEle != null) {
-				value = parsePropertySubElement(valueEle, bd, defaultValueTypeClassName);
+				value = parsePropertySubElement(valueEle, bd, defaultValueType);
 			}
 			else {
 				error("<entry> element must specify a value", entryEle);
@@ -1210,12 +1238,14 @@ public class BeanDefinitionParserDelegate {
 	 * Build a typed String value Object for the given raw value.
 	 * @see org.springframework.beans.factory.config.TypedStringValue
 	 */
-	protected final Object buildTypedStringValueForMap(String value, String defaultTypeClassName, Element entryEle) {
+	protected final Object buildTypedStringValueForMap(String value, String defaultTypeName, Element entryEle) {
 		try {
-			return buildTypedStringValue(value, defaultTypeClassName, entryEle);
+			TypedStringValue typedValue = buildTypedStringValue(value, defaultTypeName);
+			typedValue.setSource(extractSource(entryEle));
+			return typedValue;
 		}
 		catch (ClassNotFoundException ex) {
-			error("Type class [" + defaultTypeClassName + "] not found for Map key/value type", entryEle, ex);
+			error("Type class [" + defaultTypeName + "] not found for Map key/value type", entryEle, ex);
 			return value;
 		}
 	}
@@ -1223,7 +1253,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a key sub-element of a map element.
 	 */
-	public Object parseKeyElement(Element keyEle, BeanDefinition bd, String defaultKeyTypeClassName) {
+	protected Object parseKeyElement(Element keyEle, BeanDefinition bd, String defaultKeyTypeName) {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -1238,7 +1268,7 @@ public class BeanDefinitionParserDelegate {
 				}
 			}
 		}
-		return parsePropertySubElement(subElement, bd, defaultKeyTypeClassName);
+		return parsePropertySubElement(subElement, bd, defaultKeyTypeName);
 	}
 
 	/**
