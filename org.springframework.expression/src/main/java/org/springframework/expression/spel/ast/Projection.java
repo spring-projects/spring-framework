@@ -93,7 +93,7 @@ public class Projection extends SpelNodeImpl {
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
-		return sb.append("!{").append(getChild(0).toStringAST()).append("}").toString();
+		return sb.append("![").append(getChild(0).toStringAST()).append("]").toString();
 	}
 
 }

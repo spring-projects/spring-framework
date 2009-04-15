@@ -41,9 +41,9 @@ import org.springframework.expression.spel.SpelMessages;
  */
 public class Selection extends SpelNodeImpl {
 
-	public final static int ALL = 0; // ?{}
-	public final static int FIRST = 1; // ^{}
-	public final static int LAST = 2; // ${}
+	public final static int ALL = 0; // ?[]
+	public final static int FIRST = 1; // ^[]
+	public final static int LAST = 2; // $[]
 
 	private final int variant;
 
@@ -140,16 +140,16 @@ public class Selection extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder();
 		switch (variant) {
 		case ALL:
-			sb.append("?{");
+			sb.append("?[");
 			break;
 		case FIRST:
-			sb.append("^{");
+			sb.append("^[");
 			break;
 		case LAST:
-			sb.append("${");
+			sb.append("$[");
 			break;
 		}
-		return sb.append(getChild(0).toStringAST()).append("}").toString();
+		return sb.append(getChild(0).toStringAST()).append("]").toString();
 	}
 
 }

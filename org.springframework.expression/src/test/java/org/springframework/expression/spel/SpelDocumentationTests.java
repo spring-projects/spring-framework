@@ -394,7 +394,7 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		context.setVariable("primes",primes);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
-		List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression("#primes.?{#this>10}").getValue(context);
+		List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression("#primes.?[#this>10]").getValue(context);
 		assertEquals("[11, 13, 17]",primesGreaterThanTen.toString());
 	}
 	
@@ -437,7 +437,7 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 	public void testSelection() throws Exception {
 		StandardEvaluationContext societyContext = new StandardEvaluationContext();
 		societyContext.setRootObject(new IEEE());
-		List<Inventor> list = (List<Inventor>) parser.parseExpression("Members2.?{nationality == 'Serbian'}").getValue(societyContext);
+		List<Inventor> list = (List<Inventor>) parser.parseExpression("Members2.?[nationality == 'Serbian']").getValue(societyContext);
 		assertEquals(1,list.size());
 		assertEquals("Nikola Tesla",list.get(0).getName());
 	}

@@ -137,13 +137,13 @@ indexer: LBRACKET r1=argument (COMMA r2=argument)* RBRACKET -> ^(INDEXER $r1 ($r
 	
 // argument;
 	// TODO make expression conditional with ? if want completion for when the RCURLY is missing
-projection: PROJECT^ expression RCURLY!;
+projection: PROJECT^ expression RBRACKET!;
 
-selection: SELECT^ expression RCURLY!;
+selection: SELECT^ expression RBRACKET!;
 
-firstSelection:	SELECT_FIRST^ expression RCURLY!;
+firstSelection:	SELECT_FIRST^ expression RBRACKET!;
 
-lastSelection: SELECT_LAST^ expression RCURLY!;
+lastSelection: SELECT_LAST^ expression RBRACKET!;
 
 // TODO cope with array types
 type:	TYPE qualifiedId RPAREN -> ^(TYPEREF qualifiedId);
@@ -235,10 +235,10 @@ BANG: '!';
 POUND: '#';
 QMARK: '?';
 DEFAULT: '??';
-PROJECT: '!{';
-SELECT: '?{';
-SELECT_FIRST: '^{';
-SELECT_LAST: '${';
+PROJECT: '![';
+SELECT: '?[';
+SELECT_FIRST: '^[';
+SELECT_LAST: '$[';
 TYPE: 'T(';
 
 STRING_LITERAL:	'\''! (APOS|~'\'')* '\''!;

@@ -34,9 +34,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		Expression ex = parser.parseExpression("#{'Unable to render embedded object: File ({#this == 2\\}'}", TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT);
 		assertEquals("Unable to render embedded object: File ({#this == 2}",ex.getValue());
-//		ex = parser.parseExpression("Unable to render embedded object: File (#{#this}) not found", TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT);
-//		assertEquals()
-//		System.out.println(ex.getValue(new StandardEvaluationContext(new File("C:/temp"))));
+		
+		ex = parser.parseExpression("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}",TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		assertEquals("This is the last odd number in the list: 9",ex.getValue(TestScenarioCreator.getTestEvaluationContext()));
+
+		ex = parser.parseExpression("Hello ${'here is a curly bracket \\}'}",TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		assertEquals("Hello here is a curly bracket }",ex.getValue());
 	}
 
 }

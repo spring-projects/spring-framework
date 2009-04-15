@@ -104,7 +104,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		assertEquals(3, value);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
-		expr = parser.parseExpression("#primes.?{#this>10}");
+		expr = parser.parseExpression("#primes.?[#this>10]");
 		value = expr.getValue(ctx);
 		assertEquals("[11, 13, 17]", value.toString());			
 	}
