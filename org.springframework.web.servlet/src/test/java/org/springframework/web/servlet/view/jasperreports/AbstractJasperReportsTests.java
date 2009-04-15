@@ -29,6 +29,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.ui.jasperreports.ProductBean;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
@@ -44,17 +45,8 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 
 	protected static final String SUB_REPORT_PARENT = "/org/springframework/ui/jasperreports/subReportParent.jrxml";
 
-	protected static boolean canCompileReport;
-
-	static {
-		try {
-			Class.forName("org.eclipse.jdt.internal.compiler.Compiler");
-			canCompileReport = true;
-		}
-		catch (ClassNotFoundException ex) {
-			canCompileReport = false;
-		}
-	}
+	protected static final boolean canCompileReport = ClassUtils.isPresent(
+			"org.eclipse.jdt.internal.compiler.Compiler", AbstractJasperReportsTests.class.getClassLoader());
 
 
 	protected MockHttpServletRequest request;

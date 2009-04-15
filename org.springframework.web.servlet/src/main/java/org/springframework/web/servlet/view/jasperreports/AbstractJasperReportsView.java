@@ -256,6 +256,13 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Allows subclasses to populate the converted exporter parameters.
+	 */
+	protected void setConvertedExporterParameters(Map<JRExporterParameter, Object> convertedExporterParameters) {
+		this.convertedExporterParameters = convertedExporterParameters;
+	}
+
+	/**
 	 * Allows subclasses to retrieve the converted exporter parameters.
 	 */
 	protected Map<JRExporterParameter, Object> getConvertedExporterParameters() {

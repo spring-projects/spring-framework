@@ -69,7 +69,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		if (view instanceof AbstractJasperReportsSingleFormatView &&
 				((AbstractJasperReportsSingleFormatView) view).useWriter()) {
 			String output = response.getContentAsString();
-			assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
+			assertTrue("Output should contain 'MeineSeite'", output.contains("MeineSeite"));
 		}
 	}
 
