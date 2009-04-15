@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,6 @@ import java.lang.reflect.Modifier;
  * @since 19.02.2004
  * @see #prepare
  * @see #invoke
- * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
- * @see org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
  */
 public class MethodInvoker {
 
@@ -197,7 +195,7 @@ public class MethodInvoker {
 	 * @throws ClassNotFoundException if the class name was invalid
 	 */
 	protected Class resolveClassName(String className) throws ClassNotFoundException {
-		return ClassUtils.forName(className);
+		return ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
 	}
 
 	/**
@@ -216,8 +214,7 @@ public class MethodInvoker {
 		int minTypeDiffWeight = Integer.MAX_VALUE;
 		Method matchingMethod = null;
 
-		for (int i = 0; i < candidates.length; i++) {
-			Method candidate = candidates[i];
+		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
 				Class[] paramTypes = candidate.getParameterTypes();
 				if (paramTypes.length == argCount) {
