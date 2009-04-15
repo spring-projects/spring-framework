@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -424,7 +424,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		String fieldName = fqFieldName.substring(index + 1);
 
 		try {
-			Class cls = ClassUtils.forName(className);
+			Class cls = ClassUtils.forName(className, getApplicationContext().getClassLoader());
 			Field field = cls.getField(fieldName);
 
 			if (JRExporterParameter.class.isAssignableFrom(field.getType())) {
