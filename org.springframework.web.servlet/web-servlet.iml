@@ -16,6 +16,7 @@
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="context-support" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="oxm" />
     <orderEntry type="module" module-name="web" />
     <orderEntry type="module-library">
       <library>
@@ -268,7 +269,39 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="oxm" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.beanutils/1.7.0/com.springsource.org.apache.commons.beanutils-1.7.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.beanutils/1.7.0/com.springsource.org.apache.commons.beanutils-sources-1.7.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.digester/1.8.0/com.springsource.org.apache.commons.digester-1.8.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.digester/1.8.0/com.springsource.org.apache.commons.digester-sources-1.8.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.eclipse.jdt/com.springsource.org.eclipse.jdt.core.compiler.batch/3.3.0/com.springsource.org.eclipse.jdt.core.compiler.batch-3.3.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.eclipse.jdt/com.springsource.org.eclipse.jdt.core.compiler.batch/3.3.0/com.springsource.org.eclipse.jdt.core.compiler.batch-sources-3.3.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
   <component name="copyright">
     <Base>

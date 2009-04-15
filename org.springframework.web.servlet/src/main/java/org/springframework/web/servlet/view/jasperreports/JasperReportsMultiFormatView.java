@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,13 +183,10 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 		}
 
 		AbstractJasperReportsView view = (AbstractJasperReportsView) BeanUtils.instantiateClass(viewClass);
-
-		// Copy appropriate properties across.
-		view.setExporterParameters(getExporterParameters());
-
 		// Can skip most initialization since all relevant URL processing
 		// has been done - just need to convert parameters on the sub view.
-		view.convertExporterParameters();
+		view.setExporterParameters(getExporterParameters());
+		view.setConvertedExporterParameters(getConvertedExporterParameters());
 
 		// Prepare response and render report.
 		populateContentDispositionIfNecessary(response, format);
