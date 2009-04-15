@@ -78,21 +78,21 @@ public interface Marshaller {
                     <tgroup cols="2">
                         <thead>
                             <row>
-                                <entry><interfacename>javax.xml.transform.Result</interfacename> implementation</entry>
+                                <entry><interfacename>Result</interfacename> implementation</entry>
                                 <entry>Wraps XML representation</entry>
                             </row>
                         </thead>
                         <tbody>
                             <row>
-                                <entry><classname>javax.xml.transform.dom.DOMResult</classname></entry>
+                                <entry><classname>DOMResult</classname></entry>
                                 <entry><interfacename>org.w3c.dom.Node</interfacename></entry>
                             </row>
                             <row>
-                                <entry><classname>javax.xml.transform.sax.SAXResult</classname></entry>
+                                <entry><classname>SAXResult</classname></entry>
                                 <entry><interfacename>org.xml.sax.ContentHandler</interfacename></entry>
                             </row>
                             <row>
-                                <entry><interfacename>javax.xml.transform.stream.StreamResult</interfacename></entry>
+                                <entry><interfacename>StreamResult</interfacename></entry>
                                 <entry>
                                     <classname>java.io.File</classname>,
                                     <classname>java.io.OutputStream</classname>, or
@@ -106,9 +106,9 @@ public interface Marshaller {
                     <para>
                         Although the <methodname>marshal</methodname> method accepts a plain object as its first 
                         parameter, most <classname>Marshaller</classname> implementations cannot handle arbitrary 
-                        objects. Instead, an object class must be mapped in a mapping file, registered with the 
-                        marshaller, or have a common base class. Refer to the further sections in this chapter to 
-                        determine how your O/X technology of choice manages this.
+                        objects. Instead, an object class must be mapped in a mapping file, marked with an annotation,
+                        registered with the marshaller, or have a common base class. Refer to the further sections
+                        in this chapter to determine how your O/X technology of choice manages this.
                     </para>
                 </note>
             </para>
@@ -135,24 +135,24 @@ public interface Unmarshaller {
                     <tgroup cols="2">
                         <thead>
                             <row>
-                                <entry><interfacename>javax.xml.transform.Source</interfacename> implementation</entry>
+                                <entry><interfacename>Source</interfacename> implementation</entry>
                                 <entry>Wraps XML representation</entry>
                             </row>
                         </thead>
                         <tbody>
                             <row>
-                                <entry><classname>javax.xml.transform.dom.DOMSource</classname></entry>
+                                <entry><classname>DOMSource</classname></entry>
                                 <entry><interfacename>org.w3c.dom.Node</interfacename></entry>
                             </row>
                             <row>
-                                <entry><classname>javax.xml.transform.sax.SAXSource</classname></entry>
+                                <entry><classname>SAXSource</classname></entry>
                                 <entry>
                                     <classname>org.xml.sax.InputSource</classname>, and
                                     <interfacename>org.xml.sax.XMLReader</interfacename>
                                 </entry>
                             </row>
                             <row>
-                                <entry><classname>javax.xml.transform.stream.StreamSource</classname></entry>
+                                <entry><classname>StreamSource</classname></entry>
                                 <entry>
                                     <classname>java.io.File</classname>,
                                     <classname>java.io.InputStream</classname>, or
@@ -185,13 +185,8 @@ public interface Unmarshaller {
             <para>
                 The O/X Mapping exception hierarchy is shown in the following figure:
                 <mediaobject>
-                    <imageobject role="fo">
-                        <imagedata fileref="src/docbkx/resources/images/oxm-exceptions.svg"
-                                   format="SVG" align="center"/>
-                    </imageobject>
-                    <imageobject role="html">
-                        <imagedata fileref="images/oxm-exceptions.png"
-                                   format="PNG" align="center"/>
+                    <imageobject>
+                        <imagedata fileref="images/oxm-exceptions.png" align="center"/>
                     </imageobject>
                     <caption>
                         <para>
