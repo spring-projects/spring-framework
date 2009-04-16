@@ -66,17 +66,16 @@ public class Selection extends SpelNodeImpl {
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
 					lastKey = entry.getKey();
-					KeyValuePair kvp = new KeyValuePair(entry.getKey(),entry.getValue());
-					TypedValue kvpair = new TypedValue(kvp,TypeDescriptor.valueOf(KeyValuePair.class));
+					TypedValue kvpair = new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class));
 					state.pushActiveContextObject(kvpair);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST) {
-								result.put(kvp.key,kvp.value);
+								result.put(entry.getKey(),entry.getValue());
 								return new TypedValue(result);
 							}
-							result.put(kvp.key,kvp.value);
+							result.put(entry.getKey(),entry.getValue());
 						}
 					} else {
 						throw new SpelException(selectionCriteria.getCharPositionInLine(),
@@ -108,8 +107,9 @@ public class Selection extends SpelNodeImpl {
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
-							if (variant == FIRST)
+							if (variant == FIRST) {
 								return new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
+							}
 							result.add(element);
 						}
 					} else {
