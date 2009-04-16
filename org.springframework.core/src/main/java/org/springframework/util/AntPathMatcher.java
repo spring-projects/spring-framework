@@ -21,34 +21,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * PathMatcher implementation for Ant-style path patterns.
- * Examples are provided below.
+ * PathMatcher implementation for Ant-style path patterns. Examples are provided below.
  *
- * <p>Part of this mapping code has been kindly borrowed from
- * <a href="http://ant.apache.org">Apache Ant</a>.
+ * <p>Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache Ant</a>.
  *
- * <p>The mapping matches URLs using the following rules:<br>
- * <ul>
- * <li>? matches one character</li>
- * <li>* matches zero or more characters</li>
- * <li>** matches zero or more 'directories' in a path</li>
- * </ul>
+ * <p>The mapping matches URLs using the following rules:<br> <ul> <li>? matches one character</li> <li>* matches zero
+ * or more characters</li> <li>** matches zero or more 'directories' in a path</li> </ul>
  *
- * <p>Some examples:<br>
- * <ul>
- * <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
- * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li>
- * <li><code>com/*.jsp</code> - matches all <code>.jsp</code> files in the
- * <code>com</code> directory</li>
- * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code>
- * files underneath the <code>com</code> path</li>
- * <li><code>org/springframework/&#42;&#42;/*.jsp</code> - matches all <code>.jsp</code>
- * files underneath the <code>org/springframework</code> path</li>
- * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches
- * <code>org/springframework/servlet/bla.jsp</code> but also
- * <code>org/springframework/testing/servlet/bla.jsp</code> and
- * <code>org/servlet/bla.jsp</code></li>
- * </ul>
+ * <p>Some examples:<br> <ul> <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
+ * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li> <li><code>com/*.jsp</code> - matches all
+ * <code>.jsp</code> files in the <code>com</code> directory</li> <li><code>com/&#42;&#42;/test.jsp</code> - matches all
+ * <code>test.jsp</code> files underneath the <code>com</code> path</li> <li><code>org/springframework/&#42;&#42;/*.jsp</code>
+ * - matches all <code>.jsp</code> files underneath the <code>org/springframework</code> path</li>
+ * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches <code>org/springframework/servlet/bla.jsp</code> but also
+ * <code>org/springframework/testing/servlet/bla.jsp</code> and <code>org/servlet/bla.jsp</code></li> </ul>
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
@@ -63,15 +49,10 @@ public class AntPathMatcher implements PathMatcher {
 
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
-
-	/**
-	 * Set the path separator to use for pattern parsing.
-	 * Default is "/", as in Ant.
-	 */
+	/** Set the path separator to use for pattern parsing. Default is "/", as in Ant. */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
-
 
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
@@ -85,17 +66,19 @@ public class AntPathMatcher implements PathMatcher {
 		return doMatch(pattern, path, false, null);
 	}
 
-
 	/**
 	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
+	 *
 	 * @param pattern the pattern to match against
 	 * @param path the path String to test
-	 * @param fullMatch whether a full pattern match is required
-	 * (else a pattern match as far as the given base path goes is sufficient)
-	 * @return <code>true</code> if the supplied <code>path</code> matched,
-	 * <code>false</code> if it didn't
+	 * @param fullMatch whether a full pattern match is required (else a pattern match as far as the given base path goes
+	 * is sufficient)
+	 * @return <code>true</code> if the supplied <code>path</code> matched, <code>false</code> if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
+	protected boolean doMatch(String pattern,
+			String path,
+			boolean fullMatch,
+			Map<String, String> uriTemplateVariables) {
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
@@ -221,16 +204,12 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Tests whether or not a string matches against a pattern.
-	 * The pattern may contain two special characters:<br>
-	 * '*' means zero or more characters<br>
-	 * '?' means one and only one character
-	 * @param pattern pattern to match against.
-	 * Must not be <code>null</code>.
-	 * @param str string which must be matched against the pattern.
-	 * Must not be <code>null</code>.
-	 * @return <code>true</code> if the string matches against the
-	 * pattern, or <code>false</code> otherwise.
+	 * Tests whether or not a string matches against a pattern. The pattern may contain two special characters:<br> '*'
+	 * means zero or more characters<br> '?' means one and only one character
+	 *
+	 * @param pattern pattern to match against. Must not be <code>null</code>.
+	 * @param str string which must be matched against the pattern. Must not be <code>null</code>.
+	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
 	 */
 	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
 		AntPatchStringMatcher matcher = new AntPatchStringMatcher(pattern, str, uriTemplateVariables);
@@ -238,9 +217,7 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Given a pattern and a full path, determine the pattern-mapped part.
-	 * <p>For example:
-	 * <ul>
+	 * Given a pattern and a full path, determine the pattern-mapped part. <p>For example: <ul>
 	 * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -> ''</li>
 	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
 	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
@@ -248,10 +225,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>cvs/commit.html</code>'</li>
 	 * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>docs/cvs/commit.html</code>'</li>
 	 * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-	 * </ul>
-	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>'
-	 * and '<code>path</code>', but does <strong>not</strong> enforce this.
+	 * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li> </ul>
+	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>' and '<code>path</code>', but
+	 * does <strong>not</strong> enforce this.
 	 */
 	public String extractPathWithinPattern(String pattern, String path) {
 		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
@@ -291,26 +267,17 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Combines two patterns into a new pattern that is returned.
-	 * <p>This implementation simply concatenates the two patterns, unless the
-	 * first pattern contains a file extension match (such as {@code *.html}. In
-	 * that case, the second pattern should be included in the first, or an
-	 * {@code IllegalArgumentException} is thrown.
-	 * <p>For example:
-	 * <table>
-	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr>
-	 * <tr><td>/hotels</td><td>{@code null}</td><td>/hotels</td></tr>
-	 * <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
-	 * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr>
-	 * <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
-	 * <tr><td>/hotels/*</td><td>/bookings</td><td>/hotels/bookings</td></tr>
-	 * <tr><td>/hotels/&#42;&#42;</td><td>/bookings</td><td>/hotels/&#42;&#42;/bookings</td></tr>
-	 * <tr><td>/hotels</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
-	 * <tr><td>/hotels/*</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
+	 * Combines two patterns into a new pattern that is returned. <p>This implementation simply concatenates the two
+	 * patterns, unless the first pattern contains a file extension match (such as {@code *.html}. In that case, the second
+	 * pattern should be included in the first, or an {@code IllegalArgumentException} is thrown. <p>For example: <table>
+	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr> <tr><td>/hotels</td><td>{@code
+	 * null}</td><td>/hotels</td></tr> <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
+	 * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr> <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels/*</td><td>/bookings</td><td>/hotels/bookings</td></tr> <tr><td>/hotels/&#42;&#42;</td><td>/bookings</td><td>/hotels/&#42;&#42;/bookings</td></tr>
+	 * <tr><td>/hotels</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr> <tr><td>/hotels/*</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
 	 * <tr><td>/hotels/&#42;&#42;</td><td>{hotel}</td><td>/hotels/&#42;&#42;/{hotel}</td></tr>
-	 * <tr><td>/*.html</td><td>/hotels.html</td><td>/hotels.html</td></tr>
-	 * <tr><td>/*.html</td><td>/hotels</td><td>IllegalArgumentException</td></tr>
-	 * </table>
+	 * <tr><td>/*.html</td><td>/hotels.html</td><td>/hotels.html</td></tr> <tr><td>/*.html</td><td>/hotels</td><td>/hotels.html</td></tr>
+	 * <tr><td>/*.html</td><td>/*.txt</td><td>IllegalArgumentException</td></tr> </table>
 	 *
 	 * @param pattern1 the first pattern
 	 * @param pattern2 the second pattern
@@ -326,6 +293,9 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		else if (!StringUtils.hasText(pattern2)) {
 			return pattern1;
+		}
+		else if (match(pattern1, pattern2)) {
+			return pattern2;
 		}
 		else if (pattern1.endsWith("/*")) {
 			if (pattern2.startsWith("/")) {
@@ -348,9 +318,10 @@ public class AntPathMatcher implements PathMatcher {
 			}
 		}
 		else {
-			int idx = pattern1.indexOf(".");
-			if (idx == -1) {
-				// all other cases: simply concatenate the two patterns
+			int dotPos1 = pattern1.indexOf('.');
+			int dotPos2 = pattern2.indexOf('.');
+			if (dotPos1 == -1 && dotPos2 == -1) {
+				// simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;
 				}
@@ -358,17 +329,28 @@ public class AntPathMatcher implements PathMatcher {
 					return pattern1 + "/" + pattern2;
 				}
 			}
-			else {
-				// /*.html + /hotels.html -> /hotels.html
-				if (match(pattern1, pattern2)) {
-					return pattern2;
-				}
-				else {
-					// /*.html + /hotels -> exception
-					throw new IllegalArgumentException(
-							"Conflicting paths: \"" + pattern1 + "\" does not include \"" + pattern2 + "\"");
-				}
+			String fileName1 = "";
+			String extension1 = "";
+			if (dotPos1 != -1) {
+				fileName1 = pattern1.substring(0, dotPos1);
+				extension1 = pattern1.substring(dotPos1);
 			}
+			else {
+				fileName1 = pattern1;
+			}
+			String fileName2 = "";
+			String extension2 = "";
+			if (dotPos2 != -1) {
+				fileName2 = pattern2.substring(0, dotPos2);
+				extension2 = pattern2.substring(dotPos2);
+			}
+			else {
+				fileName2 = pattern2;
+			}
+			String fileName = fileName1.endsWith("*") ? fileName2 : fileName2;
+			String extension = extension1.startsWith("*") ? extension2 : extension1;
+
+			return fileName + extension;
 		}
 	}
 
