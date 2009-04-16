@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * These are tests for language features that are not yet considered 'live'.  Either missing implementation, or documentation.
+ * These are tests for language features that are not yet considered 'live'.  Either missing implementation or documentation.
  * 
  * Where implementation is missing the tests are commented out.
  * 
@@ -28,6 +28,91 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class InProgressTests extends ExpressionTestCase {
 
+	public void testRelOperatorsBetween01() {
+		evaluate("1 between listOneFive", "true", Boolean.class);
+		// evaluate("1 between {1, 5}", "true", Boolean.class); // no inline list building at the moment
+	}
+	
+	public void testRelOperatorsBetweenErrors01() {
+		 evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 12);
+	}
+	
+	public void testRelOperatorsBetweenErrors03() {
+		 evaluateAndCheckError("1 between listOfNumbersUpToTen", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+	}
+	
+	// PROJECTION 
+	public void testProjection01() {
+		evaluate("listOfNumbersUpToTen.![#this<5?'y':'n']","[y, y, y, y, n, n, n, n, n, n]",ArrayList.class);
+		// inline list creation not supported at the moment
+        // evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
+	}
+	
+	public void testProjection02() {
+		// inline map creation not supported at the moment
+		// evaluate("#{'a':'y','b':'n','c':'y'}.![value=='y'?key:null].nonnull().sort()", "[a, c]", ArrayList.class);
+		evaluate("mapOfNumbersUpToTen.![key>5?value:null]", "[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
+	}
+	
+	public void testProjection05() {
+		evaluateAndCheckError("'abc'.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
+	}
+	
+	public void testProjection06() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.![true]");
+		assertEquals("'abc'.![true]",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+	}
+
+	// SELECTION
+	
+	public void testSelection02() {
+		 evaluate("testMap.keySet().?[#this matches '.*o.*']", "[monday]", ArrayList.class);
+		 evaluate("testMap.keySet().?[#this matches '.*r.*'].contains('saturday')", "true", Boolean.class);
+		 evaluate("testMap.keySet().?[#this matches '.*r.*'].size()", "3", Integer.class);
+	}
+	 
+	 public void testSelectionError_NonBooleanSelectionCriteria() {
+		 evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']",
+				 SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	 }
+	 
+	public void testSelection03() {
+		evaluate("mapOfNumbersUpToTen.?[key>5].size()", "5", Integer.class);
+//		evaluate("listOfNumbersUpToTen.?{#this>5}", "5", ArrayList.class);
+	}
+
+	public void testSelection04() {
+		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	}
+
+	public void testSelectionFirst01() {
+		evaluate("listOfNumbersUpToTen.^[#isEven(#this) == 'y']", "2", Integer.class);
+	}
+
+	public void testSelectionFirst02() {
+		evaluate("mapOfNumbersUpToTen.^[key>5].size()", "1", Integer.class);
+	}
+
+	public void testSelectionLast01() {
+		evaluate("listOfNumbersUpToTen.$[#isEven(#this) == 'y']", "10", Integer.class);
+	}
+
+	public void testSelectionLast02() {
+		evaluate("mapOfNumbersUpToTen.$[key>5].size()", "1", Integer.class);
+	}
+
+	public void testSelectionAST() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.^[true]");
+		assertEquals("'abc'.^[true]",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		expr = (SpelExpression)parser.parseExpression("'abc'.?[true]");
+		assertEquals("'abc'.?[true]",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		expr = (SpelExpression)parser.parseExpression("'abc'.$[true]");
+		assertEquals("'abc'.$[true]",expr.toStringAST());
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+	}
 	// Constructor invocation
 	
 	// public void testPrimitiveTypeArrayConstructors() {
@@ -40,7 +125,7 @@ public class InProgressTests extends ExpressionTestCase {
 	// evaluate("new float[]{1f,2f,3f,4f}.count()", 4, Integer.class);
 	// evaluate("new byte[]{1,2,3,4}.count()", 4, Integer.class);
 	// }
-
+	//
 	// public void testPrimitiveTypeArrayConstructorsElements() {
 	// evaluate("new int[]{1,2,3,4}[0]", 1, Integer.class);
 	// evaluate("new boolean[]{true,false,true}[0]", true, Boolean.class);
@@ -51,14 +136,14 @@ public class InProgressTests extends ExpressionTestCase {
 	// evaluate("new float[]{1f,2f,3f,4f}[0]", (float) 1, Float.class);
 	// evaluate("new byte[]{1,2,3,4}[0]", (byte) 1, Byte.class);
 	// }
-
+	//
 	// public void testErrorCases() {
 	// evaluateAndCheckError("new char[7]{'a','c','d','e'}", SpelMessages.INITIALIZER_LENGTH_INCORRECT);
 	// evaluateAndCheckError("new char[3]{'a','c','d','e'}", SpelMessages.INITIALIZER_LENGTH_INCORRECT);
 	// evaluateAndCheckError("new char[2]{'hello','world'}", SpelMessages.TYPE_CONVERSION_ERROR);
 	// evaluateAndCheckError("new String('a','c','d')", SpelMessages.CONSTRUCTOR_NOT_FOUND);
 	// }
-
+	//
 	// public void testTypeArrayConstructors() {
 	// evaluate("new String[]{'a','b','c','d'}[1]", "b", String.class);
 	// evaluateAndCheckError("new String[]{'a','b','c','d'}.size()", SpelMessages.METHOD_NOT_FOUND, 30, "size()",
@@ -75,43 +160,32 @@ public class InProgressTests extends ExpressionTestCase {
 	// ,
 	// new String[3][4].getClass());
 	// }
-	
-
+	//
+	//
 	// evaluate("new String(new char[]{'h','e','l','l','o'})", "hello", String.class);
-	
-	
-
+	//
+	//
+	//
 	// public void testRelOperatorsIn01() {
 	// evaluate("3 in {1,2,3,4,5}", "true", Boolean.class);
 	// }
-
+	//
 	// public void testRelOperatorsIn02() {
 	// evaluate("name in {null, \"Nikola Tesla\"}", "true", Boolean.class);
 	// evaluate("name in {null, \"Anonymous\"}", "false", Boolean.class);
 	// }
 	//
-	public void testRelOperatorsBetween01() {
-		evaluate("1 between listOneFive", "true", Boolean.class);
-		// evaluate("1 between {1, 5}", "true", Boolean.class); // no inline list building at the moment
-	}
 	//
 	// public void testRelOperatorsBetween02() {
 	// evaluate("'efg' between {'abc', 'xyz'}", "true", Boolean.class);
 	// }
 	//
-	public void testRelOperatorsBetweenErrors01() {
-		 evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 12);
-	}
 	//
 	// public void testRelOperatorsBetweenErrors02() {
 	// evaluateAndCheckError("'abc' between {5,7}", SpelMessages.NOT_COMPARABLE, 6);
 	// }
-	public void testRelOperatorsBetweenErrors03() {
-		 evaluateAndCheckError("1 between listOfNumbersUpToTen", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
-	}
-	
 	// Lambda calculations
-
+	//
 	//
 	// public void testLambda02() {
 	// evaluate("(#max={|x,y| $x > $y ? $x : $y };true)", "true", Boolean.class);
@@ -147,16 +221,16 @@ public class InProgressTests extends ExpressionTestCase {
 	// evaluate("(#answer=42;#answer)", "42", Integer.class, true);
 	// evaluate("($answer=42;$answer)", "42", Integer.class, true);
 	// }
-//	
-//
-//	 public void testRelOperatorsIs02() {
+	//	
+	//
+	// public void testRelOperatorsIs02() {
 	// evaluate("{1, 2, 3, 4, 5} instanceof T(List)", "true", Boolean.class);
 	// }
 	//
 	// public void testRelOperatorsIs03() {
 	// evaluate("{1, 2, 3, 4, 5} instanceof T(List)", "true", Boolean.class);
 	// }
-//
+	//
 	// inline list creation
 	// public void testInlineListCreation01() {
 	// evaluate("{1, 2, 3, 4, 5}", "[1, 2, 3, 4, 5]", ArrayList.class);
@@ -211,7 +285,7 @@ public class InProgressTests extends ExpressionTestCase {
 	// public void testArrayConstruction02() {
 	// evaluate("new String[] {'abc', 'xyz'}", "java.lang.String[2]{abc,xyz}", String[].class);
 	// }
-
+	//
 	// collection processors
 	// from spring.net: count,sum,max,min,average,sort,orderBy,distinct,nonNull
 	// public void testProcessorsCount01() {
@@ -315,76 +389,9 @@ public class InProgressTests extends ExpressionTestCase {
 	//    inline list creation not supported:
 	//    evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
 	//}
-
-	// projection and selection
-	public void testProjection01() {
-		evaluate("listOfNumbersUpToTen.![#this<5?'y':'n']","[y, y, y, y, n, n, n, n, n, n]",ArrayList.class);
-		// inline list creation not supported at the moment
-        // evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
-	}
-	
-	public void testProjection02() {
-		// inline map creation not supported at the moment
-		// evaluate("#{'a':'y','b':'n','c':'y'}.![value=='y'?key:null].nonnull().sort()", "[a, c]", ArrayList.class);
-		evaluate("mapOfNumbersUpToTen.![key>5?value:null]", "[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
-	}
-	
-	public void testProjection05() {
-		evaluateAndCheckError("'abc'.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
-	}
-	
-	public void testProjection06() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.![true]");
-		assertEquals("'abc'.![true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-	}
-	 
-	public void testSelection02() {
-		 evaluate("testMap.keySet().?[#this matches '.*o.*']", "[monday]", ArrayList.class);
-		 evaluate("testMap.keySet().?[#this matches '.*r.*'].contains('saturday')", "true", Boolean.class);
-		 evaluate("testMap.keySet().?[#this matches '.*r.*'].size()", "3", Integer.class);
-	}
-	 
-	 public void testSelectionError_NonBooleanSelectionCriteria() {
-		 evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']",
-				 SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
-	 }
-	 
-	public void testSelection03() {
-		evaluate("mapOfNumbersUpToTen.?[key>5].size()", "5", Integer.class);
-//		evaluate("listOfNumbersUpToTen.?{#this>5}", "5", ArrayList.class);
-	}
-
-	public void testSelection04() {
-		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
-	}
-
-	public void testSelectionFirst01() {
-		evaluate("listOfNumbersUpToTen.^[#isEven(#this) == 'y']", "2", Integer.class);
-	}
-
-	public void testSelectionFirst02() {
-		evaluate("mapOfNumbersUpToTen.^[key>5].size()", "1", Integer.class);
-	}
-
-	public void testSelectionLast01() {
-		evaluate("listOfNumbersUpToTen.$[#isEven(#this) == 'y']", "10", Integer.class);
-	}
-
-	public void testSelectionLast02() {
-		evaluate("mapOfNumbersUpToTen.$[key>5].size()", "1", Integer.class);
-	}
-
-	public void testSelectionAST() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.^[true]");
-		assertEquals("'abc'.^[true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		expr = (SpelExpression)parser.parseExpression("'abc'.?[true]");
-		assertEquals("'abc'.?[true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		expr = (SpelExpression)parser.parseExpression("'abc'.$[true]");
-		assertEquals("'abc'.$[true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-	}
+	//
+	//	 public void testSelectionUsingIndex() {
+	//	 evaluate("listOfNumbersUpToTen.?[#index > 5 ]", "[7, 8, 9, 10]", ArrayList.class);
+	//}
 
 }

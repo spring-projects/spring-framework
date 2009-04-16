@@ -61,7 +61,7 @@ public class Projection extends SpelNodeImpl {
 			mapdata.entrySet();
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
-					state.pushActiveContextObject(new TypedValue(new KeyValuePair(entry.getKey(), entry.getValue()),TypeDescriptor.valueOf(KeyValuePair.class)));
+					state.pushActiveContextObject(new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class)));
 					result.add(getChild(0).getValueInternal(state).getValue());
 				} finally {
 					state.popActiveContextObject();
