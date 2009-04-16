@@ -326,21 +326,21 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 		else {
 			if (urlPath.equals("/")) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Root mapping to handler [" + resolvedHandler + "]");
+				if (logger.isInfoEnabled()) {
+					logger.info("Root mapping to handler [" + resolvedHandler + "]");
 				}
 				setRootHandler(resolvedHandler);
 			}
 			else if (urlPath.equals("/*")) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Default mapping to handler [" + resolvedHandler + "]");
+				if (logger.isInfoEnabled()) {
+					logger.info("Default mapping to handler [" + resolvedHandler + "]");
 				}
 				setDefaultHandler(resolvedHandler);
 			}
 			else {
 				this.handlerMap.put(urlPath, resolvedHandler);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Mapped URL path [" + urlPath + "] onto handler [" + resolvedHandler + "]");
+				if (logger.isInfoEnabled()) {
+					logger.info("Mapped URL path [" + urlPath + "] onto handler [" + resolvedHandler + "]");
 				}
 			}
 		}
