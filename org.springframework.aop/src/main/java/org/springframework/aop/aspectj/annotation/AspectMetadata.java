@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,13 +67,23 @@ public class AspectMetadata {
 	 * @param aspectClass the aspect class
 	 * @param aspectName the name of the aspect
 	 */
-	public AspectMetadata(Class aspectClass, String aspectName) {
+	public AspectMetadata(Class<?> aspectClass, String aspectName) {
 		this.aspectName = aspectName;
-		this.ajType = AjTypeSystem.getAjType(aspectClass);
-		
-		if (!this.ajType.isAspect()) {
+
+		Class<?> currClass = aspectClass;
+		AjType ajType = null;
+		while (!currClass.equals(Object.class)) {
+			AjType ajTypeToCheck = AjTypeSystem.getAjType(currClass);
+			if (ajTypeToCheck.isAspect()) {
+				ajType = ajTypeToCheck;
+				break;
+			}
+			currClass = currClass.getSuperclass();
+		}
+		if (ajType == null) {
 			throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
 		}
+		this.ajType = ajType;
 		if (this.ajType.getDeclarePrecedence().length > 0) {
 			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
 		}
