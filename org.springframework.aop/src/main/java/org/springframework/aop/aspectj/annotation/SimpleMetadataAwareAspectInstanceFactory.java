@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 	 * @param aspectClass the aspect class
 	 */
 	@Override
-	protected int getOrderForAspectClass(Class aspectClass) {
-		Order order = (Order) aspectClass.getAnnotation(Order.class);
+	protected int getOrderForAspectClass(Class<?> aspectClass) {
+		Order order = aspectClass.getAnnotation(Order.class);
 		if (order != null) {
 			return order.value();
 		}
@@ -66,4 +66,3 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 	}
 
 }
-

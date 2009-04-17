@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	 * <p>The default implementation simply returns <code>Ordered.LOWEST_PRECEDENCE</code>.
 	 * @param aspectClass the aspect class
 	 */
-	protected int getOrderForAspectClass(Class aspectClass) {
+	protected int getOrderForAspectClass(Class<?> aspectClass) {
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
