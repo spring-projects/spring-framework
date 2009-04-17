@@ -97,11 +97,15 @@
       <listitem>
         <para>User defined functions</para>
       </listitem>
-<!--
+
       <listitem>
-        <para>List projections</para>
+        <para>Collection projection</para>
       </listitem>
--->
+
+      <listitem>
+        <para>Collection selection</para>
+      </listitem>
+
       <listitem>
         <para>Templated expressions</para>
       </listitem>
@@ -253,7 +257,39 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
       <section>
         <title>Type Conversion</title>
 
-        <para>TODO</para>
+        <para>By default SpEL uses the conversion service available in
+        Spring core (<literal>org.springframework.core.convert.ConversionService</literal>).
+        This conversion service comes with many converters built in for common conversions
+        but is also fully extensible so custom conversions between
+        types can be added.  Additionally it has the key capability that it 
+        is generics aware.  This means that when working with generic types in 
+        expressions, SpEL will attempt conversions to maintain type correctness for any
+        objects it encounters.
+        </para>
+        
+        <para>What does this mean in practice?  Suppose assignment, using <literal>setValue()</literal>,
+        is being used to set a <literal>List</literal> property.  The type of the property is
+        actually <literal>List&lt;Boolean&gt;</literal>.  SpEL will recognize that the elements
+        of the list need to be converted to <literal>Boolean</literal> before being placed in it.
+        A simple example:</para>
+        
+        <programlisting>class Simple {
+    public List&lt;Boolean&gt; booleanList = new ArrayList&lt;Boolean&gt;();
+}
+    	
+Simple simple = new Simple();
+
+simple.booleanList.add(true);
+
+StandardEvaluationContext simpleContext = new StandardEvaluationContext(simple);
+
+// false is passed in here as a string.  SpEL and the conversion service will 
+// correctly recognize that it needs to be a Boolean and convert it
+parser.parseExpression("booleanList[0]").setValue(simpleContext, "false");
+
+// b will be false
+Boolean b = simple.booleanList.get(0);
+        </programlisting>
       </section>
     </section>
   </section>
@@ -677,12 +713,12 @@ parser.parseExpression("Name = #newName").getValue(context);
 
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
-<!--
       <section>
         <title>The #this variable</title>
 
         <para>The variable #this is always defined and refers to the
-        current evaluation object (the object against which unqualified references will be resolved). </para>
+        current evaluation object (the object against which unqualified 
+        references will be resolved). </para>
 
         <programlisting language="java">// create an array of integers
 List&lt;Integer&gt; primes = new ArrayList&lt;Integer&gt;();
@@ -694,11 +730,28 @@ StandardEvaluationContext context = new StandardEvaluationContext();
 context.setVariable("primes",primes);
 
 // all prime numbers &gt; 10 from the list (using selection ?{...})
-List&lt;Integer&gt; primesGreaterThanTen = (List&lt;Integer&gt;) parser.parseExpression("#primes.?{#this&gt;10}").getValue(context);
+List&lt;Integer&gt; primesGreaterThanTen = (List&lt;Integer&gt;) parser.parseExpression("#primes.?[#this&gt;10]").getValue(context);
 
 //evaluates to [11, 13, 17]</programlisting>
       </section>
--->
+      <!--
+        <section>
+        <title>The #root variable</title>
+
+        <para>The variable #root is always defined and refers to the
+        root evaluation object.  This is the object against which the first unqualified 
+        reference to a property or method is resolved.</para>
+        
+        <para>It differs from #this in that #this typically varies throughout the 
+        evaluation of an expression, whilst #root remains constant.
+        It can be useful when writing a selection criteria, where the decision
+        needs to be made based on some property of the root object rather than the
+        current collection element.  For example:</para>
+
+        <programlisting language="java">List selection = (List)parser.parseExpression("#someList.?[#root.supports(#this)]").getValue();
+</programlisting>
+      </section>
+      -->
     </section>
 
     <section id="expressions-ref-functions">
@@ -759,23 +812,56 @@ String queryResultString = parser.parseExpression(expression).getValue(societyCo
 // queryResultString = "Nikola Tesla is a member of the IEEE Society"</programlisting>
     </section>
 
-<!--
     <section>
-      <title>List Selection</title>
+      <title>Collection Selection</title>
 
-      <para>List selection is a powerful expression language feature that
-      allow you to transform the source list into another list by selecting
-      from its "rows". In other words, selection is comparable to using SQL
-      with a WHERE clause.</para>
+      <para>Selection is a powerful expression language feature that
+      allow you to transform some source collection into another by selecting
+      from its entries.</para>
 
-      <para>Selection uses the syntax ?{projectionExpression}. This will
-      filter the list and return a new list containing a subset of the
-      original element list. For example, selection would allow us to easily
+      <para>Selection uses the syntax <literal>?[selectionExpression]</literal>. This will
+      filter the collection and return a new collection containing a subset of the
+      original elements. For example, selection would allow us to easily
       get a list of Serbian inventors:</para>
 
-      <programlisting language="java">List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) parser.parseExpression("Members.?{Nationality == 'Serbian'}").getValue(societyContext);</programlisting>
+      <programlisting language="java">List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) parser.parseExpression("Members.?[Nationality == 'Serbian']").getValue(societyContext);</programlisting>
+
+      <para>Selection is possible upon both lists and maps.  In the former case the
+      selection criteria is evaluated against each individual list element whilst against
+      a map the selection criteria is evaluated against each  map entry (objects of the Java
+      type <literal>Map.Entry</literal>).  Map entries have their key and value accessible
+      as properties for use in the selection.</para>
+      
+      <para>This expression will return a new map consisting of those elements of the 
+      original map where the entry value is less than 27.</para>
+       
+      <programlisting language="java">Map newMap = parser.parseExpression("map.?[value&lt;27]").getValue();</programlisting>
+      
+      <para>In addition to returning all the selected elements, it is possible to retrieve
+      just the first or the last value.  To obtain the first entry matching the selection
+      the syntax is <literal>^[...]</literal> whilst to obtain the last matching selection
+      the syntax is <literal>$[...]</literal>.
+      </para>
     </section>
--->
+    
+    <section>
+      <title>Collection Projection</title>
+      
+      <para>Projection allows a collection to drive the evaluation of a sub-expression and
+      the result is a new collection.  The syntax for projection is <literal>![projectionExpression]</literal>.
+      Most easily understood by example, suppose we have
+      a list of inventors but want the list of cities where they were born.  Effectively
+      we want to evaluate 'placeOfBirth.city' for every entry in the inventor list.  Using
+      projection:</para>
+      
+      <programlisting language="java">// returns [ 'Smiljan', 'Idvor' ]
+List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]");</programlisting>
+      
+      <para>A map can also be used to drive projection and in this case the projection
+      expression is evaluated against each entry in the map (represented as a Java 
+      <literal>Map.Entry</literal>).  The result of a projection across a map is a list consisting
+      of the evaluation of the projection expression against each map entry.</para>
+    </section>
 
     <section>
       <title>Expression templating</title>
