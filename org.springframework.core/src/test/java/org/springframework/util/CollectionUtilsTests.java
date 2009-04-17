@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class CollectionUtilsTests extends TestCase {
+public class CollectionUtilsTests {
 
+	@Test
 	public void testIsEmpty() {
 		assertTrue(CollectionUtils.isEmpty((Set) null));
 		assertTrue(CollectionUtils.isEmpty((Map) null));
@@ -52,6 +54,7 @@ public class CollectionUtilsTests extends TestCase {
 		assertFalse(CollectionUtils.isEmpty(map));
 	}
 
+	@Test
 	public void testMergeArrayIntoCollection() {
 		Object[] arr = new Object[] {"value1", "value2"};
 		List list = new LinkedList();
@@ -63,6 +66,7 @@ public class CollectionUtilsTests extends TestCase {
 		assertEquals("value2", list.get(2));
 	}
 
+	@Test
 	public void testMergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
 		List list = new LinkedList();
@@ -74,21 +78,25 @@ public class CollectionUtilsTests extends TestCase {
 		assertEquals(new Integer(2), list.get(2));
 	}
 
+	@Test
 	public void testMergePropertiesIntoMap() {
 		Properties defaults = new Properties();
 		defaults.setProperty("prop1", "value1");
 		Properties props = new Properties(defaults);
 		props.setProperty("prop2", "value2");
+		props.put("prop3", new Integer(3));
 
 		Map map = new HashMap();
-		map.put("prop3", "value3");
+		map.put("prop4", "value4");
 
 		CollectionUtils.mergePropertiesIntoMap(props, map);
 		assertEquals("value1", map.get("prop1"));
 		assertEquals("value2", map.get("prop2"));
-		assertEquals("value3", map.get("prop3"));
+		assertEquals(new Integer(3), map.get("prop3"));
+		assertEquals("value4", map.get("prop4"));
 	}
 
+	@Test
 	public void testContains() {
 		assertFalse(CollectionUtils.contains((Iterator) null, "myElement"));
 		assertFalse(CollectionUtils.contains((Enumeration) null, "myElement"));
@@ -104,6 +112,7 @@ public class CollectionUtilsTests extends TestCase {
 		assertTrue(CollectionUtils.contains(ht.keys(), "myElement"));
 	}
 
+	@Test
 	public void testContainsAny() throws Exception {
 		List source = new ArrayList();
 		source.add("abc");
@@ -122,11 +131,13 @@ public class CollectionUtilsTests extends TestCase {
 		assertFalse(CollectionUtils.containsAny(source, candidates));
 	}
 
+	@Test
 	public void testContainsInstanceWithNullCollection() throws Exception {
 		assertFalse("Must return false if supplied Collection argument is null",
 				CollectionUtils.containsInstance(null, this));
 	}
 
+	@Test
 	public void testContainsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
 		List list = new ArrayList();
 		list.add(new Instance("fiona"));
@@ -134,6 +145,7 @@ public class CollectionUtilsTests extends TestCase {
 				CollectionUtils.containsInstance(list, new Instance("fiona")));
 	}
 
+	@Test
 	public void testContainsInstanceWithSameInstance() throws Exception {
 		List list = new ArrayList();
 		list.add(new Instance("apple"));
@@ -143,6 +155,7 @@ public class CollectionUtilsTests extends TestCase {
 				CollectionUtils.containsInstance(list, instance));
 	}
 
+	@Test
 	public void testContainsInstanceWithNullInstance() throws Exception {
 		List list = new ArrayList();
 		list.add(new Instance("apple"));
@@ -151,6 +164,7 @@ public class CollectionUtilsTests extends TestCase {
 				CollectionUtils.containsInstance(list, null));
 	}
 
+	@Test
 	public void testFindFirstMatch() throws Exception {
 		List source = new ArrayList();
 		source.add("abc");
@@ -165,6 +179,7 @@ public class CollectionUtilsTests extends TestCase {
 		assertEquals("def", CollectionUtils.findFirstMatch(source, candidates));
 	}
 
+	@Test
 	public void testHasUniqueObject() {
 		List list = new LinkedList();
 		list.add("myElement");
