@@ -319,8 +319,7 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		else {
 			int dotPos1 = pattern1.indexOf('.');
-			int dotPos2 = pattern2.indexOf('.');
-			if (dotPos1 == -1 && dotPos2 == -1) {
+			if (dotPos1 == -1) {
 				// simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;
@@ -329,25 +328,20 @@ public class AntPathMatcher implements PathMatcher {
 					return pattern1 + "/" + pattern2;
 				}
 			}
-			String fileName1 = "";
-			String extension1 = "";
-			if (dotPos1 != -1) {
-				fileName1 = pattern1.substring(0, dotPos1);
-				extension1 = pattern1.substring(dotPos1);
-			}
-			else {
-				fileName1 = pattern1;
-			}
-			String fileName2 = "";
-			String extension2 = "";
+			String fileName1 = pattern1.substring(0, dotPos1);
+			String extension1 = pattern1.substring(dotPos1);
+			String fileName2;
+			String extension2;
+			int dotPos2 = pattern2.indexOf('.');
 			if (dotPos2 != -1) {
 				fileName2 = pattern2.substring(0, dotPos2);
 				extension2 = pattern2.substring(dotPos2);
 			}
 			else {
 				fileName2 = pattern2;
+				extension2 = "";
 			}
-			String fileName = fileName1.endsWith("*") ? fileName2 : fileName2;
+			String fileName = fileName1.endsWith("*") ? fileName2 : fileName1;
 			String extension = extension1.startsWith("*") ? extension2 : extension1;
 
 			return fileName + extension;
