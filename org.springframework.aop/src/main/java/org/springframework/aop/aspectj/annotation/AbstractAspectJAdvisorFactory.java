@@ -112,12 +112,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * when compiled by ajc with the -1.5 flag, yet they cannot be consumed by Spring AOP.
 	 */
 	public boolean isAspect(Class<?> clazz) {
-		return (AjTypeSystem.getAjType(clazz).isAspect() && 
-				hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
+		return (hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
 	}
 
 	private boolean hasAspectAnnotation(Class<?> clazz) {
-		return clazz.isAnnotationPresent(Aspect.class);
+		return (AnnotationUtils.findAnnotation(clazz, Aspect.class) != null);
 	}
 
 	/**
