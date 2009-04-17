@@ -110,19 +110,19 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 			// @RequestMapping found at type level
 			this.cachedMappings.put(handlerType, mapping);
 			Set<String> urls = new LinkedHashSet<String>();
-			String[] typeLevelPaths = mapping.value();
-			if (typeLevelPaths.length > 0) {
+			String[] typeLevelPatterns = mapping.value();
+			if (typeLevelPatterns.length > 0) {
 				// @RequestMapping specifies paths at type level
-				String[] methodLevelPaths = determineUrlsForHandlerMethods(handlerType);
-				for (String typeLevelPath : typeLevelPaths) {
-					if (!typeLevelPath.startsWith("/")) {
-						typeLevelPath = "/" + typeLevelPath;
+				String[] methodLevelPatterns = determineUrlsForHandlerMethods(handlerType);
+				for (String typeLevelPattern : typeLevelPatterns) {
+					if (!typeLevelPattern.startsWith("/")) {
+						typeLevelPattern = "/" + typeLevelPattern;
 					}
-					for (String methodLevelPath : methodLevelPaths) {
-						String combinedPath = getPathMatcher().combine(typeLevelPath, methodLevelPath);
-						addUrlsForPath(urls, combinedPath);
+					for (String methodLevelPattern : methodLevelPatterns) {
+						String combinedPattern = getPathMatcher().combine(typeLevelPattern, methodLevelPattern);
+						addUrlsForPath(urls, combinedPattern);
 					}
-					addUrlsForPath(urls, typeLevelPath);
+					addUrlsForPath(urls, typeLevelPattern);
 				}
 				return StringUtils.toStringArray(urls);
 			}
