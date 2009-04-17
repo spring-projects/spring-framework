@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,11 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.util.ClassUtils;
@@ -44,11 +42,9 @@ import org.springframework.util.ClassUtils;
  */
 public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
-	protected transient Log logger = LogFactory.getLog(getClass());
+	protected final Set<Class> publishedInterfaces = new HashSet<Class>();
 
-	protected Set<Class> publishedInterfaces = new HashSet<Class>();
-
-	private transient Map<Method, Boolean> rememberedMethods = new IdentityHashMap<Method, Boolean>(32);
+	private transient Map<Method, Boolean> rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
 
 
 	/**
@@ -119,10 +115,8 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		// Rely on default serialization; just initialize state after deserialization.
 		ois.defaultReadObject();
-
 		// Initialize transient fields.
-		this.logger = LogFactory.getLog(getClass());
-		this.rememberedMethods = new IdentityHashMap<Method, Boolean>(32);
+		this.rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
 	}
 
 }
