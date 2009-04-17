@@ -58,7 +58,6 @@ public class Projection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
-			mapdata.entrySet();
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class)));
@@ -67,7 +66,7 @@ public class Projection extends SpelNodeImpl {
 					state.popActiveContextObject();
 				}
 			}
-			return new TypedValue(result,TypeDescriptor.valueOf(Map.class)); // TODO unable to build correct type descriptor
+			return new TypedValue(result,TypeDescriptor.valueOf(List.class)); // TODO unable to build correct type descriptor
 		} else if (operand instanceof List) {
 			List<Object> data = new ArrayList<Object>();
 			data.addAll((Collection<?>) operand);
