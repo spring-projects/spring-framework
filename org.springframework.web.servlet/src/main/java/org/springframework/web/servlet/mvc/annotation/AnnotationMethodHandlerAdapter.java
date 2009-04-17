@@ -503,7 +503,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			if (pattern.equals(lookupPath) || pathMatcher.match(pattern, lookupPath)) {
 				return true;
 			}
-			return !(pattern.indexOf('.') != -1) && pathMatcher.match(pattern + ".*", lookupPath);
+			boolean hasSuffix = pattern.indexOf('.') != -1;
+			if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
+				return true;
+			}
+			boolean endsWithSlash = pattern.endsWith("/");
+			if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
+				return true;
+			}
+			return false;
 		}
 
 		private boolean checkParameters(RequestMappingInfo mapping, HttpServletRequest request) {

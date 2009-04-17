@@ -152,12 +152,22 @@ public class UriTemplateServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("list", response.getContentAsString());
 
+		request = new MockHttpServletRequest("GET", "/hotels/");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("list", response.getContentAsString());
+
 		request = new MockHttpServletRequest("POST", "/hotels");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("create", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/hotels/42");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("show-42", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/hotels/42/");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("show-42", response.getContentAsString());
