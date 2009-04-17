@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.aspectj.weaver.BCException;
 import org.aspectj.weaver.patterns.NamePattern;
 import org.aspectj.weaver.reflect.ReflectionWorld;
+import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ContextBasedMatcher;
 import org.aspectj.weaver.tools.FuzzyBoolean;
 import org.aspectj.weaver.tools.JoinPointMatch;
@@ -92,7 +93,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
-	private final Map<Method, ShadowMatch> shadowMatchCache = new HashMap<Method, ShadowMatch>();
+	private final Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<Method, ShadowMatch>(32);
 
 	private PointcutParser pointcutParser;
 
@@ -243,15 +244,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	public boolean matches(Method method, Class targetClass, boolean beanHasIntroductions) {
 		checkReadyToMatch();
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		ShadowMatch shadowMatch = null;
-		try {
-			shadowMatch = getShadowMatch(targetMethod, method);
-		}
-		catch (ReflectionWorld.ReflectionWorldException ex) {
-			// Could neither introspect the target class nor the proxy class ->
-			// let's simply consider this method as non-matching.
-			return false;
-		}
+		ShadowMatch shadowMatch = getShadowMatch(targetMethod, method);
 
 		// Special handling for this, target, @this, @target, @annotation
 		// in Spring - we can optimize since we know we have exactly this class,
@@ -279,17 +272,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		checkReadyToMatch();
-		ShadowMatch shadowMatch = null;
-		ShadowMatch originalShadowMatch = null;
-		try {
-			shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
-			originalShadowMatch = getShadowMatch(method, method);
-		}
-		catch (ReflectionWorld.ReflectionWorldException ex) {
-			// Could neither introspect the target class nor the proxy class ->
-			// let's simply consider this method as non-matching.
-			return false;
-		}
+		ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
+		ShadowMatch originalShadowMatch = getShadowMatch(method, method);
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
 		// consistent with return of MethodInvocationProceedingJoinPoint
@@ -364,24 +348,31 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
-		synchronized (this.shadowMatchCache) {
-			ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
-			if (shadowMatch == null) {
-				try {
-					shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
-				}
-				catch (ReflectionWorld.ReflectionWorldException ex) {
-					// Failed to introspect target method, probably because it has been loaded
-					// in a special ClassLoader. Let's try the original method instead...
-					if (targetMethod == originalMethod) {
-						throw ex;
-					}
-					shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
-				}
-				this.shadowMatchCache.put(targetMethod, shadowMatch);
+		ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
+		if (shadowMatch == null) {
+			try {
+				shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
 			}
-			return shadowMatch;
+			catch (ReflectionWorld.ReflectionWorldException ex) {
+				// Failed to introspect target method, probably because it has been loaded
+				// in a special ClassLoader. Let's try the original method instead...
+				if (targetMethod == originalMethod) {
+					shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+				}
+				else {
+					try {
+						shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
+					}
+					catch (ReflectionWorld.ReflectionWorldException ex2) {
+						// Could neither introspect the target class nor the proxy class ->
+						// let's simply consider this method as non-matching.
+						shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+					}
+				}
+			}
+			this.shadowMatchCache.put(targetMethod, shadowMatch);
 		}
+		return shadowMatch;
 	}
 
 

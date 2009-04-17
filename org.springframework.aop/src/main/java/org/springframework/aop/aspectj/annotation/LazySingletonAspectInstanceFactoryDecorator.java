@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * Decorator to cause a MetadataAwareAspectInstanceFactory to instantiate only once.
+ * Decorator to cause a {@link MetadataAwareAspectInstanceFactory} to instantiate only once.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -30,7 +29,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 	private final MetadataAwareAspectInstanceFactory maaif;
 
-	private Object materialized;
+	private volatile Object materialized;
 
 
 	/**
@@ -42,19 +41,24 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 		this.maaif = maaif;
 	}
 
+
 	public synchronized Object getAspectInstance() {
 		if (this.materialized == null) {
-			this.materialized = this.maaif.getAspectInstance();
+			synchronized (this) {
+				if (this.materialized == null) {
+					this.materialized = this.maaif.getAspectInstance();
+				}
+			}
 		}
 		return this.materialized;
 	}
 
-	public ClassLoader getAspectClassLoader() {
-		return this.maaif.getAspectClassLoader();
-	}
-
 	public boolean isMaterialized() {
 		return (this.materialized != null);
+	}
+
+	public ClassLoader getAspectClassLoader() {
+		return this.maaif.getAspectClassLoader();
 	}
 
 	public AspectMetadata getAspectMetadata() {
@@ -62,10 +66,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	public int getOrder() {
-		if (this.maaif instanceof Ordered) {
-			return ((Ordered) this.maaif).getOrder();
-		}
-		return Ordered.LOWEST_PRECEDENCE;
+		return this.maaif.getOrder();
 	}
 
 
