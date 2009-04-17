@@ -399,11 +399,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
 					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);
-					for (String mappedPath : mappingInfo.paths) {
-						if (isPathMatch(mappedPath, lookupPath)) {
+					for (String methodLevelPattern : mappingInfo.paths) {
+						if (isPathMatch(methodLevelPattern, lookupPath)) {
 							if (checkParameters(mappingInfo, request)) {
 								match = true;
-								matchedPaths.add(mappedPath);
+								matchedPaths.add(methodLevelPattern);
 							}
 							else {
 								for (RequestMethod requestMethod : mappingInfo.methods) {
@@ -479,17 +479,31 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 		}
 
-		private boolean isPathMatch(String mappedPath, String lookupPath) {
-			if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath)) {
+		private boolean isPathMatch(String methodLevelPattern, String lookupPath) {
+			if (isPathMatchInternal(methodLevelPattern, lookupPath)) {
 				return true;
 			}
-			boolean hasSuffix = (mappedPath.indexOf('.') != -1);
-			if (!hasSuffix && pathMatcher.match(mappedPath + ".*", lookupPath)) {
+			if (hasTypeLevelMapping()) {
+				String[] typeLevelPatterns = getTypeLevelMapping().value();
+				for (String typeLevelPattern : typeLevelPatterns) {
+					if (!typeLevelPattern.startsWith("/")) {
+						typeLevelPattern = "/" + typeLevelPattern;
+					}
+					String combinedPattern = pathMatcher.combine(typeLevelPattern, methodLevelPattern);
+					if (isPathMatchInternal(combinedPattern, lookupPath)) {
+						return true;
+					}
+				}
+
+			}
+			return false;
+		}
+
+		private boolean isPathMatchInternal(String pattern, String lookupPath) {
+			if (pattern.equals(lookupPath) || pathMatcher.match(pattern, lookupPath)) {
 				return true;
 			}
-			return (!mappedPath.startsWith("/") &&
-					(lookupPath.endsWith(mappedPath) || pathMatcher.match("/**/" + mappedPath, lookupPath) ||
-							(!hasSuffix && pathMatcher.match("/**/" + mappedPath + ".*", lookupPath))));
+			return !(pattern.indexOf('.') != -1) && pathMatcher.match(pattern + ".*", lookupPath);
 		}
 
 		private boolean checkParameters(RequestMappingInfo mapping, HttpServletRequest request) {

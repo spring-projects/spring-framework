@@ -24,7 +24,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
@@ -145,24 +144,33 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
-	@Ignore("In progress")
 	public void crud() throws Exception {
 		initServlet(CrudController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("getHotels", response.getContentAsString());
+		assertEquals("list", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("newHotel", response.getContentAsString());
+		assertEquals("create", response.getContentAsString());
 
-		request = new MockHttpServletRequest("POST", "/hotels");
+		request = new MockHttpServletRequest("GET", "/hotels/42");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("newHotel", response.getContentAsString());
+		assertEquals("show-42", response.getContentAsString());
+
+		request = new MockHttpServletRequest("PUT", "/hotels/42");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("createOrUpdate-42", response.getContentAsString());
+
+		request = new MockHttpServletRequest("DELETE", "/hotels/42");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("remove-42", response.getContentAsString());
 	}
 
 	private void initServlet(final Class<?> controllerclass) throws ServletException {

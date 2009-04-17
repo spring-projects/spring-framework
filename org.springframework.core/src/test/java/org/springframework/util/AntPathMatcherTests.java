@@ -348,6 +348,7 @@ public class AntPathMatcherTests {
 		assertEquals("/hotels/{hotel}", pathMatcher.combine("/hotels/*", "{hotel}"));
 		assertEquals("/hotels/**/{hotel}", pathMatcher.combine("/hotels/**", "{hotel}"));
 		assertEquals("/hotels/{hotel}", pathMatcher.combine("/hotels", "{hotel}"));
+		assertEquals("/hotels/{hotel}.*", pathMatcher.combine("/hotels", "{hotel}.*"));
 		assertEquals("/hotels/*/booking/{booking}", pathMatcher.combine("/hotels/*/booking", "{booking}"));
 		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel.html"));
 		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel"));
