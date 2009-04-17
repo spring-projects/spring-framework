@@ -39,12 +39,13 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * <p>The meta data processing is based on the DatabaseMetaData provided by
  * the JDBC driver. Since we rely on the JDBC driver this "auto-detection"
  * can only be used for databases that are known to provide accurate meta data.
- * These currently include Derby, MySQL, Microsoft SQL Server, Oracle and DB2.
- * For any other databases you are required to declare all parameters explicitly.
- * You can of course declare all parameters explicitly even if the database provides
- * the necessary meta data. In that case your declared parameters will take precedence.
- * You can also turn off any mete data processing if you want to use parameter names
- * that do not match what is declared during the stored procedure compilation.
+ * These currently include Derby, MySQL, Microsoft SQL Server, Oracle, DB2, 
+ * Sybase and PostgreSQL. For any other databases you are required to declare all
+ * parameters explicitly. You can of course declare all parameters explicitly even
+ * if the database provides the necessary meta data. In that case your declared
+ * parameters will take precedence. You can also turn off any mete data processing
+ * if you want to use parameter names that do not match what is declared during
+ * the stored procedure compilation.
  *
  * <p>The actual insert is being handled using Spring's
  * {@link org.springframework.jdbc.core.JdbcTemplate}.
