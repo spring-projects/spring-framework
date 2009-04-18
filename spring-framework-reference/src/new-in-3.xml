@@ -312,35 +312,34 @@ public class RewardsTestDatabase {
           </itemizedlist></para>
 
         <para>Here is an example of a Java class providing basic configuration
-        using the new JavaConfig features: <programlisting language="java">@Configuration 
-public class AppConfig{ 
-    @Value("#{jdbcProperties.url}") String jdbcUrl; 
-    @Value("#{jdbcProperties.username}") String username; 
-    @Value("#{jdbcProperties.password}") String password; 
+        using the new JavaConfig features: <programlisting language="java">@Configuration
+public class AppConfig{
+    private @Value("#{jdbcProperties.url}") String jdbcUrl;
+    private @Value("#{jdbcProperties.username}") String username;
+    private @Value("#{jdbcProperties.password}") String password;
 
-    @Bean 
-    public FooServicefooService() { 
-        return new FooServiceImpl(fooRepository()); 
+    @Bean
+    public FooService fooService() {
+        return new FooServiceImpl(fooRepository());
     }
 
-    @Bean 
-    public FooRepositoryfooRepository() { 
-        return new HibernateFooRepository(sessionFactory()); 
+    @Bean
+    public FooRepository fooRepository() {
+        return new HibernateFooRepository(sessionFactory());
     }
 
-    @Bean 
-    public SessionFactorysessionFactory() { 
-        // wire up a session factory using 
-        // AnnotationSessionFactoryBean 
-        asFactoryBean.setDataSource(dataSource()); 
-        return (SessionFactory) asFactoryBean.getObject(); 
-    } 
+    @Bean
+    public SessionFactory sessionFactory() {
+        // wire up a session factory using
+        // AnnotationSessionFactoryBean
+        asFactoryBean.setDataSource(dataSource());
+        return (SessionFactory) asFactoryBean.getObject();
+    }
 
-    @Bean 
-    public DataSourcedataSource() { 
-        return new DriverManagerDataSource(jdbcUrl, 
-        username, password); 
-    } 
+    @Bean
+    public DataSource dataSource() { 
+        return new DriverManagerDataSource(jdbcUrl, username, password);
+    }
 }
 </programlisting> To get this to work you need to add the following component
         scanning entry in your minimal application context XML file.
