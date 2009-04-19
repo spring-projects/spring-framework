@@ -25,7 +25,7 @@ Import-Template:
  org.hibernate.context;version="[3.2.6.ga, 4.0.0)";resolution:=optional,
  org.hibernate.criterion;version="[3.2.6.ga, 4.0.0)";resolution:=optional,
  org.hibernate.dialect;version="[3.2.6.ga, 4.0.0)";resolution:=optional,
- org.hibernate.ejb;version="[4.0.0.ga, 3.4.0)";resolution:=optional,
+ org.hibernate.ejb;version="[3.3.0.ga, 4.0.0)";resolution:=optional,
  org.hibernate.engine;version="[3.2.6.ga, 4.0.0)";resolution:=optional,
  org.hibernate.event.*;version="[3.2.6.ga, 4.0.0)";resolution:=optional,
  org.hibernate.exception;version="[3.2.6.ga, 4.0.0)";resolution:=optional,
