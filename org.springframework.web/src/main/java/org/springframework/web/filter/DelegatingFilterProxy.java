@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -203,7 +202,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	/**
 	 * Initialize the Filter delegate, defined as bean the given Spring
 	 * application context.
-	 * <p>Default implementation fetches the bean from the application context
+	 * <p>The default implementation fetches the bean from the application context
 	 * and calls the standard <code>Filter.init</code> method on it, passing
 	 * in the FilterConfig of this Filter proxy.
 	 * @param wac the root application context
@@ -215,7 +214,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
 	 */
 	protected Filter initDelegate(WebApplicationContext wac) throws ServletException {
-		Filter delegate = (Filter) wac.getBean(getTargetBeanName(), Filter.class);
+		Filter delegate = wac.getBean(getTargetBeanName(), Filter.class);
 		if (isTargetFilterLifecycle()) {
 			delegate.init(getFilterConfig());
 		}
