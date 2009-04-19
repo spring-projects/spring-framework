@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.support;
 
 import java.util.Locale;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -79,10 +78,7 @@ public abstract class RequestContextUtils {
 			if (servletContext == null) {
 				throw new IllegalStateException("No WebApplicationContext found: not in a DispatcherServlet request?");
 			}
-			webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-			if (webApplicationContext == null) {
-				throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
-			}
+			webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 		}
 		return webApplicationContext;
 	}
