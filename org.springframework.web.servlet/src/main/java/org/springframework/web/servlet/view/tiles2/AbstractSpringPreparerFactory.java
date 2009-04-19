@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.view.tiles2;
 
-import javax.servlet.ServletRequest;
-
 import org.apache.tiles.TilesException;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.PreparerFactory;
 import org.apache.tiles.preparer.ViewPreparer;
-import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
+import org.apache.tiles.servlet.context.ServletTilesRequestContext;
 
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * Abstract implementation of the Tiles2 {@link org.apache.tiles.preparer.PreparerFactory}
@@ -41,20 +40,24 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public abstract class AbstractSpringPreparerFactory implements PreparerFactory {
 
 	public ViewPreparer getPreparer(String name, TilesRequestContext context) throws TilesException {
-		ServletRequest servletRequest = null;
-		if (context.getRequest() instanceof ServletRequest) {
-			servletRequest = (ServletRequest) context.getRequest();
+		WebApplicationContext webApplicationContext = (WebApplicationContext) context.getRequestScope().get(
+				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		if (webApplicationContext == null) {
+			/* as of Tiles 2.1:
+			webApplicationContext = (WebApplicationContext) context.getApplicationContext().getApplicationScope().get(
+					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+			if (webApplicationContext == null) {
+				throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+			}
+			*/
+			if (!(context instanceof ServletTilesRequestContext)) {
+				throw new IllegalStateException(
+						 getClass().getSimpleName() + " requires a ServletTilesRequestContext to operate on");
+			}
+			ServletTilesRequestContext servletRequestContext = (ServletTilesRequestContext) context;
+			webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(
+					servletRequestContext.getServletContext());
 		}
-		ServletTilesApplicationContext tilesApplicationContext = null;
-		if (context instanceof ServletTilesApplicationContext) {
-			tilesApplicationContext = (ServletTilesApplicationContext) context;
-		}
-		if (servletRequest == null && tilesApplicationContext == null) {
-			throw new IllegalStateException("SpringBeanPreparerFactory requires either a " +
-					"ServletRequest or a ServletTilesApplicationContext to operate on");
-		}
-		WebApplicationContext webApplicationContext = RequestContextUtils.getWebApplicationContext(
-				servletRequest, tilesApplicationContext.getServletContext());
 		return getPreparer(name, webApplicationContext);
 	}
 
