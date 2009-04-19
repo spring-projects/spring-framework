@@ -13,42 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.context.annotation.AsmUtils.*;
-import static org.springframework.context.annotation.ScopedProxyMode.*;
-import static org.springframework.context.annotation.StandardScopes.*;
+package org.springframework.context.annotation;
 
 import java.lang.reflect.Modifier;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import static org.springframework.context.annotation.ConfigurationClassReaderUtils.*;
+import static org.springframework.context.annotation.ScopedProxyMode.*;
+import static org.springframework.context.annotation.StandardScopes.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 
-
 /**
- * Unit tests for {@link BeanMethod}.
- *
  * @author Chris Beams
  */
 public class BeanMethodTests {
 	
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 	private String beanName = "foo";
-	private Bean beanAnno = createMutableAnnotation(Bean.class, ClassUtils.getDefaultClassLoader());
-	private ModelClass returnType = new ModelClass("FooType");
+	private Bean beanAnno = (Bean) createMutableAnnotation(Bean.class, ClassUtils.getDefaultClassLoader());
+	private ConfigurationClassMethod.ReturnType returnType = new ConfigurationClassMethod.ReturnType("FooType");
 	private ConfigurationClass declaringClass = new ConfigurationClass();
 	{ declaringClass.setName("test.Config"); }
 
 	@Test
 	public void testWellFormedMethod() {
-		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno);
+		ConfigurationClassMethod beanMethod = new ConfigurationClassMethod(beanName, 0, returnType, beanAnno);
 
 		assertThat(beanMethod.getName(), sameInstance(beanName));
 		assertThat(beanMethod.getModifiers(), equalTo(0));
@@ -84,7 +82,7 @@ public class BeanMethodTests {
 
 	@Test
 	public void finalMethodsAreIllegal() {
-		BeanMethod beanMethod = new BeanMethod(beanName, Modifier.FINAL, returnType, beanAnno);
+		ConfigurationClassMethod beanMethod = new ConfigurationClassMethod(beanName, Modifier.FINAL, returnType, beanAnno);
 		beanMethod.setDeclaringClass(declaringClass);
 		try {
 			beanMethod.validate(problemReporter);
@@ -96,7 +94,7 @@ public class BeanMethodTests {
 
 	@Test
 	public void privateMethodsAreIllegal() {
-		BeanMethod beanMethod = new BeanMethod(beanName, Modifier.PRIVATE, returnType, beanAnno);
+		ConfigurationClassMethod beanMethod = new ConfigurationClassMethod(beanName, Modifier.PRIVATE, returnType, beanAnno);
 		beanMethod.setDeclaringClass(declaringClass);
 		try {
 			beanMethod.validate(problemReporter);
@@ -107,56 +105,17 @@ public class BeanMethodTests {
 	}
 
 	@Test
-	public void singletonInterfaceScopedProxiesAreIllegal() {
-		Scope scope = SingletonInterfaceProxy.class.getAnnotation(Scope.class);
-		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno, scope);
-		beanMethod.setDeclaringClass(declaringClass);
-		try {
-			beanMethod.validate(problemReporter);
-			fail("should have failed due to singleton with scoped proxy");
-		} catch (Exception ex) {
-			assertTrue(ex.getMessage().contains("cannot be created for singleton/prototype beans"));
-		}
-	}
-
-	@Test
-	public void singletonTargetClassScopedProxiesAreIllegal() {
-		Scope scope = SingletonTargetClassProxy.class.getAnnotation(Scope.class);
-		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno, scope);
-		beanMethod.setDeclaringClass(declaringClass);
-		try {
-			beanMethod.validate(problemReporter);
-			fail("should have failed due to singleton with scoped proxy");
-		} catch (Exception ex) {
-			assertTrue(ex.getMessage().contains("cannot be created for singleton/prototype beans"));
-		}
-	}
-
-	@Test
 	public void singletonsSansProxyAreLegal() {
 		Scope scope = SingletonNoProxy.class.getAnnotation(Scope.class);
-		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno, scope);
+		ConfigurationClassMethod beanMethod = new ConfigurationClassMethod(beanName, 0, returnType, beanAnno, scope);
 		beanMethod.setDeclaringClass(declaringClass);
 		beanMethod.validate(problemReporter); // should validate without problems - it's legal
 	}
 
 	@Test
-	public void prototypeInterfaceScopedProxiesAreIllegal() {
-		Scope scope = PrototypeInterfaceProxy.class.getAnnotation(Scope.class);
-		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno, scope);
-		beanMethod.setDeclaringClass(declaringClass);
-		try {
-			beanMethod.validate(problemReporter);
-			fail("should have failed due to prototype with scoped proxy");
-		} catch (Exception ex) {
-			assertTrue(ex.getMessage().contains("cannot be created for singleton/prototype beans"));
-		}
-	}
-
-	@Test
 	public void sessionInterfaceScopedProxiesAreLegal() {
 		Scope scope = SessionInterfaceProxy.class.getAnnotation(Scope.class);
-		BeanMethod beanMethod = new BeanMethod(beanName, 0, returnType, beanAnno, scope);
+		ConfigurationClassMethod beanMethod = new ConfigurationClassMethod(beanName, 0, returnType, beanAnno, scope);
 		beanMethod.setDeclaringClass(declaringClass);
 		beanMethod.validate(problemReporter); // should validate without problems - it's legal
 	}

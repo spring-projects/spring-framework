@@ -16,24 +16,26 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Annotation;
 
 /**
  * Interface used when dynamically creating mutable instances of annotations associated
  * with {@link Configuration} class processing. This functionality is necessary given
  * that parsing of Configuration classes is done with ASM. Annotation metadata (including
- * attributes) is parsed from the classfiles, and instances of those annotations are
+ * attributes) is parsed from the class files, and instances of those annotations are
  * then created using this interface and its associated utilities. The annotation
- * instances are attached to the {@link ConfigurationModel} objects at runtime, namely
- * {@link BeanMethod}. This approach is better than the alternative of creating fine-grained
- * model representations of all annotations and attributes. It is better to simply attach
- * annotation instances and read them as needed.
- * 
+ * instances are attached to the configuration model objects at runtime, namely
+ * {@link ConfigurationClassMethod}. This approach is better than the alternative of
+ * creating fine-grained model representations of all annotations and attributes.
+ * It is better to simply attach annotation instances and read them as needed.
+ *
  * @author Chris Beams
- * @see MutableAnnotationVisitor
- * @see MutableAnnotationInvocationHandler
- * @see AsmUtils#createMutableAnnotation
+ * @author Juergen Hoeller
+ * @since 3.0
+ * @see ConfigurationClassAnnotationVisitor
+ * @see ConfigurationClassReaderUtils#createMutableAnnotation
  */
-interface MutableAnnotation {
+interface ConfigurationClassAnnotation extends Annotation {
 
 	void setAttributeValue(String attribName, Object attribValue);
 

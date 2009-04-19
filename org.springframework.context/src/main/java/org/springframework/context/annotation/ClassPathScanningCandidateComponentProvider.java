@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,23 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
-
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.AutowireCandidateQualifier;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -75,13 +65,8 @@ import org.springframework.util.SystemPropertyUtils;
  */
 public class ClassPathScanningCandidateComponentProvider implements ResourceLoaderAware {
 
-	protected static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
-	protected static final String QUALIFIER_CLASS_NAME = "org.springframework.beans.factory.annotation.Qualifier";
-	
-	protected static final String SCOPE_CLASS_NAME = "org.springframework.context.annotation.Scope";
-	
-	protected static final String SCOPEDPROXY_CLASS_NAME = "org.springframework.beans.factory.annotation.ScopedProxy";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -94,8 +79,6 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
 	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-
-	private int factoryBeanCount = 0;
 
 
 	/**
@@ -199,33 +182,38 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
-			for (int i = 0; i < resources.length; i++) {
-				Resource resource = resources[i];
+			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
 				}
 				if (resource.isReadable()) {
-					MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
-					if (isCandidateComponent(metadataReader)) {
-						ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
-						sbd.setResource(resource);
-						sbd.setSource(resource);
-						if (isCandidateComponent(sbd)) {
-							if (debugEnabled) {
-								logger.debug("Identified candidate component class: " + resource);
+					try {
+						MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+						if (isCandidateComponent(metadataReader)) {
+							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+							sbd.setResource(resource);
+							sbd.setSource(resource);
+							if (isCandidateComponent(sbd)) {
+								if (debugEnabled) {
+									logger.debug("Identified candidate component class: " + resource);
+								}
+								candidates.add(sbd);
 							}
-							candidates.add(sbd);
+							else {
+								if (debugEnabled) {
+									logger.debug("Ignored because not a concrete top-level class: " + resource);
+								}
+							}
 						}
 						else {
-							if (debugEnabled) {
-								logger.debug("Ignored because not a concrete top-level class: " + resource);
+							if (traceEnabled) {
+								logger.trace("Ignored because not matching any filter: " + resource);
 							}
 						}
 					}
-					else {
-						if (traceEnabled) {
-							logger.trace("Ignored because not matching any filter: " + resource);
-						}
+					catch (Throwable ex) {
+						throw new BeanDefinitionStoreException(
+								"Failed to read candidate component class: " + resource, ex);
 					}
 				}
 				else {
@@ -239,116 +227,6 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
 		}
 		return candidates;
-	}
-	
-	public Set<BeanDefinition> findCandidateFactoryMethods(final BeanDefinitionHolder beanDefinitionHolder) {
-		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
-		AbstractBeanDefinition containingBeanDef = (AbstractBeanDefinition)beanDefinitionHolder.getBeanDefinition();
-		Resource resource = containingBeanDef.getResource();
-		boolean debugEnabled = logger.isDebugEnabled();
-		boolean traceEnabled = logger.isTraceEnabled();
-		
-		try {
-			if (resource.isReadable()) {
-				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
-				Set<MethodMetadata> factoryMethodMetadataSet = metadataReader.getAnnotationMetadata().getAnnotatedMethods("org.springframework.beans.factory.annotation.FactoryMethod");
-				for (MethodMetadata methodMetadata : factoryMethodMetadataSet) {					
-					if (isCandidateFactoryMethod(methodMetadata)) {
-						ScannedGenericBeanDefinition factoryBeanDef = new ScannedGenericBeanDefinition(metadataReader);
-
-						if (!methodMetadata.isStatic())	{
-							factoryBeanDef.setFactoryBeanName(beanDefinitionHolder.getBeanName());
-						}						
-						factoryBeanDef.setFactoryMethodName(methodMetadata.getMethodName());	
-						
-						addQualifierToFactoryMethodBeanDefinition(methodMetadata, factoryBeanDef);						
-						addScopeToFactoryMethodBeanDefinition(containingBeanDef, methodMetadata, factoryBeanDef);
-						
-						factoryBeanDef.setResource(containingBeanDef.getResource());
-						factoryBeanDef.setSource(containingBeanDef.getSource());
-						
-						if (debugEnabled) {
-							logger.debug("Identified candidate factory method in class: " + resource);
-						}
-						candidates.add(factoryBeanDef);
-												
-						RootBeanDefinition scopedFactoryBeanDef = null;
-						if (methodMetadata.hasAnnotation(SCOPEDPROXY_CLASS_NAME))	{
-							//TODO validate that @ScopedProxy isn't applied to singleton/prototype beans.
-							Map<String, Object> attributes = methodMetadata.getAnnotationAttributes(SCOPEDPROXY_CLASS_NAME);
-							scopedFactoryBeanDef = new RootBeanDefinition(ScopedProxyFactoryBean.class);
-							String t= scopedFactoryBeanDef.getBeanClassName();
-							String targetBeanName = createFactoryBeanName(beanDefinitionHolder.getBeanName(), factoryBeanDef.getFactoryMethodName());
-							scopedFactoryBeanDef.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
-							
-							//TODO handle cglib options
-							//  scopedFactoryBeanDef.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
-							scopedFactoryBeanDef.setAutowireCandidate(false);
-							scopedFactoryBeanDef.setResource(containingBeanDef.getResource());
-							scopedFactoryBeanDef.setSource(containingBeanDef.getSource());
-							
-							candidates.add(scopedFactoryBeanDef);
-							
-						}
-						
-
-
-					}
-					else {
-						if (traceEnabled) {
-							logger.trace("Ignored because not matching any filter: " + resource);
-						}
-					}
-				}
-				
-			}
-		} catch (IOException ex) {
-			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
-		}
-			
-		return candidates;
-	}
-
-
-	private void addScopeToFactoryMethodBeanDefinition(
-			AbstractBeanDefinition containingBeanDefinition,
-			MethodMetadata factoryMethodMetadata,
-			ScannedGenericBeanDefinition factoryBeanDefinition) {
-		if (factoryMethodMetadata.hasAnnotation(SCOPE_CLASS_NAME))	{
-			Map<String, Object> attributes = factoryMethodMetadata.getAnnotationAttributes(SCOPE_CLASS_NAME);
-			factoryBeanDefinition.setScope(attributes.get("value").toString());
-		} else {
-			factoryBeanDefinition.setScope(containingBeanDefinition.getScope());
-		}
-	}
-
-
-	protected void addQualifierToFactoryMethodBeanDefinition(MethodMetadata methodMetadata,
-			ScannedGenericBeanDefinition beanDef) {
-		//Add qualifiers to bean definition					
-		if (methodMetadata.hasAnnotation(QUALIFIER_CLASS_NAME))
-		{
-			Map<String, Object> attributes = methodMetadata.getAnnotationAttributes(QUALIFIER_CLASS_NAME);	
-			beanDef.addQualifier(new AutowireCandidateQualifier(Qualifier.class, attributes.get("value")));
-		}
-		
-		if (methodMetadata.hasMetaAnnotation(QUALIFIER_CLASS_NAME))
-		{
-			//Need the attribute that has a qualifier meta-annotation.
-			Set<String> annotationTypes  = methodMetadata.getAnnotationTypesWithMetaAnnotation(QUALIFIER_CLASS_NAME);							
-			if (annotationTypes.size() == 1)
-			{
-				String annotationType = annotationTypes.iterator().next();
-				Map<String, Object> attributes = methodMetadata.getAnnotationAttributes(annotationType);	
-				beanDef.addQualifier(new AutowireCandidateQualifier(annotationType, attributes.get("value")));													
-			}
-		}
-	}
-		
-	protected boolean isCandidateFactoryMethod(MethodMetadata methodMetadata) {
-		
-		//TODO decide if we can support generic wildcard return types, parameter-less method and put in appropriate checks		
-		return true;
 	}
 
 
@@ -393,13 +271,6 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	 */
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
 		return (beanDefinition.getMetadata().isConcrete() && beanDefinition.getMetadata().isIndependent());
-	}
-
-
-	protected String createFactoryBeanName(String configurationComponentBeanName, String factoryMethodName) {
-		//TODO consider adding hex string and passing in definition object.
-		String beanName = configurationComponentBeanName + "$" + factoryMethodName;
-		return beanName;
 	}
 
 }

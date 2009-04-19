@@ -17,6 +17,7 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -59,23 +61,18 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	}
 
 
-
 	@Override
-	public MethodVisitor visitMethod(int access, String name, String desc,
-			String signature, String[] exceptions) {
+	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		MethodMetadataReadingVisitor md = new MethodMetadataReadingVisitor(classLoader, name, access);
 		methodMetadataSet.add(md);
 		return md;
 	}
 
-
-
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
-		return new EmptyVisitor() {
-			@Override
+		return new AnnotationVisitor() {
 			public void visit(String name, Object value) {
 				// Explicitly defined annotation attribute value.
 				Object valueToUse = value;
@@ -89,7 +86,6 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 				}
 				attributes.put(name, valueToUse);
 			}
-			@Override
 			public void visitEnum(String name, String desc, String value) {
 				Object valueToUse = value;
 				try {
@@ -104,7 +100,36 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 				}
 				attributes.put(name, valueToUse);
 			}
-			@Override
+			public AnnotationVisitor visitAnnotation(String name, String desc) {
+				return new EmptyVisitor();
+			}
+			public AnnotationVisitor visitArray(final String attrName) {
+				return new AnnotationVisitor() {
+					public void visit(String name, Object value) {
+						Object newValue = value;
+						Object existingValue = attributes.get(attrName);
+						if (existingValue != null) {
+							newValue = ObjectUtils.addObjectToArray((Object[]) existingValue, newValue);
+						}
+						else {
+							Object[] newArray = (Object[]) Array.newInstance(newValue.getClass(), 1);
+							newArray[0] = newValue;
+							newValue = newArray;
+						}
+						attributes.put(attrName, newValue);
+					}
+					public void visitEnum(String name, String desc, String value) {
+					}
+					public AnnotationVisitor visitAnnotation(String name, String desc) {
+						return new EmptyVisitor();
+					}
+					public AnnotationVisitor visitArray(String name) {
+						return new EmptyVisitor();
+					}
+					public void visitEnd() {
+					}
+				};
+			}
 			public void visitEnd() {
 				try {
 					Class<?> annotationClass = classLoader.loadClass(className);

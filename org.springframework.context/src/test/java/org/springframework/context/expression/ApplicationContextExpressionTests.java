@@ -209,7 +209,7 @@ public class ApplicationContextExpressionTests {
 		@Value("${code} #{systemProperties.country}")
 		public String country;
 
-		@Qualifier("original")
+		@Autowired @Qualifier("original")
 		public TestBean tb;
 	}
 
@@ -287,7 +287,7 @@ public class ApplicationContextExpressionTests {
 			this.country = country;
 		}
 
-		@Qualifier("original")
+		@Autowired @Qualifier("original")
 		public void setTb(TestBean tb) {
 			this.tb = tb;
 		}

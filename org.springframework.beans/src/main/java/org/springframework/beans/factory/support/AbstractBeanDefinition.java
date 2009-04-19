@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -83,7 +83,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Constant that indicates determining an appropriate autowire strategy
 	 * through introspection of the bean class.
 	 * @see #setAutowireMode
+	 * @deprecated as of Spring 3.0: If you are using mixed autowiring strategies,
+	 * use annotation-based autowiring for clearer demarcation of autowiring needs.
 	 */
+	@Deprecated
 	public static final int AUTOWIRE_AUTODETECT = AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
 
 
@@ -134,10 +137,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean autowireCandidate = true;
 
+	private boolean primary = false;
+
 	private final Map<String, AutowireCandidateQualifier> qualifiers =
 			new LinkedHashMap<String, AutowireCandidateQualifier>();
-
-	private boolean primary = false;
 
 	private ConstructorArgumentValues constructorArgumentValues;
 
@@ -317,8 +320,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public void applyDefaults(BeanDefinitionDefaults defaults) {
 		setLazyInit(defaults.isLazyInit());
-		setDependencyCheck(defaults.getDependencyCheck());
 		setAutowireMode(defaults.getAutowireMode());
+		setDependencyCheck(defaults.getDependencyCheck());
 		setInitMethodName(defaults.getInitMethodName());
 		setEnforceInitMethod(false);
 		setDestroyMethodName(defaults.getDestroyMethodName());
@@ -336,7 +339,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify the class for this bean.
 	 */
-	public void setBeanClass(Class beanClass) {
+	public void setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
 
@@ -346,7 +349,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
-	public Class getBeanClass() throws IllegalStateException {
+	public Class<?> getBeanClass() throws IllegalStateException {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject == null) {
 			throw new IllegalStateException("No bean class specified on bean definition");
@@ -556,7 +559,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Set the names of the beans that this bean depends on being initialized.
-	 * The bean factory will guarantee that these beans get initialized before.
+	 * The bean factory will guarantee that these beans get initialized first.
 	 * <p>Note that dependencies are normally expressed through bean properties or
 	 * constructor arguments. This property should just be necessary for other kinds
 	 * of dependencies like statics (*ugh*) or database preparation on startup.
@@ -584,6 +587,24 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public boolean isAutowireCandidate() {
 		return this.autowireCandidate;
+	}
+
+	/**
+	 * Set whether this bean is a primary autowire candidate.
+	 * If this value is true for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
+	}
+
+	/**
+	 * Return whether this bean is a primary autowire candidate.
+	 * If this value is true for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	public boolean isPrimary() {
+		return this.primary;
 	}
 
 	/**
@@ -624,24 +645,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	protected void copyQualifiersFrom(AbstractBeanDefinition source) {
 		Assert.notNull(source, "Source must not be null");
 		this.qualifiers.putAll(source.qualifiers);
-	}
-
-	/**
-	 * Set whether this bean is a primary autowire candidate.
-	 * If this value is true for exactly one bean among multiple
-	 * matching candidates, it will serve as a tie-breaker.
-	 */
-	public void setPrimary(boolean primary) {
-		this.primary = primary;
-	}
-
-	/**
-	 * Return whether this bean is a primary autowire candidate.
-	 * If this value is true for exactly one bean among multiple
-	 * matching candidates, it will serve as a tie-breaker.
-	 */
-	public boolean isPrimary() {
-		return this.primary;
 	}
 
 

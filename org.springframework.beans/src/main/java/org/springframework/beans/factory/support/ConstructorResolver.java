@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -45,6 +46,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class for resolving constructors and factory methods.
@@ -284,6 +286,10 @@ class ConstructorResolver {
 		}
 		else {
 			// It's a static factory method on the bean class.
+			if (!mbd.hasBeanClass()) {
+				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+						"bean definition declares neither a bean class nor a factory-bean reference");
+			}
 			factoryBean = null;
 			factoryClass = mbd.getBeanClass();
 			isStatic = true;
@@ -309,7 +315,18 @@ class ConstructorResolver {
 		if (factoryMethodToUse == null) {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
-			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+			factoryClass = ClassUtils.getUserClass(factoryClass);
+			Method[] rawCandidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+			List<Method> candidateSet = new ArrayList<Method>();
+			for (Method candidate : rawCandidates) {
+				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
+						candidate.getName().equals(mbd.getFactoryMethodName())) {
+					candidateSet.add(candidate);
+				}
+			}
+			Method[] candidates = candidateSet.toArray(new Method[candidateSet.size()]);
+			AutowireUtils.sortFactoryMethods(candidates);
+
 			boolean autowiring = (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			ConstructorArgumentValues resolvedValues = null;
@@ -332,10 +349,7 @@ class ConstructorResolver {
 				Method candidate = candidates[i];
 				Class[] paramTypes = candidate.getParameterTypes();
 
-				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
-						candidate.getName().equals(mbd.getFactoryMethodName()) &&
-						paramTypes.length >= minNrOfArgs) {
-
+				if (paramTypes.length >= minNrOfArgs) {
 					ArgumentsHolder args;
 
 					if (resolvedValues != null) {

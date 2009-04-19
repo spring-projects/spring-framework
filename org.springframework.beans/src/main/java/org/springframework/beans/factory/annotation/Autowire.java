@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public enum Autowire {
-
-	/**
-	 * Constant that indicates that autowiring information was not specified.
-	 * In some cases it may be necessary to specify autowiring status,
-	 * but merely confirm that this should be inherited from an enclosing
-	 * container definition scope.
-	 */
-	INHERITED(-1),
 
 	/**
 	 * Constant that indicates no autowiring at all.

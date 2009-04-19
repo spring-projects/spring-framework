@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.util.Assert;
 
 /**
  * Describes scope characteristics for a Spring-managed bean including the scope
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * scoped-proxies.
  *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.5
  * @see ScopeMetadataResolver
  * @see ScopedProxyMode
@@ -41,6 +43,7 @@ public class ScopeMetadata {
 	 * Set the name of the scope.
 	 */
 	public void setScopeName(String scopeName) {
+		Assert.notNull(scopeName, "'scopeName' must not be null");
 		this.scopeName = scopeName;
 	}
 
@@ -55,6 +58,7 @@ public class ScopeMetadata {
 	 * Set the proxy-mode to be applied to the scoped instance.
 	 */
 	public void setScopedProxyMode(ScopedProxyMode scopedProxyMode) {
+		Assert.notNull(scopedProxyMode, "'scopedProxyMode' must not be null");
 		this.scopedProxyMode = scopedProxyMode;
 	}
 

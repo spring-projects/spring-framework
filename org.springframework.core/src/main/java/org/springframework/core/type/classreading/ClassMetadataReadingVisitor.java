@@ -16,7 +16,11 @@
 
 package org.springframework.core.type.classreading;
 
-import org.springframework.asm.ClassAdapter;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.Attribute;
+import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.FieldVisitor;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.ClassMetadata;
@@ -33,7 +37,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-class ClassMetadataReadingVisitor extends ClassAdapter implements ClassMetadata {
+class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	private String className;
 
@@ -49,12 +53,7 @@ class ClassMetadataReadingVisitor extends ClassAdapter implements ClassMetadata 
 
 	private String[] interfaces;
 	
-	public ClassMetadataReadingVisitor()
-	{
-		super(new EmptyVisitor());
-	}
-	
-	@Override
+
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
@@ -68,17 +67,42 @@ class ClassMetadataReadingVisitor extends ClassAdapter implements ClassMetadata 
 		}
 	}
 
-	@Override
 	public void visitOuterClass(String owner, String name, String desc) {
 		this.enclosingClassName = ClassUtils.convertResourcePathToClassName(owner);
 	}
 
-	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
 		if (outerName != null && this.className.equals(ClassUtils.convertResourcePathToClassName(name))) {
 			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerName);
 			this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
 		}
+	}
+
+	public void visitSource(String source, String debug) {
+		// no-op
+	}
+
+	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+		// no-op
+		return new EmptyVisitor();
+	}
+
+	public void visitAttribute(Attribute attr) {
+		// no-op
+	}
+
+	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+		// no-op
+		return new EmptyVisitor();
+	}
+
+	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+		// no-op
+		return new EmptyVisitor();
+	}
+
+	public void visitEnd() {
+		// no-op
 	}
 
 

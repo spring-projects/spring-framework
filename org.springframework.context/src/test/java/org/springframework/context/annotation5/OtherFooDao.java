@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package example.scannable;
+package org.springframework.context.annotation5;
 
-import org.springframework.stereotype.Component;
+import example.scannable.FooDao;
+
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
 
 /**
- * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-@Component("myNamedComponent") @Lazy
-public class NamedComponent {
+@Repository
+@Primary @Lazy
+public class OtherFooDao implements FooDao {
+
+	public String findFoo(int id) {
+		return "other";
+	}
 
 }

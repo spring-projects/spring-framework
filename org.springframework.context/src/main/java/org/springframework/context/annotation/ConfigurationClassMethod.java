@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static java.lang.String.*;
-import static org.springframework.context.annotation.StandardScopes.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -28,34 +25,42 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.util.Assert;
-
+import org.springframework.util.ClassUtils;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * Represents a {@link Configuration} class method marked with the {@link Bean} annotation.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
+ * @since 3.0
  * @see ConfigurationClass
- * @see ConfigurationModel
  * @see ConfigurationClassParser
- * @see ConfigurationModelBeanDefinitionReader
+ * @see ConfigurationClassBeanDefinitionReader
  */
-final class BeanMethod implements BeanMetadataElement {
+final class ConfigurationClassMethod implements BeanMetadataElement {
 
 	private final String name;
+
 	private final int modifiers;
-	private final ModelClass returnType;
+
+	private final ReturnType returnType;
+
 	private final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
 
 	private transient ConfigurationClass declaringClass;
+
 	private transient Object source;
 
-	public BeanMethod(String name, int modifiers, ModelClass returnType, Annotation... annotations) {
+
+	public ConfigurationClassMethod(String name, int modifiers, ReturnType returnType, Annotation... annotations) {
 		Assert.hasText(name);
 		this.name = name;
 
 		Assert.notNull(annotations);
-		for (Annotation annotation : annotations)
+		for (Annotation annotation : annotations) {
 			this.annotations.add(annotation);
+		}
 
 		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative: " + modifiers);
 		this.modifiers = modifiers;
@@ -68,7 +73,7 @@ final class BeanMethod implements BeanMetadataElement {
 		return name;
 	}
 
-	public ModelClass getReturnType() {
+	public ReturnType getReturnType() {
 		return returnType;
 	}
 
@@ -100,18 +105,17 @@ final class BeanMethod implements BeanMetadataElement {
 	 */
 	public <T extends Annotation> T getRequiredAnnotation(Class<T> annoType) {
 		T anno = getAnnotation(annoType);
-
-		if(anno == null)
+		if (anno == null) {
 			throw new IllegalStateException(
-					format("required annotation %s is not present on %s", annoType.getSimpleName(), this));
-
+					String.format("required annotation %s is not present on %s", annoType.getSimpleName(), this));
+		}
 		return anno;
 	}
 
 	/**
 	 * Set up a bi-directional relationship between this method and its declaring class.
 	 * 
-	 * @see ConfigurationClass#addBeanMethod(BeanMethod)
+	 * @see ConfigurationClass#addMethod(ConfigurationClassMethod)
 	 */
 	public void setDeclaringClass(ConfigurationClass declaringClass) {
 		this.declaringClass = declaringClass;
@@ -130,97 +134,118 @@ final class BeanMethod implements BeanMetadataElement {
 	}
 
 	public Location getLocation() {
-		if (declaringClass == null)
+		if (declaringClass == null) {
 			throw new IllegalStateException(
 					"declaringClass property is null. Call setDeclaringClass() before calling getLocation()");
+		}
 		return new Location(declaringClass.getLocation().getResource(), getSource());
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-
-		if (Modifier.isPrivate(getModifiers()))
+		if (Modifier.isPrivate(getModifiers())) {
 			problemReporter.error(new PrivateMethodError());
-
-		if (Modifier.isFinal(getModifiers()))
+		}
+		if (Modifier.isFinal(getModifiers())) {
 			problemReporter.error(new FinalMethodError());
-		
-		Scope scope = this.getAnnotation(Scope.class);
-		if(scope != null
-			&& scope.proxyMode() != ScopedProxyMode.NO
-			&& (scope.value().equals(SINGLETON) || scope.value().equals(PROTOTYPE)))
-				problemReporter.error(new InvalidScopedProxyDeclarationError(this));
-	}
-
-	@Override
-	public String toString() {
-		String returnTypeName = returnType == null ? "<unknown>" : returnType.getSimpleName();
-		return format("%s: name=%s; returnType=%s; modifiers=%d",
-		              getClass().getSimpleName(), name, returnTypeName, modifiers);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
-		result = prime * result + modifiers;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BeanMethod other = (BeanMethod) obj;
-		if (annotations == null) {
-			if (other.annotations != null)
-				return false;
-		} else if (!annotations.equals(other.annotations))
-			return false;
-		if (modifiers != other.modifiers)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (returnType == null) {
-			if (other.returnType != null)
-				return false;
-		} else if (!returnType.equals(other.returnType))
-			return false;
-		return true;
-	}
-
-	/** {@link Bean} methods must be non-private in order to accommodate CGLIB. */
-	class PrivateMethodError extends Problem {
-		PrivateMethodError() {
-			super(format("Method '%s' may not be private; increase the method's visibility to continue", getName()),
-			      BeanMethod.this.getLocation());
 		}
 	}
 
-	/** {@link Bean} methods must be non-final in order to accommodate CGLIB. */
-	class FinalMethodError extends Problem {
-		FinalMethodError() {
-			super(format("Method '%s' may not be final; remove the final modifier to continue", getName()),
-			      BeanMethod.this.getLocation());
+
+	static class ReturnType implements BeanMetadataElement {
+
+		private String name;
+
+		private boolean isInterface;
+
+		private transient Object source;
+
+
+		public ReturnType(String name) {
+			this.name = name;
+		}
+
+		/**
+		 * Returns the fully-qualified name of this class.
+		 */
+		public String getName() {
+			return name;
+		}
+
+		/**
+		 * Sets the fully-qualified name of this class.
+		 */
+		public void setName(String className) {
+			this.name = className;
+		}
+
+		/**
+		 * Returns the non-qualified name of this class. Given com.acme.Foo, returns 'Foo'.
+		 */
+		public String getSimpleName() {
+			return name == null ? null : ClassUtils.getShortName(name);
+		}
+
+		/**
+		 * Returns whether the class represented by this ModelClass instance is an interface.
+		 */
+		public boolean isInterface() {
+			return isInterface;
+		}
+
+		/**
+		 * Signifies that this class is (true) or is not (false) an interface.
+		 */
+		public void setInterface(boolean isInterface) {
+			this.isInterface = isInterface;
+		}
+
+		/**
+		 * Returns a resource path-formatted representation of the .java file that declares this
+		 * class
+		 */
+		public Object getSource() {
+			return source;
+		}
+
+		/**
+		 * Set the source location for this class. Must be a resource-path formatted string.
+		 *
+		 * @param source resource path to the .java file that declares this class.
+		 */
+		public void setSource(Object source) {
+			this.source = source;
+		}
+
+		public Location getLocation() {
+			if (getName() == null) {
+				throw new IllegalStateException("'name' property is null. Call setName() before calling getLocation()");
+			}
+			return new Location(new ClassPathResource(ClassUtils.convertClassNameToResourcePath(getName())), getSource());
 		}
 	}
 
-	class InvalidScopedProxyDeclarationError extends Problem {
-		InvalidScopedProxyDeclarationError(BeanMethod method) {
-			super(format("Method %s contains an invalid annotation declaration: scoped proxies "
-			           + "cannot be created for singleton/prototype beans", method.getName()),
-			      BeanMethod.this.getLocation());
-		}
 
+	/**
+	 * {@link Bean} methods must be non-private in order to accommodate CGLIB.
+	 */
+	private class PrivateMethodError extends Problem {
+
+		public PrivateMethodError() {
+			super(String.format("Method '%s' must not be private; increase the method's visibility to continue",
+					getName()), ConfigurationClassMethod.this.getLocation());
+		}
+	}
+
+
+	/**
+	 * {@link Bean} methods must be non-final in order to accommodate CGLIB.
+	 */
+	private class FinalMethodError extends Problem {
+
+		public FinalMethodError() {
+			super(String.format("Method '%s' must not be final; remove the final modifier to continue",
+					getName()), ConfigurationClassMethod.this.getLocation());
+		}
 	}
 
 }

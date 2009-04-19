@@ -197,52 +197,37 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
-		for (int i = 0; i < basePackages.length; i++) {
-			Set<BeanDefinition> candidates = findCandidateComponents(basePackages[i]);
+		for (String basePackage : basePackages) {
+			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
-				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				if (candidate instanceof AnnotatedBeanDefinition) {
+					AnnotatedBeanDefinition abd = (AnnotatedBeanDefinition) candidate;
+					if (abd.getMetadata().hasAnnotation(Primary.class.getName())) {
+						abd.setPrimary(true);
+					}
+					if (abd.getMetadata().hasAnnotation(Lazy.class.getName())) {
+						Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
+						abd.setLazyInit(value);
+					}
+					if (abd.getMetadata().hasAnnotation(DependsOn.class.getName())) {
+						String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
+						abd.setDependsOn(value);
+					}
+				}
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 					definitionHolder = applyScope(definitionHolder, scopeMetadata);
 					beanDefinitions.add(definitionHolder);
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}						
 		}
-		
-	
-		postProcessComponentBeanDefinitions(beanDefinitions);
 		return beanDefinitions;
-	}
-
-	protected void postProcessComponentBeanDefinitions(Set<BeanDefinitionHolder> beanDefinitions) {
-		//TODO refactor increment index count as part of naming strategy.
-		Set<BeanDefinitionHolder> factoryBeanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
-		for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitions) {
-			Set<BeanDefinition> candidates = findCandidateFactoryMethods(beanDefinitionHolder);			
-			for (BeanDefinition candidate : candidates ) {	
-				
-
-				BeanDefinitionHolder definitionHolder;
-				if (candidate.getBeanClassName().equals("org.springframework.aop.scope.ScopedProxyFactoryBean")){
-					String scopedFactoryBeanName = "scopedTarget." + candidate.getPropertyValues().getPropertyValue("targetBeanName").getValue();					
-					definitionHolder = new BeanDefinitionHolder(candidate, scopedFactoryBeanName);
-				} else {	
-					String configurationComponentBeanName = beanDefinitionHolder.getBeanName();
-					String factoryMethodName = candidate.getFactoryMethodName();
-					String beanName = createFactoryBeanName(configurationComponentBeanName, factoryMethodName);	
-					definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-				}
-																			
-				factoryBeanDefinitions.add(definitionHolder);
-				registerBeanDefinition(definitionHolder, this.registry);
-			}			
-		}
-		beanDefinitions.addAll(factoryBeanDefinitions);
 	}
 
 	/**
@@ -325,8 +310,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		String scope = scopeMetadata.getScopeName();
 		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
 		definitionHolder.getBeanDefinition().setScope(scope);
-		if (BeanDefinition.SCOPE_SINGLETON.equals(scope) || BeanDefinition.SCOPE_PROTOTYPE.equals(scope) ||
-				scopedProxyMode.equals(ScopedProxyMode.NO)) {
+		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
 			return definitionHolder;
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);

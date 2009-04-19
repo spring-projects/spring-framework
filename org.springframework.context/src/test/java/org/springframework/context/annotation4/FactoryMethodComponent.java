@@ -17,63 +17,52 @@
 package org.springframework.context.annotation4;
 
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.FactoryMethod;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.ScopedProxy;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.BeanAge;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 /**
- * Class used to test the functionality of @FactoryMethod bean definitions declared inside
- * a Spring @Component class.
- *  
+ * Class used to test the functionality of factory method bean definitions
+ * declared inside a Spring component class.
+ *
  * @author Mark Pollack
+ * @author Juergen Hoeller
  */
 @Component
-public class FactoryMethodComponent {
+public final class FactoryMethodComponent {
 
-	private static TestBean staticTestBean = new TestBean("staticInstance",1);
-	
-	@Autowired @Qualifier("public")
-	public TestBean autowiredTestBean;
-	
-	private static int i;
+	private int i;
 
-	@FactoryMethod @Qualifier("static")
-	public static TestBean staticInstance()
-	{
-		return staticTestBean;
-	}
-	
-	public static TestBean nullInstance() 
-	{
+	public static TestBean nullInstance()  {
 		return null;
 	}
-	
-	@FactoryMethod @Qualifier("public")
-	public TestBean getPublicInstance() {
+
+	@Bean @Qualifier("public")
+	public TestBean publicInstance() {
 		return new TestBean("publicInstance");
 	}
 
-	@FactoryMethod @BeanAge(1)
-	protected TestBean getProtectedInstance() {
-		return new TestBean("protectedInstance", 1);
+	@Bean @BeanAge(1)
+	protected TestBean protectedInstance(@Qualifier("public") TestBean spouse, @Value("#{privateInstance.age}") String country) {
+		TestBean tb = new TestBean("protectedInstance", 1);
+		tb.setSpouse(tb);
+		tb.setCountry(country);
+		return tb;
 	}
-	
-	@FactoryMethod @Scope("prototype")
-	private TestBean getPrivateInstance() {
+
+	@Bean @Scope("prototype")
+	private TestBean privateInstance() {
 		return new TestBean("privateInstance", i++);
 	}
-	
-	@FactoryMethod @Scope("request") @ScopedProxy
-	public TestBean requestScopedInstance()
-	{
-		TestBean testBean = new TestBean("requestScopedInstance", 3); 
-		return testBean;
+
+	@Bean @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	public TestBean requestScopedInstance() {
+		return new TestBean("requestScopedInstance", 3);
 	}
-	
-	//TODO method for test that fails if use @ScopedProxy with singleton scope.
-	
+
 }

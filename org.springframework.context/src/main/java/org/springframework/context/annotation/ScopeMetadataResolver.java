@@ -23,7 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * 
  * @author Mark Fisher
  * @since 2.5
- * @see Scope
+ * @see org.springframework.context.annotation.Scope
  */
 public interface ScopeMetadataResolver {
 

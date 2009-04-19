@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * through introspection of the bean class.
 	 * @see #createBean
 	 * @see #autowire
+	 * @deprecated as of Spring 3.0: If you are using mixed autowiring strategies,
+	 * prefer annotation-based autowiring for clearer demarcation of autowiring needs.
 	 */
+	@Deprecated
 	int AUTOWIRE_AUTODETECT = 4;
 
 
@@ -181,7 +184,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_CONSTRUCTOR
-	 * @see #AUTOWIRE_AUTODETECT
 	 */
 	Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 

@@ -524,7 +524,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	@Override
 	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
-		Class beanClass = null;
+		Class beanClass;
 		if (mbd.getFactoryMethodName() != null) {
 			beanClass = getTypeForFactoryMethod(beanName, mbd, typesToMatch);
 		}
@@ -562,7 +562,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #createBean
 	 */
 	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
-		Class factoryClass = null;
+		Class factoryClass;
 		boolean isStatic = true;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
@@ -1203,7 +1203,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		MutablePropertyValues mpvs = null;
-		List<PropertyValue> original = null;
+		List<PropertyValue> original;
 
 		if (pvs instanceof MutablePropertyValues) {
 			mpvs = (MutablePropertyValues) pvs;

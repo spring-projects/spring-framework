@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.beans.factory.annotation.Autowire;
 
 /**
  * Indicates that a method produces a bean to be managed by the Spring container. The
@@ -60,7 +61,7 @@ import java.lang.annotation.Target;
  * @see Configuration
  * @see Lazy
  * @see Primary
- * @see Scope
+ * @see org.springframework.context.annotation.Scope
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -75,6 +76,11 @@ public @interface Bean {
 	String[] name() default {};
 
 	/**
+	 * Are dependencies to be injected via autowiring?
+	 */
+	Autowire autowire() default Autowire.NO;
+
+	/**
 	 * The optional name of a method to call on the bean instance during initialization.
 	 * Not commonly used, given that the method may be called programmatically directly
 	 * within the body of a Bean-annotated method.
@@ -82,25 +88,14 @@ public @interface Bean {
 	String initMethod() default "";
 
 	/**
-	 * The optional name of a method to call on the bean instance during upon closing
-	 * the application context, for example a {@literal close()}
-	 * method on a {@literal DataSource}. The method must have no arguments, but may
-	 * throw any exception.
+	 * The optional name of a method to call on the bean instance during upon closing the
+	 * application context, for example a {@literal close()} method on a {@literal DataSource}.
+	 * The method must have no arguments, but may throw any exception.
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
 	 * factory which is always the case for singletons, but not guaranteed 
      * for any other scope.
 	 * see {@link org.springframework.context.ConfigurableApplicationContext#close()}
 	 */
 	String destroyMethod() default "";
-
-	/**
-	 * Beans on which the current bean depends. Any beans specified are guaranteed to be
-	 * created by the container before this bean. Used infrequently in cases where a bean
-	 * does not explicitly depend on another through properties or constructor arguments,
-	 * but rather depends on the side effects of another bean's initialization.
-	 * <p>Note: This  attribute will not be inherited by child bean definitions, 
-	 * hence it needs to be specified per concrete bean definition.
-	 */
-	String[] dependsOn() default {};
 
 }

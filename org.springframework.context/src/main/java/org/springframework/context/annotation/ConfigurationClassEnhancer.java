@@ -16,60 +16,59 @@
 
 package org.springframework.context.annotation;
 
-import static java.lang.String.*;
-import static org.springframework.context.annotation.AsmUtils.*;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
-import net.sf.cglib.core.DefaultGeneratorStrategy;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.asm.ClassAdapter;
-import org.springframework.asm.ClassReader;
-import org.springframework.asm.ClassWriter;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
+import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
-
 
 /**
  * Enhances {@link Configuration} classes by generating a CGLIB subclass capable of
  * interacting with the Spring container to respect bean semantics.
- * 
- * @see #enhance(String)
- * 
+ *
  * @author Chris Beams
+ * @author Juergen Hoeller
+ * @since 3.0
+ * @see #enhance
  * @see ConfigurationClassPostProcessor
  */
 class ConfigurationClassEnhancer {
 
-	private static final Log log = LogFactory.getLog(ConfigurationClassEnhancer.class);
+	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
-	private final ArrayList<Callback> callbackInstances = new ArrayList<Callback>();
-	private final ArrayList<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
+	private final List<Callback> callbackInstances = new ArrayList<Callback>();
+
+	private final List<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
+
 	private final CallbackFilter callbackFilter;
 
 
 	/**
 	 * Creates a new {@link ConfigurationClassEnhancer} instance.
 	 */
-	public ConfigurationClassEnhancer(DefaultListableBeanFactory beanFactory) {
-		Assert.notNull(beanFactory, "beanFactory must be non-null");
+	public ConfigurationClassEnhancer(ConfigurableBeanFactory beanFactory) {
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
 
 		callbackInstances.add(new BeanMethodInterceptor(beanFactory));
 		callbackInstances.add(NoOp.INSTANCE);
 
-		for (Callback callback : callbackInstances)
+		for (Callback callback : callbackInstances) {
 			callbackTypes.add(callback.getClass());
+		}
 
-		// set up the callback filter to return the index of the BeanMethodInterceptor when
+		// Set up the callback filter to return the index of the BeanMethodInterceptor when
 		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
 		callbackFilter = new CallbackFilter() {
 			public int accept(Method candidateMethod) {
@@ -82,24 +81,18 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Loads the specified class and generates a CGLIB subclass of it equipped with
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
-	 * 
 	 * @return fully-qualified name of the enhanced subclass
 	 */
-	public String enhance(String configClassName) {
-		if (log.isInfoEnabled())
-			log.info("Enhancing " + configClassName);
-
-		Class<?> superclass = loadRequiredClass(configClassName);
-
-		Class<?> subclass = createClass(newEnhancer(superclass), superclass);
-
-		subclass = nestOneClassDeeperIfAspect(superclass, subclass);
-
-		if (log.isInfoEnabled())
-			log.info(format("Successfully enhanced %s; enhanced class name is: %s",
-			                configClassName, subclass.getName()));
-
-		return subclass.getName();
+	public Class enhance(Class configClass) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Enhancing " + configClass.getName());
+		}
+		Class<?> enhancedClass = createClass(newEnhancer(configClass));
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Successfully enhanced %s; enhanced class name is: %s",
+					configClass.getName(), enhancedClass.getName()));
+		}
+		return enhancedClass;
 	}
 
 	/**
@@ -116,7 +109,7 @@ class ConfigurationClassEnhancer {
 		enhancer.setSuperclass(superclass);
 		enhancer.setUseFactory(false);
 		enhancer.setCallbackFilter(callbackFilter);
-		enhancer.setCallbackTypes(callbackTypes.toArray(new Class<?>[] {}));
+		enhancer.setCallbackTypes(callbackTypes.toArray(new Class[callbackTypes.size()]));
 
 		return enhancer;
 	}
@@ -125,53 +118,86 @@ class ConfigurationClassEnhancer {
 	 * Uses enhancer to generate a subclass of superclass, ensuring that
 	 * {@link #callbackInstances} are registered for the new subclass.
 	 */
-	private Class<?> createClass(Enhancer enhancer, Class<?> superclass) {
+	private Class<?> createClass(Enhancer enhancer) {
 		Class<?> subclass = enhancer.createClass();
-
-		Enhancer.registerCallbacks(subclass, callbackInstances.toArray(new Callback[] {}));
-
+		Enhancer.registerCallbacks(subclass, callbackInstances.toArray(new Callback[callbackInstances.size()]));
 		return subclass;
 	}
 
+
 	/**
-	 * Works around a constraint imposed by the AspectJ 5 annotation-style programming
-	 * model. See comments inline for detail.
-	 * 
-	 * @return original subclass instance unless superclass is annnotated with @Aspect, in
-	 *         which case a subclass of the subclass is returned
+	 * Intercepts the invocation of any {@link Bean}-annotated methods in order to ensure proper
+	 * handling of bean semantics such as scoping and AOP proxying.
+	 * @author Chris Beams
+	 * @see Bean
+	 * @see ConfigurationClassEnhancer
 	 */
-	private Class<?> nestOneClassDeeperIfAspect(Class<?> superclass, Class<?> origSubclass) {
-		boolean superclassIsAnAspect = false;
+	private static class BeanMethodInterceptor implements MethodInterceptor {
 
-		// check for @Aspect by name rather than by class literal to avoid
-		// requiring AspectJ as a runtime dependency.
-		for (Annotation anno : superclass.getAnnotations())
-			if (anno.annotationType().getName().equals("org.aspectj.lang.annotation.Aspect"))
-				superclassIsAnAspect = true;
+		private static final Log logger = LogFactory.getLog(BeanMethodInterceptor.class);
 
-		if (!superclassIsAnAspect)
-			return origSubclass;
+		private final ConfigurableBeanFactory beanFactory;
 
-		// the superclass is annotated with AspectJ's @Aspect.
-		// this means that we must create a subclass of the subclass
-		// in order to avoid some guard logic in Spring core that disallows
-		// extending a concrete aspect class.
-		Enhancer enhancer = newEnhancer(origSubclass);
-		enhancer.setStrategy(new DefaultGeneratorStrategy() {
-			@Override
-			protected byte[] transform(byte[] b) throws Exception {
-				ClassWriter writer = new ClassWriter(false);
-				ClassAdapter adapter = new AddAnnotationAdapter(writer, "Lorg/aspectj/lang/annotation/Aspect;");
-				ClassReader reader = new ClassReader(b);
-				reader.accept(adapter, false);
-				return writer.toByteArray();
+		public BeanMethodInterceptor(ConfigurableBeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+
+		/**
+		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
+		 * existence of this bean object.
+		 */
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+			// by default the bean name is the name of the @Bean-annotated method
+			String beanName = method.getName();
+
+			// check to see if the user has explicitly set the bean name
+			Bean bean = method.getAnnotation(Bean.class);
+			if(bean != null && bean.name().length > 0) {
+				beanName = bean.name()[0];
 			}
-		});
 
-		// create a subclass of the original subclass
-		Class<?> newSubclass = createClass(enhancer, origSubclass);
+			// determine whether this bean is a scoped-proxy
+			Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
+			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
+				String scopedBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
+				if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
+					beanName = scopedBeanName;
+				}
+			}
 
-		return newSubclass;
+			// to handle the case of an inter-bean method reference, we must explicitly check the
+			// container for already cached instances
+			if (factoryContainsBean(beanName)) {
+				// we have an already existing cached instance of this bean -> retrieve it
+				Object cachedBean = beanFactory.getBean(beanName);
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Returning cached object [%s] for @Bean method %s.%s",
+							cachedBean, method.getDeclaringClass().getSimpleName(), beanName));
+				}
+				return cachedBean;
+			}
+
+			// actually create and return the bean
+			return proxy.invokeSuper(obj, args);
+		}
+
+		/**
+		 * Check the beanFactory to see whether the bean named <var>beanName</var> already
+		 * exists. Accounts for the fact that the requested bean may be "in creation", i.e.:
+		 * we're in the middle of servicing the initial request for this bean. From JavaConfig's
+		 * perspective, this means that the bean does not actually yet exist, and that it is now
+		 * our job to create it for the first time by executing the logic in the corresponding
+		 * Bean method.
+		 * <p>Said another way, this check repurposes
+		 * {@link ConfigurableBeanFactory#isCurrentlyInCreation(String)} to determine whether
+		 * the container is calling this method or the user is calling this method.
+		 * @param beanName name of bean to check for
+		 * @return true if <var>beanName</var> already exists in the factory
+		 */
+		private boolean factoryContainsBean(String beanName) {
+			return beanFactory.containsBean(beanName) && !beanFactory.isCurrentlyInCreation(beanName);
+		}
+
 	}
-
 }

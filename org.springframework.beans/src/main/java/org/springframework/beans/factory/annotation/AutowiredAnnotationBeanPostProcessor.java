@@ -54,7 +54,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -102,8 +101,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends Annotation>[] autowiredAnnotationTypes =
-			new Class[] {Autowired.class, Qualifier.class, Value.class};
+	private Class<? extends Annotation>[] autowiredAnnotationTypes = new Class[] {Autowired.class, Value.class};
 	
 	private String requiredParameterName = "required";
 	
@@ -317,28 +315,18 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					});
 					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 						public void doWith(Method method) {
-							if (!isFactoryMethod(method)) {
-								Annotation annotation = findAutowiredAnnotation(method);
-								if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-									if (Modifier.isStatic(method.getModifiers())) {
-										throw new IllegalStateException("Autowired annotation is not supported on static methods");
-									}
-									if (method.getParameterTypes().length == 0) {
-										throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
-									}
-									boolean required = determineRequiredStatus(annotation);
-									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-									newMetadata.addInjectedMethod(new AutowiredMethodElement(method, required, pd));
+							Annotation annotation = findAutowiredAnnotation(method);
+							if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+								if (Modifier.isStatic(method.getModifiers())) {
+									throw new IllegalStateException("Autowired annotation is not supported on static methods");
 								}
+								if (method.getParameterTypes().length == 0) {
+									throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
+								}
+								boolean required = determineRequiredStatus(annotation);
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+								newMetadata.addInjectedMethod(new AutowiredMethodElement(method, required, pd));
 							}
-						}
-
-						private boolean isFactoryMethod(Method method) {							
-							if (AnnotationUtils.findAnnotation(method, FactoryMethod.class)!= null) {
-								return true;
-							} else {
-								return false;
-							}							
 						}
 					});
 					metadata = newMetadata;
@@ -429,7 +417,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
 			Field field = (Field) this.member;
 			try {
-				Object value = null;
+				Object value;
 				if (this.cached) {
 					if (this.cachedFieldValue instanceof DependencyDescriptor) {
 						DependencyDescriptor descriptor = (DependencyDescriptor) this.cachedFieldValue;

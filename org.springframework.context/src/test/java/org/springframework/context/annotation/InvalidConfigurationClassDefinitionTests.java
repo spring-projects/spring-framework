@@ -45,9 +45,11 @@ public class InvalidConfigurationClassDefinitionTests {
 		beanFactory.registerBeanDefinition("config", configBeanDef);
 
 		try {
-			new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+			ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+			pp.postProcessBeanFactory(beanFactory);
 			fail("expected exception");
-		} catch (BeanDefinitionParsingException ex) {
+		}
+		catch (BeanDefinitionParsingException ex) {
 			assertTrue(ex.getMessage(), ex.getMessage().contains("Remove the final modifier"));
 		}
 	}
