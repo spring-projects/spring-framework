@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateModel;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateException;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
@@ -79,7 +82,9 @@ public class FreeMarkerMacroTests extends TestCase {
 
 	public void testExposeSpringMacroHelpers() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView() {
-			protected void processTemplate(Template template, Map model, HttpServletResponse response) {
+			@Override
+			protected void processTemplate(Template template, SimpleHash fmModel, HttpServletResponse response) throws TemplateException {
+				Map model = fmModel.toMap();
 				assertTrue(model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
 				RequestContext rc = (RequestContext) model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 				BindStatus status = rc.getBindStatus("tb.name");
@@ -100,7 +105,8 @@ public class FreeMarkerMacroTests extends TestCase {
 		final String helperTool = "wrongType";
 
 		FreeMarkerView fv = new FreeMarkerView() {
-			protected void processTemplate(Template template, Map model, HttpServletResponse response) {
+			@Override
+			protected void processTemplate(Template template, SimpleHash model, HttpServletResponse response) {
 				fail();
 			}
 		};
@@ -155,6 +161,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		view.setUrl("test.ftl");
 		view.setExposeSpringMacroHelpers(false);
 		view.setConfiguration(config);
+		view.setServletContext(new MockServletContext());
 
 		view.render(model, request, response);
 

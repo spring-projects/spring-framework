@@ -34,6 +34,7 @@ import javax.servlet.http.HttpSession;
 
 import freemarker.core.ParseException;
 import freemarker.ext.jsp.TaglibFactory;
+import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.HttpRequestParametersHashModel;
@@ -41,6 +42,7 @@ import freemarker.ext.servlet.HttpSessionHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
@@ -250,7 +252,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * library hash model.
 	 * <p>Can be overridden to customize the behavior, for example to render
 	 * multiple templates into a single view.
-	 * @param model the template model to use for rendering
+	 * @param model the model to use for rendering
 	 * @param request current HTTP request
 	 * @param response current servlet response
 	 * @throws IOException if the template file could not be retrieved
@@ -264,20 +266,34 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected void doRender(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// Expose model to JSP tags (as request attributes).
 		exposeModelAsRequestAttributes(model, request);
-
 		// Expose all standard FreeMarker hash models.
-		model.put(FreemarkerServlet.KEY_JSP_TAGLIBS, this.taglibFactory);
-		model.put(FreemarkerServlet.KEY_APPLICATION, this.servletContextHashModel);
-		model.put(FreemarkerServlet.KEY_SESSION, buildSessionModel(request, response));
-		model.put(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response, getObjectWrapper()));
-		model.put(FreemarkerServlet.KEY_REQUEST_PARAMETERS, new HttpRequestParametersHashModel(request));
+		SimpleHash fmModel = buildTemplateModel(model, request, response);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rendering FreeMarker template [" + getUrl() + "] in FreeMarkerView '" + getBeanName() + "'");
 		}
 		// Grab the locale-specific version of the template.
 		Locale locale = RequestContextUtils.getLocale(request);
-		processTemplate(getTemplate(locale), model, response);
+		processTemplate(getTemplate(locale), fmModel, response);
+	}
+
+	/**
+	 * Build a FreeMarker template model for the given model Map.
+	 * <p>The default implementation builds a {@link AllHttpScopesHashModel}.
+	 * @param model the model to use for rendering
+	 * @param request current HTTP request
+	 * @param response current servlet response
+	 * @return the FreeMarker template model, as a {@link SimpleHash} or subclass thereof
+	 */
+	protected SimpleHash buildTemplateModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) {
+		AllHttpScopesHashModel fmModel = new AllHttpScopesHashModel(getObjectWrapper(), getServletContext(), request);
+		fmModel.put(FreemarkerServlet.KEY_JSP_TAGLIBS, this.taglibFactory);
+		fmModel.put(FreemarkerServlet.KEY_APPLICATION, this.servletContextHashModel);
+		fmModel.put(FreemarkerServlet.KEY_SESSION, buildSessionModel(request, response));
+		fmModel.put(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response, getObjectWrapper()));
+		fmModel.put(FreemarkerServlet.KEY_REQUEST_PARAMETERS, new HttpRequestParametersHashModel(request));
+		fmModel.putAll(model);
+		return fmModel;
 	}
 
 	/**
@@ -338,7 +354,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @throws TemplateException if thrown by FreeMarker
 	 * @see freemarker.template.Template#process(Object, java.io.Writer)
 	 */
-	protected void processTemplate(Template template, Map<String, Object> model, HttpServletResponse response)
+	protected void processTemplate(Template template, SimpleHash model, HttpServletResponse response)
 			throws IOException, TemplateException {
 
 		template.process(model, response.getWriter());
