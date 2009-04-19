@@ -304,7 +304,15 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the current locale.
+	 * Return the model Map that this RequestContext encapsulates, if any.
+	 * @return the populated model Map, or <code>null</code> if none available
+	 */
+	public final Map<String, Object> getModel() {
+		return this.model;
+	}
+
+	/**
+	 * Return the current Locale (never <code>null</code>).
 	 */
 	public final Locale getLocale() {
 		return this.locale;
@@ -312,7 +320,7 @@ public class RequestContext {
 
 	/**
 	 * Return the current theme (never <code>null</code>).
-	 * Resolved lazily for more efficiency when theme support is not used.
+	 * <p>Resolved lazily for more efficiency when theme support is not being used.
 	 */
 	public final Theme getTheme() {
 		if (this.theme == null) {
