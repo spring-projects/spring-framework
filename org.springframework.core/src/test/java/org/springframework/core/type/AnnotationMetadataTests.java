@@ -27,9 +27,9 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
@@ -39,7 +39,6 @@ import org.springframework.stereotype.Component;
  * @author Juergen Hoeller
  */
 public class AnnotationMetadataTests extends TestCase {
-
 
 	public void testStandardAnnotationMetadata() throws IOException {
 		StandardAnnotationMetadata annInfo = new StandardAnnotationMetadata(AnnotatedComponent.class);
