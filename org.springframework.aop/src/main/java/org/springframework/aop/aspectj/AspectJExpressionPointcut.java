@@ -348,29 +348,36 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
+		// Avoid lock contention for known Methods through concurrent access...
 		ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
 		if (shadowMatch == null) {
-			try {
-				shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
-			}
-			catch (ReflectionWorld.ReflectionWorldException ex) {
-				// Failed to introspect target method, probably because it has been loaded
-				// in a special ClassLoader. Let's try the original method instead...
-				if (targetMethod == originalMethod) {
-					shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
-				}
-				else {
+			synchronized (this.shadowMatchCache) {
+				// Not found - now check again with full lock...
+				shadowMatch = this.shadowMatchCache.get(targetMethod);
+				if (shadowMatch == null) {
 					try {
-						shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
+						shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
 					}
-					catch (ReflectionWorld.ReflectionWorldException ex2) {
-						// Could neither introspect the target class nor the proxy class ->
-						// let's simply consider this method as non-matching.
-						shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+					catch (ReflectionWorld.ReflectionWorldException ex) {
+						// Failed to introspect target method, probably because it has been loaded
+						// in a special ClassLoader. Let's try the original method instead...
+						if (targetMethod == originalMethod) {
+							shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+						}
+						else {
+							try {
+								shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
+							}
+							catch (ReflectionWorld.ReflectionWorldException ex2) {
+								// Could neither introspect the target class nor the proxy class ->
+								// let's simply consider this method as non-matching.
+								shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+							}
+						}
 					}
+					this.shadowMatchCache.put(targetMethod, shadowMatch);
 				}
 			}
-			this.shadowMatchCache.put(targetMethod, shadowMatch);
 		}
 		return shadowMatch;
 	}
