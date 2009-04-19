@@ -16,26 +16,23 @@
 
 package org.springframework.context.annotation.configuration;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
-
 import org.junit.Test;
+import test.beans.ITestBean;
+import test.beans.TestBean;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.StandardScopes;
-
-import test.beans.ITestBean;
-import test.beans.TestBean;
-
 
 /**
  * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error
@@ -51,26 +48,19 @@ public class ConfigurationClassProcessingTests {
 	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
 	 * When complete, the factory is ready to service requests for any {@link Bean} methods
 	 * declared by <var>configClasses</var>.
-	 * 
-	 * @param configClasses the {@link Configuration} classes under test. may be an empty
-	 *        list.
-	 * 
-	 * @return fully initialized and post-processed {@link BeanFactory}
 	 */
-	private static BeanFactory initBeanFactory(Class<?>... configClasses) {
+	private BeanFactory initBeanFactory(Class<?>... configClasses) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-
 		for (Class<?> configClass : configClasses) {
 			String configBeanName = configClass.getName();
-			factory.registerBeanDefinition(configBeanName, rootBeanDefinition(configClass).getBeanDefinition());
+			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
 		}
-
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(factory);
-
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(factory);
 		factory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
-
 		return factory;
 	}
+
 
 	@Test
 	public void customBeanNameIsRespected() {
@@ -132,19 +122,9 @@ public class ConfigurationClassProcessingTests {
 	@Test
 	public void simplestPossibleConfiguration() {
 		BeanFactory factory = initBeanFactory(SimplestPossibleConfig.class);
-
 		String stringBean = factory.getBean("stringBean", String.class);
-
-		assertThat(stringBean, equalTo("foo"));
+		assertEquals(stringBean, "foo");
 	}
-
-	@Configuration
-	static class SimplestPossibleConfig {
-		public @Bean String stringBean() {
-			return "foo";
-		}
-	}
-
 
 	@Test
 	public void configurationWithPrototypeScopedBeans() {
@@ -154,12 +134,22 @@ public class ConfigurationClassProcessingTests {
 		ITestBean bar = factory.getBean("bar", ITestBean.class);
 		ITestBean baz = factory.getBean("baz", ITestBean.class);
 
-		assertThat(foo.getSpouse(), sameInstance(bar));
-		assertThat(bar.getSpouse(), not(sameInstance(baz)));
+		assertSame(foo.getSpouse(), bar);
+		assertNotSame(bar.getSpouse(), baz);
 	}
+
+
+	@Configuration
+	static class SimplestPossibleConfig {
+		public @Bean String stringBean() {
+			return "foo";
+		}
+	}
+
 
 	@Configuration
 	static class ConfigWithPrototypeBean {
+
 		public @Bean TestBean foo() {
 			TestBean foo = new TestBean("foo");
 			foo.setSpouse(bar());

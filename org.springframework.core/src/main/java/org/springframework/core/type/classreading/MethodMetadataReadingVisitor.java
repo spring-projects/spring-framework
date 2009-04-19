@@ -17,10 +17,10 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -32,17 +32,26 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.ReflectionUtils;
 
-public class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
+/**
+ * @author Mark Pollack
+ * @since 3.0
+ */
+class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
+
+	private ClassLoader classLoader;
+
+	private String name;
+
+	private int access;
+
+	private boolean isStatic;
 
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
 
-	private ClassLoader classLoader;
-	private String name;
-	private int access;
-	private boolean isStatic;
 
 	public MethodMetadataReadingVisitor(ClassLoader classLoader, String name, int access) {
 		super(new EmptyVisitor());
@@ -51,6 +60,7 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 		this.access = access;
 		this.isStatic = ((access & Opcodes.ACC_STATIC) != 0);
 	}
+
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.attributesMap.get(annotationType);
@@ -87,28 +97,21 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 	}
 	
 	public boolean isStatic() {
-		return isStatic;
+		return this.isStatic;
 	}
 
-	
 	public Set<String> getAnnotationTypesWithMetaAnnotation(String metaAnnotationType) {
-
-		///metaAnnotationMap.put(className, metaAnnotationTypeNames);
 		Set<String> annotationTypes = new LinkedHashSet<String>();
-		Set< Map.Entry<String, Set<String>> > metaValues = metaAnnotationMap.entrySet();
-		Iterator<Map.Entry<String, Set<String>> > metaIterator = metaValues.iterator();
-		while (metaIterator.hasNext())
-		{
-			Map.Entry<String, Set<String>> entry = metaIterator.next();
+		for (Map.Entry<String, Set<String>> entry : metaAnnotationMap.entrySet()) {
 			String attributeType = entry.getKey();
 			Set<String> metaAttributes = entry.getValue();
-			if (metaAttributes.contains(metaAnnotationType))
-			{
+			if (metaAttributes.contains(metaAnnotationType)) {
 				annotationTypes.add(attributeType);
 			}
 		}
 		return annotationTypes;
 	}
+
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
@@ -121,13 +124,27 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 				attributes.put(name, value);
 			}
 			@Override
+			public void visitEnum(String name, String desc, String value) {
+				Object valueToUse = value;
+				try {
+					Class<?> enumType = classLoader.loadClass(Type.getType(desc).getClassName());
+					Field enumConstant = ReflectionUtils.findField(enumType, value);
+					if (enumConstant != null) {
+						valueToUse = enumConstant.get(null);
+					}
+				}
+				catch (Exception ex) {
+					// Class not found - can't resolve class reference in annotation attribute.
+				}
+				attributes.put(name, valueToUse);
+			}
+			@Override
 			public void visitEnd() {
 				try {
 					Class<?> annotationClass = classLoader.loadClass(className);
 					// Check declared default values of attributes in the annotation type.
 					Method[] annotationAttributes = annotationClass.getMethods();
-					for (int i = 0; i < annotationAttributes.length; i++) {
-						Method annotationAttribute = annotationAttributes[i];
+					for (Method annotationAttribute : annotationAttributes) {
 						String attributeName = annotationAttribute.getName();
 						Object defaultValue = annotationAttribute.getDefaultValue();
 						if (defaultValue != null && !attributes.containsKey(attributeName)) {
@@ -149,6 +166,5 @@ public class MethodMetadataReadingVisitor extends MethodAdapter implements Metho
 			}
 		};
 	}
-
 
 }

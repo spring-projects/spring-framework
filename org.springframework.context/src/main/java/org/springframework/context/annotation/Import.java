@@ -23,18 +23,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Annotation that allows one {@link Configuration} class to import another Configuration,
  * and thereby all its {@link Bean} definitions.
  * 
  * <p>Provides functionality equivalent to the {@literal <import/>} element in Spring XML.
+ * Only supported for actual {@link Configuration} classes.
  *
  * @author Chris Beams
  * @since 3.0
  * @see Configuration
  */
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

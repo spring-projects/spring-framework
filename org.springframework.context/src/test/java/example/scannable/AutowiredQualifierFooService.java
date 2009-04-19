@@ -21,12 +21,14 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.AsyncResult;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
+@Lazy
 public class AutowiredQualifierFooService implements FooService {
 
 	@Autowired

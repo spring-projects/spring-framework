@@ -37,6 +37,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -487,9 +488,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke factory processors registered with the context instance.
-		for (BeanFactoryPostProcessor factoryProcessor : getBeanFactoryPostProcessors()) {
-			factoryProcessor.postProcessBeanFactory(beanFactory);
-		}
+		invokeBeanFactoryPostProcessors(getBeanFactoryPostProcessors(), beanFactory);
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let the bean factory post-processors apply to them!
@@ -515,7 +514,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// First, invoke the BeanFactoryPostProcessors that implement PriorityOrdered.
 		OrderComparator.sort(priorityOrderedPostProcessors);
-		invokeBeanFactoryPostProcessors(beanFactory, priorityOrderedPostProcessors);
+		invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors, beanFactory);
 
 		// Next, invoke the BeanFactoryPostProcessors that implement Ordered.
 		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
@@ -523,21 +522,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			orderedPostProcessors.add(getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		OrderComparator.sort(orderedPostProcessors);
-		invokeBeanFactoryPostProcessors(beanFactory, orderedPostProcessors);
+		invokeBeanFactoryPostProcessors(orderedPostProcessors, beanFactory);
 
 		// Finally, invoke all other BeanFactoryPostProcessors.
 		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
 		for (String postProcessorName : nonOrderedPostProcessorNames) {
 			nonOrderedPostProcessors.add(getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
-		invokeBeanFactoryPostProcessors(beanFactory, nonOrderedPostProcessors);
+		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
 	}
 
 	/**
 	 * Invoke the given BeanFactoryPostProcessor beans.
 	 */
 	private void invokeBeanFactoryPostProcessors(
-			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> postProcessors) {
+			List<BeanFactoryPostProcessor> postProcessors, ConfigurableListableBeanFactory beanFactory) {
 
 		for (BeanFactoryPostProcessor postProcessor : postProcessors) {
 			postProcessor.postProcessBeanFactory(beanFactory);

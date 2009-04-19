@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +51,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	private final Set<String> externallyManagedInitMethods = Collections.synchronizedSet(new HashSet<String>());
 
 	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>());
+
+	volatile Method factoryMethodForIntrospection;
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	volatile Object resolvedConstructorOrFactoryMethod;
@@ -216,6 +219,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
 		}
+	}
+
+	public Method getFactoryMethodForIntrospection() {
+		return this.factoryMethodForIntrospection;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
- * @see Scope
+ * @see org.springframework.context.annotation.Scope
  */
 public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
 	private Class<? extends Annotation> scopeAnnotationType = Scope.class;
 	
-	private ScopedProxyMode scopedProxyMode;
+	private final ScopedProxyMode defaultProxyMode;
 
 
 	/**
@@ -48,16 +48,16 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	 * @see ScopedProxyMode#NO
 	 */
 	public AnnotationScopeMetadataResolver() {
-		this(ScopedProxyMode.NO);
+		this.defaultProxyMode = ScopedProxyMode.NO;
 	}
 
 	/**
 	 * Create a new instance of the <code>AnnotationScopeMetadataResolver</code> class.
-	 * @param scopedProxyMode the desired scoped-proxy mode
+	 * @param defaultProxyMode the desired scoped-proxy mode
 	 */
-	public AnnotationScopeMetadataResolver(ScopedProxyMode scopedProxyMode) {
-		Assert.notNull(scopedProxyMode, "'scopedProxyMode' must not be null");
-		this.scopedProxyMode = scopedProxyMode;
+	public AnnotationScopeMetadataResolver(ScopedProxyMode defaultProxyMode) {
+		Assert.notNull(defaultProxyMode, "'defaultProxyMode' must not be null");
+		this.defaultProxyMode = defaultProxyMode;
 	}
 
 
@@ -78,11 +78,16 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
 			Map<String, Object> attributes =
 					annDef.getMetadata().getAnnotationAttributes(this.scopeAnnotationType.getName());
+			ScopedProxyMode annMode = null;
 			if (attributes != null) {
 				metadata.setScopeName((String) attributes.get("value"));
+				annMode = (ScopedProxyMode) attributes.get("proxyMode");
 			}
-			if (!metadata.getScopeName().equals(BeanDefinition.SCOPE_SINGLETON)) {
-				metadata.setScopedProxyMode(this.scopedProxyMode);
+			if (annMode != null && annMode != ScopedProxyMode.DEFAULT) {
+				metadata.setScopedProxyMode(annMode);
+			}
+			else if (!metadata.getScopeName().equals(BeanDefinition.SCOPE_SINGLETON)) {
+				metadata.setScopedProxyMode(this.defaultProxyMode);
 			}
 		}
 		return metadata;

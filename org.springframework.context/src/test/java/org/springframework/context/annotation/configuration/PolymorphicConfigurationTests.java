@@ -40,18 +40,23 @@ public class PolymorphicConfigurationTests {
 	public void subclassNeedNotDeclareConfigurationAnnotation() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(Config.class));
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
-
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
 		beanFactory.getBean("testBean", TestBean.class);
 	}
 
+
 	@Configuration
 	static class SuperConfig {
+
 		@Bean
 		public TestBean testBean() {
 			return new TestBean();
 		}
 	}
 
-	static class Config extends SuperConfig { }
+
+	static class Config extends SuperConfig {
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,16 +43,16 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public Set<String> getAnnotationTypes() {
 		Set<String> types = new HashSet<String>();
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (int i = 0; i < anns.length; i++) {
-			types.add(anns[i].annotationType().getName());
+		for (Annotation ann : anns) {
+			types.add(ann.annotationType().getName());
 		}
 		return types;
 	}
 
 	public boolean hasAnnotation(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (int i = 0; i < anns.length; i++) {
-			if (anns[i].annotationType().getName().equals(annotationType)) {
+		for (Annotation ann : anns) {
+			if (ann.annotationType().getName().equals(annotationType)) {
 				return true;
 			}
 		}
@@ -61,10 +61,10 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (int i = 0; i < anns.length; i++) {
-			if (anns[i].annotationType().getName().equals(annotationType)) {
+		for (Annotation ann : anns) {
+			if (ann.annotationType().getName().equals(annotationType)) {
 				Set<String> types = new HashSet<String>();
-				Annotation[] metaAnns = anns[i].annotationType().getAnnotations();
+				Annotation[] metaAnns = ann.annotationType().getAnnotations();
 				for (Annotation meta : metaAnns) {
 					types.add(meta.annotationType().getName());
 				}
@@ -76,8 +76,8 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	public boolean hasMetaAnnotation(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (int i = 0; i < anns.length; i++) {
-			Annotation[] metaAnns = anns[i].annotationType().getAnnotations();
+		for (Annotation ann : anns) {
+			Annotation[] metaAnns = ann.annotationType().getAnnotations();
 			for (Annotation meta : metaAnns) {
 				if (meta.annotationType().getName().equals(annotationType)) {
 					return true;
@@ -89,8 +89,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (int i = 0; i < anns.length; i++) {
-			Annotation ann = anns[i];
+		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
 				return AnnotationUtils.getAnnotationAttributes(ann);
 			}
@@ -101,11 +100,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];			
+		for (Method method : methods) {
 			Annotation[] methodAnnotations = method.getAnnotations();
-			for (int j = 0; j < methodAnnotations.length; j++) {
-				Annotation ann = methodAnnotations[j];
+			for (Annotation ann : methodAnnotations) {
 				if (ann.annotationType().getName().equals(annotationType)) {
 					MethodMetadata mm = new StandardMethodMetadata(method);
 					annotatedMethods.add(mm);

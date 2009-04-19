@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.context.annotation.configuration;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+package org.springframework.context.annotation.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.*;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import test.beans.ITestBean;
+import test.beans.TestBean;
+
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,17 +40,12 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.annotation.StandardScopes;
 import org.springframework.context.support.GenericApplicationContext;
 
-import test.beans.ITestBean;
-import test.beans.TestBean;
-
-
-
 /**
  * Tests that scopes are properly supported by using a custom Scope implementations
  * and scoped proxy {@link Bean} declarations.
  *
- * @author  Costin Leau
- * @author  Chris Beams
+ * @author Costin Leau
+ * @author Chris Beams
  */
 public class ScopingTests {
 
@@ -82,18 +80,15 @@ public class ScopingTests {
 		return ctx;
 	}
 
-
 	@Test
 	public void testScopeOnClasses() throws Exception {
 		genericTestScope("scopedClass");
 	}
 
-
 	@Test
 	public void testScopeOnInterfaces() throws Exception {
 		genericTestScope("scopedInterface");
 	}
-
 
 	@Test
 	public void testSameScopeOnDifferentBeans() throws Exception {
@@ -112,22 +107,8 @@ public class ScopingTests {
 		assertNotSame(newBeanBInScope, beanBInScope);
 	}
 
-
-	@Test
-	public void testScopedProxyOnSingletonBeanMethod() throws Exception {
-		// should throw - scoped proxies should not be applied on singleton/prototype beans
-		try {
-			createContext(null, InvalidProxyOnPredefinedScopesConfiguration.class);
-			fail("exception expected");
-		} catch (BeanDefinitionParsingException ex) {
-			assertTrue(ex.getMessage().contains("scoped proxies cannot be created for singleton/prototype beans"));
-		}
-	}
-
-
 	@Test
 	public void testRawScopes() throws Exception {
-		
 		String beanName = "scopedProxyInterface";
 
 		// get hidden bean
@@ -368,71 +349,56 @@ public class ScopingTests {
 		}
 	}
 
-}
 
-
-/**
- * Simple scope implementation which creates object based on a flag.
- *
- * @author  Costin Leau
- * @author  Chris Beams
- */
-class CustomScope implements org.springframework.beans.factory.config.Scope {
-
-	public boolean createNewScope = true;
-
-	private Map<String, Object> beans = new HashMap<String, Object>();
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#get(java.lang.String,
-	 * org.springframework.beans.factory.ObjectFactory)
+	/**
+	 * Simple scope implementation which creates object based on a flag.
+	 * @author Costin Leau
+	 * @author Chris Beams
 	 */
-	public Object get(String name, ObjectFactory<?> objectFactory) {
-		if (createNewScope) {
-			beans.clear();
-			// reset the flag back
-			createNewScope = false;
+	static class CustomScope implements org.springframework.beans.factory.config.Scope {
+
+		public boolean createNewScope = true;
+
+		private Map<String, Object> beans = new HashMap<String, Object>();
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.config.Scope#get(java.lang.String,
+		 * org.springframework.beans.factory.ObjectFactory)
+		 */
+		public Object get(String name, ObjectFactory<?> objectFactory) {
+			if (createNewScope) {
+				beans.clear();
+				// reset the flag back
+				createNewScope = false;
+			}
+
+			Object bean = beans.get(name);
+			// if a new object is requested or none exists under the current
+			// name, create one
+			if (bean == null) {
+				beans.put(name, objectFactory.getObject());
+			}
+
+			return beans.get(name);
 		}
 
-		Object bean = beans.get(name);
-		// if a new object is requested or none exists under the current
-		// name, create one
-		if (bean == null) {
-			beans.put(name, objectFactory.getObject());
+		public String getConversationId() {
+			return null;
 		}
 
-		return beans.get(name);
-	}
+		public void registerDestructionCallback(String name, Runnable callback) {
+			// do nothing
+		}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#getConversationId()
-	 */
-	public String getConversationId() {
-		return null;
-	}
+		public Object remove(String name) {
+			return beans.remove(name);
+		}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#registerDestructionCallback(java.lang.String,
-	 * java.lang.Runnable)
-	 */
-	public void registerDestructionCallback(String name, Runnable callback) {
-		// do nothing
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#remove(java.lang.String)
-	 */
-	public Object remove(String name) {
-		return beans.remove(name);
-	}
-
-	public Object resolveContextualObject(String key) {
-		// TODO Auto-generated method stub
-		return null;
+		public Object resolveContextualObject(String key) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 
 }

@@ -16,10 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import static org.junit.Assert.*;
-
+import example.scannable.CustomComponent;
+import example.scannable.FooService;
+import example.scannable.FooServiceImpl;
+import example.scannable.NamedStubDao;
+import example.scannable.StubFooDao;
 import org.aspectj.lang.annotation.Aspect;
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -34,12 +39,6 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Component;
 
-import example.scannable.CustomComponent;
-import example.scannable.FooService;
-import example.scannable.FooServiceImpl;
-import example.scannable.NamedStubDao;
-import example.scannable.StubFooDao;
-
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -49,7 +48,7 @@ public class ClassPathBeanDefinitionScannerTests {
 
 	private static final String BASE_PACKAGE = "example.scannable";
 
-	
+
 	@Test
 	public void testSimpleScanWithDefaultFiltersAndPostProcessors() {
 		GenericApplicationContext context = new GenericApplicationContext();
@@ -62,9 +61,34 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean("thoreau"));
+		assertTrue(context.containsBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		context.refresh();
+		FooServiceImpl service = context.getBean("fooServiceImpl", FooServiceImpl.class);
+		assertTrue(context.getDefaultListableBeanFactory().containsSingleton("myNamedComponent"));
+		assertEquals("bar", service.foo(1));
+	}
+
+	@Test
+	public void testSimpleScanWithDefaultFiltersAndPrimaryLazyBean() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.scan(BASE_PACKAGE);
+		scanner.scan("org.springframework.context.annotation5");
+		assertTrue(context.containsBean("serviceInvocationCounter"));
+		assertTrue(context.containsBean("fooServiceImpl"));
+		assertTrue(context.containsBean("stubFooDao"));
+		assertTrue(context.containsBean("myNamedComponent"));
+		assertTrue(context.containsBean("myNamedDao"));
+		assertTrue(context.containsBean("otherFooDao"));
+		context.refresh();
+		assertFalse(context.getBeanFactory().containsSingleton("otherFooDao"));
+		assertFalse(context.getBeanFactory().containsSingleton("fooServiceImpl"));
+		FooServiceImpl service = context.getBean("fooServiceImpl", FooServiceImpl.class);
+		assertTrue(context.getBeanFactory().containsSingleton("otherFooDao"));
+		assertEquals("other", service.foo(1));
 	}
 
 	@Test
@@ -354,7 +378,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertEquals(10, beanCount);
 		context.refresh();
 
-		FooServiceImpl fooService = (FooServiceImpl) context.getBean("fooService");
+		FooServiceImpl fooService = context.getBean("fooService", FooServiceImpl.class);
 		StaticListableBeanFactory myBf = (StaticListableBeanFactory) context.getBean("myBf");
 		MessageSource ms = (MessageSource) context.getBean("messageSource");
 		assertTrue(fooService.isInitCalled());
@@ -415,6 +439,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.scan(BASE_PACKAGE);
 		try {
 			context.refresh();
+			context.getBean("fooService");
 			fail("BeanCreationException expected; fooDao should not have been an autowire-candidate");
 		}
 		catch (BeanCreationException expected) {

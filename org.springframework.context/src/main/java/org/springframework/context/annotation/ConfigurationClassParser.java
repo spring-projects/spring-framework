@@ -16,75 +16,79 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.AsmUtils.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.Stack;
 
 import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.util.ClassUtils;
 
-
 /**
- * Parses a {@link Configuration} class definition, populating a {@link ConfigurationModel}.
+ * Parses a {@link Configuration} class definition, populating a configuration model.
  * This ASM-based implementation avoids reflection and eager classloading in order to
  * interoperate effectively with tooling (Spring IDE) and OSGi environments.
- * <p>
- * This class helps separate the concern of parsing the structure of a Configuration class
+ *
+ * <p>This class helps separate the concern of parsing the structure of a Configuration class
  * from the concern of registering {@link BeanDefinition} objects based on the content of
  * that model.
- * 
+ *
  * @author Chris Beams
- * @see ConfigurationModel
- * @see ConfigurationModelBeanDefinitionReader
+ * @author Juergen Hoeller
+ * @since 3.0
+ * @see ConfigurationClassBeanDefinitionReader
  */
 class ConfigurationClassParser {
 
-	/**
-	 * Model to be populated during calls to {@link #parse(Object, String)}
-	 */
-	private final ConfigurationModel model;
+	private final Set<ConfigurationClass> model;
+
 	private final ProblemReporter problemReporter;
+
 	private final ClassLoader classLoader;
 
+
 	/**
-	 * Creates a new {@link ConfigurationClassParser} instance that will be used to populate a
-	 * {@link ConfigurationModel}.
-	 * 
+	 * Create a new {@link ConfigurationClassParser} instance that will be used to populate a
+	 * configuration model.
 	 * @param model model to be populated by each successive call to {@link #parse}
-	 * @see #getConfigurationModel()
 	 */
 	public ConfigurationClassParser(ProblemReporter problemReporter, ClassLoader classLoader) {
-		this.model = new ConfigurationModel();
+		this.model = new LinkedHashSet<ConfigurationClass>();
 		this.problemReporter = problemReporter;
 		this.classLoader = classLoader;
 	}
 
+
 	/**
-	 * Parse the {@link Configuration @Configuration} class encapsulated by
-	 * <var>configurationSource</var>.
-	 * 
-	 * @param configurationSource reader for Configuration class being parsed
-	 * @param configurationId may be null, but if populated represents the bean id (assumes
-	 *        that this configuration class was configured via XML)
+	 * Parse the specified {@link Configuration @Configuration} class.
+	 * @param className the name of the class to parse
+	 * @param beanName may be null, but if populated represents the bean id
+	 * (assumes that this configuration class was configured via XML)
 	 */
-	public void parse(String className, String configurationId) {
-
+	public void parse(String className, String beanName) {
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
-
-		ClassReader configClassReader = newAsmClassReader(getClassAsStream(resourcePath, classLoader));
-
+		ClassReader configClassReader = ConfigurationClassReaderUtils.newAsmClassReader(ConfigurationClassReaderUtils.getClassAsStream(resourcePath, classLoader));
 		ConfigurationClass configClass = new ConfigurationClass();
-		configClass.setBeanName(configurationId);
-
+		configClass.setBeanName(beanName);
 		configClassReader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader), false);
 		model.add(configClass);
 	}
 
 	/**
-	 * Returns the current {@link ConfigurationModel}, to be called after {@link #parse}.
+	 * Recurse through the model validating each {@link ConfigurationClass}.
+	 * @param problemReporter {@link ProblemReporter} against which any validation errors
+	 * will be registered
+	 * @see ConfigurationClass#validate
 	 */
-	public ConfigurationModel getConfigurationModel() {
-		return model;
+	public void validate() {
+		for (ConfigurationClass configClass : this.model) {
+			configClass.validate(this.problemReporter);
+		}
+	}
+
+	public Set<ConfigurationClass> getModel() {
+		return this.model;
 	}
 
 }

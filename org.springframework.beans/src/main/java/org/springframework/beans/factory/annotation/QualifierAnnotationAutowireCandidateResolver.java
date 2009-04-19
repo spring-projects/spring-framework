@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,9 +26,9 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -134,8 +135,14 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			return true;
 		}
 		boolean match = checkQualifiers(bdHolder, descriptor.getAnnotations());
-		if (match && descriptor.getMethodParameter() != null) {
-			match = checkQualifiers(bdHolder, descriptor.getMethodParameter().getAnnotations());
+		if (match) {
+			MethodParameter methodParam = descriptor.getMethodParameter();
+			if (methodParam != null) {
+				Method method = methodParam.getMethod();
+				if (method == null || void.class.equals(method.getReturnType())) {
+					match = checkQualifiers(bdHolder, methodParam.getAnnotations());
+				}
+			}
 		}
 		return match;
 	}
@@ -178,15 +185,21 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			BeanDefinitionHolder bdHolder, Annotation annotation, TypeConverter typeConverter) {
 
 		Class<? extends Annotation> type = annotation.annotationType();
-		AbstractBeanDefinition bd = (AbstractBeanDefinition) bdHolder.getBeanDefinition();
+		RootBeanDefinition bd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		AutowireCandidateQualifier qualifier = bd.getQualifier(type.getName());
 		if (qualifier == null) {
 			qualifier = bd.getQualifier(ClassUtils.getShortName(type));
 		}
-		if (qualifier == null && bd.hasBeanClass()) {
-			// look for matching annotation on the target class
-			Class<?> beanClass = bd.getBeanClass();
-			Annotation targetAnnotation = beanClass.getAnnotation(type);
+		if (qualifier == null) {
+			Annotation targetAnnotation = null;
+			if (bd.getFactoryMethodForIntrospection() != null) {
+				targetAnnotation = bd.getFactoryMethodForIntrospection().getAnnotation(type);
+			}
+			if (targetAnnotation == null && bd.hasBeanClass()) {
+				// look for matching annotation on the target class
+				Class<?> beanClass = bd.getBeanClass();
+				targetAnnotation = beanClass.getAnnotation(type);
+			}
 			if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
 				return true;
 			}

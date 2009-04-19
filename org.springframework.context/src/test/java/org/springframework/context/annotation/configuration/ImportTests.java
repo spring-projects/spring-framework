@@ -41,9 +41,11 @@ public class ImportTests {
 
 	private DefaultListableBeanFactory processConfigurationClasses(Class<?>... classes) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		for (Class<?> clazz : classes)
+		for (Class<?> clazz : classes) {
 			beanFactory.registerBeanDefinition(clazz.getSimpleName(), new RootBeanDefinition(clazz));
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		}
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
 		return beanFactory;
 	}
 
@@ -137,7 +139,8 @@ public class ImportTests {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(
 				WithMultipleArgumentsThatWillCauseDuplication.class));
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
 		assertThat(beanFactory.getBeanDefinitionCount(), equalTo(4));
 		assertThat(beanFactory.getBean("foo", ITestBean.class).getName(), equalTo("foo2"));
 	}

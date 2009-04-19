@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
-
+import org.springframework.context.annotation.DependsOn;
 
 /**
  * Unit tests proving that the various attributes available via the {@link Bean}
@@ -67,7 +67,7 @@ public class BeanAnnotationAttributePropagationTests {
 	@Test
 	public void dependsOnMetadataIsPropagated() {
 		@Configuration class Config {
-			@Bean(dependsOn={"bar", "baz"}) Object foo() { return null; }
+			@Bean() @DependsOn({"bar", "baz"}) Object foo() { return null; }
 		}
 
 		assertArrayEquals("dependsOn metadata was not propagated",
@@ -149,8 +149,8 @@ public class BeanAnnotationAttributePropagationTests {
 	private AbstractBeanDefinition beanDef(Class<?> configClass) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("config", new RootBeanDefinition(configClass));
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(factory);
-
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(factory);
 		return (AbstractBeanDefinition) factory.getBeanDefinition("foo");
 	}
 

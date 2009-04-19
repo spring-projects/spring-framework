@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,6 +144,30 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setScope(String scope);
 
 	/**
+	 * Return whether this bean should be lazily initialized, i.e. not
+	 * eagerly instantiated on startup. Only applicable to a singleton bean.
+	 */
+	boolean isLazyInit();
+
+	/**
+	 * Set whether this bean should be lazily initialized.
+	 * <p>If <code>false</code>, the bean will get instantiated on startup by bean
+	 * factories that perform eager initialization of singletons.
+	 */
+	void setLazyInit(boolean lazyInit);
+
+	/**
+	 * Return the bean names that this bean depends on.
+	 */
+	String[] getDependsOn();
+
+	/**
+	 * Set the names of the beans that this bean depends on being initialized.
+	 * The bean factory will guarantee that these beans get initialized first.
+	 */
+	void setDependsOn(String[] dependsOn);
+
+	/**
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
 	 */
 	boolean isAutowireCandidate();
@@ -152,6 +176,20 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Set whether this bean is a candidate for getting autowired into some other bean.
 	 */
 	void setAutowireCandidate(boolean autowireCandidate);
+
+	/**
+	 * Return whether this bean is a primary autowire candidate.
+	 * If this value is true for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	boolean isPrimary();
+
+	/**
+	 * Set whether this bean is a primary autowire candidate.
+	 * <p>If this value is true for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	void setPrimary(boolean primary);
 
 
 	/**
@@ -179,12 +217,6 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
 	 */
 	boolean isAbstract();
-
-	/**
-	 * Return whether this bean should be lazily initialized, that is, not
-	 * eagerly instantiated on startup.
-	 */
-	boolean isLazyInit();
 
 	/**
 	 * Get the role hint for this <code>BeanDefinition</code>. The role hint

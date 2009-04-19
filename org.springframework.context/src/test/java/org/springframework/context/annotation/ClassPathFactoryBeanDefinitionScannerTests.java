@@ -16,91 +16,75 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Set;
-
 import junit.framework.TestCase;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.SimpleMapScope;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation4.FactoryMethodComponent;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.ClassUtils;
 
-
+/**
+ * @author Mark Pollack
+ * @author Juergen Hoeller
+ */
 public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 
 	private static final String BASE_PACKAGE = FactoryMethodComponent.class.getPackage().getName();
 	
-	private static final int NUM_DEFAULT_BEAN_DEFS = 5;
-	
-	private static final int NUM_FACTORY_METHODS = 5;  // @ScopedProxy creates another
-	
-	private static final int NUM_COMPONENT_DEFS = 1;
-	
 		
-	public void testSingletonScopedFactoryMethod()
-	{
+	public void testSingletonScopedFactoryMethod() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		
-		SimpleMapScope scope = new SimpleMapScope();
-		context.getBeanFactory().registerScope("request", scope);		
-		
-		int beanCount = scanner.scan(BASE_PACKAGE);
-				
-		assertEquals(NUM_FACTORY_METHODS + NUM_COMPONENT_DEFS + NUM_DEFAULT_BEAN_DEFS, beanCount);
-		assertTrue(context.containsBean("factoryMethodComponent"));		
-		assertTrue(context.containsBean("factoryMethodComponent$staticInstance"));
-		assertTrue(context.containsBean("factoryMethodComponent$getPublicInstance"));
-		
 
-		
+		context.getBeanFactory().registerScope("request", new SimpleMapScope());
 
-		TestBean staticTestBean = (TestBean)context.getBean("factoryMethodComponent$staticInstance");//1
-		assertEquals("staticInstance", staticTestBean.getName());
-		TestBean staticTestBean2 =  (TestBean)context.getBean("factoryMethodComponent$staticInstance");//1
-		assertSame(staticTestBean, staticTestBean2);
-		
-		TestBean tb = (TestBean)context.getBean("factoryMethodComponent$getPublicInstance"); //2
+		scanner.scan(BASE_PACKAGE);
+		context.registerBeanDefinition("clientBean", new RootBeanDefinition(QualifiedClientBean.class));
+		context.refresh();
+
+		FactoryMethodComponent fmc = context.getBean("factoryMethodComponent", FactoryMethodComponent.class);
+		assertFalse(fmc.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
+
+		TestBean tb = (TestBean)context.getBean("publicInstance"); //2
 		assertEquals("publicInstance", tb.getName());
-		TestBean tb2 = (TestBean)context.getBean("factoryMethodComponent$getPublicInstance"); //2
+		TestBean tb2 = (TestBean)context.getBean("publicInstance"); //2
 		assertEquals("publicInstance", tb2.getName());
 		assertSame(tb2, tb);
 		
-		//Were qualifiers applied to bean definition
-		ConfigurableListableBeanFactory cbf = (ConfigurableListableBeanFactory)context.getAutowireCapableBeanFactory();
-		AbstractBeanDefinition abd = (AbstractBeanDefinition)cbf.getBeanDefinition("factoryMethodComponent$getPublicInstance"); //2
-		Set<AutowireCandidateQualifier> qualifierSet = abd.getQualifiers();
-		assertEquals(1, qualifierSet.size());
-		
-		
-		tb = (TestBean)context.getBean("factoryMethodComponent$getProtectedInstance"); //3
+		tb = (TestBean)context.getBean("protectedInstance"); //3
 		assertEquals("protectedInstance", tb.getName());
-		tb2 = (TestBean)context.getBean("factoryMethodComponent$getProtectedInstance"); //3
+		assertSame(tb, context.getBean("protectedInstance"));
+		assertEquals("0", tb.getCountry());
+		tb2 = (TestBean)context.getBean("protectedInstance"); //3
 		assertEquals("protectedInstance", tb2.getName());
 		assertSame(tb2, tb);
-		
-		tb = (TestBean)context.getBean("factoryMethodComponent$getPrivateInstance"); //4
+
+		tb = (TestBean)context.getBean("privateInstance"); //4
 		assertEquals("privateInstance", tb.getName());
-		assertEquals(0, tb.getAge());
-		tb2 = (TestBean)context.getBean("factoryMethodComponent$getPrivateInstance"); //4
-		assertEquals(1, tb2.getAge());
+		assertEquals(1, tb.getAge());
+		tb2 = (TestBean)context.getBean("privateInstance"); //4
+		assertEquals(2, tb2.getAge());
 		assertNotSame(tb2, tb);
 		
-		Object bean = context.getBean("scopedTarget.factoryMethodComponent$requestScopedInstance"); //5
-		assertNotNull(bean);
-		assertTrue(bean instanceof ScopedObject);
-	
-		//Scope assertions
+		Object bean = context.getBean("requestScopedInstance"); //5
 		assertTrue(AopUtils.isCglibProxy(bean));
-		
-		
-		
-		
-	
+		assertTrue(bean instanceof ScopedObject);
+
+		QualifiedClientBean clientBean = context.getBean("clientBean", QualifiedClientBean.class);
+		assertSame(clientBean.testBean, context.getBean("publicInstance"));
 	}
+
+
+	public static class QualifiedClientBean {
+
+		@Autowired @Qualifier("public")
+		public TestBean testBean;
+	}
+
 }

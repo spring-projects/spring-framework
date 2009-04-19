@@ -57,7 +57,7 @@ import org.springframework.stereotype.Component;
  * @see Value
  * @see ConfigurationClassPostProcessor;
  */
-@Target( { ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
