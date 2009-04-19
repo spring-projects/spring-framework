@@ -220,11 +220,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.freemarker/com.springsource.freemarker/2.3.12/com.springsource.freemarker-2.3.12.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.freemarker/com.springsource.freemarker/2.3.15/com.springsource.freemarker-2.3.15.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.freemarker/com.springsource.freemarker/2.3.12/com.springsource.freemarker-sources-2.3.12.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.freemarker/com.springsource.freemarker/2.3.15/com.springsource.freemarker-sources-2.3.15.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.template.Configuration;
+import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.easymock.MockControl;
@@ -104,7 +106,7 @@ public class FreeMarkerViewTests {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wac.getServletContext();
-		wmc.setReturnValue(sc, 4);
+		wmc.setReturnValue(sc, 5);
 		wmc.replay();
 
 		fv.setUrl("templateName");
@@ -141,7 +143,7 @@ public class FreeMarkerViewTests {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wac.getServletContext();
-		wmc.setReturnValue(sc, 4);
+		wmc.setReturnValue(sc, 5);
 		wmc.replay();
 
 		fv.setUrl("templateName");
@@ -170,9 +172,9 @@ public class FreeMarkerViewTests {
 			return new Template(name, new StringReader("test")) {
 				public void process(Object model, Writer writer) throws TemplateException, IOException {
 					assertEquals(Locale.US, locale);
-					assertTrue(model instanceof Map);
-					Map modelMap = (Map) model;
-					assertEquals("myvalue", modelMap.get("myattr"));
+					assertTrue(model instanceof AllHttpScopesHashModel);
+					AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
+					assertEquals("myvalue", fmModel.get("myattr").toString());
 				}
 			};
 		}

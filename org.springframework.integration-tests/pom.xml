@@ -309,7 +309,7 @@
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
-      <version>2.3.12</version>
+      <version>2.3.15</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -34,7 +34,7 @@
 					conf="optional, feed->compile"/>
 		<dependency org="com.lowagie.text" name="com.springsource.com.lowagie.text" rev="2.0.8"
 					conf="optional, itext->compile"/>
-		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.12"
+		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.15"
 					conf="optional, freemarker->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided->compile"/>
