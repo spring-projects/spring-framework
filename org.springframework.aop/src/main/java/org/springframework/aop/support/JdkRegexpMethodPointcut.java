@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	/** 
 	 * Compiled form of the patterns.
 	 */
-	private transient Pattern[] compiledPatterns = new Pattern[0];
+	private Pattern[] compiledPatterns = new Pattern[0];
 
 	/** 
 	 * Compiled form of the exclusion patterns.
 	 */
-	private transient Pattern[] compiledExclusionPatterns = new Pattern[0];
+	private Pattern[] compiledExclusionPatterns = new Pattern[0];
 
 
 	/**
@@ -56,6 +56,14 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	@Override
 	protected void initPatternRepresentation(String[] patterns) throws PatternSyntaxException {
 		this.compiledPatterns = compilePatterns(patterns);
+	}
+
+	/**
+	 * Initialize exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
+	 */
+	@Override
+	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws PatternSyntaxException {
+		this.compiledExclusionPatterns = compilePatterns(excludedPatterns);
 	}
 
 	/**
@@ -69,14 +77,6 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	}
 
 	/**
-	 * Initialize exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
-	 */
-	@Override
-	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException {
-		this.compiledExclusionPatterns = compilePatterns(excludedPatterns);
-	}
-
-	/**
 	 * Returns <code>true</code> if the exclusion {@link Pattern} at index <code>patternIndex</code>
 	 * matches the supplied candidate <code>String</code>.
 	 */
@@ -86,11 +86,12 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 		return matcher.matches();
 	}
 
+
 	/**
 	 * Compiles the supplied <code>String[]</code> into an array of
 	 * {@link Pattern} objects and returns that array.
 	 */
-	private Pattern[] compilePatterns(String[] source) {
+	private Pattern[] compilePatterns(String[] source) throws PatternSyntaxException {
 		Pattern[] destination = new Pattern[source.length];
 		for (int i = 0; i < source.length; i++) {
 			destination[i] = Pattern.compile(source[i]);
