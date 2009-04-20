@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,15 +44,18 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 		if (node instanceof Element) {
 			Element ele = (Element) node;
 			if (ele.hasAttribute(PROXY_TARGET_CLASS)) {
-				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
+				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
 			}
 		}
 		
-		// Register the original bean definition as it will be referenced by the scoped proxy and is relevant for tooling (validation, navigation).
+		// Register the original bean definition as it will be referenced by the scoped proxy
+		// and is relevant for tooling (validation, navigation).
+		BeanDefinitionHolder holder =
+				ScopedProxyUtils.createScopedProxy(definition, parserContext.getRegistry(), proxyTargetClass);
 		String targetBeanName = ScopedProxyUtils.getTargetBeanName(definition.getBeanName());
-		parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(definition.getBeanDefinition(), targetBeanName));
-		
-		return ScopedProxyUtils.createScopedProxy(definition, parserContext.getRegistry(), proxyTargetClass);
+		parserContext.getReaderContext().fireComponentRegistered(
+				new BeanComponentDefinition(definition.getBeanDefinition(), targetBeanName));
+		return holder;
 	}
 
 }
