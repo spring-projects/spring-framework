@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
-import org.springframework.beans.FatalBeanException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link EntityResolver} implementation that attempts to resolve schema URLs into
@@ -67,7 +69,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	private final String schemaMappingsLocation;
 
 	/** Stores the mapping of schema URL -> local schema path */
-	private Properties schemaMappings;
+	private volatile Map<String, String> schemaMappings;
 
 
 	/**
@@ -104,7 +106,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 					"] and system id [" + systemId + "]");
 		}
 		if (systemId != null) {
-			String resourceLocation = getSchemaMapping(systemId);
+			String resourceLocation = getSchemaMappings().get(systemId);
 			if (resourceLocation != null) {
 				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				InputSource source = new InputSource(resource.getInputStream());
@@ -119,24 +121,40 @@ public class PluggableSchemaResolver implements EntityResolver {
 		return null;
 	}
 
-	protected String getSchemaMapping(String systemId) {
+	/**
+	 * Load the specified schema mappings lazily.
+	 */
+	private Map<String, String> getSchemaMappings() {
 		if (this.schemaMappings == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
-			}
-			try {
-				this.schemaMappings =
-						PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Loaded schema mappings: " + this.schemaMappings);
+			synchronized (this) {
+				if (this.schemaMappings == null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
+					}
+					try {
+						Properties mappings =
+								PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Loaded schema mappings: " + mappings);
+						}
+						Map<String, String> schemaMappings = new ConcurrentHashMap<String, String>();
+						CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
+						this.schemaMappings = schemaMappings;
+					}
+					catch (IOException ex) {
+						throw new IllegalStateException(
+								"Unable to load schema mappings from location [" + this.schemaMappingsLocation + "]", ex);
+					}
 				}
 			}
-			catch (IOException ex) {
-				throw new FatalBeanException(
-						"Unable to load schema mappings from location [" + this.schemaMappingsLocation + "]", ex);
-			}
 		}
-		return this.schemaMappings.getProperty(systemId);
+		return this.schemaMappings;
+	}
+
+
+	@Override
+	public String toString() {
+		return "EntityResolver using mappings " + getSchemaMappings();
 	}
 
 }
