@@ -318,7 +318,9 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws IllegalArgumentException if the string cannot be parsed
 	 */
 	public static List<MediaType> parseMediaTypes(String mediaTypes) {
-		Assert.hasLength(mediaTypes, "'mediaTypes' must not be empty");
+		if (!StringUtils.hasLength(mediaTypes)) {
+			return Collections.emptyList();
+		}
 		String[] tokens = mediaTypes.split(",\\s*");
 		List<MediaType> result = new ArrayList<MediaType>(tokens.length);
 		for (String token : tokens) {
