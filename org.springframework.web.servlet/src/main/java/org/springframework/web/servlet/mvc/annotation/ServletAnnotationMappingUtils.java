@@ -16,8 +16,11 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import java.util.Iterator;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.WebUtils;
@@ -32,6 +35,7 @@ abstract class ServletAnnotationMappingUtils {
 
 	/**
 	 * Check whether the given request matches the specified request methods.
+	 *
 	 * @param methods the HTTP request methods to check against
 	 * @param request the current HTTP request to check
 	 */
@@ -49,8 +53,8 @@ abstract class ServletAnnotationMappingUtils {
 
 	/**
 	 * Check whether the given request matches the specified parameter conditions.
-	 * @param params the parameter conditions, following
-	 * {@link org.springframework.web.bind.annotation.RequestMapping#params()}
+	 *
+	 * @param params the parameter conditions, following {@link org.springframework.web.bind.annotation.RequestMapping#params()}
 	 * @param request the current HTTP request to check
 	 */
 	public static boolean checkParameters(String[] params, HttpServletRequest request) {
@@ -77,6 +81,64 @@ abstract class ServletAnnotationMappingUtils {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Check whether the given request matches the specified header conditions.
+	 *
+	 * @param headers the header conditions, following {@link org.springframework.web.bind.annotation.RequestMapping#headers()}
+	 * @param request the current HTTP request to check
+	 */
+	public static boolean checkHeaders(String[] headers, HttpServletRequest request) {
+		if (!ObjectUtils.isEmpty(headers)) {
+			for (String header : headers) {
+				int separator = header.indexOf('=');
+				if (separator == -1) {
+					if (header.startsWith("!")) {
+						if (hasHeader(request, header.substring(1))) {
+							return false;
+						}
+					}
+					else if (!hasHeader(request, header)) {
+						return false;
+					}
+				}
+				else {
+					String key = header.substring(0, separator);
+					String value = header.substring(separator + 1);
+					if (isMediaTypeHeader(key)) {
+						List<MediaType> requestMediaTypes = MediaType.parseMediaTypes(request.getHeader(key));
+						List<MediaType> valueMediaTypes = MediaType.parseMediaTypes(value);
+						boolean found = false;
+						for (Iterator<MediaType> valIter = valueMediaTypes.iterator(); valIter.hasNext() && !found;) {
+							MediaType valueMediaType =  valIter.next();
+							for (Iterator<MediaType> reqIter = requestMediaTypes.iterator(); reqIter.hasNext() && !found;) {
+								MediaType requestMediaType =  reqIter.next();
+								if (valueMediaType.includes(requestMediaType)) {
+									found = true;
+								}
+							}
+
+						}
+						if (!found) {
+							return false;
+						}
+					}
+					else if (!value.equals(request.getHeader(key))) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private static boolean hasHeader(HttpServletRequest request, String headerName) {
+		return request.getHeader(headerName) != null;
+	}
+
+	private static boolean isMediaTypeHeader(String headerName) {
+		return "Accept".equalsIgnoreCase(headerName) || "Content-Type".equalsIgnoreCase(headerName);
 	}
 
 }

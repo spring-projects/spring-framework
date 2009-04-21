@@ -396,12 +396,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
 					mappingInfo.params = mapping.params();
 				}
+				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(), getTypeLevelMapping().headers())) {
+					mappingInfo.headers = mapping.headers();
+				}
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
 					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);
 					for (String methodLevelPattern : mappingInfo.paths) {
 						if (isPathMatch(methodLevelPattern, lookupPath)) {
-							if (checkParameters(mappingInfo, request)) {
+							if (mappingInfo.matches(request)) {
 								match = true;
 								matchedPaths.add(methodLevelPattern);
 							}
@@ -418,7 +421,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 				else {
 					// No paths specified: parameter match sufficient.
-					match = checkParameters(mappingInfo, request);
+					match = mappingInfo.matches(request);
 					if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 &&
 							resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
 						match = false;
@@ -512,11 +515,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				return true;
 			}
 			return false;
-		}
-
-		private boolean checkParameters(RequestMappingInfo mapping, HttpServletRequest request) {
-			return ServletAnnotationMappingUtils.checkRequestMethod(mapping.methods, request) &&
-					ServletAnnotationMappingUtils.checkParameters(mapping.params, request);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -726,21 +724,29 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		String[] params = new String[0];
 
+		String[] headers = new String[0];
+
 		String bestMatchedPath() {
 			return matchedPaths.length > 0 ? matchedPaths[0] : null;
+		}
+
+		public boolean matches(HttpServletRequest request) {
+			return ServletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
+					ServletAnnotationMappingUtils.checkParameters(this.params, request) &&
+					ServletAnnotationMappingUtils.checkHeaders(this.headers, request);
 		}
 
 		@Override
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
 			return (Arrays.equals(this.paths, other.paths) && Arrays.equals(this.methods, other.methods) &&
-					Arrays.equals(this.params, other.params));
+					Arrays.equals(this.params, other.params) && Arrays.equals(this.headers, other.headers));
 		}
 
 		@Override
 		public int hashCode() {
-			return (Arrays.hashCode(this.paths) * 29 + Arrays.hashCode(this.methods) * 31 +
-					Arrays.hashCode(this.params));
+			return (Arrays.hashCode(this.paths) * 23 + Arrays.hashCode(this.methods) * 29 +
+					Arrays.hashCode(this.params) * 31 + Arrays.hashCode(this.headers));
 		}
 	}
 
@@ -777,14 +783,21 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else if (info1MethodCount == 1 & info2MethodCount > 1) {
 				return -1;
-
 			}
 			else if (info2MethodCount == 1 & info1MethodCount > 1) {
 				return 1;
 			}
 			int info1ParamCount = info1.params.length;
 			int info2ParamCount = info2.params.length;
-			return (info1ParamCount < info2ParamCount ? 1 : (info1ParamCount == info2ParamCount ? 0 : -1));
+			if (info1ParamCount != info2ParamCount) {
+				return info2ParamCount - info1ParamCount;
+			}
+			int info1HeaderCount = info1.headers.length;
+			int info2HeaderCount = info2.headers.length;
+			if (info1HeaderCount != info2HeaderCount) {
+				return info2HeaderCount - info1HeaderCount;
+			}
+			return 0;
 		}
 	}
 

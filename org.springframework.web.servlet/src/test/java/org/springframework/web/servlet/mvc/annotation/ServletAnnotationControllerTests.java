@@ -894,6 +894,23 @@ public class ServletAnnotationControllerTests {
 		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
 	}
 
+	@Test
+	public void headers() throws ServletException, IOException {
+		initServlet(HeadersController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Content-Type", "application/pdf");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("pdf", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Content-Type", "text/html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("text", response.getContentAsString());
+	}
+
 	/*
 	 * Controllers
 	 */
@@ -1469,6 +1486,20 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping(value = "/something", method = RequestMethod.PUT)
 		public void handle(@RequestBody String body, Writer writer) throws IOException {
 			writer.write(body);
+		}
+	}
+
+	@Controller
+	public static class HeadersController {
+
+		@RequestMapping(value = "/something", headers = "content-type=application/pdf")
+		public void handlePdf(Writer writer) throws IOException {
+			writer.write("pdf");
+		}
+
+		@RequestMapping(value = "/something", headers = "content-type=text/*")
+		public void handleHtml(Writer writer) throws IOException {
+			writer.write("text");
 		}
 	}
 

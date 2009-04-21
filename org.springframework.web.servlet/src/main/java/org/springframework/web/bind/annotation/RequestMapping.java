@@ -230,4 +230,25 @@ public @interface RequestMapping {
 	 */
 	String[] params() default {};
 
+	/**
+	 * The headers of the mapped request, narrowing the primary mapping.
+	 * <p>Same format for any environment: a sequence of "My-Header=myValue" style
+	 * expressions, with a request only mapped if each such header is found
+	 * to have the given value. "My-Header" style expressions are also supported,
+	 * with such headers having to be present in the request (allowed to have
+	 * any value). Finally, "!My-Header" style expressions indicate that the
+	 * specified header is <i>not</i> supposed to be present in the request.
+	 * <p>Also supports media type wildcards (*), for headers such as Accept
+	 * and Content-Type. For instance,
+	 * <pre>
+	 * &#064;RequestMapping(value = "/something", headers = "content-type=text/*")
+	 * </pre>
+	 * will match requests with a Content-Type of "text/html", "text/plain", etc.
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method-level mappings inherit
+	 * this header restriction (i.e. the type-level restriction
+	 * gets checked before the handler method is even resolved).
+	 * @see org.springframework.http.MediaType
+	 */
+	String[] headers() default {}; 
 }
