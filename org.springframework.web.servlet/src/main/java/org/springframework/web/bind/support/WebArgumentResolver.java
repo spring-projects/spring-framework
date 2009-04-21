@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * SPI for resolving custom arguments for a specific handler method parameter.
- * Typically implemented to detect sppecial parameter types, resolving
+ * Typically implemented to detect special parameter types, resolving
  * well-known argument values for them.
  *
  * <p>A typical implementation could look like as follows:
  *
  * <pre class="code">
- * public class MySpecialArgumentResolver implements ArgumentResolver {
+ * public class MySpecialArgumentResolver implements WebArgumentResolver {
  *
  *   public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
  *     if (methodParameter.getParameterType().equals(MySpecialArg.class)) {
