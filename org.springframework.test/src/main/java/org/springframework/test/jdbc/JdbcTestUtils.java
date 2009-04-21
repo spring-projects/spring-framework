@@ -32,7 +32,7 @@ import java.io.IOException;
 public class JdbcTestUtils {
 
 	/**
-	 * Read a script from the LineNumberReaded and build a String containing the lines.
+	 * Read a script from the LineNumberReader and build a String containing the lines.
 	 * @param lineNumberReader the <code>LineNumberReader</> containing the script to be processed
 	 * @return <code>String</code> containing the script lines
 	 * @throws IOException
