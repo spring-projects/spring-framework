@@ -8,7 +8,7 @@
 
 	<aop:config>
 		<aop:aspect ref="getMessageAspect">
-			<aop:before method="before" pointcut="execution(* org.springframework.scripting.Messenger.*(..))"/>
+			<aop:before method="before" pointcut="execution(* *..Messenger.*(..))"/>
 		</aop:aspect>
 	</aop:config>
 
