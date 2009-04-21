@@ -35,7 +35,7 @@ import java.lang.annotation.Annotation;
  * @see ConfigurationClassAnnotationVisitor
  * @see ConfigurationClassReaderUtils#createMutableAnnotation
  */
-interface ConfigurationClassAnnotation extends Annotation {
+public interface ConfigurationClassAnnotation extends Annotation {
 
 	void setAttributeValue(String attribName, Object attribValue);
 
