@@ -95,5 +95,9 @@ public class CompositeStringExpression implements Expression {
 	public boolean isWritable(EvaluationContext context) {
 		return false;
 	}
+	
+	public Expression[] getExpressions() {
+		return expressions;
+	}
 
 }
