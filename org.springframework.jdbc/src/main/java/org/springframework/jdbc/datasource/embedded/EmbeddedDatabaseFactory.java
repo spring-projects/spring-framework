@@ -68,7 +68,7 @@ public class EmbeddedDatabaseFactory {
 	}
 	
 	/**
-	 * Sets the name of the test database.
+	 * Sets the name of the database.
 	 * Defaults to 'testdb'.
 	 * @param name of the test database
 	 */
