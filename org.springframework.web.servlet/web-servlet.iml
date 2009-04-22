@@ -186,17 +186,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/0.9.0/com.springsource.com.sun.syndication-0.9.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/0.9.0/com.springsource.com.sun.syndication-sources-0.9.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -299,6 +288,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$IVY_CACHE$/org.eclipse.jdt/com.springsource.org.eclipse.jdt.core.compiler.batch/3.3.0/com.springsource.org.eclipse.jdt.core.compiler.batch-sources-3.3.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
