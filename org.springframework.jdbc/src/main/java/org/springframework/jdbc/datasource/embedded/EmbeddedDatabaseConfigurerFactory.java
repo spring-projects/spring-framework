@@ -15,9 +15,16 @@
  */
 package org.springframework.jdbc.datasource.embedded;
 
+import org.springframework.util.Assert;
+
+/**
+ * Package private factory for mapping well-known embedded database types to database configurer strategies.
+ * @author Keith Donald
+ */
 class EmbeddedDatabaseConfigurerFactory {
 
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
+		Assert.notNull(type, "The EmbeddedDatabaseType is required");
 		try {
 			if (type == EmbeddedDatabaseType.HSQL) {
 				return HsqlEmbeddedDatabaseConfigurer.getInstance();

@@ -20,7 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Strategy for populating a database with data.
- * 
+ * @author Keith Donald
  * @see ResourceDatabasePopulator
  */
 public interface DatabasePopulator {
