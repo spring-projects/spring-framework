@@ -75,6 +75,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
 import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
@@ -671,6 +672,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				Object returnValue,
 				ExtendedModelMap implicitModel,
 				ServletWebRequest webRequest) {
+
+			if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
+				ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
+				HttpServletResponse response = webRequest.getResponse();
+				response.setStatus(responseStatus.value().value());
+				responseArgumentUsed = true;
+			}
 
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;

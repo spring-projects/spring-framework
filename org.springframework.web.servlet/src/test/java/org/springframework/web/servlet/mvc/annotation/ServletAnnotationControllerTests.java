@@ -54,6 +54,7 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -78,6 +79,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
@@ -911,6 +913,17 @@ public class ServletAnnotationControllerTests {
 		assertEquals("text", response.getContentAsString());
 	}
 
+	@Test
+	public void responseStatus() throws ServletException, IOException {
+		initServlet(ResponseStatusController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("something", response.getContentAsString());
+		assertEquals(201, response.getStatus());
+	}
+
 	/*
 	 * Controllers
 	 */
@@ -1503,6 +1516,15 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
+	public static class ResponseStatusController {
+
+		@RequestMapping("/something")
+		@ResponseStatus(HttpStatus.CREATED)
+		public void handle(Writer writer) throws IOException {
+			writer.write("something");
+		}
+	}
 
 	public static class MyMessageConverter implements HttpMessageConverter {
 

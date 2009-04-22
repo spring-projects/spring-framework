@@ -25,12 +25,14 @@ import java.lang.annotation.Target;
 import org.springframework.http.HttpStatus;
 
 /**
- * Marks an exception class with the status code and reason that should be returned whenever said exception is thrown.
+ * Marks a method or exception class with the status code and reason that should be returned. The status code is applied
+ * to the HTTP response when the handler method is invoked, or whenever said exception is thrown.
  *
  * @author Arjen Poutsma
+ * @see org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver
  * @since 3.0
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ResponseStatus {
