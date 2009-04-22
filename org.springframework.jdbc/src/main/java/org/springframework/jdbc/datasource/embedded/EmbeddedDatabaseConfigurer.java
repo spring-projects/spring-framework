@@ -23,6 +23,8 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
  * Encapsulates the configuration required to create, connect to, and shutdown a specific type of embedded database such as HSQLdb or H2.
  * Create a subclass for each database type we wish to support.
  * 
+ * TODO - introduce ConfigurableDataSource strategy for configuring connection properties?
+ * 
  * @see EmbeddedDatabaseConfigurerFactory
  */
 abstract class EmbeddedDatabaseConfigurer {
