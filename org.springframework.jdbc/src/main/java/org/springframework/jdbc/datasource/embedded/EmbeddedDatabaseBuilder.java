@@ -25,7 +25,7 @@ import org.springframework.core.io.ResourceLoader;
  * Usage example:
  * <pre>
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
- * EmbeddedDatabase db = builder.schema("schema.sql").testData("test-data.sql").build();
+ * EmbeddedDatabase db = builder.script("schema.sql").script("test-data.sql").build();
  * db.shutdown();
  * </pre>
  * @author Keith Donald
@@ -48,7 +48,7 @@ public class EmbeddedDatabaseBuilder {
 	/**
 	 * Sets the name of the embedded database
 	 * Defaults to 'testdb' if not called.
-	 * @param databaseType the embedded database type
+	 * @param databaseName the database name
 	 * @return this, for fluent call chaining
 	 */
 	public EmbeddedDatabaseBuilder name(String databaseName) {
@@ -59,7 +59,7 @@ public class EmbeddedDatabaseBuilder {
 	/**
 	 * Sets the type of embedded database.
 	 * Defaults to HSQL if not called.
-	 * @param databaseType the embedded database type
+	 * @param databaseType the database type
 	 * @return this, for fluent call chaining
 	 */
 	public EmbeddedDatabaseBuilder type(EmbeddedDatabaseType databaseType) {
@@ -86,7 +86,7 @@ public class EmbeddedDatabaseBuilder {
 	}
 	
 	/**
-	 * Factory method that creates a embedded database builder that loads resources relative to the provided class.
+	 * Factory method that creates a EmbeddedDatabaseBuilder that loads SQL resources relative to the provided class.
 	 * @param clazz the class to load relative to
 	 * @return the embedded database builder
 	 */
@@ -105,7 +105,7 @@ public class EmbeddedDatabaseBuilder {
 	
 	/**
 	 * Factory method that builds a default EmbeddedDatabase instance.
-	 * The default is HSQL with a schema created from classpath:schema.sql and test-data loaded from classpath:test-data.sql.
+	 * The default instance is HSQL with a schema created from classpath:schema.sql and test-data loaded from classpath:test-data.sql.
 	 * @return an embedded database
 	 */
 	public static EmbeddedDatabase buildDefault() {
