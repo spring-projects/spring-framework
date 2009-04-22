@@ -102,7 +102,7 @@ public class EmbeddedDatabaseFactory {
 	 * @param populator the database populator 
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
-		Assert.notNull(populator, "The TestDatabasePopulator is required");
+		Assert.notNull(populator, "The DatabasePopulator is required");
 		databasePopulator = populator;
 	}
 
