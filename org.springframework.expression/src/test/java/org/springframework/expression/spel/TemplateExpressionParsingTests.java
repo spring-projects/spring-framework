@@ -20,6 +20,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
+import org.springframework.expression.common.CompositeStringExpression;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -111,6 +112,11 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 
 		// not a useful expression but tests nested expression syntax that clashes with template prefix/suffix
 		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#root.listOfNumbersUpToTen.$[#this%2==1]==3]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		assertEquals(CompositeStringExpression.class,ex.getClass());
+		CompositeStringExpression cse = (CompositeStringExpression)ex;
+		Expression[] exprs = cse.getExpressions();
+		assertEquals(3,exprs.length);
+		assertEquals("listOfNumbersUpToTen.$[#root.listOfNumbersUpToTen.$[#this%2==1]==3]",exprs[1].getExpressionString());
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello  world",s);
 
@@ -126,10 +132,10 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		}	
 		
 		try {
-			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.${#root.listOfNumbersUpToTen.${#this%2==1==3}} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#root.listOfNumbersUpToTen.$[#this%2==1==3]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 			fail("Should have failed");
 		} catch (ParseException pe) {
-			assertEquals("No ending suffix '}' for expression starting at character 6: ${listOfNumbersUpToTen.${#root.listOfNumbersUpToTen.${#this%2==1==3}} world",pe.getMessage());
+			assertEquals("Found closing '}' at position 74 but most recent opening is '[' at position 30",pe.getMessage());
 		}	
 	}
 	
@@ -139,11 +145,11 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello 7 world",s);
 
-		ex = parser.parseExpression("hello ${3+4} wo\\${rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		ex = parser.parseExpression("hello ${3+4} wo${'${'}rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello 7 wo${rld",s);
 
-		ex = parser.parseExpression("hello ${3+4} wo\\}rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		ex = parser.parseExpression("hello ${3+4} wo}rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		assertEquals("hello 7 wo}rld",s);
 	}

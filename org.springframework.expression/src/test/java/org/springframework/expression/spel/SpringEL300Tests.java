@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import org.springframework.expression.Expression;
+import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 
 /**
@@ -26,20 +27,82 @@ import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
  */
 public class SpringEL300Tests extends ExpressionTestCase {
 
+
+	public static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+		public String getExpressionPrefix() {
+			return "$[";
+		}
+		public String getExpressionSuffix() {
+			return "]";
+		}
+		public boolean isTemplate() {
+			return true;
+		}
+	};
+	
 	public void testNPE_5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
 	
 	public void testNPE_5673() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
-		Expression ex = parser.parseExpression("#{'Unable to render embedded object: File ({#this == 2\\}'}", TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT);
-		assertEquals("Unable to render embedded object: File ({#this == 2}",ex.getValue());
+		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
+		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
 		
-		ex = parser.parseExpression("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}",TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT);
-		assertEquals("This is the last odd number in the list: 9",ex.getValue(TestScenarioCreator.getTestEvaluationContext()));
+		checkTemplateParsing("abc${'def'} ghi","abcdef ghi");
+		
+		checkTemplateParsingError("abc${ {}( 'abc'","Missing closing ')' for '(' at position 8");
+		checkTemplateParsingError("abc${ {}[ 'abc'","Missing closing ']' for '[' at position 8");
+		checkTemplateParsingError("abc${ {}{ 'abc'","Missing closing '}' for '{' at position 8");
+		checkTemplateParsingError("abc${ ( 'abc' }","Found closing '}' at position 14 but most recent opening is '(' at position 6");
+		checkTemplateParsingError("abc${ '... }","Found non terminating string literal starting at position 6");
+		checkTemplateParsingError("abc${ \"... }","Found non terminating string literal starting at position 6");
+		checkTemplateParsingError("abc${ ) }","Found closing ')' at position 6 without an opening '('");
+		checkTemplateParsingError("abc${ ] }","Found closing ']' at position 6 without an opening '['");
+		checkTemplateParsingError("abc${ } }","No expression defined within delimiter '${}' at character 3");
+		checkTemplateParsingError("abc$[ } ]",DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT,"Found closing '}' at position 6 without an opening '{'");
+		
+		checkTemplateParsing("abc ${\"def''g}hi\"} jkl","abc def'g}hi jkl");
+		checkTemplateParsing("abc ${'def''g}hi'} jkl","abc def'g}hi jkl");
+		checkTemplateParsing("}","}");
+		checkTemplateParsing("${'hello'} world","hello world");
+		checkTemplateParsing("Hello ${'}'}]","Hello }]");
+		checkTemplateParsing("Hello ${'}'}","Hello }");
+		checkTemplateParsingError("Hello ${ ( ","No ending suffix '}' for expression starting at character 6: ${ ( ");
+		checkTemplateParsingError("Hello ${ ( }","Found closing '}' at position 11 but most recent opening is '(' at position 9");
+		checkTemplateParsing("#{'Unable to render embedded object: File ({#this == 2}'}", hashes,"Unable to render embedded object: File ({#this == 2}");
+		checkTemplateParsing("This is the last odd number in the list: ${listOfNumbersUpToTen.$[#this%2==1]}",dollars,"This is the last odd number in the list: 9");
+		checkTemplateParsing("Hello ${'here is a curly bracket }'}",dollars,"Hello here is a curly bracket }");
+		checkTemplateParsing("He${'${'}llo ${'here is a curly bracket }'}}",dollars,"He${llo here is a curly bracket }}");
+		checkTemplateParsing("Hello ${'()()()}{}{}{][]{}{][}[][][}{()()'} World",dollars,"Hello ()()()}{}{}{][]{}{][}[][][}{()() World");
+		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World","Hello inner literal that's got {[(])]}an escaped quote in it World");
+		checkTemplateParsingError("Hello ${","No ending suffix '}' for expression starting at character 6: ${");
+	}
 
-		ex = parser.parseExpression("Hello ${'here is a curly bracket \\}'}",TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT);
-		assertEquals("Hello here is a curly bracket }",ex.getValue());
+	private void checkTemplateParsing(String expression, String expectedValue) throws Exception {
+		checkTemplateParsing(expression,TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
+	}
+	
+	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		Expression expr = parser.parseExpression(expression,context);
+		assertEquals(expectedValue,expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
+	}
+
+	private void checkTemplateParsingError(String expression,String expectedMessage) throws Exception {
+		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT,expectedMessage);
+	}
+	
+	private void checkTemplateParsingError(String expression,ParserContext context, String expectedMessage) throws Exception {
+		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		try {
+			Expression expr = parser.parseExpression(expression,context);
+			fail("Should have failed");
+		} catch (Exception e) {
+			if (!e.getMessage().equals(expectedMessage)) {
+				e.printStackTrace();
+			}
+			assertEquals(expectedMessage,e.getMessage());
+		}
 	}
 
 }
