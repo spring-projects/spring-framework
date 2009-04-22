@@ -183,18 +183,14 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 
 	public final void afterPropertiesSet() throws CastorMappingException, IOException {
-		if (this.mappingLocations != null && this.targetClass != null) {
-			throw new IllegalArgumentException("Cannot set both the 'mappingLocations' and 'targetClass' property. " +
-					"Set 'targetClass' for unmarshalling a single class, and 'mappingLocations' for multiple classes.");
-		}
 		if (logger.isInfoEnabled()) {
 			if (this.mappingLocations != null) {
 				logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(this.mappingLocations));
 			}
-			else if (this.targetClass != null) {
+			if (this.targetClass != null) {
 				logger.info("Configured for target class [" + this.targetClass.getName() + "]");
 			}
-			else {
+			if (this.mappingLocations == null && this.targetClass == null) {
 				logger.info("Using default configuration");
 			}
 		}

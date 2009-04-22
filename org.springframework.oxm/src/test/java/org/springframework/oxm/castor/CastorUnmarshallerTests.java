@@ -18,19 +18,18 @@ package org.springframework.oxm.castor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Override
@@ -67,12 +66,27 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		testFlights(flights);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetBothTargetClassAndMapping() throws IOException {
-		CastorMarshaller marshaller = new CastorMarshaller();
-		marshaller.setMappingLocation(new ClassPathResource("mapping.xml", CastorMarshaller.class));
-		marshaller.setTargetClass(getClass());
-		marshaller.afterPropertiesSet();
+		CastorMarshaller unmarshaller = new CastorMarshaller();
+		unmarshaller.setMappingLocation(new ClassPathResource("order-mapping.xml", CastorMarshaller.class));
+		unmarshaller.setTargetClass(ArrayList.class);
+		unmarshaller.afterPropertiesSet();
+
+		String xml = "<order>" +
+				"<order-item id=\"1\" quantity=\"15\"/>" +
+				"<order-item id=\"3\" quantity=\"20\"/>" +
+				"</order>";
+
+		ArrayList result = (ArrayList) unmarshaller.unmarshal(new StreamSource(new StringReader(xml)));
+		assertEquals("Invalid amount of items", 2, result.size());
+		OrderItem item = (OrderItem) result.get(0);
+		assertEquals("Invalid items", "1", item.getId());
+		assertEquals("Invalid items", new Integer(15), item.getQuantity());
+		item = (OrderItem) result.get(1);
+		assertEquals("Invalid items", "3", item.getId());
+		assertEquals("Invalid items", new Integer(20), item.getQuantity());
 	}
+
 
 }
