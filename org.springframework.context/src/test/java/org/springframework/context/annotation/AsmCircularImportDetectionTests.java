@@ -16,10 +16,7 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
-import org.springframework.context.annotation.ConfigurationClassParser;
-import org.springframework.context.annotation.Import;
-import org.springframework.util.ClassUtils;
-
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 
 /**
  * Unit test proving that ASM-based {@link ConfigurationClassParser} correctly detects circular use of
@@ -32,9 +29,10 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  */
 public class AsmCircularImportDetectionTests extends AbstractCircularImportDetectionTests {
+
 	@Override
 	protected ConfigurationClassParser newParser() {
-		return new ConfigurationClassParser(new FailFastProblemReporter(), ClassUtils.getDefaultClassLoader());
+		return new ConfigurationClassParser(new CachingMetadataReaderFactory(), new FailFastProblemReporter());
 	}
 
 	@Override

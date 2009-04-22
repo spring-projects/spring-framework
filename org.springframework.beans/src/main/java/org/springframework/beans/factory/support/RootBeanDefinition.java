@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.util.Assert;
 
 /**
  * A root bean definition represents the merged bean definition that backs
@@ -52,7 +53,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>());
 
-	volatile Method factoryMethodForIntrospection;
+	boolean isFactoryMethodUnique;
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	volatile Object resolvedConstructorOrFactoryMethod;
@@ -198,7 +199,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param original the original bean definition to copy from
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
-		super((BeanDefinition) original);
+		this((BeanDefinition) original);
 	}
 
 	/**
@@ -208,6 +209,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	RootBeanDefinition(BeanDefinition original) {
 		super(original);
+		if (original instanceof RootBeanDefinition) {
+			this.isFactoryMethodUnique = ((RootBeanDefinition) original).isFactoryMethodUnique;
+		}
 	}
 
 
@@ -221,8 +225,26 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
-	public Method getFactoryMethodForIntrospection() {
-		return this.factoryMethodForIntrospection;
+	/**
+	 * Specify a factory method name that refers to a non-overloaded method.
+	 */
+	public void setUniqueFactoryMethodName(String name) {
+		Assert.hasText(name, "Factory method name must not be empty");
+		setFactoryMethodName(name);
+		this.isFactoryMethodUnique = true;
+	}
+
+	public boolean isFactoryMethod(Method candidate) {
+		return (candidate != null && candidate.getName().equals(getFactoryMethodName()));
+	}
+
+	/**
+	 * Return the resolved factory method as a Java Method object, if available.
+	 * @return the factory method, or <code>null</code> if not found or not resolved yet
+	 */
+	public Method getResolvedFactoryMethod() {
+		Object candidate = this.resolvedConstructorOrFactoryMethod;
+		return (candidate instanceof Method ? (Method) candidate : null);
 	}
 
 
@@ -252,7 +274,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 
 	@Override
-	public AbstractBeanDefinition cloneBeanDefinition() {
+	public RootBeanDefinition cloneBeanDefinition() {
 		return new RootBeanDefinition(this);
 	}
 

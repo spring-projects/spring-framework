@@ -30,29 +30,55 @@ import org.springframework.core.type.ClassMetadata;
  * @author Juergen Hoeller
  * @since 2.5
  */
-class SimpleMetadataReader implements MetadataReader {
+public class SimpleMetadataReader implements MetadataReader {
 
 	private final ClassReader classReader;
 
 	private final ClassLoader classLoader;
 
+	private ClassMetadata classMetadata;
 
-	public SimpleMetadataReader(ClassReader classReader, ClassLoader classLoader) {
+	private AnnotationMetadata annotationMetadata;
+
+
+	SimpleMetadataReader(ClassReader classReader, ClassLoader classLoader) {
 		this.classReader = classReader;
 		this.classLoader = classLoader;
 	}
 
 
+	/**
+	 * Return the underlying ASM ClassReader.
+	 */
+	public final ClassReader getClassReader() {
+		return this.classReader;
+	}
+
+	/**
+	 * Return the underlying ClassLoader.
+	 */
+	public final ClassLoader getClassLoader() {
+		return this.classLoader;
+	}
+
+
 	public ClassMetadata getClassMetadata() {
-		ClassMetadataReadingVisitor visitor = new ClassMetadataReadingVisitor();
-		this.classReader.accept(visitor, true);
-		return visitor;
+		if (this.classMetadata == null) {
+			ClassMetadataReadingVisitor visitor = new ClassMetadataReadingVisitor();
+			this.classReader.accept(visitor, true);
+			this.classMetadata = visitor;
+		}
+		return this.classMetadata;
 	}
 
 	public AnnotationMetadata getAnnotationMetadata() {
-		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(this.classLoader);
-		this.classReader.accept(visitor, true);
-		return visitor;
+		if (this.annotationMetadata == null) {
+			AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(this.classLoader);
+			this.classReader.accept(visitor, true);
+			this.annotationMetadata = visitor;
+			this.classMetadata = visitor;
+		}
+		return this.annotationMetadata;
 	}
 
 }

@@ -16,14 +16,14 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.Stack;
 
-import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.util.ClassUtils;
+import org.springframework.core.type.classreading.SimpleMetadataReader;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 /**
  * Parses a {@link Configuration} class definition, populating a configuration model.
@@ -41,11 +41,11 @@ import org.springframework.util.ClassUtils;
  */
 class ConfigurationClassParser {
 
-	private final Set<ConfigurationClass> model;
+	private final SimpleMetadataReaderFactory metadataReaderFactory;
 
 	private final ProblemReporter problemReporter;
 
-	private final ClassLoader classLoader;
+	private final Set<ConfigurationClass> model;
 
 
 	/**
@@ -53,10 +53,10 @@ class ConfigurationClassParser {
 	 * configuration model.
 	 * @param model model to be populated by each successive call to {@link #parse}
 	 */
-	public ConfigurationClassParser(ProblemReporter problemReporter, ClassLoader classLoader) {
-		this.model = new LinkedHashSet<ConfigurationClass>();
+	public ConfigurationClassParser(SimpleMetadataReaderFactory metadataReaderFactory, ProblemReporter problemReporter) {
+		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
-		this.classLoader = classLoader;
+		this.model = new LinkedHashSet<ConfigurationClass>();
 	}
 
 
@@ -66,12 +66,11 @@ class ConfigurationClassParser {
 	 * @param beanName may be null, but if populated represents the bean id
 	 * (assumes that this configuration class was configured via XML)
 	 */
-	public void parse(String className, String beanName) {
-		String resourcePath = ClassUtils.convertClassNameToResourcePath(className);
-		ClassReader configClassReader = ConfigurationClassReaderUtils.newAsmClassReader(ConfigurationClassReaderUtils.getClassAsStream(resourcePath, classLoader));
+	public void parse(String className, String beanName) throws IOException {
+		SimpleMetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
 		ConfigurationClass configClass = new ConfigurationClass();
 		configClass.setBeanName(beanName);
-		configClassReader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader), false);
+		reader.getClassReader().accept(new ConfigurationClassVisitor(configClass, model, problemReporter, metadataReaderFactory), false);
 		model.add(configClass);
 	}
 

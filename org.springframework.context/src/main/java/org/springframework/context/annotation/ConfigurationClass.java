@@ -19,6 +19,9 @@ package org.springframework.context.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
@@ -46,25 +49,20 @@ final class ConfigurationClass implements BeanMetadataElement {
 
 	private String name;
 
-	private transient Object source;
+	private ConfigurationClass declaringClass;
+
+	private Object source;
 
 	private String beanName;
 
 	private int modifiers;
 
-	private Set<Annotation> annotations = new HashSet<Annotation>();
+	private final Set<Annotation> annotations = new HashSet<Annotation>();
 
-	private Set<ConfigurationClassMethod> methods = new HashSet<ConfigurationClassMethod>();
+	private final Set<ConfigurationClassMethod> methods = new LinkedHashSet<ConfigurationClassMethod>();
 
-	private ConfigurationClass declaringClass;
+	private final Map<String, Integer> overloadedMethodMap = new LinkedHashMap<String, Integer>();
 
-
-	/**
-	 * Returns the fully-qualified name of this class.
-	 */
-	public String getName() {
-		return name;
-	}
 
 	/**
 	 * Sets the fully-qualified name of this class.
@@ -74,18 +72,25 @@ final class ConfigurationClass implements BeanMetadataElement {
 	}
 
 	/**
+	 * Returns the fully-qualified name of this class.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
 	 * Returns the non-qualified name of this class. Given com.acme.Foo, returns 'Foo'.
 	 */
 	public String getSimpleName() {
 		return name == null ? null : ClassUtils.getShortName(name);
 	}
 
-	/**
-	 * Returns a resource path-formatted representation of the .java file that declares this
-	 * class
-	 */
-	public Object getSource() {
-		return source;
+	public void setDeclaringClass(ConfigurationClass configurationClass) {
+		this.declaringClass = configurationClass;
+	}
+
+	public ConfigurationClass getDeclaringClass() {
+		return declaringClass;
 	}
 
 	/**
@@ -96,6 +101,14 @@ final class ConfigurationClass implements BeanMetadataElement {
 		this.source = source;
 	}
 
+	/**
+	 * Returns a resource path-formatted representation of the .java file that declares this
+	 * class
+	 */
+	public Object getSource() {
+		return source;
+	}
+
 	public Location getLocation() {
 		if (getName() == null) {
 			throw new IllegalStateException("'name' property is null. Call setName() before calling getLocation()");
@@ -103,23 +116,23 @@ final class ConfigurationClass implements BeanMetadataElement {
 		return new Location(new ClassPathResource(ClassUtils.convertClassNameToResourcePath(getName())), getSource());
 	}
 
-	public String getBeanName() {
-		return beanName;
-	}
-
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
-	public int getModifiers() {
-		return modifiers;
+	public String getBeanName() {
+		return beanName;
 	}
 
 	public void setModifiers(int modifiers) {
 		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative");
 		this.modifiers = modifiers;
 	}
-	
+
+	public int getModifiers() {
+		return modifiers;
+	}
+
 	public void addAnnotation(Annotation annotation) {
 		this.annotations.add(annotation);
 	}
@@ -153,26 +166,34 @@ final class ConfigurationClass implements BeanMetadataElement {
 		return anno;
 	}
 
+	public ConfigurationClass addMethod(ConfigurationClassMethod method) {
+		method.setDeclaringClass(this);
+		methods.add(method);
+		Integer count = overloadedMethodMap.get(method.getName());
+		if (count != null) {
+			overloadedMethodMap.put(method.getName(), count + 1);
+		}
+		else {
+			overloadedMethodMap.put(method.getName(), 1);
+		}
+		return this;
+	}
+
 	public Set<ConfigurationClassMethod> getBeanMethods() {
 		return methods;
 	}
 
-	public ConfigurationClass addMethod(ConfigurationClassMethod method) {
-		method.setDeclaringClass(this);
-		methods.add(method);
-		return this;
-	}
-
-	public ConfigurationClass getDeclaringClass() {
-		return declaringClass;
-	}
-
-	public void setDeclaringClass(ConfigurationClass configurationClass) {
-		this.declaringClass = configurationClass;
-	}
-
 	public void validate(ProblemReporter problemReporter) {
-		// a configuration class may not be final (CGLIB limitation)
+		// No overloading of factory methods allowed
+		for (Map.Entry<String, Integer> entry : overloadedMethodMap.entrySet()) {
+			String methodName = entry.getKey();
+			int count = entry.getValue();
+			if (count > 1) {
+				problemReporter.error(new OverloadedMethodProblem(methodName, count));
+			}
+		}
+
+		// A configuration class may not be final (CGLIB limitation)
 		if (getAnnotation(Configuration.class) != null) {
 			if (Modifier.isFinal(modifiers)) {
 				problemReporter.error(new FinalConfigurationProblem());
@@ -188,10 +209,21 @@ final class ConfigurationClass implements BeanMetadataElement {
 	private class FinalConfigurationProblem extends Problem {
 
 		public FinalConfigurationProblem() {
-			super(String.format("@Configuration class [%s] may not be final. Remove the final modifier to continue.",
+			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
 					getSimpleName()), ConfigurationClass.this.getLocation());
 		}
-
 	}
+
+
+	/** Factory methods on configuration classes must not be overloaded. */
+	private class OverloadedMethodProblem extends Problem {
+
+		public OverloadedMethodProblem(String methodName, int count) {
+			super(String.format("@Configuration class '%s' has %s overloaded factory methods of name '%s'. " +
+					"Only one factory method of the same name allowed.",
+					getSimpleName(), count, methodName), ConfigurationClass.this.getLocation());
+		}
+	}
+
 
 }

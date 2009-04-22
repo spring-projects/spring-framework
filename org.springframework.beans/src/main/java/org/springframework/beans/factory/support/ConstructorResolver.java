@@ -21,6 +21,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -43,10 +44,10 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ClassUtils;
 
 /**
  * Helper class for resolving constructors and factory methods.
@@ -248,6 +249,36 @@ class ConstructorResolver {
 	}
 
 	/**
+	 * Resolve the factory method in the specified bean definition, if possible.
+	 * {@link RootBeanDefinition#getResolvedFactoryMethod()} can be checked for the result.
+	 * @param mbd the bean definition to check
+	 */
+	public void resolveFactoryMethodIfPossible(RootBeanDefinition mbd) {
+		Class factoryClass;
+		if (mbd.getFactoryBeanName() != null) {
+			factoryClass = this.beanFactory.getType(mbd.getFactoryBeanName());
+		}
+		else {
+			factoryClass = mbd.getBeanClass();
+		}
+		factoryClass = ClassUtils.getUserClass(factoryClass);
+		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+		Method uniqueCandidate = null;
+		for (Method candidate : candidates) {
+			if (mbd.isFactoryMethod(candidate)) {
+				if (uniqueCandidate == null) {
+					uniqueCandidate = candidate;
+				}
+				else if (!Arrays.equals(uniqueCandidate.getParameterTypes(), candidate.getParameterTypes())) {
+					uniqueCandidate = null;
+					break;
+				}
+			}
+		}
+		mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+	}
+
+	/**
 	 * Instantiate the bean using a named factory method. The method may be static, if the
 	 * bean definition parameter specifies a class, rather than a "factory-bean", or
 	 * an instance variable on a factory object itself configured using Dependency Injection.
@@ -306,13 +337,13 @@ class ConstructorResolver {
 			if (factoryMethodToUse != null) {
 				// Found a cached factory method...
 				argsToUse = mbd.resolvedConstructorArguments;
-				if (argsToUse == null) {
+				if (argsToUse == null && mbd.preparedConstructorArguments != null) {
 					argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse);
 				}
 			}
 		}
 
-		if (factoryMethodToUse == null) {
+		if (factoryMethodToUse == null || argsToUse == null) {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
@@ -320,7 +351,8 @@ class ConstructorResolver {
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
-						candidate.getName().equals(mbd.getFactoryMethodName())) {
+						candidate.getName().equals(mbd.getFactoryMethodName()) &&
+						mbd.isFactoryMethod(candidate)) {
 					candidateSet.add(candidate);
 				}
 			}

@@ -37,6 +37,7 @@ import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
@@ -81,6 +82,8 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	private SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+
 
 	/**
 	 * Override the default {@link ProblemReporter}.
@@ -92,6 +95,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
+		this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
 	}
 
 	public int getOrder() {
@@ -132,9 +136,15 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		}
 
 		// Populate a new configuration model by parsing each @Configuration classes
-		ConfigurationClassParser parser = new ConfigurationClassParser(this.problemReporter, this.beanClassLoader);
+		ConfigurationClassParser parser = new ConfigurationClassParser(this.metadataReaderFactory, this.problemReporter);
 		for (BeanDefinitionHolder holder : configBeanDefs) {
-			parser.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+			String beanClassName = holder.getBeanDefinition().getBeanClassName();
+			try {
+				parser.parse(beanClassName, holder.getBeanName());
+			}
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException("Failed to load bean class [" + beanClassName + "]", ex);
+			}
 		}
 		parser.validate();
 
@@ -208,11 +218,10 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 				return false;
 			}
 		}
-		SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory(this.beanClassLoader);
 		String className = beanDef.getBeanClassName();
 		while (className != null && !(className.equals(Object.class.getName()))) {
 			try {
-				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
+				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(className);
 				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
 				if (metadata.hasAnnotation(Configuration.class.getName())) {
 					beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, "full");

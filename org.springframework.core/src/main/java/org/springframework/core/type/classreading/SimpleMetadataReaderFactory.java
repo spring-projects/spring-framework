@@ -63,13 +63,22 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 	}
 
 
-	public MetadataReader getMetadataReader(String className) throws IOException {
+	/**
+	 * Return the ResourceLoader that this MetadataReaderFactory has been
+	 * constructed with.
+	 */
+	public final ResourceLoader getResourceLoader() {
+		return this.resourceLoader;
+	}
+
+
+	public SimpleMetadataReader getMetadataReader(String className) throws IOException {
 		String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
 				ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
 		return getMetadataReader(this.resourceLoader.getResource(resourcePath));
 	}
 
-	public MetadataReader getMetadataReader(Resource resource) throws IOException {
+	public SimpleMetadataReader getMetadataReader(Resource resource) throws IOException {
 		InputStream is = resource.getInputStream();
 		try {
 			return new SimpleMetadataReader(new ClassReader(is), this.resourceLoader.getClassLoader());
