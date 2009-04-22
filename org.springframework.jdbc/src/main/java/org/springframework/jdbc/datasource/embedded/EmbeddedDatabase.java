@@ -27,6 +27,7 @@ public interface EmbeddedDatabase extends DataSource {
 	
 	/**
 	 * Shutdown this embedded database.
+	 * TODO - annotate with @PreDestroy for invocation by Spring container?
 	 */
 	void shutdown();
 }
