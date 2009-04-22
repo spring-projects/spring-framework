@@ -88,7 +88,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 		if (target == null) {
-			return null;
+			throw new AccessException("Cannot read property of null target");
 		}
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 

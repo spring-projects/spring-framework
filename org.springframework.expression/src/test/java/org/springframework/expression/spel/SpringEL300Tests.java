@@ -16,9 +16,13 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.expression.AccessException;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
+import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.support.ReflectivePropertyResolver;
 
 /**
  * Tests based on Jiras up to the release of Spring 3.0.0
@@ -27,24 +31,11 @@ import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
  */
 public class SpringEL300Tests extends ExpressionTestCase {
 
-
-	public static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-		public String getExpressionPrefix() {
-			return "$[";
-		}
-		public String getExpressionSuffix() {
-			return "]";
-		}
-		public boolean isTemplate() {
-			return true;
-		}
-	};
-	
-	public void testNPE_5661() {
+	public void testNPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
 	
-	public void testNPE_5673() throws Exception {
+	public void testNPE_SPR5673() throws Exception {
 		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
 		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
 		
@@ -77,6 +68,28 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World","Hello inner literal that's got {[(])]}an escaped quote in it World");
 		checkTemplateParsingError("Hello ${","No ending suffix '}' for expression starting at character 6: ${");
 	}
+	
+	public void testAccessingNullPropertyViaReflection_SPR5663() throws AccessException {
+		PropertyAccessor propertyAccessor = new ReflectivePropertyResolver();
+		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
+		assertFalse(propertyAccessor.canRead(context, null, "abc"));
+		assertFalse(propertyAccessor.canWrite(context, null, "abc"));
+		try {
+			propertyAccessor.read(context, null, "abc");
+			fail("Should have failed with an AccessException");
+		} catch (AccessException ae) {
+			// success
+		}
+		try {
+			propertyAccessor.write(context, null, "abc","foo");
+			fail("Should have failed with an AccessException");
+		} catch (AccessException ae) {
+			// success
+		}
+	}
+	
+	
+	// ---
 
 	private void checkTemplateParsing(String expression, String expectedValue) throws Exception {
 		checkTemplateParsing(expression,TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
@@ -95,7 +108,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	private void checkTemplateParsingError(String expression,ParserContext context, String expectedMessage) throws Exception {
 		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
 		try {
-			Expression expr = parser.parseExpression(expression,context);
+			parser.parseExpression(expression,context);
 			fail("Should have failed");
 		} catch (Exception e) {
 			if (!e.getMessage().equals(expectedMessage)) {
@@ -104,5 +117,18 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			assertEquals(expectedMessage,e.getMessage());
 		}
 	}
+	
+	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+		public String getExpressionPrefix() {
+			return "$[";
+		}
+		public String getExpressionSuffix() {
+			return "]";
+		}
+		public boolean isTemplate() {
+			return true;
+		}
+	};
+	
 
 }
