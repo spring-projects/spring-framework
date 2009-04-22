@@ -17,12 +17,12 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
@@ -43,26 +43,16 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
-	private Resource schemaLocation = new ClassPathResource("schema.sql");
-
-	private Resource testDataLocation = new ClassPathResource("test-data.sql");
-
 	private String sqlScriptEncoding;
+
+	private List<Resource> scripts = new ArrayList<Resource>();
 	
 	/**
-	 * Sets the location of .sql file containing the database schema to create.
-	 * @param schemaLocation the path to the db schema definition
+	 * Add a script to execute to populate the database.
+	 * @param script the path to a SQL script
 	 */
-	public void setSchemaLocation(Resource schemaLocation) {
-		this.schemaLocation = schemaLocation;
-	}
-
-	/**
-	 * Sets the location of the .sql file containing the test data to populate.
-	 * @param testDataLocation the path to the db test data file
-	 */
-	public void setTestDataLocation(Resource testDataLocation) {
-		this.testDataLocation = testDataLocation;
+	public void addScript(Resource script) {
+		scripts.add(script);
 	}
 	
 	/**
@@ -73,18 +63,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	public void populate(JdbcTemplate template) {
-		createDatabaseSchema(template);
-		insertTestData(template);
-	}
-
-	// create the application's database schema (tables, indexes, etc.)
-	private void createDatabaseSchema(JdbcTemplate template) {
-		executeSqlScript(template, new EncodedResource(schemaLocation, sqlScriptEncoding), false);
-	}
-
-	// populate the tables with test data
-	private void insertTestData(JdbcTemplate template) {
-		executeSqlScript(template, new EncodedResource(testDataLocation, sqlScriptEncoding), false);
+		for (Resource script : scripts) {
+			executeSqlScript(template, new EncodedResource(script, sqlScriptEncoding), false);
+		}
 	}
 
 	// From SimpleJdbcTestUtils - TODO address duplication
@@ -94,16 +75,13 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * <p>The script will normally be loaded by classpath. There should be one statement
 	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
 	 * DDL if you expect rollback.</b>
-	 * @param simpleJdbcTemplate the SimpleJdbcTemplate with which to perform JDBC operations
+	 * @param template the SimpleJdbcTemplate with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from.
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error.
-	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
 	 */
-	static void executeSqlScript(JdbcTemplate jdbcTemplate,
-			EncodedResource resource, boolean continueOnError) throws DataAccessException {
+	static void executeSqlScript(JdbcTemplate template, EncodedResource resource, boolean continueOnError) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
 		}
@@ -119,7 +97,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			splitSqlScript(script, delimiter, statements);
 			for (String statement : statements) {
 				try {
-					int rowsAffected = jdbcTemplate.update(statement);
+					int rowsAffected = template.update(statement);
 					if (logger.isDebugEnabled()) {
 						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
@@ -145,7 +123,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		}
 	}
 	
-	// From JdbcTestUtils - TODO address duplication
+	// From JdbcTestUtils - TODO address duplication - these do not seem as useful as the one above
 
 	/**
 	 * Read a script from the LineNumberReader and build a String containing the lines.
@@ -153,7 +131,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @return <code>String</code> containing the script lines
 	 * @throws IOException
 	 */
-	static String readScript(LineNumberReader lineNumberReader) throws IOException {
+	private static String readScript(LineNumberReader lineNumberReader) throws IOException {
 		String currentStatement = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
@@ -173,7 +151,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param script the SQL script
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 */
-	static boolean containsSqlScriptDelimiters(String script, char delim) {
+	private static boolean containsSqlScriptDelimiters(String script, char delim) {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
@@ -194,7 +172,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 * @param statements the List that will contain the individual statements
 	 */
-	static void splitSqlScript(String script, char delim, List<String> statements) {
+	private static void splitSqlScript(String script, char delim, List<String> statements) {
 		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();

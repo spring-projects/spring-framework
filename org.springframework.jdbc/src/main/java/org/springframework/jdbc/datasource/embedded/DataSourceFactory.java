@@ -17,16 +17,23 @@ package org.springframework.jdbc.datasource.embedded;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+
 /**
- * A handle to an EmbeddedDatabase instance.
- * Is a {@link DataSource}.
- * Adds a shutdown operation so the embedded database instance can be shutdown.
- * @author Keith Donald
+ * A factory for a kind of DataSource, such as a {@link SimpleDriverDataSource} or connection pool such as Apache DBCP or c3p0.
+ * Call {@link #getConnectionProperties()} to configure normalized DataSource properties before calling {@link #getDataSource()} to actually get the configured DataSource instance.
+ * @author Keith Donald 
  */
-public interface EmbeddedDatabase extends DataSource {
+public interface DataSourceFactory {
 	
 	/**
-	 * Shutdown this embedded database.
+	 * Allows properties of the DataSource to be configured.
 	 */
-	void shutdown();
+	ConnectionProperties getConnectionProperties();
+	
+	/**
+	 * Returns the DataSource with the connection properties applied.
+	 */
+	DataSource getDataSource();
+	
 }

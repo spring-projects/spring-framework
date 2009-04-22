@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -36,10 +35,13 @@ import org.springframework.util.Assert;
  * When the database is returned, callers are guaranteed that the database schema and test data will have already been loaded.
  * 
  * Can be configured.
- * Call {@link #setDatabaseName(String)} to change the name of the test database.
- * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the test database type.
+ * Call {@link #setDatabaseName(String)} to change the name of the  database.
+ * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database type if you wish to use one of the supported types.
+ * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to set a configuration strategy for your own embedded database type.
  * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.
- * Call {@link #getDatabase()} to the {@link EmbeddedDatabase} instance.
+ * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.
+ * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.
+ * @author Keith Donald
  */
 public class EmbeddedDatabaseFactory {
 
@@ -47,19 +49,22 @@ public class EmbeddedDatabaseFactory {
 
 	private String databaseName;
 
-	private EmbeddedDatabaseConfigurer dataSourceConfigurer;
+	private DataSourceFactory dataSourceFactory;
+	
+	private EmbeddedDatabaseConfigurer databaseConfigurer;
 
 	private DatabasePopulator databasePopulator;
 
 	private EmbeddedDatabase database;
 	
 	/**
-	 * Creates a new EmbeddedDatabaseFactory that uses the default {@link ResourceDatabasePopulator}.
+	 * Creates a default {@link EmbeddedDatabaseFactory}.
+	 * Calling {@link #getDatabase()} will create a embedded HSQL database of name 'testdb'.
 	 */
 	public EmbeddedDatabaseFactory() {
 		setDatabaseName("testdb");
 		setDatabaseType(EmbeddedDatabaseType.HSQL);
-		setDatabasePopulator(new ResourceDatabasePopulator());
+		setDataSourceFactory(new SimpleDriverDataSourceFactory());
 	}
 	
 	/**
@@ -73,25 +78,44 @@ public class EmbeddedDatabaseFactory {
 	}
 	
 	/**
-	 * Sets the type of test database to use.
+	 * Sets the type of embedded database to use.
+	 * Call this when you wish to configure one of the pre-supported types.
 	 * Defaults to HSQL.
 	 * @param type the test database type
 	 */
 	public void setDatabaseType(EmbeddedDatabaseType type) {
-		Assert.notNull(type, "The TestDatabaseType is required");
-		dataSourceConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(type);
+		setDatabaseConfigurer(EmbeddedDatabaseConfigurerFactory.getConfigurer(type));
 	}
 
 	/**
-	 * Sets the helper that will be invoked to populate the test database with data.
-	 * Defaults a {@link ResourceDatabasePopulator}.
-	 * @param populator
+	 * Sets the strategy that will be used to configure the embedded database instance.
+	 * Call this when you wish to use an embedded database type not already supported.
+	 * @param configurer the embedded database configurer
+	 */
+	public void setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
+		this.databaseConfigurer = configurer;
+	}
+	
+	/**
+	 * Sets the strategy that will be used to populate the embedded database.
+	 * Defaults to null.
+	 * @param populator the database populator 
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
 		Assert.notNull(populator, "The TestDatabasePopulator is required");
 		databasePopulator = populator;
 	}
-	
+
+	/**
+	 * Sets the factory to use to create the DataSource instance that connects to the embedded database.
+	 * Defaults to {@link SimpleDriverDataSourceFactory}.
+	 * @param dataSourceFactory the data source factory
+	 */
+	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
+		Assert.notNull(dataSourceFactory, "The DataSourceFactory is required");
+		this.dataSourceFactory = dataSourceFactory;
+	}
+
 	// other public methods
 
 	/**
@@ -106,9 +130,8 @@ public class EmbeddedDatabaseFactory {
 	
 	// internal helper methods
 
-	// encapsulates the steps involved in initializing the data source: creating it, and populating it
 	private void initDatabase() {
-		// create the in-memory database source first
+		// create the embedded database source first
 		database = new EmbeddedDataSourceProxy(createDataSource());
 		if (logger.isInfoEnabled()) {
 			logger.info("Created embedded database '" + databaseName + "'");
@@ -120,9 +143,8 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	private DataSource createDataSource() {
-		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-		dataSourceConfigurer.configureConnectionProperties(dataSource, databaseName);
-		return dataSource;
+		databaseConfigurer.configureConnectionProperties(dataSourceFactory.getConnectionProperties(), databaseName);
+		return dataSourceFactory.getDataSource();
 	}
 
 	private void populateDatabase() {
@@ -183,7 +205,7 @@ public class EmbeddedDatabaseFactory {
 	
 	private void shutdownDatabase() {
 		if (database != null) {
-			dataSourceConfigurer.shutdown(database);
+			databaseConfigurer.shutdown(database);
 			database = null;
 		}
 	}

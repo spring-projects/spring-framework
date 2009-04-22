@@ -28,9 +28,6 @@ import org.springframework.core.io.ResourceLoader;
  * EmbeddedDatabase db = builder.schema("schema.sql").testData("test-data.sql").build();
  * db.shutdown();
  * </pre>
- * 
- * TODO - should we replace schema/testdata with more general 'script' method?
- * 
  * @author Keith Donald
  */
 public class EmbeddedDatabaseBuilder {
@@ -71,24 +68,12 @@ public class EmbeddedDatabaseBuilder {
 	}
 	
 	/**
-	 * Sets the location of the schema SQL to run to create the database structure.
-	 * Defaults to classpath:schema.sql if not called.
+	 * Adds a SQL script to execute to populate the database.
 	 * @param sqlResource the sql resource location
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder schema(String sqlResource) {
-		databasePopulator.setSchemaLocation(resourceLoader.getResource(sqlResource));
-		return this;
-	}
-
-	/**
-	 * Sets the location of the schema SQL to run to create the database structure.
-	 * Defaults to classpath:test-data.sql if not called
-	 * @param sqlResource the sql resource location
-	 * @return this, for fluent call chaining
-	 */
-	public EmbeddedDatabaseBuilder testData(String sqlResource) {
-		databasePopulator.setTestDataLocation(resourceLoader.getResource(sqlResource));
+	public EmbeddedDatabaseBuilder script(String sqlResource) {
+		databasePopulator.addScript(resourceLoader.getResource(sqlResource));
 		return this;
 	}
 
@@ -120,11 +105,11 @@ public class EmbeddedDatabaseBuilder {
 	
 	/**
 	 * Factory method that builds a default EmbeddedDatabase instance.
-	 * The default is HSQL with a schema created from classpath:schema.sql and test-data loaded from classpatH:test-data.sql.
+	 * The default is HSQL with a schema created from classpath:schema.sql and test-data loaded from classpath:test-data.sql.
 	 * @return an embedded database
 	 */
 	public static EmbeddedDatabase buildDefault() {
-		return new EmbeddedDatabaseBuilder().build();
+		return new EmbeddedDatabaseBuilder().script("schema.sql").script("test-data.sql").build();
 	}
 	
 	private EmbeddedDatabaseBuilder(ResourceLoader loader) {

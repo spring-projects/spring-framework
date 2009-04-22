@@ -22,31 +22,20 @@ public class EmbeddedDatabaseBuilderTests {
 	@Test
 	public void testBuild() {
 		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
-		EmbeddedDatabase db = builder.schema("db-schema.sql").testData("db-test-data.sql").build();
+		EmbeddedDatabase db = builder.script("db-schema.sql").script("db-test-data.sql").build();
 		JdbcTemplate template = new JdbcTemplate(db);
 		assertEquals("Keith", template.queryForObject("select NAME from T_TEST", String.class));
 		db.shutdown();
 	}
 
 	@Test
-	public void testBuildNoSuchSchema() {
+	public void testBuildNoSuchScript() {
 		try {
-			new EmbeddedDatabaseBuilder().schema("bogus.sql").build();
+			new EmbeddedDatabaseBuilder().script("bogus.sql").build();
 			fail("Should have failed");
 		} catch (DataAccessException e) {
 			
 		}
 	}
-	
-	@Test
-	public void testBuildNoSuchTestdata() {
-		try {
-			new EmbeddedDatabaseBuilder().testData("bogus.sql").build();
-			fail("Should have failed");
-		} catch (DataAccessException e) {
-			
-		}
-	}
-
 
 }

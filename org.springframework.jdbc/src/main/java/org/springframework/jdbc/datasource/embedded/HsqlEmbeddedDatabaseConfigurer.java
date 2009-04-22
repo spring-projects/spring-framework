@@ -18,10 +18,9 @@ package org.springframework.jdbc.datasource.embedded;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.util.ClassUtils;
 
-class HsqlEmbeddedDatabaseConfigurer extends EmbeddedDatabaseConfigurer {
+public class HsqlEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 	
 	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
 	
@@ -33,11 +32,11 @@ class HsqlEmbeddedDatabaseConfigurer extends EmbeddedDatabaseConfigurer {
 		return INSTANCE;
 	}
 	
-	public void configureConnectionProperties(SimpleDriverDataSource dataSource, String databaseName) {
-		dataSource.setDriverClass(org.hsqldb.jdbcDriver.class);
-		dataSource.setUrl("jdbc:hsqldb:mem:" + databaseName);
-		dataSource.setUsername("sa");
-		dataSource.setPassword("");		
+	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
+		properties.setDriverClass(org.hsqldb.jdbcDriver.class);
+		properties.setUrl("jdbc:hsqldb:mem:" + databaseName);
+		properties.setUsername("sa");
+		properties.setPassword("");		
 	}
 
 	public void shutdown(DataSource dataSource) {
