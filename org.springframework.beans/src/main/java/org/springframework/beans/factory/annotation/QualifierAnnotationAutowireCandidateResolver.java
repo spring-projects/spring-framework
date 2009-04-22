@@ -192,8 +192,8 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		}
 		if (qualifier == null) {
 			Annotation targetAnnotation = null;
-			if (bd.getFactoryMethodForIntrospection() != null) {
-				targetAnnotation = bd.getFactoryMethodForIntrospection().getAnnotation(type);
+			if (bd.getResolvedFactoryMethod() != null) {
+				targetAnnotation = bd.getResolvedFactoryMethod().getAnnotation(type);
 			}
 			if (targetAnnotation == null && bd.hasBeanClass()) {
 				// look for matching annotation on the target class

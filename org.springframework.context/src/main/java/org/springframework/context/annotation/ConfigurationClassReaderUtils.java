@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
-import java.io.InputStream;
 import static java.lang.String.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -26,17 +24,11 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.asm.ClassReader;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -47,8 +39,6 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  */
 class ConfigurationClassReaderUtils {
-
-	private static final Log logger = LogFactory.getLog(ConfigurationClassReaderUtils.class);
 
 	/**
 	 * Convert a type descriptor to a classname suitable for classloading with
@@ -92,94 +82,14 @@ class ConfigurationClassReaderUtils {
 		return convertAsmTypeDescriptorToClassName(returnTypeDescriptor);
 	}
 
-	/**
-	 * Create a new ASM {@link ClassReader} for <var>pathToClass</var>. Appends '.class' to
-	 * pathToClass before attempting to load.
-	 */
-	public static ClassReader newAsmClassReader(String pathToClass, ClassLoader classLoader) {
-		InputStream is = getClassAsStream(pathToClass, classLoader);
-		return newAsmClassReader(is);
-	}
-
-	/**
-	 * Convenience method that creates and returns a new ASM {@link ClassReader} for the
-	 * given InputStream <var>is</var>, closing the InputStream after creating the
-	 * ClassReader and rethrowing any IOException thrown during ClassReader instantiation as
-	 * an unchecked exception. Logs and ignores any IOException thrown when closing the
-	 * InputStream.
-	 * 
-	 * @param is InputStream that will be provided to the new ClassReader instance.
-	 */
-	public static ClassReader newAsmClassReader(InputStream is) {
-		try {
-			return new ClassReader(is);
-		}
-		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("An unexpected exception occurred while creating ASM ClassReader: " + ex);
-		}
-		finally {
-			try {
-				is.close();
-			}
-			catch (IOException ex) {
-				// ignore
-			}
-		}
-	}
-
-	/**
-	 * Uses the default ClassLoader to load <var>pathToClass</var>. Appends '.class' to
-	 * pathToClass before attempting to load.
-	 * @param pathToClass resource path to class, not including .class suffix. e.g.: com/acme/MyClass
-	 * @return inputStream for <var>pathToClass</var>
-	 * @throws RuntimeException if <var>pathToClass</var> does not exist
-	 */
-	public static InputStream getClassAsStream(String pathToClass, ClassLoader classLoader) {
-		String classFileName = pathToClass + ClassUtils.CLASS_FILE_SUFFIX;
-		InputStream is = classLoader.getResourceAsStream(classFileName);
-		if (is == null) {
-			throw new IllegalStateException("Class file [" + classFileName + "] not found");
-		}
-		return is;
-	}
-
-	/**
-	 * Loads the specified class using the default class loader, gracefully handling any
-	 * {@link ClassNotFoundException} that may be thrown by issuing a WARN level logging
-	 * statement and return null. This functionality is specifically implemented to
-	 * accomodate tooling (Spring IDE) concerns, where user-defined types will not be
-	 * available to the tooling.
-	 * <p>
-	 * Because {@link ClassNotFoundException} is compensated for by returning null, callers
-	 * must take care to handle the null case appropriately.
-	 * <p>
-	 * In cases where the WARN logging statement is not desired, use the
-	 * {@link #loadClass(String)} method, which returns null but issues no logging
-	 * statements.
-	 * <p>
-	 * This method should only ever return null in the case of a user-defined type be
-	 * processed at tooling time. Therefore, tooling may not be able to represent any custom
-	 * annotation semantics, but JavaConfig itself will not have any problem loading and
-	 * respecting them at actual runtime.
-	 * 
-	 * @param <T> type of class to be returned
-	 * @param fqClassName fully-qualified class name
-	 * 
-	 * @return newly loaded class, null if class could not be found.
-	 * 
-	 * @see #loadClass(String)
-	 * @see #loadRequiredClass(String)
-	 * @see ClassUtils#getDefaultClassLoader()
-	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Class<? extends T> loadToolingSafeClass(String fqClassName, ClassLoader classLoader) {
+	public static Class<? extends Annotation> loadAnnotationType(String annoTypeDesc, ClassLoader classLoader) {
+		String annoTypeName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(annoTypeDesc);
 		try {
-			return (Class<? extends T>) classLoader.loadClass(fqClassName);
+			return (Class<? extends Annotation>) classLoader.loadClass(annoTypeName);
 		}
 		catch (ClassNotFoundException ex) {
-			logger.warn(String.format("Unable to load class [%s], likely due to tooling-specific restrictions."
-			        + "Attempting to continue, but unexpected errors may occur", fqClassName), ex);
-			return null;
+			throw new IllegalStateException("Could not load annotation type [" + annoTypeName + "]", ex);
 		}
 	}
 
@@ -212,7 +122,7 @@ class ConfigurationClassReaderUtils {
 			// and default values of the attributes defined in 'annoType'
 			Method[] attribs = annoType.getDeclaredMethods();
 			for (Method attrib : attribs) {
-				this.attributes.put(attrib.getName(), getDefaultValue(annoType, attrib.getName()));
+				this.attributes.put(attrib.getName(), AnnotationUtils.getDefaultValue(annoType, attrib.getName()));
 				this.attributeTypes.put(attrib.getName(), getAttributeType(annoType, attrib.getName()));
 			}
 
@@ -349,11 +259,10 @@ class ConfigurationClassReaderUtils {
 		}
 
 		private String getAttribs() {
-			ArrayList<String> attribs = new ArrayList<String>();
-
-			for (String attribName : attributes.keySet())
+			List<String> attribs = new ArrayList<String>();
+			for (String attribName : attributes.keySet()) {
 				attribs.add(format("%s=%s", attribName, attributes.get(attribName)));
-
+			}
 			return StringUtils.collectionToDelimitedString(attribs, ", ");
 		}
 
@@ -361,15 +270,12 @@ class ConfigurationClassReaderUtils {
 		 * Retrieve the type of the given annotation attribute.
 		 */
 		private static Class<?> getAttributeType(Class<? extends Annotation> annotationType, String attributeName) {
-			Method method = null;
-
 			try {
-				method = annotationType.getDeclaredMethod(attributeName);
-			} catch (Exception ex) {
-				ReflectionUtils.handleReflectionException(ex);
+				return annotationType.getDeclaredMethod(attributeName).getReturnType();
 			}
-
-			return method.getReturnType();
+			catch (Exception ex) {
+				throw new IllegalStateException("Could not introspect return type", ex);
+			}
 		}
 	}
 

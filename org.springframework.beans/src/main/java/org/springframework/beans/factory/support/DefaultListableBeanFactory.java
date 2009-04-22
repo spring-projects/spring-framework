@@ -17,9 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -49,9 +47,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -432,31 +428,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
 		resolveBeanClass(mbd, beanName);
-		// TODO: the following is duplicating the factory method resolution algorithm in
-		// ConstructorResolver quite a bit...
-		if (mbd.getFactoryMethodName() != null && mbd.factoryMethodForIntrospection == null) {
-			Class factoryClass;
-			if (mbd.getFactoryBeanName() != null) {
-				factoryClass = getType(mbd.getFactoryBeanName());
-			}
-			else {
-				factoryClass = mbd.getBeanClass();
-			}
-			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
-			Method uniqueCandidate = null;
-			for (Method candidate : candidates) {
-				if (candidate.getName().equals(mbd.getFactoryMethodName())) {
-					if (uniqueCandidate == null) {
-						uniqueCandidate = candidate;
-					}
-					else if (!Arrays.equals(uniqueCandidate.getParameterTypes(), candidate.getParameterTypes())) {
-						uniqueCandidate = null;
-						break;
-					}
-				}
-			}
-			mbd.factoryMethodForIntrospection = uniqueCandidate;
+		if (mbd.isFactoryMethodUnique && mbd.resolvedConstructorOrFactoryMethod == null) {
+			new ConstructorResolver(this, null, null, null).resolveFactoryMethodIfPossible(mbd);
 		}
 		return getAutowireCandidateResolver().isAutowireCandidate(
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);

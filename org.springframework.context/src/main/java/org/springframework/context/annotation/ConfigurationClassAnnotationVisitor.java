@@ -17,10 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Array;
-import java.util.List;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Type;
@@ -57,40 +57,47 @@ class ConfigurationClassAnnotationVisitor implements AnnotationVisitor {
 
 	public void visit(String attribName, Object attribValue) {
 		Class<?> attribReturnType = mutableAnno.getAttributeType(attribName);
-
 		if (attribReturnType.equals(Class.class)) {
 			// the attribute type is Class -> load it and set it.
-			String fqClassName = ((Type) attribValue).getClassName();
-			Class<?> classVal = ConfigurationClassReaderUtils.loadToolingSafeClass(fqClassName, classLoader);
-			if (classVal == null) {
-				return;
+			String className = ((Type) attribValue).getClassName();
+			try {
+				Class<?> classVal = classLoader.loadClass(className);
+				if (classVal != null) {
+					mutableAnno.setAttributeValue(attribName, classVal);
+				}
 			}
-			mutableAnno.setAttributeValue(attribName, classVal);
-			return;
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException("Cannot resolve attribute type [" + className + "]", ex);
+			}
 		}
-
-		// otherwise, assume the value can be set literally
-		mutableAnno.setAttributeValue(attribName, attribValue);
+		else {
+			// otherwise, assume the value can be set literally
+			mutableAnno.setAttributeValue(attribName, attribValue);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public void visitEnum(String attribName, String enumTypeDescriptor, String strEnumValue) {
-		String enumClassName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(enumTypeDescriptor);
-		Class<? extends Enum> enumClass = ConfigurationClassReaderUtils.loadToolingSafeClass(enumClassName, classLoader);
-		if (enumClass == null) {
-			return;
+		String enumTypeName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(enumTypeDescriptor);
+		try {
+			Class<? extends Enum> enumType = (Class<? extends Enum>) classLoader.loadClass(enumTypeName);
+			if (enumType == null) {
+				return;
+			}
+			Enum enumValue = Enum.valueOf(enumType, strEnumValue);
+			mutableAnno.setAttributeValue(attribName, enumValue);
 		}
-		Enum enumValue = Enum.valueOf(enumClass, strEnumValue);
-		mutableAnno.setAttributeValue(attribName, enumValue);
+		catch (ClassNotFoundException ex) {
+			throw new IllegalStateException("Cannot resolve enum type [" + enumTypeName + "]", ex);
+		}
 	}
 
-	public AnnotationVisitor visitAnnotation(String attribName, String attribAnnoTypeDesc) {
-		String annoTypeName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(attribAnnoTypeDesc);
-		Class<? extends Annotation> annoType = ConfigurationClassReaderUtils.loadToolingSafeClass(annoTypeName, classLoader);
-		if (annoType == null) {
+	public AnnotationVisitor visitAnnotation(String attribName, String annoTypeDesc) {
+		Class<? extends Annotation> annoClass = ConfigurationClassReaderUtils.loadAnnotationType(annoTypeDesc, classLoader);
+		if (annoClass == null) {
 			return new EmptyVisitor();
 		}
-		ConfigurationClassAnnotation anno = ConfigurationClassReaderUtils.createMutableAnnotation(annoType, classLoader);
+		ConfigurationClassAnnotation anno = ConfigurationClassReaderUtils.createMutableAnnotation(annoClass, classLoader);
 		try {
 			Field attribute = mutableAnno.getClass().getField(attribName);
 			attribute.set(mutableAnno, anno);
@@ -123,13 +130,11 @@ class ConfigurationClassAnnotationVisitor implements AnnotationVisitor {
 
 		private final ClassLoader classLoader;
 
-
 		public MutableAnnotationArrayVisitor(ConfigurationClassAnnotation mutableAnno, String attribName, ClassLoader classLoader) {
 			this.mutableAnno = mutableAnno;
 			this.attribName = attribName;
 			this.classLoader = classLoader;
 		}
-
 
 		public void visit(String na, Object value) {
 			values.add(value);
@@ -139,12 +144,11 @@ class ConfigurationClassAnnotationVisitor implements AnnotationVisitor {
 		}
 
 		public AnnotationVisitor visitAnnotation(String na, String annoTypeDesc) {
-			String annoTypeName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(annoTypeDesc);
-			Class<? extends Annotation> annoType = ConfigurationClassReaderUtils.loadToolingSafeClass(annoTypeName, classLoader);
-			if (annoType == null) {
+			Class<? extends Annotation> annoClass = ConfigurationClassReaderUtils.loadAnnotationType(annoTypeDesc, classLoader);
+			if (annoClass == null) {
 				return new EmptyVisitor();
 			}
-			ConfigurationClassAnnotation anno = ConfigurationClassReaderUtils.createMutableAnnotation(annoType, classLoader);
+			ConfigurationClassAnnotation anno = ConfigurationClassReaderUtils.createMutableAnnotation(annoClass, classLoader);
 			values.add(anno);
 			return new ConfigurationClassAnnotationVisitor(anno, classLoader);
 		}

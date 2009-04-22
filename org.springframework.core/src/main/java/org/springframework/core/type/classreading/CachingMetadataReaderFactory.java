@@ -33,7 +33,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	private final Map<Resource, MetadataReader> classReaderCache = new HashMap<Resource, MetadataReader>();
+	private final Map<Resource, SimpleMetadataReader> classReaderCache = new HashMap<Resource, SimpleMetadataReader>();
 
 
 	/**
@@ -62,9 +62,9 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 
 	@Override
-	public MetadataReader getMetadataReader(Resource resource) throws IOException {
+	public SimpleMetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
-			MetadataReader metadataReader = this.classReaderCache.get(resource);
+			SimpleMetadataReader metadataReader = this.classReaderCache.get(resource);
 			if (metadataReader == null) {
 				metadataReader = super.getMetadataReader(resource);
 				this.classReaderCache.put(resource, metadataReader);

@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
@@ -32,7 +34,6 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -105,7 +106,7 @@ class ConfigurationClassBeanDefinitionReader {
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition();
 		ConfigurationClass configClass = method.getDeclaringClass();
 		beanDef.setFactoryBeanName(configClass.getBeanName());
-		beanDef.setFactoryMethodName(method.getName());
+		beanDef.setUniqueFactoryMethodName(method.getName());
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 
 		// consider name and any aliases
@@ -197,11 +198,27 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition created
 	 * by JavaConfig as opposed to any other configuration source. Used in bean overriding cases
-	 * where it's necessary to determine whether the bean definition was created externally
-	 * (e.g. via XML).
+	 * where it's necessary to determine whether the bean definition was created externally.
 	 */
 	@SuppressWarnings("serial")
 	private class ConfigurationClassBeanDefinition extends RootBeanDefinition {
+
+		public ConfigurationClassBeanDefinition() {
+		}
+
+		private ConfigurationClassBeanDefinition(ConfigurationClassBeanDefinition original) {
+			super(original);
+		}
+
+		@Override
+		public boolean isFactoryMethod(Method candidate) {
+			return (super.isFactoryMethod(candidate) && candidate.isAnnotationPresent(Bean.class));
+		}
+
+		@Override
+		public ConfigurationClassBeanDefinition cloneBeanDefinition() {
+			return new ConfigurationClassBeanDefinition(this);
+		}
 	}
 
 }

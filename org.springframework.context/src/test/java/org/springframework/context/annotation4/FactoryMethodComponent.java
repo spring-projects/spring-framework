@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.BeanAge;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -44,6 +43,11 @@ public final class FactoryMethodComponent {
 
 	@Bean @Qualifier("public")
 	public TestBean publicInstance() {
+		return new TestBean("publicInstance");
+	}
+
+	// to be ignored
+	public TestBean publicInstance(boolean doIt) {
 		return new TestBean("publicInstance");
 	}
 

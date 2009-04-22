@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,10 +38,13 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.type.classreading.SimpleMetadataReader;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -64,27 +68,28 @@ class ConfigurationClassVisitor implements ClassVisitor {
 
 	private final ProblemReporter problemReporter;
 
-	private final ClassLoader classLoader;
+	private final SimpleMetadataReaderFactory metadataReaderFactory;
 
 	private final Stack<ConfigurationClass> importStack;
 
 
 	public ConfigurationClassVisitor(ConfigurationClass configClass, Set<ConfigurationClass> model,
-			ProblemReporter problemReporter, ClassLoader classLoader) {
+			ProblemReporter problemReporter, SimpleMetadataReaderFactory metadataReaderFactory) {
 
 		this.configClass = configClass;
 		this.model = model;
 		this.problemReporter = problemReporter;
-		this.classLoader = classLoader;
+		this.metadataReaderFactory = metadataReaderFactory;
 		this.importStack = new ImportStack();
 	}
 
 	private ConfigurationClassVisitor(ConfigurationClass configClass, Set<ConfigurationClass> model,
-			ProblemReporter problemReporter, ClassLoader classLoader, Stack<ConfigurationClass> importStack) {
+			ProblemReporter problemReporter, SimpleMetadataReaderFactory metadataReaderFactory,
+			Stack<ConfigurationClass> importStack) {
 		this.configClass = configClass;
 		this.model = model;
 		this.problemReporter = problemReporter;
-		this.classLoader = classLoader;
+		this.metadataReaderFactory = metadataReaderFactory;
 		this.importStack = importStack;
 	}
 
@@ -105,9 +110,15 @@ class ConfigurationClassVisitor implements ClassVisitor {
 		if (OBJECT_DESC.equals(superTypeDesc)) {
 			return;
 		}
-		ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader, importStack);
-		ClassReader reader = ConfigurationClassReaderUtils.newAsmClassReader(superTypeDesc, classLoader);
-		reader.accept(visitor, false);
+		ConfigurationClassVisitor visitor = new ConfigurationClassVisitor(configClass, model, problemReporter, metadataReaderFactory, importStack);
+		String superClassName = ClassUtils.convertResourcePathToClassName(superTypeDesc);
+		try {
+			SimpleMetadataReader reader = this.metadataReaderFactory.getMetadataReader(superClassName);
+			reader.getClassReader().accept(visitor, false);
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException("Failed to load bean super class [" + superClassName + "]", ex);
+		}
 	}
 
 	public void visitSource(String sourceFile, String debug) {
@@ -132,15 +143,14 @@ class ConfigurationClassVisitor implements ClassVisitor {
 	 * @see Lazy
 	 * @see Import
 	 */
+	@SuppressWarnings("unchecked")
 	public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
-		String annoTypeName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(annoTypeDesc);
-		Class<? extends Annotation> annoClass = ConfigurationClassReaderUtils.loadToolingSafeClass(annoTypeName, classLoader);
-
+		ClassLoader classLoader = metadataReaderFactory.getResourceLoader().getClassLoader();
+		Class<? extends Annotation> annoClass = ConfigurationClassReaderUtils.loadAnnotationType(annoTypeDesc, classLoader);
 		if (annoClass == null) {
 			// annotation was unable to be loaded -> probably Spring IDE unable to load a user-defined annotation
 			return new EmptyVisitor();
 		}
-
 		if (Import.class.equals(annoClass)) {
 			if (!importStack.contains(configClass)) {
 				importStack.push(configClass);
@@ -169,6 +179,7 @@ class ConfigurationClassVisitor implements ClassVisitor {
 	 * {@link ConfigurationClassMethodVisitor}.
 	 */
 	public MethodVisitor visitMethod(int modifiers, String methodName, String methodDescriptor, String arg3, String[] arg4) {
+		ClassLoader classLoader = metadataReaderFactory.getResourceLoader().getClassLoader();
 		return new ConfigurationClassMethodVisitor(configClass, methodName, methodDescriptor, modifiers, classLoader);
 	}
 
@@ -181,7 +192,7 @@ class ConfigurationClassVisitor implements ClassVisitor {
 	 * {@link Configuration} class. Determines whether the method is a {@link Bean}
 	 * method and if so, adds it to the {@link ConfigurationClass}.
 	 */
-	private static class ConfigurationClassMethodVisitor extends MethodAdapter {
+	private class ConfigurationClassMethodVisitor extends MethodAdapter {
 
 		private final ConfigurationClass configClass;
 		private final String methodName;
@@ -214,9 +225,9 @@ class ConfigurationClassVisitor implements ClassVisitor {
 		 * present (regardless of its RetentionPolicy).
 		 */
 		@Override
+		@SuppressWarnings("unchecked")
 		public AnnotationVisitor visitAnnotation(String annoTypeDesc, boolean visible) {
-			String annoClassName = ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(annoTypeDesc);
-			Class<? extends Annotation> annoClass = ConfigurationClassReaderUtils.loadToolingSafeClass(annoClassName, classLoader);
+			Class<? extends Annotation> annoClass = ConfigurationClassReaderUtils.loadAnnotationType(annoTypeDesc, classLoader);
 			if (annoClass == null) {
 				return super.visitAnnotation(annoTypeDesc, visible);
 			}
@@ -262,14 +273,19 @@ class ConfigurationClassVisitor implements ClassVisitor {
 		private ConfigurationClassMethod.ReturnType initReturnTypeFromMethodDescriptor(String methodDescriptor) {
 			final ConfigurationClassMethod.ReturnType returnType = new ConfigurationClassMethod.ReturnType(ConfigurationClassReaderUtils.getReturnTypeFromAsmMethodDescriptor(methodDescriptor));
 			// detect whether the return type is an interface
-			ConfigurationClassReaderUtils.newAsmClassReader(ClassUtils.convertClassNameToResourcePath(returnType.getName()), classLoader).accept(
-					new ClassAdapter(new EmptyVisitor()) {
-						@Override
-						public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
-							returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
-						}
-					}, false);
-			return returnType;
+			try {
+				metadataReaderFactory.getMetadataReader(returnType.getName()).getClassReader().accept(
+						new ClassAdapter(new EmptyVisitor()) {
+							@Override
+							public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) {
+								returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
+							}
+						}, false);
+				return returnType;
+			}
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException("Failed to load bean return type [" + returnType.getName() + "]", ex);
+			}
 		}
 	}
 
@@ -285,17 +301,13 @@ class ConfigurationClassVisitor implements ClassVisitor {
 
 		private final ProblemReporter problemReporter;
 
-		private final ClassLoader classLoader;
-
 		private final List<String> classesToImport = new ArrayList<String>();
-
 
 		public ImportAnnotationVisitor(
 				Set<ConfigurationClass> model, ProblemReporter problemReporter, ClassLoader classLoader) {
 
 			this.model = model;
 			this.problemReporter = problemReporter;
-			this.classLoader = classLoader;
 		}
 
 		public void visit(String s, Object o) {
@@ -337,13 +349,18 @@ class ConfigurationClassVisitor implements ClassVisitor {
 
 		private void processClassToImport(String classToImport) {
 			ConfigurationClass configClass = new ConfigurationClass();
-			ClassReader reader = ConfigurationClassReaderUtils.newAsmClassReader(ClassUtils.convertClassNameToResourcePath(classToImport), classLoader);
-			reader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, classLoader, importStack), false);
-			if (configClass.getAnnotation(Configuration.class) == null) {
-				problemReporter.error(new NonAnnotatedConfigurationProblem(configClass.getName(), configClass.getLocation()));
+			try {
+				ClassReader reader = metadataReaderFactory.getMetadataReader(classToImport).getClassReader();
+				reader.accept(new ConfigurationClassVisitor(configClass, model, problemReporter, metadataReaderFactory, importStack), false);
+				if (configClass.getAnnotation(Configuration.class) == null) {
+					problemReporter.error(new NonAnnotatedConfigurationProblem(configClass.getName(), configClass.getLocation()));
+				}
+				else {
+					model.add(configClass);
+				}
 			}
-			else {
-				model.add(configClass);
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException("Failed to load imported configuration class [" + classToImport + "]", ex);
 			}
 		}
 	}
