@@ -30,7 +30,7 @@
 	</publications>
 
 	<dependencies>
-		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0"
+		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="1.0.0"
 					conf="optional, feed->compile"/>
 		<dependency org="com.lowagie.text" name="com.springsource.com.lowagie.text" rev="2.0.8"
 					conf="optional, itext->compile"/>
