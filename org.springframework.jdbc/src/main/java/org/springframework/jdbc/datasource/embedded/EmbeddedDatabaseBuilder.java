@@ -29,6 +29,8 @@ import org.springframework.core.io.ResourceLoader;
  * db.shutdown();
  * </pre>
  * 
+ * TODO - should we replace schema/testdata with more general 'script' method?
+ * 
  * @author Keith Donald
  */
 public class EmbeddedDatabaseBuilder {
