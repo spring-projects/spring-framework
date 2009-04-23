@@ -15,7 +15,6 @@
  */
 package org.springframework.jdbc.datasource.embedded;
 
-import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 
 /**
@@ -29,6 +28,5 @@ public interface EmbeddedDatabase extends DataSource {
 	/**
 	 * Shutdown this embedded database.
 	 */
-	@PreDestroy
 	void shutdown();
 }

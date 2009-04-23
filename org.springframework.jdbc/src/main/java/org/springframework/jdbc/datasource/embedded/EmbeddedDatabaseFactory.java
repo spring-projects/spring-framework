@@ -55,7 +55,7 @@ public class EmbeddedDatabaseFactory {
 
 	private DatabasePopulator databasePopulator;
 
-	private EmbeddedDatabase database;
+	private DataSource dataSource;
 	
 	/**
 	 * Creates a default {@link EmbeddedDatabaseFactory}.
@@ -122,42 +122,51 @@ public class EmbeddedDatabaseFactory {
 	 * Factory method that returns the embedded database instance.
 	 */
 	public EmbeddedDatabase getDatabase() {
-		if (database == null) {
-			initDatabase();
+		if (dataSource == null) {
+			initDataSource();
 		}
-		return database;
+		return new EmbeddedDataSourceProxy(dataSource);
 	}
-	
-	// internal helper methods
 
-	private void initDatabase() {
+	// subclassing hooks
+	
+	protected void initDataSource() {
 		// create the embedded database source first
-		database = new EmbeddedDataSourceProxy(createDataSource());
 		if (logger.isInfoEnabled()) {
 			logger.info("Created embedded database '" + databaseName + "'");
 		}
+		databaseConfigurer.configureConnectionProperties(dataSourceFactory.getConnectionProperties(), databaseName);
+		dataSource = dataSourceFactory.getDataSource();
 		if (databasePopulator != null) {
 			// now populate the database
 			populateDatabase();
 		}
 	}
 
-	private DataSource createDataSource() {
-		databaseConfigurer.configureConnectionProperties(dataSourceFactory.getConnectionProperties(), databaseName);
-		return dataSourceFactory.getDataSource();
+	protected DataSource getDataSource() {
+		return dataSource;
 	}
+	
+	protected void shutdownDataSource() {
+		if (dataSource != null) {
+			databaseConfigurer.shutdown(dataSource);
+			dataSource = null;
+		}
+	}
+	
+	// internal helper methods
 
 	private void populateDatabase() {
-		TransactionTemplate template = new TransactionTemplate(new DataSourceTransactionManager(database));
+		TransactionTemplate template = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
 		template.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				databasePopulator.populate(new JdbcTemplate(database));
+				databasePopulator.populate(new JdbcTemplate(dataSource));
 			}
 		});
 	}
 	
-	class EmbeddedDataSourceProxy implements EmbeddedDatabase {
+	private class EmbeddedDataSourceProxy implements EmbeddedDatabase {
 		private DataSource dataSource;
 
 		public EmbeddedDataSourceProxy(DataSource dataSource) {
@@ -198,16 +207,9 @@ public class EmbeddedDatabaseFactory {
 		}
 		
 		public void shutdown() {
-			shutdownDatabase();
+			shutdownDataSource();
 		}
 
-	}
-	
-	private void shutdownDatabase() {
-		if (database != null) {
-			databaseConfigurer.shutdown(database);
-			database = null;
-		}
 	}
 	
 }
