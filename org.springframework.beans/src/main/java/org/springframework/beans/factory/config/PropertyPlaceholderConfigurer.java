@@ -92,7 +92,7 @@ import org.springframework.util.StringValueResolver;
  * @see PropertyOverrideConfigurer
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
-	implements BeanNameAware, BeanFactoryAware {
+		implements BeanNameAware, BeanFactoryAware {
 
 	/** Default placeholder prefix: "${" */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
