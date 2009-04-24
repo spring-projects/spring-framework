@@ -19,13 +19,13 @@ package org.springframework.context.annotation.configuration;
 import java.lang.annotation.Inherited;
 
 import org.junit.Test;
+import test.beans.TestBean;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
-
-import test.beans.TestBean;
 
 /**
  * Tests that polymorphic Configuration classes need not explicitly redeclare the
@@ -37,7 +37,7 @@ import test.beans.TestBean;
 public class PolymorphicConfigurationTests {
 
 	@Test
-	public void subclassNeedNotDeclareConfigurationAnnotation() {
+	public void beanMethodsDetectedOnSuperClass() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(Config.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -56,6 +56,7 @@ public class PolymorphicConfigurationTests {
 	}
 
 
+	@Configuration
 	static class Config extends SuperConfig {
 	}
 

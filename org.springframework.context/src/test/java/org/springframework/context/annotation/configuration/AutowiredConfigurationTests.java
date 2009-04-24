@@ -34,12 +34,10 @@ import org.springframework.core.io.ClassPathResource;
 import test.beans.Colour;
 import test.beans.TestBean;
 
-
 /**
  * System tests covering use of {@link Autowired} and {@link Value} within
  * {@link Configuration} classes.
  * 
- *
  * @author Chris Beams
  */
 public class AutowiredConfigurationTests {
@@ -73,6 +71,7 @@ public class AutowiredConfigurationTests {
 		}
 	}
 
+
 	/**
 	 * {@link Autowired} constructors are not supported on {@link Configuration} classes
 	 * due to CGLIB constraints
@@ -96,6 +95,7 @@ public class AutowiredConfigurationTests {
 		}
 	}
 
+
 	@Test
 	public void testValueInjection() {
 		System.setProperty("myProp", "foo");
@@ -118,6 +118,7 @@ public class AutowiredConfigurationTests {
 			return new TestBean(name);
 		}
 	}
+
 
 	@Test
 	public void testCustomProperties() {
@@ -143,4 +144,5 @@ public class AutowiredConfigurationTests {
 			return new TestBean(hostname);
 		}
 	}
+
 }

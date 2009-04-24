@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -78,7 +80,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClass(configClass);
-		for (ConfigurationClassMethod method : configClass.getBeanMethods()) {
+		for (ConfigurationClassMethod method : configClass.getConfigurationMethods()) {
 			loadBeanDefinitionsForModelMethod(method);
 		}
 	}
@@ -89,7 +91,7 @@ class ConfigurationClassBeanDefinitionReader {
 	private void doLoadBeanDefinitionForConfigurationClass(ConfigurationClass configClass) {
 		if (configClass.getBeanName() == null) {
 			GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
-			configBeanDef.setBeanClassName(configClass.getName());
+			configBeanDef.setBeanClassName(configClass.getMetadata().getClassName());
 			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
@@ -103,24 +105,26 @@ class ConfigurationClassBeanDefinitionReader {
 	 * {@link #registry} based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
+		MethodMetadata metadata = method.getMetadata();
+
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition();
 		ConfigurationClass configClass = method.getDeclaringClass();
 		beanDef.setFactoryBeanName(configClass.getBeanName());
-		beanDef.setUniqueFactoryMethodName(method.getName());
+		beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 
 		// consider name and any aliases
-		Bean bean = method.getRequiredAnnotation(Bean.class);
-		List<String> names = new ArrayList<String>(Arrays.asList(bean.name()));
-		String beanName = (names.size() > 0) ? names.remove(0) : method.getName();
-		for (String alias : bean.name()) {
+		Map<String, Object> beanAttributes = metadata.getAnnotationAttributes(Bean.class.getName());
+		List<String> names = new ArrayList<String>(Arrays.asList((String[]) beanAttributes.get("name")));
+		String beanName = (names.size() > 0 ? names.remove(0) : method.getMetadata().getMethodName());
+		for (String alias : names) {
 			registry.registerAlias(beanName, alias);
 		}
 
 		// has this already been overriden (i.e.: via XML)?
 		if (registry.containsBeanDefinition(beanName)) {
 			BeanDefinition existingBeanDef = registry.getBeanDefinition(beanName);
-			// is the existing bean definition one that was created by JavaConfig?
+			// is the existing bean definition one that was created from a configuration class?
 			if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
 				// no -> then it's an external override, probably XML
 				// overriding is legal, return immediately
@@ -132,48 +136,46 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 		}
 
-		if (method.getAnnotation(Primary.class) != null) {
+		if (metadata.hasAnnotation(Primary.class.getName())) {
 			beanDef.setPrimary(true);
 		}
 
 		// is this bean to be instantiated lazily?
-		Lazy lazy = method.getAnnotation(Lazy.class);
-		if (lazy != null) {
-			beanDef.setLazyInit(lazy.value());
+		if (metadata.hasAnnotation(Lazy.class.getName())) {
+			beanDef.setLazyInit((Boolean) metadata.getAnnotationAttributes(Lazy.class.getName()).get("value"));
 		}
-		else {
-			Lazy defaultLazy = configClass.getAnnotation(Lazy.class);
-			if (defaultLazy != null) {
-				beanDef.setLazyInit(defaultLazy.value());
+		else if (configClass.getMetadata().hasAnnotation(Lazy.class.getName())){
+			beanDef.setLazyInit((Boolean) configClass.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value"));
+		}
+
+		if (metadata.hasAnnotation(DependsOn.class.getName())) {
+			String[] dependsOn = (String[]) metadata.getAnnotationAttributes(DependsOn.class.getName()).get("value");
+			if (dependsOn.length > 0) {
+				beanDef.setDependsOn(dependsOn);
 			}
 		}
 
-		DependsOn dependsOn = method.getAnnotation(DependsOn.class);
-		if (dependsOn != null && dependsOn.value().length > 0) {
-			beanDef.setDependsOn(dependsOn.value());
-		}
-
-		Autowire autowire = bean.autowire();
+		Autowire autowire = (Autowire) beanAttributes.get("autowire");
 		if (autowire.isAutowire()) {
 			beanDef.setAutowireMode(autowire.value());
 		}
 
-		String initMethodName = bean.initMethod();
+		String initMethodName = (String) beanAttributes.get("initMethod");
 		if (StringUtils.hasText(initMethodName)) {
 			beanDef.setInitMethodName(initMethodName);
 		}
 
-		String destroyMethodName = bean.destroyMethod();
+		String destroyMethodName = (String) beanAttributes.get("destroyMethod");
 		if (StringUtils.hasText(destroyMethodName)) {
 			beanDef.setDestroyMethodName(destroyMethodName);
 		}
 
 		// consider scoping
-		Scope scope = method.getAnnotation(Scope.class);
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		if (scope != null) {
-			beanDef.setScope(scope.value());
-			proxyMode = scope.proxyMode();
+		if (metadata.hasAnnotation(Scope.class.getName())) {
+			Map<String, Object> scopeAttributes = metadata.getAnnotationAttributes(Scope.class.getName());
+			beanDef.setScope((String) scopeAttributes.get("value"));
+			proxyMode = (ScopedProxyMode) scopeAttributes.get("proxyMode");
 			if (proxyMode == ScopedProxyMode.DEFAULT) {
 				proxyMode = ScopedProxyMode.NO;
 			}
@@ -188,7 +190,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Registering bean definition for @Bean method %s.%s()", configClass.getName(), beanName));
+			logger.debug(String.format("Registering bean definition for @Bean method %s.%s()", configClass.getMetadata().getClassName(), beanName));
 		}
 
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
@@ -196,11 +198,11 @@ class ConfigurationClassBeanDefinitionReader {
 
 
 	/**
-	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition created
-	 * by JavaConfig as opposed to any other configuration source. Used in bean overriding cases
-	 * where it's necessary to determine whether the bean definition was created externally.
+	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
+	 * created from a configuration class as opposed to any other configuration source.
+	 * Used in bean overriding cases where it's necessary to determine whether the bean
+	 * definition was created externally.
 	 */
-	@SuppressWarnings("serial")
 	private class ConfigurationClassBeanDefinition extends RootBeanDefinition {
 
 		public ConfigurationClassBeanDefinition() {

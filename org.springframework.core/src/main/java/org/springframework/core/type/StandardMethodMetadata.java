@@ -17,7 +17,6 @@
 package org.springframework.core.type;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
@@ -28,52 +27,62 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
+ * {@link MethodMetadata} implementation that uses standard reflection
+ * to introspect a given <code>Method</code>.
+ *
  * @author Mark Pollack
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class StandardMethodMetadata implements MethodMetadata {
 
 	private final Method introspectedMethod;
-	
-	public StandardMethodMetadata(Method method) {
-		Assert.notNull(method, "Method must not be null");
-		introspectedMethod = method;
+
+
+	/**
+	 * Create a new StandardMethodMetadata wrapper for the given Method.
+	 * @param introspectedMethod the Method to introspect
+	 */
+	public StandardMethodMetadata(Method introspectedMethod) {
+		Assert.notNull(introspectedMethod, "Method must not be null");
+		this.introspectedMethod = introspectedMethod;
 	}
-	
+
+	/**
+	 * Return the underlying Method.
+	 */
 	public final Method getIntrospectedMethod() {
 		return this.introspectedMethod;
 	}
-	
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		Annotation[] anns = getIntrospectedMethod().getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				return AnnotationUtils.getAnnotationAttributes(ann);
-			}
-		}
-		return null;
+
+	public String getMethodName() {
+		return this.introspectedMethod.getName();
+	}
+
+	public boolean isStatic() {
+		return Modifier.isStatic(this.introspectedMethod.getModifiers());
+	}
+
+	public boolean isFinal() {
+		return Modifier.isFinal(this.introspectedMethod.getModifiers());
+	}
+
+	public boolean isOverridable() {
+		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
 	}
 
 	public Set<String> getAnnotationTypes() {
 		Set<String> types = new HashSet<String>();
-		Annotation[] anns = getIntrospectedMethod().getAnnotations();
+		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {
 			types.add(ann.annotationType().getName());
 		}
 		return types;
 	}
 
-	public String getMethodName() {
-		return introspectedMethod.getName();
-	}
-
-	public int getModifiers() {
-		return introspectedMethod.getModifiers();
-	}
-
 	public boolean hasAnnotation(String annotationType) {
-		Annotation[] anns = getIntrospectedMethod().getAnnotations();
+		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
 				return true;
@@ -82,44 +91,14 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return false;
 	}
 
-	public boolean isStatic() {
-		return Modifier.isStatic(getIntrospectedMethod().getModifiers());
-	}
-
-	public Set<String> getMetaAnnotationTypes(String annotationType) {
-		Annotation[] anns = getIntrospectedMethod().getAnnotations();
+	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
-				Set<String> types = new HashSet<String>();
-				Annotation[] metaAnns = ann.annotationType().getAnnotations();
-				for (Annotation meta : metaAnns) {
-					types.add(meta.annotationType().getName());
-				}
-				return types;
+				return AnnotationUtils.getAnnotationAttributes(ann, true);
 			}
 		}
 		return null;
 	}
-
-	public boolean hasMetaAnnotation(String metaAnnotationType) {
-		//TODO can refactor into shared (utility) method with StandardAnnotationMetadata
-		Annotation[] anns = getIntrospectedMethod().getAnnotations();
-		for (Annotation ann : anns) {
-			Annotation[] metaAnns = ann.annotationType().getAnnotations();
-			for (Annotation meta : metaAnns) {
-				if (meta.annotationType().getName().equals(metaAnnotationType)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public Set<String> getAnnotationTypesWithMetaAnnotation(String qualifierClassName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	
 
 }

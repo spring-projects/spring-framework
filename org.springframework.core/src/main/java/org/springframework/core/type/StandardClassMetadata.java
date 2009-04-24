@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.core.type;
 
 import java.lang.reflect.Modifier;
 
+import org.springframework.util.Assert;
+
 /**
  * {@link ClassMetadata} implementation that uses standard reflection
  * to introspect a given <code>Class</code>.
@@ -30,57 +32,69 @@ public class StandardClassMetadata implements ClassMetadata {
 	private final Class introspectedClass;
 
 
+	/**
+	 * Create a new StandardClassMetadata wrapper for the given Class.
+	 * @param introspectedClass the Class to introspect
+	 */
 	public StandardClassMetadata(Class introspectedClass) {
+		Assert.notNull(introspectedClass, "Class must not be null");
 		this.introspectedClass = introspectedClass;
 	}
 
+	/**
+	 * Return the underlying Class.
+	 */
 	public final Class getIntrospectedClass() {
 		return this.introspectedClass;
 	}
 
 
 	public String getClassName() {
-		return getIntrospectedClass().getName();
+		return this.introspectedClass.getName();
 	}
 
 	public boolean isInterface() {
-		return getIntrospectedClass().isInterface();
+		return this.introspectedClass.isInterface();
 	}
 
 	public boolean isAbstract() {
-		return Modifier.isAbstract(getIntrospectedClass().getModifiers());
+		return Modifier.isAbstract(this.introspectedClass.getModifiers());
 	}
 
 	public boolean isConcrete() {
 		return !(isInterface() || isAbstract());
 	}
 
+	public boolean isFinal() {
+		return Modifier.isFinal(this.introspectedClass.getModifiers());
+	}
+
 	public boolean isIndependent() {
 		return (!hasEnclosingClass() ||
-				(getIntrospectedClass().getDeclaringClass() != null &&
-						Modifier.isStatic(getIntrospectedClass().getModifiers())));
+				(this.introspectedClass.getDeclaringClass() != null &&
+						Modifier.isStatic(this.introspectedClass.getModifiers())));
 	}
 
 	public boolean hasEnclosingClass() {
-		return (getIntrospectedClass().getEnclosingClass() != null);
+		return (this.introspectedClass.getEnclosingClass() != null);
 	}
 
 	public String getEnclosingClassName() {
-		Class enclosingClass = getIntrospectedClass().getEnclosingClass();
+		Class enclosingClass = this.introspectedClass.getEnclosingClass();
 		return (enclosingClass != null ? enclosingClass.getName() : null);
 	}
 
 	public boolean hasSuperClass() {
-		return (getIntrospectedClass().getSuperclass() != null);
+		return (this.introspectedClass.getSuperclass() != null);
 	}
 
 	public String getSuperClassName() {
-		Class superClass = getIntrospectedClass().getSuperclass();
+		Class superClass = this.introspectedClass.getSuperclass();
 		return (superClass != null ? superClass.getName() : null);
 	}
 
 	public String[] getInterfaceNames() {
-		Class[] ifcs = getIntrospectedClass().getInterfaces();
+		Class[] ifcs = this.introspectedClass.getInterfaces();
 		String[] ifcNames = new String[ifcs.length];
 		for (int i = 0; i < ifcs.length; i++) {
 			ifcNames[i] = ifcs[i].getName();

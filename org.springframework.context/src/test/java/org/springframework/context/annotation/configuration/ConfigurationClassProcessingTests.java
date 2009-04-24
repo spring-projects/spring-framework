@@ -74,15 +74,6 @@ public class ConfigurationClassProcessingTests {
 		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
 	}
 
-	@Configuration
-	static class ConfigWithBeanWithCustomName {
-		static TestBean testBean = new TestBean();
-		@Bean(name="customName")
-		public TestBean methodName() {
-			return testBean;
-		}
-	}
-
 	@Test
 	public void aliasesAreRespected() {
 		BeanFactory factory = initBeanFactory(ConfigWithBeanWithAliases.class);
@@ -98,25 +89,9 @@ public class ConfigurationClassProcessingTests {
 		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
 	}
 
-	@Configuration
-	static class ConfigWithBeanWithAliases {
-		static TestBean testBean = new TestBean();
-		@Bean(name={"name1", "alias1", "alias2", "alias3"})
-		public TestBean methodName() {
-			return testBean;
-		}
-	}
-
 	@Test(expected=BeanDefinitionParsingException.class)
 	public void testFinalBeanMethod() {
 		initBeanFactory(ConfigWithFinalBean.class);
-	}
-
-	@Configuration
-	static class ConfigWithFinalBean {
-		public final @Bean TestBean testBean() {
-			return new TestBean();
-		}
 	}
 
 	@Test
@@ -140,9 +115,37 @@ public class ConfigurationClassProcessingTests {
 
 
 	@Configuration
+	static class ConfigWithBeanWithCustomName {
+		static TestBean testBean = new TestBean();
+		@Bean(name="customName")
+		public TestBean methodName() {
+			return testBean;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithFinalBean {
+		public final @Bean TestBean testBean() {
+			return new TestBean();
+		}
+	}
+
+
+	@Configuration
 	static class SimplestPossibleConfig {
 		public @Bean String stringBean() {
 			return "foo";
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithBeanWithAliases {
+		static TestBean testBean = new TestBean();
+		@Bean(name={"name1", "alias1", "alias2", "alias3"})
+		public TestBean methodName() {
+			return testBean;
 		}
 	}
 
