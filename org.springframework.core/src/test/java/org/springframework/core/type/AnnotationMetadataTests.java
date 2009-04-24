@@ -79,7 +79,7 @@ public class AnnotationMetadataTests extends TestCase {
 		assertEquals("myScope", scopeAttrs.get("value"));
 		Map<String, Object> specialAttrs = metadata.getAnnotationAttributes(SpecialAttr.class.getName());
 		assertEquals(2, specialAttrs.size());
-		assertEquals(String.class, specialAttrs.get("clazz"));
+		assertEquals(String.class.getName(), specialAttrs.get("clazz"));
 		assertEquals(Thread.State.NEW, specialAttrs.get("state"));
 	}
 	
