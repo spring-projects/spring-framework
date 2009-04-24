@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class ClassPathResource extends AbstractResource {
 	 * @see java.lang.Class#getResourceAsStream(String)
 	 */
 	public InputStream getInputStream() throws IOException {
-		InputStream is = null;
+		InputStream is;
 		if (this.clazz != null) {
 			is = this.clazz.getResourceAsStream(this.path);
 		}
@@ -153,7 +153,7 @@ public class ClassPathResource extends AbstractResource {
 	 */
 	@Override
 	public URL getURL() throws IOException {
-		URL url = null;
+		URL url;
 		if (this.clazz != null) {
 			url = this.clazz.getResource(this.path);
 		}
