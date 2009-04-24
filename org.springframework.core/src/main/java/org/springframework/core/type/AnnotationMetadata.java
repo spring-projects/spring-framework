@@ -46,8 +46,19 @@ public interface AnnotationMetadata extends ClassMetadata {
 	boolean hasAnnotation(String annotationType);
 
 	/**
+	 * Retrieve the attributes of the annotation of the given type,
+	 * if any (i.e. if defined on the underlying class).
+	 * @param annotationType the annotation type to look for
+	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
+	 * and the defined attribute value as Map value. This return value will be
+	 * <code>null</code> if no matching annotation is defined.
+	 */
+	Map<String, Object> getAnnotationAttributes(String annotationType);
+
+	/**
 	 * Return the names of all meta-annotation types defined on the
 	 * given annotation type of the underlying class.
+	 * @param annotationType the meta-annotation type to look for
 	 * @return the meta-annotation type names
 	 */
 	Set<String> getMetaAnnotationTypes(String annotationType);
@@ -61,26 +72,20 @@ public interface AnnotationMetadata extends ClassMetadata {
 	boolean hasMetaAnnotation(String metaAnnotationType);
 
 	/**
-	 * Retrieve the attributes of the annotation of the given type,
-	 * if any (i.e. if defined on the underlying class).
-	 * @param annotationType the annotation type to look for
-	 * @return a Map of attributes, with the attribute name as key
-	 * (e.g. "value") and the defined attribute value as Map value.
-	 * This return value will be <code>null</code> if no matching
-	 * annotation is defined.
+	 * Retrieve the method metadata for all methods that are annotated
+	 * with at least one annotation type.
+	 * @return a Set of {@link MethodMetadata} for methods that have annotations.
+	 * The return value will be an empty set if no annotated methods are found.
 	 */
-	Map<String, Object> getAnnotationAttributes(String annotationType);
-
-
-	// TODO return null would be more consistent with other methods if no match is found
+	Set<MethodMetadata> getAnnotatedMethods();
 
 	/**
-	 * Retrieve the method meta-data for all methods that have the
+	 * Retrieve the method metadata for all methods that have the
 	 * given annotation type.
 	 * @param annotationType the annotation type to look for
-	 * @return a Set of (@link MethodMetadata) for methods that
-	 * have a matching annotation.  The return value will be an
-	 * empty set if no methods match the annotation type. 
+	 * @return a Set of {@link MethodMetadata} for methods that have a matching
+	 * annotation. The return value will be an empty set if no methods match
+	 * the annotation type.
 	 */
 	Set<MethodMetadata> getAnnotatedMethods(String annotationType);
 

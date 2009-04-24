@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 
@@ -29,12 +30,18 @@ import org.springframework.core.type.ClassMetadata;
 public interface MetadataReader {
 
 	/**
+	 * Return the resource reference for the class file.
+	 */
+	Resource getResource();
+
+	/**
 	 * Read basic class metadata for the underlying class.
 	 */
 	ClassMetadata getClassMetadata();
 
 	/**
-	 * Read full annotation metadata for the underlying class.
+	 * Read full annotation metadata for the underlying class,
+	 * including metadata for annotated methods.
 	 */
 	AnnotationMetadata getAnnotationMetadata();
 

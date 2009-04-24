@@ -60,17 +60,14 @@ class ConfigurationClassEnhancer {
 	 */
 	public ConfigurationClassEnhancer(ConfigurableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
-
-		callbackInstances.add(new BeanMethodInterceptor(beanFactory));
-		callbackInstances.add(NoOp.INSTANCE);
-
-		for (Callback callback : callbackInstances) {
-			callbackTypes.add(callback.getClass());
+		this.callbackInstances.add(new BeanMethodInterceptor(beanFactory));
+		this.callbackInstances.add(NoOp.INSTANCE);
+		for (Callback callback : this.callbackInstances) {
+			this.callbackTypes.add(callback.getClass());
 		}
-
 		// Set up the callback filter to return the index of the BeanMethodInterceptor when
 		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
-		callbackFilter = new CallbackFilter() {
+		this.callbackFilter = new CallbackFilter() {
 			public int accept(Method candidateMethod) {
 				return (AnnotationUtils.findAnnotation(candidateMethod, Bean.class) != null) ? 0 : 1;
 			}
@@ -84,12 +81,12 @@ class ConfigurationClassEnhancer {
 	 * @return fully-qualified name of the enhanced subclass
 	 */
 	public Class enhance(Class configClass) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Enhancing " + configClass.getName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Enhancing " + configClass.getName());
 		}
 		Class<?> enhancedClass = createClass(newEnhancer(configClass));
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Successfully enhanced %s; enhanced class name is: %s",
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
 					configClass.getName(), enhancedClass.getName()));
 		}
 		return enhancedClass;
@@ -100,17 +97,14 @@ class ConfigurationClassEnhancer {
 	 */
 	private Enhancer newEnhancer(Class<?> superclass) {
 		Enhancer enhancer = new Enhancer();
-
-		// because callbackFilter and callbackTypes are dynamically populated
+		// Because callbackFilter and callbackTypes are dynamically populated
 		// there's no opportunity for caching. This does not appear to be causing
 		// any performance problem.
 		enhancer.setUseCache(false);
-
 		enhancer.setSuperclass(superclass);
 		enhancer.setUseFactory(false);
-		enhancer.setCallbackFilter(callbackFilter);
-		enhancer.setCallbackTypes(callbackTypes.toArray(new Class[callbackTypes.size()]));
-
+		enhancer.setCallbackFilter(this.callbackFilter);
+		enhancer.setCallbackTypes(this.callbackTypes.toArray(new Class[this.callbackTypes.size()]));
 		return enhancer;
 	}
 
@@ -120,7 +114,7 @@ class ConfigurationClassEnhancer {
 	 */
 	private Class<?> createClass(Enhancer enhancer) {
 		Class<?> subclass = enhancer.createClass();
-		Enhancer.registerCallbacks(subclass, callbackInstances.toArray(new Callback[callbackInstances.size()]));
+		Enhancer.registerCallbacks(subclass, this.callbackInstances.toArray(new Callback[this.callbackInstances.size()]));
 		return subclass;
 	}
 
@@ -142,7 +136,6 @@ class ConfigurationClassEnhancer {
 			this.beanFactory = beanFactory;
 		}
 
-
 		/**
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
@@ -161,7 +154,7 @@ class ConfigurationClassEnhancer {
 			Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
-				if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
+				if (this.beanFactory.isCurrentlyInCreation(scopedBeanName)) {
 					beanName = scopedBeanName;
 				}
 			}
@@ -170,7 +163,7 @@ class ConfigurationClassEnhancer {
 			// container for already cached instances
 			if (factoryContainsBean(beanName)) {
 				// we have an already existing cached instance of this bean -> retrieve it
-				Object cachedBean = beanFactory.getBean(beanName);
+				Object cachedBean = this.beanFactory.getBean(beanName);
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Returning cached object [%s] for @Bean method %s.%s",
 							cachedBean, method.getDeclaringClass().getSimpleName(), beanName));
@@ -185,18 +178,18 @@ class ConfigurationClassEnhancer {
 		/**
 		 * Check the beanFactory to see whether the bean named <var>beanName</var> already
 		 * exists. Accounts for the fact that the requested bean may be "in creation", i.e.:
-		 * we're in the middle of servicing the initial request for this bean. From JavaConfig's
-		 * perspective, this means that the bean does not actually yet exist, and that it is now
-		 * our job to create it for the first time by executing the logic in the corresponding
-		 * Bean method.
+		 * we're in the middle of servicing the initial request for this bean. From an enhanced
+		 * factory method's perspective, this means that the bean does not actually yet exist,
+		 * and that it is now our job to create it for the first time by executing the logic
+		 * in the corresponding factory method.
 		 * <p>Said another way, this check repurposes
 		 * {@link ConfigurableBeanFactory#isCurrentlyInCreation(String)} to determine whether
 		 * the container is calling this method or the user is calling this method.
 		 * @param beanName name of bean to check for
-		 * @return true if <var>beanName</var> already exists in the factory
+		 * @return whether <var>beanName</var> already exists in the factory
 		 */
 		private boolean factoryContainsBean(String beanName) {
-			return beanFactory.containsBean(beanName) && !beanFactory.isCurrentlyInCreation(beanName);
+			return (this.beanFactory.containsBean(beanName) && !this.beanFactory.isCurrentlyInCreation(beanName));
 		}
 
 	}

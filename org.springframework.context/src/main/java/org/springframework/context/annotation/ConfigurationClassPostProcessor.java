@@ -35,23 +35,23 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
  * {@link Configuration @Configuration} classes.
- * <p>
- * Registered by default when using {@literal <context:annotation-config/>} or
+ *
+ * <p>Registered by default when using {@literal <context:annotation-config/>} or
  * {@literal <context:component-scan/>}. Otherwise, may be declared manually as
  * with any other BeanFactoryPostProcessor.
- * <p>
- * This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it's important
+ *
+ * <p>This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it is important
  * that any {@link Bean} methods declared in Configuration classes have their
  * respective bean definitions registered before any other BeanFactoryPostProcessor
  * executes.
@@ -62,32 +62,33 @@ import org.springframework.util.ClassUtils;
  */
 public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor, BeanClassLoaderAware {
 
-	public static final String CONFIGURATION_CLASS_ATTRIBUTE =
+	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
+
+	private static final String CONFIGURATION_CLASS_FULL = "full";
+
+	private static final String CONFIGURATION_CLASS_LITE = "lite";
+
 
 	/** Whether the CGLIB2 library is present on the classpath */
 	private static final boolean cglibAvailable = ClassUtils.isPresent(
 			"net.sf.cglib.proxy.Enhancer", ConfigurationClassPostProcessor.class.getClassLoader());
 
 
-	private static final Log logger = LogFactory.getLog(ConfigurationClassPostProcessor.class);
+	private final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Used to register any problems detected with {@link Configuration} or {@link Bean}
-	 * declarations. For instance, a Bean method marked as {@literal final} is illegal
-	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter},
-	 * but is overridable with {@link #setProblemReporter}
-	 */
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	private SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
 
 	/**
-	 * Override the default {@link ProblemReporter}.
-	 * @param problemReporter custom problem reporter
+	 * Set the {@link ProblemReporter} to use.
+	 * <p>Used to register any problems detected with {@link Configuration} or {@link Bean}
+	 * declarations. For instance, a Bean method marked as {@literal final} is illegal
+	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter}.
 	 */
 	public void setProblemReporter(ProblemReporter problemReporter) {
 		this.problemReporter = problemReporter;
@@ -116,40 +117,80 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		enhanceConfigurationClasses(beanFactory);
 	}
 
-
 	/**
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
 	protected final void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
-		Set<BeanDefinitionHolder> configBeanDefs = new LinkedHashSet<BeanDefinitionHolder>();
+		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : registry.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
-			if (checkConfigurationClassBeanDefinition(beanDef)) {
-				configBeanDefs.add(new BeanDefinitionHolder(beanDef, beanName));
+			if (checkConfigurationClassCandidate(beanDef)) {
+				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
 		}
 
 		// Return immediately if no @Configuration classes were found
-		if (configBeanDefs.isEmpty()) {
+		if (configCandidates.isEmpty()) {
 			return;
 		}
 
 		// Populate a new configuration model by parsing each @Configuration classes
 		ConfigurationClassParser parser = new ConfigurationClassParser(this.metadataReaderFactory, this.problemReporter);
-		for (BeanDefinitionHolder holder : configBeanDefs) {
-			String beanClassName = holder.getBeanDefinition().getBeanClassName();
+		for (BeanDefinitionHolder holder : configCandidates) {
+			BeanDefinition bd = holder.getBeanDefinition();
 			try {
-				parser.parse(beanClassName, holder.getBeanName());
+				if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
+					parser.parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
+				}
+				else {
+					parser.parse(bd.getBeanClassName(), holder.getBeanName());
+				}
 			}
 			catch (IOException ex) {
-				throw new BeanDefinitionStoreException("Failed to load bean class [" + beanClassName + "]", ex);
+				throw new BeanDefinitionStoreException("Failed to load bean class: " + bd.getBeanClassName(), ex);
 			}
 		}
 		parser.validate();
 
 		// Read the model and create bean definitions based on its content
 		new ConfigurationClassBeanDefinitionReader(registry).loadBeanDefinitions(parser.getModel());
+	}
+
+	private boolean checkConfigurationClassCandidate(BeanDefinition beanDef) {
+		AnnotationMetadata metadata;
+
+		// Check already loaded Class if present...
+		// since we possibly can't even load the class file for this Class.
+		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+			Class beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
+			metadata = new StandardAnnotationMetadata(beanClass);
+		}
+		else {
+			String className = beanDef.getBeanClassName();
+			try {
+				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(className);
+				metadata = metadataReader.getAnnotationMetadata();
+			}
+			catch (IOException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not find class file for introspecting factory methods: " + className, ex);
+				}
+				return false;
+			}
+		}
+
+		if (metadata.hasAnnotation(Configuration.class.getName())) {
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+			return true;
+		}
+		else if (metadata.hasAnnotation(Component.class.getName())) {
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/**
@@ -162,7 +203,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		Set<BeanDefinitionHolder> configBeanDefs = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
-			if ("full".equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE))) {
+			if (CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE))) {
 				configBeanDefs.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
 		}
@@ -195,50 +236,6 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 				throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
 			}
 		}
-	}
-
-	/**
-	 * @return whether the BeanDefinition's beanClass (or its ancestry) is
-	 * {@link Configuration}-annotated, false if no beanClass is specified.
-	 */
-	private boolean checkConfigurationClassBeanDefinition(BeanDefinition beanDef) {
-		// accommodating SPR-5655
-		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			if (AnnotationUtils.findAnnotation(
-					((AbstractBeanDefinition) beanDef).getBeanClass(), Configuration.class) != null) {
-				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, "full");
-				return true;
-			}
-			else if (AnnotationUtils.findAnnotation(
-					((AbstractBeanDefinition) beanDef).getBeanClass(), Component.class) != null) {
-				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, "lite");
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		String className = beanDef.getBeanClassName();
-		while (className != null && !(className.equals(Object.class.getName()))) {
-			try {
-				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(className);
-				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-				if (metadata.hasAnnotation(Configuration.class.getName())) {
-					beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, "full");
-					return true;
-				}
-				if (metadata.hasAnnotation(Component.class.getName())) {
-					beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, "lite");
-					return true;
-				}
-				className = metadata.getSuperClassName();
-			}
-			catch (IOException ex) {
-				throw new BeanDefinitionStoreException("Failed to load class file [" + className + "]", ex);
-			}
-		}
-
-		return false;
 	}
 
 }

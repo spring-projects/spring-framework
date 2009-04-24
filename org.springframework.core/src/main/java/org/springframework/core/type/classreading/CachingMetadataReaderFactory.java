@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	private final Map<Resource, SimpleMetadataReader> classReaderCache = new HashMap<Resource, SimpleMetadataReader>();
+	private final Map<Resource, MetadataReader> classReaderCache = new HashMap<Resource, MetadataReader>();
 
 
 	/**
@@ -62,9 +62,9 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 
 	@Override
-	public SimpleMetadataReader getMetadataReader(Resource resource) throws IOException {
+	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
-			SimpleMetadataReader metadataReader = this.classReaderCache.get(resource);
+			MetadataReader metadataReader = this.classReaderCache.get(resource);
 			if (metadataReader == null) {
 				metadataReader = super.getMetadataReader(resource);
 				this.classReaderCache.put(resource, metadataReader);

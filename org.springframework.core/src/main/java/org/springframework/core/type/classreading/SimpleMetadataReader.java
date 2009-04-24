@@ -16,7 +16,11 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.springframework.asm.ClassReader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 
@@ -30,7 +34,9 @@ import org.springframework.core.type.ClassMetadata;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class SimpleMetadataReader implements MetadataReader {
+final class SimpleMetadataReader implements MetadataReader {
+
+	private final Resource resource;
 
 	private final ClassReader classReader;
 
@@ -41,26 +47,22 @@ public class SimpleMetadataReader implements MetadataReader {
 	private AnnotationMetadata annotationMetadata;
 
 
-	SimpleMetadataReader(ClassReader classReader, ClassLoader classLoader) {
-		this.classReader = classReader;
+	SimpleMetadataReader(Resource resource, ClassLoader classLoader) throws IOException {
+		this.resource = resource;
+		InputStream is = this.resource.getInputStream();
+		try {
+			this.classReader = new ClassReader(is);
+		}
+		finally {
+			is.close();
+		}
 		this.classLoader = classLoader;
 	}
 
 
-	/**
-	 * Return the underlying ASM ClassReader.
-	 */
-	public final ClassReader getClassReader() {
-		return this.classReader;
+	public Resource getResource() {
+		return this.resource;
 	}
-
-	/**
-	 * Return the underlying ClassLoader.
-	 */
-	public final ClassLoader getClassLoader() {
-		return this.classLoader;
-	}
-
 
 	public ClassMetadata getClassMetadata() {
 		if (this.classMetadata == null) {

@@ -16,20 +16,19 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.Assert;
+import org.springframework.core.io.DescriptiveResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -45,75 +44,42 @@ import org.springframework.util.ClassUtils;
  * @see ConfigurationClassMethod
  * @see ConfigurationClassParser
  */
-final class ConfigurationClass implements BeanMetadataElement {
+final class ConfigurationClass {
 
-	private String name;
+	private final AnnotationMetadata metadata;
 
-	private ConfigurationClass declaringClass;
-
-	private Object source;
+	private final Resource resource;
 
 	private String beanName;
-
-	private int modifiers;
-
-	private final Set<Annotation> annotations = new HashSet<Annotation>();
 
 	private final Set<ConfigurationClassMethod> methods = new LinkedHashSet<ConfigurationClassMethod>();
 
 	private final Map<String, Integer> overloadedMethodMap = new LinkedHashMap<String, Integer>();
 
 
-	/**
-	 * Sets the fully-qualified name of this class.
-	 */
-	public void setName(String className) {
-		this.name = className;
+	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
+		this.metadata = metadataReader.getAnnotationMetadata();
+		this.resource = metadataReader.getResource();
+		this.beanName = beanName;
 	}
 
-	/**
-	 * Returns the fully-qualified name of this class.
-	 */
-	public String getName() {
-		return name;
+	public ConfigurationClass(Class clazz, String beanName) {
+		this.metadata = new StandardAnnotationMetadata(clazz);
+		this.resource = new DescriptiveResource(clazz.toString());
+		this.beanName = beanName;
 	}
 
-	/**
-	 * Returns the non-qualified name of this class. Given com.acme.Foo, returns 'Foo'.
-	 */
+
+	public AnnotationMetadata getMetadata() {
+		return this.metadata;
+	}
+
+	public Resource getResource() {
+		return this.resource;
+	}
+
 	public String getSimpleName() {
-		return name == null ? null : ClassUtils.getShortName(name);
-	}
-
-	public void setDeclaringClass(ConfigurationClass configurationClass) {
-		this.declaringClass = configurationClass;
-	}
-
-	public ConfigurationClass getDeclaringClass() {
-		return declaringClass;
-	}
-
-	/**
-	 * Set the source location for this class. Must be a resource-path formatted string.
-	 * @param source resource path to the .java file that declares this class.
-	 */
-	public void setSource(Object source) {
-		this.source = source;
-	}
-
-	/**
-	 * Returns a resource path-formatted representation of the .java file that declares this
-	 * class
-	 */
-	public Object getSource() {
-		return source;
-	}
-
-	public Location getLocation() {
-		if (getName() == null) {
-			throw new IllegalStateException("'name' property is null. Call setName() before calling getLocation()");
-		}
-		return new Location(new ClassPathResource(ClassUtils.convertClassNameToResourcePath(getName())), getSource());
+		return ClassUtils.getShortName(getMetadata().getClassName());
 	}
 
 	public void setBeanName(String beanName) {
@@ -121,71 +87,29 @@ final class ConfigurationClass implements BeanMetadataElement {
 	}
 
 	public String getBeanName() {
-		return beanName;
-	}
-
-	public void setModifiers(int modifiers) {
-		Assert.isTrue(modifiers >= 0, "modifiers must be non-negative");
-		this.modifiers = modifiers;
-	}
-
-	public int getModifiers() {
-		return modifiers;
-	}
-
-	public void addAnnotation(Annotation annotation) {
-		this.annotations.add(annotation);
-	}
-
-	/**
-	 * @return the annotation on this class matching <var>annoType</var> or
-	 * {@literal null} if not present.
-	 * @see #getRequiredAnnotation(Class)
-	 */
-	@SuppressWarnings("unchecked")
-	public <A extends Annotation> A getAnnotation(Class<A> annoType) {
-		for (Annotation annotation : annotations) {
-			if (annotation.annotationType().equals(annoType)) {
-				return (A) annotation;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * @return the annotation on this class matching <var>annoType</var>
-	 * @throws {@link IllegalStateException} if not present
-	 * @see #getAnnotation(Class)
-	 */
-	public <A extends Annotation> A getRequiredAnnotation(Class<A> annoType) {
-		A anno = getAnnotation(annoType);
-		if (anno == null) {
-			throw new IllegalStateException(
-					String.format("Required annotation %s is not present on %s", annoType.getSimpleName(), this));
-		}
-		return anno;
+		return this.beanName;
 	}
 
 	public ConfigurationClass addMethod(ConfigurationClassMethod method) {
-		method.setDeclaringClass(this);
-		methods.add(method);
-		Integer count = overloadedMethodMap.get(method.getName());
+		this.methods.add(method);
+		String name = method.getMetadata().getMethodName();
+		Integer count = this.overloadedMethodMap.get(name);
 		if (count != null) {
-			overloadedMethodMap.put(method.getName(), count + 1);
+			this.overloadedMethodMap.put(name, count + 1);
 		}
 		else {
-			overloadedMethodMap.put(method.getName(), 1);
+			this.overloadedMethodMap.put(name, 1);
 		}
 		return this;
 	}
 
-	public Set<ConfigurationClassMethod> getBeanMethods() {
-		return methods;
+	public Set<ConfigurationClassMethod> getConfigurationMethods() {
+		return this.methods;
 	}
 
 	public void validate(ProblemReporter problemReporter) {
 		// No overloading of factory methods allowed
-		for (Map.Entry<String, Integer> entry : overloadedMethodMap.entrySet()) {
+		for (Map.Entry<String, Integer> entry : this.overloadedMethodMap.entrySet()) {
 			String methodName = entry.getKey();
 			int count = entry.getValue();
 			if (count > 1) {
@@ -194,11 +118,11 @@ final class ConfigurationClass implements BeanMetadataElement {
 		}
 
 		// A configuration class may not be final (CGLIB limitation)
-		if (getAnnotation(Configuration.class) != null) {
-			if (Modifier.isFinal(modifiers)) {
+		if (getMetadata().hasAnnotation(Configuration.class.getName())) {
+			if (getMetadata().isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
-			for (ConfigurationClassMethod method : methods) {
+			for (ConfigurationClassMethod method : this.methods) {
 				method.validate(problemReporter);
 			}
 		}
@@ -210,7 +134,7 @@ final class ConfigurationClass implements BeanMetadataElement {
 
 		public FinalConfigurationProblem() {
 			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
-					getSimpleName()), ConfigurationClass.this.getLocation());
+					getSimpleName()), new Location(getResource()));
 		}
 	}
 
@@ -221,9 +145,8 @@ final class ConfigurationClass implements BeanMetadataElement {
 		public OverloadedMethodProblem(String methodName, int count) {
 			super(String.format("@Configuration class '%s' has %s overloaded factory methods of name '%s'. " +
 					"Only one factory method of the same name allowed.",
-					getSimpleName(), count, methodName), ConfigurationClass.this.getLocation());
+					getSimpleName(), count, methodName), new Location(getResource()));
 		}
 	}
-
 
 }

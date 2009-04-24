@@ -35,6 +35,10 @@ import org.springframework.core.annotation.AnnotationUtils;
  */
 public class StandardAnnotationMetadata extends StandardClassMetadata implements AnnotationMetadata {
 
+	/**
+	 * Create a new StandardAnnotationMetadata wrapper for the given Class.
+	 * @param introspectedClass the Class to introspect
+	 */
 	public StandardAnnotationMetadata(Class introspectedClass) {
 		super(introspectedClass);
 	}
@@ -57,6 +61,16 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 			}
 		}
 		return false;
+	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		Annotation[] anns = getIntrospectedClass().getAnnotations();
+		for (Annotation ann : anns) {
+			if (ann.annotationType().getName().equals(annotationType)) {
+				return AnnotationUtils.getAnnotationAttributes(ann, true);
+			}
+		}
+		return null;
 	}
 
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
@@ -87,25 +101,25 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				return AnnotationUtils.getAnnotationAttributes(ann);
+	public Set<MethodMetadata> getAnnotatedMethods() {
+		Method[] methods = getIntrospectedClass().getDeclaredMethods();
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+		for (Method method : methods) {
+			if (method.getAnnotations().length > 0) {
+				annotatedMethods.add(new StandardMethodMetadata(method));
 			}
 		}
-		return null;
+		return annotatedMethods;
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		Method[] methods = getIntrospectedClass().getMethods();
+		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
 			Annotation[] methodAnnotations = method.getAnnotations();
 			for (Annotation ann : methodAnnotations) {
 				if (ann.annotationType().getName().equals(annotationType)) {
-					MethodMetadata mm = new StandardMethodMetadata(method);
-					annotatedMethods.add(mm);
+					annotatedMethods.add(new StandardMethodMetadata(method));
 				}
 			}
 		}

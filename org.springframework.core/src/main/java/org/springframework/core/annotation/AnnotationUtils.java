@@ -231,19 +231,46 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the given annotation's attributes as a Map.
+	 * Retrieve the given annotation's attributes as a Map,
+	 * preserving all attribute types as-is.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the Map of annotation attributes, with attribute names as keys
 	 * and corresponding attribute values as values
 	 */
 	public static Map<String, Object> getAnnotationAttributes(Annotation annotation) {
+		return getAnnotationAttributes(annotation, false);
+	}
+
+	/**
+	 * Retrieve the given annotation's attributes as a Map.
+	 * @param annotation the annotation to retrieve the attributes for
+	 * @param filterClasses whether to turn Class references into Strings
+	 * (for compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * or to preserve them as Class references
+	 * @return the Map of annotation attributes, with attribute names as keys
+	 * and corresponding attribute values as values
+	 */
+	public static Map<String, Object> getAnnotationAttributes(Annotation annotation, boolean filterClasses) {
 		Map<String, Object> attrs = new HashMap<String, Object>();
 		Method[] methods = annotation.annotationType().getDeclaredMethods();
-		for (int j = 0; j < methods.length; j++) {
-			Method method = methods[j];
+		for (Method method : methods) {
 			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
 				try {
-					attrs.put(method.getName(), method.invoke(annotation));
+					Object value = method.invoke(annotation);
+					if (filterClasses) {
+						if (value instanceof Class) {
+							value = ((Class) value).getName();
+						}
+						else if (value instanceof Class[]) {
+							Class[] clazzArray = (Class[]) value;
+							String[] newValue = new String[clazzArray.length];
+							for (int i = 0; i < clazzArray.length; i++) {
+								newValue[i] = clazzArray[i].getName();
+							}
+							value = newValue;
+						}
+					}
+					attrs.put(method.getName(), value);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute values", ex);

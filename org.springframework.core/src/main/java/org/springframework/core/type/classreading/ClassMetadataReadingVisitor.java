@@ -45,6 +45,8 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	private boolean isAbstract;
 
+	private boolean isFinal;
+
 	private String enclosingClassName;
 
 	private boolean independentInnerClass;
@@ -58,6 +60,7 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
 		this.isAbstract = ((access & Opcodes.ACC_ABSTRACT) != 0);
+		this.isFinal = ((access & Opcodes.ACC_FINAL) != 0);
 		if (supername != null) {
 			this.superClassName = ClassUtils.convertResourcePathToClassName(supername);
 		}
@@ -120,6 +123,10 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	public boolean isConcrete() {
 		return !(this.isInterface || this.isAbstract);
+	}
+
+	public boolean isFinal() {
+		return this.isFinal;
 	}
 
 	public boolean isIndependent() {

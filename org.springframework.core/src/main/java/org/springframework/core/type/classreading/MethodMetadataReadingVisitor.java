@@ -16,13 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,139 +26,68 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.util.ReflectionUtils;
 
 /**
+ * ASM method visitor which looks for the annotations defined on the method,
+ * exposing them through the {@link org.springframework.core.type.MethodMetadata}
+ * interface.
+ *
  * @author Mark Pollack
+ * @author Juergen Hoeller
  * @since 3.0
  */
-class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
+final class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
 
-	private ClassLoader classLoader;
+	private final String name;
 
-	private String name;
+	private final int access;
 
-	private int access;
+	private final ClassLoader classLoader;
 
-	private boolean isStatic;
-
-	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
-
-	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
+	private final Map<String, Map<String, Object>> annotationMap = new LinkedHashMap<String, Map<String, Object>>();
 
 
-	public MethodMetadataReadingVisitor(ClassLoader classLoader, String name, int access) {
+	public MethodMetadataReadingVisitor(String name, int access, ClassLoader classLoader) {
 		super(new EmptyVisitor());
-		this.classLoader = classLoader;
 		this.name = name;
 		this.access = access;
-		this.isStatic = ((access & Opcodes.ACC_STATIC) != 0);
+		this.classLoader = classLoader;
 	}
 
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return this.attributesMap.get(annotationType);
+	public String getMethodName() {
+		return this.name;
+	}
+
+	public boolean isStatic() {
+		return ((this.access & Opcodes.ACC_STATIC) != 0);
+	}
+
+	public boolean isFinal() {
+		return ((this.access & Opcodes.ACC_FINAL) != 0);
+	}
+
+	public boolean isOverridable() {
+		return (!isStatic() && !isFinal() && ((this.access & Opcodes.ACC_PRIVATE) == 0));
 	}
 
 	public Set<String> getAnnotationTypes() {
-		return this.attributesMap.keySet();
-	}
-
-	public String getMethodName() {
-		return name;
-	}
-
-	public int getModifiers() {
-		return access;
+		return this.annotationMap.keySet();
 	}
 
 	public boolean hasAnnotation(String annotationType) {
-		return this.attributesMap.containsKey(annotationType);
+		return this.annotationMap.containsKey(annotationType);
 	}
 	
-	public Set<String> getMetaAnnotationTypes(String annotationType) {
-		return this.metaAnnotationMap.get(annotationType);
-	}
-
-	public boolean hasMetaAnnotation(String metaAnnotationType) {
-		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
-		for (Set<String> metaTypes : allMetaTypes) {
-			if (metaTypes.contains(metaAnnotationType)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public boolean isStatic() {
-		return this.isStatic;
-	}
-
-	public Set<String> getAnnotationTypesWithMetaAnnotation(String metaAnnotationType) {
-		Set<String> annotationTypes = new LinkedHashSet<String>();
-		for (Map.Entry<String, Set<String>> entry : metaAnnotationMap.entrySet()) {
-			String attributeType = entry.getKey();
-			Set<String> metaAttributes = entry.getValue();
-			if (metaAttributes.contains(metaAnnotationType)) {
-				annotationTypes.add(attributeType);
-			}
-		}
-		return annotationTypes;
+	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		return this.annotationMap.get(annotationType);
 	}
 
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-		final String className = Type.getType(desc).getClassName();
-		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
-		return new EmptyVisitor() {
-			@Override
-			public void visit(String name, Object value) {
-				// Explicitly defined annotation attribute value.
-				attributes.put(name, value);
-			}
-			@Override
-			public void visitEnum(String name, String desc, String value) {
-				Object valueToUse = value;
-				try {
-					Class<?> enumType = classLoader.loadClass(Type.getType(desc).getClassName());
-					Field enumConstant = ReflectionUtils.findField(enumType, value);
-					if (enumConstant != null) {
-						valueToUse = enumConstant.get(null);
-					}
-				}
-				catch (Exception ex) {
-					// Class not found - can't resolve class reference in annotation attribute.
-				}
-				attributes.put(name, valueToUse);
-			}
-			@Override
-			public void visitEnd() {
-				try {
-					Class<?> annotationClass = classLoader.loadClass(className);
-					// Check declared default values of attributes in the annotation type.
-					Method[] annotationAttributes = annotationClass.getMethods();
-					for (Method annotationAttribute : annotationAttributes) {
-						String attributeName = annotationAttribute.getName();
-						Object defaultValue = annotationAttribute.getDefaultValue();
-						if (defaultValue != null && !attributes.containsKey(attributeName)) {
-							attributes.put(attributeName, defaultValue);
-						}
-					}
-					// Register annotations that the annotation type is annotated with.
-					Annotation[] metaAnnotations = annotationClass.getAnnotations();
-					Set<String> metaAnnotationTypeNames = new HashSet<String>();
-					for (Annotation metaAnnotation : metaAnnotations) {
-						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
-					}
-					metaAnnotationMap.put(className, metaAnnotationTypeNames);
-				}
-				catch (ClassNotFoundException ex) {
-					// Class not found 
-				}
-				attributesMap.put(className, attributes);
-			}
-		};
+		String className = Type.getType(desc).getClassName();
+		return new AnnotationAttributesReadingVisitor(className, this.annotationMap, null, this.classLoader);
 	}
 
 }
