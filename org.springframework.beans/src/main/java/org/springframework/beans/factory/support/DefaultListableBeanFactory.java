@@ -367,15 +367,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * if not found on the exposed bean reference (e.g. in case of a proxy).
 	 */
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
-		Class<?> handlerType = getType(beanName);
-		A ann = AnnotationUtils.findAnnotation(handlerType, annotationType);
+		A ann = AnnotationUtils.findAnnotation(getType(beanName), annotationType);
 		if (ann == null && containsBeanDefinition(beanName)) {
 			BeanDefinition bd = getMergedBeanDefinition(beanName);
 			if (bd instanceof AbstractBeanDefinition) {
 				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
 				if (abd.hasBeanClass()) {
-					Class<?> beanClass = abd.getBeanClass();
-					ann = AnnotationUtils.findAnnotation(beanClass, annotationType);
+					ann = AnnotationUtils.findAnnotation(abd.getBeanClass(), annotationType);
 				}
 			}
 		}
