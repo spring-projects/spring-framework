@@ -28,11 +28,12 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.StandardScopes;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error
@@ -64,14 +65,20 @@ public class ConfigurationClassProcessingTests {
 
 	@Test
 	public void customBeanNameIsRespected() {
-		BeanFactory factory = initBeanFactory(ConfigWithBeanWithCustomName.class);
-		assertSame(factory.getBean("customName"), ConfigWithBeanWithCustomName.testBean);
+		GenericApplicationContext ac = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		ac.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithBeanWithCustomName.class));
+		ac.refresh();
+		assertSame(ac.getBean("customName"), ConfigWithBeanWithCustomName.testBean);
 
 		// method name should not be registered
 		try {
-			factory.getBean("methodName");
+			ac.getBean("methodName");
 			fail("bean should not have been registered with 'methodName'");
-		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -165,7 +172,7 @@ public class ConfigurationClassProcessingTests {
 			return bar;
 		}
 
-		@Bean @Scope(StandardScopes.PROTOTYPE)
+		@Bean @Scope("prototype")
 		public TestBean baz() {
 			return new TestBean("bar");
 		}

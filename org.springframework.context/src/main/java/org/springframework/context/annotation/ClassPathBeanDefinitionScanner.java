@@ -19,7 +19,6 @@ package org.springframework.context.annotation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -317,18 +316,5 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		return ScopedProxyCreator.createScopedProxy(definitionHolder, this.registry, proxyTargetClass);
 	}
 
-
-	/**
-	 * Inner factory class used to just introduce an AOP framework dependency
-	 * when actually creating a scoped proxy.
-	 */
-	private static class ScopedProxyCreator {
-
-		public static BeanDefinitionHolder createScopedProxy(
-				BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry, boolean proxyTargetClass) {
-
-			return ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
-		}
-	}
 
 }

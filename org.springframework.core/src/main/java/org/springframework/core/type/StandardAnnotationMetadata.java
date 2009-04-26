@@ -18,7 +18,6 @@ package org.springframework.core.type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -45,12 +44,30 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 
 	public Set<String> getAnnotationTypes() {
-		Set<String> types = new HashSet<String>();
+		Set<String> types = new LinkedHashSet<String>();
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
 			types.add(ann.annotationType().getName());
 		}
 		return types;
+	}
+
+	public Set<String> getMetaAnnotationTypes(String annotationType) {
+		Annotation[] anns = getIntrospectedClass().getAnnotations();
+		for (Annotation ann : anns) {
+			if (ann.annotationType().getName().equals(annotationType)) {
+				Set<String> types = new LinkedHashSet<String>();
+				Annotation[] metaAnns = ann.annotationType().getAnnotations();
+				for (Annotation metaAnn : metaAnns) {
+					types.add(metaAnn.annotationType().getName());
+					for (Annotation metaMetaAnn : metaAnn.annotationType().getAnnotations()) {
+						types.add(metaMetaAnn.annotationType().getName());
+					}
+				}
+				return types;
+			}
+		}
+		return null;
 	}
 
 	public boolean hasAnnotation(String annotationType) {
@@ -63,42 +80,37 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
+	public boolean hasMetaAnnotation(String annotationType) {
+		Annotation[] anns = getIntrospectedClass().getAnnotations();
+		for (Annotation ann : anns) {
+			Annotation[] metaAnns = ann.annotationType().getAnnotations();
+			for (Annotation metaAnn : metaAnns) {
+				if (metaAnn.annotationType().getName().equals(annotationType)) {
+					return true;
+				}
+				for (Annotation metaMetaAnn : metaAnn.annotationType().getAnnotations()) {
+					if (metaMetaAnn.annotationType().getName().equals(annotationType)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
 				return AnnotationUtils.getAnnotationAttributes(ann, true);
 			}
-		}
-		return null;
-	}
-
-	public Set<String> getMetaAnnotationTypes(String annotationType) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				Set<String> types = new HashSet<String>();
-				Annotation[] metaAnns = ann.annotationType().getAnnotations();
-				for (Annotation meta : metaAnns) {
-					types.add(meta.annotationType().getName());
-				}
-				return types;
-			}
-		}
-		return null;
-	}
-
-	public boolean hasMetaAnnotation(String annotationType) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			Annotation[] metaAnns = ann.annotationType().getAnnotations();
-			for (Annotation meta : metaAnns) {
-				if (meta.annotationType().getName().equals(annotationType)) {
-					return true;
+			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+				if (metaAnn.annotationType().getName().equals(annotationType)) {
+					return AnnotationUtils.getAnnotationAttributes(metaAnn, true);
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods() {

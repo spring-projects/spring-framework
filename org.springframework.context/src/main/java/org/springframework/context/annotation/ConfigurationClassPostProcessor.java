@@ -17,7 +17,9 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -121,7 +123,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
-	protected final void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
+	protected void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : registry.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
@@ -157,14 +159,19 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		new ConfigurationClassBeanDefinitionReader(registry).loadBeanDefinitions(parser.getModel());
 	}
 
-	private boolean checkConfigurationClassCandidate(BeanDefinition beanDef) {
+	/**
+	 * Check whether the given bean definition is a candidate for a configuration class,
+	 * and mark it accordingly.
+	 * @param beanDef the bean definition to check
+	 * @return whether the candidate qualifies as (any kind of) configuration class
+	 */
+	protected boolean checkConfigurationClassCandidate(BeanDefinition beanDef) {
 		AnnotationMetadata metadata;
 
 		// Check already loaded Class if present...
 		// since we possibly can't even load the class file for this Class.
 		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			Class beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
-			metadata = new StandardAnnotationMetadata(beanClass);
+			metadata = new StandardAnnotationMetadata(((AbstractBeanDefinition) beanDef).getBeanClass());
 		}
 		else {
 			String className = beanDef.getBeanClassName();
@@ -199,12 +206,16 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 	 * Candidate status is determined by BeanDefinition attribute metadata.
 	 * @see ConfigurationClassEnhancer
 	 */
-	private void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
-		Set<BeanDefinitionHolder> configBeanDefs = new LinkedHashSet<BeanDefinitionHolder>();
+	protected void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
+		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<String, AbstractBeanDefinition>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			if (CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE))) {
-				configBeanDefs.add(new BeanDefinitionHolder(beanDef, beanName));
+				if (!(beanDef instanceof AbstractBeanDefinition)) {
+					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
+							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
+				}
+				configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);
 			}
 		}
 		if (configBeanDefs.isEmpty()) {
@@ -212,27 +223,23 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 			return;
 		}
 		if (!cglibAvailable) {
-			Set<String> beanNames = new LinkedHashSet<String>();
-			for (BeanDefinitionHolder holder : configBeanDefs) {
-				beanNames.add(holder.getBeanName());
-			}
 			throw new IllegalStateException("CGLIB is required to process @Configuration classes. " +
 					"Either add CGLIB to the classpath or remove the following @Configuration bean definitions: " +
-					beanNames);
+					configBeanDefs.keySet());
 		}
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer(beanFactory);
-		for (BeanDefinitionHolder holder : configBeanDefs) {
-			AbstractBeanDefinition beanDef = (AbstractBeanDefinition) holder.getBeanDefinition();
+		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
+			AbstractBeanDefinition beanDef = entry.getValue();
 			try {
 				Class configClass = beanDef.resolveBeanClass(this.beanClassLoader);
 				Class enhancedClass = enhancer.enhance(configClass);
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " +
-							"with enhanced class name '%s'", holder.getBeanName(), configClass.getName(), enhancedClass.getName()));
+							"with enhanced class name '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 				}
 				beanDef.setBeanClass(enhancedClass);
 			}
-			catch (ClassNotFoundException ex) {
+			catch (Throwable ex) {
 				throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
 			}
 		}

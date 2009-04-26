@@ -69,6 +69,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		FooServiceImpl service = context.getBean("fooServiceImpl", FooServiceImpl.class);
 		assertTrue(context.getDefaultListableBeanFactory().containsSingleton("myNamedComponent"));
 		assertEquals("bar", service.foo(1));
+		assertTrue(context.isPrototype("thoreau"));
 	}
 
 	@Test

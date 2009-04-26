@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import static org.junit.Assert.*;
-
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.junit.Test;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.core.type.filter.RegexPatternTypeFilter;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ClassUtils;
 
 import example.scannable.FooDao;
 import example.scannable.FooService;
@@ -41,6 +28,18 @@ import example.scannable.NamedComponent;
 import example.scannable.NamedStubDao;
 import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
+import org.aspectj.lang.annotation.Aspect;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Mark Fisher
@@ -95,7 +94,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addExcludeFilter(new AnnotationTypeFilter(Service.class));
 		provider.addExcludeFilter(new AnnotationTypeFilter(Controller.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(3, candidates.size());
+		assertEquals(2, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 		assertFalse(containsBeanClass(candidates, FooServiceImpl.class));
@@ -107,8 +106,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	@Test
 	public void testWithAspectAnnotationOnly() throws Exception {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-		provider.addIncludeFilter(new AnnotationTypeFilter(
-				ClassUtils.forName("org.aspectj.lang.annotation.Aspect")));
+		provider.addIncludeFilter(new AnnotationTypeFilter(Aspect.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertEquals(1, candidates.size());
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));

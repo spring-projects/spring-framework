@@ -26,7 +26,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -184,7 +183,7 @@ class ConfigurationClassBeanDefinitionReader {
 		// replace the original bean definition with the target one, if necessary
 		BeanDefinition beanDefToRegister = beanDef;
 		if (proxyMode != ScopedProxyMode.NO) {
-			BeanDefinitionHolder proxyDef = ScopedProxyUtils.createScopedProxy(
+			BeanDefinitionHolder proxyDef = ScopedProxyCreator.createScopedProxy(
 					new BeanDefinitionHolder(beanDef, beanName), registry, proxyMode == ScopedProxyMode.TARGET_CLASS);
 			beanDefToRegister = proxyDef.getBeanDefinition();
 		}

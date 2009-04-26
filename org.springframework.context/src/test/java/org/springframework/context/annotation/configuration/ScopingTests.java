@@ -29,7 +29,6 @@ import test.beans.TestBean;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.context.annotation.StandardScopes;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -52,7 +50,9 @@ public class ScopingTests {
 	public static String flag = "1";
 
 	private static final String SCOPE = "my scope";
+
 	private CustomScope customScope;
+
 	private GenericApplicationContext ctx;
 
 	@Before
@@ -117,10 +117,8 @@ public class ScopingTests {
 		assertFalse(bean instanceof ScopedObject);
 	}
 
-
 	@Test
 	public void testScopedProxyConfiguration() throws Exception {
-
 		TestBean singleton = (TestBean) ctx.getBean("singletonWithScopedInterfaceDep");
 		ITestBean spouse = singleton.getSpouse();
 		assertTrue("scoped bean is not wrapped by the scoped-proxy", spouse instanceof ScopedObject);
@@ -224,7 +222,7 @@ public class ScopingTests {
 	static class ScopeTestConfiguration {
 
 		@Bean
-		@Scope(value=StandardScopes.SESSION, proxyMode=ScopedProxyMode.INTERFACES)
+		@Scope(value="session", proxyMode=ScopedProxyMode.INTERFACES)
 		public Foo foo() {
 			return new Foo();
 		}

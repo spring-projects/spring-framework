@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.transaction.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
@@ -35,6 +36,14 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
 		Transactional ann = ae.getAnnotation(Transactional.class);
+		if (ann == null) {
+			for (Annotation metaAnn : ae.getAnnotations()) {
+				ann = metaAnn.annotationType().getAnnotation(Transactional.class);
+				if (ann != null) {
+					break;
+				}
+			}
+		}
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);
 		}
@@ -51,23 +60,23 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		rbta.setReadOnly(ann.readOnly());
 		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
 		Class[] rbf = ann.rollbackFor();
-		for (int i = 0; i < rbf.length; ++i) {
-			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbf[i]);
+		for (Class rbRule : rbf) {
+			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
 		String[] rbfc = ann.rollbackForClassName();
-		for (int i = 0; i < rbfc.length; ++i) {
-			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbfc[i]);
+		for (String rbRule : rbfc) {
+			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
 		Class[] nrbf = ann.noRollbackFor();
-		for (int i = 0; i < nrbf.length; ++i) {
-			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(nrbf[i]);
+		for (Class rbRule : nrbf) {
+			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
 		String[] nrbfc = ann.noRollbackForClassName();
-		for (int i = 0; i < nrbfc.length; ++i) {
-			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(nrbfc[i]);
+		for (String rbRule : nrbfc) {
+			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
 		rbta.getRollbackRules().addAll(rollBackRules);
