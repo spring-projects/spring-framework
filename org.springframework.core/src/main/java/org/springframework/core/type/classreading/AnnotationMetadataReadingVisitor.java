@@ -39,9 +39,11 @@ import org.springframework.core.type.MethodMetadata;
  */
 final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
-	private final Map<String, Map<String, Object>> annotationMap = new LinkedHashMap<String, Map<String, Object>>();
+	private final Set<String> annotationSet = new LinkedHashSet<String>();
 
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
+
+	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	private final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>();
 
@@ -63,26 +65,23 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
-		return new AnnotationAttributesReadingVisitor(className, this.annotationMap, this.metaAnnotationMap, this.classLoader);
+		this.annotationSet.add(className);
+		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, this.metaAnnotationMap, this.classLoader);
 	}
 
 
 	public Set<String> getAnnotationTypes() {
-		return this.annotationMap.keySet();
-	}
-
-	public boolean hasAnnotation(String annotationType) {
-		return this.annotationMap.containsKey(annotationType);
-	}
-
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return this.annotationMap.get(annotationType);
+		return this.annotationSet;
 	}
 
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		return this.metaAnnotationMap.get(annotationType);
 	}
-	
+
+	public boolean hasAnnotation(String annotationType) {
+		return this.annotationSet.contains(annotationType);
+	}
+
 	public boolean hasMetaAnnotation(String metaAnnotationType) {
 		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
 		for (Set<String> metaTypes : allMetaTypes) {
@@ -91,6 +90,10 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 			}
 		}
 		return false;
+	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		return this.attributeMap.get(annotationType);
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods() {

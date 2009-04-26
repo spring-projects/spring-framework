@@ -38,12 +38,28 @@ public interface AnnotationMetadata extends ClassMetadata {
 	Set<String> getAnnotationTypes();
 
 	/**
+	 * Return the names of all meta-annotation types defined on the
+	 * given annotation type of the underlying class.
+	 * @param annotationType the meta-annotation type to look for
+	 * @return the meta-annotation type names
+	 */
+	Set<String> getMetaAnnotationTypes(String annotationType);
+
+	/**
 	 * Determine whether the underlying class has an annotation of the given
 	 * type defined.
 	 * @param annotationType the annotation type to look for
 	 * @return whether a matching annotation is defined
 	 */
 	boolean hasAnnotation(String annotationType);
+
+	/**
+	 * Determine whether the underlying class has an annotation that
+	 * is itself annotated with the meta-annotation of the given type.
+	 * @param metaAnnotationType the meta-annotation type to look for
+	 * @return whether a matching meta-annotation is defined
+	 */
+	boolean hasMetaAnnotation(String metaAnnotationType);
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type,
@@ -54,22 +70,6 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * <code>null</code> if no matching annotation is defined.
 	 */
 	Map<String, Object> getAnnotationAttributes(String annotationType);
-
-	/**
-	 * Return the names of all meta-annotation types defined on the
-	 * given annotation type of the underlying class.
-	 * @param annotationType the meta-annotation type to look for
-	 * @return the meta-annotation type names
-	 */
-	Set<String> getMetaAnnotationTypes(String annotationType);
-
-	/**
-	 * Determine whether the underlying class has an annotation that
-	 * is itself annotated with the meta-annotation of the given type.
-	 * @param metaAnnotationType the meta-annotation type to look for
-	 * @return whether a matching meta-annotation is defined
-	 */
-	boolean hasMetaAnnotation(String metaAnnotationType);
 
 	/**
 	 * Retrieve the method metadata for all methods that are annotated

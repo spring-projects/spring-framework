@@ -20,8 +20,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +30,7 @@ import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * ASM visitor which looks for the annotations defined on a class or method.
@@ -47,7 +48,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 
 	private final ClassLoader classLoader;
 
-	private final Map<String, Object> attributes =  new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 
 	public AnnotationAttributesReadingVisitor(
@@ -120,6 +121,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 	}
 
 	public void visitEnd() {
+		this.annotationMap.put(this.annotationType, this.attributes);
 		try {
 			Class<?> annotationClass = this.classLoader.loadClass(this.annotationType);
 			// Check declared default values of attributes in the annotation type.
@@ -133,10 +135,16 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 			}
 			// Register annotations that the annotation type is annotated with.
 			if (this.metaAnnotationMap != null) {
-				Annotation[] metaAnnotations = annotationClass.getAnnotations();
-				Set<String> metaAnnotationTypeNames = new HashSet<String>();
-				for (Annotation metaAnnotation : metaAnnotations) {
+				Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
+				for (Annotation metaAnnotation : annotationClass.getAnnotations()) {
 					metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+					if (!this.annotationMap.containsKey(metaAnnotation.annotationType().getName())) {
+						this.annotationMap.put(metaAnnotation.annotationType().getName(),
+								AnnotationUtils.getAnnotationAttributes(metaAnnotation, true));
+					}
+					for (Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
+						metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
+					}
 				}
 				this.metaAnnotationMap.put(this.annotationType, metaAnnotationTypeNames);
 			}
@@ -144,7 +152,6 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 		catch (ClassNotFoundException ex) {
 			// Class not found - can't determine meta-annotations.
 		}
-		this.annotationMap.put(this.annotationType, this.attributes);
 	}
 
 }

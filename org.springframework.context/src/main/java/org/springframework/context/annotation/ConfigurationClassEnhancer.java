@@ -60,14 +60,17 @@ class ConfigurationClassEnhancer {
 	 */
 	public ConfigurationClassEnhancer(ConfigurableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
+
 		this.callbackInstances.add(new BeanMethodInterceptor(beanFactory));
 		this.callbackInstances.add(NoOp.INSTANCE);
+
 		for (Callback callback : this.callbackInstances) {
 			this.callbackTypes.add(callback.getClass());
 		}
+
 		// Set up the callback filter to return the index of the BeanMethodInterceptor when
 		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
-		this.callbackFilter = new CallbackFilter() {
+		callbackFilter = new CallbackFilter() {
 			public int accept(Method candidateMethod) {
 				return (AnnotationUtils.findAnnotation(candidateMethod, Bean.class) != null) ? 0 : 1;
 			}
@@ -85,8 +88,8 @@ class ConfigurationClassEnhancer {
 			logger.debug("Enhancing " + configClass.getName());
 		}
 		Class<?> enhancedClass = createClass(newEnhancer(configClass));
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Successfully enhanced %s; enhanced class name is: %s",
 					configClass.getName(), enhancedClass.getName()));
 		}
 		return enhancedClass;
@@ -151,6 +154,7 @@ class ConfigurationClassEnhancer {
 			}
 
 			// determine whether this bean is a scoped-proxy
+			// TODO: remove hard ScopedProxyUtils dependency
 			Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
