@@ -6437,10 +6437,10 @@ public class FactoryMethodComponent {
   }
 }</programlisting>
 
-      <para>This class is a Spring component and has appliation specific code
+      <para>This class is a Spring component and has application specific code
       contained in its <methodname>DoWork</methodname> method. However, it
-      also contributes a bean definition that has a factory method refering to
-      the method <methodname>publicInstance</methodname>. The
+      also contributes a bean definition that has a factory method referring
+      to the method <methodname>publicInstance</methodname>. The
       <literal>@Bean</literal> annotation identifies the factory method and
       also other bean definition properties, such as a qualifier value via the
       <classname>@Qualifier</classname> annotation. Other method level
