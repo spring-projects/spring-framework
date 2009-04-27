@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TestExecutionListeners defines class-level metadata for configuring which
- * {@link TestExecutionListener TestExecutionListeners} should be registered
- * with a {@link TestContextManager}. Typically,
- * {@link TestExecutionListeners @TestExecutionListeners} will be used in
- * conjunction with {@link ContextConfiguration @ContextConfiguration}.
+ * <code>TestExecutionListeners</code> defines class-level metadata for
+ * configuring which {@link TestExecutionListener TestExecutionListeners} should
+ * be registered with a {@link TestContextManager}. Typically,
+ * <code>&#064;TestExecutionListeners</code> will be used in conjunction with
+ * {@link ContextConfiguration &#064;ContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -75,14 +75,14 @@ public @interface TestExecutionListeners {
 	 * </p>
 	 *
 	 * <pre class="code">
-	 * {@link TestExecutionListeners @TestExecutionListeners}({ DependencyInjectionTestExecutionListener.class,
+	 * &#064;TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
 	 *     DirtiesContextTestExecutionListener.class })
 	 * public abstract class AbstractBaseTest {
 	 *     // ...
 	 * }
 	 *
-	 * {@link TestExecutionListeners @TestExecutionListeners}({ TransactionalTestExecutionListener.class })
-	 * public class TransactionalTest extends BaseTest {
+	 * &#064;TestExecutionListeners(TransactionalTestExecutionListener.class)
+	 * public class TransactionalTest extends AbstractBaseTest {
 	 *     // ...
 	 * }
 	 * </pre>
