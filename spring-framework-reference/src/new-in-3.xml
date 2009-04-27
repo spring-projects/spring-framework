@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="new-in-3">
   <title>What's new in Spring 3.0?</title>
 
@@ -178,8 +177,9 @@
       </listitem>
 
       <listitem>
-        <para>Object to XML mapping functionality (OXM) moved from Spring Web Services project</para>
-    </listitem>
+        <para>Object to XML mapping functionality (OXM) moved from Spring Web
+        Services project</para>
+      </listitem>
 
       <listitem>
         <para>Comprehensive REST support</para>
@@ -348,32 +348,33 @@ public class AppConfig{
       </section>
 
       <section>
-        <title>Factory Bean definitions using annotations</title>
+        <title>Defining bean metadata within components</title>
 
-        <para>FactoryBeans can be defined within a Spring component definition
-        and registered using standard component-scanning techniques. See <link
-        linkend="beans-factorybeans-annotations">Factory Bean Definitions
-        using annotations</link> for more information</para>
+        <para><literal>@Bean</literal> annotated methods are also supported
+        inside Spring components. They contribute a factory bean definition to
+        the container. See <link
+        linkend="beans-factorybeans-annotations">Defining bean metadata within
+        components</link> for more information</para>
       </section>
-  </section>
+    </section>
 
-  <section id="new-feature-oxm">
-    <title>The Data Tier</title>
+    <section id="new-feature-oxm">
+      <title>The Data Tier</title>
 
-    <para>Object to XML mapping functionality (OXM) from the Spring Web Services project have
-	been moved to the core Spring Framework now. The functionality is found in the
-    <literal>org.springframework.oxm</literal> package. More information on
-    the use of the <literal>OXM</literal> can be found
-    in the  <link linkend="oxm">Marshalling XML using O/X Mappers</link> chapter.</para>
-
-   </section>
+      <para>Object to XML mapping functionality (OXM) from the Spring Web
+      Services project have been moved to the core Spring Framework now. The
+      functionality is found in the <literal>org.springframework.oxm</literal>
+      package. More information on the use of the <literal>OXM</literal> can
+      be found in the <link linkend="oxm">Marshalling XML using O/X
+      Mappers</link> chapter.</para>
+    </section>
 
     <section id="new-feature-rest">
       <title>The Web Tier</title>
 
-      <para>The most exciting new feature for the Web Tier is the support for building 
-	RESTful web services and web applications. There are also some new annotations that
-	can be used in any web application.</para>
+      <para>The most exciting new feature for the Web Tier is the support for
+      building RESTful web services and web applications. There are also some
+      new annotations that can be used in any web application.</para>
 
       <section>
         <title>Comprehensive REST support</title>
@@ -387,14 +388,14 @@ public class AppConfig{
         functionality make use of
         <interfacename>HttpConverter</interfacename>s to facilitate the
         conversion between objects and their representation in HTTP request
-        and replies. </para>
+        and replies.</para>
 
         <para>The <classname>MarhsallingHttpMessageConverter</classname> uses
-        the <emphasis>Object to XML mapping</emphasis> functionality mentioned earlier.</para>
+        the <emphasis>Object to XML mapping</emphasis> functionality mentioned
+        earlier.</para>
 
         <para>Refer to the section on <link linkend="rest">REST support</link>
         for more information.</para>
-
       </section>
 
       <section>
@@ -407,7 +408,6 @@ public class AppConfig{
         @CookieValue annotation</link> and <link
         linkend="mvc-ann-requestheader">Mapping request header attributes with
         the @RequestHeader annotation</link> for more information.</para>
-
       </section>
     </section>
 
@@ -422,10 +422,11 @@ public class AppConfig{
     <section id="new-feature-jee-6">
       <title>Early support for Java EE 6</title>
 
-      <para>We provide support for asynchronous method invocations through the use of 
-      the new @Async annotation (or EJB 3.1's @Asynchronous annotation).</para>
+      <para>We provide support for asynchronous method invocations through the
+      use of the new @Async annotation (or EJB 3.1's @Asynchronous
+      annotation).</para>
 
-     <para>JSF 2.0, JPA 2.0, etc</para>
+      <para>JSF 2.0, JPA 2.0, etc</para>
 
       <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>

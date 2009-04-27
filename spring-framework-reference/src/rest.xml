@@ -853,8 +853,10 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
     <section id="rest-message-conversion">
       <title>HTTP Message Conversion</title>
 
-      <para>Objects passed to and returned from the methods getForObject(),
-      postForLocation(), and put() and are converted to HTTP requests and from
+      <para>Objects passed to and returned from the methods
+      <methodname>getForObject</methodname>,
+      <methodname>postForLocation</methodname>, and
+      <methodname>put</methodname> are converted to HTTP requests and from
       HTTP responses by <interfacename>HttpMessageConverters</interfacename>.
       The <interfacename>HttpMessageConverter</interfacename> interface is
       show below to give you a better feel for its functionality</para>
