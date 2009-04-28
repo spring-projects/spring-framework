@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,18 +30,17 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 
 /**
  * <p>
- * Abstract base test class which integrates the
- * <em>Spring TestContext Framework</em> with explicit
- * {@link ApplicationContext} testing support in a <strong>JUnit 4.4</strong>
- * environment.
+ * Abstract base test class which integrates the <em>Spring TestContext
+ * Framework</em> with explicit {@link ApplicationContext} testing support in a
+ * <strong>JUnit 4.5</strong> environment.
  * </p>
  * <p>
  * Concrete subclasses should typically declare a class-level
- * {@link ContextConfiguration @ContextConfiguration} annotation to configure
- * the {@link ApplicationContext application context}
+ * {@link ContextConfiguration &#064;ContextConfiguration} annotation to
+ * configure the {@link ApplicationContext application context}
  * {@link ContextConfiguration#locations() resource locations}.
  * <em>If your test does not need to load an application context, you may choose
- * to omit the {@link ContextConfiguration @ContextConfiguration} declaration
+ * to omit the {@link ContextConfiguration &#064;ContextConfiguration} declaration
  * and to configure the appropriate
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
  * manually.</em>
@@ -51,11 +49,11 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * Note: this class serves only as a convenience for extension. If you do not
  * wish for your test classes to be tied to a Spring-specific class hierarchy,
  * you may configure your own custom test classes by using
- * {@link SpringJUnit4ClassRunner},
- * {@link ContextConfiguration @ContextConfiguration},
- * {@link TestExecutionListeners @TestExecutionListeners}, etc.
+ * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration
+ * &#064;ContextConfiguration}, {@link TestExecutionListeners
+ * &#064;TestExecutionListeners}, etc.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see ContextConfiguration
@@ -66,7 +64,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public abstract class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
 	/**
