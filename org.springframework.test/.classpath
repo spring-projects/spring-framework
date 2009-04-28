@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
-	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.jdbc"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.transaction"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web.portlet"/>
@@ -27,6 +28,5 @@
 	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-2.1.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-sources-2.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-3.2.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-sources-3.2.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-1.8.0.9.jar" sourcepath="/IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-sources-1.8.0.9.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
