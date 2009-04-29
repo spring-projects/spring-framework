@@ -33,8 +33,9 @@ import org.springframework.stereotype.Component;
  * 
  * <p>Configuration is meta-annotated as a {@link Component}, therefore Configuration
  * classes are candidates for component-scanning and may also take advantage of
- * {@link Autowired} at the field, method and constructor level. Externalized values
- * may be wired into Configuration classes using the {@link Value} annotation.
+ * {@link Autowired} at the field and method but not at the constructor level.
+ * Externalized values may be wired into Configuration classes using the {@link Value}
+ * annotation.
  * 
  * <p>May be used in conjunction with the {@link Lazy} annotation to indicate that all Bean
  * methods declared within this class are by default lazily initialized.
