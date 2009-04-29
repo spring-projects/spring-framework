@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,12 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 
 /**
  * <p>
- * JUnit 4 based test suite for tests involving {@link SpringJUnit4ClassRunner},
- * {@link SpringMethodRoadie}, and Spring's annotation-based test support.
+ * JUnit 4 based test suite for tests involving {@link SpringJUnit4ClassRunner}
+ * and the <em>Spring TestContext Framework</em>.
  * </p>
  * <p>
  * This test suite serves a dual purpose of verifying that tests run with
@@ -37,57 +36,38 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
  * from an automated build process, test runner, etc. that is configured to run
  * tests based on a &quot;*Tests.class&quot; pattern match.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses( {
-
-StandardJUnit4FeaturesTests.class,
-
-StandardJUnit4FeaturesSpringRunnerTests.class,
-
-EnabledAndIgnoredSpringRunnerTests.class,
-
-HardCodedProfileValueSourceSpringRunnerTests.class,
-
-SpringJUnit4ClassRunnerAppCtxTests.class,
-
-ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.class,
-
-AbsolutePathSpringJUnit4ClassRunnerAppCtxTests.class,
-
-RelativePathSpringJUnit4ClassRunnerAppCtxTests.class,
-
-MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class,
-
-InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
-
-PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,
-
-SpringRunnerContextCacheTests.class,
-
-ParameterizedDependencyInjectionTests.class,
-
-ClassLevelTransactionalSpringRunnerTests.class,
-
-MethodLevelTransactionalSpringRunnerTests.class,
-
-DefaultRollbackTrueTransactionalSpringRunnerTests.class,
-
-DefaultRollbackFalseTransactionalSpringRunnerTests.class,
-
-RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,
-
-RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,
-
-BeforeAndAfterTransactionAnnotationTests.class,
-
-TimedTransactionalSpringRunnerTests.class
-
+@SuiteClasses( {//
+StandardJUnit4FeaturesTests.class,//
+	StandardJUnit4FeaturesSpringRunnerTests.class,//
+	ExpectedExceptionSpringRunnerTests.class,//
+	TimedSpringRunnerTests.class,//
+	RepeatedSpringRunnerTests.class,//
+	EnabledAndIgnoredSpringRunnerTests.class,//
+	HardCodedProfileValueSourceSpringRunnerTests.class,//
+	SpringJUnit4ClassRunnerAppCtxTests.class,//
+	ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.class,//
+	AbsolutePathSpringJUnit4ClassRunnerAppCtxTests.class,//
+	RelativePathSpringJUnit4ClassRunnerAppCtxTests.class,//
+	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class,//
+	InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
+	PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,//
+	SpringRunnerContextCacheTests.class,//
+	ParameterizedDependencyInjectionTests.class,//
+	ClassLevelTransactionalSpringRunnerTests.class,//
+	MethodLevelTransactionalSpringRunnerTests.class,//
+	DefaultRollbackTrueTransactionalSpringRunnerTests.class,//
+	DefaultRollbackFalseTransactionalSpringRunnerTests.class,//
+	RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,//
+	RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,//
+	BeforeAndAfterTransactionAnnotationTests.class,//
+	TimedTransactionalSpringRunnerTests.class //
 })
 public class SpringJUnit4SuiteTests {
-	/* this test case is comprised completely of tests loaded as a suite. */
+	/* this test case consists entirely of tests loaded as a suite. */
 }
