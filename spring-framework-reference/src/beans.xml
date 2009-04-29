@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE preface PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="beans">
   <title>The IoC container</title>
@@ -205,23 +205,23 @@
         <para>Find below an example of the basic structure of XML-based
         configuration metadata.</para>
 
-        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-  &lt;bean id="..." class="..."&gt;
-    &lt;!-- collaborators and configuration for this bean go here --&gt;
-  &lt;/bean&gt;
+  <bean id="..." class="...">
+    <!-- collaborators and configuration for this bean go here -->
+  </bean>
 
-  &lt;bean id="..." class="..."&gt;
-    &lt;!-- collaborators and configuration for this bean go here --&gt;
-  &lt;/bean&gt;
+  <bean id="..." class="...">
+    <!-- collaborators and configuration for this bean go here -->
+  </bean>
 
-  &lt;!-- more bean definitions go here --&gt;
+  <!-- more bean definitions go here -->
 
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
       </section>
     </section>
 
@@ -254,16 +254,16 @@ BeanFactory factory = context;</programlisting>
         load bean definitions from another file (or files). Let's look at a
         sample:</para>
 
-        <programlisting language="xml">&lt;beans&gt;
+        <programlisting language="xml"><![CDATA[<beans>
 
-    &lt;import resource="services.xml"/&gt;
-    &lt;import resource="resources/messageSource.xml"/&gt;
-    &lt;import resource="/resources/themeSource.xml"/&gt;
+    <import resource="services.xml"/>
+    <import resource="resources/messageSource.xml"/>
+    <import resource="/resources/themeSource.xml"/>
 
-    &lt;bean id="bean1" class="..."/&gt;
-    &lt;bean id="bean2" class="..."/&gt;
+    <bean id="bean1" class="..."/>
+    <bean id="bean2" class="..."/>
 
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
         <para>In this example, external bean definitions are being loaded from
         3 files, <literal>services.xml</literal>,
@@ -518,7 +518,7 @@ BeanFactory factory = context;</programlisting>
           XML-based configuration metadata this may be accomplished via the
           use of the <literal>&lt;alias/&gt;</literal> element.</para>
 
-          <programlisting language="xml">&lt;alias name="fromName" alias="toName"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<alias name="fromName" alias="toName"/>]]></programlisting>
 
           <para>In this case, a bean in the same container which is named
           <literal>'fromName'</literal>, may also after the use of this alias
@@ -534,8 +534,8 @@ BeanFactory factory = context;</programlisting>
           easily handled by adding to the MyApp XML fragment the following
           standalone aliases:</para>
 
-          <programlisting language="xml">&lt;alias name="componentA-dataSource" alias="componentB-dataSource"/&gt;
-&lt;alias name="componentA-dataSource" alias="myApp-dataSource" /&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<alias name="componentA-dataSource" alias="componentB-dataSource"/>
+<alias name="componentA-dataSource" alias="myApp-dataSource" />]]></programlisting>
 
           <para>Now each component and the main application can refer to the
           dataSource via a name that is unique and guaranteed not to clash
@@ -622,9 +622,9 @@ BeanFactory factory = context;</programlisting>
           <para>When using XML-based configuration metadata you can specify
           your bean class like so:</para>
 
-          <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
+          <programlisting language="xml"><![CDATA[<bean id="exampleBean" class="examples.ExampleBean"/>
 
-&lt;bean name="anotherExample" class="examples.ExampleBeanTwo"/&gt;</programlisting>
+<bean name="anotherExample" class="examples.ExampleBeanTwo"/>]]></programlisting>
 
           <para>The mechanism for supplying arguments to the constructor (if
           required), or setting properties of the object instance after it has
@@ -654,9 +654,9 @@ BeanFactory factory = context;</programlisting>
           this example, the <methodname>createInstance()</methodname> method
           must be a <emphasis>static</emphasis> method.</para>
 
-          <programlisting language="xml">&lt;bean id="exampleBean"
+          <programlisting language="xml"><![CDATA[<bean id="exampleBean"
       class="examples.ExampleBean2"
-      factory-method="createInstance"/&gt;</programlisting>
+      factory-method="createInstance"/>]]></programlisting>
 
           <para>The mechanism for supplying (optional) arguments to the
           factory method, or setting properties of the object instance after
@@ -724,8 +724,8 @@ BeanFactory factory = context;</programlisting>
       <interfacename>BeanFactory</interfacename> you would create one and read
       in some bean definitions in the XML format as follows:</para>
 
-      <programlisting language="java">Resource res = new FileSystemResource("beans.xml");
-BeanFactory factory = new XmlBeanFactory(res);</programlisting>
+      <programlisting language="java"><![CDATA[Resource res = new FileSystemResource("beans.xml");
+BeanFactory factory = new XmlBeanFactory(res);]]></programlisting>
 
       <para>Basically that is all there is to it. Using
       <methodname>getBean(String)</methodname> you can retrieve instances of
@@ -830,16 +830,16 @@ public class Foo {
           specify the constructor argument indexes and / or types
           explicitly.</para>
 
-          <programlisting language="xml">&lt;beans&gt;
-    &lt;bean name="foo" class="x.y.Foo"&gt;
-        &lt;constructor-arg&gt;
-            &lt;bean class="x.y.Bar"/&gt;
-        &lt;/constructor-arg&gt;
-        &lt;constructor-arg&gt;
-            &lt;bean class="x.y.Baz"/&gt;
-        &lt;/constructor-arg&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<beans>
+    <bean name="foo" class="x.y.Foo">
+        <constructor-arg>
+            <bean class="x.y.Bar"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="x.y.Baz"/>
+        </constructor-arg>
+    </bean>
+</beans>]]></programlisting>
 
           <para>When another bean is referenced, the type is known, and
           matching can occur (as was the case with the preceding example).
@@ -872,10 +872,10 @@ public class ExampleBean {
             the constructor argument using the <literal>'type'</literal>
             attribute. For example:</para>
 
-            <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-  &lt;constructor-arg type="int" value="7500000"/&gt;
-  &lt;constructor-arg type="java.lang.String" value="42"/&gt;
-&lt;/bean&gt;</programlisting>
+            <programlisting language="xml"><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
+  <constructor-arg type="int" value="7500000"/>
+  <constructor-arg type="java.lang.String" value="42"/>
+</bean>]]></programlisting>
           </section>
 
           <section id="beans-factory-ctor-arguments-index">
@@ -885,10 +885,10 @@ public class ExampleBean {
             explicitly by use of the <literal>index</literal> attribute. For
             example:</para>
 
-            <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-  &lt;constructor-arg index="0" value="7500000"/&gt;
-  &lt;constructor-arg index="1" value="42"/&gt;
-&lt;/bean&gt;</programlisting>
+            <programlisting language="xml"><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
+  <constructor-arg index="0" value="7500000"/>
+  <constructor-arg index="1" value="42"/>
+</bean>]]></programlisting>
 
             <para>As well as solving the ambiguity problem of multiple simple
             values, specifying an index also solves the problem of ambiguity
@@ -1099,7 +1099,7 @@ public class ExampleBean {
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
 &lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
 
-        <programlisting language="java">public class ExampleBean {
+        <programlisting language="java"><![CDATA[public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
@@ -1116,7 +1116,7 @@ public class ExampleBean {
     public void setIntegerProperty(int i) {
         this.i = i;
     }    
-}</programlisting>
+}]]></programlisting>
 
         <para>As you can see, setters have been declared to match against the
         properties specified in the XML file. Find below an example of using
@@ -1138,7 +1138,7 @@ public class ExampleBean {
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
 &lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
 
-        <programlisting language="java">public class ExampleBean {
+        <programlisting language="java"><![CDATA[public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
@@ -1150,7 +1150,7 @@ public class ExampleBean {
         this.beanTwo = yetAnotherBean;
         this.i = i;
     }
-}</programlisting>
+}]]></programlisting>
 
         <para>As you can see, the constructor arguments specified in the bean
         definition will be used to pass in as arguments to the constructor of
@@ -1160,15 +1160,15 @@ public class ExampleBean {
         constructor, Spring is told to call a <literal>static</literal>
         factory method to return an instance of the object:</para>
 
-        <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"
-      factory-method="createInstance"&gt;
-  &lt;constructor-arg ref="anotherExampleBean"/&gt;
-  &lt;constructor-arg ref="yetAnotherBean"/&gt;
-  &lt;constructor-arg value="1"/&gt; 
-&lt;/bean&gt;
+        <programlisting language="xml"><![CDATA[<bean id="exampleBean" class="examples.ExampleBean"
+      factory-method="createInstance">
+  <constructor-arg ref="anotherExampleBean"/>
+  <constructor-arg ref="yetAnotherBean"/>
+  <constructor-arg value="1"/> 
+</bean>
 
-&lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
-&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
+<bean id="anotherExampleBean" class="examples.AnotherBean"/>
+<bean id="yetAnotherBean" class="examples.YetAnotherBean"/>]]></programlisting>
 
         <programlisting language="java">public class ExampleBean {
 
@@ -1295,23 +1295,23 @@ public class ExampleBean {
           container (to a <literal>&lt;constructor-arg/&gt;</literal> or
           <literal>&lt;property/&gt;</literal> element).</para>
 
-          <programlisting language="xml">&lt;bean id="theTargetBean" class="..."/&gt;
+          <programlisting language="xml"><![CDATA[<bean id="theTargetBean" class="..."/>
 
-&lt;bean id="theClientBean" class="..."&gt;
-    &lt;property name="targetName"&gt;
-        &lt;idref bean="theTargetBean" /&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+<bean id="theClientBean" class="...">
+    <property name="targetName">
+        <idref bean="theTargetBean" />
+    </property>
+</bean>]]></programlisting>
 
           <para>The above bean definition snippet is
           <emphasis>exactly</emphasis> equivalent (at runtime) to the
           following snippet:</para>
 
-          <programlisting language="xml">&lt;bean id="theTargetBean" class="..." /&gt;
+          <programlisting language="xml"><![CDATA[<bean id="theTargetBean" class="..." />
 
-&lt;bean id="client" class="..."&gt;
-    &lt;property name="targetName" value="theTargetBean" /&gt;
-&lt;/bean&gt;</programlisting>
+<bean id="client" class="...">
+    <property name="targetName" value="theTargetBean" />
+</bean>]]></programlisting>
 
           <para>The main reason the first form is preferable to the second is
           that using the <literal>idref</literal> tag allows the container to
@@ -1374,7 +1374,7 @@ public class ExampleBean {
         bean, or one of the values in the <literal>'name'</literal> attribute
         of the target bean.</para>
 
-        <programlisting language="xml">&lt;ref bean="someBean"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<ref bean="someBean"/>]]></programlisting>
 
         <para>Specifying the target bean by using the <literal>local</literal>
         attribute leverages the ability of the XML parser to validate XML id
@@ -1386,7 +1386,7 @@ public class ExampleBean {
         about errors as early as possible) if the target bean is in the same
         XML file.</para>
 
-        <programlisting language="xml">&lt;ref local="someBean"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<ref local="someBean"/>]]></programlisting>
 
         <para>Specifying the target bean by using the
         <literal>'parent'</literal> attribute allows a reference to be created
@@ -1514,7 +1514,7 @@ public class ExampleBean {
         value, can also again be any of the following
         elements:</emphasis></para>
 
-        <programlisting language="xml">bean | ref | idref | list | set | map | props | value | null</programlisting>
+        <programlisting language="xml"><![CDATA[bean | ref | idref | list | set | map | props | value | null]]></programlisting>
 
         <section id="beans-collection-elements-merging">
           <title>Collection merging</title>
@@ -1574,9 +1574,9 @@ public class ExampleBean {
           <literal>adminEmails</literal> collection with the parent's
           <literal>adminEmails</literal> collection.</para>
 
-          <programlisting>administrator=administrator@example.com
+          <programlisting><![CDATA[administrator=administrator@example.com
 sales=sales@example.com
-support=support@example.co.uk</programlisting>
+support=support@example.co.uk]]></programlisting>
 
           <para>Notice how the child <classname>Properties</classname>
           collection's value set will have inherited all the property elements
@@ -1631,26 +1631,26 @@ support=support@example.co.uk</programlisting>
           instances will be converted to the appropriate type prior to being
           added to the <interfacename>Collection</interfacename>.</para>
 
-          <programlisting language="java">public class Foo {
+          <programlisting language="java"><![CDATA[public class Foo {
                 
-    private Map&lt;String, Float&gt; accounts;
+    private Map<String, Float> accounts;
     
-    public void setAccounts(Map&lt;String, Float&gt; accounts) {
+    public void setAccounts(Map<String, Float> accounts) {
         this.accounts = accounts;
     }
-}</programlisting>
+}]]></programlisting>
 
-          <programlisting language="xml">&lt;beans&gt;
-    &lt;bean id="foo" class="x.y.Foo"&gt;
-        &lt;property name="accounts"&gt;
-            &lt;map&gt;
-                &lt;entry key="one" value="9.99"/&gt;
-                &lt;entry key="two" value="2.75"/&gt;
-                &lt;entry key="six" value="3.99"/&gt;
-            &lt;/map&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<beans>
+    <bean id="foo" class="x.y.Foo">
+        <property name="accounts">
+            <map>
+                <entry key="one" value="9.99"/>
+                <entry key="two" value="2.75"/>
+                <entry key="six" value="3.99"/>
+            </map>
+        </property>
+    </bean>
+</beans>]]></programlisting>
 
           <para>When the <literal>'accounts'</literal> property of the
           <literal>'foo'</literal> bean is being prepared for injection, the
@@ -1675,18 +1675,18 @@ support=support@example.co.uk</programlisting>
         email property being set to the empty <classname>String</classname>
         value ("")</para>
 
-        <programlisting language="xml">&lt;bean class="ExampleBean"&gt;
-  &lt;property name="email"&gt;&lt;value/&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean class="ExampleBean">
+  <property name="email"><value/></property>
+</bean>]]></programlisting>
 
         <para>This is equivalent to the following Java code:
         <methodname>exampleBean.setEmail("")</methodname>. The special
         <literal>&lt;null&gt;</literal> element may be used to indicate a
         <literal>null</literal> value. For example:</para>
 
-        <programlisting language="xml">&lt;bean class="ExampleBean"&gt;
-  &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean class="ExampleBean">
+  <property name="email"><null/></property>
+</bean>]]></programlisting>
 
         <para>The above configuration is equivalent to the following Java
         code: <methodname>exampleBean.setEmail(null)</methodname>.</para>
@@ -1713,25 +1713,25 @@ support=support@example.co.uk</programlisting>
           embedding a full <literal>&lt;value/&gt;</literal> element.
           Therefore, the following:</para>
 
-          <programlisting language="xml">&lt;property name="myProperty"&gt;
-  &lt;value&gt;hello&lt;/value&gt;
-&lt;/property&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<property name="myProperty">
+  <value>hello</value>
+</property>]]></programlisting>
 
-          <programlisting language="xml">&lt;constructor-arg&gt;
-  &lt;value&gt;hello&lt;/value&gt;
-&lt;/constructor-arg&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<constructor-arg>
+  <value>hello</value>
+</constructor-arg>]]></programlisting>
 
-          <programlisting language="xml">&lt;entry key="myKey"&gt;
-  &lt;value&gt;hello&lt;/value&gt;
-&lt;/entry&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<entry key="myKey">
+  <value>hello</value>
+</entry>]]></programlisting>
 
           <para>are equivalent to:</para>
 
-          <programlisting language="xml">&lt;property name="myProperty" value="hello"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<property name="myProperty" value="hello"/>]]></programlisting>
 
-          <programlisting language="xml">&lt;constructor-arg value="hello"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<constructor-arg value="hello"/>]]></programlisting>
 
-          <programlisting language="xml">&lt;entry key="myKey" value="hello"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<entry key="myKey" value="hello"/>]]></programlisting>
 
           <para>The <literal>&lt;property/&gt;</literal> and
           <literal>&lt;constructor-arg/&gt;</literal> elements support a
@@ -1739,19 +1739,19 @@ support=support@example.co.uk</programlisting>
           used instead of a full nested <literal>&lt;ref/&gt;</literal>
           element. Therefore, the following:</para>
 
-          <programlisting language="xml">&lt;property name="myProperty"&gt;
-  &lt;ref bean="myBean"&gt;
-&lt;/property&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<property name="myProperty">
+  <ref bean="myBean">
+</property>]]></programlisting>
 
-          <programlisting language="xml">&lt;constructor-arg&gt;
-  &lt;ref bean="myBean"&gt;
-&lt;/constructor-arg&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<constructor-arg>
+  <ref bean="myBean">
+</constructor-arg>]]></programlisting>
 
           <para>... are equivalent to:</para>
 
-          <programlisting language="xml">&lt;property name="myProperty" ref="myBean"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<property name="myProperty" ref="myBean"/>]]></programlisting>
 
-          <programlisting language="xml">&lt;constructor-arg ref="myBean"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<constructor-arg ref="myBean"/>]]></programlisting>
 
           <para>Note however that the shortcut form is equivalent to a
           <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no
@@ -1764,16 +1764,16 @@ support=support@example.co.uk</programlisting>
           <literal>'value'</literal> / <literal>'value-ref'</literal>
           attributes. Therefore, the following:</para>
 
-          <programlisting language="xml">&lt;entry&gt;
-  &lt;key&gt;
-    &lt;ref bean="myKeyBean" /&gt;
-  &lt;/key&gt;
-  &lt;ref bean="myValueBean" /&gt;
-&lt;/entry&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<entry>
+  <key>
+    <ref bean="myKeyBean" />
+  </key>
+  <ref bean="myValueBean" />
+</entry>]]></programlisting>
 
           <para>is equivalent to:</para>
 
-          <programlisting language="xml">&lt;entry key-ref="myKeyBean" value-ref="myValueBean"/&gt;</programlisting>
+          <programlisting language="xml"><![CDATA[<entry key-ref="myKeyBean" value-ref="myValueBean"/>]]></programlisting>
 
           <para>Again, the shortcut form is equivalent to a <literal>&lt;ref
           bean="xxx"&gt;</literal> element; there is no shortcut for
@@ -1807,19 +1807,19 @@ support=support@example.co.uk</programlisting>
           the end: the first is using the standard XML format whereas the
           second example is using the p-namespace.</para>
 
-          <programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+          <programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
     
-    &lt;bean name="classic" class="com.example.ExampleBean"&gt;
-        &lt;property name="email" value="foo@bar.com/&gt;
-    &lt;/bean&gt;
+    <bean name="classic" class="com.example.ExampleBean">
+        <property name="email" value="foo@bar.com/>
+    </bean>
     
-    &lt;bean name="p-namespace" class="com.example.ExampleBean"
-          p:email="foo@bar.com"/&gt;
-&lt;/beans&gt;</programlisting>
+    <bean name="p-namespace" class="com.example.ExampleBean"
+          p:email="foo@bar.com"/>
+</beans>]]></programlisting>
 
           <para>As you can see, we are including an attribute in the
           p-namespace called email in the bean definition - this is telling
@@ -1831,26 +1831,26 @@ support=support@example.co.uk</programlisting>
           <para>This next example includes two more bean definitions that both
           have a reference to another bean:</para>
 
-          <programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+          <programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
     
-    &lt;bean name="john-classic" class="com.example.Person"&gt;
-        &lt;property name="name" value="John Doe"/&gt;
-        &lt;property name="spouse" ref="jane"/&gt;
-    &lt;/bean&gt;
+    <bean name="john-classic" class="com.example.Person">
+        <property name="name" value="John Doe"/>
+        <property name="spouse" ref="jane"/>
+    </bean>
 
-    &lt;bean name="john-modern" 
+    <bean name="john-modern" 
         class="com.example.Person"
         p:name="John Doe"
-        p:spouse-ref="jane"/&gt;
+        p:spouse-ref="jane"/>
 
-    &lt;bean name="jane" class="com.example.Person"&gt;
-        &lt;property name="name" value="Jane Doe"/&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting>
+    <bean name="jane" class="com.example.Person">
+        <property name="name" value="Jane Doe"/>
+    </bean>
+</beans>]]></programlisting>
 
           <para>As you can see, this example doesn't only include a property
           value using the p-namespace, but also uses a special format to
@@ -1888,9 +1888,9 @@ support=support@example.co.uk</programlisting>
         the final property name are not <literal>null</literal>. Consider the
         following bean definition...</para>
 
-        <programlisting language="xml">&lt;bean id="foo" class="foo.Bar"&gt;
-  &lt;property name="fred.bob.sammy" value="123" /&gt;
-&lt;/bean&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="foo" class="foo.Bar">
+  <property name="fred.bob.sammy" value="123" />
+</bean>]]></programlisting>
 
         <para>The <literal>foo</literal> bean has a <literal>fred</literal>
         property which has a <literal>bob</literal> property, which has a
@@ -1932,12 +1932,12 @@ support=support@example.co.uk</programlisting>
       <literal>'depends-on'</literal> attribute, with commas, whitespace and
       semicolons all valid delimiters, like so:</para>
 
-      <programlisting language="xml">&lt;bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao"&gt;
-  &lt;property name="manager" ref="manager" /&gt;
-&lt;/bean&gt;
+      <programlisting language="xml"><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao">
+  <property name="manager" ref="manager" />
+</bean>
 
-&lt;bean id="manager" class="ManagerBean" /&gt;
-&lt;bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" /&gt;</programlisting>
+<bean id="manager" class="ManagerBean" />
+<bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" />]]></programlisting>
 
       <note>
         <para>The '<literal>depends-on</literal>' attribute at the bean
@@ -2544,9 +2544,9 @@ public class ReplacementComputeValue implements MethodReplacer {
         fully qualified type name. For example, all the following would match
         <classname>java.lang.String</classname>.</para>
 
-        <programlisting language="java">    java.lang.String
+        <programlisting language="java"><![CDATA[    java.lang.String
     String
-    Str</programlisting>
+    Str]]></programlisting>
 
         <para>Since the number of arguments is often enough to distinguish
         between each possible choice, this shortcut can save a lot of typing,
@@ -2873,13 +2873,13 @@ public class ReplacementComputeValue implements MethodReplacer {
         the declarations in your web application's
         <literal>'web.xml'</literal> file.</para>
 
-        <programlisting language="xml">&lt;web-app&gt;
+        <programlisting language="xml"><![CDATA[<web-app>
   ...
-  &lt;listener&gt;
-    &lt;listener-class&gt;org.springframework.web.context.request.RequestContextListener&lt;/listener-class&gt;
-  &lt;/listener&gt;
+  <listener>
+    <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+  </listener>
   ...
-&lt;/web-app&gt;</programlisting>
+</web-app>]]></programlisting>
 
         <para>If you are using an older web container (Servlet 2.3), you will
         need to use the provided
@@ -2891,18 +2891,18 @@ public class ReplacementComputeValue implements MethodReplacer {
         mapping depends on the surrounding web application configuration and
         so you will have to change it as appropriate.)</para>
 
-        <programlisting language="xml">&lt;web-app&gt;
+        <programlisting language="xml"><![CDATA[<web-app>
   ..
-  &lt;filter&gt; 
-    &lt;filter-name&gt;requestContextFilter&lt;/filter-name&gt; 
-    &lt;filter-class&gt;org.springframework.web.filter.RequestContextFilter&lt;/filter-class&gt;
-  &lt;/filter&gt; 
-  &lt;filter-mapping&gt; 
-    &lt;filter-name&gt;requestContextFilter&lt;/filter-name&gt; 
-    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-  &lt;/filter-mapping&gt;
+  <filter> 
+    <filter-name>requestContextFilter</filter-name> 
+    <filter-class>org.springframework.web.filter.RequestContextFilter</filter-class>
+  </filter> 
+  <filter-mapping> 
+    <filter-name>requestContextFilter</filter-name> 
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
   ...
-&lt;/web-app&gt;</programlisting>
+</web-app>]]></programlisting>
 
         <para>That's it. <classname>DispatcherServlet</classname>,
         <classname>RequestContextListener</classname> and
@@ -2918,7 +2918,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Consider the following bean definition:</para>
 
-        <programlisting language="xml">&lt;bean id="loginAction" class="com.foo.LoginAction" scope="request"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="loginAction" class="com.foo.LoginAction" scope="request"/>]]></programlisting>
 
         <para>With the above bean definition in place, the Spring container
         will create a brand new instance of the
@@ -2940,7 +2940,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Consider the following bean definition:</para>
 
-        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>]]></programlisting>
 
         <para>With the above bean definition in place, the Spring container
         will create a brand new instance of the
@@ -2967,7 +2967,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Consider the following bean definition:</para>
 
-        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/>]]></programlisting>
 
         <para>The <literal>global session</literal> scope is similar to the
         standard HTTP <interfacename>Session</interfacename> scope (<link
@@ -3060,11 +3060,11 @@ public class ReplacementComputeValue implements MethodReplacer {
         bean definition as it stands is
         <emphasis>incomplete</emphasis>):</para>
 
-        <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;
+        <programlisting language="xml"><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>
 
-&lt;bean id="userManager" class="com.foo.UserManager"&gt;
-    &lt;property name="userPreferences" ref="userPreferences"/&gt;
-&lt;/bean&gt;</programlisting>
+<bean id="userManager" class="com.foo.UserManager">
+    <property name="userPreferences" ref="userPreferences"/>
+</bean>]]></programlisting>
 
         <para>From the above configuration it is evident that the singleton
         bean <literal>'userManager'</literal> is being injected with a
@@ -3204,7 +3204,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         of the bean, after having bound it to the session for future
         reference).</para>
 
-        <programlisting language="java">Object get(String name, ObjectFactory objectFactory)</programlisting>
+        <programlisting language="java"><![CDATA[Object get(String name, ObjectFactory objectFactory)]]></programlisting>
 
         <para>The second method should remove the object from the underlying
         scope. The session scope implementation for example, removes the
@@ -3212,20 +3212,20 @@ public class ReplacementComputeValue implements MethodReplacer {
         returned (you are allowed to return null if the object with the
         specified name wasn't found)</para>
 
-        <programlisting language="java">Object remove(String name)</programlisting>
+        <programlisting language="java"><![CDATA[Object remove(String name)]]></programlisting>
 
         <para>The third method is used to register callbacks the scope should
         execute when it is destroyed or when the specified object in the scope
         is destroyed. Please refer to the Javadoc or a Spring scope
         implementation for more information on destruction callbacks.</para>
 
-        <programlisting language="java">void registerDestructionCallback(String name, Runnable destructionCallback)</programlisting>
+        <programlisting language="java"><![CDATA[void registerDestructionCallback(String name, Runnable destructionCallback)]]></programlisting>
 
         <para>The last method deals with obtaining the conversation identifier
         for the underlying scope. This identifier is different for each scope.
         For a session for example, this can be the session identifier.</para>
 
-        <programlisting language="java">String getConversationId()</programlisting>
+        <programlisting language="java"><![CDATA[String getConversationId()]]></programlisting>
       </section>
 
       <section id="beans-factory-scopes-custom-using">
@@ -3241,7 +3241,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         <interfacename>BeanFactory</interfacename> implementations that ship
         with Spring); this central method is displayed below:</para>
 
-        <programlisting language="java">void registerScope(String scopeName, Scope scope);</programlisting>
+        <programlisting language="java"><![CDATA[void registerScope(String scopeName, Scope scope);]]></programlisting>
 
         <para>The first argument to the
         <methodname>registerScope(..)</methodname> method is the unique name
@@ -3358,7 +3358,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         <interfacename>InitializingBean</interfacename> interface specifies
         exactly one method:</para>
 
-        <programlisting language="java">void afterPropertiesSet() throws Exception;</programlisting>
+        <programlisting language="java"><![CDATA[void afterPropertiesSet() throws Exception;]]></programlisting>
 
         <para>Generally, the use of the
         <interfacename>InitializingBean</interfacename> interface can be
@@ -3369,7 +3369,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         <literal>'init-method'</literal> attribute. For example, the following
         definition:</para>
 
-        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>]]></programlisting>
 
         <programlisting language="java">public class ExampleBean {
     
@@ -3380,7 +3380,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
 
         <para>...is exactly the same as...</para>
 
-        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>]]></programlisting>
 
         <programlisting language="java">public class AnotherExampleBean implements InitializingBean {
     
@@ -3402,7 +3402,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         <interfacename>DisposableBean</interfacename> interface specifies a
         single method:</para>
 
-        <programlisting language="java">void destroy() throws Exception;</programlisting>
+        <programlisting language="java"><![CDATA[void destroy() throws Exception;]]></programlisting>
 
         <para>Generally, the use of the
         <interfacename>DisposableBean</interfacename> callback interface can
@@ -3414,7 +3414,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         <literal>&lt;bean/&gt;</literal>. For example, the following
         definition:</para>
 
-        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/>]]></programlisting>
 
         <programlisting language="java">public class ExampleBean {
 
@@ -3425,7 +3425,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
 
         <para>...is exactly the same as...</para>
 
-        <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>]]></programlisting>
 
         <programlisting language="java">public class AnotherExampleBean implements DisposableBean {
 
@@ -3666,10 +3666,10 @@ public final class Boot {
         <interfacename>BeanFactory</interfacename> that created it, when it is
         created by that <interfacename>BeanFactory</interfacename>.</para>
 
-        <programlisting language="java">public interface BeanFactoryAware {
+        <programlisting language="java"><![CDATA[public interface BeanFactoryAware {
 
     void setBeanFactory(BeanFactory beanFactory) throws BeansException;
-}</programlisting>
+}]]></programlisting>
 
         <para>This allows beans to manipulate the
         <interfacename>BeanFactory</interfacename> that created them
@@ -3712,7 +3712,7 @@ public final class Boot {
         <classname>ObjectFactoryCreatingFactoryBean</classname> with the name
         of the bean that is to be looked up. Let's look at an example:</para>
 
-        <programlisting language="java">package x.y;
+        <programlisting language="java"><![CDATA[package x.y;
 
 public class NewsFeed {
     
@@ -3725,9 +3725,9 @@ public class NewsFeed {
     public String getNews() {
         return this.toString() + ": '" + news + "'";
     }
-}</programlisting>
+}]]></programlisting>
 
-        <programlisting language="java">package x.y;
+        <programlisting language="java"><![CDATA[package x.y;
 
 import org.springframework.beans.factory.ObjectFactory;
 
@@ -3745,28 +3745,28 @@ public class NewsFeedManager {
         NewsFeed news = (NewsFeed) factory.getObject();
         System.out.println(news.getNews());
     }
-}</programlisting>
+}]]></programlisting>
 
         <para>Find below the XML configuration to wire together the above
         classes using the
         <classname>ObjectFactoryCreatingFactoryBean</classname>
         approach.</para>
 
-        <programlisting language="xml">&lt;beans&gt;
-    &lt;bean id="newsFeedManager" class="x.y.NewsFeedManager"&gt;
-        &lt;property name="factory"&gt;
-            &lt;bean
-class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean"&gt;
-                &lt;property name="targetBeanName"&gt;
-                    &lt;idref local="newsFeed" /&gt;
-                &lt;/property&gt;
-            &lt;/bean&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-    &lt;bean id="newsFeed" class="x.y.NewsFeed" scope="prototype"&gt;
-        &lt;property name="news" value="... that's fit to print!" /&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<beans>
+    <bean id="newsFeedManager" class="x.y.NewsFeedManager">
+        <property name="factory">
+            <bean
+class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+                <property name="targetBeanName">
+                    <idref local="newsFeed" />
+                </property>
+            </bean>
+        </property>
+    </bean>
+    <bean id="newsFeed" class="x.y.NewsFeed" scope="prototype">
+        <property name="news" value="... that's fit to print!" />
+    </bean>
+</beans>]]></programlisting>
 
         <para>And here is a small driver program to test the fact that new
         (prototype) instances of the <literal>newsFeed</literal> bean are
@@ -3775,7 +3775,7 @@ class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean
         <classname>NewsFeedManager</classname>'s
         <methodname>printNews()</methodname> method.</para>
 
-        <programlisting language="java">import org.springframework.context.ApplicationContext;
+        <programlisting language="java"><![CDATA[import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import x.y.NewsFeedManager;
 
@@ -3788,13 +3788,13 @@ public class Main {
         manager.printNews();
         manager.printNews();
     }
-}</programlisting>
+}]]></programlisting>
 
         <para>The output from running the above program will look like so
         (results will of course vary on your machine).</para>
 
-        <programlisting language="java">x.y.NewsFeed@1292d26: '... that's fit to print!'
-x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
+        <programlisting language="java"><![CDATA[x.y.NewsFeed@1292d26: '... that's fit to print!'
+x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
 
         <para>As of Spring 2.5, you can rely upon autowiring of the
         <interfacename>BeanFactory</interfacename> as yet another alternative
@@ -4137,7 +4137,7 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
         <para>Find below a small driver script to exercise the above code and
         configuration;</para>
 
-        <programlisting language="java">import org.springframework.context.ApplicationContext;
+        <programlisting language="java"><![CDATA[import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scripting.Messenger;
 
@@ -4148,13 +4148,13 @@ public final class Boot {
         Messenger messenger = (Messenger) ctx.getBean("messenger");
         System.out.println(messenger);
     }
-}</programlisting>
+}]]></programlisting>
 
         <para>The output of executing the above program will be (something
         like) this:</para>
 
-        <programlisting>Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@272961
-org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
+        <programlisting><![CDATA[Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@272961
+org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
       </section>
 
       <section id="beans-factory-extension-bpp-examples-rabpp">
@@ -4315,10 +4315,10 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         <para>The actual values come from another file in the standard Java
         <classname>Properties</classname> format:</para>
 
-        <programlisting language="java">jdbc.driverClassName=org.hsqldb.jdbcDriver
+        <programlisting language="java"><![CDATA[jdbc.driverClassName=org.hsqldb.jdbcDriver
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
-jdbc.password=root</programlisting>
+jdbc.password=root]]></programlisting>
 
         <para>With the <literal>context</literal> namespace introduced in
         Spring 2.5, it is possible to configure property placeholders with a
@@ -4326,7 +4326,7 @@ jdbc.password=root</programlisting>
         a comma-separated list for the <literal>location</literal>
         attribute.</para>
 
-        <programlisting language="xml">&lt;context:property-placeholder location="classpath:com/foo/jdbc.properties"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<context:property-placeholder location="classpath:com/foo/jdbc.properties"/>]]></programlisting>
 
         <para>The <classname>PropertyPlaceholderConfigurer</classname> doesn't
         only look for properties in the <classname>Properties</classname> file
@@ -4349,16 +4349,16 @@ jdbc.password=root</programlisting>
           you have to pick a particular implementation class at runtime. For
           example:</para>
 
-          <programlisting language="xml">&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
-    &lt;property name="locations"&gt;
-        &lt;value&gt;classpath:com/foo/strategy.properties&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="properties"&gt;
-        &lt;value&gt;custom.strategy.class=com.foo.DefaultStrategy&lt;/value&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;
+          <programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+        <value>classpath:com/foo/strategy.properties</value>
+    </property>
+    <property name="properties">
+        <value>custom.strategy.class=com.foo.DefaultStrategy</value>
+    </property>
+</bean>
 
-&lt;bean id="serviceStrategy" class="${custom.strategy.class}"/&gt;</programlisting>
+<bean id="serviceStrategy" class="${custom.strategy.class}"/>]]></programlisting>
 
           <para>If the class is unable to be resolved at runtime to a valid
           class, resolution of the bean will fail once it is about to be
@@ -4392,12 +4392,12 @@ jdbc.password=root</programlisting>
         <para>Properties file configuration lines are expected to be in the
         format:</para>
 
-        <programlisting language="java">beanName.property=value</programlisting>
+        <programlisting language="java"><![CDATA[beanName.property=value]]></programlisting>
 
         <para>An example properties file might look like this:</para>
 
-        <programlisting language="java">dataSource.driverClassName=com.mysql.jdbc.Driver
-dataSource.url=jdbc:mysql:mydb</programlisting>
+        <programlisting language="java"><![CDATA[dataSource.driverClassName=com.mysql.jdbc.Driver
+dataSource.url=jdbc:mysql:mydb]]></programlisting>
 
         <para>This example file would be usable against a container definition
         which contains a bean called <emphasis>dataSource</emphasis>, which
@@ -4409,7 +4409,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         is already non-null (presumably initialized by the constructors). In
         this example...</para>
 
-        <programlisting language="java">foo.fred.bob.sammy=123</programlisting>
+        <programlisting language="java"><![CDATA[foo.fred.bob.sammy=123]]></programlisting>
 
         <para>... the <literal>sammy</literal> property of the
         <literal>bob</literal> property of the <literal>fred</literal>
@@ -4425,7 +4425,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         Spring 2.5, it is possible to configure property overriding with a
         dedicated configuration element:</para>
 
-        <programlisting language="xml">&lt;context:property-override location="classpath:override.properties"/&gt;</programlisting>
+        <programlisting language="xml"><![CDATA[<context:property-override location="classpath:override.properties"/>]]></programlisting>
       </section>
     </section>
 
@@ -4718,18 +4718,18 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       source. The <classname>ResourceBundleMessageSource</classname> is more
       interesting and is the one we will provide an example for:</para>
 
-      <programlisting language="xml">&lt;beans&gt;
-  &lt;bean id="messageSource"
-        class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
-    &lt;property name="basenames"&gt;
-      &lt;list&gt;
-        &lt;value&gt;format&lt;/value&gt;
-        &lt;value&gt;exceptions&lt;/value&gt;
-        &lt;value&gt;windows&lt;/value&gt;
-      &lt;/list&gt;
-    &lt;/property&gt;
-  &lt;/bean&gt;
-&lt;/beans&gt;</programlisting>
+      <programlisting language="xml"><![CDATA[<beans>
+  <bean id="messageSource"
+        class="org.springframework.context.support.ResourceBundleMessageSource">
+    <property name="basenames">
+      <list>
+        <value>format</value>
+        <value>exceptions</value>
+        <value>windows</value>
+      </list>
+    </property>
+  </bean>
+</beans>]]></programlisting>
 
       <para>This assumes you have three resource bundles defined on your
       classpath called <literal>format</literal>,
@@ -4752,15 +4752,15 @@ argument.required=The '{0}' argument is required.</programlisting>
       implementations and so can be cast to the
       <classname>MessageSource</classname> interface.</para>
 
-      <programlisting language="java">public static void main(String[] args) {
+      <programlisting language="java"><![CDATA[public static void main(String[] args) {
     MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
     String message = resources.getMessage("message", null, "Default", null);
     System.out.println(message);
-}</programlisting>
+}]]></programlisting>
 
       <para>The resulting output from the above program will be...</para>
 
-      <programlisting>Alligators rock!</programlisting>
+      <programlisting><![CDATA[Alligators rock!]]></programlisting>
 
       <para>So to summarize, the <classname>MessageSource</classname> is
       defined in a file called <literal>'beans.xml'</literal> (this file
@@ -4792,7 +4792,7 @@ argument.required=The '{0}' argument is required.</programlisting>
 
 &lt;/beans&gt;</programlisting>
 
-      <programlisting language="java">public class Example {
+      <programlisting language="java"><![CDATA[public class Example {
 
     private MessageSource messages;
 
@@ -4806,12 +4806,12 @@ argument.required=The '{0}' argument is required.</programlisting>
         System.out.println(message);
     }
 
-}</programlisting>
+}]]></programlisting>
 
       <para>The resulting output from the invocation of the
       <methodname>execute()</methodname> method will be...</para>
 
-      <programlisting>The 'userDao' argument is required.</programlisting>
+      <programlisting><![CDATA[The 'userDao' argument is required.]]></programlisting>
 
       <para>With regard to internationalization (i18n), Spring's various
       <classname>MessageResource</classname> implementations follow the same
@@ -4831,17 +4831,17 @@ argument.required=The '{0}' argument is required.</programlisting>
       <programlisting><lineannotation># in 'exceptions_en_GB.properties'</lineannotation>
 argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</programlisting>
 
-      <programlisting language="java">public static void main(final String[] args) {
+      <programlisting language="java"><![CDATA[public static void main(final String[] args) {
     MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
     String message = resources.getMessage("argument.required",
         new Object [] {"userDao"}, "Required", Locale.UK);
     System.out.println(message);
-}</programlisting>
+}]]></programlisting>
 
       <para>The resulting output from the running of the above program will
       be...</para>
 
-      <programlisting>Ebagum lad, the 'userDao' argument is required, I say, required.</programlisting>
+      <programlisting><![CDATA[Ebagum lad, the 'userDao' argument is required, I say, required.]]></programlisting>
 
       <para>The <classname>MessageSourceAware</classname> interface can also
       be used to acquire a reference to any
@@ -4988,19 +4988,19 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>Let's look at an example. First, the
       <interfacename>ApplicationContext</interfacename>:</para>
 
-      <programlisting language="xml">&lt;bean id="emailer" class="example.EmailBean"&gt;
-  &lt;property name="blackList"&gt;
-    &lt;list&gt;
-      &lt;value&gt;black@list.org&lt;/value&gt;
-      &lt;value&gt;white@list.org&lt;/value&gt;
-      &lt;value&gt;john@doe.org&lt;/value&gt;
-    &lt;/list&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;
+      <programlisting language="xml"><![CDATA[<bean id="emailer" class="example.EmailBean">
+  <property name="blackList">
+    <list>
+      <value>black@list.org</value>
+      <value>white@list.org</value>
+      <value>john@doe.org</value>
+    </list>
+  </property>
+</bean>
 
-&lt;bean id="blackListListener" class="example.BlackListNotifier"&gt;
-  &lt;property name="notificationAddress" value="spam@list.org"/&gt;
-&lt;/bean&gt;</programlisting>
+<bean id="blackListListener" class="example.BlackListNotifier">
+  <property name="notificationAddress" value="spam@list.org"/>
+</bean>]]></programlisting>
 
       <para>Now, let's look at the actual classes:</para>
 
@@ -5296,10 +5296,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     adds support for JSR-250 annotations such as
     <interfacename>@Resource</interfacename>,
     <interfacename>@PostConstruct</interfacename>, and
-    <interfacename>@PreDestroy</interfacename>. Of course, these options are
-    only available if you are using at least Java 5 (Tiger) and thus have
-    access to source level annotations. Use of these annotations also requires
-    that certain <interfacename>BeanPostProcessors</interfacename> be
+    <interfacename>@PreDestroy</interfacename>. Use of these annotations also
+    requires that certain <interfacename>BeanPostProcessors</interfacename> be
     registered within the Spring container. As always, these can be registered
     as individual bean definitions, but they can also be implicitly registered
     by including the following tag in an XML-based Spring configuration
@@ -5731,12 +5729,12 @@ public @interface Genre {
       Internet connection is available. First define the simple
       annotation:</para>
 
-      <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
+      <programlisting language="java"><![CDATA[@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
 public @interface Offline {
 
-}</programlisting>
+}]]></programlisting>
 
       <para>Then add the annotation to the field or property to be
       autowired:</para>
@@ -5766,7 +5764,7 @@ public @interface Offline {
       be considered an autowire candidate. As an example, consider the
       following annotation definition:</para>
 
-      <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
+      <programlisting language="java"><![CDATA[@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
 public @interface MovieQualifier {
@@ -5774,14 +5772,14 @@ public @interface MovieQualifier {
     String genre();
     
     Format format();
-}</programlisting>
+}]]></programlisting>
 
       <para>In this case <literal>Format</literal> is an enum:</para>
 
-      <programlisting language="java">public enum Format {
+      <programlisting language="java"><![CDATA[public enum Format {
     
     VHS, DVD, BLURAY
-}</programlisting>
+}]]></programlisting>
 
       <para>The fields to be autowired are annotated with the custom qualifier
       and include values for both attributes: <literal>'genre'</literal> and
@@ -5870,13 +5868,13 @@ public @interface MovieQualifier {
       even if they are not themselves annotated with Spring's
       <interfacename>@Qualifier</interfacename> annotation.</para>
 
-      <programlisting language="xml">&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
-    &lt;property name="customQualifierTypes"&gt;
-        &lt;set&gt;
-            &lt;value&gt;example.CustomQualifier&lt;/value&gt;
-        &lt;/set&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+      <programlisting language="xml"><![CDATA[<bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer">
+    <property name="customQualifierTypes">
+        <set>
+            <value>example.CustomQualifier</value>
+        </set>
+    </property>
+</bean>]]></programlisting>
 
       <para>Note that the particular implementation of
       <interfacename>AutowireCandidateResolver</interfacename> that will be
@@ -6028,6 +6026,327 @@ public @interface MovieQualifier {
     </section>
   </section>
 
+  <section id="beans-java-configuration">
+    <title>Java-based configuration</title>
+
+    <para>Starting with Spring 3.0 many of the features provided by the <ulink
+    url="http://www.springsource.org/javaconfig">Spring JavaConfig
+    project</ulink> have been added to the core Spring Framework. This allows
+    you to define beans using Java rather than using the traditional XML
+    files.</para>
+
+    <para>The central artifact in Spring's new Java-configuration support is
+    the <interfacename>@Configuration</interfacename>-annotated class. These
+    classes consist principally of
+    <interfacename>@Bean</interfacename>-annotated methods that define
+    instantiation, configuration, and initialization logic for objects that
+    will be managed by the Spring IoC container.</para>
+
+    <section id="beans-javaconfig-configuration-annotation">
+      <title>Using the <interfacename>@Configuration</interfacename>
+      annotation</title>
+
+      <para>Annotating a class with the
+      <interfacename>@Configuration</interfacename> indicates that the class
+      may be used by the Spring IoC container as a source of bean definitions.
+      The simplest possible <interfacename>@Configuration</interfacename>
+      class would read as follows: <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+
+}            ]]></programlisting></para>
+
+      <para>An application may make use of just one
+      <interfacename>@Configuration</interfacename>-annotated class, or many.
+      <interfacename>@Configuration</interfacename> is meta-annotated as a
+      <interfacename>@Component</interfacename>, therefore
+      Configuration-classes are candidates for component-scanning and may also
+      take advantage of <interfacename>@Autowired</interfacename> annotations
+      at the field and method level but not at the constructor level.
+      Configuration-classes must also have a default constructor. Externalized
+      values may be wired into Configuration-classes using the
+      <interfacename>@Value</interfacename> annotation.</para>
+    </section>
+
+    <section id="beans-javaconfig-bean-annotation">
+      <title>Using the <interfacename>@Bean</interfacename> annotation</title>
+
+      <para><interfacename>@Bean</interfacename> is a method-level annotation
+      and a direct analog of the XML <code>&lt;bean/&gt;</code> element. The
+      annotation supports most of the attributes offered by
+      <code>&lt;bean/&gt;</code>, such as: <code><link
+      linkend="beans-factory-lifecycle-initializingbean">init-method</link></code>,
+      <code><link
+      linkend="beans-factory-lifecycle-disposablebean">destroy-method</link></code>,
+      <code><link linkend="beans-factory-autowire">autowiring</link></code>,
+      <code><link linkend="beans-factory-lazy-init">lazy-init</link></code>,
+      <code><link
+      linkend="beans-factory-dependencies">dependency-check</link></code>,
+      <code><link linkend="beans-factory-dependson">depends-on</link></code>
+      and <code><link
+      linkend="beans-factory-scopes">scope</link></code>.</para>
+
+      <section id="beans-javaconfig-declaring-a-bean">
+        <title>Declaring a bean</title>
+
+        <para>To declare a bean, simply annotate a method with the
+        <interfacename>@Bean</interfacename> annotation. When JavaConfig
+        encounters such a method, it will execute that method and register the
+        return value as a bean within a <code>BeanFactory</code>. By default,
+        the bean name will be the same as the method name (see <link
+        linkend="bean-naming"> bean naming</link> for details on how to
+        customize this behavior). The following is a simple example of a
+        <interfacename>@Bean</interfacename> method declaration:
+        <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+    @Bean
+    public TransferService transferService() {
+        return new TransferServiceImpl();
+    }
+}                ]]></programlisting></para>
+
+        <para>For comparison sake, the configuration above is exactly
+        equivalent to the following Spring XML: <programlisting
+        language="xml"><![CDATA[<beans>
+    <bean name="transferService" class="com.acme.TransferServiceImpl"/>
+</beans>                ]]></programlisting></para>
+
+        <para>Both will result in a bean named <code>transferService</code>
+        being available in the <code>BeanFactory</code> or
+        <code>ApplicationContext</code>, bound to an object instance of type
+        <code>TransferServiceImpl</code>: <programlisting><![CDATA[
+transferService -> com.acme.TransferServiceImpl
+                ]]></programlisting></para>
+      </section>
+
+      <section id="beans-javaconfig-injecting-dependencies">
+        <title>Injecting dependencies</title>
+
+        <para>When <interfacename>@Bean</interfacename>s have dependencies on
+        one another, expressing that dependency is as simple as having one
+        bean method call another: <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+    @Bean
+    public Foo foo() {
+        return new Foo(bar());
+    }
+
+    @Bean
+    public Bar bar() {
+        return new Bar();
+    }
+}                ]]></programlisting></para>
+
+        <para>In the example above, the <code>foo</code> bean recevies a
+        reference to <code> bar</code> via constructor injection.</para>
+      </section>
+
+      <section id="beans-javaconfig-lifecycle-callbacks">
+        <title>Receiving lifecycle callbacks</title>
+
+        <para>Beans created in a Configuration-class supports the regular
+        lifecycle callbacks. Any classes defined with the @Bean annotation can
+        use the @PostConstruct and @PreDestroy annotations from JSR-250, see
+        the section on <link
+        linkend="beans-factory-lifecycle-combined-effects">JSR-250
+        annotations</link> for further details.</para>
+
+        <para>The regular Spring <link
+        linkend="beans-factory-nature">lifecycle</link> callbacks are fully
+        supported as well. If a bean implements <code>InitializingBean</code>,
+        <code>DisposableBean</code>, or <code>Lifecycle</code>, their
+        respective methods will be called by the container.</para>
+
+        <para>The standard set of <code>*Aware</code> interfaces such as
+        <code><link
+        linkend="beans-factory-aware-beanfactoryaware">BeanFactoryAware</link></code>,
+        <code><link
+        linkend="beans-factory-aware-beannameaware">BeanNameAware</link></code>,
+        <code><link
+        linkend="context-functionality-messagesource">MessageSourceAware</link></code>,
+        <code><link
+        linkend="context-functionality-events">ApplicationContextAware</link></code>,
+        etc. are also fully supported.</para>
+
+        <para>The <interfacename>@Bean</interfacename> annotation supports
+        specifying arbitrary initialization and destruction callback methods,
+        much like Spring XML's <code>init-method</code> and
+        <code>destroy-method</code> attributes to the <code>bean</code>
+        element: <programlisting language="java"><![CDATA[public class Foo {
+    public void init() {
+        // initialization logic
+    }
+}
+
+public class Bar {
+    public void cleanup() {
+        // destruction logic
+    }
+}
+
+@Configuration
+public class AppConfig {
+    @Bean(initMethodName = "init")
+    public Foo foo() {
+        return new Foo();
+    }
+    @Bean(destroyMethodName="cleanup")
+    public Bar bar() {
+        return new Bar();
+    }
+}
+]]></programlisting></para>
+
+        <para>Of course, in the case of <code>Foo</code> above, it would be
+        equally as valid to call the <code>init()</code> method directly
+        during construction: <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+    @Bean
+    public Foo foo() {
+        Foo foo = new Foo();
+        foo.init();
+        return foo;
+    }
+
+    // ...
+}                    ]]></programlisting></para>
+
+        <tip>
+          <para>Remember that because you are working directly in Java, you
+          can do anything you like with your objects, and do not always need
+          to rely on the container!</para>
+        </tip>
+      </section>
+
+      <section id="beans-javaconfig-specifying-bean-scope">
+        <title>Specifying bean scope</title>
+
+        <section id="beans-javaconfig-available-scopes">
+          <title>Using the <interfacename>@Scope</interfacename>
+          annotation</title>
+
+          <para>You can specify that your beans defined with the
+          <interfacename>@Bean</interfacename> annotation should have a
+          specific scope. You can use any of the standard scopes specified in
+          the <link linkend="beans-factory-scopes">Bean Scopes</link>
+          section.</para>
+
+          <para>The <code>StandardScopes</code> class provides string
+          constants for each of these four scopes. SINGLETON is the default,
+          and can be overridden by using the
+          <interfacename>@Scope</interfacename> annotation: <programlisting
+          language="java"><![CDATA[@Configuration
+public class MyConfiguration {
+    @Bean
+    @Scope(StandardScopes.PROTOTYPE)
+    public Encryptor encryptor() {
+        // ...
+    }
+}                 ]]></programlisting></para>
+        </section>
+
+        <section id="beans-javaconfig-scoped-proxy">
+          <title><code>@Scope and scoped-proxy</code></title>
+
+          <para>Spring offers a convenient way of working with scoped
+          dependencies through <link
+          linkend="beans-factory-scopes-other-injection">scoped
+          proxies</link>. The easiest way to create such a proxy when using
+          the XML configuration is the <code>&lt;aop:scoped-proxy/&gt;</code>
+          element. Configuring your beans in Java with a @Scope annotation
+          offers equivalent support with the proxyMode attribute. The default
+          is no proxy (<varname>ScopedProxyMode.NO</varname>) but you can
+          specify <classname>ScopedProxyMode.TARGET_CLASS</classname> or
+          <classname>ScopedProxyMode.INTERFACES</classname>.</para>
+
+          <para>If we were to port the the XML reference documentation scoped
+          proxy example (see link above) to our
+          <interfacename>@Bean</interfacename> using Java, it would look like
+          the following: <programlisting language="java"><![CDATA[// a HTTP Session-scoped bean exposed as a proxy
+@Bean
+@Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public UserPreferences userPreferences() {
+   return new UserPreferences();
+}
+
+@Bean
+public Service userService() {
+   UserService service = new SimpleUserService();
+   // a reference to the proxied 'userPreferences' bean
+   service.seUserPreferences(userPreferences());
+   return service;
+}                ]]></programlisting></para>
+        </section>
+
+        <section id="beans-javaconfig-method-injection">
+          <title>Lookup method injection</title>
+
+          <para>As noted in the core documentation, <link
+          linkend="beans-factory-method-injection">lookup method
+          injection</link> is an advanced feature that should be comparatively
+          rarely used. It is useful in cases where a singleton-scoped bean has
+          a dependency on a prototype-scoped bean. JavaConfig provides a
+          natural means for implementing this pattern. <emphasis>Note that the
+          example below is adapted from the example classes and configuration
+          in the core documentation linked above.</emphasis> <programlisting
+          language="java"><![CDATA[public abstract class CommandManager { 
+    public Object process(Object commandState) { 
+        // grab a new instance of the appropriate Command interface 
+        Command command = createCommand(); 
+
+        // set the state on the (hopefully brand new) Command instance 
+        command.setState(commandState); 
+        return command.execute(); 
+    } 
+
+    // okay... but where is the implementation of this method? 
+    protected abstract Command createCommand(); 
+}                   ]]></programlisting></para>
+
+          <para>JavaConfig can easily create a subclass of
+          <code>CommandManager</code> where the abstract
+          <code>createCommand()</code> is overridden in such a way that it
+          'looks up' a brand new (prototype) command object: <programlisting
+          language="java"><![CDATA[@Bean
+@Scope(StandardScopes.PROTOTYPE)
+public AsyncCommand asyncCommand() {
+    AsyncCommand command = new AsyncCommand();
+    // inject dependencies here as required
+    return command;
+}
+
+@Bean
+public CommandManager commandManager() {
+    // return new anonymous implementation of CommandManager with command() overridden
+    // to return a new prototype Command object
+    return new CommandManager() {
+        protected Command command() {
+            return asyncCommand();
+        }
+    }
+}                    ]]></programlisting></para>
+        </section>
+      </section>
+
+      <section id="beans-javaconfig-customizing-bean-naming">
+        <title>Customizing bean naming</title>
+
+        <para>By default, Configuration-classes uses a
+        <interfacename>@Bean</interfacename> method's name as the name of the
+        resulting bean. This functionality can be overridden, however, using
+        the <code>name</code> attribute. <programlisting
+        language="java"><![CDATA[@Configuration
+public class AppConfig {
+
+    @Bean(name = "bar")
+    public Foo foo() {
+        return new Foo();
+    }
+
+}        ]]></programlisting></para>
+      </section>
+    </section>
+  </section>
+
   <section id="beans-classpath-scanning">
     <title>Classpath scanning for managed components</title>
 
@@ -6096,7 +6415,7 @@ public @interface MovieQualifier {
       <interfacename>ApplicationContext</interfacename>. For example, the
       following two classes are eligible for such autodetection:</para>
 
-      <programlisting language="java">@Service
+      <programlisting language="java"><![CDATA[@Service
 public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
@@ -6105,7 +6424,7 @@ public class SimpleMovieLister {
     public SimpleMovieLister(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-}</programlisting>
+}]]></programlisting>
 
       <programlisting language="java">@Repository
 public class JpaMovieFinder implements MovieFinder {
@@ -6118,18 +6437,18 @@ public class JpaMovieFinder implements MovieFinder {
       alternatively a comma-separated list could be specified that included
       the parent package of each class).</para>
 
-      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd">
                
-     &lt;context:component-scan base-package="org.example"/&gt;
+     <context:component-scan base-package="org.example"/>
      
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
       <note>
         <para>Note that the scanning of classpath packages requires the
@@ -6246,14 +6565,14 @@ public class JpaMovieFinder implements MovieFinder {
       <interfacename>@Repository</interfacename> annotations and using "stub"
       repositories instead.</para>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml"><![CDATA[<beans ...>
 
-     &lt;context:component-scan base-package="org.example"&gt;
-        &lt;context:include-filter type="regex" expression=".*Stub.*Repository"/&gt;
-        &lt;context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/&gt;
-     &lt;/context:component-scan&gt;
+     <context:component-scan base-package="org.example">
+        <context:include-filter type="regex" expression=".*Stub.*Repository"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+     </context:component-scan>
 
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
       <note>
         <para>It is also possible to disable the default filters by providing
@@ -6306,12 +6625,12 @@ public class MovieFinderImpl implements MovieFinder {
         scanner:</para>
       </note>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml"><![CDATA[<beans ...>
                
-     &lt;context:component-scan base-package="org.example"
-                             name-generator="org.example.MyNameGenerator" /&gt;
+     <context:component-scan base-package="org.example"
+                             name-generator="org.example.MyNameGenerator" />
 
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
       <para>As a general rule, consider specifying the name with the
       annotation whenever other components may be making explicit references
@@ -6344,12 +6663,12 @@ public class MovieFinderImpl implements MovieFinder {
         scanner:</para>
       </note>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml"><![CDATA[<beans ...>
                
-     &lt;context:component-scan base-package="org.example"
-                             scope-resolver="org.example.MyScopeResolver" /&gt;
+     <context:component-scan base-package="org.example"
+                             scope-resolver="org.example.MyScopeResolver" />
      
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
       <para>When using certain non-singleton scopes, it may be necessary to
       generate proxies for the scoped objects. The reasoning is described in
@@ -6360,12 +6679,12 @@ public class MovieFinderImpl implements MovieFinder {
       'interfaces', and 'targetClass'. For example, the following
       configuration will result in standard JDK dynamic proxies:</para>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml"><![CDATA[<beans ...>
                
-     &lt;context:component-scan base-package="org.example"
-                             scoped-proxy="interfaces" /&gt;
+     <context:component-scan base-package="org.example"
+                             scoped-proxy="interfaces" />
      
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
     </section>
 
     <section id="beans-scanning-qualifiers">
@@ -6423,7 +6742,7 @@ public class CachingMovieCatalog implements MovieCatalog {
       <literal>@Configuration</literal> annotated classes. Here is a simple
       example</para>
 
-      <programlisting>@Component
+      <programlisting><![CDATA[@Component
 public class FactoryMethodComponent {
 
   @Bean @Qualifier("public")
@@ -6435,7 +6754,7 @@ public class FactoryMethodComponent {
   {
     // Component method implementation omitted
   }
-}</programlisting>
+}]]></programlisting>
 
       <para>This class is a Spring component and has application specific code
       contained in its <methodname>DoWork</methodname> method. However, it
@@ -6449,7 +6768,7 @@ public class FactoryMethodComponent {
       fields and methods are supported as before with the additional support
       for autowiring of @Bean methods, as shown in the example below</para>
 
-      <programlisting language="java">@Component
+      <programlisting language="java"><![CDATA[@Component
 public class FactoryMethodComponent {
 
  private static int i;
@@ -6479,7 +6798,7 @@ public class FactoryMethodComponent {
   return new TestBean("requestScopedInstance", 3);
  }
 }
-</programlisting>
+]]></programlisting>
 
       <para>Note the use of autowiring of the <classname>String</classname>
       method parameter <literal>country</literal> to the value of the
@@ -6511,11 +6830,11 @@ public class FactoryMethodComponent {
     <para>The <literal>context</literal> namespace introduced in Spring 2.5
     provides a <literal>load-time-weaver</literal> element.</para>
 
-    <programlisting language="xml">&lt;beans ...&gt;
+    <programlisting language="xml"><![CDATA[<beans ...>
      
-     &lt;context:load-time-weaver/&gt;
+     <context:load-time-weaver/>
      
-&lt;/beans&gt;</programlisting>
+</beans>]]></programlisting>
 
     <para>Adding this element to an XML-based Spring configuration file
     activates a Spring <interfacename>LoadTimeWeaver</interfacename> for the
