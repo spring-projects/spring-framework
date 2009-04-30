@@ -5,9 +5,10 @@
 <chapter id="getting-started">
   <title>Getting started with Spring</title>
 
-  <para>This chapter will give you a quick introduction and a guide for how to get started
-	in using the Spring Framework for your Java development. We can of course only cover a tiny 
-	subset of the available features in this chapter. You will have to turn  to the rest of this 
+  <para>
+    This chapter will give you a quick introduction and serve as a guide for how to get started
+	using the Spring Framework for your Java development. We can of course only cover a tiny 
+	subset of the available features in this chapter. You will have to turn to the rest of this 
 	reference document for more detailed coverage of all features.</para>
 	
   <section id="start-app-context">
