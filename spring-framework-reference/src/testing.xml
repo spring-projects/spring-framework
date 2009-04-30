@@ -22,7 +22,7 @@
 
     <para>One of the main benefits of Dependency Injection is that your code
     should really depend far less on the container than in traditional J2EE
-    development. The POJOs that comprise your application should be testable
+    development. The POJOs that make up your application should be testable
     in JUnit or TestNG tests, with objects simply instantiated using the
     <literal>new</literal> operator, <emphasis>without Spring or any other
     container</emphasis>. You can use <link linkend="mock-objects">mock
@@ -181,7 +181,7 @@
       linkend="testcontext-framework">Spring TestContext Framework</link>,
       which is agnostic of the actual testing framework in use, thus allowing
       instrumentation of tests in various environments including JUnit 3.8,
-      JUnit 4.4, TestNG, etc. <emphasis>Note that the Spring TestContext
+      JUnit 4.5, TestNG, etc. <emphasis>Note that the Spring TestContext
       Framework requires Java 5+.</emphasis></para>
     </section>
 
@@ -443,7 +443,7 @@
       simplify standard database testing scenarios. <emphasis>Note that <link
       linkend="testcontext-support-classes-junit38"><classname>AbstractTransactionalJUnit38SpringContextTests</classname></link>,
       <link
-      linkend="testcontext-support-classes-junit44"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>,
+      linkend="testcontext-support-classes-junit45"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>,
       and <link
       linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
       provide convenience methods which delegate to
@@ -636,7 +636,7 @@ public void testProcessWithoutTransaction() {
           linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link>
           or the <link linkend="testcontext-support-classes-junit38">JUnit
           3.8</link> and <link
-          linkend="testcontext-support-classes-junit44">JUnit 4.4</link> base
+          linkend="testcontext-support-classes-junit45">JUnit 4.5</link> base
           test classes). Refer to the documentation in the
           <emphasis>TestContext Framework</emphasis> section for further
           details.</para>
@@ -647,7 +647,7 @@ public void testProcessWithoutTransaction() {
     <section id="junit38-legacy-support">
       <title>JUnit 3.8 legacy support</title>
 
-      <para>Spring's JUnit 3.8 legacy support is comprised of the classes
+      <para>Spring's JUnit 3.8 legacy support consists of the classes
       found in the <literal>org.springframework.test</literal> package. This
       package provides valuable JUnit <classname>TestCase</classname>
       superclasses which can be extended for out-of-container integration
@@ -967,15 +967,15 @@ public void testProcessWithoutTransaction() {
       <literal>org.springframework.test.context</literal> package) provides
       generic, annotation-driven unit and integration testing support that is
       agnostic of the testing framework in use, for example JUnit 3.8, JUnit
-      4.4, TestNG 5.5, etc. The TestContext framework also places a great deal
+      4.5, TestNG 5.8, etc. The TestContext framework also places a great deal
       of importance on <emphasis>convention over configuration</emphasis> with
       reasonable defaults that can be overridden via annotation-based
       configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
-      framework provides explicit support for JUnit 3.8, JUnit 4.4, and TestNG
-      5.5 in the form of <literal>abstract</literal> support classes. For
-      JUnit 4.4, the framework also provides a custom
+      framework provides explicit support for JUnit 3.8, JUnit 4.5, and TestNG
+      5.8 in the form of <literal>abstract</literal> support classes. For
+      JUnit 4.5, the framework also provides a custom
       <interfacename>Runner</interfacename> which allows one to write test
       classes that are not required to extend a particular class
       hierarchy.</para>
@@ -1041,9 +1041,7 @@ public void testProcessWithoutTransaction() {
 
             <para>Spring provides three
             <interfacename>TestExecutionListener</interfacename>
-            implementations which are configured by default (via the
-            <interfacename>@TestExecutionListeners</interfacename>
-            annotation):
+            implementations which are configured by default:
             <classname>DependencyInjectionTestExecutionListener</classname>,
             <classname>DirtiesContextTestExecutionListener</classname>, and
             <classname>TransactionalTestExecutionListener</classname>, which
@@ -1080,6 +1078,25 @@ public void testProcessWithoutTransaction() {
         <classname>AbstractTestNGSpringContextTests</classname> already
         implement <interfacename>ApplicationContextAware</interfacename> and
         therefore provide this functionality out-of-the-box.</para>
+
+        <tip>
+        	<title>@Autowired ApplicationContext</title>
+			<para>
+				As an alternative to implementing the
+				<interfacename>ApplicationContextAware</interfacename> interface,
+				your test class can have its application context injected via the
+				<interfacename>@Autowired</interfacename> annotation on either a
+				field or setter method, for example:
+			</para>
+        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration
+public class MyTest {
+	<emphasis role="bold">@Autowired</emphasis>
+	private ApplicationContext applicationContext;
+
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+        </tip>
 
         <para>In contrast to the JUnit 3.8 legacy support, test classes which
         use the TestContext framework do not need to override any
@@ -1196,10 +1213,10 @@ public class ExtendedTest extends BaseTest {
         <interfacename>@ContextConfiguration</interfacename> by Setter
         Injection, Field Injection, or both, depending on which annotations
         you choose and whether you place them on setter methods or fields. For
-        consistency with annotation support in Spring 2.5, you may choose
-        either Spring's <interfacename>@Autowired</interfacename> annotation
-        or the <interfacename>@Resource</interfacename> annotation from JSR
-        250. The semantics for both are consistent throughout the Spring
+        consistency with the annotation support introduced in Spring 2.5, you
+        may choose either Spring's <interfacename>@Autowired</interfacename>
+        annotation or the <interfacename>@Resource</interfacename> annotation
+        from JSR 250. The semantics for both are consistent throughout the Spring
         Framework. For example, if you prefer <link
         linkend="beans-factory-autowire"><emphasis>autowiring by
         type</emphasis></link>, annotate your setter methods or fields with
@@ -1221,11 +1238,13 @@ public class ExtendedTest extends BaseTest {
         same type, you cannot rely on this approach for those particular
         beans. In that case, you can use
         <interfacename>@Resource</interfacename> for injection <emphasis>by
-        name</emphasis>. Alternatively, if your test class implements
-        <classname>ApplicationContextAware</classname>, you can directly
-        access the <classname>ApplicationContext</classname> supplied to your
-        test and perform an explicit lookup using (for example) a call to
-        <methodname>applicationContext.getBean("titleDao")</methodname>.</para>
+        name</emphasis>. Alternatively, if your test class has access to its
+        <classname>ApplicationContext</classname>, you can perform an explicit
+        lookup using (for example) a call to
+        <methodname>applicationContext.getBean("titleDao")</methodname>. A
+        third option is to use <interfacename>@Autowired</interfacename>
+        in conjunction with <interfacename>@Qualifier</interfacename>.
+        </para>
 
         <para>If you don't want dependency injection applied to your test
         instances, simply don't annotate any fields or setter methods with
@@ -1240,12 +1259,12 @@ public class ExtendedTest extends BaseTest {
         <para>Consider the scenario where we have a class,
         <classname>HibernateTitleDao</classname> (as outlined in the <link
         linkend="testing-fixture-di">common goals</link> section). First,
-        let's look at a JUnit 4.4 based implementation of the test class
+        let's look at a JUnit 4.5 based implementation of the test class
         itself which uses <interfacename>@Autowired</interfacename> for field
         injection (we will look at the application context configuration after
         all sample code listings). <emphasis>Note: The dependency injection
         behavior in the following code listings is not in any way specific to
-        JUnit 4.4. The same DI techniques can be used in conjunction with any
+        JUnit 4.5. The same DI techniques can be used in conjunction with any
         testing framework.</emphasis></para>
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
@@ -1441,7 +1460,7 @@ public final class HibernateTitleDaoTests {
         <para><emphasis>Note that <link
         linkend="testcontext-support-classes-junit38"><classname>AbstractTransactionalJUnit38SpringContextTests</classname></link>,
         <link
-        linkend="testcontext-support-classes-junit44"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>,
+        linkend="testcontext-support-classes-junit45"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>,
         and <link
         linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
         are pre-configured for transactional support at the class level.
@@ -1595,11 +1614,11 @@ public class FictitiousTransactionalTest {
           </itemizedlist>
         </section>
 
-        <section id="testcontext-support-classes-junit44">
-          <title>JUnit 4.4 support classes</title>
+        <section id="testcontext-support-classes-junit45">
+          <title>JUnit 4.5 support classes</title>
 
           <para>The <literal>org.springframework.test.context.junit4</literal>
-          package provides support classes for JUnit 4.4 based test
+          package provides support classes for JUnit 4.5 based test
           cases.</para>
 
           <itemizedlist>
@@ -1609,7 +1628,7 @@ public class FictitiousTransactionalTest {
               <para>Abstract base test class which integrates the
               <emphasis>Spring TestContext Framework</emphasis> with explicit
               <classname>ApplicationContext</classname> testing support in a
-              JUnit 4.4 environment.</para>
+              JUnit 4.5 environment.</para>
 
               <para>When you extend
               <classname>AbstractJUnit4SpringContextTests</classname> you will
@@ -1679,13 +1698,13 @@ public class FictitiousTransactionalTest {
         </section>
 
         <section id="testcontext-junit4-runner">
-          <title>Custom JUnit 4.4 Runner</title>
+          <title>Custom JUnit 4.5 Runner</title>
 
           <para>The <emphasis>Spring TestContext Framework</emphasis> offers
-          full integration with JUnit 4.4 via a custom runner. By annotating
+          full integration with JUnit 4.5 via a custom runner. By annotating
           test classes with
           <literal>@Runwith(SpringJUnit4ClassRunner.class)</literal>,
-          developers can implement standard JUnit 4.4 unit and integration
+          developers can implement standard JUnit 4.5 unit and integration
           tests and simultaneously reap the benefits of the TestContext
           framework such as support for loading application contexts,
           dependency injection of test instances, transactional test method
@@ -1810,7 +1829,7 @@ public class SimpleTest {
         linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link> or
         the <link linkend="testcontext-support-classes-junit38">JUnit
         3.8</link> and <link
-        linkend="testcontext-support-classes-junit44">JUnit 4.4</link> support
+        linkend="testcontext-support-classes-junit45">JUnit 4.5</link> support
         classes.</emphasis></para>
 
         <itemizedlist>
@@ -2017,7 +2036,7 @@ public void afterTransaction() {
 
       <para>The PetClinic sample application included with the full Spring
       distribution illustrates several features of the <emphasis>Spring
-      TestContext Framework</emphasis> in a JUnit 4.4 environment. Most test
+      TestContext Framework</emphasis> in a JUnit 4.5 environment. Most test
       functionality is included in the
       <classname>AbstractClinicTests</classname>, for which a partial listing
       is shown below:</para>
@@ -2149,57 +2168,56 @@ public class HibernateClinicTests extends AbstractClinicTests { }
   <section id="testing-resources">
     <title>Further Resources</title>
 
-    <para>This section contains links to further resources about testing in
-    general.</para>
+    <para>This section contains links to further resources about testing in general.</para>
 
     <itemizedlist>
       <listitem>
-        <para>The <ulink url="http://www.junit.org/">JUnit homepage</ulink>.
-        The Spring Framework's unit test suite is written using JUnit 3.8 as
-        the testing framework.</para>
+        <para><ulink url="http://www.junit.org/">JUnit</ulink>:
+        the Spring Framework's unit and integration test suite is written using
+        JUnit 3.8 and JUnit 4.5 as the testing framework.</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://testng.org/">TestNG homepage</ulink>.
-        TestNG is a testing framework inspired by JUnit 3.8 with added support
+        <para><ulink url="http://testng.org/">TestNG</ulink>:
+        a testing framework inspired by JUnit 3.8 with added support
         for Java 5 annotations, test groups, data-driven testing, distributed
         testing, etc.</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://www.mockobjects.com/">Mock Objects
-        homepage</ulink>. About Mock Objects, a technique for improving the
-        design of code within Test-Driven Development.</para>
+        <para><ulink url="http://www.mockobjects.com/">MockObjects.com</ulink>:
+        a website dedicated to mock objects, a technique for improving the design
+        of code within Test-Driven Development.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://en.wikipedia.org/wiki/Mock_Object"> "Mock
-        Objects" article at Wikipedia</ulink>.</para>
+        <para><ulink url="http://en.wikipedia.org/wiki/Mock_Object">"Mock Objects"</ulink>:
+        article at Wikipedia.</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://www.easymock.org/">EasyMock
-        homepage</ulink>. The Spring Framework uses EasyMock extensively in
-        its test suite.</para>
+        <para><ulink url="http://www.easymock.org/">EasyMock</ulink>:
+        the Spring Framework uses EasyMock extensively in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://www.jmock.org/">JMock homepage</ulink>.
-        JMock is a library that supports test-driven development of Java code
+        <para><ulink url="http://www.jmock.org/">JMock</ulink>:
+        a library that supports test-driven development of Java code
         with mock objects.</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://dbunit.sourceforge.net/">DbUnit
-        homepage</ulink>. DbUnit is a JUnit extension (also usable with Ant)
-        targeted for database-driven projects that, among other things, puts
-        your database into a known state between test runs.</para>
+        <para><ulink url="http://dbunit.sourceforge.net/">DbUnit</ulink>:
+        a JUnit extension (also usable with Ant and Maven) targeted for database-driven
+        projects that, among other things, puts your database into a known state
+        between test runs.</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://grinder.sourceforge.net/">Grinder
-        homepage</ulink>. The Grinder is a Java load-testing framework.</para>
+        <para><ulink url="http://grinder.sourceforge.net/">Grinder</ulink>:
+        a Java load testing framework.</para>
       </listitem>
     </itemizedlist>
+
   </section>
 </chapter>
