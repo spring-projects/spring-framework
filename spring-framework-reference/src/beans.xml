@@ -6072,26 +6072,22 @@ public class AppConfig {
 
       <para><interfacename>@Bean</interfacename> is a method-level annotation
       and a direct analog of the XML <code>&lt;bean/&gt;</code> element. The
-      annotation supports most of the attributes offered by
+      annotation supports some of the attributes offered by
       <code>&lt;bean/&gt;</code>, such as: <code><link
       linkend="beans-factory-lifecycle-initializingbean">init-method</link></code>,
       <code><link
       linkend="beans-factory-lifecycle-disposablebean">destroy-method</link></code>,
-      <code><link linkend="beans-factory-autowire">autowiring</link></code>,
-      <code><link linkend="beans-factory-lazy-init">lazy-init</link></code>,
-      <code><link
-      linkend="beans-factory-dependencies">dependency-check</link></code>,
-      <code><link linkend="beans-factory-dependson">depends-on</link></code>
+      <code><link linkend="beans-factory-autowire">autowiring</link></code>
       and <code><link
-      linkend="beans-factory-scopes">scope</link></code>.</para>
+      linkend="beans-factory-scopes">name</link></code>.</para>
 
       <section id="beans-javaconfig-declaring-a-bean">
         <title>Declaring a bean</title>
 
         <para>To declare a bean, simply annotate a method with the
-        <interfacename>@Bean</interfacename> annotation. When JavaConfig
-        encounters such a method, it will execute that method and register the
-        return value as a bean within a <code>BeanFactory</code>. By default,
+        <interfacename>@Bean</interfacename> annotation. Such a method
+        will be used to register a bean definition within a <code>BeanFactory</code> 
+        of the type specified as the methods return value. By default,
         the bean name will be the same as the method name (see <link
         linkend="bean-naming"> bean naming</link> for details on how to
         customize this behavior). The following is a simple example of a
@@ -6284,11 +6280,11 @@ public Service userService() {
           linkend="beans-factory-method-injection">lookup method
           injection</link> is an advanced feature that should be comparatively
           rarely used. It is useful in cases where a singleton-scoped bean has
-          a dependency on a prototype-scoped bean. JavaConfig provides a
-          natural means for implementing this pattern. <emphasis>Note that the
-          example below is adapted from the example classes and configuration
-          in the core documentation linked above.</emphasis> <programlisting
-          language="java"><![CDATA[public abstract class CommandManager { 
+          a dependency on a prototype-scoped bean. Using Java for this type
+          of configuration provides a natural means for implementing this pattern. 
+          <emphasis>Note that the example below is adapted from the example 
+          classes and configuration in the core documentation linked above.</emphasis>
+          <programlisting language="java"><![CDATA[public abstract class CommandManager { 
     public Object process(Object commandState) { 
         // grab a new instance of the appropriate Command interface 
         Command command = createCommand(); 
