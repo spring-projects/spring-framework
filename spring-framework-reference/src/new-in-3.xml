@@ -12,7 +12,7 @@
   <sidebar id="new-in-3-intro-java">
     <title>Java SE and Java EE Support</title>
 
-    <para>The Spring Framework is now based on Java 5 and Java 6 is fully
+    <para>The Spring Framework is now based on Java 5, and Java 6 is fully
     supported.</para>
 
     <para>Furthermore, Spring is compatible with J2EE 1.4 and Java EE 5, while
@@ -201,27 +201,29 @@
     <section id="new-feature-java5">
       <title>Core APIs updated for Java 5</title>
 
-      <para>BeanFactoryinterface returns typed bean instancesas far as
-      possible <itemizedlist>
-          <listitem>
-            <para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para>
-          </listitem>
+      <para>BeanFactory interface returns typed bean instances as far as possible:
+	      <itemizedlist>
+	          <listitem>
+	            <para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para>
+	          </listitem>
+	
+	          <listitem>
+	            <para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt; type)</para>
+	          </listitem>
+	      </itemizedlist>
+      </para>
 
-          <listitem>
-            <para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt;
-            type)</para>
-          </listitem>
-        </itemizedlist></para>
-
-      <para>Spring's TaskExecutorinterface extends
-      <classname>java.util.concurrent.Executor</classname> now <itemizedlist>
+      <para>Spring's TaskExecutor interface now extends
+      <classname>java.util.concurrent.Executor</classname>:
+      <itemizedlist>
           <listitem>
             <para>extended AsyncTaskExecutor supports standard Callables with
             Futures</para>
           </listitem>
         </itemizedlist></para>
 
-      <para>New Java 5 based converter API and SPI <itemizedlist>
+      <para>New Java 5 based converter API and SPI:
+      <itemizedlist>
           <listitem>
             <para>stateless ConversionService and Converters</para>
           </listitem>
@@ -246,11 +248,11 @@
       linkend="expressions">Spring Expression Language (SpEL).</link></para>
 
       <para>The Spring Expression Language was created to provide the Spring
-      community with a single well supported expression language that can used
+      community a single, well supported expression language that can be used
       across all the products in the Spring portfolio. Its language features
       are driven by the requirements of the projects in the Spring portfolio,
       including tooling requirements for code completion support within the
-      eclipse based SpringSource Tool Suite.</para>
+      Eclipse based SpringSource Tool Suite.</para>
 
       <para>The following is an example of how the Expression Language can be
       used to configure some properties of a database setup <programlisting
@@ -281,11 +283,13 @@ public class RewardsTestDatabase {
       <section id="new-java-configuration">
         <title>Java based bean metadata</title>
 
-        <para>Some core features from the <ulink
-        url="http://www.springsource.org/javaconfig"><link
-        linkend="???">JavaConfig</link></ulink> project have been added to the
-        Spring Framework now. This means that the following annotations are
-        now directly supported: <itemizedlist>
+        <para>
+        	Some core features from the
+        	<ulink url="http://www.springsource.org/javaconfig">JavaConfig</ulink>
+        	project have been added to the Spring Framework now. This means
+        	that the following annotations are now directly supported:
+        	
+        	<itemizedlist>
             <listitem>
               <para>@Configuration</para>
             </listitem>
@@ -309,7 +313,8 @@ public class RewardsTestDatabase {
             <listitem>
               <para>@Value</para>
             </listitem>
-          </itemizedlist></para>
+          </itemizedlist>
+        </para>
 
         <para>Here is an example of a Java class providing basic configuration
         using the new JavaConfig features: <programlisting language="java">@Configuration
@@ -362,10 +367,10 @@ public class AppConfig{
       <title>The Data Tier</title>
 
       <para>Object to XML mapping functionality (OXM) from the Spring Web
-      Services project have been moved to the core Spring Framework now. The
+      Services project has been moved to the core Spring Framework now. The
       functionality is found in the <literal>org.springframework.oxm</literal>
-      package. More information on the use of the <literal>OXM</literal> can
-      be found in the <link linkend="oxm">Marshalling XML using O/X
+      package. More information on the use of the <literal>OXM</literal> module
+      can be found in the <link linkend="oxm">Marshalling XML using O/X
       Mappers</link> chapter.</para>
     </section>
 
