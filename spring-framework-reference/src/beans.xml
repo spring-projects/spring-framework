@@ -6026,325 +6026,9 @@ public @interface MovieQualifier {
     </section>
   </section>
 
-  <section id="beans-java-configuration">
-    <title>Java-based configuration</title>
-
-    <para>Starting with Spring 3.0 many of the features provided by the <ulink
-    url="http://www.springsource.org/javaconfig">Spring JavaConfig
-    project</ulink> have been added to the core Spring Framework. This allows
-    you to define beans using Java rather than using the traditional XML
-    files.</para>
-
-    <para>The central artifact in Spring's new Java-configuration support is
-    the <interfacename>@Configuration</interfacename>-annotated class. These
-    classes consist principally of
-    <interfacename>@Bean</interfacename>-annotated methods that define
-    instantiation, configuration, and initialization logic for objects that
-    will be managed by the Spring IoC container.</para>
-
-    <section id="beans-javaconfig-configuration-annotation">
-      <title>Using the <interfacename>@Configuration</interfacename>
-      annotation</title>
-
-      <para>Annotating a class with the
-      <interfacename>@Configuration</interfacename> indicates that the class
-      may be used by the Spring IoC container as a source of bean definitions.
-      The simplest possible <interfacename>@Configuration</interfacename>
-      class would read as follows: <programlisting language="java"><![CDATA[@Configuration
-public class AppConfig {
-
-}            ]]></programlisting></para>
-
-      <para>An application may make use of just one
-      <interfacename>@Configuration</interfacename>-annotated class, or many.
-      <interfacename>@Configuration</interfacename> is meta-annotated as a
-      <interfacename>@Component</interfacename>, therefore
-      Configuration-classes are candidates for component-scanning and may also
-      take advantage of <interfacename>@Autowired</interfacename> annotations
-      at the field and method level but not at the constructor level.
-      Configuration-classes must also have a default constructor. Externalized
-      values may be wired into Configuration-classes using the
-      <interfacename>@Value</interfacename> annotation.</para>
-    </section>
-
-    <section id="beans-javaconfig-bean-annotation">
-      <title>Using the <interfacename>@Bean</interfacename> annotation</title>
-
-      <para><interfacename>@Bean</interfacename> is a method-level annotation
-      and a direct analog of the XML <code>&lt;bean/&gt;</code> element. The
-      annotation supports some of the attributes offered by
-      <code>&lt;bean/&gt;</code>, such as: <code><link
-      linkend="beans-factory-lifecycle-initializingbean">init-method</link></code>,
-      <code><link
-      linkend="beans-factory-lifecycle-disposablebean">destroy-method</link></code>,
-      <code><link linkend="beans-factory-autowire">autowiring</link></code>
-      and <code><link
-      linkend="beans-factory-scopes">name</link></code>.</para>
-
-      <section id="beans-javaconfig-declaring-a-bean">
-        <title>Declaring a bean</title>
-
-        <para>To declare a bean, simply annotate a method with the
-        <interfacename>@Bean</interfacename> annotation. Such a method
-        will be used to register a bean definition within a <code>BeanFactory</code> 
-        of the type specified as the methods return value. By default,
-        the bean name will be the same as the method name (see <link
-        linkend="bean-naming"> bean naming</link> for details on how to
-        customize this behavior). The following is a simple example of a
-        <interfacename>@Bean</interfacename> method declaration:
-        <programlisting language="java"><![CDATA[@Configuration
-public class AppConfig {
-    @Bean
-    public TransferService transferService() {
-        return new TransferServiceImpl();
-    }
-}                ]]></programlisting></para>
-
-        <para>For comparison sake, the configuration above is exactly
-        equivalent to the following Spring XML: <programlisting
-        language="xml"><![CDATA[<beans>
-    <bean name="transferService" class="com.acme.TransferServiceImpl"/>
-</beans>                ]]></programlisting></para>
-
-        <para>Both will result in a bean named <code>transferService</code>
-        being available in the <code>BeanFactory</code> or
-        <code>ApplicationContext</code>, bound to an object instance of type
-        <code>TransferServiceImpl</code>: <programlisting><![CDATA[
-transferService -> com.acme.TransferServiceImpl
-                ]]></programlisting></para>
-      </section>
-
-      <section id="beans-javaconfig-injecting-dependencies">
-        <title>Injecting dependencies</title>
-
-        <para>When <interfacename>@Bean</interfacename>s have dependencies on
-        one another, expressing that dependency is as simple as having one
-        bean method call another: <programlisting language="java"><![CDATA[@Configuration
-public class AppConfig {
-    @Bean
-    public Foo foo() {
-        return new Foo(bar());
-    }
-
-    @Bean
-    public Bar bar() {
-        return new Bar();
-    }
-}                ]]></programlisting></para>
-
-        <para>In the example above, the <code>foo</code> bean recevies a
-        reference to <code> bar</code> via constructor injection.</para>
-      </section>
-
-      <section id="beans-javaconfig-lifecycle-callbacks">
-        <title>Receiving lifecycle callbacks</title>
-
-        <para>Beans created in a Configuration-class supports the regular
-        lifecycle callbacks. Any classes defined with the @Bean annotation can
-        use the @PostConstruct and @PreDestroy annotations from JSR-250, see
-        the section on <link
-        linkend="beans-factory-lifecycle-combined-effects">JSR-250
-        annotations</link> for further details.</para>
-
-        <para>The regular Spring <link
-        linkend="beans-factory-nature">lifecycle</link> callbacks are fully
-        supported as well. If a bean implements <code>InitializingBean</code>,
-        <code>DisposableBean</code>, or <code>Lifecycle</code>, their
-        respective methods will be called by the container.</para>
-
-        <para>The standard set of <code>*Aware</code> interfaces such as
-        <code><link
-        linkend="beans-factory-aware-beanfactoryaware">BeanFactoryAware</link></code>,
-        <code><link
-        linkend="beans-factory-aware-beannameaware">BeanNameAware</link></code>,
-        <code><link
-        linkend="context-functionality-messagesource">MessageSourceAware</link></code>,
-        <code><link
-        linkend="context-functionality-events">ApplicationContextAware</link></code>,
-        etc. are also fully supported.</para>
-
-        <para>The <interfacename>@Bean</interfacename> annotation supports
-        specifying arbitrary initialization and destruction callback methods,
-        much like Spring XML's <code>init-method</code> and
-        <code>destroy-method</code> attributes to the <code>bean</code>
-        element: <programlisting language="java"><![CDATA[public class Foo {
-    public void init() {
-        // initialization logic
-    }
-}
-
-public class Bar {
-    public void cleanup() {
-        // destruction logic
-    }
-}
-
-@Configuration
-public class AppConfig {
-    @Bean(initMethodName = "init")
-    public Foo foo() {
-        return new Foo();
-    }
-    @Bean(destroyMethodName="cleanup")
-    public Bar bar() {
-        return new Bar();
-    }
-}
-]]></programlisting></para>
-
-        <para>Of course, in the case of <code>Foo</code> above, it would be
-        equally as valid to call the <code>init()</code> method directly
-        during construction: <programlisting language="java"><![CDATA[@Configuration
-public class AppConfig {
-    @Bean
-    public Foo foo() {
-        Foo foo = new Foo();
-        foo.init();
-        return foo;
-    }
-
-    // ...
-}                    ]]></programlisting></para>
-
-        <tip>
-          <para>Remember that because you are working directly in Java, you
-          can do anything you like with your objects, and do not always need
-          to rely on the container!</para>
-        </tip>
-      </section>
-
-      <section id="beans-javaconfig-specifying-bean-scope">
-        <title>Specifying bean scope</title>
-
-        <section id="beans-javaconfig-available-scopes">
-          <title>Using the <interfacename>@Scope</interfacename>
-          annotation</title>
-
-          <para>You can specify that your beans defined with the
-          <interfacename>@Bean</interfacename> annotation should have a
-          specific scope. You can use any of the standard scopes specified in
-          the <link linkend="beans-factory-scopes">Bean Scopes</link>
-          section.</para>
-
-          <para>The <code>StandardScopes</code> class provides string
-          constants for each of these four scopes. SINGLETON is the default,
-          and can be overridden by using the
-          <interfacename>@Scope</interfacename> annotation: <programlisting
-          language="java"><![CDATA[@Configuration
-public class MyConfiguration {
-    @Bean
-    @Scope(StandardScopes.PROTOTYPE)
-    public Encryptor encryptor() {
-        // ...
-    }
-}                 ]]></programlisting></para>
-        </section>
-
-        <section id="beans-javaconfig-scoped-proxy">
-          <title><code>@Scope and scoped-proxy</code></title>
-
-          <para>Spring offers a convenient way of working with scoped
-          dependencies through <link
-          linkend="beans-factory-scopes-other-injection">scoped
-          proxies</link>. The easiest way to create such a proxy when using
-          the XML configuration is the <code>&lt;aop:scoped-proxy/&gt;</code>
-          element. Configuring your beans in Java with a @Scope annotation
-          offers equivalent support with the proxyMode attribute. The default
-          is no proxy (<varname>ScopedProxyMode.NO</varname>) but you can
-          specify <classname>ScopedProxyMode.TARGET_CLASS</classname> or
-          <classname>ScopedProxyMode.INTERFACES</classname>.</para>
-
-          <para>If we were to port the the XML reference documentation scoped
-          proxy example (see link above) to our
-          <interfacename>@Bean</interfacename> using Java, it would look like
-          the following: <programlisting language="java"><![CDATA[// a HTTP Session-scoped bean exposed as a proxy
-@Bean
-@Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public UserPreferences userPreferences() {
-   return new UserPreferences();
-}
-
-@Bean
-public Service userService() {
-   UserService service = new SimpleUserService();
-   // a reference to the proxied 'userPreferences' bean
-   service.seUserPreferences(userPreferences());
-   return service;
-}                ]]></programlisting></para>
-        </section>
-
-        <section id="beans-javaconfig-method-injection">
-          <title>Lookup method injection</title>
-
-          <para>As noted in the core documentation, <link
-          linkend="beans-factory-method-injection">lookup method
-          injection</link> is an advanced feature that should be comparatively
-          rarely used. It is useful in cases where a singleton-scoped bean has
-          a dependency on a prototype-scoped bean. Using Java for this type
-          of configuration provides a natural means for implementing this pattern. 
-          <emphasis>Note that the example below is adapted from the example 
-          classes and configuration in the core documentation linked above.</emphasis>
-          <programlisting language="java"><![CDATA[public abstract class CommandManager { 
-    public Object process(Object commandState) { 
-        // grab a new instance of the appropriate Command interface 
-        Command command = createCommand(); 
-
-        // set the state on the (hopefully brand new) Command instance 
-        command.setState(commandState); 
-        return command.execute(); 
-    } 
-
-    // okay... but where is the implementation of this method? 
-    protected abstract Command createCommand(); 
-}                   ]]></programlisting></para>
-
-          <para>JavaConfig can easily create a subclass of
-          <code>CommandManager</code> where the abstract
-          <code>createCommand()</code> is overridden in such a way that it
-          'looks up' a brand new (prototype) command object: <programlisting
-          language="java"><![CDATA[@Bean
-@Scope(StandardScopes.PROTOTYPE)
-public AsyncCommand asyncCommand() {
-    AsyncCommand command = new AsyncCommand();
-    // inject dependencies here as required
-    return command;
-}
-
-@Bean
-public CommandManager commandManager() {
-    // return new anonymous implementation of CommandManager with command() overridden
-    // to return a new prototype Command object
-    return new CommandManager() {
-        protected Command command() {
-            return asyncCommand();
-        }
-    }
-}                    ]]></programlisting></para>
-        </section>
-      </section>
-
-      <section id="beans-javaconfig-customizing-bean-naming">
-        <title>Customizing bean naming</title>
-
-        <para>By default, Configuration-classes uses a
-        <interfacename>@Bean</interfacename> method's name as the name of the
-        resulting bean. This functionality can be overridden, however, using
-        the <code>name</code> attribute. <programlisting
-        language="java"><![CDATA[@Configuration
-public class AppConfig {
-
-    @Bean(name = "bar")
-    public Foo foo() {
-        return new Foo();
-    }
-
-}        ]]></programlisting></para>
-      </section>
-    </section>
-  </section>
-
   <section id="beans-classpath-scanning">
-    <title>Classpath scanning for managed components</title>
+    <title>Classpath scanning, managed components and writing configurations
+    using Java</title>
 
     <para>Thus far most of the examples within this chapter have used XML for
     specifying the configuration metadata that produces each
@@ -6357,6 +6041,18 @@ public class AppConfig {
     only. The current section introduces an option for implicitly detecting
     the <emphasis>candidate components</emphasis> by scanning the classpath
     and matching against <emphasis>filters</emphasis>.</para>
+
+    <note>
+      <para>Starting with Spring 3.0 many of the features provided by the
+      <ulink url="http://www.springsource.org/javaconfig">Spring JavaConfig
+      project</ulink> have been added to the core Spring Framework. This
+      allows you to define beans using Java rather than using the traditional
+      XML files. Take a look at the
+      <interfacename>@Configuration</interfacename>,
+      <interfacename>@Bean</interfacename>,
+      <interfacename>@Value</interfacename> annotations for how to use these
+      new features.</para>
+    </note>
 
     <section id="beans-stereotype-annotations">
       <title><interfacename>@Component</interfacename> and further stereotype
@@ -6582,6 +6278,410 @@ public class JpaMovieFinder implements MovieFinder {
       </note>
     </section>
 
+    <section id="beans-javaconfig-configuration-annotation">
+      <title>Using the <interfacename>@Configuration</interfacename>
+      annotation</title>
+
+      <para>The central artifact in Spring's new Java-configuration support is
+      the <interfacename>@Configuration</interfacename>-annotated class. These
+      classes consist principally of
+      <interfacename>@Bean</interfacename>-annotated methods that define
+      instantiation, configuration, and initialization logic for objects that
+      will be managed by the Spring IoC container.</para>
+
+      <para>Annotating a class with the
+      <interfacename>@Configuration</interfacename> indicates that the class
+      may be used by the Spring IoC container as a source of bean definitions.
+      The simplest possible <interfacename>@Configuration</interfacename>
+      class would read as follows: <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+
+}            ]]></programlisting></para>
+
+      <para>An application may make use of one
+      <interfacename>@Configuration</interfacename>-annotated class, or many.
+      <interfacename>@Configuration</interfacename> is meta-annotated as a
+      <interfacename>@Component</interfacename>, therefore
+      Configuration-classes are candidates for component-scanning and may also
+      take advantage of <interfacename>@Autowired</interfacename> annotations
+      at the field and method level but not at the constructor level.
+      Configuration-classes must also have a default constructor. Externalized
+      values may be wired into Configuration-classes using the
+      <interfacename>@Value</interfacename> annotation.</para>
+    </section>
+
+    <section id="beans-javaconfig-bean-annotation">
+      <title>Using the <interfacename>@Bean</interfacename> annotation</title>
+
+      <para><interfacename>@Bean</interfacename> is a method-level annotation
+      and a direct analog of the XML <code>&lt;bean/&gt;</code> element. The
+      annotation supports some of the attributes offered by
+      <code>&lt;bean/&gt;</code>, such as: <code><link
+      linkend="beans-factory-lifecycle-initializingbean">init-method</link></code>,
+      <code><link
+      linkend="beans-factory-lifecycle-disposablebean">destroy-method</link></code>,
+      <code><link linkend="beans-factory-autowire">autowiring</link></code>
+      and <code><link
+      linkend="beans-factory-scopes">name</link></code>.</para>
+
+      <para>You can use the @Bean annotation in a Configuraton-class or in a
+      Component-class.</para>
+
+      <section id="beans-javaconfig-declaring-a-bean">
+        <title>Declaring a bean</title>
+
+        <para>To declare a bean, simply annotate a method with the
+        <interfacename>@Bean</interfacename> annotation. Such a method will be
+        used to register a bean definition within a <code>BeanFactory</code>
+        of the type specified as the methods return value. By default, the
+        bean name will be the same as the method name (see <link
+        linkend="bean-naming"> bean naming</link> for details on how to
+        customize this behavior). The following is a simple example of a
+        <interfacename>@Bean</interfacename> method declaration:
+        <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+
+    @Bean
+    public TransferService transferService() {
+        return new TransferServiceImpl();
+    }
+
+}                ]]></programlisting></para>
+
+        <para>For comparison sake, the configuration above is exactly
+        equivalent to the following Spring XML: <programlisting
+        language="xml"><![CDATA[<beans>
+    <bean name="transferService" class="com.acme.TransferServiceImpl"/>
+</beans>                ]]></programlisting></para>
+
+        <para>Both will result in a bean named <code>transferService</code>
+        being available in the <code>BeanFactory</code> or
+        <code>ApplicationContext</code>, bound to an object instance of type
+        <code>TransferServiceImpl</code>: <programlisting><![CDATA[
+transferService -> com.acme.TransferServiceImpl
+                ]]></programlisting></para>
+      </section>
+
+      <section id="beans-javaconfig-injecting-dependencies">
+        <title>Injecting dependencies</title>
+
+        <para>When <interfacename>@Bean</interfacename>s have dependencies on
+        one another, expressing that dependency is as simple as having one
+        bean method call another: <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+
+    @Bean
+    public Foo foo() {
+        return new Foo(bar());
+    }
+
+    @Bean
+    public Bar bar() {
+        return new Bar();
+    }
+
+}                ]]></programlisting></para>
+
+        <para>In the example above, the <code>foo</code> bean recevies a
+        reference to <code> bar</code> via constructor injection.</para>
+      </section>
+
+      <section id="beans-javaconfig-lifecycle-callbacks">
+        <title>Receiving lifecycle callbacks</title>
+
+        <para>Beans created in a Configuration-class supports the regular
+        lifecycle callbacks. Any classes defined with the @Bean annotation can
+        use the @PostConstruct and @PreDestroy annotations from JSR-250, see
+        the section on <link
+        linkend="beans-factory-lifecycle-combined-effects">JSR-250
+        annotations</link> for further details.</para>
+
+        <para>The regular Spring <link
+        linkend="beans-factory-nature">lifecycle</link> callbacks are fully
+        supported as well. If a bean implements <code>InitializingBean</code>,
+        <code>DisposableBean</code>, or <code>Lifecycle</code>, their
+        respective methods will be called by the container.</para>
+
+        <para>The standard set of <code>*Aware</code> interfaces such as
+        <code><link
+        linkend="beans-factory-aware-beanfactoryaware">BeanFactoryAware</link></code>,
+        <code><link
+        linkend="beans-factory-aware-beannameaware">BeanNameAware</link></code>,
+        <code><link
+        linkend="context-functionality-messagesource">MessageSourceAware</link></code>,
+        <code><link
+        linkend="context-functionality-events">ApplicationContextAware</link></code>,
+        etc. are also fully supported.</para>
+
+        <para>The <interfacename>@Bean</interfacename> annotation supports
+        specifying arbitrary initialization and destruction callback methods,
+        much like Spring XML's <code>init-method</code> and
+        <code>destroy-method</code> attributes to the <code>bean</code>
+        element: <programlisting language="java"><![CDATA[public class Foo {
+    public void init() {
+        // initialization logic
+    }
+}
+
+public class Bar {
+    public void cleanup() {
+        // destruction logic
+    }
+}
+
+@Configuration
+public class AppConfig {
+    @Bean(initMethodName = "init")
+    public Foo foo() {
+        return new Foo();
+    }
+    @Bean(destroyMethodName="cleanup")
+    public Bar bar() {
+        return new Bar();
+    }
+}
+]]></programlisting></para>
+
+        <para>Of course, in the case of <code>Foo</code> above, it would be
+        equally as valid to call the <code>init()</code> method directly
+        during construction: <programlisting language="java"><![CDATA[@Configuration
+public class AppConfig {
+    @Bean
+    public Foo foo() {
+        Foo foo = new Foo();
+        foo.init();
+        return foo;
+    }
+
+    // ...
+}                    ]]></programlisting></para>
+
+        <tip>
+          <para>Remember that because you are working directly in Java, you
+          can do anything you like with your objects, and do not always need
+          to rely on the container!</para>
+        </tip>
+      </section>
+
+      <section id="beans-javaconfig-specifying-bean-scope">
+        <title>Specifying bean scope</title>
+
+        <section id="beans-javaconfig-available-scopes">
+          <title>Using the <interfacename>@Scope</interfacename>
+          annotation</title>
+
+          <para>You can specify that your beans defined with the
+          <interfacename>@Bean</interfacename> annotation should have a
+          specific scope. You can use any of the standard scopes specified in
+          the <link linkend="beans-factory-scopes">Bean Scopes</link>
+          section.</para>
+
+          <para>The <code>StandardScopes</code> class provides string
+          constants for each of these four scopes. SINGLETON is the default,
+          and can be overridden by using the
+          <interfacename>@Scope</interfacename> annotation: <programlisting
+          language="java"><![CDATA[@Configuration
+public class MyConfiguration {
+    @Bean
+    @Scope(StandardScopes.PROTOTYPE)
+    public Encryptor encryptor() {
+        // ...
+    }
+}                 ]]></programlisting></para>
+        </section>
+
+        <section id="beans-javaconfig-scoped-proxy">
+          <title><code>@Scope and scoped-proxy</code></title>
+
+          <para>Spring offers a convenient way of working with scoped
+          dependencies through <link
+          linkend="beans-factory-scopes-other-injection">scoped
+          proxies</link>. The easiest way to create such a proxy when using
+          the XML configuration is the <code>&lt;aop:scoped-proxy/&gt;</code>
+          element. Configuring your beans in Java with a @Scope annotation
+          offers equivalent support with the proxyMode attribute. The default
+          is no proxy (<varname>ScopedProxyMode.NO</varname>) but you can
+          specify <classname>ScopedProxyMode.TARGET_CLASS</classname> or
+          <classname>ScopedProxyMode.INTERFACES</classname>.</para>
+
+          <para>If we were to port the the XML reference documentation scoped
+          proxy example (see link above) to our
+          <interfacename>@Bean</interfacename> using Java, it would look like
+          the following: <programlisting language="java"><![CDATA[// a HTTP Session-scoped bean exposed as a proxy
+@Bean
+@Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public UserPreferences userPreferences() {
+   return new UserPreferences();
+}
+
+@Bean
+public Service userService() {
+   UserService service = new SimpleUserService();
+   // a reference to the proxied 'userPreferences' bean
+   service.seUserPreferences(userPreferences());
+   return service;
+}                ]]></programlisting></para>
+        </section>
+
+        <section id="beans-javaconfig-method-injection">
+          <title>Lookup method injection</title>
+
+          <para>As noted in the core documentation, <link
+          linkend="beans-factory-method-injection">lookup method
+          injection</link> is an advanced feature that should be comparatively
+          rarely used. It is useful in cases where a singleton-scoped bean has
+          a dependency on a prototype-scoped bean. Using Java for this type of
+          configuration provides a natural means for implementing this
+          pattern. <emphasis>Note that the example below is adapted from the
+          example classes and configuration in the core documentation linked
+          above.</emphasis> <programlisting language="java"><![CDATA[public abstract class CommandManager { 
+    public Object process(Object commandState) { 
+        // grab a new instance of the appropriate Command interface 
+        Command command = createCommand(); 
+
+        // set the state on the (hopefully brand new) Command instance 
+        command.setState(commandState); 
+        return command.execute(); 
+    } 
+
+    // okay... but where is the implementation of this method? 
+    protected abstract Command createCommand(); 
+}                   ]]></programlisting></para>
+
+          <para>JavaConfig can easily create a subclass of
+          <code>CommandManager</code> where the abstract
+          <code>createCommand()</code> is overridden in such a way that it
+          'looks up' a brand new (prototype) command object: <programlisting
+          language="java"><![CDATA[@Bean
+@Scope(StandardScopes.PROTOTYPE)
+public AsyncCommand asyncCommand() {
+    AsyncCommand command = new AsyncCommand();
+    // inject dependencies here as required
+    return command;
+}
+
+@Bean
+public CommandManager commandManager() {
+    // return new anonymous implementation of CommandManager with command() overridden
+    // to return a new prototype Command object
+    return new CommandManager() {
+        protected Command command() {
+            return asyncCommand();
+        }
+    }
+}                    ]]></programlisting></para>
+        </section>
+      </section>
+
+      <section id="beans-javaconfig-customizing-bean-naming">
+        <title>Customizing bean naming</title>
+
+        <para>By default, Configuration-classes uses a
+        <interfacename>@Bean</interfacename> method's name as the name of the
+        resulting bean. This functionality can be overridden, however, using
+        the <code>name</code> attribute. <programlisting
+        language="java"><![CDATA[@Configuration
+public class AppConfig {
+
+    @Bean(name = "bar")
+    public Foo foo() {
+        return new Foo();
+    }
+
+}        ]]></programlisting></para>
+      </section>
+    </section>
+
+    <section id="beans-factorybeans-annotations">
+      <title>Defining bean metadata within components</title>
+
+      <para>Spring components can also contribute bean definition metadata to
+      the container. This is done with the same <literal>@Bean</literal>
+      annotation used to define bean metadata within
+      <literal>@Configuration</literal> annotated classes. Here is a simple
+      example</para>
+
+      <programlisting><![CDATA[@Component
+public class FactoryMethodComponent {
+
+  @Bean @Qualifier("public")
+  public TestBean publicInstance() {
+    return new TestBean("publicInstance");
+  }
+
+  public void DoWork() 
+  {
+    // Component method implementation omitted
+  }
+}]]></programlisting>
+
+      <para>This class is a Spring component and has application specific code
+      contained in its <methodname>DoWork</methodname> method. However, it
+      also contributes a bean definition that has a factory method referring
+      to the method <methodname>publicInstance</methodname>. The
+      <literal>@Bean</literal> annotation identifies the factory method and
+      also other bean definition properties, such as a qualifier value via the
+      <classname>@Qualifier</classname> annotation. Other method level
+      annotations that can be specified are <literal>@Scope</literal>,
+      <literal>@Lazy</literal>, and custom qualifier annotations. Autowired
+      fields and methods are supported as before with the additional support
+      for autowiring of @Bean methods, as shown in the example below</para>
+
+      <programlisting language="java"><![CDATA[@Component
+public class FactoryMethodComponent {
+
+ private static int i;
+
+ @Bean @Qualifier("public")
+ public TestBean publicInstance() { 
+  return new TestBean("publicInstance");
+ }
+
+ // use of a custom qualifier and autowiring of method parameters
+
+ @Bean @BeanAge(1)
+ protected TestBean protectedInstance(@Qualifier("public") TestBean spouse, @Value("#{privateInstance.age}") String country) {
+  TestBean tb = new TestBean("protectedInstance", 1);
+  tb.setSpouse(tb);
+  tb.setCountry(country);
+  return tb;
+ }
+
+ @Bean @Scope(StandardScopes.PROTOTYPE)
+ private TestBean privateInstance() {
+  return new TestBean("privateInstance", i++);
+ }
+
+ @Bean @Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+ public TestBean requestScopedInstance() {
+  return new TestBean("requestScopedInstance", 3);
+ }
+}
+]]></programlisting>
+
+      <para>Note the use of autowiring of the <classname>String</classname>
+      method parameter <literal>country</literal> to the value of the
+      <literal>Age</literal> property on another bean named
+      <literal>privateInstance</literal>. A Spring Expression Language element
+      is used to define the value of the property via the notation <literal>#{
+      &lt;expression&gt; }</literal>. For <literal>@Value</literal>
+      annotations, an expression resolver is preconfigured to look for bean
+      names when resolving expression text.</para>
+
+      <para>The <literal>@Bean</literal> methods in a Spring component are
+      processed differently than their counterparts inside a Spring
+      <literal>@Configuration</literal> class. The difference is that
+      <literal>@Component</literal> classes are not enhanced with CGLIB to
+      intercept the invocation of methods and fields. CGLIB proxying is the
+      means by which invoking methods or fields within
+      <literal>@Configuration</literal> classes' <literal>@Bean</literal>
+      methods create bean metadata references to collaborating objects and do
+      <emphasis>not</emphasis> invoke the method with normal Java semantics.
+      In contrast, calling a method or field within a
+      <literal>@Component</literal> classes' <literal>@Bean</literal> method
+      <emphasis>has</emphasis> standard Java semantics.</para>
+    </section>
+
     <section id="beans-scanning-name-generator">
       <title>Naming autodetected components</title>
 
@@ -6643,7 +6743,7 @@ public class MovieFinderImpl implements MovieFinder {
       <interfacename>@Scope</interfacename> annotation as well. Simply provide
       the name of the scope within the annotation, such as:</para>
 
-      <programlisting language="java">@Scope("prototype")
+      <programlisting language="java">@Scope(StandardScopes.PROTOTYPE)
 @Repository
 public class MovieFinderImpl implements MovieFinder {
     <lineannotation>// ...</lineannotation>
@@ -6727,96 +6827,6 @@ public class CachingMovieCatalog implements MovieCatalog {
         since that metadata is provided per-instance rather than
         per-class.</para>
       </note>
-    </section>
-
-    <section id="beans-factorybeans-annotations">
-      <title>Defining bean metadata within components</title>
-
-      <para>Spring components can also contribute bean definition metadata to
-      the container. This is done with the same <literal>@Bean</literal>
-      annotation used to define bean metadata within
-      <literal>@Configuration</literal> annotated classes. Here is a simple
-      example</para>
-
-      <programlisting><![CDATA[@Component
-public class FactoryMethodComponent {
-
-  @Bean @Qualifier("public")
-  public TestBean publicInstance() {
-    return new TestBean("publicInstance");
-  }
-
-  public void DoWork() 
-  {
-    // Component method implementation omitted
-  }
-}]]></programlisting>
-
-      <para>This class is a Spring component and has application specific code
-      contained in its <methodname>DoWork</methodname> method. However, it
-      also contributes a bean definition that has a factory method referring
-      to the method <methodname>publicInstance</methodname>. The
-      <literal>@Bean</literal> annotation identifies the factory method and
-      also other bean definition properties, such as a qualifier value via the
-      <classname>@Qualifier</classname> annotation. Other method level
-      annotations that can be specified are <literal>@Scope</literal>,
-      <literal>@Lazy</literal>, and custom qualifier annotations. Autowired
-      fields and methods are supported as before with the additional support
-      for autowiring of @Bean methods, as shown in the example below</para>
-
-      <programlisting language="java"><![CDATA[@Component
-public class FactoryMethodComponent {
-
- private static int i;
-
- @Bean @Qualifier("public")
- public TestBean publicInstance() { 
-  return new TestBean("publicInstance");
- }
-
- // use of a custom qualifier and autowiring of method parameters
-
- @Bean @BeanAge(1)
- protected TestBean protectedInstance(@Qualifier("public") TestBean spouse, @Value("#{privateInstance.age}") String country) {
-  TestBean tb = new TestBean("protectedInstance", 1);
-  tb.setSpouse(tb);
-  tb.setCountry(country);
-  return tb;
- }
-
- @Bean @Scope("prototype")
- private TestBean privateInstance() {
-  return new TestBean("privateInstance", i++);
- }
-
- @Bean @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
- public TestBean requestScopedInstance() {
-  return new TestBean("requestScopedInstance", 3);
- }
-}
-]]></programlisting>
-
-      <para>Note the use of autowiring of the <classname>String</classname>
-      method parameter <literal>country</literal> to the value of the
-      <literal>Age</literal> property on another bean named
-      <literal>privateInstance</literal>. A Spring Expression Language element
-      is used to define the value of the property via the notation <literal>#{
-      &lt;expression&gt; }</literal>. For <literal>@Value</literal>
-      annotations, an expression resolver is preconfigured to look for bean
-      names when resolving expression text.</para>
-
-      <para>The <literal>@Bean</literal> methods in a Spring component are
-      processed differently than their counterparts inside a Spring
-      <literal>@Configuration</literal> class. The difference is that
-      <literal>@Component</literal> classes are not enhanced with CGLIB to
-      intercept the invocation of methods and fields. CGLIB proxying is the
-      means by which invoking methods or fields within
-      <literal>@Configuration</literal> classes' <literal>@Bean</literal>
-      methods create bean metadata references to collaborating objects and do
-      <emphasis>not</emphasis> invoke the method with normal Java semantics.
-      In contrast, calling a method or field within a
-      <literal>@Component</literal> classes' <literal>@Bean</literal> method
-      <emphasis>has</emphasis> standard Java semantics.</para>
     </section>
   </section>
 
