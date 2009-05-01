@@ -6048,10 +6048,9 @@ public @interface MovieQualifier {
       project</ulink> have been added to the core Spring Framework. This
       allows you to define beans using Java rather than using the traditional
       XML files. Take a look at the
-      <interfacename>@Configuration</interfacename>,
-      <interfacename>@Bean</interfacename>,
-      <interfacename>@Value</interfacename> annotations for how to use these
-      new features.</para>
+      <interfacename>@Configuration</interfacename>, <interfacename>@Bean,
+      @Import</interfacename> and <interfacename>@DependsOn</interfacename>
+      annotations for how to use these new features.</para>
     </note>
 
     <section id="beans-stereotype-annotations">
@@ -6526,15 +6525,13 @@ public Service userService() {
         <section id="beans-javaconfig-method-injection">
           <title>Lookup method injection</title>
 
-          <para>As noted in the core documentation, <link
+          <para>As noted earlier, <link
           linkend="beans-factory-method-injection">lookup method
           injection</link> is an advanced feature that should be comparatively
           rarely used. It is useful in cases where a singleton-scoped bean has
           a dependency on a prototype-scoped bean. Using Java for this type of
           configuration provides a natural means for implementing this
-          pattern. <emphasis>Note that the example below is adapted from the
-          example classes and configuration in the core documentation linked
-          above.</emphasis> <programlisting language="java"><![CDATA[public abstract class CommandManager { 
+          pattern. <programlisting language="java"><![CDATA[public abstract class CommandManager { 
     public Object process(Object commandState) { 
         // grab a new instance of the appropriate Command interface 
         Command command = createCommand(); 
@@ -6548,8 +6545,8 @@ public Service userService() {
     protected abstract Command createCommand(); 
 }                   ]]></programlisting></para>
 
-          <para>JavaConfig can easily create a subclass of
-          <code>CommandManager</code> where the abstract
+          <para>Using Java-configurtion support we can easily create a
+          subclass of <code>CommandManager</code> where the abstract
           <code>createCommand()</code> is overridden in such a way that it
           'looks up' a brand new (prototype) command object: <programlisting
           language="java"><![CDATA[@Bean
