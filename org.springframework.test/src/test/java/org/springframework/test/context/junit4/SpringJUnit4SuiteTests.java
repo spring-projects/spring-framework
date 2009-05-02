@@ -57,6 +57,7 @@ StandardJUnit4FeaturesTests.class,//
 	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class,//
 	InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,//
+	CustomDefaultContextLoaderClassSpringRunnerTests.class,//
 	SpringRunnerContextCacheTests.class,//
 	ParameterizedDependencyInjectionTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
