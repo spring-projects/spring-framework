@@ -94,7 +94,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * {@link TestContextManager} to provide Spring testing functionality to
 	 * standard JUnit tests.
 	 * 
-	 * @param clazz the Class object corresponding to the test class to be run
+	 * @param clazz the test class to be run
 	 * @see #createTestContextManager(Class)
 	 */
 	public SpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
@@ -106,14 +106,15 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Creates a new {@link TestContextManager}. Can be overridden by
-	 * subclasses.
+	 * Creates a new {@link TestContextManager} for the supplied test class and
+	 * the configured <em>default <code>ContextLoader</code> class name</em>.
+	 * Can be overridden by subclasses.
 	 * 
-	 * @param clazz the Class object corresponding to the test class to be
-	 * managed
+	 * @param clazz the test class to be managed
+	 * @see #getDefaultContextLoaderClassName(Class)
 	 */
 	protected TestContextManager createTestContextManager(Class<?> clazz) {
-		return new TestContextManager(clazz);
+		return new TestContextManager(clazz, getDefaultContextLoaderClassName(clazz));
 	}
 
 	/**
@@ -121,6 +122,24 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected final TestContextManager getTestContextManager() {
 		return this.testContextManager;
+	}
+
+	/**
+	 * Get the name of the default <code>ContextLoader</code> class to use for
+	 * the supplied test class. The named class will be used if the test class
+	 * does not explicitly declare a <code>ContextLoader</code> class via the
+	 * <code>&#064;ContextConfiguration</code> annotation.
+	 * <p>
+	 * The default implementation returns <code>null</code>, thus implying use
+	 * of the <em>standard</em> default <code>ContextLoader</code> class name.
+	 * Can be overridden by subclasses.
+	 * </p>
+	 * 
+	 * @param clazz the test class
+	 * @return <code>null</code>
+	 */
+	protected String getDefaultContextLoaderClassName(Class<?> clazz) {
+		return null;
 	}
 
 	/**
