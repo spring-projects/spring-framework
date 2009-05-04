@@ -182,7 +182,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * method of this DAO's HibernateTemplate.
 	 * <p>Typically used in plain Hibernate code, in combination with
 	 * {@link #getSession} and {@link #releaseSession}.
-	 * @param ex HibernateException that occured
+	 * @param ex HibernateException that occurred
 	 * @return the corresponding DataAccessException instance
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#convertHibernateAccessException
 	 */
