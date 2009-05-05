@@ -150,6 +150,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private WebArgumentResolver[] customArgumentResolvers;
 
+	private ModelAndViewResolver[] customModelAndViewResolvers;
+
 	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
 
@@ -269,7 +271,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	/**
-	 * Set a custom ArgumentResolvers to use for special method parameter types. Such a custom ArgumentResolver will kick
+	 * Set a custom WebArgumentResolvers to use for special method parameter types. Such a custom WebArgumentResolver will kick
 	 * in first, having a chance to resolve an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
@@ -277,11 +279,27 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	/**
-	 * Set one or more custom ArgumentResolvers to use for special method parameter types. Any such custom ArgumentResolver
+	 * Set one or more custom WebArgumentResolvers to use for special method parameter types. Any such custom WebArgumentResolver
 	 * will kick in first, having a chance to resolve an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
+	}
+
+	/**
+	 * Set a custom ModelAndViewResolvers to use for special method return types. Such a custom ModelAndViewResolver will kick
+	 * in first, having a chance to resolve an return value before the standard ModelAndView handling kicks in.
+	 */
+	public void setCustomModelAndViewResolver(ModelAndViewResolver customModelAndViewResolver) {
+		this.customModelAndViewResolvers = new ModelAndViewResolver[]{customModelAndViewResolver};
+	}
+
+	/**
+	 * Set one or more custom ModelAndViewResolvers to use for special method return types. Any such custom ModelAndViewResolver
+	 * will kick in first, having a chance to resolve an return value before the standard ModelAndView handling kicks in.
+	 */
+	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
+		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
 	/**
@@ -673,6 +691,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				ExtendedModelMap implicitModel,
 				ServletWebRequest webRequest) {
 
+			// Invoke custom resolvers if present...
+			if (customModelAndViewResolvers != null) {
+				for (ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
+					ModelAndView mav = mavResolver
+							.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
+					if (mav != ModelAndViewResolver.UNRESOLVED) {
+						return mav;
+					}
+				}
+			}
 			if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
 				ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
 				HttpServletResponse response = webRequest.getResponse();

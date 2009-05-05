@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.portlet.mvc.annotation;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -32,6 +33,8 @@ import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.UnavailableException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
@@ -72,6 +75,8 @@ import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.mvc.AbstractController;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 
 /**
  * @author Juergen Hoeller
@@ -434,6 +439,28 @@ public class PortletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testMavResolver() throws Exception {
+		@SuppressWarnings("serial") DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(ModelAndViewResolverController.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues()
+						.addPropertyValue("customModelAndViewResolver", new MyModelAndViewResolver());
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+	}
+
 
 	@RequestMapping("VIEW")
 	private static class MyController extends AbstractController {
@@ -766,6 +793,39 @@ public class PortletAnnotationControllerTests extends TestCase {
 			List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 			response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
 					"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+		}
+	}
+
+	@Controller
+	public static class ModelAndViewResolverController {
+
+		@RequestMapping("VIEW")
+		public MySpecialArg handle() {
+			return new MySpecialArg("foo");
+		}
+	}
+
+	public static class MyModelAndViewResolver implements ModelAndViewResolver {
+
+		public org.springframework.web.servlet.ModelAndView resolveModelAndView(Method handlerMethod,
+				Class handlerType,
+				Object returnValue,
+				ExtendedModelMap implicitModel,
+				NativeWebRequest webRequest) {
+			if (returnValue instanceof MySpecialArg) {
+				return new org.springframework.web.servlet.ModelAndView(new View() {
+					public String getContentType() {
+						return "text/html";
+					}
+
+					public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+							throws Exception {
+						response.getWriter().write("myValue");
+					}
+
+				});
+			}
+			return UNRESOLVED;
 		}
 	}
 
