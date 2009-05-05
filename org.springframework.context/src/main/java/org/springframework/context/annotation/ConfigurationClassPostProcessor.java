@@ -166,7 +166,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
 	protected boolean checkConfigurationClassCandidate(BeanDefinition beanDef) {
-		AnnotationMetadata metadata;
+		AnnotationMetadata metadata = null;
 
 		// Check already loaded Class if present...
 		// since we possibly can't even load the class file for this Class.
@@ -175,29 +175,31 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		}
 		else {
 			String className = beanDef.getBeanClassName();
-			try {
-				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(className);
-				metadata = metadataReader.getAnnotationMetadata();
-			}
-			catch (IOException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not find class file for introspecting factory methods: " + className, ex);
+			if (className != null) {
+				try {
+					MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(className);
+					metadata = metadataReader.getAnnotationMetadata();
 				}
-				return false;
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not find class file for introspecting factory methods: " + className, ex);
+					}
+					return false;
+				}
 			}
 		}
 
-		if (metadata.hasAnnotation(Configuration.class.getName())) {
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
-			return true;
+		if (metadata != null) {
+			if (metadata.hasAnnotation(Configuration.class.getName())) {
+				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+				return true;
+			}
+			else if (metadata.hasAnnotation(Component.class.getName())) {
+				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+				return true;
+			}
 		}
-		else if (metadata.hasAnnotation(Component.class.getName())) {
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-			return true;
-		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	/**

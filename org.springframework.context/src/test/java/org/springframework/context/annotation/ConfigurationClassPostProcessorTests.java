@@ -18,7 +18,9 @@ package org.springframework.context.annotation;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import test.beans.TestBean;
 
+import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -42,8 +44,8 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
-		Foo foo = (Foo) beanFactory.getBean("foo");
-		Bar bar = (Bar) beanFactory.getBean("bar");
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertSame(foo, bar.foo);
 	}
 
@@ -61,6 +63,23 @@ public class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 		beanFactory.getBean("foo");
 		beanFactory.getBean("bar");
+	}
+
+	/**
+	 * Tests whether a bean definition without a specified bean class is handled
+	 * correctly.
+	 */
+	@Test
+	public void testPostProcessorIntrospectsInheritedDefinitionsCorrectly() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("parent", new RootBeanDefinition(TestBean.class));
+		beanFactory.registerBeanDefinition("child", new ChildBeanDefinition("parent"));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
 	}
 
 
