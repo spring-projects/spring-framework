@@ -20,8 +20,8 @@
 	<xsd:element name="property-placeholder">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Activates replacement of ${...} placeholders, resolved against the specified properties file or Properties object
-	(if any). Falls back to resolving placeholders against JVM system properties.
+	Activates replacement of ${...} placeholders, resolved against the specified properties file or
+	Properties object (if any). Falls back to resolving placeholders against JVM system properties.
 	Alternatively, define a parameterized PropertyPlaceholderConfigurer bean in the context.
 			]]></xsd:documentation>
 			<xsd:appinfo>
@@ -155,23 +155,22 @@
 			<xsd:attribute name="use-default-filters" type="xsd:boolean" default="true">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Indicates whether automatic detection of classes annotated with @Component, @Repository, @Service, or @Controller
-	should be enabled. Default is "true".
+	Indicates whether automatic detection of classes annotated with @Component, @Repository, @Service,
+	or @Controller should be enabled. Default is "true".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="annotation-config" type="xsd:boolean" default="true">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Indicates whether the implicit AutowiredAnnotationBeanPostProcessor and CommonAnnotationBeanPostProcessor should
-	 be enabled. Default is "true".
+	Indicates whether the implicit annotation post-processors should be enabled. Default is "true".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="name-generator" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The fully-qualified classname of the BeanNameGenerator to be used for naming detected components.
+	The fully-qualified class name of the BeanNameGenerator to be used for naming detected components.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation>
@@ -184,7 +183,8 @@
 			<xsd:attribute name="scope-resolver" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The fully-qualified class name of the ScopeMetadataResolver to be used for resolving the scope of detected components.
+	The fully-qualified class name of the ScopeMetadataResolver to be used for resolving the scope of
+	detected components.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation>
@@ -197,8 +197,8 @@
 			<xsd:attribute name="scoped-proxy">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Indicates whether proxies should be generated for detected components, which may be necessary when using certain
-	non-singleton scopes in a proxy-style fashion. Default is to generate no such proxies.
+	Indicates whether proxies should be generated for detected components, which may be necessary
+	when using scopes in a proxy-style fashion. Default is to generate no such proxies.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
