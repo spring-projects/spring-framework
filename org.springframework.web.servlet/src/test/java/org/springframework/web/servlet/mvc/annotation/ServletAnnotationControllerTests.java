@@ -18,6 +18,10 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
@@ -117,6 +121,16 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void customAnnotationController() throws Exception {
+		initServlet(CustomAnnotationController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Invalid response status code", HttpServletResponse.SC_OK, response.getStatus());
+	}
+
+	@Test
 	public void requiredParamMissing() throws Exception {
 		initServlet(RequiredParamController.class);
 
@@ -124,6 +138,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+		assertTrue(servlet.getWebApplicationContext().isSingleton("controller"));
 	}
 
 	@Test
@@ -1437,6 +1452,20 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId") String id) {
+		}
+	}
+
+	@Target({ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Controller
+	public @interface MyControllerAnnotation {
+	}
+
+	@MyControllerAnnotation
+	public static class CustomAnnotationController {
+
+		@RequestMapping("/myPath.do")
+		public void myHandle() {
 		}
 	}
 
