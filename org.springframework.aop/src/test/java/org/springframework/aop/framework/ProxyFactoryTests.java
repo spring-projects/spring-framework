@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.aop.framework;
 
-
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+
+import javax.swing.*;
+import javax.accessibility.Accessible;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -310,6 +312,15 @@ public final class ProxyFactoryTests {
 		assertTrue(proxy instanceof TestBean);
 	}
 
+	@Test
+	public void testExclusionOfNonPublicInterfaces() {
+		JFrame frame = new JFrame();
+		ProxyFactory proxyFactory = new ProxyFactory(frame);
+		Object proxy = proxyFactory.getProxy();
+		assertTrue(proxy instanceof RootPaneContainer);
+		assertTrue(proxy instanceof Accessible);
+	}
+
 
 	public static class Concrete {
 
@@ -317,43 +328,36 @@ public final class ProxyFactoryTests {
 		}
 	}
 
-}
 
+	@SuppressWarnings("serial")
+	private static class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
 
-/**
- * Simple before advice example that we can use for counting checks.
- *
- * @author Rod Johnson
- */
-@SuppressWarnings("serial")
-class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
-
-	public void before(Method m, Object[] args, Object target) throws Throwable {
-		count(m);
+		public void before(Method m, Object[] args, Object target) throws Throwable {
+			count(m);
+		}
 	}
 
-}
 
+	@SuppressWarnings("serial")
+	private static class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
+		implements TimeStamped {
 
-@SuppressWarnings("serial")
-class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
-	implements TimeStamped {
+		private long ts;
 
-	private long ts;
+		public TimestampIntroductionInterceptor() {
+		}
 
-	public TimestampIntroductionInterceptor() {
-	}
+		public TimestampIntroductionInterceptor(long ts) {
+			this.ts = ts;
+		}
 
-	public TimestampIntroductionInterceptor(long ts) {
-		this.ts = ts;
-	}
-	
-	public void setTime(long ts) {
-		this.ts = ts;
-	}
+		public void setTime(long ts) {
+			this.ts = ts;
+		}
 
-	public long getTimeStamp() {
-		return ts;
+		public long getTimeStamp() {
+			return ts;
+		}
 	}
 
 }
