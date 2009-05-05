@@ -760,6 +760,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @param bean the original bean instance
 	 * @return the adapted MBean, or <code>null</code> if not possible
 	 */
+	@SuppressWarnings("unchecked")
 	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
 		Class targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass != bean.getClass()) {

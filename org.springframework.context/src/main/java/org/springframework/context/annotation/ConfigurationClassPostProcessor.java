@@ -123,7 +123,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
-	protected void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
+	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : registry.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
@@ -206,7 +206,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 	 * Candidate status is determined by BeanDefinition attribute metadata.
 	 * @see ConfigurationClassEnhancer
 	 */
-	protected void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
+	public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<String, AbstractBeanDefinition>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
