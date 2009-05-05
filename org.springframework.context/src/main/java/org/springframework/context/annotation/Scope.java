@@ -42,7 +42,6 @@ import org.springframework.stereotype.Component;
  * @since 2.5
  * @see Component
  * @see Bean
- * @see StandardScopes
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -52,7 +51,6 @@ public @interface Scope {
 	/**
 	 * Specifies the scope to use for the annotated component/bean.
 	 * @return the specified scope
-	 * @see StandardScopes
 	 */
 	String value() default BeanDefinition.SCOPE_SINGLETON;
 
