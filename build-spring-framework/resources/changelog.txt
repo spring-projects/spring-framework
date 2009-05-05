@@ -3,26 +3,35 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.M3 (2009-04-06)
+Changes in version 3.0.0.M3 (2009-05-05)
 ----------------------------------------
 
 * Spring 3.0 is shipping with proper Maven POMs now
 * updated to JRuby 1.2 (remaining compatible with JRuby 1.1 and above)
 * updated to Hessian 3.2.1 (remaining compatible with Hessian 3.1.3 and above)
+* updated to FreeMarker 2.3.15 (for exposure of FreeMarkerServlet-style HTTP scopes)
 * removed Axis 1.x support package, keeping basic JAX-RPC support only (next to JAX-WS)
+* introduced explicit XML array element in spring-beans-3.0.xsd
 * introduced new converter subsystem in "core.convert"
-* introduced support for annotated factory methods
-* introduced support for JavaConfig-style @Configuration classes
+* introduced annotated @Bean factory methods and JavaConfig-style @Configuration classes
+* introduced @Primary, @Lazy and @DependsOn annotations for scanned components
+* custom stereotype annotations can be meta-annotated with @Service, @Controller etc as well
+* @Scope and @Transactional are now supported as meta-annotations on custom annotations
 * @Autowired uses field/parameter name as fallback qualifier value
 * qualifier annotations can be used at method level as well (applying to all parameters)
 * @Value annotation can be used at method level as well (e.g. on bean property setters)
 * @Value values may use ${...} placeholders (driven by PropertyPlaceholderConfigurer)
+* @Resource names may use ${...} placeholders (driven by PropertyPlaceholderConfigurer)
 * fixed EL evaluation of prepared constructor arguments for repeated prototype creation
 * ConstructorArgumentValues exposed indexed arguments in the order of definition
+* AutowiredAnnotationBeanPostProcessor calculates cached arguments in a synchronized block
 * declarative destroy-method="..." specifications get validated at bean creation time
+* component-scan's "base-package" attribute supports spaces as separators as well
 * CachedIntrospectionResults always caches bean classes except in case of custom BeanInfo
 * GenericTypeResolver's type variable cache uses weak values (for OSGi compatibility)
 * fixed CachingMapDecorator to support garbage-collected weak references (again)
+* AOP ProxyFactory excludes non-public interfaces when autodetecting proxy interfaces
+* added DuplicateKeyException to DAO exception hierachy 
 * SessionAwareMessageListener supports generic declaration of concrete JMS Message type
 * RmiServiceExporter and RmiRegistryFactoryBean synchronize registry lookup/creation
 * added "unregisterManagedResource" method to MBeanExporter/MBeanExportOperations
@@ -31,10 +40,19 @@ Changes in version 3.0.0.M3 (2009-04-06)
 * added ConcurrentTaskScheduler and ThreadPoolTaskScheduler
 * added CommonJ TimerManagerTaskScheduler
 * added CronTrigger implementation for cron expression support
+* renamed "contextProperties" attribute to "contextParameters" (matching web.xml naming)
+* "contextParameters" contains Servlet/PortletConfig parameters as well
+* added default "servletContext" and "servletConfig" environment beans
+* added default "portletContext" and "portletConfig" environment beans
+* added default web scope "application", wrapping a ServletContext/PortletContext
 * JSF FacesContext and ExternalContext are resolvable dependencies by default, if available
 * FacesRequestAttributes (as used by RequestContextHolder) can access global Portlet session
+* revised @RequestMapping semantics for REST support purposes
 * request handler methods with @ModelAttribute annotation always return a model attribute
+* introduced @ExceptionHandler annotation for used in annotated web controllers
+* introduced ModelAndViewResolver SPI for custom handler method return types
 * FreeMarkerView can be initialized with ServletContext only (e.g. for testing)
+* MockPortletSession supports destruction of session attributes on invalidation
 
 
 Changes in version 3.0.0.M2 (2009-02-25)
