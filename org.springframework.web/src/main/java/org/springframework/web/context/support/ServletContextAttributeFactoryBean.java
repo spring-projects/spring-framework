@@ -30,10 +30,15 @@ import org.springframework.web.context.ServletContextAware;
  * the startup of the Spring application context. Typically, such
  * attributes will have been put there by third-party web frameworks.
  * In a purely Spring-based web application, no such linking in of
- * ServletContext attrutes will be necessary.
+ * ServletContext attributes will be necessary.
+ *
+ * <p><b>NOTE:</b> As of Spring 3.0, you may also use the "contextAttributes" default
+ * bean which is of type Map, and dereference it using an "#{contextAttributes.myKey}"
+ * expression to access a specific attribute by name.
  *
  * @author Juergen Hoeller
  * @since 1.1.4
+ * @see org.springframework.web.context.WebApplicationContext#CONTEXT_ATTRIBUTES_BEAN_NAME
  * @see ServletContextParameterFactoryBean
  */
 public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, ServletContextAware {
@@ -52,7 +57,7 @@ public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, 
 
 	public void setServletContext(ServletContext servletContext) {
 		if (this.attributeName == null) {
-			throw new IllegalArgumentException("attributeName is required");
+			throw new IllegalArgumentException("Property 'attributeName' is required");
 		}
 		this.attribute = servletContext.getAttribute(this.attributeName);
 		if (this.attribute == null) {

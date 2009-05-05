@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,13 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @see org.springframework.web.servlet.FrameworkServlet#createWebApplicationContext
  */
 public interface ConfigurableWebApplicationContext extends WebApplicationContext, ConfigurableApplicationContext {
+
+	/**
+	 * Name of the ServletConfig environment bean in the factory.
+	 * @see javax.servlet.ServletConfig
+	 */
+	String SERVLET_CONFIG_BEAN_NAME = "servletConfig";
+
 
 	/**
 	 * Set the ServletContext for this web application context.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,12 +139,10 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext, this.portletConfig));
 		beanFactory.ignoreDependencyInterface(PortletContextAware.class);
 		beanFactory.ignoreDependencyInterface(PortletConfigAware.class);
-		beanFactory.registerResolvableDependency(ServletContext.class, this.servletContext);
-		beanFactory.registerResolvableDependency(PortletContext.class, this.portletContext);
-		beanFactory.registerResolvableDependency(PortletConfig.class, this.portletConfig);
 
-		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory);
-		PortletApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.portletContext);
+		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory, this.portletContext);
+		PortletApplicationContextUtils.registerEnvironmentBeans(
+				beanFactory, this.servletContext, this.portletContext, this.portletConfig);
 	}
 
 	/**

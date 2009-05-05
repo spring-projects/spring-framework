@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequestDispatcher;
+import javax.activation.FileTypeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -152,7 +153,7 @@ public class MockPortletContext implements PortletContext {
 	}
 
 	public int getMajorVersion() {
-		return 1;
+		return 2;
 	}
 
 	public int getMinorVersion() {
@@ -160,7 +161,7 @@ public class MockPortletContext implements PortletContext {
 	}
 	
 	public String getMimeType(String filePath) {
-		return null;
+		return MimeTypeResolver.getMimeType(filePath);
 	}
 
 	public String getRealPath(String path) {
@@ -260,6 +261,18 @@ public class MockPortletContext implements PortletContext {
 
 	public Enumeration<String> getContainerRuntimeOptions() {
 		return Collections.enumeration(this.containerRuntimeOptions);
+	}
+
+
+	/**
+	 * Inner factory class used to just introduce a Java Activation Framework
+	 * dependency when actually asked to resolve a MIME type.
+	 */
+	private static class MimeTypeResolver {
+
+		public static String getMimeType(String filePath) {
+			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
+		}
 	}
 
 }

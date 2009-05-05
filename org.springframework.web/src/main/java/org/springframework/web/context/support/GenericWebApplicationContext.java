@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,16 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	/**
+	 * Create a new GenericWebApplicationContext for the given ServletContext.
+	 * @param servletContext the ServletContext to run in
+	 * @see #registerBeanDefinition
+	 * @see #refresh
+	 */
+	public GenericWebApplicationContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
+	/**
 	 * Create a new GenericWebApplicationContext with the given DefaultListableBeanFactory.
 	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
 	 * @see #setServletContext
@@ -80,6 +90,18 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	public GenericWebApplicationContext(DefaultListableBeanFactory beanFactory) {
 		super(beanFactory);
+	}
+
+	/**
+	 * Create a new GenericWebApplicationContext with the given DefaultListableBeanFactory.
+	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
+	 * @param servletContext the ServletContext to run in
+	 * @see #registerBeanDefinition
+	 * @see #refresh
+	 */
+	public GenericWebApplicationContext(DefaultListableBeanFactory beanFactory, ServletContext servletContext) {
+		super(beanFactory);
+		this.servletContext = servletContext;
 	}
 
 
@@ -103,9 +125,8 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
-		beanFactory.registerResolvableDependency(ServletContext.class, this.servletContext);
 
-		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory);
+		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
 	}
 

@@ -39,7 +39,11 @@ import org.springframework.web.context.ServletContextAware;
  * @see javax.servlet.ServletContext
  * @see org.springframework.web.context.ServletContextAware
  * @see ServletContextAttributeFactoryBean
+ * @see org.springframework.web.context.WebApplicationContext#SERVLET_CONTEXT_BEAN_NAME
+ * @deprecated as of Spring 3.0, since "servletContext" is now available
+ * as a default bean in every WebApplicationContext
  */
+@Deprecated
 public class ServletContextFactoryBean implements FactoryBean<ServletContext>, ServletContextAware {
 
 	private ServletContext servletContext;

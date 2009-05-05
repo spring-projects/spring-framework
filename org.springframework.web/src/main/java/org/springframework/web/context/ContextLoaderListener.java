@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
- * Bootstrap listener to start up Spring's root {@link WebApplicationContext}.
- * Simply delegates to {@link ContextLoader}.
+ * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
+ * Simply delegates to {@link ContextLoader} as well as to {@link ContextCleanupListener}.
  *
  * <p>This listener should be registered after
  * {@link org.springframework.web.util.Log4jConfigListener}
@@ -77,6 +77,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 		if (this.contextLoader != null) {
 			this.contextLoader.closeWebApplicationContext(event.getServletContext());
 		}
+		ContextCleanupListener.cleanupAttributes(event.getServletContext());
 	}
 
 }

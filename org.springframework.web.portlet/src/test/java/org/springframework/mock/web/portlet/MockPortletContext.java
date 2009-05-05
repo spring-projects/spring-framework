@@ -152,7 +152,7 @@ public class MockPortletContext implements PortletContext {
 	}
 
 	public int getMajorVersion() {
-		return 1;
+		return 2;
 	}
 
 	public int getMinorVersion() {

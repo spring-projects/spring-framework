@@ -19,9 +19,14 @@ package org.springframework.mock.web.portlet;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+
+import org.springframework.mock.web.MockHttpSession;
 
 /**
  * Mock implementation of the {@link javax.portlet.PortletSession} interface.
@@ -70,7 +75,7 @@ public class MockPortletSession implements PortletSession {
 		this.portletContext = (portletContext != null ? portletContext : new MockPortletContext());
 	}
 
-	
+
 	public Object getAttribute(String name) {
 		return this.portletAttributes.get(name);
 	}
@@ -120,14 +125,34 @@ public class MockPortletSession implements PortletSession {
 		return this.maxInactiveInterval;
 	}
 
+	/**
+	 * Clear all of this session's attributes.
+	 */
+	public void clearAttributes() {
+		doClearAttributes(this.portletAttributes);
+		doClearAttributes(this.applicationAttributes);
+	}
+
+	protected void doClearAttributes(Map<String, Object> attributes) {
+		for (Iterator<Map.Entry<String, Object>> it = attributes.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, Object> entry = it.next();
+			String name = entry.getKey();
+			Object value = entry.getValue();
+			it.remove();
+			if (value instanceof HttpSessionBindingListener) {
+				((HttpSessionBindingListener) value).valueUnbound(
+						new HttpSessionBindingEvent(new MockHttpSession(), name, value));
+			}
+		}
+	}
+
 	public void invalidate() {
 		this.invalid = true;
-		this.portletAttributes.clear();
-		this.applicationAttributes.clear();
+		clearAttributes();
 	}
 
 	public boolean isInvalid() {
-		return invalid;
+		return this.invalid;
 	}
 
 	public void setNew(boolean value) {

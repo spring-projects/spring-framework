@@ -20,6 +20,9 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpSession;
@@ -27,6 +30,8 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -49,10 +54,15 @@ import org.springframework.web.context.request.SessionScope;
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.jsf.FacesContextUtils
- * @see org.springframework.web.jsf.DelegatingVariableResolver
+ * @see org.springframework.web.jsf.SpringBeanVariableResolver
+ * @see org.springframework.web.jsf.el.SpringBeanFacesELResolver
  */
 public abstract class WebApplicationContextUtils {
-	
+
+	private static final boolean jsfPresent =
+			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
+
+
 	/**
 	 * Find the root WebApplicationContext for this web application, which is
 	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener}.
@@ -64,7 +74,7 @@ public abstract class WebApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc)
-	    throws IllegalStateException {
+			throws IllegalStateException {
 
 		WebApplicationContext wac = getWebApplicationContext(sc);
 		if (wac == null) {
@@ -115,14 +125,30 @@ public abstract class WebApplicationContextUtils {
 
 
 	/**
-	 * Register web-specific scopes with the given BeanFactory,
-	 * as used by the WebApplicationContext.
+	 * Register web-specific scopes ("request", "session", "globalSession")
+	 * with the given BeanFactory, as used by the WebApplicationContext.
 	 * @param beanFactory the BeanFactory to configure
 	 */
 	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
+		registerWebApplicationScopes(beanFactory, null);
+	}
+
+	/**
+	 * Register web-specific scopes ("request", "session", "globalSession", "application")
+	 * with the given BeanFactory, as used by the WebApplicationContext.
+	 * @param beanFactory the BeanFactory to configure
+	 * @param sc the ServletContext that we're running within
+	 */
+	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory, ServletContext sc) {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
 		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
+		if (sc != null) {
+			ServletContextScope appScope = new ServletContextScope(sc);
+			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
+			// Register as ServletContext attribute, for ContextCleanupListener to detect it.
+			sc.setAttribute(ServletContextScope.class.getName(), appScope);
+		}
 
 		beanFactory.registerResolvableDependency(ServletRequest.class, new ObjectFactory<ServletRequest>() {
 			public ServletRequest getObject() {
@@ -142,16 +168,41 @@ public abstract class WebApplicationContextUtils {
 				return ((ServletRequestAttributes) requestAttr).getRequest().getSession();
 			}
 		});
+
+		if (jsfPresent) {
+			FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
+		}
 	}
 
 	/**
-	 * Register web-specific environment beans with the given BeanFactory,
-	 * as used by the WebApplicationContext.
+	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
+	 * with the given BeanFactory, as used by the WebApplicationContext.
 	 * @param bf the BeanFactory to configure
 	 * @param sc the ServletContext that we're running within
 	 */
-	static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, ServletContext sc) {
-		if (!bf.containsBean(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME)) {
+	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, ServletContext sc) {
+		registerEnvironmentBeans(bf, sc, null);
+	}
+
+	/**
+	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
+	 * with the given BeanFactory, as used by the WebApplicationContext.
+	 * @param bf the BeanFactory to configure
+	 * @param sc the ServletContext that we're running within
+	 * @param config the ServletConfig of the containing Portlet
+	 */
+	public static void registerEnvironmentBeans(
+			ConfigurableListableBeanFactory bf, ServletContext sc, ServletConfig config) {
+
+		if (sc != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
+			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, sc);
+		}
+
+		if (config != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
+			bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME, config);
+		}
+
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<String, String>();
 			if (sc != null) {
 				Enumeration paramNameEnum = sc.getInitParameterNames();
@@ -160,7 +211,14 @@ public abstract class WebApplicationContextUtils {
 					parameterMap.put(paramName, sc.getInitParameter(paramName));
 				}
 			}
-			bf.registerSingleton(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME,
+			if (config != null) {
+				Enumeration paramNameEnum = config.getInitParameterNames();
+				while (paramNameEnum.hasMoreElements()) {
+					String paramName = (String) paramNameEnum.nextElement();
+					parameterMap.put(paramName, config.getInitParameter(paramName));
+				}
+			}
+			bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,
 					Collections.unmodifiableMap(parameterMap));
 		}
 
@@ -175,6 +233,26 @@ public abstract class WebApplicationContextUtils {
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
 					Collections.unmodifiableMap(attributeMap));
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid hard-coded JSF dependency.
+ 	 */
+	private static class FacesDependencyRegistrar {
+
+		public static void registerFacesDependencies(ConfigurableListableBeanFactory beanFactory) {
+			beanFactory.registerResolvableDependency(FacesContext.class, new ObjectFactory<FacesContext>() {
+				public FacesContext getObject() {
+					return FacesContext.getCurrentInstance();
+				}
+			});
+			beanFactory.registerResolvableDependency(ExternalContext.class, new ObjectFactory<ExternalContext>() {
+				public ExternalContext getObject() {
+					return FacesContext.getCurrentInstance().getExternalContext();
+				}
+			});
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,14 +72,30 @@ public interface WebApplicationContext extends ApplicationContext {
 	String SCOPE_GLOBAL_SESSION = "globalSession";
 
 	/**
-	 * Name of the ServletContext init-params environment bean in the factory.
-	 * @see javax.servlet.ServletContext#getInitParameterNames()
-	 * @see javax.servlet.ServletContext#getInitParameter(String)
+	 * Scope identifier for the global web application scope: "application".
+	 * Supported in addition to the standard scopes "singleton" and "prototype".
 	 */
-	String CONTEXT_PROPERTIES_BEAN_NAME = "contextProperties";
+	String SCOPE_APPLICATION = "application";
 
 	/**
-	 * Name of the ServletContext attributes environment bean in the factory.
+	 * Name of the ServletContext environment bean in the factory.
+	 * @see javax.servlet.ServletContext
+	 */
+	String SERVLET_CONTEXT_BEAN_NAME = "servletContext";
+
+	/**
+	 * Name of the ServletContext/PortletContext init-params environment bean in the factory.
+	 * <p>Note: Possibly merged with ServletConfig/PortletConfig parameters.
+	 * ServletConfig parameters override ServletContext parameters of the same name.
+	 * @see javax.servlet.ServletContext#getInitParameterNames()
+	 * @see javax.servlet.ServletContext#getInitParameter(String)
+	 * @see javax.servlet.ServletConfig#getInitParameterNames()
+	 * @see javax.servlet.ServletConfig#getInitParameter(String)
+	 */
+	String CONTEXT_PARAMETERS_BEAN_NAME = "contextParameters";
+
+	/**
+	 * Name of the ServletContext/PortletContext attributes environment bean in the factory.
 	 * @see javax.servlet.ServletContext#getAttributeNames()
 	 * @see javax.servlet.ServletContext#getAttribute(String)
 	 */
@@ -88,6 +104,7 @@ public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Return the standard Servlet API ServletContext for this application.
+	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
 	ServletContext getServletContext();
 	
