@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.context.junit4;
 
 import org.junit.runner.RunWith;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 
@@ -25,13 +24,19 @@ import org.springframework.util.ResourceUtils;
  * Extension of {@link SpringJUnit4ClassRunnerAppCtxTests}, which verifies that
  * we can specify multiple resource locations for our application context, each
  * configured differently.
- *
+ * <p>
+ * As of Spring 3.0,
+ * <code>MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests</code> is also used
+ * to verify support for the new <code>value</code> attribute alias for
+ * <code>&#064;ContextConfiguration</code>'s <code>locations</code> attribute.
+ * </p>
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.CLASSPATH_RESOURCE_PATH,
+@ContextConfiguration( { MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.CLASSPATH_RESOURCE_PATH,
 	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.LOCAL_RESOURCE_PATH,
 	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.ABSOLUTE_RESOURCE_PATH })
 public class MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {

@@ -184,7 +184,25 @@ public class TestContext extends AttributeAccessorSupport {
 				logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for declaring class ["
 						+ declaringClass + "]");
 			}
-			String[] locations = contextLoader.processLocations(declaringClass, contextConfiguration.locations());
+
+			String[] valueLocations = contextConfiguration.value();
+			String[] locations = contextConfiguration.locations();
+			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
+				String msg = "Test class ["
+						+ declaringClass
+						+ "] has been configured with @ContextConfiguration's 'value' ["
+						+ ObjectUtils.nullSafeToString(valueLocations)
+						+ "] and 'locations' ["
+						+ ObjectUtils.nullSafeToString(locations)
+						+ "] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.";
+				logger.error(msg);
+				throw new IllegalStateException(msg);
+			}
+			else if (!ObjectUtils.isEmpty(valueLocations)) {
+				locations = valueLocations;
+			}
+
+			locations = contextLoader.processLocations(declaringClass, locations);
 			locationsList.addAll(0, Arrays.<String> asList(locations));
 			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
 				annotationType, declaringClass.getSuperclass()) : null;

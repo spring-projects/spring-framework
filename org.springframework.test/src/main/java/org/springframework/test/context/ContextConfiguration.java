@@ -46,6 +46,13 @@ public @interface ContextConfiguration {
 	String[] locations() default {};
 
 	/**
+	 * Alias for {@link #locations()}.
+	 * 
+	 * @since 3.0
+	 */
+	String[] value() default {};
+
+	/**
 	 * Whether or not {@link #locations() resource locations} from superclasses
 	 * should be <em>inherited</em>.
 	 * <p>The default value is <code>true</code>, which means that an annotated
