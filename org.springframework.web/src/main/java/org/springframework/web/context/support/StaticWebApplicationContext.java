@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.request.RequestScope;
-import org.springframework.web.context.request.SessionScope;
 
 /**
  * Static {@link org.springframework.web.context.WebApplicationContext}
@@ -137,11 +135,9 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
-		beanFactory.registerResolvableDependency(ServletContext.class, this.servletContext);
-		beanFactory.registerResolvableDependency(ServletConfig.class, this.servletConfig);
 
-		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory);
-		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
+		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
+		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);
 	}
 
 	/**

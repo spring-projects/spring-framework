@@ -20,9 +20,11 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -102,14 +104,21 @@ public abstract class PortletApplicationContextUtils {
 
 
 	/**
-	 * Register portlet-specific scopes with the given BeanFactory,
-	 * as used by the Portlet ApplicationContext.
+	 * Register web-specific scopes ("request", "session", "globalSession")
+	 * with the given BeanFactory, as used by the Portlet ApplicationContext.
 	 * @param beanFactory the BeanFactory to configure
+	 * @param pc the PortletContext that we're running within
 	 */
-	static void registerPortletApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
+	static void registerPortletApplicationScopes(ConfigurableListableBeanFactory beanFactory, PortletContext pc) {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
 		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
+		if (pc != null) {
+			PortletContextScope appScope = new PortletContextScope(pc);
+			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
+			// Register as PortletContext attribute, for ContextCleanupListener to detect it.
+			pc.setAttribute(PortletContextScope.class.getName(), appScope);
+		}
 
 		beanFactory.registerResolvableDependency(PortletRequest.class, new ObjectFactory<PortletRequest>() {
 			public PortletRequest getObject() {
@@ -132,13 +141,29 @@ public abstract class PortletApplicationContextUtils {
 	}
 
 	/**
-	 * Register web-specific environment beans with the given BeanFactory,
-	 * as used by the Portlet ApplicationContext.
+	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
+	 * with the given BeanFactory, as used by the Portlet ApplicationContext.
 	 * @param bf the BeanFactory to configure
+	 * @param sc the ServletContext that we're running within
 	 * @param pc the PortletContext that we're running within
+	 * @param config the PortletConfig of the containing Portlet
 	 */
-	static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, PortletContext pc) {
-		if (!bf.containsBean(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME)) {
+	static void registerEnvironmentBeans(
+			ConfigurableListableBeanFactory bf, ServletContext sc, PortletContext pc, PortletConfig config) {
+
+		if (sc != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
+			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, sc);
+		}
+
+		if (pc != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME)) {
+			bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME, pc);
+		}
+
+		if (config != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME)) {
+			bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME, config);
+		}
+
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<String, String>();
 			if (pc != null) {
 				Enumeration paramNameEnum = pc.getInitParameterNames();
@@ -147,7 +172,14 @@ public abstract class PortletApplicationContextUtils {
 					parameterMap.put(paramName, pc.getInitParameter(paramName));
 				}
 			}
-			bf.registerSingleton(WebApplicationContext.CONTEXT_PROPERTIES_BEAN_NAME,
+			if (config != null) {
+				Enumeration paramNameEnum = config.getInitParameterNames();
+				while (paramNameEnum.hasMoreElements()) {
+					String paramName = (String) paramNameEnum.nextElement();
+					parameterMap.put(paramName, config.getInitParameter(paramName));
+				}
+			}
+			bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,
 					Collections.unmodifiableMap(parameterMap));
 		}
 
