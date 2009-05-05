@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 */
 	public OverridingClassLoader(ClassLoader parent) {
 		super(parent);
-		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
-			excludePackage(DEFAULT_EXCLUDED_PACKAGES[i]);
+		for (String packageName : DEFAULT_EXCLUDED_PACKAGES) {
+			excludePackage(packageName);
 		}
 	}
 

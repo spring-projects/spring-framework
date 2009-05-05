@@ -177,9 +177,10 @@ public class MethodParameter {
 	 */
 	public Class getParameterType() {
 		if (this.parameterType == null) {
-			if (parameterIndex < 0) {
-				this.parameterType = (this.method !=null ? this.method.getReturnType():null);
-			} else {
+			if (this.parameterIndex < 0) {
+				this.parameterType = (this.method != null ? this.method.getReturnType() : null);
+			}
+			else {
 				this.parameterType = (this.method != null ?
 					this.method.getParameterTypes()[this.parameterIndex] :
 					this.constructor.getParameterTypes()[this.parameterIndex]);
