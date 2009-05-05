@@ -948,7 +948,7 @@ public abstract class ClassUtils {
 		while (clazz != null) {
 			Class[] ifcs = clazz.getInterfaces();
 			for (Class ifc : ifcs) {
-				if (!interfaces.contains(ifc) && Modifier.isPublic(ifc.getModifiers()) &&
+				if (!interfaces.contains(ifc) &&
 						(classLoader == null || isVisible(ifc, classLoader))) {
 					interfaces.add(ifc);
 				}
