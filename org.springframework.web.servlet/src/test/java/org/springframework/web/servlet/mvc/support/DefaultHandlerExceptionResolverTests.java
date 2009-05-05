@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.handler;
+package org.springframework.web.servlet.mvc.support;
 
 import java.util.Collections;
 
