@@ -245,10 +245,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public RequestDispatcher getRequestDispatcher(String path) {
-		if (!path.startsWith("/")) {
-			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
-		}
-		return new MockRequestDispatcher(path);
+		return null;
 	}
 
 	public RequestDispatcher getNamedDispatcher(String path) {
