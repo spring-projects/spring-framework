@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -924,6 +925,32 @@ public class ServletAnnotationControllerTests {
 		assertEquals(201, response.getStatus());
 	}
 
+	@Test
+	public void mavResolver() throws ServletException, IOException {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(ModelAndViewResolverController.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues()
+						.addPropertyValue("customModelAndViewResolver", new MyModelAndViewResolver());
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myValue", response.getContentAsString());
+
+	}
+
+
 	/*
 	 * Controllers
 	 */
@@ -1502,6 +1529,27 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	public static class MyMessageConverter implements HttpMessageConverter {
+
+		public boolean supports(Class clazz) {
+			return true;
+		}
+
+		public List getSupportedMediaTypes() {
+			return Collections.singletonList(new MediaType("application", "pdf"));
+		}
+
+		public Object read(Class clazz, HttpInputMessage inputMessage)
+				throws IOException, HttpMessageNotReadableException {
+			throw new HttpMessageNotReadableException("Could not read");
+		}
+
+		public void write(Object o, HttpOutputMessage outputMessage)
+				throws IOException, HttpMessageNotWritableException {
+			throw new UnsupportedOperationException("Not implemented");
+		}
+	}
+
 	@Controller
 	public static class HeadersController {
 
@@ -1526,25 +1574,40 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	public static class MyMessageConverter implements HttpMessageConverter {
 
-		public boolean supports(Class clazz) {
-			return true;
-		}
+	@Controller
+	public static class ModelAndViewResolverController {
 
-		public List getSupportedMediaTypes() {
-			return Collections.singletonList(new MediaType("application", "pdf"));
-		}
-
-		public Object read(Class clazz, HttpInputMessage inputMessage)
-				throws IOException, HttpMessageNotReadableException {
-			throw new HttpMessageNotReadableException("Could not read");
-		}
-
-		public void write(Object o, HttpOutputMessage outputMessage)
-				throws IOException, HttpMessageNotWritableException {
-			throw new UnsupportedOperationException("Not implemented");
+		@RequestMapping("/")
+		public MySpecialArg handle() {
+			return new MySpecialArg("foo");
 		}
 	}
+
+	public static class MyModelAndViewResolver implements ModelAndViewResolver {
+
+		public ModelAndView resolveModelAndView(Method handlerMethod,
+				Class handlerType,
+				Object returnValue,
+				ExtendedModelMap implicitModel,
+				NativeWebRequest webRequest) {
+			if (returnValue instanceof MySpecialArg) {
+				return new ModelAndView(new View() {
+					public String getContentType() {
+						return "text/html";
+					}
+
+					public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+							throws Exception {
+						response.getWriter().write("myValue");
+					}
+
+				});
+			}
+			return UNRESOLVED;
+		}
+	}
+
+
 
 }

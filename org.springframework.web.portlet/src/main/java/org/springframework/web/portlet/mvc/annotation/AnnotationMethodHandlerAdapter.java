@@ -93,6 +93,7 @@ import org.springframework.web.portlet.handler.PortletContentGenerator;
 import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 import org.springframework.web.portlet.util.PortletUtils;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerAdapter}
@@ -130,6 +131,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	private WebArgumentResolver[] customArgumentResolvers;
+
+	private ModelAndViewResolver[] customModelAndViewResolvers;
 
 	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
@@ -199,8 +202,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 	/**
-	 * Set a custom ArgumentResolvers to use for special method parameter types.
-	 * Such a custom ArgumentResolver will kick in first, having a chance to
+	 * Set a custom WebArgumentResolvers to use for special method parameter types.
+	 * Such a custom WebArgumentResolver will kick in first, having a chance to
 	 * resolve an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
@@ -208,13 +211,29 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 	/**
-	 * Set one or more custom ArgumentResolvers to use for special method
-	 * parameter types. Any such custom ArgumentResolver will kick in first,
+	 * Set one or more custom WebArgumentResolvers to use for special method
+	 * parameter types. Any such custom WebArgumentResolver will kick in first,
 	 * having a chance to resolve an argument value before the standard
 	 * argument handling kicks in.
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
+	}
+
+	/**
+	 * Set a custom ModelAndViewResolvers to use for special method return types. Such a custom ModelAndViewResolver will kick
+	 * in first, having a chance to resolve an return value before the standard ModelAndView handling kicks in.
+	 */
+	public void setCustomModelAndViewResolver(ModelAndViewResolver customModelAndViewResolver) {
+		this.customModelAndViewResolvers = new ModelAndViewResolver[]{customModelAndViewResolver};
+	}
+
+	/**
+	 * Set one or more custom ModelAndViewResolvers to use for special method return types. Any such custom ModelAndViewResolver
+	 * will kick in first, having a chance to resolve an return value before the standard ModelAndView handling kicks in.
+	 */
+	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
+		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
 
@@ -296,7 +315,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		PortletHandlerMethodInvoker methodInvoker = new PortletHandlerMethodInvoker(methodResolver);
 
 		Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
-		ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, handler.getClass(), result, implicitModel);
+		ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, handler.getClass(), result, implicitModel,
+				webRequest);
 		methodInvoker.updateModelAttributes(
 				handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
 
@@ -660,8 +680,20 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(
-				Method handlerMethod, Class handlerType, Object returnValue, ExtendedModelMap implicitModel) {
+		public ModelAndView getModelAndView(Method handlerMethod, Class handlerType, Object returnValue, ExtendedModelMap implicitModel,
+				PortletWebRequest webRequest) {
+			// Invoke custom resolvers if present...
+			if (customModelAndViewResolvers != null) {
+				for (ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
+					org.springframework.web.servlet.ModelAndView smav = mavResolver
+							.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
+					if (smav != ModelAndViewResolver.UNRESOLVED) {
+						return (smav.isReference() ?
+								new ModelAndView(smav.getViewName(), smav.getModelMap()) :
+								new ModelAndView(smav.getView(), smav.getModelMap()));
+					}
+				}
+			}
 
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
