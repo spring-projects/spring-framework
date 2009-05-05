@@ -15,7 +15,7 @@
 		<property name="targetField"><value>INSTANCE</value></property>
 	</bean>
 	
-	<bean id="countingBeforeAdvice" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
+	<bean id="countingBeforeAdvice" class="test.aop.CountingBeforeAdvice"/>
 
 	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
