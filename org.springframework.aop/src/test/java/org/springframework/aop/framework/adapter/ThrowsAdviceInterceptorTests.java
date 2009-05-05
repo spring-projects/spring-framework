@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2009 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,30 +16,21 @@
 
 package org.springframework.aop.framework.adapter;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-
 import javax.transaction.TransactionRolledbackException;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Ignore;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.aop.ThrowsAdvice;
-
 import test.aop.MethodCounter;
 
+import org.springframework.aop.ThrowsAdvice;
+
 /**
- * Unit tests for {@link ThrowsAdviceInterceptor}
- * 
  * @author Rod Johnson
  * @author Chris Beams
  */
@@ -52,7 +43,6 @@ public final class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	@Ignore
 	public void testNotInvoked() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
