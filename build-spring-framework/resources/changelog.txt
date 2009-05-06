@@ -53,7 +53,9 @@ Changes in version 3.0.0.M3 (2009-05-05)
 * introduced ModelAndViewResolver SPI for custom handler method return types
 * FreeMarkerView can be initialized with ServletContext only (e.g. for testing)
 * MockPortletSession supports destruction of session attributes on invalidation
-
+* completed upgrade of the TestContext Framework to JUnit 4.5
+* SpringJUnit4ClassRunner subclasses can now override the default ContextLoader class
+* added "value" alias for @ContextConfiguration's "locations" attribute
 
 Changes in version 3.0.0.M2 (2009-02-25)
 ----------------------------------------
