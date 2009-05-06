@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 /**
- * A factory for DataSource implementation, such as a {@link SimpleDriverDataSource} or connection pool such as Apache DBCP or c3p0.
+ * Encapsulates the creation of a particular DataSource implementation, such as a {@link SimpleDriverDataSource} or connection pool such as Apache DBCP or c3p0.
  * Call {@link #getConnectionProperties()} to configure normalized DataSource properties before calling {@link #getDataSource()} to actually get the configured DataSource instance.
  * @author Keith Donald 
  */

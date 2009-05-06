@@ -26,13 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 /**
- * Returns a {@link EmbeddedDatabase} instance pre-populated with test data. When the database is returned, callers are
- * guaranteed that the database schema and test data will have already been loaded.
+ * Creates a {@link EmbeddedDatabase} instance.
+ * Callers are guaranteed that the returned database has been fully initialized and populated.
  * <p>
  * Can be configured:<br>
  * Call {@link #setDatabaseName(String)} to change the name of the database.<br>
  * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database type if you wish to use one of the supported types.<br>
- * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to set a configuration strategy for your own embedded database type.<br>
+ * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to configure support for your own embedded database type.<br>
  * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.<br>
  * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.<br>
  * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.<br>
