@@ -116,14 +116,19 @@ public class EmbeddedDatabaseFactory {
 	 */
 	public EmbeddedDatabase getDatabase() {
 		if (dataSource == null) {
-			initDataSource();
+			initDatabase();
 		}
 		return new EmbeddedDataSourceProxy(dataSource);
 	}
 
 	// subclassing hooks
 
-	protected void initDataSource() {
+	/**
+	 * Hook to initialize the embedded database.
+	 * Subclasses may call to force initialization.
+	 * After calling this method, {@link #getDataSource()} returns the DataSource providing connectivity to the db.
+	 */
+	protected void initDatabase() {
 		// create the embedded database source first
 		if (logger.isInfoEnabled()) {
 			logger.info("Created embedded database '" + databaseName + "'");
@@ -136,11 +141,23 @@ public class EmbeddedDatabaseFactory {
 		}
 	}
 
+	/**
+	 * Hook that gets the datasource that provides the connectivity to the embedded database.
+	 * Returns null if the datasource has not been initialized or the database has been shutdown.
+	 * Subclasses may call to access the datasource instance directly.
+	 * @return the datasource
+	 */
 	protected DataSource getDataSource() {
 		return dataSource;
 	}
 
-	protected void shutdownDataSource() {
+	/**
+	 * Hook to shutdown the embedded database.
+	 * Subclasses may call to force shutdown.
+	 * After calling, {@link #getDataSource()} returns null.
+	 * Does nothing if no embedded database has been initialized.
+	 */
+	protected void shutdownDatabase() {
 		if (dataSource != null) {
 			databaseConfigurer.shutdown(dataSource);
 			dataSource = null;
@@ -200,7 +217,7 @@ public class EmbeddedDatabaseFactory {
 		}
 
 		public void shutdown() {
-			shutdownDataSource();
+			shutdownDatabase();
 		}
 
 	}

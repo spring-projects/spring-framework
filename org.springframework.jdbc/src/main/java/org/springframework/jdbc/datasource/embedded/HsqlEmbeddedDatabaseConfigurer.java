@@ -25,12 +25,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ClassUtils;
 
-public class HsqlEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
+/**
+ * Initializes a HSQL embedded database instance.
+ * Call {@link #getInstance()} to get the singleton instance of this class.
+ * 
+ * @author Keith Donald
+ */
+final class HsqlEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 	
 	private static final Log logger = LogFactory.getLog(HsqlEmbeddedDatabaseConfigurer.class);
 
 	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
 	
+	private HsqlEmbeddedDatabaseConfigurer() {	
+	}
+	
+	/**
+	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
+	 * @return the configurer
+	 * @throws ClassNotFoundException if HSQL is not on the classpath
+	 */
 	public static synchronized HsqlEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
 			ClassUtils.forName("org.hsqldb.jdbcDriver", HsqlEmbeddedDatabaseConfigurer.class.getClassLoader());
