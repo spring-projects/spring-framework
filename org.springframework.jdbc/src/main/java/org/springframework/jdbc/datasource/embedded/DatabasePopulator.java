@@ -19,7 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Strategy for populating a database with data.
+ * Strategy used to populate an embedded database during initialization.
  * @author Keith Donald
  * @see ResourceDatabasePopulator
  */

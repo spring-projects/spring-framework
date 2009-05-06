@@ -33,10 +33,11 @@ import org.springframework.util.StringUtils;
 /**
  * Populates a database from schema and test-data SQL defined in external resources. By default, looks for a schema.sql
  * file and test-data.sql resource in the root of the classpath.
- * 
- * May be configured. Call {@link #setSchemaLocation(Resource)} to configure the location of the database schema file.
- * Call {@link #setTestDataLocation(Resource)} to configure the location of the test data file. Call
- * {@link #setSqlScriptEncoding(String)} to set the encoding for the schema and test data SQL.
+ * <p>
+ * May be configured:<br>
+ * Call {@link #setSchemaLocation(Resource)} to configure the location of the database schema file.<br>
+ * Call {@link #setTestDataLocation(Resource)} to configure the location of the test data file.<br>
+ * Call {@link #setSqlScriptEncoding(String)} to set the encoding for the schema and test data SQL.<br>
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 

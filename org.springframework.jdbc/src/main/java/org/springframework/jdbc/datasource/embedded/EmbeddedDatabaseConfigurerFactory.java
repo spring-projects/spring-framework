@@ -18,7 +18,7 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.Assert;
 
 /**
- * Package private factory for mapping well-known {@link EmbeddedDatabaseType embedded database types} to
+ * Maps well-known {@link EmbeddedDatabaseType embedded database types} to
  * {@link EmbeddedDatabaseConfigurer} strategies.
  * @author Keith Donald
  */
