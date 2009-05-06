@@ -57,6 +57,7 @@ Changes in version 3.0.0.M3 (2009-05-05)
 * SpringJUnit4ClassRunner subclasses can now override the default ContextLoader class
 * added "value" alias for @ContextConfiguration's "locations" attribute
 
+
 Changes in version 3.0.0.M2 (2009-02-25)
 ----------------------------------------
 
