@@ -18,7 +18,7 @@ package org.springframework.jdbc.datasource.embedded;
 import javax.sql.DataSource;
 
 /**
- * Encapsulates the configuration required to create, connect to, and shutdown a specific type of embedded database such as HSQLdb or H2.
+ * Encapsulates the configuration required to create, connect to, and shutdown a specific type of embedded database such as HSQL or H2.
  * Create a implementation for each database type you wish to support; for example HSQL, H2, or some other type.
  * @author Keith Donald
  */
