@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,6 +54,14 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
+	 * Set the scripts to execute to populate the database.
+	 * @param scripts the scripts to execute
+	 */
+	public void setScripts(Resource[] scripts) {
+		this.scripts = Arrays.asList(scripts);
+	}
+
+	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
 	 * Note setting this property has no effect on added scripts that are already {@link EncodedResource encoded resources}.
 	 * @see #addScript(Resource)
@@ -60,7 +69,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
 		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
-
+	
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), false);
