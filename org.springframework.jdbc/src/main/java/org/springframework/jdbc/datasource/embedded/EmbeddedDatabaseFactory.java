@@ -23,24 +23,20 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 
 /**
- * Returns a {@link EmbeddedDatabase} instance pre-populated with test data.
- * When the database is returned, callers are guaranteed that the database schema and test data will have already been loaded.
+ * Returns a {@link EmbeddedDatabase} instance pre-populated with test data. When the database is returned, callers are
+ * guaranteed that the database schema and test data will have already been loaded.
+ * <p>
+ * Can be configured:<br>
+ * Call {@link #setDatabaseName(String)} to change the name of the database.<br>
+ * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database type if you wish to use one of the supported types.<br>
+ * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to set a configuration strategy for your own embedded database type.<br>
+ * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.<br>
+ * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.<br>
+ * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.<br>
  * 
- * Can be configured.
- * Call {@link #setDatabaseName(String)} to change the name of the  database.
- * Call {@link #setDatabaseType(EmbeddedDatabaseType)} to set the database type if you wish to use one of the supported types.
- * Call {@link #setDatabaseConfigurer(EmbeddedDatabaseConfigurer)} to set a configuration strategy for your own embedded database type.
- * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.
- * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.
- * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.
  * @author Keith Donald
  */
 public class EmbeddedDatabaseFactory {
@@ -50,36 +46,34 @@ public class EmbeddedDatabaseFactory {
 	private String databaseName;
 
 	private DataSourceFactory dataSourceFactory;
-	
+
 	private EmbeddedDatabaseConfigurer databaseConfigurer;
 
 	private DatabasePopulator databasePopulator;
 
 	private DataSource dataSource;
-	
+
 	/**
-	 * Creates a default {@link EmbeddedDatabaseFactory}.
-	 * Calling {@link #getDatabase()} will create a embedded HSQL database of name 'testdb'.
+	 * Creates a default {@link EmbeddedDatabaseFactory}. Calling {@link #getDatabase()} will create a embedded HSQL
+	 * database of name 'testdb'.
 	 */
 	public EmbeddedDatabaseFactory() {
 		setDatabaseName("testdb");
 		setDatabaseType(EmbeddedDatabaseType.HSQL);
 		setDataSourceFactory(new SimpleDriverDataSourceFactory());
 	}
-	
+
 	/**
-	 * Sets the name of the database.
-	 * Defaults to 'testdb'.
+	 * Sets the name of the database. Defaults to 'testdb'.
 	 * @param name of the test database
 	 */
 	public void setDatabaseName(String name) {
 		Assert.notNull(name, "The testDatabaseName is required");
 		databaseName = name;
 	}
-	
+
 	/**
-	 * Sets the type of embedded database to use.
-	 * Call this when you wish to configure one of the pre-supported types.
+	 * Sets the type of embedded database to use. Call this when you wish to configure one of the pre-supported types.
 	 * Defaults to HSQL.
 	 * @param type the test database type
 	 */
@@ -88,18 +82,17 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Sets the strategy that will be used to configure the embedded database instance.
-	 * Call this when you wish to use an embedded database type not already supported.
+	 * Sets the strategy that will be used to configure the embedded database instance. Call this when you wish to use
+	 * an embedded database type not already supported.
 	 * @param configurer the embedded database configurer
 	 */
 	public void setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
 		this.databaseConfigurer = configurer;
 	}
-	
+
 	/**
-	 * Sets the strategy that will be used to populate the embedded database.
-	 * Defaults to null.
-	 * @param populator the database populator 
+	 * Sets the strategy that will be used to populate the embedded database. Defaults to null.
+	 * @param populator the database populator
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
 		Assert.notNull(populator, "The DatabasePopulator is required");
@@ -107,8 +100,8 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Sets the factory to use to create the DataSource instance that connects to the embedded database.
-	 * Defaults to {@link SimpleDriverDataSourceFactory}.
+	 * Sets the factory to use to create the DataSource instance that connects to the embedded database. Defaults to
+	 * {@link SimpleDriverDataSourceFactory}.
 	 * @param dataSourceFactory the data source factory
 	 */
 	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
@@ -129,7 +122,7 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	// subclassing hooks
-	
+
 	protected void initDataSource() {
 		// create the embedded database source first
 		if (logger.isInfoEnabled()) {
@@ -146,26 +139,27 @@ public class EmbeddedDatabaseFactory {
 	protected DataSource getDataSource() {
 		return dataSource;
 	}
-	
+
 	protected void shutdownDataSource() {
 		if (dataSource != null) {
 			databaseConfigurer.shutdown(dataSource);
 			dataSource = null;
 		}
 	}
-	
+
 	// internal helper methods
 
 	private void populateDatabase() {
-		TransactionTemplate template = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
-		template.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				databasePopulator.populate(new JdbcTemplate(dataSource));
-			}
-		});
+		Connection connection = JdbcUtils.getConnection(dataSource);
+		try {
+			databasePopulator.populate(connection);
+		} catch (SQLException e) {
+			throw new RuntimeException("SQLException occurred populating embedded database", e);
+		} finally {
+			JdbcUtils.closeConnection(connection);
+		}
 	}
-	
+
 	private class EmbeddedDataSourceProxy implements EmbeddedDatabase {
 		private DataSource dataSource;
 
@@ -177,8 +171,7 @@ public class EmbeddedDatabaseFactory {
 			return dataSource.getConnection();
 		}
 
-		public Connection getConnection(String username, String password)
-				throws SQLException {
+		public Connection getConnection(String username, String password) throws SQLException {
 			return dataSource.getConnection(username, password);
 		}
 
@@ -205,11 +198,11 @@ public class EmbeddedDatabaseFactory {
 		public <T> T unwrap(Class<T> iface) throws SQLException {
 			return dataSource.unwrap(iface);
 		}
-		
+
 		public void shutdown() {
 			shutdownDataSource();
 		}
 
 	}
-	
+
 }

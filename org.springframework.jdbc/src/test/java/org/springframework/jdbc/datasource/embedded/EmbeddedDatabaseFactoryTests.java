@@ -2,12 +2,9 @@ package org.springframework.jdbc.datasource.embedded;
 
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
+
 import org.junit.Test;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.DatabasePopulator;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory;
 
 public class EmbeddedDatabaseFactoryTests {
 	
@@ -26,7 +23,7 @@ public class EmbeddedDatabaseFactoryTests {
 
 		private boolean populateCalled;
 		
-		public void populate(JdbcTemplate template) throws DataAccessException {
+		public void populate(Connection connection) {
 			this.populateCalled = true;
 		}
 		
