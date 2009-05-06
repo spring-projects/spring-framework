@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.support;
+package org.springframework.scheduling.config;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.Assert;
 
 /**
