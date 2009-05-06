@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 /**
  * ContextConfiguration defines class-level metadata which can be used to
  * instruct client code with regard to how to load and configure an
- * {@link org.springframework.context.ApplicationContext}.
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -46,7 +46,7 @@ public @interface ContextConfiguration {
 	String[] locations() default {};
 
 	/**
-	 * Alias for {@link #locations()}.
+	 * Alias for {@link #locations() locations}.
 	 * 
 	 * @since 3.0
 	 */
@@ -61,18 +61,19 @@ public @interface ContextConfiguration {
 	 * annotated class will be appended to the list of resource locations
 	 * defined by an annotated superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of resource locations. In the following
-	 * example, the {@link org.springframework.context.ApplicationContext}
+	 * example, the {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * for <code>ExtendedTest</code> will be loaded from
 	 * &quot;base-context.xml&quot; <strong>and</strong>
 	 * &quot;extended-context.xml&quot;, in that order. Beans defined in
 	 * &quot;extended-context.xml&quot; may therefore override those defined in
 	 * &quot;base-context.xml&quot;.
 	 * <pre class="code">
-	 * {@link ContextConfiguration @ContextConfiguration}(locations={&quot;base-context.xml&quot;})
+	 * &#064;ContextConfiguration(&quot;base-context.xml&quot;)
 	 * public class BaseTest {
 	 *     // ...
 	 * }
-	 * {@link ContextConfiguration @ContextConfiguration}(locations={&quot;extended-context.xml&quot;})
+	 * 
+	 * &#064;ContextConfiguration(&quot;extended-context.xml&quot;)
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
 	 * }
@@ -85,7 +86,7 @@ public @interface ContextConfiguration {
 
 	/**
 	 * The type of {@link ContextLoader} to use for loading an
-	 * {@link org.springframework.context.ApplicationContext}.
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
 
