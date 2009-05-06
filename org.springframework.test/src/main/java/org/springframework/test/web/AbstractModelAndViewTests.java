@@ -28,11 +28,11 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Convenient JUnit 3.8 base class for tests dealing with Spring Web MVC
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
- *
+ * 
  * <p>All <code>assert*()</code> methods throw {@link AssertionFailedError}s.
- *
+ * 
  * <p>Consider the use of {@link ModelAndViewAssert} with JUnit 4 and TestNG.
- *
+ * 
  * @author Alef Arendsen
  * @author Bram Smeets
  * @author Sam Brannen
@@ -41,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @see ModelAndViewAssert
  * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
+ * or {@link ModelAndViewAssert} with JUnit 4 and TestNG.
  */
 @Deprecated
 public abstract class AbstractModelAndViewTests extends TestCase {
