@@ -15,13 +15,20 @@
  */
 package org.springframework.jdbc.datasource.embedded;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ClassUtils;
 
 public class HsqlEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 	
+	private static final Log logger = LogFactory.getLog(HsqlEmbeddedDatabaseConfigurer.class);
+
 	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
 	
 	public static synchronized HsqlEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
@@ -40,7 +47,18 @@ public class HsqlEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	}
 
 	public void shutdown(DataSource dataSource) {
-		new JdbcTemplate(dataSource).execute("SHUTDOWN");
+		Connection connection = JdbcUtils.getConnection(dataSource);
+		Statement stmt = null;
+		try {
+			stmt = connection.createStatement();
+			stmt.execute("SHUTDOWN");
+		} catch (SQLException e) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not shutdown in-memory HSQL database", e);
+			}
+		} finally {
+			JdbcUtils.closeStatement(stmt);
+		}
 	}
 
 }

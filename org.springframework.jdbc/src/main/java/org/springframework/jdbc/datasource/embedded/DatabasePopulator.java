@@ -15,8 +15,8 @@
  */
 package org.springframework.jdbc.datasource.embedded;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Strategy for populating a database with data.
@@ -27,8 +27,8 @@ public interface DatabasePopulator {
 	
 	/**
 	 * Populate the database using the JDBC-based data access template provided.
-	 * @param template the data access template to use to populate the db; already configured and ready to use
-	 * @throws DataAccessException if an unrecoverable data access exception occurs during database population
+	 * @param connection the JDBC connection to use to populate the db; already configured and ready to use
+	 * @throws SQLException if an unrecoverable data access exception occurs during database population
 	 */
-	void populate(JdbcTemplate template);
+	void populate(Connection connection) throws SQLException;
 }

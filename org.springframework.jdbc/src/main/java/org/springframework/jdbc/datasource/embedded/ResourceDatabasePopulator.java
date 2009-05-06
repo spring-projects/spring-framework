@@ -17,6 +17,9 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,19 +28,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
 /**
- * Populates a database from schema and test-data SQL defined in external resources.
- * By default, looks for a schema.sql file and test-data.sql resource in the root of the classpath.
+ * Populates a database from schema and test-data SQL defined in external resources. By default, looks for a schema.sql
+ * file and test-data.sql resource in the root of the classpath.
  * 
- * May be configured.
- * Call {@link #setSchemaLocation(Resource)} to configure the location of the database schema file.
- * Call {@link #setTestDataLocation(Resource)} to configure the location of the test data file.
- * Call {@link #setSqlScriptEncoding(String)} to set the encoding for the schema and test data SQL.
+ * May be configured. Call {@link #setSchemaLocation(Resource)} to configure the location of the database schema file.
+ * Call {@link #setTestDataLocation(Resource)} to configure the location of the test data file. Call
+ * {@link #setSqlScriptEncoding(String)} to set the encoding for the schema and test data SQL.
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
@@ -46,7 +45,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private String sqlScriptEncoding;
 
 	private List<Resource> scripts = new ArrayList<Resource>();
-	
+
 	/**
 	 * Add a script to execute to populate the database.
 	 * @param script the path to a SQL script
@@ -54,7 +53,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public void addScript(Resource script) {
 		scripts.add(script);
 	}
-	
+
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
 	 */
@@ -62,68 +61,64 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
 
-	public void populate(JdbcTemplate template) {
+	public void populate(Connection connection) throws SQLException {
 		for (Resource script : scripts) {
-			executeSqlScript(template, new EncodedResource(script, sqlScriptEncoding), false);
+			executeSqlScript(connection, new EncodedResource(script, sqlScriptEncoding), false);
 		}
 	}
 
-	// From SimpleJdbcTestUtils - TODO address duplication
-	
 	/**
-	 * Execute the given SQL script.
-	 * <p>The script will normally be loaded by classpath. There should be one statement
-	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
-	 * DDL if you expect rollback.</b>
+	 * Execute the given SQL script. <p>The script will normally be loaded by classpath. There should be one statement
+	 * per line. Any semicolons will be removed. <b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param template the SimpleJdbcTemplate with which to perform JDBC operations
-	 * @param resource the resource (potentially associated with a specific encoding)
-	 * to load the SQL script from.
-	 * @param continueOnError whether or not to continue without throwing an
-	 * exception in the event of an error.
+	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from.
+	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error.
 	 */
-	static void executeSqlScript(JdbcTemplate template, EncodedResource resource, boolean continueOnError) {
+	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError)
+			throws SQLException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
 		}
 		long startTime = System.currentTimeMillis();
 		List<String> statements = new LinkedList<String>();
+		String script;
 		try {
-			LineNumberReader lnr = new LineNumberReader(resource.getReader());
-			String script = readScript(lnr);
-			char delimiter = ';';
-			if (!containsSqlScriptDelimiters(script, delimiter)) {
-				delimiter = '\n';			
-			}
-			splitSqlScript(script, delimiter, statements);
-			for (String statement : statements) {
-				try {
-					int rowsAffected = template.update(statement);
-					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-					}
+			script = readScript(resource);
+		} catch (IOException e) {
+			throw new CannotReadScriptException(resource, e);
+		}
+		char delimiter = ';';
+		if (!containsSqlScriptDelimiters(script, delimiter)) {
+			delimiter = '\n';
+		}
+		splitSqlScript(script, delimiter, statements);
+		int lineNumber = 0;
+		for (String statement : statements) {
+			lineNumber++;
+			Statement stmt = null;
+			try {
+				stmt = connection.createStatement();
+				int rowsAffected = stmt.executeUpdate(statement);
+				if (logger.isDebugEnabled()) {
+					logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 				}
-				catch (DataAccessException ex) {
-					if (continueOnError) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("SQL: " + statement + " failed", ex);
-						}
+			} catch (SQLException e) {
+				if (continueOnError) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Line " + lineNumber + " statement failed: " + statement, e);
 					}
-					else {
-						throw ex;
-					}
+				} else {
+					throw e;
 				}
-			}
-			long elapsedTime = System.currentTimeMillis() - startTime;
-			if (logger.isInfoEnabled()) {
-				logger.info("Done executing SQL script from " + resource + " in " + elapsedTime + " ms.");
+			} finally {
+				JdbcUtils.closeStatement(stmt);
 			}
 		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource, ex);
+		long elapsedTime = System.currentTimeMillis() - startTime;
+		if (logger.isInfoEnabled()) {
+			logger.info("Done executing SQL script from " + resource + " in " + elapsedTime + " ms.");
 		}
 	}
-	
-	// From JdbcTestUtils - TODO address duplication - these do not seem as useful as the one above
 
 	/**
 	 * Read a script from the LineNumberReader and build a String containing the lines.
@@ -131,8 +126,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @return <code>String</code> containing the script lines
 	 * @throws IOException
 	 */
-	private static String readScript(LineNumberReader lineNumberReader) throws IOException {
-		String currentStatement = lineNumberReader.readLine();
+	private static String readScript(EncodedResource resource) throws IOException {
+		LineNumberReader lnr = new LineNumberReader(resource.getReader());
+		String currentStatement = lnr.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
 			if (StringUtils.hasText(currentStatement)) {
@@ -141,7 +137,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 				}
 				scriptBuilder.append(currentStatement);
 			}
-			currentStatement = lineNumberReader.readLine();
+			currentStatement = lnr.readLine();
 		}
 		return scriptBuilder.toString();
 	}
@@ -166,8 +162,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Split an SQL script into separate statements delimited with the provided delimiter character. Each
-	 * individual statement will be added to the provided <code>List</code>.
+	 * Split an SQL script into separate statements delimited with the provided delimiter character. Each individual
+	 * statement will be added to the provided <code>List</code>.
 	 * @param script the SQL script
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 * @param statements the List that will contain the individual statements
@@ -185,8 +181,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					statements.add(sb.toString());
 					sb = new StringBuilder();
 				}
-			}
-			else {
+			} else {
 				sb.append(content[i]);
 			}
 		}

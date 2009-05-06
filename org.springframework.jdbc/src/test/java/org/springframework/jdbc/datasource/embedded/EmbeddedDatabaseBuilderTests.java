@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 public class EmbeddedDatabaseBuilderTests {
 	
@@ -33,8 +30,7 @@ public class EmbeddedDatabaseBuilderTests {
 		try {
 			new EmbeddedDatabaseBuilder().script("bogus.sql").build();
 			fail("Should have failed");
-		} catch (DataAccessException e) {
-			
+		} catch (CannotReadScriptException e) {
 		}
 	}
 
