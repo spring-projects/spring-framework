@@ -31,21 +31,18 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.StringUtils;
 
 /**
- * Populates a database from schema and test-data SQL defined in external resources. By default, looks for a schema.sql
- * file and test-data.sql resource in the root of the classpath.
+ * Populates a database from SQL scripts defined in external resources.
  * <p>
- * May be configured:<br>
- * Call {@link #setSchemaLocation(Resource)} to configure the location of the database schema file.<br>
- * Call {@link #setTestDataLocation(Resource)} to configure the location of the test data file.<br>
- * Call {@link #setSqlScriptEncoding(String)} to set the encoding for the schema and test data SQL.<br>
+ * Call {@link #addScript(Resource)} to add a SQL script location.<br>
+ * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.<br>
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
-	private String sqlScriptEncoding;
-
 	private List<Resource> scripts = new ArrayList<Resource>();
+
+	private String sqlScriptEncoding;
 
 	/**
 	 * Add a script to execute to populate the database.
@@ -57,6 +54,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
+	 * Note setting this property has no effect on added scripts that are already {@link EncodedResource encoded resources}.
+	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
 		this.sqlScriptEncoding = sqlScriptEncoding;
@@ -64,10 +63,18 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : scripts) {
-			executeSqlScript(connection, new EncodedResource(script, sqlScriptEncoding), false);
+			executeSqlScript(connection, applyEncodingIfNecessary(script), false);
 		}
 	}
 
+	private EncodedResource applyEncodingIfNecessary(Resource script) {
+		if (script instanceof EncodedResource) {
+			return (EncodedResource) script;
+		} else {
+			return new EncodedResource(script, sqlScriptEncoding);
+		}
+	}
+	
 	/**
 	 * Execute the given SQL script. <p>The script will normally be loaded by classpath. There should be one statement
 	 * per line. Any semicolons will be removed. <b>Do not use this method to execute DDL if you expect rollback.</b>
