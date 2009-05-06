@@ -162,7 +162,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Does the provided SQL script contain the specified delimiter?
 	 * @param script the SQL script
-	 * @param delim charecter delimiting each statement - typically a ';' character
+	 * @param delim character delimiting each statement - typically a ';' character
 	 */
 	private static boolean containsSqlScriptDelimiters(String script, char delim) {
 		boolean inLiteral = false;
@@ -182,7 +182,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Split an SQL script into separate statements delimited with the provided delimiter character. Each individual
 	 * statement will be added to the provided <code>List</code>.
 	 * @param script the SQL script
-	 * @param delim charecter delimiting each statement - typically a ';' character
+	 * @param delim character delimiting each statement - typically a ';' character
 	 * @param statements the List that will contain the individual statements
 	 */
 	private static void splitSqlScript(String script, char delim, List<String> statements) {
