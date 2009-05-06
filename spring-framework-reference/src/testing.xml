@@ -120,22 +120,22 @@
         <title>Spring MVC</title>
 
         <para>The <literal>org.springframework.test.web</literal> package
-        contains <classname>AbstractModelAndViewTests</classname>, which
-        serves as a convenient base class for JUnit 3.8 based unit tests
-        dealing with Spring MVC <classname>ModelAndView</classname> objects.
-        When developing against Java 1.4 and higher (e.g., in combination with
-        JUnit 4+, TestNG, etc.), you have the option of using the
-        <classname>ModelAndViewAssert</classname> class (in the same package)
-        to test your <classname>ModelAndView</classname> related
-        functionality.</para>
-
-        <para>Tip: depending on your testing environment, either extend
-        <classname>AbstractModelAndViewTests</classname> or use
-        <classname>ModelAndViewAssert</classname> directly and then use
-        <literal>MockHttpServletRequest</literal>,
-        <literal>MockHttpSession</literal>, etc. from the <link
-        linkend="mock-objects-servlet"><literal>org.springframework.mock.web</literal></link>
-        package to test your Spring MVC <literal>Controller</literal>s.</para>
+        contains <classname>ModelAndViewAssert</classname>, which can be
+        used in combination with any testing framework (e.g., JUnit 4+,
+        TestNG, etc.) for unit tests dealing with Spring MVC
+        <classname>ModelAndView</classname> objects.</para>
+        
+        <tip>
+	        <title>Unit testing Spring MVC Controllers</title>
+	        <para>
+		        To test your Spring MVC <literal>Controller</literal>s,
+		        use <classname>ModelAndViewAssert</classname> combined with
+		        <literal>MockHttpServletRequest</literal>,
+		        <literal>MockHttpSession</literal>, etc. from the <link
+		        linkend="mock-objects-servlet"><literal>org.springframework.mock.web</literal></link>
+		        package.
+	        </para>
+        </tip>
       </section>
     </section>
   </section>
@@ -175,7 +175,7 @@
       or remote tests relying on deployment to an application server.</para>
 
       <para>
-	      Since Spring 2.5 unit and integration testing support is provided 
+	      Since Spring 2.5, unit and integration testing support is provided 
 	      in the form of the annotation-driven <link
 	      linkend="testcontext-framework">Spring TestContext Framework</link>.
 	      The TestContext Framework is agnostic of the actual testing framework
@@ -265,7 +265,7 @@
         rebuild the application context before executing the next test.</para>
 
         <para>
-        	Context management and caching with the 
+        	See: context management and caching with the 
         	<link linkend="testcontext-ctx-management">TestContext Framework</link>.
         </para>
       </section>
@@ -312,7 +312,7 @@
         </itemizedlist>
 
         <para>
-        	Dependency Injection of test fixtures with the 
+        	See: dependency injection of test fixtures with the 
         	<link linkend="testcontext-fixture-di">TestContext Framework</link>.
         </para>
       </section>
@@ -323,11 +323,11 @@
         <para>One common issue in tests that access a real database is their
         affect on the state of the persistence store. Even when you're using a
         development database, changes to the state may affect future tests.
-        Also, many operations - such as inserting to or modifying persistent
+        Also, many operations - such as inserting or modifying persistent
         data - cannot be performed (or verified) outside a transaction.</para>
 
-        <para>The TestContext framework meets this need. By default, the
-        framework will create and roll back a transaction for each
+        <para>The TestContext framework addresses this issue. By default,
+        the framework will create and roll back a transaction for each
         test. You simply write code that can assume the existence of a
         transaction. If you call transactionally proxied objects in your
         tests, they will behave correctly, according to their transactional
@@ -343,11 +343,14 @@
         useful when you want a particular test to populate or modify the
         database - the TestContext framework can be
         instructed to cause the transaction to commit instead of roll back
-        via the <interfacename>@TransactionConfiguration</interfacename>
-        and <interfacename>@Rollback</interfacename> annotations.</para>
+        via the
+        <link linkend="integration-testing-annotations"><interfacename>@TransactionConfiguration</interfacename></link>
+        and 
+        <link linkend="integration-testing-annotations"><interfacename>@Rollback</interfacename></link>
+        annotations.</para>
 
         <para>
-	        Transaction management with the 
+	        See: transaction management with the 
         	<link linkend="testcontext-tx">TestContext Framework</link>.
 		</para>
       </section>
@@ -382,12 +385,14 @@
           </listitem>
         </itemizedlist>
 
-        <para>You may find it desirable to provide a custom, application-wide superclass for
-        integration tests that provides further useful instance variables and
+        <para>
+        In addition, you may find it desirable to provide your own custom,
+        application-wide superclass for integration tests that provides
+        further useful instance variables and
         methods specific to your project.</para>
 
         <para>
-        	Support classes for the 
+        	See: support classes for the 
         	<link linkend="testcontext-support-classes">TestContext Framework</link>.
 		</para>
       </section>
@@ -458,6 +463,7 @@ public class CustomConfiguredApplicationContextTests {
           passed or not).</para>
 
           <programlisting language="java">@DirtiesContext
+@Test
 public void testProcessWhichDirtiesAppCtx() {
     <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
 }</programlisting>
@@ -520,6 +526,7 @@ public class CustomConfiguredTransactionalTests {
           the default rollback flag configured at the class level.</para>
 
           <programlisting language="java">@Rollback(false)
+@Test
 public void testProcessWithoutRollback() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -566,6 +573,7 @@ public void afterTransaction() {
           context.</para>
 
           <programlisting language="java">@NotTransactional 
+@Test
 public void testProcessWithoutTransaction() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -596,6 +604,7 @@ public void testProcessWithoutTransaction() {
 	          entire class or individual methods.</para>
 	
 	          <programlisting language="java">@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
+@Test
 public void testProcessWhichRunsOnlyOnSunJvm() {
     <lineannotation>// some logic that should run only on Java VMs from Sun Microsystems</lineannotation>
 }</programlisting>
@@ -607,6 +616,7 @@ public void testProcessWhichRunsOnlyOnSunJvm() {
 	          Consider the following example:</para>
 	
 	          <programlisting language="java">@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
+@Test
 public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
     <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
 }</programlisting>
@@ -706,6 +716,7 @@ public void testProcessWithOneSecondTimeout() {
 	          fixture.</para>
 
 	          <programlisting language="java">@Repeat(10)
+@Test
 public void testProcessRepeatedly() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -894,16 +905,16 @@ public void testProcessRepeatedly() {
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class MyTest {
-	<emphasis role="bold">@Autowired</emphasis>
-	private ApplicationContext applicationContext;
+    <emphasis role="bold">@Autowired</emphasis>
+    private ApplicationContext applicationContext;
 
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
         </tip>
 
-        <para>In contrast to the now deprecated JUnit 3.8 legacy support, test
-        classes which use the TestContext framework do not need to override any
-        <literal>protected</literal> instance methods to configure their
+        <para>In contrast to the now deprecated JUnit 3.8 legacy class hierarchy,
+        test classes which use the TestContext framework do not need to override
+        any <literal>protected</literal> instance methods to configure their
         application context. Rather, configuration is achieved merely by
         declaring the <interfacename>@ContextConfiguration</interfacename>
         annotation at the class level. If your test class does not explicitly
@@ -1079,7 +1090,7 @@ public class ExtendedTest extends BaseTest {
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration("daos.xml")</emphasis>
 public final class HibernateTitleDaoTests {
 
     <lineannotation>// this instance will be dependency injected <emphasis
@@ -1100,7 +1111,7 @@ public final class HibernateTitleDaoTests {
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration("daos.xml")</emphasis>
 public final class HibernateTitleDaoTests {
 
     <lineannotation>// this instance will be dependency injected <emphasis
@@ -1125,7 +1136,7 @@ public final class HibernateTitleDaoTests {
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration("daos.xml")</emphasis>
 public final class HibernateTitleDaoTests {
 
     <lineannotation>// this instance will be dependency injected <emphasis
@@ -1146,7 +1157,7 @@ public final class HibernateTitleDaoTests {
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"daos.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration("daos.xml")</emphasis>
 public final class HibernateTitleDaoTests {
 
     <lineannotation>// this instance will be dependency injected <emphasis
