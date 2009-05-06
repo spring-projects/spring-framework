@@ -32,7 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
 public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
 
 	public void afterPropertiesSet() throws Exception {
-		initDataSource();
+		initDatabase();
 	}
 
 	public DataSource getObject() throws Exception {
@@ -48,7 +48,7 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory impleme
 	}
 
 	public void destroy() throws Exception {
-		shutdownDataSource();
+		shutdownDatabase();
 	}	
 
 }

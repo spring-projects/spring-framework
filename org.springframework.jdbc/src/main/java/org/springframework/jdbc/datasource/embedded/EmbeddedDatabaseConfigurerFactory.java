@@ -18,22 +18,27 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.Assert;
 
 /**
- * Package private factory for mapping well-known embedded database types to database configurer strategies.
+ * Package private factory for mapping well-known {@link EmbeddedDatabaseType embedded database types} to
+ * {@link EmbeddedDatabaseConfigurer} strategies.
  * @author Keith Donald
  */
-class EmbeddedDatabaseConfigurerFactory {
+final class EmbeddedDatabaseConfigurerFactory {
 
+	private EmbeddedDatabaseConfigurerFactory() {		
+	}
+	
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
 		Assert.notNull(type, "The EmbeddedDatabaseType is required");
 		try {
 			if (type == EmbeddedDatabaseType.HSQL) {
 				return HsqlEmbeddedDatabaseConfigurer.getInstance();
 			} else {
-				throw new UnsupportedOperationException("Other types not yet supported");
+				throw new UnsupportedOperationException("Other embedded database types not yet supported");
 			}
 		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException("Drivers for test database type [" + type + "] are not available in the classpath", e);
+			throw new IllegalStateException("Drivers for test database type [" + type
+					+ "] are not available in the classpath", e);
 		}
 	}
-	
+
 }
