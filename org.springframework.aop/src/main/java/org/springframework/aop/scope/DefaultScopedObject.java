@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.aop.scope;
+
+import java.io.Serializable;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.util.Assert;
@@ -32,7 +34,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroyScopedBean
  */
-public class DefaultScopedObject implements ScopedObject {
+public class DefaultScopedObject implements ScopedObject, Serializable {
 
 	private final ConfigurableBeanFactory beanFactory;
 
@@ -43,8 +45,6 @@ public class DefaultScopedObject implements ScopedObject {
 	 * Creates a new instance of the {@link DefaultScopedObject} class.
 	 * @param beanFactory the {@link ConfigurableBeanFactory} that holds the scoped target object
 	 * @param targetBeanName the name of the target bean
-	 * @throws IllegalArgumentException if either of the parameters is <code>null</code>; or
-	 * if the <code>targetBeanName</code> consists wholly of whitespace
 	 */
 	public DefaultScopedObject(ConfigurableBeanFactory beanFactory, String targetBeanName) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");

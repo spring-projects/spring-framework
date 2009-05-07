@@ -99,6 +99,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	public GenericApplicationContext() {
 		this.beanFactory = new DefaultListableBeanFactory();
+		this.beanFactory.setSerializationId(getId());
 		this.beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		this.beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 	}
@@ -147,6 +148,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
+	}
+
+	@Override
+	public void setId(String id) {
+		super.setId(id);
+		this.beanFactory.setSerializationId(id);
 	}
 
 	/**
@@ -219,11 +226,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	/**
-	 * Do nothing: We hold a single internal BeanFactory that will never
+	 * Not much to do: We hold a single internal BeanFactory that will never
 	 * get released.
 	 */
 	@Override
 	protected final void closeBeanFactory() {
+		this.beanFactory.setSerializationId(null);
 	}
 
 	/**

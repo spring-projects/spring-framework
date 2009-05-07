@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.context.annotation;
 
+import example.scannable.FooService;
+import example.scannable.ScopedProxyTestBean;
 import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import example.scannable.FooService;
-import example.scannable.ScopedProxyTestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Mark Fisher
@@ -54,7 +54,7 @@ public class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	public void testInterfacesScopedProxy() {
+	public void testInterfacesScopedProxy() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -62,16 +62,26 @@ public class ComponentScanParserScopedProxyTests {
 		FooService bean = (FooService) context.getBean("scopedProxyTestBean");
 		// should be dynamic proxy
 		assertTrue(AopUtils.isJdkDynamicProxy(bean));
+		// test serializability
+		assertEquals("bar", bean.foo(1));
+		FooService deserialized = (FooService) SerializationTestUtils.serializeAndDeserialize(bean);
+		assertNotNull(deserialized);
+		assertEquals("bar", deserialized.foo(1));
 	}
 
 	@Test
-	public void testTargetClassScopedProxy() {
+	public void testTargetClassScopedProxy() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should be a class-based proxy
 		assertTrue(AopUtils.isCglibProxy(bean));
+		// test serializability
+		assertEquals("bar", bean.foo(1));
+		ScopedProxyTestBean deserialized = (ScopedProxyTestBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		assertNotNull(deserialized);
+		assertEquals("bar", deserialized.foo(1));
 	}
 
 	@Test

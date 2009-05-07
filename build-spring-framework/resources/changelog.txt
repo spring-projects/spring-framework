@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.0.RC1 (2009-06-10)
+-----------------------------------------
+
+* Servlet/Portlet ApplicationContexts use a specific id based on servlet/portlet name
+* DefaultListableBeanFactory references are serializable now when initialized with an id
+* scoped proxies are serializable now, for web scopes as well as for singleton beans
+* injected request/session references are serializable proxies for the current request now
+* ReloadableResourceBundleMessageSource correctly calculates filenames for all locales now
+
+
 Changes in version 3.0.0.M3 (2009-05-06)
 ----------------------------------------
 

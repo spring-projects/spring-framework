@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,29 +155,6 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		this.targetBeanName = other.targetBeanName;
 		this.targetClass = other.targetClass;
 		this.beanFactory = other.beanFactory;
-	}
-
-	/**
-	 * Replaces this object with a SingletonTargetSource on serialization.
-	 * Protected as otherwise it won't be invoked for subclasses.
-	 * (The <code>writeReplace()</code> method must be visible to the class
-	 * being serialized.)
-	 * <p>With this implementation of this method, there is no need to mark
-	 * non-serializable fields in this class or subclasses as transient.
-	 */
-	protected Object writeReplace() throws ObjectStreamException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Disconnecting TargetSource [" + this + "]");
-		}
-		try {
-			// Create disconnected SingletonTargetSource.
-			return new SingletonTargetSource(getTarget());
-		}
-		catch (Exception ex) {
-			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
-			throw new NotSerializableException(
-					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
-		}
 	}
 
 

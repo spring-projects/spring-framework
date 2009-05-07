@@ -868,12 +868,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		if (mbd.isSingleton() || mbd.isPrototype()) {
 			throw new IllegalArgumentException(
-					"Bean name '" + beanName + "' does not correspond to an object in a Scope");
+					"Bean name '" + beanName + "' does not correspond to an object in a mutable scope");
 		}
 		String scopeName = mbd.getScope();
 		Scope scope = this.scopes.get(scopeName);
 		if (scope == null) {
-			throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
+			throw new IllegalStateException("No Scope SPI registered for scope '" + scopeName + "'");
 		}
 		Object bean = scope.remove(beanName);
 		if (bean != null) {

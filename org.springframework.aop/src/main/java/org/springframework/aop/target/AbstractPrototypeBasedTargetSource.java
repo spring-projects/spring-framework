@@ -16,6 +16,9 @@
 
 package org.springframework.aop.target;
 
+import java.io.NotSerializableException;
+import java.io.ObjectStreamException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -23,8 +26,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
- * Base class for dynamic TargetSources that can create new prototype bean
- * instances to support a pooling or new-instance-per-invocation strategy.
+ * Base class for dynamic {@link TargetSource} implementations that create new prototype
+ * bean instances to support a pooling or new-instance-per-invocation strategy.
  *
  * <p>Such TargetSources must run in a {@link BeanFactory}, as it needs to
  * call the <code>getBean</code> method to create a new prototype instance.
@@ -80,6 +83,34 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 			catch (Throwable ex) {
 				logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
 			}
+		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	/**
+	 * Replaces this object with a SingletonTargetSource on serialization.
+	 * Protected as otherwise it won't be invoked for subclasses.
+	 * (The <code>writeReplace()</code> method must be visible to the class
+	 * being serialized.)
+	 * <p>With this implementation of this method, there is no need to mark
+	 * non-serializable fields in this class or subclasses as transient.
+	 */
+	protected Object writeReplace() throws ObjectStreamException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Disconnecting TargetSource [" + this + "]");
+		}
+		try {
+			// Create disconnected SingletonTargetSource.
+			return new SingletonTargetSource(getTarget());
+		}
+		catch (Exception ex) {
+			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
+			throw new NotSerializableException(
+					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
 		}
 	}
 
