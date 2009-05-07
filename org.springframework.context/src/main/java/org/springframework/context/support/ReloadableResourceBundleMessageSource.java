@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ import org.springframework.util.StringUtils;
  * @see java.util.ResourceBundle
  */
 public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
-	implements ResourceLoaderAware {
+		implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 
@@ -127,10 +127,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * {@link ResourceBundleMessageSource} referring to a Spring resource location:
 	 * e.g. "WEB-INF/messages" for "WEB-INF/messages.properties",
 	 * "WEB-INF/messages_en.properties", etc.
-	 * <p>As of Spring 1.2.2, XML properties files are also supported:
-	 * e.g. "WEB-INF/messages" will find and load "WEB-INF/messages.xml",
-	 * "WEB-INF/messages_en.xml", etc as well. Note that this will only
-	 * work on JDK 1.5+.
+	 * <p>XML properties files are also supported: .g. "WEB-INF/messages" will find
+	 * and load "WEB-INF/messages.xml", "WEB-INF/messages_en.xml", etc as well.
 	 * @param basename the single basename
 	 * @see #setBasenames
 	 * @see org.springframework.core.io.ResourceEditor
@@ -146,14 +144,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * {@link ResourceBundleMessageSource} referring to a Spring resource location:
 	 * e.g. "WEB-INF/messages" for "WEB-INF/messages.properties",
 	 * "WEB-INF/messages_en.properties", etc.
-	 * <p>As of Spring 1.2.2, XML properties files are also supported:
-	 * e.g. "WEB-INF/messages" will find and load "WEB-INF/messages.xml",
-	 * "WEB-INF/messages_en.xml", etc as well. Note that this will only
-	 * work on JDK 1.5+.
-	 * <p>The associated resource bundles will be checked sequentially
-	 * when resolving a message code. Note that message definitions in a
-	 * <i>previous</i> resource bundle will override ones in a later bundle,
-	 * due to the sequential lookup.
+	 * <p>XML properties files are also supported: .g. "WEB-INF/messages" will find
+	 * and load "WEB-INF/messages.xml", "WEB-INF/messages_en.xml", etc as well.
+	 * <p>The associated resource bundles will be checked sequentially when resolving
+	 * a message code. Note that message definitions in a <i>previous</i> resource
+	 * bundle will override ones in a later bundle, due to the sequential lookup.
 	 * @param basenames an array of basenames
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle
@@ -393,6 +388,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * appending language code, country code, and variant code.
 	 * E.g.: basename "messages", Locale "de_AT_oo" -> "messages_de_AT_OO",
 	 * "messages_de_AT", "messages_de".
+	 * <p>Follows the rules defined by {@link java.util.Locale#toString()}.
 	 * @param basename the basename of the bundle
 	 * @param locale the locale
 	 * @return the List of filenames to check
@@ -404,17 +400,19 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		String variant = locale.getVariant();
 		StringBuilder temp = new StringBuilder(basename);
 
+		temp.append('_');
 		if (language.length() > 0) {
-			temp.append('_').append(language);
+			temp.append(language);
 			result.add(0, temp.toString());
 		}
 
+		temp.append('_');
 		if (country.length() > 0) {
-			temp.append('_').append(country);
+			temp.append(country);
 			result.add(0, temp.toString());
 		}
 
-		if (variant.length() > 0) {
+		if (variant.length() > 0 && (language.length() > 0 || country.length() > 0)) {
 			temp.append('_').append(variant);
 			result.add(0, temp.toString());
 		}
