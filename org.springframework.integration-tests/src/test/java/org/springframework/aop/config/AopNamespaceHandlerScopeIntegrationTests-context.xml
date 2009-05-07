@@ -13,6 +13,11 @@
 
 	<bean id="testBean" class="test.beans.TestBean"/>
 
+	<bean id="singletonScoped" class="test.beans.TestBean">
+		<aop:scoped-proxy/>
+		<property name="name" value="Rob Harrop"/>
+	</bean>
+
 	<bean id="requestScoped" class="test.beans.TestBean" scope="request">
 		<aop:scoped-proxy/>
 		<property name="name" value="Rob Harrop"/>

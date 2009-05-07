@@ -247,6 +247,7 @@ public class ContextLoader {
 
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
+		wac.setId(servletContext.getServletContextName());
 		wac.setParent(parent);
 		wac.setServletContext(servletContext);
 		wac.setConfigLocation(servletContext.getInitParameter(CONFIG_LOCATION_PARAM));

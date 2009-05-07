@@ -382,7 +382,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			catch (BeansException ex) {
 				// Destroy already created singletons to avoid dangling resources.
-				beanFactory.destroySingletons();
+				destroyBeans();
 
 				// Reset 'active' flag.
 				cancelRefresh(ex);
@@ -794,7 +794,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * destroys the singletons in the bean factory of this application context.
 	 * <p>Called by both <code>close()</code> and a JVM shutdown hook, if any.
 	 * @see org.springframework.context.event.ContextClosedEvent
-	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
+	 * @see #destroyBeans()
 	 * @see #close()
 	 * @see #registerShutdownHook()
 	 */
@@ -803,6 +803,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing " + this);
 			}
+
 			try {
 				// Publish shutdown event.
 				publishEvent(new ContextClosedEvent(this));
@@ -810,15 +811,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			catch (Throwable ex) {
 				logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent", ex);
 			}
+
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
 			Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 			for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
 				doStop(lifecycleBeans, beanName);
 			}
+
 			// Destroy all cached singletons in the context's BeanFactory.
 			destroyBeans();
+
 			// Close the state of this context itself.
 			closeBeanFactory();
+
 			onClose();
 			synchronized (this.activeMonitor) {
 				this.active = false;

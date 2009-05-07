@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -121,6 +126,57 @@ abstract class AutowireUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Resolve the given autowiring value against the given required type,
+	 * e.g. an {@link ObjectFactory} value to its actual object result.
+	 * @param autowiringValue the value to resolve
+	 * @param requiredType the type to assign the result to
+	 * @return the resolved value
+	 */
+	public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
+		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue) &&
+				autowiringValue instanceof Serializable && requiredType.isInterface()) {
+			autowiringValue = Proxy.newProxyInstance(
+					requiredType.getClassLoader(), new Class[] {requiredType},
+					new ObjectFactoryDelegatingInvocationHandler((ObjectFactory) autowiringValue));
+		}
+		return autowiringValue;
+	}
+
+
+	/**
+	 * Reflective InvocationHandler for lazy access to the current target object.
+	 */
+	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
+
+		private final ObjectFactory objectFactory;
+
+		public ObjectFactoryDelegatingInvocationHandler(ObjectFactory objectFactory) {
+			this.objectFactory = objectFactory;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			String methodName = method.getName();
+			if (methodName.equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0]);
+			}
+			else if (methodName.equals("hashCode")) {
+				// Use hashCode of proxy.
+				return System.identityHashCode(proxy);
+			}
+			else if (methodName.equals("toString")) {
+				return this.objectFactory.toString();
+			}
+			try {
+				return method.invoke(this.objectFactory.getObject(), args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
 	}
 
 }

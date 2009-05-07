@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.io.Serializable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -72,6 +73,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -524,7 +526,7 @@ public class ServletAnnotationControllerTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.setServletContext(servletContext);
 				RootBeanDefinition bd = new RootBeanDefinition(MyParameterDispatchingController.class);
-				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				//bd.setScope(WebApplicationContext.SCOPE_REQUEST);
 				wac.registerBeanDefinition("controller", bd);
 				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
 				wac.getBeanFactory().registerResolvableDependency(ServletConfig.class, servletConfig);
@@ -541,8 +543,8 @@ public class ServletAnnotationControllerTests {
 		assertEquals("myView", response.getContentAsString());
 		assertSame(servletContext, request.getAttribute("servletContext"));
 		assertSame(servletConfig, request.getAttribute("servletConfig"));
-		assertSame(session, request.getAttribute("session"));
-		assertSame(request, request.getAttribute("request"));
+		assertSame(session.getId(), request.getAttribute("sessionId"));
+		assertSame(request.getRequestURI(), request.getAttribute("requestUri"));
 
 		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		response = new MockHttpServletResponse();
@@ -551,8 +553,8 @@ public class ServletAnnotationControllerTests {
 		assertEquals("myView", response.getContentAsString());
 		assertSame(servletContext, request.getAttribute("servletContext"));
 		assertSame(servletConfig, request.getAttribute("servletConfig"));
-		assertSame(session, request.getAttribute("session"));
-		assertSame(request, request.getAttribute("request"));
+		assertSame(session.getId(), request.getAttribute("sessionId"));
+		assertSame(request.getRequestURI(), request.getAttribute("requestUri"));
 
 		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("view", "other");
@@ -572,6 +574,11 @@ public class ServletAnnotationControllerTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
+
+		MyParameterDispatchingController deserialized = (MyParameterDispatchingController)
+				SerializationTestUtils.serializeAndDeserialize(servlet.getWebApplicationContext().getBean("controller"));
+		assertNotNull(deserialized.request);
+		assertNotNull(deserialized.session);
 	}
 
 	@Test
@@ -1265,13 +1272,13 @@ public class ServletAnnotationControllerTests {
 
 	@Controller
 	@RequestMapping("/myPath.do")
-	private static class MyParameterDispatchingController {
+	private static class MyParameterDispatchingController implements Serializable {
 
 		@Autowired
-		private ServletContext servletContext;
+		private transient ServletContext servletContext;
 
 		@Autowired
-		private ServletConfig servletConfig;
+		private transient ServletConfig servletConfig;
 
 		@Autowired
 		private HttpSession session;
@@ -1288,8 +1295,8 @@ public class ServletAnnotationControllerTests {
 			response.getWriter().write("myView");
 			request.setAttribute("servletContext", this.servletContext);
 			request.setAttribute("servletConfig", this.servletConfig);
-			request.setAttribute("session", this.session);
-			request.setAttribute("request", this.request);
+			request.setAttribute("sessionId", this.session.getId());
+			request.setAttribute("requestUri", this.request.getRequestURI());
 		}
 
 		@RequestMapping(params = {"view", "!lang"})

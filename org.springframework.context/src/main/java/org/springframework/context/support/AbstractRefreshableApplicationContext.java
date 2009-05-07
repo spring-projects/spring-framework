@@ -122,6 +122,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
 			loadBeanDefinitions(beanFactory);
 			synchronized (this.beanFactoryMonitor) {
@@ -135,8 +136,17 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 	@Override
+	protected void cancelRefresh(BeansException ex) {
+		synchronized (this.beanFactoryMonitor) {
+			this.beanFactory.setSerializationId(null);
+		}
+		super.cancelRefresh(ex);
+	}
+
+	@Override
 	protected final void closeBeanFactory() {
 		synchronized (this.beanFactoryMonitor) {
+			this.beanFactory.setSerializationId(null);
 			this.beanFactory = null;
 		}
 	}

@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.support;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -150,25 +151,8 @@ public abstract class WebApplicationContextUtils {
 			sc.setAttribute(ServletContextScope.class.getName(), appScope);
 		}
 
-		beanFactory.registerResolvableDependency(ServletRequest.class, new ObjectFactory<ServletRequest>() {
-			public ServletRequest getObject() {
-				RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-				if (!(requestAttr instanceof ServletRequestAttributes)) {
-					throw new IllegalStateException("Current request is not a servlet request");
-				}
-				return ((ServletRequestAttributes) requestAttr).getRequest();
-			}
-		});
-		beanFactory.registerResolvableDependency(HttpSession.class, new ObjectFactory<HttpSession>() {
-			public HttpSession getObject() {
-				RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-				if (!(requestAttr instanceof ServletRequestAttributes)) {
-					throw new IllegalStateException("Current request is not a servlet request");
-				}
-				return ((ServletRequestAttributes) requestAttr).getRequest().getSession();
-			}
-		});
-
+		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());
+		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
 		if (jsfPresent) {
 			FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
 		}
@@ -233,6 +217,46 @@ public abstract class WebApplicationContextUtils {
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
 					Collections.unmodifiableMap(attributeMap));
+		}
+	}
+
+
+	/**
+	 * Factory that exposes the current request object on demand.
+	 */
+	private static class RequestObjectFactory implements ObjectFactory<ServletRequest>, Serializable {
+
+		public ServletRequest getObject() {
+			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
+			if (!(requestAttr instanceof ServletRequestAttributes)) {
+				throw new IllegalStateException("Current request is not a servlet request");
+			}
+			return ((ServletRequestAttributes) requestAttr).getRequest();
+		}
+
+		@Override
+		public String toString() {
+			return "Current HttpServletRequest";
+		}
+	}
+
+
+	/**
+	 * Factory that exposes the current session object on demand.
+	 */
+	private static class SessionObjectFactory implements ObjectFactory<HttpSession>, Serializable {
+
+		public HttpSession getObject() {
+			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
+			if (!(requestAttr instanceof ServletRequestAttributes)) {
+				throw new IllegalStateException("Current request is not a servlet request");
+			}
+			return ((ServletRequestAttributes) requestAttr).getRequest().getSession();
+		}
+
+		@Override
+		public String toString() {
+			return "Current HttpSession";
 		}
 	}
 

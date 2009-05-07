@@ -16,6 +16,7 @@
 
 package org.springframework.web.portlet.context;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -120,24 +121,8 @@ public abstract class PortletApplicationContextUtils {
 			pc.setAttribute(PortletContextScope.class.getName(), appScope);
 		}
 
-		beanFactory.registerResolvableDependency(PortletRequest.class, new ObjectFactory<PortletRequest>() {
-			public PortletRequest getObject() {
-				RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-				if (!(requestAttr instanceof PortletRequestAttributes)) {
-					throw new IllegalStateException("Current request is not a portlet request");
-				}
-				return ((PortletRequestAttributes) requestAttr).getRequest();
-			}
-		});
-		beanFactory.registerResolvableDependency(PortletSession.class, new ObjectFactory<PortletSession>() {
-			public PortletSession getObject() {
-				RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-				if (!(requestAttr instanceof PortletRequestAttributes)) {
-					throw new IllegalStateException("Current request is not a portlet request");
-				}
-				return ((PortletRequestAttributes) requestAttr).getRequest().getPortletSession();
-			}
-		});
+		beanFactory.registerResolvableDependency(PortletRequest.class, new RequestObjectFactory());
+		beanFactory.registerResolvableDependency(PortletSession.class, new SessionObjectFactory());
 	}
 
 	/**
@@ -194,6 +179,46 @@ public abstract class PortletApplicationContextUtils {
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
 					Collections.unmodifiableMap(attributeMap));
+		}
+	}
+
+
+	/**
+	 * Factory that exposes the current request object on demand.
+	 */
+	private static class RequestObjectFactory implements ObjectFactory<PortletRequest>, Serializable {
+
+		public PortletRequest getObject() {
+			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
+			if (!(requestAttr instanceof PortletRequestAttributes)) {
+				throw new IllegalStateException("Current request is not a portlet request");
+			}
+			return ((PortletRequestAttributes) requestAttr).getRequest();
+		}
+
+		@Override
+		public String toString() {
+			return "Current PortletRequest";
+		}
+	}
+
+
+	/**
+	 * Factory that exposes the current session object on demand.
+	 */
+	private static class SessionObjectFactory implements ObjectFactory<PortletSession>, Serializable {
+
+		public PortletSession getObject() {
+			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
+			if (!(requestAttr instanceof PortletRequestAttributes)) {
+				throw new IllegalStateException("Current request is not a portlet request");
+			}
+			return ((PortletRequestAttributes) requestAttr).getRequest().getPortletSession();
+		}
+
+		@Override
+		public String toString() {
+			return "Current PortletSession";
 		}
 	}
 

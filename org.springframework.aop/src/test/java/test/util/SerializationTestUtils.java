@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package test.util;
 
-import static org.junit.Assert.*;
-
-import java.awt.Point;
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,8 +26,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
-
 import test.beans.TestBean;
 
 /**
@@ -41,13 +39,13 @@ import test.beans.TestBean;
  * @author Chris Beams
  */
 public final class SerializationTestUtils {
-	
+
 	public static void testSerialization(Object o) throws IOException {
 		OutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
 		oos.writeObject(o);
 	}
-	
+
 	public static boolean isSerializable(Object o) throws IOException {
 		try {
 			testSerialization(o);
@@ -57,7 +55,7 @@ public final class SerializationTestUtils {
 			return false;
 		}
 	}
-	
+
 	public static Object serializeAndDeserialize(Object o) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -69,30 +67,30 @@ public final class SerializationTestUtils {
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = new ObjectInputStream(is);
 		Object o2 = ois.readObject();
-		
 		return o2;
 	}
-	
+
+
 	@Test(expected=NotSerializableException.class)
 	public void testWithNonSerializableObject() throws IOException {
 		TestBean o = new TestBean();
 		assertFalse(o instanceof Serializable);
 		assertFalse(isSerializable(o));
-		
+
 		testSerialization(o);
 	}
-	
+
 	@Test
 	public void testWithSerializableObject() throws Exception {
 		int x = 5;
 		int y = 10;
 		Point p = new Point(x, y);
 		assertTrue(p instanceof Serializable);
-	
+
 		testSerialization(p);
-		
+
 		assertTrue(isSerializable(p));
-		
+
 		Point p2 = (Point) serializeAndDeserialize(p);
 		assertNotSame(p, p2);
 		assertEquals(x, (int) p2.getX());

@@ -16,7 +16,11 @@
 
 package org.springframework.beans.factory.support;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,7 +85,14 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
-	implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
+		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
+
+	/** Map from serialized id to factory instance */
+	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
+			new ConcurrentHashMap<String, Reference<DefaultListableBeanFactory>>();
+
+	/** Optional id for this factory, for serialization purposes */
+	private String serializationId;
 
 	/** Whether to allow re-registration of a different definition with the same name */
 	private boolean allowBeanDefinitionOverriding = true;
@@ -126,6 +137,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		super(parentBeanFactory);
 	}
 
+
+	/**
+	 * Specify an id for serialization purposes, allowing this BeanFactory to be
+	 * deserialized from this id back into the BeanFactory object, if needed.
+	 */
+	public void setSerializationId(String serializationId) {
+		if (serializationId != null) {
+			serializableFactories.put(serializationId, new WeakReference<DefaultListableBeanFactory>(this));
+		}
+		else if (this.serializationId != null) {
+			serializableFactories.remove(this.serializationId);
+		}
+		this.serializationId = serializationId;
+	}
 
 	/**
 	 * Set whether it should be allowed to override bean definitions by registering
@@ -724,9 +749,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (Class autowiringType : this.resolvableDependencies.keySet()) {
 			if (autowiringType.isAssignableFrom(requiredType)) {
 				Object autowiringValue = this.resolvableDependencies.get(autowiringType);
-				if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
-					autowiringValue = ((ObjectFactory) autowiringValue).getObject();
-				}
+				autowiringValue = AutowireUtils.resolveAutowiringValue(autowiringValue, requiredType);
 				if (requiredType.isInstance(autowiringValue)) {
 					result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
 					break;
@@ -822,6 +845,48 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			sb.append("parent: ").append(ObjectUtils.identityToString(parent));
 		}
 		return sb.toString();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	protected Object writeReplace() throws ObjectStreamException {
+		if (this.serializationId != null) {
+			return new SerializedBeanFactoryReference(this.serializationId);
+		}
+		else {
+			return this;
+		}
+	}
+
+
+	/**
+	 * Minimal id reference to the factory.
+	 * Resolved to the actual factory instance on deserialization.
+	 */
+	private static class SerializedBeanFactoryReference implements Serializable {
+
+		private final String id;
+
+		public SerializedBeanFactoryReference(String id) {
+			this.id = id;
+		}
+
+		private Object readResolve() {
+			Reference ref = serializableFactories.get(this.id);
+			if (ref == null) {
+				throw new IllegalStateException(
+						"Cannot deserialize BeanFactory with id " + this.id + ": no factory registered for this id");
+			}
+			Object result = ref.get();
+			if (result == null) {
+				throw new IllegalStateException(
+						"Cannot deserialize BeanFactory with id " + this.id + ": factory has been garbage-collected");
+			}
+			return result;
+		}
 	}
 
 }
