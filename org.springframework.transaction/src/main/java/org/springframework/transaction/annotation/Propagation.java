@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,13 @@ package org.springframework.transaction.annotation;
 import org.springframework.transaction.TransactionDefinition; 
 
 /**
- * Enumeration that represents transaction propagation behaviors
- * for use with the JDK 1.5+ transaction annotation, corresponding
- * to the TransactionDefinition interface.
+ * Enumeration that represents transaction propagation behaviors for use
+ * with the {@link Transactional} annotation, corresponding to the
+ * {@link TransactionDefinition} interface.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.2
- * @see org.springframework.transaction.annotation.Transactional
- * @see org.springframework.transaction.TransactionDefinition
  */
 public enum Propagation {
 	
@@ -43,7 +41,7 @@ public enum Propagation {
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>Note: For transaction managers with transaction synchronization,
 	 * PROPAGATION_SUPPORTS is slightly different from no transaction at all,
-	 * as it defines a transaction scopp that synchronization will apply for.
+	 * as it defines a transaction scope that synchronization will apply for.
 	 * As a consequence, the same resources (JDBC Connection, Hibernate Session, etc)
 	 * will be shared for the entire specified scope. Note that this depends on
 	 * the actual synchronization configuration of the transaction manager.
@@ -102,6 +100,6 @@ public enum Propagation {
 
 	Propagation(int value) { this.value = value; }
 	
-	public int value() { return value; }
+	public int value() { return this.value; }
 	
 }
