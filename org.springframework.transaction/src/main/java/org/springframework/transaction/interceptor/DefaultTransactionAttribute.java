@@ -27,6 +27,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
+	private String qualifier;
+
+
 	/**
 	 * Create a new DefaultTransactionAttribute, with default settings.
 	 * Can be modified through bean property setters.
@@ -66,10 +69,18 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 
+	public void setQualifier(String qualifier) {
+		this.qualifier = qualifier;
+	}
+
+	public String getQualifier() {
+		return this.qualifier;
+	}
+
 	/**
-	 * Default behavior is as with EJB: rollback on unchecked exception.
+	 * The default behavior is as with EJB: rollback on unchecked exception.
 	 * Additionally attempt to rollback on Error.
-	 * Consistent with TransactionTemplate's behavior.
+	 * <p>This is consistent with TransactionTemplate's default behavior.
 	 */
 	public boolean rollbackOn(Throwable ex) {
 		return (ex instanceof RuntimeException || ex instanceof Error);

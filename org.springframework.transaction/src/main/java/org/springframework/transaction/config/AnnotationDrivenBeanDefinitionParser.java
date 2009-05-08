@@ -95,8 +95,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static void registerTransactionManager(Element element, BeanDefinition def) {
 		String transactionManagerName = (element.hasAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) ?
 				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) : DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
-		def.getPropertyValues().addPropertyValue(
-				TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
+		def.getPropertyValues().addPropertyValue("transactionManagerBeanName", transactionManagerName);
 	}
 
 
