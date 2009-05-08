@@ -28,6 +28,7 @@ public class SchedulingNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
 		this.registerBeanDefinitionParser("scheduled-tasks", new ScheduledTasksBeanDefinitionParser());
+		this.registerBeanDefinitionParser("task-scheduler", new TaskSchedulerBeanDefinitionParser());
 	}
 
 }
