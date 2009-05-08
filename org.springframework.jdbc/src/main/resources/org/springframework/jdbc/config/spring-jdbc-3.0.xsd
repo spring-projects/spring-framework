@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns="http://www.springframework.org/schema/jdbc"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/jdbc"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" />
+	<xsd:import namespace="http://www.springframework.org/schema/tool" />
+
+	<xsd:element name="embedded-database">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.jdbc.embedded.EmbeddedDataSourceFactoryBean"><![CDATA[
+	Creates an embedded database instance and makes it available to other beans as a javax.sql.DataSource.
+			]]></xsd:documentation>		
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="javax.sql.DataSource" />
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:sequence>
+						<xsd:element name="script" type="scriptType" minOccurs="0" maxOccurs="unbounded">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+			A SQL script to execute during embedded database initialization.
+								]]></xsd:documentation>
+					</xsd:annotation>	
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="type" type="databaseType">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+			The type of embedded database to create, such as HSQL or H2.
+							]]></xsd:documentation>
+						</xsd:annotation>			
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="scriptType">
+		<xsd:attribute name="location" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.core.io.Resource"><![CDATA[
+	The resource location of the SQL script to execute.
+				]]></xsd:documentation>
+			</xsd:annotation>		
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:simpleType name="databaseType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="HSQL" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>
