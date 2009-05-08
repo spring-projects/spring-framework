@@ -17,6 +17,31 @@
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
+	<xsd:element name="task-scheduler">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Defines a ThreadPoolTaskScheduler instance with configurable pool size.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name for the generated ThreadPoolTaskScheduler instance.
+	It will also be used as the default thread name prefix.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="size" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The size of the ScheduledExecutorService's thread pool. The default is 1.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
 	<xsd:element name="scheduled-tasks">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
