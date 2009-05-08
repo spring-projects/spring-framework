@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/scheduling"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/scheduling"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+	Defines the elements used in the Spring Framework's scheduling support.
+		]]></xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
+	<xsd:element name="scheduled-tasks">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Top-level element that contains one or more task sub-elements to be
+	managed by a given TaskScheduler.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="task" type="taskType" minOccurs="1" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="scheduler" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Reference to an instance of TaskScheduler to manage the provided tasks. If not specified,
+	the default value will be a wrapper for a single-threaded Executor.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.scheduling.TaskScheduler"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="taskType">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Element defining a method-invoking task and its corresponding trigger.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="cron" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	A cron-based trigger. See the org.springframework.scheduling.support.CronSequenceGenerator
+	JavaDoc for example patterns.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="fixed-delay" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	An interval-based trigger where the interval is measured from the completion time of the
+	previous task. The time unit value is measured in milliseconds.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="fixed-rate" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	An interval-based trigger where the interval is measured from the start time of the
+	previous task. The time unit value is measured in milliseconds.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Reference to an object that provides a method to be invoked.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="method" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the method to be invoked.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+</xsd:schema>
