@@ -319,7 +319,7 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write("create");
 		}
 
-		@RequestMapping(value = "{hotel}", method = RequestMethod.GET)
+		@RequestMapping(value = "/{hotel}", method = RequestMethod.GET)
 		public void show(@PathVariable String hotel, Writer writer) throws IOException {
 			writer.write("show-" + hotel);
 		}

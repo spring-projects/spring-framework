@@ -62,6 +62,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -502,7 +503,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		private boolean isPathMatch(String methodLevelPattern, String lookupPath) {
-			if (isPathMatchInternal(methodLevelPattern, lookupPath)) {
+			if ((!hasTypeLevelMapping() || ObjectUtils.isEmpty(getTypeLevelMapping().value())) &&
+					isPathMatchInternal(methodLevelPattern, lookupPath)) {
 				return true;
 			}
 			if (hasTypeLevelMapping()) {
