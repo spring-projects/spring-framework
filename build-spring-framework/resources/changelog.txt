@@ -11,7 +11,7 @@ Changes in version 3.0.0.RC1 (2009-06-10)
 * scoped proxies are serializable now, for web scopes as well as for singleton beans
 * injected request/session references are serializable proxies for the current request now
 * ReloadableResourceBundleMessageSource correctly calculates filenames for all locales now
-
+* Added spring-jdbc config schema; initially provides an embedded-database tag for creating an embedded database instance (HSQL, H2, etc).
 
 Changes in version 3.0.0.M3 (2009-05-06)
 ----------------------------------------
