@@ -64,6 +64,10 @@ public abstract class DelegatingTransactionAttribute implements TransactionAttri
 		return this.targetAttribute.getName();
 	}
 
+	public String getQualifier() {
+		return this.targetAttribute.getQualifier();
+	}
+
 	public boolean rollbackOn(Throwable ex) {
 		return this.targetAttribute.rollbackOn(ex);
 	}

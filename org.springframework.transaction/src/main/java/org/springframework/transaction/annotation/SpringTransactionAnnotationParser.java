@@ -17,8 +17,8 @@
 package org.springframework.transaction.annotation;
 
 import java.io.Serializable;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
@@ -58,6 +58,7 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		rbta.setIsolationLevel(ann.isolation().value());
 		rbta.setTimeout(ann.timeout());
 		rbta.setReadOnly(ann.readOnly());
+		rbta.setQualifier(ann.value());
 		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
 		Class[] rbf = ann.rollbackFor();
 		for (Class rbRule : rbf) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,11 +94,12 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		// If the transaction attribute is null, the method is non-transactional.
 		final TransactionAttribute txAttr =
 				getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(), targetClass);
+		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
 		final String joinpointIdentification = methodIdentification(invocation.getMethod());
 
-		if (txAttr == null || !(getTransactionManager() instanceof CallbackPreferringPlatformTransactionManager)) {
+		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
-			TransactionInfo txInfo = createTransactionIfNecessary(txAttr, joinpointIdentification);
+			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
 			Object retVal = null;
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
@@ -120,10 +121,10 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		else {
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
-				Object result = ((CallbackPreferringPlatformTransactionManager) getTransactionManager()).execute(txAttr,
-						new TransactionCallback() {
+				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
+						new TransactionCallback<Object>() {
 							public Object doInTransaction(TransactionStatus status) {
-								TransactionInfo txInfo = prepareTransactionInfo(txAttr, joinpointIdentification, status);
+								TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 								try {
 									return invocation.proceed();
 								}
@@ -167,6 +168,15 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	// Serialization support
 	//---------------------------------------------------------------------
 
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		// Rely on default serialization, although this class itself doesn't carry state anyway...
+		oos.defaultWriteObject();
+
+		// Deserialize superclass fields.
+		oos.writeObject(getTransactionManager());
+		oos.writeObject(getTransactionAttributeSource());
+	}
+
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		// Rely on default serialization, although this class itself doesn't carry state anyway...
 		ois.defaultReadObject();
@@ -176,15 +186,6 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		// for AspectJ aspects (which are not allowed to implement Serializable)!
 		setTransactionManager((PlatformTransactionManager) ois.readObject());
 		setTransactionAttributeSource((TransactionAttributeSource) ois.readObject());
-	}
-
-	private void writeObject(ObjectOutputStream oos) throws IOException {
-		// Rely on default serialization, although this class itself doesn't carry state anyway...
-		oos.defaultWriteObject();
-
-		// Deserialize superclass fields.
-		oos.writeObject(getTransactionManager());
-		oos.writeObject(getTransactionAttributeSource());
 	}
 
 
