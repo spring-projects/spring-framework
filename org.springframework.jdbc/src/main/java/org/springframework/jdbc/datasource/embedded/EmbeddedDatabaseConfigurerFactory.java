@@ -25,9 +25,6 @@ import org.springframework.util.Assert;
  */
 final class EmbeddedDatabaseConfigurerFactory {
 
-	private EmbeddedDatabaseConfigurerFactory() {
-	}
-
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
 		Assert.notNull(type, "The EmbeddedDatabaseType is required");
 		try {
@@ -44,4 +41,8 @@ final class EmbeddedDatabaseConfigurerFactory {
 					+ "] are not available in the classpath", e);
 		}
 	}
+	
+	private EmbeddedDatabaseConfigurerFactory() {
+	}
+
 }

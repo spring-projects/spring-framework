@@ -27,9 +27,6 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 
 	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
 
-	private HsqlEmbeddedDatabaseConfigurer() {
-	}
-
 	/**
 	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
@@ -49,4 +46,8 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 		properties.setUsername("sa");
 		properties.setPassword("");
 	}
+	
+	private HsqlEmbeddedDatabaseConfigurer() {
+	}
+
 }
