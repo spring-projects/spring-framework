@@ -26,9 +26,6 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 
 	private static H2EmbeddedDatabaseConfigurer INSTANCE;
 
-	private H2EmbeddedDatabaseConfigurer() {
-	}
-
 	/**
 	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
@@ -48,4 +45,8 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 		properties.setUsername("sa");
 		properties.setPassword("");
 	}
+	
+	private H2EmbeddedDatabaseConfigurer() {
+	}
+
 }
