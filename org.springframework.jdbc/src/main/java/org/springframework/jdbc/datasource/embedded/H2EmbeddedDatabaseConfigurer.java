@@ -19,15 +19,14 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Initializes a HSQL embedded database instance.
- * Call {@link #getInstance()} to get the singleton instance of this class.
- * @author Keith Donald
- * @authoe Oliver Gierke
+ * Call {@link #getInstance()} to get the singleton instance of this class. * 
+ * @author Oliver Gierke
  */
-final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
+final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
-	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
+	private static H2EmbeddedDatabaseConfigurer INSTANCE;
 
-	private HsqlEmbeddedDatabaseConfigurer() {
+	private H2EmbeddedDatabaseConfigurer() {
 	}
 
 	/**
@@ -35,17 +34,17 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 	 * @return the configurer
 	 * @throws ClassNotFoundException if HSQL is not on the classpath
 	 */
-	public static synchronized HsqlEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
+	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
-			ClassUtils.forName("org.hsqldb.jdbcDriver", HsqlEmbeddedDatabaseConfigurer.class.getClassLoader());
-			INSTANCE = new HsqlEmbeddedDatabaseConfigurer();
+			ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader());
+			INSTANCE = new H2EmbeddedDatabaseConfigurer();
 		}
 		return INSTANCE;
 	}
 
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(org.hsqldb.jdbcDriver.class);
-		properties.setUrl("jdbc:hsqldb:mem:" + databaseName);
+		properties.setDriverClass(org.h2.Driver.class);
+		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1", databaseName));
 		properties.setUsername("sa");
 		properties.setPassword("");
 	}

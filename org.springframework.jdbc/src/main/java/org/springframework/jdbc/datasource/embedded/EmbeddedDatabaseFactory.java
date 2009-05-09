@@ -26,8 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 /**
- * Creates a {@link EmbeddedDatabase} instance.
- * Callers are guaranteed that the returned database has been fully initialized and populated.
+ * Creates a {@link EmbeddedDatabase} instance. Callers are guaranteed that the returned database has been fully
+ * initialized and populated.
  * <p>
  * Can be configured:<br>
  * Call {@link #setDatabaseName(String)} to change the name of the database.<br>
@@ -54,8 +54,8 @@ public class EmbeddedDatabaseFactory {
 	private DataSource dataSource;
 
 	/**
-	 * Creates a default {@link EmbeddedDatabaseFactory}. Calling {@link #getDatabase()} will create a embedded HSQL
-	 * database of name 'testdb'.
+	 * Creates a default {@link EmbeddedDatabaseFactory}.
+	 * Calling {@link #getDatabase()} will create a embedded HSQL database of name 'testdb'.
 	 */
 	public EmbeddedDatabaseFactory() {
 		setDatabaseName("testdb");
@@ -82,8 +82,8 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Sets the strategy that will be used to configure the embedded database instance. Call this when you wish to use
-	 * an embedded database type not already supported.
+	 * Sets the strategy that will be used to configure the embedded database instance.
+	 * Call this when you wish to use an embedded database type not already supported.
 	 * @param configurer the embedded database configurer
 	 */
 	public void setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
@@ -100,8 +100,8 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Sets the factory to use to create the DataSource instance that connects to the embedded database. Defaults to
-	 * {@link SimpleDriverDataSourceFactory}.
+	 * Sets the factory to use to create the DataSource instance that connects to the embedded database
+	 * Defaults to {@link SimpleDriverDataSourceFactory}.
 	 * @param dataSourceFactory the data source factory
 	 */
 	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
@@ -124,9 +124,8 @@ public class EmbeddedDatabaseFactory {
 	// subclassing hooks
 
 	/**
-	 * Hook to initialize the embedded database.
-	 * Subclasses may call to force initialization.
-	 * After calling this method, {@link #getDataSource()} returns the DataSource providing connectivity to the db.
+	 * Hook to initialize the embedded database. Subclasses may call to force initialization. After calling this method,
+	 * {@link #getDataSource()} returns the DataSource providing connectivity to the db.
 	 */
 	protected void initDatabase() {
 		// create the embedded database source first
@@ -152,14 +151,12 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Hook to shutdown the embedded database.
-	 * Subclasses may call to force shutdown.
-	 * After calling, {@link #getDataSource()} returns null.
-	 * Does nothing if no embedded database has been initialized.
+	 * Hook to shutdown the embedded database. Subclasses may call to force shutdown.
+	 * After calling, {@link #getDataSource()} returns null. Does nothing if no embedded database has been initialized.
 	 */
 	protected void shutdownDatabase() {
 		if (dataSource != null) {
-			databaseConfigurer.shutdown(dataSource);
+			databaseConfigurer.shutdown(dataSource, databaseName);
 			dataSource = null;
 		}
 	}

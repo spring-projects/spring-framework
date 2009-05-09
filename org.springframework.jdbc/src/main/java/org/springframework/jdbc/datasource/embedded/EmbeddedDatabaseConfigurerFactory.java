@@ -18,21 +18,25 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.Assert;
 
 /**
- * Maps well-known {@link EmbeddedDatabaseType embedded database types} to
- * {@link EmbeddedDatabaseConfigurer} strategies.
+ * Maps well-known {@link EmbeddedDatabaseType embedded database types} to {@link EmbeddedDatabaseConfigurer}
+ * strategies.
  * @author Keith Donald
+ * @author Oliver Gierke
  */
 final class EmbeddedDatabaseConfigurerFactory {
 
-	private EmbeddedDatabaseConfigurerFactory() {		
+	private EmbeddedDatabaseConfigurerFactory() {
 	}
-	
+
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
 		Assert.notNull(type, "The EmbeddedDatabaseType is required");
 		try {
-			if (type == EmbeddedDatabaseType.HSQL) {
+			switch (type) {
+			case HSQL:
 				return HsqlEmbeddedDatabaseConfigurer.getInstance();
-			} else {
+			case H2:
+				return H2EmbeddedDatabaseConfigurer.getInstance();
+			default:
 				throw new UnsupportedOperationException("Other embedded database types not yet supported");
 			}
 		} catch (ClassNotFoundException e) {
@@ -40,5 +44,4 @@ final class EmbeddedDatabaseConfigurerFactory {
 					+ "] are not available in the classpath", e);
 		}
 	}
-
 }

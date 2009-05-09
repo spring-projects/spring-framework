@@ -18,7 +18,8 @@ package org.springframework.jdbc.datasource.embedded;
 /**
  * A supported embedded database type.
  * @author Keith Donald
+ * @author Oliver Gierke
  */
 public enum EmbeddedDatabaseType {
-	HSQL;
+	HSQL, H2;
 }

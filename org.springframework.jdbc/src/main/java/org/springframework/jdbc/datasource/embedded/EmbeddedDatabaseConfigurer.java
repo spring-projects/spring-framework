@@ -34,7 +34,8 @@ public interface EmbeddedDatabaseConfigurer {
 	/**
 	 * Shutdown the embedded database instance that backs dataSource.
 	 * @param dataSource the data source
+	 * @param databaseName the name of the database being shutdown
 	 */
-	void shutdown(DataSource dataSource);
+	void shutdown(DataSource dataSource, String databaseName);
 	
 }
