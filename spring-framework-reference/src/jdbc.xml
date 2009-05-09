@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="jdbc">
   <title>Data access using JDBC</title>
 
@@ -73,8 +72,8 @@
           <para><emphasis role="bold">JdbcTemplate</emphasis> - this is the
           classic Spring JDBC approach and the most widely used. This is the
           "lowest level" approach and all other approaches use a JdbcTemplate
-          under the covers. Works well in a JDK 1.4 and higher
-          environment.</para>
+          under the covers. In Spring 3.0 it has been updated with Java 5
+          support like generics and vararg support. </para>
         </listitem>
 
         <listitem>
@@ -82,16 +81,17 @@
           wraps a JdbcTemplate to provide more convenient usage with named
           parameters instead of the traditional JDBC "?" place holders. This
           provides better documentation and ease of use when you have multiple
-          parameters for an SQL statement. Works with JDK 1.4 and up.</para>
+          parameters for an SQL statement. It has also been updated with Java
+          5 support like generics and vararg support for Spring 3.0.</para>
         </listitem>
 
         <listitem>
           <para><emphasis role="bold">SimpleJdbcTemplate</emphasis> - this
           class combines the most frequently used features of both
           JdbcTemplate and NamedParameterJdbcTemplate plus it adds additional
-          convenience by taking advantage of some Java 5 features like
-          varargs, autoboxing and generics to provide an easier to use API.
-          Requires JDK 5 or higher.</para>
+          convenience by taking better advantage of Java 5 varargs for
+          ceratain methods where this wasn't possible in the JdbcTemplate due
+          to backwars compatibility reasons.</para>
         </listitem>
 
         <listitem>
@@ -101,8 +101,8 @@
           simplify the coding to a point where you only need to provide the
           name of the table or procedure and provide a Map of parameters
           matching the column names. Designed to work together with the
-          SimpleJdbcTemplate. Requires JDK 5 or higher and a database that
-          provides adequate metadata.</para>
+          SimpleJdbcTemplate. Requires a database that provides adequate
+          metadata.</para>
         </listitem>
 
         <listitem>
@@ -112,8 +112,9 @@
           your data access layer. This approach is modeled after JDO Query
           where you define your query string, declare parameters and compile
           the query. Once that is done any execute methods can be called
-          multiple times with various parameter values passed in. Works with
-          JDK 1.4 and higher.</para>
+          multiple times with various parameter values passed in. It has also
+          been updated with Java 5 support like generics and vararg support
+          for Spring 3.0.</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -231,48 +232,48 @@
           <para>A simple query for getting the number of rows in a
           relation.</para>
 
-          <programlisting language="java">int rowCount = this.jdbcTemplate.queryForInt("select count(0) from t_accrual");</programlisting>
+          <programlisting language="java"><![CDATA[int rowCount = this.jdbcTemplate.queryForInt("select count(*) from t_actor");]]></programlisting>
 
           <para>A simple query using a bind variable.</para>
 
-          <programlisting language="java">int countOfActorsNamedJoe = this.jdbcTemplate.queryForInt(
-        "select count(0) from t_actors where first_name = ?", new Object[]{"Joe"});</programlisting>
+          <programlisting language="java"><![CDATA[int countOfActorsNamedJoe = this.jdbcTemplate.queryForInt(
+        "select count(*) from t_actor where first_name = ?", "Joe");]]></programlisting>
 
           <para>Querying for a <classname>String</classname>.</para>
 
-          <programlisting language="java">String surname = (String) this.jdbcTemplate.queryForObject(
+          <programlisting language="java"><![CDATA[String surname = this.jdbcTemplate.queryForObject(
         "select surname from t_actor where id = ?", 
-        new Object[]{new Long(1212)}, String.class);</programlisting>
+        new Object[]{1212L}, String.class);]]></programlisting>
 
           <para>Querying and populating a <emphasis>single</emphasis> domain
           object.</para>
 
-          <programlisting language="java">Actor actor = (Actor) this.jdbcTemplate.queryForObject(
-    "select first_name, surname from t_actor where id = ?",
-    new Object[]{new Long(1212)},
-    new RowMapper() {
-
-        public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Actor actor = new Actor();
-            actor.setFirstName(rs.getString("first_name"));
-            actor.setSurname(rs.getString("surname"));
-            return actor;
-        }
-    });</programlisting>
+          <programlisting language="java"><![CDATA[Actor actor = this.jdbcTemplate.queryForObject(
+        "select first_name, surname from t_actor where id = ?",
+        new Object[]{1212L},
+        new RowMapper<Actor>() {
+            public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Actor actor = new Actor();
+                actor.setFirstName(rs.getString("first_name"));
+                actor.setSurname(rs.getString("surname"));
+                return actor;
+            }
+        });
+]]></programlisting>
 
           <para>Querying and populating a number of domain objects.</para>
 
-          <programlisting language="java">Collection actors = this.jdbcTemplate.query(
-    "select first_name, surname from t_actor",
-    new RowMapper() {
-
-        public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Actor actor = new Actor();
-            actor.setFirstName(rs.getString("first_name"));
-            actor.setSurname(rs.getString("surname"));
-            return actor;
-        }
-    });</programlisting>
+          <programlisting language="java"><![CDATA[List<Actor> actors = this.jdbcTemplate.query(
+        "select first_name, surname from t_actor",
+        new RowMapper<Actor>() {
+            public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Actor actor = new Actor();
+                actor.setFirstName(rs.getString("first_name"));
+                actor.setSurname(rs.getString("surname"));
+                return actor;
+            }
+        });
+]]></programlisting>
 
           <para>If the last two snippets of code actually existed in the same
           application, it would make sense to remove the duplication present
@@ -282,35 +283,35 @@
           by DAO methods as needed. For example, the last code snippet might
           be better off written like so:</para>
 
-          <programlisting language="java">public Collection findAllActors() {
+          <programlisting language="java"><![CDATA[public List<Actor> findAllActors() {
     return this.jdbcTemplate.query( "select first_name, surname from t_actor", new ActorMapper());
 }
 
-private static final class ActorMapper implements RowMapper {
+private static final class ActorMapper implements RowMapper<Actor> {
 
-    public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
         Actor actor = new Actor();
         actor.setFirstName(rs.getString("first_name"));
         actor.setSurname(rs.getString("surname"));
         return actor;
-    }
-}</programlisting>
+    }        
+}]]></programlisting>
         </section>
 
         <section id="jdbc-JdbcTemplate-examples-update">
           <title>Updating (INSERT/UPDATE/DELETE)</title>
 
-          <programlisting language="java">this.jdbcTemplate.update(
+          <programlisting language="java"><![CDATA[this.jdbcTemplate.update(
         "insert into t_actor (first_name, surname) values (?, ?)", 
-        new Object[] {"Leonor", "Watling"});</programlisting>
+        new Object[] {"Leonor", "Watling"});]]></programlisting>
 
-          <programlisting language="java">this.jdbcTemplate.update(
+          <programlisting language="java"><![CDATA[this.jdbcTemplate.update(
         "update t_actor set weapon = ? where id = ?", 
-        new Object[] {"Banjo", new Long(5276)});</programlisting>
+        new Object[] {"Banjo", new Long(5276)});]]></programlisting>
 
-          <programlisting language="java">this.jdbcTemplate.update(
+          <programlisting language="java"><![CDATA[this.jdbcTemplate.update(
         "delete from actor where id = ?",
-        new Object[] {new Long.valueOf(actorId)});</programlisting>
+        new Object[] {new Long.valueOf(actorId)});]]></programlisting>
         </section>
 
         <section id="jdbc-JdbcTemplate-examples-other">
@@ -321,15 +322,15 @@ private static final class ActorMapper implements RowMapper {
           statements. It is heavily overloaded with variants taking callback
           interfaces, binding variable arrays, and suchlike.</para>
 
-          <programlisting language="java">this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");</programlisting>
+          <programlisting language="java"><![CDATA[this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");]]></programlisting>
 
           <para>Invoking a simple stored procedure (more sophisticated stored
           procedure support is <link linkend="jdbc-StoredProcedure">covered
           later</link>).</para>
 
-          <programlisting language="java">this.jdbcTemplate.update(
+          <programlisting language="java"><![CDATA[this.jdbcTemplate.update(
         "call SUPPORT.REFRESH_ACTORS_SUMMARY(?)", 
-        new Object[]{Long.valueOf(unionId)});</programlisting>
+        new Object[]{Long.valueOf(unionId)});]]></programlisting>
         </section>
       </section>
 
@@ -693,11 +694,11 @@ public Actor findActor(long id) {
       used to connect to the database. Here is an example of how to configure
       a <classname>DriverManagerDataSource</classname>:</para>
 
-      <programlisting language="java">DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      <programlisting language="java"><![CDATA[DriverManagerDataSource dataSource = new DriverManagerDataSource();
 dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
 dataSource.setUrl("jdbc:hsqldb:hsql://localhost:");
 dataSource.setUsername("sa");
-dataSource.setPassword("");</programlisting>
+dataSource.setPassword("");]]></programlisting>
     </section>
 
     <section id="jdbc-SQLExceptionTranslator">
@@ -752,7 +753,7 @@ dataSource.setPassword("");</programlisting>
       <para><classname>SQLErrorCodeSQLExceptionTranslator</classname> can be
       extended the following way:</para>
 
-      <programlisting language="java">public class MySQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
+      <programlisting language="java"><![CDATA[public class MySQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
 
     protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
         if (sqlex.getErrorCode() == -12345) {
@@ -760,7 +761,7 @@ dataSource.setPassword("");</programlisting>
         }
         return null;
     }
-}</programlisting>
+}]]></programlisting>
 
       <para>In this example the specific error code
       <literal>'-12345'</literal> is translated and any other errors are
@@ -802,7 +803,7 @@ su.update();</programlisting>
       what you need to include for a minimal but fully functional class that
       creates a new table.</para>
 
-      <programlisting language="java">import javax.sql.DataSource;
+      <programlisting language="java"><![CDATA[import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAStatement {
@@ -816,7 +817,7 @@ public class ExecuteAStatement {
     public void doExecute() {
         this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");
     }
-}</programlisting>
+}]]></programlisting>
     </section>
 
     <section id="jdbc-statements-querying">
@@ -836,7 +837,7 @@ public class ExecuteAStatement {
       an <classname>int</classname> and one that queries for a
       <classname>String</classname>.</para>
 
-      <programlisting language="java">import javax.sql.DataSource;
+      <programlisting language="java"><![CDATA[import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RunAQuery {
@@ -858,7 +859,7 @@ public class RunAQuery {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
-}</programlisting>
+}]]></programlisting>
 
       <para>In addition to the single results query methods there are several
       methods that return a List with an entry for each row that the query
@@ -870,7 +871,7 @@ public class RunAQuery {
       above example to retrieve a list of all the rows, it would look like
       this:</para>
 
-      <programlisting language="java">
+      <programlisting language="java"><![CDATA[
 private JdbcTemplate jdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -879,11 +880,11 @@ public void setDataSource(DataSource dataSource) {
 
 public List getList() {
     return this.jdbcTemplate.queryForList("select * from mytable");
-}</programlisting>
+}]]></programlisting>
 
       <para>The list returned would look something like this:</para>
 
-      <programlisting>[{name=Bob, id=1}, {name=Mary, id=2}]</programlisting>
+      <programlisting><![CDATA[[{name=Bob, id=1}, {name=Mary, id=2}]]]></programlisting>
     </section>
 
     <section id="jdbc-updates">
@@ -896,7 +897,7 @@ public List getList() {
       objects (and thus primitives have to be wrapped in the primitive wrapper
       classes).</para>
 
-      <programlisting language="java">import javax.sql.DataSource;
+      <programlisting language="java"><![CDATA[import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -913,7 +914,7 @@ public class ExecuteAnUpdate {
                 "update mytable set name = ? where id = ?", 
                 new Object[] {name, new Integer(id)});
     }
-}</programlisting>
+}]]></programlisting>
     </section>
 
     <section id="jdbc-auto-genereted-keys">
@@ -1016,8 +1017,9 @@ jdbcTemplate.update(
 
       <para>The <classname>DriverManagerDataSource</classname> class is an
       implementation of the standard <interfacename>DataSource</interfacename>
-      interface that configures a plain old JDBC Driver via bean properties, and
-      returns a new <interfacename>Connection</interfacename> every time.</para>
+      interface that configures a plain old JDBC Driver via bean properties,
+      and returns a new <interfacename>Connection</interfacename> every
+      time.</para>
 
       <para>This is potentially useful for test or standalone environments
       outside of a J2EE container, either as a
@@ -1172,7 +1174,7 @@ jdbcTemplate.update(
       where we update the actor table based on entries in a list. The entire
       list is used as the batch in his example.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
@@ -1197,7 +1199,7 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>If you are processing stream of updates or reading from a
+}]]></programlisting>If you are processing stream of updates or reading from a
       file then you might have a preferred batch size, but the last batch
       might not have that number of entries. In this case you can use the
       <classname>InterruptibleBatchPreparedStatementSetter</classname>
@@ -1223,14 +1225,14 @@ jdbcTemplate.update(
 
       <para>This example shows a batch update using named parameters:</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
     }
 
-    public int[] batchUpdate(final List&lt;Actor&gt; actors) {
+    public int[] batchUpdate(final List<Actor> actors) {
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(actors.toArray());
         int[] updateCounts = simpleJdbcTemplate.batchUpdate(
                 "update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
@@ -1239,23 +1241,23 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>For an SQL statement using the classic "?" place holders you
-      pass in a List containing an object array with the update values. This
-      object array must have one entry for each placeholder in the SQL
+}]]></programlisting>For an SQL statement using the classic "?" place holders
+      you pass in a List containing an object array with the update values.
+      This object array must have one entry for each placeholder in the SQL
       statement and they must be in the same order as they are defined in the
       SQL statement.</para>
 
       <para>The same example using classic JDBC "?" place holders:</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
     }
 
-    public int[] batchUpdate(final List&lt;Actor&gt; actors) {
-        List&lt;Object[]&gt; batch = new ArrayList&lt;Object[]&gt;();
+    public int[] batchUpdate(final List<Actor> actors) {
+        List<Object[]> batch = new ArrayList<Object[]>();
         for (Actor actor : actors) {
             Object[] values = new Object[] {
                     actor.getFirstName(),
@@ -1270,9 +1272,9 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>All batch update methods return an int array containing the
-      number of affected rows for each batch entry. This count is reported by
-      the JDBC driver and it's not always available in which case the JDBC
+}]]></programlisting>All batch update methods return an int array containing
+      the number of affected rows for each batch entry. This count is reported
+      by the JDBC driver and it's not always available in which case the JDBC
       driver simply returns a -2 value.</para>
     </section>
   </section>
@@ -1304,7 +1306,7 @@ jdbcTemplate.update(
       configuration methods. In this case there is only one configuration
       method used but we will see examples of multiple ones soon.</para>
 
-      <programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1315,7 +1317,7 @@ jdbcTemplate.update(
     }
 
     public void add(Actor actor) {
-        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(3);
+        Map<String, Object> parameters = new HashMap<String, Object>(3);
         parameters.put("id", actor.getId());
         parameters.put("first_name", actor.getFirstName());
         parameters.put("last_name", actor.getLastName());
@@ -1323,7 +1325,7 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>
+}]]></programlisting>
 
       <para>The execute method used here takes a plain
       <classname>java.utils.Map</classname> as its only parameter. The
@@ -1343,7 +1345,7 @@ jdbcTemplate.update(
       generated key column using the
       <classname>usingGeneratedKeyColumns</classname> method.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1356,7 +1358,7 @@ jdbcTemplate.update(
     }
 
     public void add(Actor actor) {
-        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(2);
+        Map<String, Object> parameters = new HashMap<String, Object>(2);
         parameters.put("first_name", actor.getFirstName());
         parameters.put("last_name", actor.getLastName());
         Number newId = insertActor.executeAndReturnKey(parameters);
@@ -1364,7 +1366,7 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>Here we can see the main difference when executing the
+}]]></programlisting>Here we can see the main difference when executing the
       insert is that we don't add the id to the Map and we call the
       <literal>executeReturningKey</literal> method. This returns a
       <literal>java.lang.Number</literal> object that we can use to create an
@@ -1384,7 +1386,7 @@ jdbcTemplate.update(
       specifying a list of column names to be used. This is accomplished using
       the <classname>usingColumns</classname> method.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1398,7 +1400,7 @@ jdbcTemplate.update(
     }
 
     public void add(Actor actor) {
-        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(2);
+        Map<String, Object> parameters = new HashMap<String, Object>(2);
         parameters.put("first_name", actor.getFirstName());
         parameters.put("last_name", actor.getLastName());
         Number newId = insertActor.executeAndReturnKey(parameters);
@@ -1406,8 +1408,8 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>The execution of the insert is the same as if we had relied
-      on the metadata for determining what columns to use.</para>
+}]]></programlisting>The execution of the insert is the same as if we had
+      relied on the metadata for determining what columns to use.</para>
     </section>
 
     <section id="jdbc-simple-jdbc-parameters">
@@ -1422,7 +1424,7 @@ jdbcTemplate.update(
       contains your values. It will use the corresponding getter method to
       extract the parameter values. Here is an example:</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1441,12 +1443,12 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>Another option is the
+}]]></programlisting>Another option is the
       <classname>MapSqlParameterSource</classname> that resembles a Map but
       provides a more convenient <classname>addValue</classname> method that
       can be chained.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
@@ -1467,8 +1469,8 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>As you can see, the configuration is the same, it;s just the
-      executing code that has to change to use these alternative input
+}]]></programlisting>As you can see, the configuration is the same, it;s just
+      the executing code that has to change to use these alternative input
       classes.</para>
     </section>
 
@@ -1491,7 +1493,7 @@ jdbcTemplate.update(
       the source for the procedure as it would look when using MySQL as the
       database:</para>
 
-      <para><programlisting>CREATE PROCEDURE read_actor ( 
+      <para><programlisting><![CDATA[CREATE PROCEDURE read_actor ( 
   IN in_id INTEGER, 
   OUT out_first_name VARCHAR(100), 
   OUT out_last_name VARCHAR(100), 
@@ -1500,7 +1502,7 @@ BEGIN
   SELECT first_name, last_name, birth_date 
   INTO out_first_name, out_last_name, out_birth_date 
   FROM t_actor where id = in_id;
-END;</programlisting>As you can see there are four parameters. One is an in
+END;]]></programlisting>As you can see there are four parameters. One is an in
       parameter "in_id" containing the id of the Actor we are looking up. The
       remaining parameters are out parameters and they will be used to return
       the data read from the table.</para>
@@ -1510,7 +1512,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       subclass and we declare it in the initialization method. For this
       example, all we need to specify is the name of the procedure.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall procReadActor;
 
@@ -1534,7 +1536,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
     }
 
     //  ... additional methods
-}</programlisting>The execution of the call involves creating an
+}]]></programlisting>The execution of the call involves creating an
       <classname>SqlParameterSource</classname> containing the in parameter.
       It's important to match the name of the parameter declared in the stored
       procedure. The case doesn't have to match since we use metadata to
@@ -1565,7 +1567,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <classname>commons-collections.jar</classname> on your classpath for
       this to work. Here is an example of this configuration:</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcCall procReadActor;
 
     public void setDataSource(DataSource dataSource) {
@@ -1578,8 +1580,8 @@ END;</programlisting>As you can see there are four parameters. One is an in
 
 
     //  ... additional methods
-}</programlisting>By doing this, you don't have to worry about the case used
-      for the names of your returned out parameters.</para>
+}]]></programlisting>By doing this, you don't have to worry about the case
+      used for the names of your returned out parameters.</para>
     </section>
 
     <section id="jdbc-simple-jdbc-call-2">
@@ -1606,7 +1608,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <para>This is what a fully declared procedure call declaration of our
       earlier example would look like:</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcCall procReadActor;
 
     public void setDataSource(DataSource dataSource) {
@@ -1627,7 +1629,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
 
 
     //  ... additional methods
-}</programlisting>The execution and end results are the same, we are just
+}]]></programlisting>The execution and end results are the same, we are just
       specifying all the details explicitly rather than relying on metadata.
       This will be necessary if the database we use is not part of the
       supported databases. Currently we support metadata lookup of stored
@@ -1647,8 +1649,8 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <classname>java.sql.Types</classname> constants. We have already seen
       declarations like:</para>
 
-      <para><programlisting language="java">   new SqlParameter("in_id", Types.NUMERIC),
-   new SqlOutParameter("out_first_name", Types.VARCHAR),</programlisting></para>
+      <para><programlisting language="java"><![CDATA[   new SqlParameter("in_id", Types.NUMERIC),
+   new SqlOutParameter("out_first_name", Types.VARCHAR),]]></programlisting></para>
 
       <para>The first line with the <classname>SqlParameter</classname>
       declares an in parameter. In parameters can be used for both stored
@@ -1668,7 +1670,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
         input values. This is different from the
         <classname>StoredProcedure</classname> class which for backwards
         compatibility reasons allows input values to be provided for
-        parameters declared as <classname>SqlOutParameter</classname>. </para>
+        parameters declared as <classname>SqlOutParameter</classname>.</para>
       </note>
 
       <para>In addition to the name and the SQL type you can specify
@@ -1699,7 +1701,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       that returns an actor's full name. Here is the MySQL source for this
       function:</para>
 
-      <para><programlisting>CREATE FUNCTION get_actor_name (in_id INTEGER)
+      <para><programlisting><![CDATA[CREATE FUNCTION get_actor_name (in_id INTEGER)
 RETURNS VARCHAR(200) READS SQL DATA 
 BEGIN
   DECLARE out_name VARCHAR(200);
@@ -1707,13 +1709,13 @@ BEGIN
     INTO out_name
     FROM t_actor where id = in_id;
   RETURN out_name;
-END;</programlisting></para>
+END;]]></programlisting></para>
 
       <para>To call this function we again create a
       <classname>SimpleJdbcCall</classname> in the initialization
       method.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall funcGetActorName;
 
@@ -1734,7 +1736,7 @@ END;</programlisting></para>
     }
 
     //  ... additional methods
-}</programlisting>The execute method used returns a
+}]]></programlisting>The execute method used returns a
       <classname>String</classname> containing the return value from the
       function call.</para>
     </section>
@@ -1761,17 +1763,17 @@ END;</programlisting></para>
       parameters and returns all rows from the t_actor table. Here is the
       MySQL source for this procedure:</para>
 
-      <para><programlisting>CREATE PROCEDURE read_all_actors()
+      <para><programlisting><![CDATA[CREATE PROCEDURE read_all_actors()
 BEGIN
  SELECT a.id, a.first_name, a.last_name, a.birth_date FROM t_actor a;
-END;</programlisting>In order to call this procedure we need to declare the
+END;]]></programlisting>In order to call this procedure we need to declare the
       <classname>RowMapper</classname> to be used. Since the class we want to
       map to follows the JavaBean rules, we can use a
       <classname>ParameterizedBeanPropertyRowMapper</classname> that is
       created by passing in the required class to map to in the
       <classname>newInstance</classname> method.</para>
 
-      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+      <para><programlisting language="java"><![CDATA[public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall procReadAllActors;
 
@@ -1787,12 +1789,12 @@ END;</programlisting>In order to call this procedure we need to declare the
     }
 
     public List getActorsList() {
-        Map m = procReadAllActors.execute(new HashMap&lt;String, Object&gt;(0));
+        Map m = procReadAllActors.execute(new HashMap<String, Object>(0));
         return (List) m.get("actors");
     }
 
     //  ... additional methods
-}</programlisting>The execute call passes in an empty Map since this call
+}]]></programlisting>The execute call passes in an empty Map since this call
       doesn't take any parameters. The list of Actors is then retrieved from
       the results map and returned to the caller.</para>
     </section>
@@ -1855,7 +1857,7 @@ END;</programlisting>In order to call this procedure we need to declare the
       customer relation to an instance of the <classname>Customer</classname>
       class.</para>
 
-      <programlisting language="java">private class CustomerMappingQuery extends MappingSqlQuery {
+      <programlisting language="java"><![CDATA[private class CustomerMappingQuery extends MappingSqlQuery {
 
     public CustomerMappingQuery(DataSource ds) {
         super(ds, "SELECT id, name FROM customer WHERE id = ?");
@@ -1869,7 +1871,7 @@ END;</programlisting>In order to call this procedure we need to declare the
         cust.setName(rs.getString("name"));
         return cust;
     } 
-}</programlisting>
+}]]></programlisting>
 
       <para>We provide a constructor for this customer query that takes the
       <interfacename>DataSource</interfacename> as the only parameter. In this
@@ -1886,18 +1888,18 @@ END;</programlisting>In order to call this procedure we need to declare the
       have been defined we call the <literal>compile()</literal> method so the
       statement can be prepared and later be executed.</para>
 
-      <programlisting language="java">public Customer getCustomer(Integer id) {
+      <programlisting language="java"><![CDATA[public Customer getCustomer(Integer id) {
     CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
     Object[] parms = new Object[1];
     parms[0] = id;
     List customers = custQry.execute(parms);
-    if (customers.size() &gt; 0) {
+    if (customers.size() > 0) {
         return (Customer) customers.get(0);
     }
     else {
         return null;
     }
-}</programlisting>
+}]]></programlisting>
 
       <para>The method in this example retrieves the customer with the id that
       is passed in as the only parameter. After creating an instance of the
@@ -1975,8 +1977,8 @@ public class UpdateCreditRating extends SqlUpdate {
       SQL type is specified using the <classname>java.sql.Types</classname>
       constants. We have already seen declarations like:</para>
 
-      <para><programlisting language="java">   new SqlParameter("in_id", Types.NUMERIC),
-   new SqlOutParameter("out_first_name", Types.VARCHAR),</programlisting></para>
+      <para><programlisting language="java"><![CDATA[   new SqlParameter("in_id", Types.NUMERIC),
+   new SqlOutParameter("out_first_name", Types.VARCHAR),]]></programlisting></para>
 
       <para>The first line with the <classname>SqlParameter</classname>
       declares an in parameter. In parameters can be used for both stored
@@ -1991,11 +1993,11 @@ public class UpdateCreditRating extends SqlUpdate {
       that also return a value</para>
 
       <para><note>
-          <para> Parameters declared as <classname>SqlParameter</classname>
-          and <classname>SqlInOutParameter</classname> will always be used to
+          <para>Parameters declared as <classname>SqlParameter</classname> and
+          <classname>SqlInOutParameter</classname> will always be used to
           provide input values. In addition to this any parameter declared as
           <classname>SqlOutParameter</classname> where an non-null input value
-          is provided will also be used as an input paraneter. </para>
+          is provided will also be used as an input paraneter.</para>
         </note></para>
 
       <para>In addition to the name and the SQL type you can specify
@@ -2113,7 +2115,7 @@ public class TitlesAndGenresStoredProcedure extends StoredProcedure {
       <classname>Title</classname> domain object for each row in the supplied
       <interfacename>ResultSet</interfacename>.</para>
 
-      <programlisting language="java">import com.foo.sprocs.domain.Title;
+      <programlisting language="java"><![CDATA[import com.foo.sprocs.domain.Title;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -2127,14 +2129,14 @@ public final class TitleMapper implements RowMapper {
         title.setName(rs.getString("name"));
         return title;
     }
-}</programlisting>
+}]]></programlisting>
 
       <para>Secondly, the <classname>GenreMapper</classname> class, which
       again simply maps a <interfacename>ResultSet</interfacename> to a
       <classname>Genre</classname> domain object for each row in the supplied
       <interfacename>ResultSet</interfacename>.</para>
 
-      <programlisting language="java">import org.springframework.jdbc.core.RowMapper;
+      <programlisting language="java"><![CDATA[import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -2146,7 +2148,7 @@ public final class GenreMapper implements RowMapper {
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Genre(rs.getString("name"));
     }
-}</programlisting>
+}]]></programlisting>
 
       <para>If one needs to pass parameters to a stored procedure (that is the
       stored procedure has been declared as having one or more input
@@ -2155,7 +2157,7 @@ public final class GenreMapper implements RowMapper {
       superclass' (untyped) <literal>execute(Map parameters)</literal> (which
       has <literal>protected</literal> access); for example:</para>
 
-      <programlisting language="java">import oracle.jdbc.driver.OracleTypes;
+      <programlisting language="java"><![CDATA[import oracle.jdbc.driver.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.object.StoredProcedure;
 
@@ -2180,7 +2182,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
         inputs.put(CUTOFF_DATE_PARAM, cutoffDate);
         return super.execute(inputs);
     }
-}</programlisting>
+}]]></programlisting>
     </section>
 
     <section id="jdbc-SqlFunction">
@@ -2211,11 +2213,11 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       the appropriate run method repeatedly to execute the function. Here is
       an example of retrieving the count of rows from a table:</para>
 
-      <programlisting language="java">public int countRows() {
+      <programlisting language="java"><![CDATA[public int countRows() {
     SqlFunction sf = new SqlFunction(dataSource, "select count(*) from mytable");
     sf.compile();
     return sf.run();
-}</programlisting>
+}]]></programlisting>
     </section>
   </section>
 
@@ -2346,7 +2348,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
           <area coords="13" id="jdbc.lobhandler.setBlob" />
         </areaspec>
 
-        <programlisting language="java">final File blobIn = new File("spring2004.jpg");
+        <programlisting language="java"><![CDATA[final File blobIn = new File("spring2004.jpg");
 final InputStream blobIs = new FileInputStream(blobIn);
 final File clobIn = new File("large.txt");
 final InputStream clobIs = new FileInputStream(clobIn);
@@ -2363,7 +2365,7 @@ jdbcTemplate.execute(
   }
 );
 blobIs.close();
-clobReader.close();</programlisting>
+clobReader.close();]]></programlisting>
 
         <calloutlist>
           <callout arearefs="jdbc.lobhandler.variableref">
@@ -2395,7 +2397,7 @@ clobReader.close();</programlisting>
             <area coords="7" id="jdbc.lobhandler.getBlob" />
           </areaspec>
 
-          <programlisting language="java">List l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
+          <programlisting language="java"><![CDATA[List l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
     new RowMapper() {
       public Object mapRow(ResultSet rs, int i) throws SQLException {
         Map results = new HashMap();
@@ -2406,7 +2408,7 @@ clobReader.close();</programlisting>
         return results;
       }
     });
-</programlisting>
+]]></programlisting>
 
           <calloutlist>
             <callout arearefs="jdbc.lobhandler.setClob">
@@ -2474,7 +2476,7 @@ clobReader.close();</programlisting>
       interface is used as part of the declaration of an
       <classname>SqlOutParameter</classname>.</para>
 
-      <para><programlisting language="java">declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+      <para><programlisting language="java"><![CDATA[declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
     new SqlReturnType() {
       public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) 
           throws SQLException {
@@ -2486,7 +2488,7 @@ clobReader.close();</programlisting>
         item.setExpirationDate((java.util.Date)attr[2]);
         return item;
       }
-    }));</programlisting>Going from Java to the database and passing in the
+    }));]]></programlisting>Going from Java to the database and passing in the
       value of a <classname>TestItem</classname> into a stored procedure is
       done using the <classname>SqlTypeValue</classname>. The
       <classname>SqlTypeValue</classname> interface has a single method named
@@ -2495,7 +2497,7 @@ clobReader.close();</programlisting>
       specific objects like <classname>StructDescriptor</classname>s or
       <classname>ArrayDescriptor</classname>s</para>
 
-      <para><programlisting language="java">SqlTypeValue value = new AbstractSqlTypeValue() {
+      <para><programlisting language="java"><![CDATA[SqlTypeValue value = new AbstractSqlTypeValue() {
   protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
     StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
     Struct item = new STRUCT(itemDescriptor, conn,
@@ -2506,9 +2508,9 @@ clobReader.close();</programlisting>
         });
     return item;
   }
-};</programlisting>This <classname>SqlTypeValue</classname> can now be added
-      to the Map containing the input parameters for the execute call of the
-      stored procedure.</para>
+};]]></programlisting>This <classname>SqlTypeValue</classname> can now be
+      added to the Map containing the input parameters for the execute call of
+      the stored procedure.</para>
     </section>
   </section>
 </chapter>
