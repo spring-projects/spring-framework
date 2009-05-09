@@ -11,8 +11,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 /**
- * Helper JDBC utilities used by other classes in this package. There is some duplication here with JdbcUtils in
- * jdbc.support package. We may want to consider simply using that. Package private for now.
+ * Helper JDBC utilities used by other classes in this package.
+ * Note there is some duplication here with JdbcUtils in jdbc.support package.
+ * We may want to consider simply using that at some point.
  * @author Keith Donald
  */
 final class JdbcUtils {

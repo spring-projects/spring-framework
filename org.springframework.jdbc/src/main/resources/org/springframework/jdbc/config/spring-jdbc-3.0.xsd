@@ -30,7 +30,7 @@
 								<xsd:documentation><![CDATA[
 			A SQL script to execute during embedded database initialization.
 								]]></xsd:documentation>
-					</xsd:annotation>	
+							</xsd:annotation>	
 						</xsd:element>
 					</xsd:sequence>
 					<xsd:attribute name="type" type="databaseType">
@@ -57,7 +57,20 @@
 
 	<xsd:simpleType name="databaseType">
 		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="HSQL" />
+			<xsd:enumeration value="HSQL">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			Hyper SQL Java Database Engine
+					]]></xsd:documentation>
+				</xsd:annotation>	
+			</xsd:enumeration>
+			<xsd:enumeration value="H2">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			H2 Java Database Engine
+					]]></xsd:documentation>
+				</xsd:annotation>	
+			</xsd:enumeration>
 		</xsd:restriction>
 	</xsd:simpleType>
 
