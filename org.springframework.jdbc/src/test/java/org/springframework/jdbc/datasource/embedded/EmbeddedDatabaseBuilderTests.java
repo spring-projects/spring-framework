@@ -38,7 +38,6 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	private void assertDatabaseCreatedAndShutdown(EmbeddedDatabase db) {
-
 		JdbcTemplate template = new JdbcTemplate(db);
 		assertEquals("Keith", template.queryForObject("select NAME from T_TEST", String.class));
 		db.shutdown();
