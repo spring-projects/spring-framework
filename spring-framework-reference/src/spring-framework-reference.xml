@@ -7,7 +7,7 @@
 		<title>Reference Documentation</title>
 		<subtitle>(Work in progress)</subtitle>
 	    <productname>Spring Framework</productname>
-		<releaseinfo>3.0.M3</releaseinfo>
+		<releaseinfo>3.0.0.M3</releaseinfo>
 	    <mediaobject>
 	      <imageobject role="fo">
 	        <imagedata align="center" fileref="images/logo-pdf.png"
@@ -24,8 +24,8 @@
 				<surname>Hoeller</surname>
 			</author>
 			<author>
-				<firstname>Alef</firstname>
-				<surname>Arendsen</surname>
+				<firstname>Keith</firstname>
+				<surname>Donald</surname>
 			</author>
 			<author>
 				<firstname>Colin</firstname>
@@ -38,6 +38,10 @@
 			<author>
 				<firstname>Thomas</firstname>
 				<surname>Risberg</surname>
+			</author>
+			<author>
+				<firstname>Alef</firstname>
+				<surname>Arendsen</surname>
 			</author>
 			<author>
 				<firstname>Darren</firstname>
@@ -106,7 +110,7 @@
 		</authorgroup>
 		<copyright>
 			<year>2004-2009</year>
-			<holder>Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop, Thomas Risberg, Darren Davison, 
+			<holder>Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Alef Arendsen, Thomas Risberg, Darren Davison, 
 				Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, 
                 Costin Leau, Mark Fisher, Sam Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abed Rabbo
 			</holder>

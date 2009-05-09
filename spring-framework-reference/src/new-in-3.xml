@@ -196,6 +196,11 @@
       <listitem>
         <para>Early support for Java EE 6</para>
       </listitem>
+      
+      <listitem>
+        <para>Embedded database support</para>
+      </listitem>
+      
     </itemizedlist>
 
     <section id="new-feature-java5">
@@ -435,5 +440,13 @@ public class AppConfig{
 
       <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
+    
+    <section id="new-feature-embedded-databases">
+    	<title>Support for embedded databases</title>
+    	<para>
+    		Convenient support for <link linkend="jdbc-embedded-database-support">embedded Java database engines</link>, such as HSQL and H2, is now provided.
+    	</para>
+    </section>
+    
   </section>
 </chapter>

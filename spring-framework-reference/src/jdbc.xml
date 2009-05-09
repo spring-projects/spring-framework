@@ -87,11 +87,10 @@
 
         <listitem>
           <para><emphasis role="bold">SimpleJdbcTemplate</emphasis> - this
-          class combines the most frequently used features of both
-          JdbcTemplate and NamedParameterJdbcTemplate plus it adds additional
-          convenience by taking better advantage of Java 5 varargs for
-          ceratain methods where this wasn't possible in the JdbcTemplate due
-          to backwars compatibility reasons.</para>
+          class combines the most frequently used operations across
+          JdbcTemplate and NamedParameterJdbcTemplate.
+          It also adds some additional convenience around support for Java 5 varargs
+          where this was not possible in the JdbcTemplate due to backwards compatibility reasons.</para>
         </listitem>
 
         <listitem>
@@ -142,11 +141,9 @@
       contains a utility class for easy
       <interfacename>DataSource</interfacename> access, and various simple
       <interfacename>DataSource</interfacename> implementations that can be
-      used for testing and running unmodified JDBC code outside of a J2EE
-      container. The utility class provides static methods to obtain
-      connections from JNDI and to close connections if necessary. It has
-      support for thread-bound connections, e.g. for use with
-      <classname>DataSourceTransactionManager</classname>.</para>
+      used for testing and running unmodified JDBC code outside of a Java EE container.
+      A sub-package named <literal>org.springfamework.jdbc.datasource.embedded</literal>
+      provides support for creating in-memory database instances using Java database engines such as HSQL and H2.</para>
 
       <para>Next, the <literal>org.springframework.jdbc.object</literal>
       package contains classes that represent RDBMS queries, updates, and
@@ -2512,5 +2509,69 @@ clobReader.close();]]></programlisting>
       added to the Map containing the input parameters for the execute call of
       the stored procedure.</para>
     </section>
+  </section>
+  <section id="jdbc-embedded-database-support">
+  	<title>Embedded database support</title>
+  	<para>
+  		The <literal>org.springframework.jdbc.datasource.embedded</literal> package provides support for embedded Java database engines.
+  		Support for <ulink url="http://www.hsqldb.org">HSQL</ulink> and <ulink url="http://www.h2database.com">H2</ulink> is provided natively.
+  		There is also an extensible API for plugging in new embedded database types and <classname>DataSource</classname> implementations.
+  	</para>
+  	<section id="jdbc-why-embedded-database">
+  		<title>Why use a embedded database?</title>
+  		<para>
+  			An embedded database is useful during the development phase of a project due to its lightweight nature.
+  			Ease of configuration, quick startup time, testability, and the ability to rapidly evolve SQL during development are just some of the benefits of using an embedded database.
+  		</para>
+  	</section>
+  	<section id="jdbc-embedded-database-xml">
+  		<title>Creating an embedded database instance using Spring XML</title>
+  		<para>
+  			When you wish to expose an embedded database instance as a bean in a Spring ApplicationContext, use the embedded-database tag in the spring-jdbc namespace:
+  			<programlisting language="xml"><![CDATA[
+    <jdbc:embedded-database id="dataSource">
+        <jdbc:script location="classpath:schema.sql"/>
+        <jdbc:script location="classpath:test-data.sql"/>
+    </jdbc:embedded-database>]]>
+  			</programlisting>
+  		</para>
+  		<para>
+  			The configuration above creates an embedded HSQL database populated with SQL from schema.sql and testdata.sql resources in the classpath.
+  			The database instance is made available to the Spring container as a bean of type <classname>javax.sql.DataSource</classname>.
+  			This bean can then be injected into data access objects as needed.
+  		</para>  		
+  	</section>
+  	<section id="jdbc-embedded-database-java">
+  		<title>
+  			Creating an embedded database instance programatically
+  		</title>
+  		<para>
+  			The <classname>EmbeddedDatabaseBuilder</classname> class provides a fluent API for constructing an embedded database programmatically.
+  			Use this when you need to create an embedded database instance in a standalone environment, such as a data access object unit test:
+ 	 		<programlisting language="java"><![CDATA[
+    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+    EmbeddedDatabase db = builder.type(H2).script("schema.sql").script("test-data.sql").build();
+    // do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
+    db.shutdown()]]>
+  			</programlisting>
+  		</para>
+  	</section>
+  	<section id="jdbc-embedded-database-extension">
+  		<title>Extending the embedded database support</title>
+  		<para>
+  			Spring Jdbc's embedded database support can be extended in two ways:
+  			<orderedlist>
+  				<listitem>
+  					<para>Implement <classname>EmbeddedDatabaseConfigurer</classname> to support a new embedded database type, such as Apache Derby.</para>
+  				</listitem>
+  				<listitem>
+  					<para>Implement <classname>DataSourceFactory</classname> to support a new DataSource implementation, such as a connection pool, to manage embedded database connections.</para>
+  				</listitem>
+  			</orderedlist>
+  		</para>
+  		<para>
+  			You are encouraged to contribute back extensions to the Spring community at <ulink url="jira.springframework.org">jira.springframework.org</ulink>.  			
+  		</para>
+  	</section>
   </section>
 </chapter>
