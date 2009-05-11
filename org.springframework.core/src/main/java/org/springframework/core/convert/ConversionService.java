@@ -18,7 +18,7 @@ package org.springframework.core.convert;
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
  * <p>
- * Call {@link #executeConversion(Object, TypeDescriptor)} to perform a thread-safe type conversion using
+ * Call {@link #convert(Object, TypeDescriptor)} to perform a thread-safe type conversion using
  * this system.
  * 
  * @author Keith Donald
@@ -43,6 +43,6 @@ public interface ConversionService {
 	 * source to an instance of targetType
 	 * @throws ConversionException if an exception occurred during the conversion process
 	 */
-	public Object executeConversion(Object source, TypeDescriptor targetType);
+	public Object convert(Object source, TypeDescriptor targetType);
 
 }

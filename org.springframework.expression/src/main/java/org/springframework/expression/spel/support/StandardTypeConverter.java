@@ -52,7 +52,7 @@ public class StandardTypeConverter implements TypeConverter {
 
 	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 		try {
-			return conversionService.executeConversion(value, typeDescriptor);
+			return conversionService.convert(value, typeDescriptor);
 		} catch (ConverterNotFoundException cenfe) {
 			throw new SpelException(cenfe, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 		} catch (ConversionException ce) {

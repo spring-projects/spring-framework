@@ -64,14 +64,14 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementType();
 		assertEquals(String.class,clazz);
-		List l = (List) tcs.executeConversion(listOfInteger, typeDescriptorForListOfString);
+		List l = (List) tcs.convert(listOfInteger, typeDescriptorForListOfString);
 		assertNotNull(l); 
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementType();
 		assertEquals(Integer.class,clazz);
 		
-		l = (List) tcs.executeConversion(listOfString, typeDescriptorForListOfString);
+		l = (List) tcs.convert(listOfString, typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
 	
@@ -103,13 +103,13 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 
 		@SuppressWarnings("unchecked")
 		public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-			return (T)super.executeConversion(value,TypeDescriptor.valueOf(targetType));
+			return (T)super.convert(value,TypeDescriptor.valueOf(targetType));
 		}
 
 		@SuppressWarnings("unchecked")
 		public Object convertValue(Object value, TypeDescriptor typeDescriptor)
 				throws EvaluationException {
-			return super.executeConversion(value, typeDescriptor);
+			return super.convert(value, typeDescriptor);
 		}
 		
 	}
