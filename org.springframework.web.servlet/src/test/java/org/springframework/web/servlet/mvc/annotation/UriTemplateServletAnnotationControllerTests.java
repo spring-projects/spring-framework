@@ -183,6 +183,33 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("remove-42", response.getContentAsString());
 	}
 
+	@Test
+	public void methodNotSupported() throws Exception {
+		initServlet(MethodNotAllowedController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(200, response.getStatus());
+
+		request = new MockHttpServletRequest("POST", "/hotels/1");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(405, response.getStatus());
+
+		request = new MockHttpServletRequest("GET", "/hotels");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(200, response.getStatus());
+
+		request = new MockHttpServletRequest("POST", "/hotels");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(405, response.getStatus());
+
+
+	}
+
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -335,6 +362,27 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write("remove-" + hotel);
 		}
 
+	}
+
+	@Controller
+	@RequestMapping("/hotels")
+	public static class MethodNotAllowedController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void list(Writer writer) {
+		}
+
+		@RequestMapping(method = RequestMethod.GET, value = "{hotelId}")
+		public void show(@PathVariable long hotelId, Writer writer) {
+		}
+
+		@RequestMapping(method = RequestMethod.PUT, value = "{hotelId}")
+		public void createOrUpdate(@PathVariable long hotelId, Writer writer) {
+		}
+
+		@RequestMapping(method = RequestMethod.DELETE, value = "/{hotelId}")
+		public void remove(@PathVariable long hotelId, Writer writer) {
+		}
 	}
 
 

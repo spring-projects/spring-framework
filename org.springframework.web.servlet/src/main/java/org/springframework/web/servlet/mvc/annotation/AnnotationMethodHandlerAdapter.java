@@ -446,6 +446,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 &&
 							resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
 						match = false;
+					} else {
+						for (RequestMethod requestMethod : mappingInfo.methods) {
+							allowedMethods.add(requestMethod.toString());
+						}						
 					}
 				}
 				if (match) {
