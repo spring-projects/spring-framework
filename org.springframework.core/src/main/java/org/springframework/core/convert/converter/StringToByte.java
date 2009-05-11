@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToByte implements Converter<String, Byte> {
+public class StringToByte implements TwoWayConverter<String, Byte> {
 
 	public Byte convert(String source) {
 		return Byte.valueOf(source);

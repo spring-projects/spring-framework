@@ -15,7 +15,7 @@
  */
 package org.springframework.core.convert.converter;
 
-import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConvertException;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -34,7 +34,7 @@ public interface SuperConverter<S, T> {
 	 * @param targetClass the requested target class to convert to (RT), which must be equal to T or extend from T
 	 * @return the converted object, which must be an instance of RT
 	 * @throws Exception an exception occurred performing the conversion; may be any checked exception, the conversion
-	 * system will handle wrapping the failure in a {@link ConversionException} that provides a consistent type
+	 * system will handle wrapping the failure in a {@link ConvertException} that provides a consistent type
 	 * conversion error context
 	 */
 	public <RT extends T> RT convert(S source, Class<RT> targetClass) throws Exception;

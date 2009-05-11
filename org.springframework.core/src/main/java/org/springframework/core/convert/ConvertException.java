@@ -20,14 +20,14 @@ package org.springframework.core.convert;
  * 
  * @author Keith Donald
  */
-public abstract class ConversionException extends RuntimeException {
+public abstract class ConvertException extends RuntimeException {
 
 	/**
 	 * Creates a new conversion exception.
 	 * @param message the exception message
 	 * @param cause the cause
 	 */
-	public ConversionException(String message, Throwable cause) {
+	public ConvertException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -35,7 +35,7 @@ public abstract class ConversionException extends RuntimeException {
 	 * Creates a new conversion exception.
 	 * @param message the exception message
 	 */
-	public ConversionException(String message) {
+	public ConvertException(String message) {
 		super(message);
 	}
 }

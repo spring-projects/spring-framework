@@ -22,7 +22,7 @@ import org.springframework.core.style.StylerUtils;
  * 
  * @author Keith Donald
  */
-public class ConversionExecutionException extends ConversionException {
+public class ConversionExecutionException extends ConvertException {
 
 	/**
 	 * The value we tried to convert. Transient because we cannot guarantee that the value is Serializable.

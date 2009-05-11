@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToLong implements Converter<String, Long> {
+public class StringToLong implements TwoWayConverter<String, Long> {
 
 	public Long convert(String source) {
 		return Long.valueOf(source);

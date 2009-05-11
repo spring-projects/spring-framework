@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToCharacter implements Converter<String, Character> {
+public class StringToCharacter implements TwoWayConverter<String, Character> {
 
 	public Character convert(String source) {
 		if (source.length() != 1) {

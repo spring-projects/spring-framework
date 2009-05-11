@@ -15,7 +15,7 @@
  */
 package org.springframework.core.convert.converter;
 
-import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConvertException;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -33,19 +33,9 @@ public interface Converter<S, T> {
 	 * @param source the source object to convert, which must be an instance of S
 	 * @return the converted object, which must be an instance of T
 	 * @throws Exception an exception occurred performing the conversion; may be any checked exception, the conversion
-	 * system will handle wrapping the failure in a {@link ConversionException} that provides a consistent type
+	 * system will handle wrapping the failure in a {@link ConvertException} that provides a consistent type
 	 * conversion error context
 	 */
 	public T convert(S source) throws Exception;
-
-	/**
-	 * Convert the target of type T back to source type S.
-	 * @param target the target object to convert, which must be an instance of T
-	 * @return the converted object, which must be an instance of S
-	 * @throws Exception an exception occurred performing the conversion; may be any checked exception, the conversion
-	 * system will handle wrapping the failure in a {@link ConversionException} that provides a consistent type
-	 * conversion error context
-	 */
-	public S convertBack(T target) throws Exception;
 
 }

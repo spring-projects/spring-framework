@@ -16,6 +16,7 @@
 package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.TwoWayConverter;
 
 /**
  * A converter that reverses another converter.
@@ -24,17 +25,14 @@ import org.springframework.core.convert.converter.Converter;
 @SuppressWarnings("unchecked")
 class ReverseConverter implements Converter {
 
-	private Converter converter;
+	private TwoWayConverter converter;
 
-	public ReverseConverter(Converter converter) {
+	public ReverseConverter(TwoWayConverter converter) {
 		this.converter = converter;
 	}
 
 	public Object convert(Object source) throws Exception {
 		return converter.convertBack(source);
 	}
-
-	public Object convertBack(Object target) throws Exception {
-		throw new IllegalStateException("Should not be called");
-	}
+	
 }

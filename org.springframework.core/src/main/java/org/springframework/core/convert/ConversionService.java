@@ -39,9 +39,7 @@ public interface ConversionService {
 	 * @param targetType context about the target type to convert to
 	 * @return the converted object, an instance of {@link TypeDescriptor#getType()}</code>, or <code>null</code> if a null source
 	 * was provided
-	 * @throws ConverterNotFoundException if no suitable conversion executor could be found to convert the
-	 * source to an instance of targetType
-	 * @throws ConversionException if an exception occurred during the conversion process
+	 * @throws ConvertException if an exception occurred during the conversion process
 	 */
 	public Object convert(Object source, TypeDescriptor targetType);
 

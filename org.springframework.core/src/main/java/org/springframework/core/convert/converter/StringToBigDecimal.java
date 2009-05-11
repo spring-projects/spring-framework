@@ -22,7 +22,7 @@ import java.math.BigDecimal;
  * 
  * @author Keith Donald
  */
-public class StringToBigDecimal implements Converter<String, BigDecimal> {
+public class StringToBigDecimal implements TwoWayConverter<String, BigDecimal> {
 
 	public BigDecimal convert(String source) {
 		return new BigDecimal(source);

@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
  * @see #StringToBoolean(String, String)
  * @author Keith Donald
  */
-public class StringToBoolean implements Converter<String, Boolean> {
+public class StringToBoolean implements TwoWayConverter<String, Boolean> {
 
 	private String trueString;
 

@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToInteger implements Converter<String, Integer> {
+public class StringToInteger implements TwoWayConverter<String, Integer> {
 
 	public Integer convert(String source) {
 		return Integer.valueOf(source);
