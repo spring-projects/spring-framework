@@ -264,20 +264,21 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Controller
+	@RequestMapping("/hotels")
 	public static class AmbiguousUriTemplateController {
 
-		@RequestMapping("/hotels/new")
-		public void handleSpecific(Writer writer) throws IOException {
-			writer.write("specific");
-		}
-
-		@RequestMapping("/hotels/{hotel}")
+		@RequestMapping("/{hotel}")
 		public void handleVars(@PathVariable("hotel") String hotel, Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			writer.write("variables");
 		}
 
-		@RequestMapping("/hotels/*")
+		@RequestMapping("/new")
+		public void handleSpecific(Writer writer) throws IOException {
+			writer.write("specific");
+		}
+
+		@RequestMapping("/*")
 		public void handleWildCard(Writer writer) throws IOException {
 			writer.write("wildcard");
 		}

@@ -423,10 +423,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				if (mappingInfo.paths.length > 0) {
 					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);
 					for (String methodLevelPattern : mappingInfo.paths) {
-						if (isPathMatch(methodLevelPattern, lookupPath)) {
+						String matchedPattern = getMatchedPattern(methodLevelPattern, lookupPath);
+						if (matchedPattern != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
-								matchedPaths.add(methodLevelPattern);
+								matchedPaths.add(matchedPattern);
 							}
 							else {
 								for (RequestMethod requestMethod : mappingInfo.methods) {
@@ -437,7 +438,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						}
 					}
 					Collections.sort(matchedPaths, pathComparator);
-					mappingInfo.matchedPaths = matchedPaths.toArray(new String[matchedPaths.size()]);
+					mappingInfo.matchedPaths = matchedPaths;
 				}
 				else {
 					// No paths specified: parameter match sufficient.
@@ -485,8 +486,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						new RequestMappingInfoComparator(pathComparator);
 				Collections.sort(matches, requestMappingInfoComparator);
 				RequestMappingInfo bestMappingMatch = matches.get(0);
-				if (bestMappingMatch.matchedPaths.length > 0) {
-					extractHandlerMethodUriTemplates(bestMappingMatch.matchedPaths[0], lookupPath, request);
+				String bestMatchedPath = bestMappingMatch.bestMatchedPath();
+				if (bestMatchedPath != null) {
+					extractHandlerMethodUriTemplates(bestMatchedPath, lookupPath, request);
 				}
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
@@ -502,10 +504,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 		}
 
-		private boolean isPathMatch(String methodLevelPattern, String lookupPath) {
+		private String getMatchedPattern(String methodLevelPattern, String lookupPath) {
 			if ((!hasTypeLevelMapping() || ObjectUtils.isEmpty(getTypeLevelMapping().value())) &&
 					isPathMatchInternal(methodLevelPattern, lookupPath)) {
-				return true;
+				return methodLevelPattern;
 			}
 			if (hasTypeLevelMapping()) {
 				String[] typeLevelPatterns = getTypeLevelMapping().value();
@@ -515,12 +517,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					}
 					String combinedPattern = pathMatcher.combine(typeLevelPattern, methodLevelPattern);
 					if (isPathMatchInternal(combinedPattern, lookupPath)) {
-						return true;
+						return combinedPattern;
 					}
 				}
 
 			}
-			return false;
+			return null;
 		}
 
 		private boolean isPathMatchInternal(String pattern, String lookupPath) {
@@ -756,7 +758,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		String[] paths = new String[0];
 
-		String[] matchedPaths = new String[0];
+		List<String> matchedPaths = Collections.emptyList();
 
 		RequestMethod[] methods = new RequestMethod[0];
 
@@ -765,7 +767,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		String[] headers = new String[0];
 
 		String bestMatchedPath() {
-			return matchedPaths.length > 0 ? matchedPaths[0] : null;
+			return matchedPaths.isEmpty() ? null : matchedPaths.get(0);
 		}
 
 		public boolean matches(HttpServletRequest request) {
