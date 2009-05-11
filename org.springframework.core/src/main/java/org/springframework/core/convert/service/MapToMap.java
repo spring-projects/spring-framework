@@ -22,7 +22,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.springframework.core.convert.ConversionExecutionException;
-import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
@@ -36,7 +35,7 @@ class MapToMap implements ConversionExecutor {
 
 	private TypeDescriptor targetType;
 
-	private ConversionService conversionService;
+	private GenericConversionService conversionService;
 
 	private EntryConverter entryConverter;
 
@@ -46,7 +45,7 @@ class MapToMap implements ConversionExecutor {
 	 * @param targetType the target map type
 	 * @param conversionService the conversion service
 	 */
-	public MapToMap(TypeDescriptor sourceType, TypeDescriptor targetType, ConversionService conversionService) {
+	public MapToMap(TypeDescriptor sourceType, TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.conversionService = conversionService;

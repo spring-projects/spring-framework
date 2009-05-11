@@ -16,7 +16,6 @@
 package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.ConversionExecutionException;
-import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;

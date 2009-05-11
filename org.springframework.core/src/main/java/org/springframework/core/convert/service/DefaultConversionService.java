@@ -49,7 +49,6 @@ public class DefaultConversionService extends GenericConversionService {
 	 */
 	public DefaultConversionService() {
 		addDefaultConverters();
-		addDefaultAliases();
 	}
 
 	/**
@@ -71,23 +70,6 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverter(new NumberToNumber());
 		addConverter(new NumberToCharacter());
 		addConverter(new ObjectToString());
-	}
-
-	protected void addDefaultAliases() {
-		addAlias("string", String.class);
-		addAlias("byte", Byte.class);
-		addAlias("boolean", Boolean.class);
-		addAlias("char", Character.class);
-		addAlias("short", Short.class);
-		addAlias("int", Integer.class);
-		addAlias("long", Long.class);
-		addAlias("float", Float.class);
-		addAlias("double", Double.class);
-		addAlias("bigInt", BigInteger.class);
-		addAlias("bigDecimal", BigDecimal.class);
-		addAlias("locale", Locale.class);
-		addAlias("enum", Enum.class);
-		addAlias("date", Date.class);
 	}
 
 }

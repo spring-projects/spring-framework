@@ -18,7 +18,6 @@ package org.springframework.core.convert.service;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
-import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**

@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert;
+package org.springframework.core.convert.service;
+
+import org.springframework.core.convert.ConversionExecutionException;
 
 /**
  * A command parameterized with the information necessary to perform a conversion of a source input to a
@@ -29,6 +31,6 @@ public interface ConversionExecutor {
 	 * @param source the source to convert
 	 * @throws ConversionExecutionException if an exception occurs during type conversion
 	 */
-	public Object execute(Object source) throws ConversionExecutionException;
+	public Object execute(Object source);
 
 }
