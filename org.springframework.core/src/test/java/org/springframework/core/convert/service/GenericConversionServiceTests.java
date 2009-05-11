@@ -45,17 +45,17 @@ public class GenericConversionServiceTests {
 	@Test
 	public void executeConversion() {
 		service.addConverter(new StringToInteger());
-		assertEquals(new Integer(3), service.executeConversion("3", type(Integer.class)));
+		assertEquals(new Integer(3), service.convert("3", type(Integer.class)));
 	}
 
 	@Test
 	public void executeConversionNullSource() {
-		assertEquals(null, service.executeConversion(null, type(Integer.class)));
+		assertEquals(null, service.convert(null, type(Integer.class)));
 	}
 	
 	@Test
 	public void executeCompatibleSource() {
-		assertEquals(false, service.executeConversion(false, type(boolean.class)));
+		assertEquals(false, service.convert(false, type(boolean.class)));
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertExecutorNotFound() {
 		try {
-			service.executeConversion("3", type(Integer.class));
+			service.convert("3", type(Integer.class));
 			fail("Should have thrown an exception");
 		} catch (ConverterNotFoundException e) {
 		}
@@ -160,7 +160,7 @@ public class GenericConversionServiceTests {
 			}
 		});
 		try {
-			service.executeConversion("3", type(Integer.class));
+			service.convert("3", type(Integer.class));
 			fail("Should have failed");
 		} catch (ConverterNotFoundException e) {
 
@@ -271,7 +271,7 @@ public class GenericConversionServiceTests {
 		foo.put("2", "BAZ");
 		service.addConverter(new StringToInteger());
 		service.addConverter(new StringToEnum());
-		service.executeConversion(foo, new TypeDescriptor(getClass().getField("genericMap")));
+		service.convert(foo, new TypeDescriptor(getClass().getField("genericMap")));
 	}
 
 	@Ignore
@@ -359,7 +359,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testSuperTwoWayConverterConverterAdaption() {
 		service.addConverter(GenericConversionService.converterFor(String.class, FooEnum.class, new StringToEnum()));
-		assertEquals(FooEnum.BAR, service.executeConversion("BAR", type(FooEnum.class)));
+		assertEquals(FooEnum.BAR, service.convert("BAR", type(FooEnum.class)));
 	}
 
 	private TypeDescriptor type(Class<?> clazz) {

@@ -140,7 +140,7 @@ public class GenericConversionService implements ConversionService {
 		}
 	}
 
-	public Object executeConversion(Object source, TypeDescriptor targetType) {
+	public Object convert(Object source, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
@@ -149,7 +149,7 @@ public class GenericConversionService implements ConversionService {
 			return executor.execute(source);
 		} else {
 			if (parent != null) {
-				return parent.executeConversion(source, targetType);
+				return parent.convert(source, targetType);
 			} else {
 				throw new ConverterNotFoundException(source.getClass(), targetType,
 						"No converter found that can convert from sourceType [" + source.getClass().getName()
