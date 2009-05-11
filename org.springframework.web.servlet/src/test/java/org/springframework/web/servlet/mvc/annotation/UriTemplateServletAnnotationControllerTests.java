@@ -74,7 +74,18 @@ public class UriTemplateServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/dates/2008-11-18");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-42", response.getContentAsString());
+		assertEquals(200, response.getStatus());
+
+		request = new MockHttpServletRequest("GET", "/hotels/42/dates/2008-foo-bar");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(400, response.getStatus());
+
+		initServlet(NonBindingUriTemplateController.class);
+		request = new MockHttpServletRequest("GET", "/hotels/42/dates/2008-foo-bar");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(500, response.getStatus());
 	}
 
 	@Test
@@ -272,6 +283,16 @@ public class UriTemplateServletAnnotationControllerTests {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
 			writer.write("test-" + hotel);
+		}
+
+	}
+
+	@Controller
+	public static class NonBindingUriTemplateController {
+
+		@RequestMapping("/hotels/{hotel}/dates/{date}")
+		public void handle(@PathVariable("hotel") String hotel, @PathVariable Date date, Writer writer)
+				throws IOException {
 		}
 
 	}

@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.io.Serializable;
+import java.io.Writer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -106,6 +106,7 @@ import org.springframework.web.util.NestedServletException;
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Arjen Poutsma
  * @since 2.5
  */
 public class ServletAnnotationControllerTests {
