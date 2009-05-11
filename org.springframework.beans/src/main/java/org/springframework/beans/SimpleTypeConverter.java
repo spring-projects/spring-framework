@@ -37,12 +37,12 @@ public class SimpleTypeConverter extends PropertyEditorRegistrySupport implement
 	}
 
 
-	public Object convertIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
 		return convertIfNecessary(value, requiredType, null);
 	}
 
-	public Object convertIfNecessary(
-			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
+	public <T> T convertIfNecessary(
+			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
 		}
