@@ -81,7 +81,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public Object convertIfNecessary(Object newValue, Class requiredType) throws IllegalArgumentException {
+	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType) throws IllegalArgumentException {
 		return convertIfNecessary(null, null, newValue, requiredType, null, null);
 	}
 
@@ -95,7 +95,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public Object convertIfNecessary(Object newValue, Class requiredType, MethodParameter methodParam)
+	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType, MethodParameter methodParam)
 			throws IllegalArgumentException {
 
 		return convertIfNecessary(null, null, newValue, requiredType, null, methodParam);
@@ -111,8 +111,8 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public Object convertIfNecessary(
-			String propertyName, Object oldValue, Object newValue, Class requiredType)
+	public <T> T convertIfNecessary(
+			String propertyName, Object oldValue, Object newValue, Class<T> requiredType)
 			throws IllegalArgumentException {
 
 		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, null, null);
@@ -149,8 +149,9 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	protected Object convertIfNecessary(
-			String propertyName, Object oldValue, Object newValue, Class requiredType,
+	@SuppressWarnings("unchecked")
+	protected <T> T convertIfNecessary(
+			String propertyName, Object oldValue, Object newValue, Class<T> requiredType,
 			PropertyDescriptor descriptor, MethodParameter methodParam)
 			throws IllegalArgumentException {
 
@@ -173,11 +174,11 @@ class TypeConverterDelegate {
 			if (convertedValue != null) {
 				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
 					// We can stringify any primitive value...
-					return convertedValue.toString();
+					return (T) convertedValue.toString();
 				}
 				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
-					return convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
+					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 				}
 				else if (convertedValue instanceof Collection && CollectionFactory.isApproximableCollectionType(requiredType)) {
 					// Convert elements to target type, if determined.
@@ -228,7 +229,7 @@ class TypeConverterDelegate {
 			}
 		}
 
-		return convertedValue;
+		return (T) convertedValue;
 	}
 
 	/**
@@ -278,7 +279,7 @@ class TypeConverterDelegate {
 			// we just want to allow special PropertyEditors to override setValue
 			// for type conversion from non-String values to the required type.
 			try {
-				Object newConvertedValue = null;
+				Object newConvertedValue;
 				if (sharedEditor) {
 					// Synchronized access to shared editor instance.
 					synchronized (editor) {
@@ -358,7 +359,7 @@ class TypeConverterDelegate {
 		return editor.getValue();
 	}
 
-	protected Object convertToTypedArray(Object input, String propertyName, Class componentType) {
+	protected Object convertToTypedArray(Object input, String propertyName, Class<?> componentType) {
 		if (input instanceof Collection) {
 			// Convert Collection elements to array elements.
 			Collection coll = (Collection) input;
@@ -409,8 +410,8 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Collection convertedCopy = null;
-		Iterator it = null;
+		Collection convertedCopy;
+		Iterator it;
 		try {
 			it = original.iterator();
 			if (it == null) {
@@ -461,8 +462,8 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Map convertedCopy = null;
-		Iterator it = null;
+		Map convertedCopy;
+		Iterator it;
 		try {
 			it = original.entrySet().iterator();
 			if (it == null) {

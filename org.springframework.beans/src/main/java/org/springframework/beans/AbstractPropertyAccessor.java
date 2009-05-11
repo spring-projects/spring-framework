@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 		}
 	}
 
-	public Object convertIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
 		return convertIfNecessary(value, requiredType, null);
 	}
 
