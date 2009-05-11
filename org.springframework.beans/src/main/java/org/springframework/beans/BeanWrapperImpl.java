@@ -355,6 +355,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 		catch (IllegalArgumentException ex) {
 			throw new TypeMismatchException(value, requiredType, ex);
+		} catch (IllegalStateException ex) {
+			throw new ConversionNotSupportedException(value, requiredType, ex);
 		}
 	}
 
@@ -381,6 +383,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			PropertyChangeEvent pce =
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
 			throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
+		}
+		catch (IllegalStateException ex) {
+			PropertyChangeEvent pce =
+					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
+			throw new ConversionNotSupportedException(pce, pd.getPropertyType(), ex);
 		}
 	}
 
@@ -839,6 +846,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				PropertyChangeEvent pce =
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
+			}
+			catch (IllegalStateException ex) {
+				PropertyChangeEvent pce =
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
+				throw new ConversionNotSupportedException(pce, pd.getPropertyType(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				PropertyChangeEvent pce =

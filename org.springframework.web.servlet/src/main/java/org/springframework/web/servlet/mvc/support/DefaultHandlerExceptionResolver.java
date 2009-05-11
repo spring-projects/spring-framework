@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
@@ -94,6 +95,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			else if (ex instanceof MissingServletRequestParameterException) {
 				return handleMissingServletRequestParameter((MissingServletRequestParameterException) ex, request,
 						response, handler);
+			}
+			else if (ex instanceof ConversionNotSupportedException) {
+				return handleConversionNotSupported((ConversionNotSupportedException) ex, request, response, handler);
 			}
 			else if (ex instanceof TypeMismatchException) {
 				return handleTypeMismatch((TypeMismatchException) ex, request, response, handler);
@@ -212,6 +216,27 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
+	 * Handle the case when a {@link org.springframework.web.bind.WebDataBinder} conversion cannot occur. <p>The default
+	 * implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}. Alternatively, a fallback view
+	 * could be chosen, or the TypeMismatchException could be rethrown as-is.
+	 *
+	 * @param ex the ConversionNotSupportedException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception (for example,
+	 * if multipart resolution failed)
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleConversionNotSupported(ConversionNotSupportedException ex,
+			HttpServletRequest request,
+			HttpServletResponse response,
+			Object handler) throws Exception {
+		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		return new ModelAndView();
+	}
+
+	/**
 	 * Handle the case when a {@link org.springframework.web.bind.WebDataBinder} conversion error occurs. <p>The default
 	 * implementation sends an HTTP 400 error, and returns an empty {@code ModelAndView}. Alternatively, a fallback view
 	 * could be chosen, or the TypeMismatchException could be rethrown as-is.
@@ -228,7 +253,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request,
 			HttpServletResponse response,
 			Object handler) throws Exception {
-
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}

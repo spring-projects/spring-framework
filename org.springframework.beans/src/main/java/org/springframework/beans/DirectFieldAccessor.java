@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,10 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, field.getType(), ex);
 		}
+		catch (IllegalStateException ex) {
+			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
+			throw new ConversionNotSupportedException(pce, field.getType(), ex);
+		}
 	}
 
 	public Object convertIfNecessary(
@@ -133,6 +137,9 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		}
 		catch (IllegalArgumentException ex) {
 			throw new TypeMismatchException(value, requiredType, ex);
+		}
+		catch (IllegalStateException ex) {
+			throw new ConversionNotSupportedException(value, requiredType, ex);
 		}
 	}
 

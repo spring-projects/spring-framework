@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,7 +209,7 @@ class TypeConverterDelegate {
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
-				// Definitely doesn't match: throw IllegalArgumentException.
+				// Definitely doesn't match: throw IllegalArgumentException/IllegalStateException
 				StringBuilder msg = new StringBuilder();
 				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
 				msg.append("] to required type [").append(ClassUtils.getQualifiedName(requiredType)).append("]");
@@ -219,11 +219,12 @@ class TypeConverterDelegate {
 				if (editor != null) {
 					msg.append(": PropertyEditor [").append(editor.getClass().getName()).append(
 							"] returned inappropriate value");
+					throw new IllegalArgumentException(msg.toString());
 				}
 				else {
 					msg.append(": no matching editors or conversion strategy found");
+					throw new IllegalStateException(msg.toString());
 				}
-				throw new IllegalArgumentException(msg.toString());
 			}
 		}
 
