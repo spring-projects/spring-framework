@@ -27,7 +27,7 @@ import org.springframework.core.Ordered;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public interface SmartApplicationListener extends ApplicationListener, Ordered {
+public interface SmartApplicationListener extends ApplicationListener<ApplicationEvent>, Ordered {
 
 	/**
 	 * Determine whether this listener actually supports the given event type.
