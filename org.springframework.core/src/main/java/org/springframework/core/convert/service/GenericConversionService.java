@@ -26,10 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.ConversionExecutor;
-import org.springframework.core.convert.ConversionExecutorNotFoundException;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterInfo;
@@ -60,11 +58,6 @@ public class GenericConversionService implements ConversionService {
 	 * Map.Entry value is a Map that defines the targetType-to-SuperConverter mappings for that source.
 	 */
 	private final Map sourceTypeSuperConverters = new HashMap();
-
-	/**
-	 * Indexes classes by well-known aliases.
-	 */
-	private final Map aliasMap = new HashMap<String, Class<?>>();
 
 	/**
 	 * An optional parent conversion service.
@@ -132,48 +125,41 @@ public class GenericConversionService implements ConversionService {
 		return new SuperTwoWayConverterConverter(converter, sourceType, targetType);
 	}
 
-	/**
-	 * Add a convenient alias for the target type. {@link #getType(String)} can then be used to lookup the type given
-	 * the alias.
-	 * @see #getType(String)
-	 */
-	public void addAlias(String alias, Class targetType) {
-		aliasMap.put(alias, targetType);
-	}
-
 	// implementing ConversionService
 
 	public boolean canConvert(Class<?> sourceType, TypeDescriptor targetType) {
-		try {
-			getConversionExecutor(sourceType, targetType);
+		ConversionExecutor executor = getConversionExecutor(sourceType, targetType);
+		if (executor != null) {
 			return true;
-		} catch (ConversionExecutorNotFoundException e) {
-			return false;
+		} else {
+			if (parent != null) {
+				return parent.canConvert(sourceType, targetType);
+			} else {
+				return false;
+			}
 		}
 	}
 
-	public boolean canConvert(Object source, TypeDescriptor targetType) {
-		if (source == null) {
-			return true;
-		}
-		try {
-			getConversionExecutor(source.getClass(), targetType);
-			return true;
-		} catch (ConversionExecutorNotFoundException e) {
-			return false;
-		}
-	}
-
-	public Object executeConversion(Object source, TypeDescriptor targetType)
-			throws ConversionExecutorNotFoundException, ConversionException {
+	public Object executeConversion(Object source, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
-		return getConversionExecutor(source.getClass(), targetType).execute(source);
+		ConversionExecutor executor = getConversionExecutor(source.getClass(), targetType);
+		if (executor != null) {
+			return executor.execute(source);
+		} else {
+			if (parent != null) {
+				return parent.executeConversion(source, targetType);
+			} else {
+				throw new ConverterNotFoundException(source.getClass(), targetType,
+						"No converter found that can convert from sourceType [" + source.getClass().getName()
+								+ "] to targetType [" + targetType.getName() + "]");
+			}
+		}
 	}
 
-	public ConversionExecutor getConversionExecutor(Class sourceClass, TypeDescriptor targetType)
-			throws ConversionExecutorNotFoundException {
+	ConversionExecutor getConversionExecutor(Class sourceClass, TypeDescriptor targetType)
+			throws ConverterNotFoundException {
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
 		TypeDescriptor sourceType = TypeDescriptor.valueOf(sourceClass);
@@ -193,21 +179,21 @@ public class GenericConversionService implements ConversionService {
 			if (sourceType.isCollection()) {
 				return new CollectionToArray(sourceType, targetType, this);
 			} else {
-				throw new ConversionExecutorNotFoundException(sourceType, targetType, "Object to Array conversion not yet supported");
+				return null;
 			}
 		}
 		if (sourceType.isCollection()) {
 			if (targetType.isCollection()) {
 				return new CollectionToCollection(sourceType, targetType, this);
 			} else {
-				throw new ConversionExecutorNotFoundException(sourceType, targetType, "Object to Collection conversion not yet supported");
+				return null;
 			}
 		}
 		if (sourceType.isMap()) {
 			if (targetType.isMap()) {
 				return new MapToMap(sourceType, targetType, this);
 			} else {
-				throw new ConversionExecutorNotFoundException(sourceType, targetType, "Object to Map conversion not yet supported");
+				return null;
 			}
 		}
 		Converter converter = findRegisteredConverter(sourceClass, targetType.getType());
@@ -217,28 +203,10 @@ public class GenericConversionService implements ConversionService {
 			SuperConverter superConverter = findRegisteredSuperConverter(sourceClass, targetType.getType());
 			if (superConverter != null) {
 				return new StaticSuperConversionExecutor(sourceType, targetType, superConverter);
-			}
-			if (parent != null) {
-				return parent.getConversionExecutor(sourceClass, targetType);
 			} else {
 				if (sourceType.isAssignableTo(targetType)) {
 					return new StaticConversionExecutor(sourceType, targetType, NoOpConverter.INSTANCE);
 				}
-				throw new ConversionExecutorNotFoundException(sourceType, targetType,
-						"No ConversionExecutor found for converting from sourceType [" + sourceType.getName()
-								+ "] to targetType [" + targetType.getName() + "]");
-			}
-		}
-	}
-
-	public Class getType(String name) throws IllegalArgumentException {
-		Class clazz = (Class) aliasMap.get(name);
-		if (clazz != null) {
-			return clazz;
-		} else {
-			if (parent != null) {
-				return parent.getType(name);
-			} else {
 				return null;
 			}
 		}

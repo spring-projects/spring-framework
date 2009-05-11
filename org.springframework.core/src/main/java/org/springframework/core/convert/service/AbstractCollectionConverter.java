@@ -16,7 +16,6 @@
 package org.springframework.core.convert.service;
 
 import org.springframework.core.convert.ConversionExecutionException;
-import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
@@ -26,7 +25,7 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 abstract class AbstractCollectionConverter implements ConversionExecutor {
 
-	private ConversionService conversionService;
+	private GenericConversionService conversionService;
 
 	private ConversionExecutor elementConverter;
 	
@@ -34,7 +33,7 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 	
 	private TypeDescriptor targetCollectionType;
 	
-	public AbstractCollectionConverter(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType, ConversionService conversionService) {
+	public AbstractCollectionConverter(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType, GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 		this.sourceCollectionType = sourceCollectionType;
 		this.targetCollectionType = targetCollectionType;
@@ -61,7 +60,7 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		return targetCollectionType.getElementType();
 	}
 
-	protected ConversionService getConversionService() {
+	protected GenericConversionService getConversionService() {
 		return conversionService;
 	}
 

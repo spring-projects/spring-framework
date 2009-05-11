@@ -31,8 +31,7 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionExecutionException;
-import org.springframework.core.convert.ConversionExecutor;
-import org.springframework.core.convert.ConversionExecutorNotFoundException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.NumberToNumber;
@@ -84,9 +83,9 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertExecutorNotFound() {
 		try {
-			service.getConversionExecutor(String.class, type(Integer.class));
+			service.executeConversion("3", type(Integer.class));
 			fail("Should have thrown an exception");
-		} catch (ConversionExecutorNotFoundException e) {
+		} catch (ConverterNotFoundException e) {
 		}
 	}
 
@@ -161,9 +160,9 @@ public class GenericConversionServiceTests {
 			}
 		});
 		try {
-			ConversionExecutor executor = service.getConversionExecutor(String.class, type(Integer.class));
+			service.executeConversion("3", type(Integer.class));
 			fail("Should have failed");
-		} catch (ConversionExecutorNotFoundException e) {
+		} catch (ConverterNotFoundException e) {
 
 		}
 	}

@@ -19,7 +19,6 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.core.convert.ConversionExecutor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.service.DefaultConversionService;
 import org.springframework.core.convert.service.GenericConversionService;
@@ -65,17 +64,14 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementType();
 		assertEquals(String.class,clazz);
-		ConversionExecutor executor = tcs.getConversionExecutor(ArrayList.class, typeDescriptorForListOfString);
-		assertNotNull(executor);
-		List l = (List)executor.execute(listOfInteger);
+		List l = (List) tcs.executeConversion(listOfInteger, typeDescriptorForListOfString);
 		assertNotNull(l); 
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementType();
 		assertEquals(Integer.class,clazz);
-		executor = tcs.getConversionExecutor(ArrayList.class, typeDescriptorForListOfInteger);
-		assertNotNull(executor);
-		l = (List)executor.execute(listOfString);
+		
+		l = (List) tcs.executeConversion(listOfString, typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
 	
