@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Keith Donald
  */
-public class StringToLocale implements Converter<String, Locale> {
+public class StringToLocale implements TwoWayConverter<String, Locale> {
 
 	public Locale convert(String source) {
 		return StringUtils.parseLocaleString(source);

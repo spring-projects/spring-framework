@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToShort implements Converter<String, Short> {
+public class StringToShort implements TwoWayConverter<String, Short> {
 
 	public Short convert(String source) {
 		return Short.valueOf(source);

@@ -33,6 +33,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.SuperConverter;
 import org.springframework.core.convert.converter.SuperTwoWayConverter;
+import org.springframework.core.convert.converter.TwoWayConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -89,9 +90,11 @@ public class GenericConversionService implements ConversionService {
 		// index forward
 		Map sourceMap = getSourceMap(sourceType);
 		sourceMap.put(targetType, converter);
-		// index reverse
-		sourceMap = getSourceMap(targetType);
-		sourceMap.put(sourceType, new ReverseConverter(converter));
+		if (converter instanceof TwoWayConverter) {
+			// index reverse
+			sourceMap = getSourceMap(targetType);
+			sourceMap.put(sourceType, new ReverseConverter((TwoWayConverter) converter));
+		}
 	}
 
 	/**
@@ -228,7 +231,7 @@ public class GenericConversionService implements ConversionService {
 			for (Type genericInterface : genericInterfaces) {
 				if (genericInterface instanceof ParameterizedType) {
 					ParameterizedType pInterface = (ParameterizedType) genericInterface;
-					if (Converter.class.equals(pInterface.getRawType())
+					if (Converter.class.isAssignableFrom((Class) pInterface.getRawType())
 							|| SuperConverter.class.isAssignableFrom((Class) pInterface.getRawType())) {
 						Class s = getParameterClass(pInterface.getActualTypeArguments()[0], converter.getClass());
 						Class t = getParameterClass(pInterface.getActualTypeArguments()[1], converter.getClass());

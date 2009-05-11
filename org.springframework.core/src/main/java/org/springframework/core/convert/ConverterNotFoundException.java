@@ -16,11 +16,11 @@
 package org.springframework.core.convert;
 
 /**
- * Thrown when a conversion executor could not be found in a conversion service.
+ * Thrown when a suitable converter could not be found in a conversion service.
  * 
  * @author Keith Donald
  */
-public class ConverterNotFoundException extends ConversionException {
+public class ConverterNotFoundException extends ConvertException {
 
 	private Class<?> sourceType;
 

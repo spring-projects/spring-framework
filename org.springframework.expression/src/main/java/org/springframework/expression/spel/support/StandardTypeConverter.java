@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel.support;
 
-import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConvertException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -55,7 +55,7 @@ public class StandardTypeConverter implements TypeConverter {
 			return conversionService.convert(value, typeDescriptor);
 		} catch (ConverterNotFoundException cenfe) {
 			throw new SpelException(cenfe, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
-		} catch (ConversionException ce) {
+		} catch (ConvertException ce) {
 			throw new SpelException(ce, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 		}
 	}

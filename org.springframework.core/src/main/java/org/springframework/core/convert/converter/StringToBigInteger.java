@@ -22,7 +22,7 @@ import java.math.BigInteger;
  * 
  * @author Keith Donald
  */
-public class StringToBigInteger implements Converter<String, BigInteger> {
+public class StringToBigInteger implements TwoWayConverter<String, BigInteger> {
 
 	public BigInteger convert(String source) {
 		return new BigInteger(source);

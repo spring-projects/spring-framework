@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToDouble implements Converter<String, Double> {
+public class StringToDouble implements TwoWayConverter<String, Double> {
 
 	public Double convert(String source) {
 		return Double.valueOf(source);

@@ -20,7 +20,7 @@ package org.springframework.core.convert.converter;
  * 
  * @author Keith Donald
  */
-public class StringToFloat implements Converter<String, Float> {
+public class StringToFloat implements TwoWayConverter<String, Float> {
 
 	public Float convert(String source) {
 		return Float.valueOf(source);
