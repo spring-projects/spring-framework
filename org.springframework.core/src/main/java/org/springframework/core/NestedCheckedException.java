@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,12 @@ public abstract class NestedCheckedException extends Exception {
 
 	/** Use serialVersionUID from Spring 1.2 for interoperability */
 	private static final long serialVersionUID = 7100714597678207546L;
+
+	static {
+		// Eagerly load the NestedExceptionUtils class to avoid classloader deadlock
+		// issues on OSGi when calling getMessage(). Reported by Don Brown; SPR-5607.
+		NestedExceptionUtils.class.getName();
+	}
 
 
 	/**
