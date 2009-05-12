@@ -75,7 +75,7 @@
       variable. A Spring controller method to process above example is shown
       below;</para>
 
-      <programlisting language="java">@RequestMapping("/users/{userid}", method=RequestMethod.GET)
+      <programlisting language="java">@RequestMapping(value="/users/{userid}", method=RequestMethod.GET)
 public String getUser(@PathVariable String userId) {
   // implementation omitted...
 }</programlisting>
@@ -93,7 +93,7 @@ public String getUser(@PathVariable String userId) {
         <para>The following code snippet shows the use of a single
         <classname>@PathVariable</classname> in a controller method:</para>
 
-        <programlisting language="java">@RequestMapping("/owners/{ownerId}", method=RequestMethod.GET)
+        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ownerId, Model model) {
   Owner owner = ownerService.findOwner(ownerId);  
   model.addAttribute("owner", owner);  
@@ -114,7 +114,7 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ow
         name of the URI Template variable name to bind to in the @PathVariable
         annotation. For example</para>
 
-        <programlisting language="java">@RequestMapping("/owners/{ownerId}", method=RequestMethod.GET)
+        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String ownerId, Model model) {
   // implementation omitted
 }
@@ -124,7 +124,7 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId"
         so you may also use a controller method with the signature shown
         below</para>
 
-        <programlisting language="java">@RequestMapping("/owners/{ownerId}", method=RequestMethod.GET)
+        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String theOwner, Model model) {
   // implementation omitted
 }</programlisting>
@@ -132,7 +132,7 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId"
         <para>Multiple @PathVariable annotations can be used to bind to
         multiple URI Template variables as shown below:</para>
 
-        <programlisting language="java">@RequestMapping("/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
+        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
 public String findPet(<emphasis role="bold">@PathVariable</emphasis> String ownerId, <emphasis
             role="bold">@PathVariable</emphasis> String petId, Model model) {
   Owner owner = ownerService.findOwner(ownderId);  
