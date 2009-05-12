@@ -57,6 +57,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
@@ -87,7 +88,7 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setConverters
  * @see #setEncoding
  */
-public class XStreamMarshaller extends AbstractMarshaller {
+public class XStreamMarshaller extends AbstractMarshaller implements InitializingBean {
 
 	/**
 	 * The default encoding used for stream access: UTF-8.
@@ -251,6 +252,17 @@ public class XStreamMarshaller extends AbstractMarshaller {
 		this.supportedClasses = supportedClasses;
 	}
 
+	public final void afterPropertiesSet() throws Exception {
+		customizeXStream(getXStream());
+	}
+
+	/**
+	 * Template to allow for customizing of the given {@link XStream}.
+	 * <p>Default implementation is empty.
+	 * @param xstream the {@code XStream} instance
+	 */
+	protected void customizeXStream(XStream xstream) {
+	}
 
 	public boolean supports(Class clazz) {
 		if (ObjectUtils.isEmpty(this.supportedClasses)) {
