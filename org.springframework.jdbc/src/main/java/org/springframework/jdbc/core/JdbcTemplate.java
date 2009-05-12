@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
@@ -48,6 +47,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -1161,16 +1161,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Create a Map instance to be used as results map.
-	 * <p>If "isResultsMapCaseInsensitive" has been set to true, a linked case-insensitive Map
-	 * will be created if possible, else a plain HashMap (see Spring's CollectionFactory).
+	 * <p>If "isResultsMapCaseInsensitive" has been set to true,
+	 * a linked case-insensitive Map will be created.
 	 * @return the results Map instance
 	 * @see #setResultsMapCaseInsensitive
-	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
 	 */
-	@SuppressWarnings("unchecked")
 	protected Map<String, Object> createResultsMap() {
 		if (isResultsMapCaseInsensitive()) {
-			return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(16);
+			return new LinkedCaseInsensitiveMap<Object>();
 		}
 		else {
 			return new LinkedHashMap<String, Object>();
