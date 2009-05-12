@@ -82,7 +82,7 @@ public class AnnotationMetadataTests extends TestCase {
 		assertEquals(String.class.getName(), specialAttrs.get("clazz"));
 		assertEquals(Thread.State.NEW, specialAttrs.get("state"));
 	}
-	
+
 	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
 		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods("org.springframework.beans.factory.annotation.Autowired");
 		assertEquals(1, methods.size());
@@ -111,14 +111,11 @@ public class AnnotationMetadataTests extends TestCase {
 		
 		@Autowired
 		public void doWork(@Qualifier("myColor") java.awt.Color color) {
-			
 		}
 		@Test
-		public void doSleep() 
-		{
-			
+
+		public void doSleep()  {
 		}
 	}
-
 
 }

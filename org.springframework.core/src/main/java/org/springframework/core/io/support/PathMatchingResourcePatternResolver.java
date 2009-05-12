@@ -171,7 +171,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		try {
 			Class fileLocatorClass = PathMatchingResourcePatternResolver.class.getClassLoader().loadClass(
 					"org.eclipse.core.runtime.FileLocator");
-			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", new Class[] {URL.class});
+			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", URL.class);
 			logger.debug("Found Equinox FileLocator for OSGi bundle URL resolution");
 		}
 		catch (Throwable ex) {
@@ -420,9 +420,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			throws IOException {
 
 		URLConnection con = rootDirResource.getURL().openConnection();
-		JarFile jarFile = null;
-		String jarFileUrl = null;
-		String rootEntryPath = null;
+		JarFile jarFile;
+		String jarFileUrl;
+		String rootEntryPath;
 		boolean newJarFile = false;
 
 		if (con instanceof JarURLConnection) {
@@ -516,7 +516,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
 			throws IOException {
 
-		File rootDir = null;
+		File rootDir;
 		try {
 			rootDir = rootDirResource.getFile().getAbsoluteFile();
 		}
