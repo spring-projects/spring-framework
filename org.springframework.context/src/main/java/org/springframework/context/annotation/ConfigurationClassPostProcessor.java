@@ -85,6 +85,8 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 
 	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
+	private boolean setMetadataReaderFactoryCalled = false;
+
 
 	/**
 	 * Set the {@link ProblemReporter} to use.
@@ -96,9 +98,21 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		this.problemReporter = problemReporter;
 	}
 
+	/**
+	 * Set the {@link MetadataReaderFactory} to use.
+	 * <p>Default is a {@link CachingMetadataReaderFactory} for the specified
+	 * {@link #setBeanClassLoader bean class loader}.
+	 */
+	public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
+		this.metadataReaderFactory = metadataReaderFactory;
+		this.setMetadataReaderFactoryCalled = true;
+	}
+
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
-		this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
+		if (!this.setMetadataReaderFactoryCalled) {
+			this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
+		}
 	}
 
 	public int getOrder() {
