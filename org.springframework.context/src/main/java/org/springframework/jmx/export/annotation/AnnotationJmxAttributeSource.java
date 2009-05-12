@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,6 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.jmx.export.annotation.ManagedResource
  * @see org.springframework.jmx.export.annotation.ManagedAttribute
  * @see org.springframework.jmx.export.annotation.ManagedOperation
- * @see org.springframework.jmx.export.metadata.AttributesJmxAttributeSource
- * @see org.springframework.metadata.commons.CommonsAttributes
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
