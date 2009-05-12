@@ -5,9 +5,7 @@ Bundle-ManifestVersion: 2
 Import-Package: 
  org.eclipse.core.runtime;version="0";common="split";resolution:=optional
 Import-Template: 
- edu.emory.mathcs.backport.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  javax.xml.*;version="0";resolution:=optional,
- org.apache.commons.collections.*;version="[3.2.0, 4.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.springframework.asm.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
