@@ -234,6 +234,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.isFactoryMethodUnique = true;
 	}
 
+	/**
+	 * Check whether the given candidate qualifies as a factory method.
+	 */
 	public boolean isFactoryMethod(Method candidate) {
 		return (candidate != null && candidate.getName().equals(getFactoryMethodName()));
 	}
