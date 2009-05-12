@@ -182,7 +182,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <para>The conversion of the request body to the method argument is
         done using a <interfacename>HttpMessageConverter</interfacename>.
         <interfacename>HttpMessageConverter</interfacename> is responsible for
-        converting for converting from the HTTP request message to an object
+        converting from the HTTP request message to an object
         and converting from an object to the HTTP response body.
         <classname>DispatcherServlet</classname> supports annotation based
         processing using the
@@ -599,7 +599,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
     <section id="rest-exception">
       <title>Exception Handling</title>
 
-      <para>The <classname>@ExceptionHandling</classname> method annotation is
+      <para>The <classname>@ExceptionHandler</classname> method annotation is
       used within a controller to specify which method will be invoked when an
       exception of a specific type is thrown during the execution of
       controller methods. For example</para>
