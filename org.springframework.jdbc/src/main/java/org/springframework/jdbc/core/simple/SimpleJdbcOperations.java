@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
@@ -159,7 +160,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args)
+	<T> T queryForObject(String sql, RowMapper<T> rm, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
@@ -173,7 +174,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+	<T> T queryForObject(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException;
 
 	/**
@@ -186,7 +187,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args)
+	<T> T queryForObject(String sql, RowMapper<T> rm, Object... args)
 			throws DataAccessException;
 
 	/**
@@ -200,7 +201,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args)
+	<T> List<T> query(String sql, RowMapper<T> rm, Map<String, Object> args)
 			throws DataAccessException;
 
 	/**
@@ -214,7 +215,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+	<T> List<T> query(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException;
 
 	/**
@@ -227,7 +228,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args)
+	<T> List<T> query(String sql, RowMapper<T> rm, Object... args)
 			throws DataAccessException;
 
 	/**

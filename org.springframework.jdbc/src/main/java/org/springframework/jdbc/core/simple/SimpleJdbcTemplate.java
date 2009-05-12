@@ -29,6 +29,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -154,36 +155,36 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
+	public <T> T queryForObject(String sql, RowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+	public <T> T queryForObject(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
+	public <T> T queryForObject(String sql, RowMapper<T> rm, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, rm):
 				getJdbcOperations().queryForObject(sql, getArguments(args), rm));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
+	public <T> List<T> query(String sql, RowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().query(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+	public <T> List<T> query(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().query(sql, args, rm);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
+	public <T> List<T> query(String sql, RowMapper<T> rm, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().query(sql, rm) :
 				getJdbcOperations().query(sql, getArguments(args), rm));
