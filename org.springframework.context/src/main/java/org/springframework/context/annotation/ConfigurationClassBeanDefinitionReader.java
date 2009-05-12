@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -36,7 +37,6 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,10 +56,16 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final BeanDefinitionRegistry registry;
 
+	private final SourceExtractor sourceExtractor;
 
-	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry) {
-		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+
+	/**
+	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
+	 * to populate the given {@link BeanDefinitionRegistry}.
+	 */
+	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor) {
 		this.registry = registry;
+		this.sourceExtractor = sourceExtractor;
 	}
 
 
@@ -108,6 +114,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition();
 		ConfigurationClass configClass = method.getDeclaringClass();
+		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 		beanDef.setFactoryBeanName(configClass.getBeanName());
 		beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
