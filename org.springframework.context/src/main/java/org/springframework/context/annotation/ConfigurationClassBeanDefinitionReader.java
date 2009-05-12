@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.StringUtils;
 
@@ -110,10 +112,11 @@ class ConfigurationClassBeanDefinitionReader {
 	 * {@link #registry} based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
+		ConfigurationClass configClass = method.getDeclaringClass();
 		MethodMetadata metadata = method.getMetadata();
 
-		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition();
-		ConfigurationClass configClass = method.getDeclaringClass();
+		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
+		beanDef.setResource(configClass.getResource());
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 		beanDef.setFactoryBeanName(configClass.getBeanName());
 		beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
@@ -209,13 +212,21 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Used in bean overriding cases where it's necessary to determine whether the bean
 	 * definition was created externally.
 	 */
-	private class ConfigurationClassBeanDefinition extends RootBeanDefinition {
+	private class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
 
-		public ConfigurationClassBeanDefinition() {
+		private AnnotationMetadata annotationMetadata;
+
+		public ConfigurationClassBeanDefinition(ConfigurationClass configClass) {
+			this.annotationMetadata = configClass.getMetadata();
 		}
 
 		private ConfigurationClassBeanDefinition(ConfigurationClassBeanDefinition original) {
 			super(original);
+			this.annotationMetadata = original.annotationMetadata;
+		}
+
+		public AnnotationMetadata getMetadata() {
+			return this.annotationMetadata;
 		}
 
 		@Override
