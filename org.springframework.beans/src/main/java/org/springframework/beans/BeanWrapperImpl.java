@@ -699,6 +699,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 					throw new TypeMismatchException(pce, requiredType, ex);
 				}
+				catch (IllegalStateException ex) {
+					PropertyChangeEvent pce =
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
+					throw new ConversionNotSupportedException(pce, requiredType, ex);
+				}
 				catch (IndexOutOfBoundsException ex) {
 					throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 							"Invalid array index in property path '" + propertyName + "'", ex);
