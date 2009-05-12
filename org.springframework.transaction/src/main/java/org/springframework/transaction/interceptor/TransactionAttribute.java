@@ -24,12 +24,18 @@ import org.springframework.transaction.TransactionDefinition;
  * in the AOP transaction package.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16.03.2003
  * @see DefaultTransactionAttribute
  * @see RuleBasedTransactionAttribute
  */
 public interface TransactionAttribute extends TransactionDefinition {
 
+	/**
+	 * Return a qualifier value associated with this transaction attribute.
+	 * <p>This may be used for choosing a corresponding transaction manager
+	 * to process this specific transaction.
+	 */
 	String getQualifier();
 
 	/**
