@@ -18,7 +18,7 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.ClassUtils;
 
 /**
- * Initializes a HSQL embedded database instance.
+ * Initializes a H2 embedded database instance.
  * Call {@link #getInstance()} to get the singleton instance of this class. * 
  * @author Oliver Gierke
  */
@@ -27,9 +27,9 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 	private static H2EmbeddedDatabaseConfigurer INSTANCE;
 
 	/**
-	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
+	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
-	 * @throws ClassNotFoundException if HSQL is not on the classpath
+	 * @throws ClassNotFoundException if H2 is not on the classpath
 	 */
 	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
