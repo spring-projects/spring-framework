@@ -2,49 +2,39 @@ Bundle-SymbolicName: org.springframework.web.servlet
 Bundle-Name: Spring Web Servlet
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
-Import-Package: 
- org.springframework.stereotype;version="[3.0.0, 3.0.1)",
- org.apache.tiles.definition;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.tiles.jsp.context;version="[2.0.5, 3.0.0)";resolution:=optional
 Import-Template: 
  com.sun.syndication.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  com.lowagie.text.*;version="[2.0.0, 3.0.0)";resolution:=optional,
- freemarker.*;version="[2.3.0, 3.0.0)";resolution:=optional,
+ freemarker.*;version="[2.3.14, 3.0.0)";resolution:=optional,
+ javax.activation.*;version="0";resolution:=optional,
+ javax.sql.*;version="0";resolution:=optional,
  javax.el.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  javax.servlet;version="[2.4.0, 4.0.0)",
  javax.servlet.http;version="[2.4.0, 4.0.0)",
  javax.servlet.jsp;version="[2.0.0, 3.0.0)";resolution:=optional,
  javax.servlet.jsp.jstl.*;version="[1.1.0, 2.0.0)";resolution:=optional,
  javax.servlet.jsp.tagext;version="[2.0.0, 3.0.0)";resolution:=optional,
+ javax.xml.*;version="0";resolution:=optional,
  jxl.*;version="[2.6.6, 3.0.0)";resolution:=optional,
  net.sf.jasperreports.*;version="[2.0.5, 3.0.0)";resolution:=optional,
  org.apache.commons.fileupload.*;version="[1.2.0, 2.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)";resolution:=optional,
  org.apache.poi.*;version="[3.0.2.FINAL, 4.0.0)";resolution:=optional,
- org.apache.tiles;version="[2.0.5, 3.0.0)";resolution:=optional,
- org.apache.tiles.access;version="[2.0.5, 3.0.0)";resolution:=optional,
- org.apache.tiles.context;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.tiles.factory;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.tiles.locale.impl;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.tiles.preparer;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.tiles.servlet.context;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.tiles.web.util;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
- org.apache.velocity;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.apache.velocity.app.*;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.apache.velocity.context;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.apache.velocity.exception;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.apache.velocity.runtime.*;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.apache.velocity.tools.generic;version="[1.4.0, 3.0.0)";resolution:=optional,
- org.apache.velocity.tools.view.*;version="[1.4.0, 3.0.0)";resolution:=optional,
+ org.apache.tiles.*;version="[2.0.5, 3.0.0)";resolution:=optional,
+ org.apache.velocity.*;version="[1.5.0, 2.0.0)";resolution:=optional,
+ org.apache.velocity.tools.*;version="[1.4.0, 3.0.0)";resolution:=optional,
  org.springframework.beans.*;version="[3.0.0, 3.0.1)",
  org.springframework.context.*;version="[3.0.0, 3.0.1)",
  org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.http.*;version="[3.0.0, 3.0.1)",
+ org.springframework.oxm.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.stereotype;version="[3.0.0, 3.0.1)",
  org.springframework.ui.*;version="[3.0.0, 3.0.1)",
  org.springframework.util.*;version="[3.0.0, 3.0.1)",
  org.springframework.validation.*;version="[3.0.0, 3.0.1)",
- org.springframework.web.*;version="[3.0.0, 3.0.1)"
-Unversioned-Imports: 
- *
+ org.springframework.web.*;version="[3.0.0, 3.0.1)",
+ org.xml.sax.*;version="0";resolution:=optional,
+ org.w3c.dom.*;version="0";resolution:=optional
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,
