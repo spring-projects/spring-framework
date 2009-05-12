@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,10 +69,18 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 
+	/**
+	 * Associate a qualifier value with this transaction attribute.
+	 * <p>This may be used for choosing a corresponding transaction manager
+	 * to process this specific transaction.
+	 */
 	public void setQualifier(String qualifier) {
 		this.qualifier = qualifier;
 	}
 
+	/**
+	 * Return a qualifier value associated with this transaction attribute.
+	 */
 	public String getQualifier() {
 		return this.qualifier;
 	}
