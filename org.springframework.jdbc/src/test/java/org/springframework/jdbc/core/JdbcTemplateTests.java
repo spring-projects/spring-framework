@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
-import org.easymock.MockControl;
 import org.apache.commons.logging.LogFactory;
+import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -49,6 +48,7 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /** 
  * Mock object based tests for JdbcTemplate.
@@ -1954,8 +1954,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.call(new CallableStatementCreator() {
-				public CallableStatement createCallableStatement(Connection conn)
-					throws SQLException {
+				public CallableStatement createCallableStatement(Connection conn) throws SQLException {
 					return conn.prepareCall("my query");
 				}
 			}, params);
@@ -2005,13 +2004,11 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		params.add(new SqlOutParameter("a", 12));
 
 		Map out = template.call(new CallableStatementCreator() {
-			public CallableStatement createCallableStatement(Connection conn)
-				throws SQLException {
+			public CallableStatement createCallableStatement(Connection conn) throws SQLException {
 				return conn.prepareCall("my query");
 			}
 		}, params);
-		assertTrue("this should have been an Apache Commons Collections class",
-				out.getClass().getName().startsWith("org.apache.commons.collections.map"));
+		assertTrue("this should have been a LinkedCaseInsensitiveMap", out instanceof LinkedCaseInsensitiveMap);
 		assertNotNull("we should have gotten the result with upper case", out.get("A"));
 		assertNotNull("we should have gotten the result with lower case", out.get("a"));
 

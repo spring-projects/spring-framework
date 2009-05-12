@@ -25,7 +25,6 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -35,6 +34,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -88,10 +88,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final List<Cookie> cookies = new ArrayList<Cookie>();
 
-	/**
-	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
-	 */
-	private final Map<String, HeaderValueHolder> headers = new HashMap<String, HeaderValueHolder>();
+	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<HeaderValueHolder>();
 
 	private int status = HttpServletResponse.SC_OK;
 

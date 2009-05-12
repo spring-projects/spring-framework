@@ -29,8 +29,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -64,7 +64,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	private static String LOCATION = "Location";
 
 
-	private final Map<String, List<String>> headers = CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(5);
+	private final Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<List<String>>(8);
 
 
 	/**
@@ -302,6 +302,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	public Set<Entry<String, List<String>>> entrySet() {
 		return this.headers.entrySet();
 	}
+
 
 	@Override
 	public boolean equals(Object other) {

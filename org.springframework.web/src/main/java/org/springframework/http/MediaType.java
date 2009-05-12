@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -102,7 +102,7 @@ public class MediaType implements Comparable<MediaType> {
 		this.type = type.toLowerCase(Locale.ENGLISH);
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
-			this.parameters = CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(parameters.size());
+			this.parameters = new LinkedCaseInsensitiveMap<String>(parameters.size());
 			this.parameters.putAll(parameters);
 		}
 		else {
@@ -282,31 +282,29 @@ public class MediaType implements Comparable<MediaType> {
 		Assert.hasLength(mediaType, "'mediaType' must not be empty");
 		String[] parts = StringUtils.tokenizeToStringArray(mediaType, ";");
 
-		Map<String, String> parameters;
-		if (parts.length <= 1) {
-			parameters = null;
-		}
-		else {
-			parameters = new LinkedHashMap<String, String>(parts.length - 1);
-		}
-		for (int i = 1; i < parts.length; i++) {
-			String part = parts[i];
-			int idx = part.indexOf('=');
-			if (idx != -1) {
-				String name = part.substring(0, idx);
-				String value = part.substring(idx + 1, part.length());
-				parameters.put(name, value);
-			}
-		}
 		String fullType = parts[0].trim();
-
 		// java.net.HttpURLConnection returns a *; q=.2 Accept header
 		if (WILDCARD_TYPE.equals(fullType)) {
 			fullType = "*/*";
 		}
-		int idx = fullType.indexOf('/');
-		String type = fullType.substring(0, idx);
-		String subtype = fullType.substring(idx + 1, fullType.length());
+		int subIndex = fullType.indexOf('/');
+		String type = fullType.substring(0, subIndex);
+		String subtype = fullType.substring(subIndex + 1, fullType.length());
+
+		Map<String, String> parameters = null;
+		if (parts.length > 1) {
+			parameters = new LinkedHashMap<String, String>(parts.length - 1);
+			for (int i = 1; i < parts.length; i++) {
+				String part = parts[i];
+				int eqIndex = part.indexOf('=');
+				if (eqIndex != -1) {
+					String name = part.substring(0, eqIndex);
+					String value = part.substring(eqIndex + 1, part.length());
+					parameters.put(name, value);
+				}
+			}
+		}
+
 		return new MediaType(type, subtype, parameters);
 	}
 

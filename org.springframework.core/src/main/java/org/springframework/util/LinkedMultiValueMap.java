@@ -24,11 +24,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Simple implementation of {@link MultiValueMap} that wraps a plain {@code Map}
- * (by default a {@link LinkedHashMap}, storing multiple values in a {@link LinkedList}.
+ * Simple implementation of {@link MultiValueMap} that wraps a {@link LinkedHashMap},
+ * storing multiple values in a {@link LinkedList}.
  *
  * <p>This Map implementation is generally not thread-safe. It is primarily designed
  * for data structures exposed from request objects, for use in a single thread only.
+ *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
@@ -37,15 +38,17 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 
 	private final Map<K, List<V>> targetMap;
 
+
 	/**
-	 * Create a new SimpleMultiValueMap that wraps a newly created {@link LinkedHashMap}.
+	 * Create a new LinkedMultiValueMap that wraps a {@link LinkedHashMap}.
 	 */
 	public LinkedMultiValueMap() {
 		this.targetMap = new LinkedHashMap<K, List<V>>();
 	}
 
 	/**
-	 * Create a new SimpleMultiValueMap that wraps a newly created {@link LinkedHashMap} with the given initial capacity.
+	 * Create a new LinkedMultiValueMap that wraps a {@link LinkedHashMap}
+	 * with the given initial capacity.
 	 * @param initialCapacity the initial capacity
 	 */
 	public LinkedMultiValueMap(int initialCapacity) {
@@ -53,16 +56,14 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 	}
 
 	/**
-	 * Create a new SimpleMultiValueMap that wraps the given target Map.
-	 * <p>Note: The given Map will be used as active underlying Map.
-	 * Any changes in the underlying map will be reflected in the
-	 * MultiValueMap object, and vice versa.
-	 * @param targetMap the target Map to wrap
+	 * Copy constructor: Create a new LinkedMultiValueMap with the same mappings
+	 * as the specified Map.
+	 * @param otherMap the Map whose mappings are to be placed in this Map
 	 */
-	public LinkedMultiValueMap(Map<K, List<V>> targetMap) {
-		Assert.notNull(targetMap, "'targetMap' must not be null");
-		this.targetMap = targetMap;
+	public LinkedMultiValueMap(Map<K, List<V>> otherMap) {
+		this.targetMap = new LinkedHashMap<K, List<V>>(otherMap);
 	}
+
 
 	// MultiValueMap implementation
 
@@ -85,6 +86,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 		values.add(value);
 		this.targetMap.put(key, values);
 	}
+
 
 	// Map implementation
 
@@ -135,6 +137,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 	public Set<Entry<K, List<V>>> entrySet() {
 		return this.targetMap.entrySet();
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {

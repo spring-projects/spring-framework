@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * {@link RowMapper} implementation that creates a <code>java.util.Map</code>
@@ -61,16 +61,15 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 
 	/**
 	 * Create a Map instance to be used as column map.
-	 * <p>By default, a linked case-insensitive Map will be created if possible,
-	 * else a plain HashMap (see Spring's CollectionFactory).
+	 * <p>By default, a linked case-insensitive Map will be created.
 	 * @param columnCount the column count, to be used as initial
 	 * capacity for the Map
 	 * @return the new Map instance
-	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
+	 * @see org.springframework.util.LinkedCaseInsensitiveMap
 	 */
 	@SuppressWarnings("unchecked")
 	protected Map<String, Object> createColumnMap(int columnCount) {
-		return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(columnCount);
+		return new LinkedCaseInsensitiveMap<Object>(columnCount);
 	}
 
 	/**

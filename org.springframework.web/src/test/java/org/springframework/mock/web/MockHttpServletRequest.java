@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
@@ -142,10 +143,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Cookie[] cookies;
 
-	/**
-	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
-	 */
-	private final Map<String, HeaderValueHolder> headers = new LinkedHashMap<String, HeaderValueHolder>();
+	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<HeaderValueHolder>();
 
 	private String method;
 

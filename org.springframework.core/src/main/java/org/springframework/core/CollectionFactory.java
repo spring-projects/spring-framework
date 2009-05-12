@@ -36,12 +36,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.apache.commons.collections.map.CaseInsensitiveMap;
-import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Factory for collections, being aware of Commons Collection 3.x's extended
@@ -57,13 +52,6 @@ import org.springframework.util.ClassUtils;
  * @since 1.1.1
  */
 public abstract class CollectionFactory {
-
-	private static final Log logger = LogFactory.getLog(CollectionFactory.class);
-
-	/** Whether the Commons Collections 3.x library is present on the classpath */
-	private static final boolean commonsCollections3Available =
-			ClassUtils.isPresent("org.apache.commons.collections.map.CaseInsensitiveMap",
-					CollectionFactory.class.getClassLoader());
 
 	private static final Set<Class> approximableCollectionTypes = new HashSet<Class>(10);
 
@@ -129,23 +117,15 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a linked case-insensitive Map if possible: if Commons Collections
-	 * 3.x is available, a CaseInsensitiveMap with ListOrderedMap decorator will
-	 * be created. Else, a JDK {@link java.util.LinkedHashMap} will be used.
+	 * Create a linked case-insensitive Map if possible: This implementation
+	 * always returns a {@link org.springframework.util.LinkedCaseInsensitiveMap}.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new Map instance
-	 * @see org.apache.commons.collections.map.CaseInsensitiveMap
-	 * @see org.apache.commons.collections.map.ListOrderedMap
+	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
-	public static <K,V> Map<K,V> createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
-		if (commonsCollections3Available) {
-			logger.trace("Creating [org.apache.commons.collections.map.ListOrderedMap/CaseInsensitiveMap]");
-			return CommonsCollectionFactory.createListOrderedCaseInsensitiveMap(initialCapacity);
-		}
-		else {
-			logger.debug("Falling back to [java.util.LinkedHashMap] for linked case-insensitive map");
-			return new LinkedHashMap<K,V>(initialCapacity);
-		}
+	@Deprecated
+	public static Map createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
+		return new LinkedCaseInsensitiveMap(initialCapacity);
 	}
 
 	/**
@@ -157,8 +137,8 @@ public abstract class CollectionFactory {
 	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
 	@Deprecated
-	public static <K,V> Map<K,V> createIdentityMapIfPossible(int initialCapacity) {
-		return new IdentityHashMap<K,V>(initialCapacity);
+	public static Map createIdentityMapIfPossible(int initialCapacity) {
+		return new IdentityHashMap(initialCapacity);
 	}
 
 	/**
@@ -170,8 +150,8 @@ public abstract class CollectionFactory {
 	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
 	@Deprecated
-	public static <K,V> Map<K,V> createConcurrentMapIfPossible(int initialCapacity) {
-		return new ConcurrentHashMap<K,V>(initialCapacity);
+	public static Map createConcurrentMapIfPossible(int initialCapacity) {
+		return new ConcurrentHashMap(initialCapacity);
 	}
 
 	/**
@@ -183,8 +163,8 @@ public abstract class CollectionFactory {
 	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
 	@Deprecated
-	public static <K,V> ConcurrentMap<K,V> createConcurrentMap(int initialCapacity) {
-		return new JdkConcurrentHashMap<K,V>(initialCapacity);
+	public static ConcurrentMap createConcurrentMap(int initialCapacity) {
+		return new JdkConcurrentHashMap(initialCapacity);
 	}
 
 	/**
@@ -246,26 +226,12 @@ public abstract class CollectionFactory {
 	 * @see java.util.LinkedHashMap
 	 */
 	@SuppressWarnings("unchecked")
-	public static <K,V> Map<K,V> createApproximateMap(Object map, int initialCapacity) {
+	public static Map createApproximateMap(Object map, int initialCapacity) {
 		if (map instanceof SortedMap) {
-			return new TreeMap<K,V>(((SortedMap<K,V>) map).comparator());
+			return new TreeMap(((SortedMap) map).comparator());
 		}
 		else {
-			return new LinkedHashMap<K,V>(initialCapacity);
-		}
-	}
-
-
-	/**
-	 * Actual creation of Commons Collections.
-	 * In separate inner class to avoid runtime dependency on Commons Collections 3.x.
-	 */
-	private static abstract class CommonsCollectionFactory {
-
-		@SuppressWarnings("unchecked")
-		private static <K,V> Map<K,V> createListOrderedCaseInsensitiveMap(int initialCapacity) {
-			// Commons Collections does not support initial capacity of 0.
-			return ListOrderedMap.decorate(new CaseInsensitiveMap(initialCapacity == 0 ? 1 : initialCapacity));
+			return new LinkedHashMap(initialCapacity);
 		}
 	}
 
@@ -274,7 +240,7 @@ public abstract class CollectionFactory {
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
 	@Deprecated
-	private static class JdkConcurrentHashMap<K,V> extends ConcurrentHashMap<K,V> implements ConcurrentMap<K,V> {
+	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
 
 		private JdkConcurrentHashMap(int initialCapacity) {
 			super(initialCapacity);
