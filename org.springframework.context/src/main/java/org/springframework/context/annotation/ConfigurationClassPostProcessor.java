@@ -32,7 +32,9 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
+import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.Conventions;
@@ -43,6 +45,7 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -79,6 +82,8 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+	private SourceExtractor sourceExtractor = new PassThroughSourceExtractor();
+
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
@@ -89,13 +94,21 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 
 
 	/**
+	 * Set the {@link SourceExtractor} to use for generated bean definitions
+	 * that correspond to {@link Bean} factory methods.
+	 */
+	public void setSourceExtractor(SourceExtractor sourceExtractor) {
+		this.sourceExtractor = (sourceExtractor != null ? sourceExtractor : new PassThroughSourceExtractor());
+	}
+
+	/**
 	 * Set the {@link ProblemReporter} to use.
 	 * <p>Used to register any problems detected with {@link Configuration} or {@link Bean}
-	 * declarations. For instance, a Bean method marked as {@literal final} is illegal
+	 * declarations. For instance, an @Bean method marked as {@literal final} is illegal
 	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter}.
 	 */
 	public void setProblemReporter(ProblemReporter problemReporter) {
-		this.problemReporter = problemReporter;
+		this.problemReporter = (problemReporter != null ? problemReporter : new FailFastProblemReporter());
 	}
 
 	/**
@@ -104,6 +117,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 	 * {@link #setBeanClassLoader bean class loader}.
 	 */
 	public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
+		Assert.notNull(metadataReaderFactory, "MetadataReaderFactory must not be null");
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.setMetadataReaderFactoryCalled = true;
 	}
@@ -170,7 +184,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		parser.validate();
 
 		// Read the model and create bean definitions based on its content
-		new ConfigurationClassBeanDefinitionReader(registry).loadBeanDefinitions(parser.getModel());
+		new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor).loadBeanDefinitions(parser.getModel());
 	}
 
 	/**
