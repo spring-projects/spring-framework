@@ -36,17 +36,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-3.2.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-sources-3.2.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
