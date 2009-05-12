@@ -3,10 +3,7 @@ Bundle-Name: Spring Expression Language
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template: 
- org.springframework.util;version="[3.0.0, 3.0.1)",
- org.springframework.core;version="[3.0.0, 3.0.1)",
- org.springframework.core.convert;version="[3.0.0, 3.0.1)",
- org.springframework.core.convert.service;version="[3.0.0, 3.0.1)",
  org.apache.commons.logging;version="[1.1.1, 2.0.0)",
- org.antlr.runtime;version="[3.0.1,4.0.0)",
- org.antlr.runtime.tree;version="[3.0.1,4.0.0)"
+ org.antlr.runtime.*;version="[3.0.1,4.0.0)",
+ org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.util.*;version="[3.0.0, 3.0.1)"
