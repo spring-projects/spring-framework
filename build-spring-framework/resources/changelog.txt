@@ -6,12 +6,20 @@ http://www.springsource.org
 Changes in version 3.0.0.RC1 (2009-06-10)
 -----------------------------------------
 
+* updated all Spring Framework OSGI manifests to list unversioned imports explicitly
+* relaxed several OSGi bundle dependencies to optional and extended version ranges
+* replaced Commons Collections dependency with Spring-provided LinkedCaseInsensitiveMap
+* case-insensitive Maps and key Sets preserve original casing for introspection/logging
 * Servlet/Portlet ApplicationContexts use a specific id based on servlet/portlet name
 * DefaultListableBeanFactory references are serializable now when initialized with an id
 * scoped proxies are serializable now, for web scopes as well as for singleton beans
 * injected request/session references are serializable proxies for the current request now
 * ReloadableResourceBundleMessageSource correctly calculates filenames for all locales now
-* Added spring-jdbc config schema; initially provides an embedded-database tag for creating an embedded database instance (HSQL, H2, etc).
+* @Import detects and accepts existing configuration class of the desired type
+* @Transactional supports qualifier value for choosing between multiple transaction managers
+* added spring-jdbc config schema with initial embedded-database tag (supporting HSQL and H2)
+* Velocity/FreeMarker/TilesViewResolver only return a view if the target resource exists now
+
 
 Changes in version 3.0.0.M3 (2009-05-06)
 ----------------------------------------
