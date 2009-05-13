@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
-			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
 			return createView(viewName, locale);
 		}
 		else {
@@ -112,7 +111,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		}
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
-			Object cachedView = null;
+			Object cachedView;
 			synchronized (this.viewCache) {
 				cachedView = this.viewCache.remove(cacheKey);
 			}

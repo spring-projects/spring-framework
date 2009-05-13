@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Enumeration;
 import java.util.Properties;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
@@ -49,14 +48,11 @@ import org.springframework.web.context.ServletContextAware;
  * for more information about Tiles, which basically is a templating
  * mechanism for JSP-based web applications.
  *
- * <p>The TilesConfigurer simply configures a TilesContainer using a set
- * of files containing definitions, to be accessed by {@link TilesView}
- * instances.
+ * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
+ * containing definitions, to be accessed by {@link TilesView} instances.
  *
  * <p>TilesViews can be managed by any {@link org.springframework.web.servlet.ViewResolver}.
- * For simple convention-based view resolution, consider using
- * {@link org.springframework.web.servlet.view.UrlBasedViewResolver} with the
- * "viewClass" property set to "org.springframework.web.servlet.view.tiles2.TilesView".
+ * For simple convention-based view resolution, consider using {@link TilesViewResolver}.
  *
  * <p>A typical TilesConfigurer bean definition looks as follows:
  *

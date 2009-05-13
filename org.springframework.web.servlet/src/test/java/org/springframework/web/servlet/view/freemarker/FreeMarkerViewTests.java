@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
@@ -26,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.template.Configuration;
-import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.easymock.MockControl;
@@ -38,9 +38,13 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.AbstractView;
+import org.springframework.web.servlet.view.InternalResourceView;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * @author Juergen Hoeller
@@ -49,7 +53,7 @@ import org.springframework.web.servlet.view.AbstractView;
 public class FreeMarkerViewTests {
 
 	@Test
-	public void testNoFreemarkerConfig() throws Exception {
+	public void testNoFreeMarkerConfig() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
@@ -101,7 +105,7 @@ public class FreeMarkerViewTests {
 		Map configs = new HashMap();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
-		configs.put("freemarkerConfig", configurer);
+		configs.put("configurer", configurer);
 		wmc.setReturnValue(configs);
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
@@ -138,7 +142,7 @@ public class FreeMarkerViewTests {
 		Map configs = new HashMap();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
-		configs.put("freemarkerConfig", configurer);
+		configs.put("configurer", configurer);
 		wmc.setReturnValue(configs);
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
@@ -164,19 +168,54 @@ public class FreeMarkerViewTests {
 		assertEquals("myContentType", response.getContentType());
 	}
 
+	@Test
+	public void testFreeMarkerViewResolver() throws Exception {
+		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+		configurer.setConfiguration(new TestConfiguration());
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(new MockServletContext());
+		wac.getBeanFactory().registerSingleton("configurer", configurer);
+		wac.refresh();
+
+		FreeMarkerViewResolver vr = new FreeMarkerViewResolver();
+		vr.setPrefix("prefix_");
+		vr.setSuffix("_suffix");
+		vr.setApplicationContext(wac);
+
+		View view = vr.resolveViewName("test", Locale.CANADA);
+		assertEquals("Correct view class", FreeMarkerView.class, view.getClass());
+		assertEquals("Correct URL", "prefix_test_suffix", ((FreeMarkerView) view).getUrl());
+
+		view = vr.resolveViewName("non-existing", Locale.CANADA);
+		assertNull(view);
+
+		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", RedirectView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+
+		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
+	}
+
 
 	private class TestConfiguration extends Configuration {
 
 		public Template getTemplate(String name, final Locale locale) throws IOException {
-			assertEquals("templateName", name);
-			return new Template(name, new StringReader("test")) {
-				public void process(Object model, Writer writer) throws TemplateException, IOException {
-					assertEquals(Locale.US, locale);
-					assertTrue(model instanceof AllHttpScopesHashModel);
-					AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
-					assertEquals("myvalue", fmModel.get("myattr").toString());
-				}
-			};
+			if (name.equals("templateName") || name.equals("prefix_test_suffix")) {
+				return new Template(name, new StringReader("test")) {
+					public void process(Object model, Writer writer) throws TemplateException, IOException {
+						assertEquals(Locale.US, locale);
+						assertTrue(model instanceof AllHttpScopesHashModel);
+						AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
+						assertEquals("myvalue", fmModel.get("myattr").toString());
+					}
+				};
+			}
+			else {
+				throw new FileNotFoundException();
+			}
 		}
 	}
 
