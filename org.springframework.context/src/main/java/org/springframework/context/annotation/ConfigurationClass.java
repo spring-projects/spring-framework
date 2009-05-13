@@ -129,6 +129,24 @@ final class ConfigurationClass {
 	}
 
 
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof ConfigurationClass)) {
+			return false;
+		}
+		ConfigurationClass otherCc = (ConfigurationClass) other;
+		return getMetadata().getClassName().equals(otherCc.getMetadata().getClassName());
+	}
+
+	@Override
+	public int hashCode() {
+		return getMetadata().getClassName().hashCode();
+	}
+
+
 	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
 	private class FinalConfigurationProblem extends Problem {
 
