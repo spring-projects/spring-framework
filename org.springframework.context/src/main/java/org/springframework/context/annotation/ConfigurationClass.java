@@ -34,9 +34,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Represents a user-defined {@link Configuration @Configuration} class.
  * Includes a set of {@link Bean} methods, including all such methods defined in the
- * ancestry of the class, in a 'flattened-out' manner. Note that each {@link ConfigurationClassMethod}
- * representation contains source information about where it was originally detected
- * (for the purpose of tooling with Spring IDE).
+ * ancestry of the class, in a 'flattened-out' manner.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -131,14 +129,8 @@ final class ConfigurationClass {
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ConfigurationClass)) {
-			return false;
-		}
-		ConfigurationClass otherCc = (ConfigurationClass) other;
-		return getMetadata().getClassName().equals(otherCc.getMetadata().getClassName());
+		return (this == other || (other instanceof ConfigurationClass &&
+				getMetadata().getClassName().equals(((ConfigurationClass) other).getMetadata().getClassName())));
 	}
 
 	@Override

@@ -37,12 +37,12 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 /**
  * Parses a {@link Configuration} class definition, populating a configuration model.
- * This ASM-based implementation avoids reflection and eager classloading in order to
- * interoperate effectively with tooling (Spring IDE) and OSGi environments.
+ * This ASM-based implementation avoids reflection and eager class loading in order to
+ * interoperate effectively with lazy class loading in a Spring ApplicationContext.
  *
- * <p>This class helps separate the concern of parsing the structure of a Configuration class
- * from the concern of registering {@link BeanDefinition} objects based on the content of
- * that model.
+ * <p>This class helps separate the concern of parsing the structure of a Configuration
+ * class from the concern of registering {@link BeanDefinition} objects based on the
+ * content of that model.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -112,7 +112,12 @@ class ConfigurationClassParser {
 				metadata = null;
 			}
 		}
-		model.add(configClass);
+		if (this.model.contains(configClass) && configClass.getBeanName() != null) {
+			// Explicit bean definition found, probably replacing an import.
+			// Let's remove the old one and go with the new one.
+			this.model.remove(configClass);
+		}
+		this.model.add(configClass);
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {

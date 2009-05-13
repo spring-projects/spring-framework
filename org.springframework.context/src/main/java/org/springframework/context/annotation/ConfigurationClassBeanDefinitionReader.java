@@ -51,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
+ * @see ConfigurationClassParser
  */
 class ConfigurationClassBeanDefinitionReader {
 
