@@ -18,8 +18,10 @@ package org.springframework.context.annotation.configuration;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-
 import org.junit.Test;
+import test.beans.ITestBean;
+import test.beans.TestBean;
+
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -27,9 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Import;
-
-import test.beans.ITestBean;
-import test.beans.TestBean;
 
 
 /**
@@ -58,8 +57,28 @@ public class ImportTests {
 	public void testProcessImports() {
 		int configClasses = 2;
 		int beansInClasses = 2;
-
 		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class);
+	}
+
+	@Test
+	public void testProcessImportsWithDoubleImports() {
+		int configClasses = 3;
+		int beansInClasses = 3;
+		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class, OtherConfigurationWithImportAnnotation.class);
+	}
+
+	@Test
+	public void testProcessImportsWithExplicitOverridingBefore() {
+		int configClasses = 2;
+		int beansInClasses = 2;
+		assertBeanDefinitionCount((configClasses + beansInClasses), OtherConfiguration.class, ConfigurationWithImportAnnotation.class);
+	}
+
+	@Test
+	public void testProcessImportsWithExplicitOverridingAfter() {
+		int configClasses = 2;
+		int beansInClasses = 2;
+		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class, OtherConfiguration.class);
 	}
 
 	@Configuration
@@ -72,9 +91,18 @@ public class ImportTests {
 	}
 
 	@Configuration
-	static class OtherConfiguration {
+	@Import(OtherConfiguration.class)
+	static class OtherConfigurationWithImportAnnotation {
 		@Bean
 		public ITestBean two() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class OtherConfiguration {
+		@Bean
+		public ITestBean three() {
 			return new TestBean();
 		}
 	}
