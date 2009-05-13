@@ -99,7 +99,7 @@ class ConfigurationClassBeanDefinitionReader {
 		if (configClass.getBeanName() == null) {
 			GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
 			configBeanDef.setBeanClassName(configClass.getMetadata().getClassName());
-			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, registry);
+			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, this.registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
@@ -109,7 +109,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 	/**
 	 * Reads a particular {@link ConfigurationClassMethod}, registering bean definitions with
-	 * {@link #registry} based on its contents.
+	 * the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
 		ConfigurationClass configClass = method.getDeclaringClass();
