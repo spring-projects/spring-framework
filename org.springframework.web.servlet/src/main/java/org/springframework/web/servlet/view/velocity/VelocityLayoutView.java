@@ -17,14 +17,13 @@
 package org.springframework.web.servlet.view.velocity;
 
 import java.io.StringWriter;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
-import org.springframework.context.ApplicationContextException;
+import org.springframework.core.NestedIOException;
 
 /**
  * VelocityLayoutView emulates the functionality offered by Velocity's
@@ -119,19 +118,22 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * can be changed which may invalidate any early checking done here.
 	 */
 	@Override
-	protected void checkTemplate() throws ApplicationContextException {
-		super.checkTemplate();
+	public boolean checkResource() throws Exception {
+		if (!super.checkResource()) {
+			return false;
+		}
 
 		try {
 			// Check that we can get the template, even if we might subsequently get it again.
 			getTemplate(this.layoutUrl);
+			return true;
 		}
 		catch (ResourceNotFoundException ex) {
-			throw new ApplicationContextException("Cannot find Velocity template for URL [" + this.layoutUrl +
+			throw new NestedIOException("Cannot find Velocity template for URL [" + this.layoutUrl +
 					"]: Did you specify the correct resource loader path?", ex);
 		}
 		catch (Exception ex) {
-			throw new ApplicationContextException(
+			throw new NestedIOException(
 					"Could not load Velocity template for URL [" + this.layoutUrl + "]", ex);
 		}
 	}

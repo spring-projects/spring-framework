@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.core.NestedIOException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.util.NestedServletException;
@@ -52,10 +53,10 @@ import org.springframework.web.util.NestedServletException;
  * view, or <code>null</code> if not needed. VelocityFormatter is part of standard Velocity.
  * <li><b>dateToolAttribute</b> (optional, default=null): the name of the
  * DateTool helper object to expose in the Velocity context of this view,
- * or <code>null</code> if not needed. DateTool is part of Velocity Tools 1.0.
+ * or <code>null</code> if not needed. DateTool is part of Velocity Tools.
  * <li><b>numberToolAttribute</b> (optional, default=null): the name of the
  * NumberTool helper object to expose in the Velocity context of this view,
- * or <code>null</code> if not needed. NumberTool is part of Velocity Tools 1.1.
+ * or <code>null</code> if not needed. NumberTool is part of Velocity Tools.
  * <li><b>cacheTemplate</b> (optional, default=false): whether or not the Velocity
  * template should be cached. It should normally be true in production, but setting
  * this to false enables us to modify Velocity templates without restarting the
@@ -67,8 +68,8 @@ import org.springframework.web.util.NestedServletException;
  * accessible in the current web application context, with any bean name.
  * Alternatively, you can set the VelocityEngine object as bean property.
  *
- * <p>Note: Spring's VelocityView requires Velocity 1.3 or higher, and optionally
- * Velocity Tools 1.0 or higher (depending on the use of DateTool and/or NumberTool).
+ * <p>Note: Spring 3.0's VelocityView requires Velocity 1.4 or higher, and optionally
+ * Velocity Tools 1.1 or higher (depending on the use of DateTool and/or NumberTool).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -194,7 +195,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the VelocityEngine to be used by this view.
-	 * If this is not set, the default lookup will occur: A single VelocityConfig
+	 * <p>If this is not set, the default lookup will occur: A single VelocityConfig
 	 * is expected in the current web application context, with any bean name.
 	 * @see VelocityConfig
 	 */
@@ -222,8 +223,6 @@ public class VelocityView extends AbstractTemplateView {
 			// No explicit VelocityEngine: try to autodetect one.
 			setVelocityEngine(autodetectVelocityEngine());
 		}
-
-		checkTemplate();
 	}
 
 	/**
@@ -252,19 +251,22 @@ public class VelocityView extends AbstractTemplateView {
 	 * Check that the Velocity template used for this view exists and is valid.
 	 * <p>Can be overridden to customize the behavior, for example in case of
 	 * multiple templates to be rendered into a single view.
-	 * @throws ApplicationContextException if the template cannot be found or is invalid
 	 */
-	protected void checkTemplate() throws ApplicationContextException {
+	@Override
+	public boolean checkResource() throws Exception {
 		try {
 			// Check that we can get the template, even if we might subsequently get it again.
-			this.template = getTemplate();
+			this.template = getTemplate(getUrl());
+			return true;
 		}
 		catch (ResourceNotFoundException ex) {
-			throw new ApplicationContextException("Cannot find Velocity template for URL [" + getUrl() +
-				"]: Did you specify the correct resource loader path?", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("No Velocity view found for URL: " + getUrl());
+			}
+			return false;
 		}
 		catch (Exception ex) {
-			throw new ApplicationContextException(
+			throw new NestedIOException(
 					"Could not load Velocity template for URL [" + getUrl() + "]", ex);
 		}
 	}

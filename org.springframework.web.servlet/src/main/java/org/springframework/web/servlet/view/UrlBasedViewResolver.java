@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,12 @@ import org.springframework.web.servlet.View;
  * <p>Note: This class does not support localized resolution, i.e. resolving
  * a symbolic view name to different resources depending on the current locale.
  *
- * <p>Note: When chaining ViewResolvers, a UrlBasedViewResolver always needs
- * to be last, as it will attempt to resolve any view name, no matter whether
- * the underlying resource actually exists.
+ * <p><b>Note:</b> When chaining ViewResolvers, a UrlBasedViewResolver will check whether
+ * the {@link AbstractUrlBasedView#checkResource specified resource actually exists}.
+ * However, with {@link InternalResourceView}, it is not generally possible to
+ * determine the existence of the target resource upfront. In such a scenario,
+ * a UrlBasedViewResolver will always return View for any given view name;
+ * as a consequence, it should be configured as the last ViewResolver in the chain.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -370,8 +373,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		// Check for special "redirect:" prefix.
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
-			return new RedirectView(
-							redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			return new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
 		}
 		// Check for special "forward:" prefix.
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
@@ -415,7 +417,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		AbstractUrlBasedView view = buildView(viewName);
-		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		View result = (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		return (view.checkResource() ? result : null);
 	}
 
 	/**

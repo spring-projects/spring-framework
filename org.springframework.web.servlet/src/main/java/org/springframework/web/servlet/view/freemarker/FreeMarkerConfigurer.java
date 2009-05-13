@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.web.servlet.view.freemarker;
 
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.ServletContext;
 
 import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -120,7 +120,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 * for the Spring-provided macros, added to the end of the list.
 	 */
 	@Override
-	protected void postProcessTemplateLoaders(List templateLoaders) {
+	protected void postProcessTemplateLoaders(List<TemplateLoader> templateLoaders) {
 		templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
 		logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
 	}

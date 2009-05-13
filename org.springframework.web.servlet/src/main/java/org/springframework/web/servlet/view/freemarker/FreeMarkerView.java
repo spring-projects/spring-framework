@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -112,7 +113,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 	/**
 	 * Set the FreeMarker Configuration to be used by this view.
-	 * If this is not set, the default lookup will occur: a single {@link FreeMarkerConfig}
+	 * <p>If this is not set, the default lookup will occur: a single {@link FreeMarkerConfig}
 	 * is expected in the current web application context, with any bean name.
 	 * <strong>Note:</strong> using this method will cause a new instance of {@link TaglibFactory}
 	 * to created for every single {@link FreeMarkerView} instance. This can be quite expensive
@@ -158,8 +159,6 @@ public class FreeMarkerView extends AbstractTemplateView {
 			throw new BeanInitializationException("Initialization of GenericServlet adapter failed", ex);
 		}
 		this.servletContextHashModel = new ServletContextHashModel(servlet, getObjectWrapper());
-
-		checkTemplate();
 	}
 
 	/**
@@ -196,12 +195,19 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Check that the FreeMarker template used for this view exists and is valid.
 	 * <p>Can be overridden to customize the behavior, for example in case of
 	 * multiple templates to be rendered into a single view.
-	 * @throws ApplicationContextException if the template cannot be found or is invalid
 	 */
-	protected void checkTemplate() throws ApplicationContextException {
+	@Override
+	public boolean checkResource() throws Exception {
 		try {
 			// Check that we can get the template, even if we might subsequently get it again.
-			getTemplate(getConfiguration().getLocale());
+			getTemplate(getUrl(), getConfiguration().getLocale());
+			return true;
+		}
+		catch (FileNotFoundException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No FreeMarker view found for URL: " + getUrl());
+			}
+			return false;
 		}
 		catch (ParseException ex) {
 			throw new ApplicationContextException(

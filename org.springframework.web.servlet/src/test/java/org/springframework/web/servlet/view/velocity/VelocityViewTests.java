@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.generic.NumberTool;
@@ -72,7 +71,7 @@ public class VelocityViewTests extends TestCase {
 		}
 		catch (ApplicationContextException ex) {
 			// Check there's a helpful error message
-			assertTrue(ex.getMessage().indexOf("VelocityConfig") != -1);
+			assertTrue(ex.getMessage().contains("VelocityConfig"));
 		}
 
 		wmc.verify();
@@ -90,61 +89,6 @@ public class VelocityViewTests extends TestCase {
 		}
 	}
 
-	public void testCannotResolveTemplateNameResourceNotFoundException() throws Exception {
-		testCannotResolveTemplateName(new ResourceNotFoundException(""));
-	}
-
-	public void testCannotResolveTemplateNameParseErrorException() throws Exception {
-		testCannotResolveTemplateName(new ParseErrorException(""));
-	}
-
-	public void testCannotResolveTemplateNameNonspecificException() throws Exception {
-		testCannotResolveTemplateName(new Exception(""));
-	}
-
-	/**
-	 * Check for failure to lookup a template for a range of reasons.
-	 */
-	private void testCannotResolveTemplateName(final Exception templateLookupException) throws Exception {
-		final String templateName = "test.vm";
-
-		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getParentBeanFactory();
-		wmc.setReturnValue(null);
-		VelocityConfig vc = new VelocityConfig() {
-			public VelocityEngine getVelocityEngine() {
-				return new VelocityEngine() {
-					public Template getTemplate(String tn)
-						throws ResourceNotFoundException, ParseErrorException, Exception {
-						assertEquals(tn, templateName);
-						throw templateLookupException;
-					}
-				};
-			}
-		};
-		wac.getBeansOfType(VelocityConfig.class, true, false);
-		Map configurers = new HashMap();
-		configurers.put("velocityConfigurer", vc);
-		wmc.setReturnValue(configurers);
-		wmc.replay();
-
-		VelocityView vv = new VelocityView();
-		//vv.setExposeDateFormatter(false);
-		//vv.setExposeCurrencyFormatter(false);
-		vv.setUrl(templateName);
-
-		try {
-			vv.setApplicationContext(wac);
-			fail();
-		}
-		catch (ApplicationContextException ex) {
-			assertEquals(ex.getCause(), templateLookupException);
-		}
-
-		wmc.verify();
-	}
-	
 	public void testMergeTemplateSucceeds() throws Exception {
 		testValidTemplateName(null);
 	}
@@ -397,6 +341,7 @@ public class VelocityViewTests extends TestCase {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.getBeanFactory().registerSingleton("configurer", vc);
+		wac.refresh();
 
 		VelocityViewResolver vr = new VelocityViewResolver();
 		vr.setPrefix("prefix_");
@@ -406,6 +351,9 @@ public class VelocityViewTests extends TestCase {
 		View view = vr.resolveViewName("test", Locale.CANADA);
 		assertEquals("Correct view class", VelocityView.class, view.getClass());
 		assertEquals("Correct URL", "prefix_test_suffix", ((VelocityView) view).getUrl());
+
+		view = vr.resolveViewName("non-existing", Locale.CANADA);
+		assertNull(view);
 
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", RedirectView.class, view.getClass());
@@ -425,6 +373,7 @@ public class VelocityViewTests extends TestCase {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.getBeanFactory().registerSingleton("configurer", vc);
+		wac.refresh();
 
 		String toolbox = "org/springframework/web/servlet/view/velocity/toolbox.xml";
 
@@ -452,6 +401,7 @@ public class VelocityViewTests extends TestCase {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.getBeanFactory().registerSingleton("configurer", vc);
+		wac.refresh();
 
 		String toolbox = "org/springframework/web/servlet/view/velocity/toolbox.xml";
 
@@ -480,6 +430,7 @@ public class VelocityViewTests extends TestCase {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.getBeanFactory().registerSingleton("configurer", vc);
+		wac.refresh();
 
 		VelocityLayoutViewResolver vr = new VelocityLayoutViewResolver();
 		vr.setPrefix("prefix_");

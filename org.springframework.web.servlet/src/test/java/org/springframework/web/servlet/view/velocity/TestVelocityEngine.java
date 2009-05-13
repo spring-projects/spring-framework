@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.ResourceNotFoundException;
 
 /**
  * @author Juergen Hoeller
@@ -46,7 +47,7 @@ public class TestVelocityEngine extends VelocityEngine {
 	public Template getTemplate(String name) {
 		Template template = (Template) this.templates.get(name);
 		if (template == null) {
-			throw new IllegalStateException("No template registered for name [" + name + "]");
+			throw new ResourceNotFoundException("No template registered for name [" + name + "]");
 		}
 		return template;
 	}
