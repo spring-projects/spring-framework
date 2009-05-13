@@ -400,7 +400,7 @@ private static final class ActorMapper implements RowMapper<Actor> {
 
         <para>An alternative to explicit configuration is to use the component
         scanning and annotation support for dependency injection. In this case
-        we woul annotate the setter method for the
+        we would annotate the setter method for the
         <classname>DataSource</classname> with the
         <interfacename>@Autowired</interfacename> annotation.</para>
 
@@ -622,7 +622,7 @@ public int countOfActors(Actor exampleActor) {
         well, but the <classname>SimpleJdbcTemplate</classname> still has the
         advantage of providing a simpler API when you don't need access to all
         the methods that the <classname>JdbcTemplate</classname> offers. Also,
-        siince the <classname>SimpleJdbcTemplate</classname> was designed for
+        since the <classname>SimpleJdbcTemplate</classname> was designed for
         Java 5 there are more methods that take advantage of varargs due to
         different ordering of the parameters.</emphasis></para>
       </note>
@@ -738,7 +738,7 @@ public Actor findActor(String specialty, int age) {
       implementation provided by a third party. Popular ones are Apache
       Jakarta Commons DBCP and C3P0. There are some implementations provided
       in the Spring distribution, but they are only meant to be used for
-      testing purposes since they don't provide any pooling. </para>
+      testing purposes since they don't provide any pooling.</para>
 
       <para>We will use the <classname>DriverManagerDataSource</classname>
       implementation for this section but there are several additional
@@ -774,8 +774,8 @@ dataSource.setPassword("");]]></programlisting>
 
       <note>
         <para>The <classname>DriverManagerDataSource</classname> class should
-        only be used for testing puposes since it does not provide pooling and
-        will perform poorly when multiple requests for a connection are
+        only be used for testing purposes since it does not provide pooling
+        and will perform poorly when multiple requests for a connection are
         made.</para>
       </note>
 
@@ -1969,28 +1969,33 @@ END;]]></programlisting>In order to call this procedure we need to declare the
       <para><classname>MappingSqlQuery</classname> is a reusable query in
       which concrete subclasses must implement the abstract
       <methodname>mapRow(..)</methodname> method to convert each row of the
-      supplied <interfacename>ResultSet</interfacename> into an object. Find
-      below a brief example of a custom query that maps the data from the
-      customer relation to an instance of the <classname>Customer</classname>
-      class.</para>
+      supplied <interfacename>ResultSet</interfacename> into an object of the
+      type specified. Below is a brief example of a custom query that maps the
+      data from the t_actor relation to an instance of the
+      <classname>Actor</classname> class.</para>
 
-      <programlisting language="java"><![CDATA[private class CustomerMappingQuery extends MappingSqlQuery {
+      <programlisting language="java"><![CDATA[public class ActorMappingQuery extends MappingSqlQuery<Actor> {
 
-    public CustomerMappingQuery(DataSource ds) {
-        super(ds, "SELECT id, name FROM customer WHERE id = ?");
+    public ActorMappingQuery(DataSource ds) {
+        super(ds, "select id, first_name, last_name from t_actor where id = ?");
         super.declareParameter(new SqlParameter("id", Types.INTEGER));
         compile();
     }
 
-    public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
-        Customer cust = new Customer();
-        cust.setId((Integer) rs.getObject("id"));
-        cust.setName(rs.getString("name"));
-        return cust;
-    } 
+    @Override
+    protected Actor mapRow(ResultSet rs, int rowNumber) throws SQLException {
+        Actor actor = new Actor();
+        actor.setId(rs.getLong("id"));
+        actor.setFirstName(rs.getString("first_name"));
+        actor.setLastName(rs.getString("last_name"));
+        return actor;
+    }
+
 }]]></programlisting>
 
-      <para>We provide a constructor for this customer query that takes the
+      <para>The class extends <classname>MappingSqlQuery</classname>
+      parameterized with the <classname>Actor</classname> type. We provide a
+      constructor for this customer query that takes the
       <interfacename>DataSource</interfacename> as the only parameter. In this
       constructor we call the constructor on the superclass with the
       <interfacename>DataSource</interfacename> and the SQL that should be
@@ -2003,31 +2008,33 @@ END;]]></programlisting>In order to call this procedure we need to declare the
       <classname>SqlParameter</classname> takes a name and the JDBC type as
       defined in <classname>java.sql.Types</classname>. After all parameters
       have been defined we call the <literal>compile()</literal> method so the
-      statement can be prepared and later be executed.</para>
+      statement can be prepared and later be executed. This class is thread
+      safe once it has been compiled, so as long as these classes are created
+      when the DAO is initialized they can be kept as instance variable and be
+      reused.</para>
 
-      <programlisting language="java"><![CDATA[public Customer getCustomer(Integer id) {
-    CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
-    Object[] parms = new Object[1];
-    parms[0] = id;
-    List customers = custQry.execute(parms);
-    if (customers.size() > 0) {
-        return (Customer) customers.get(0);
-    }
-    else {
-        return null;
-    }
+      <programlisting language="java"><![CDATA[private ActorMappingQuery actorMappingQuery;
+
+@Autowired
+public void setDataSource(DataSource dataSource) {
+    this.actorMappingQuery = new ActorMappingQuery(dataSource);
+}
+
+public Customer getCustomer(Long id) {
+    return actorMappingQuery.findObject(id);
 }]]></programlisting>
 
       <para>The method in this example retrieves the customer with the id that
-      is passed in as the only parameter. After creating an instance of the
-      <classname>CustomerMappingQuery</classname> class we create an array of
-      objects that will contain all parameters that are passed in. In this
-      case there is only one parameter and it is passed in as an
-      <classname>Integer</classname>. Now we are ready to execute the query
-      using this array of parameters and we get a <literal>List</literal> that
-      contains a <classname>Customer</classname> object for each row that was
-      returned for our query. In this case it will only be one entry if there
-      was a match.</para>
+      is passed in as the only parameter. Since we only want one object
+      returned we simply call the convenience method findObject with the id as
+      parameter. If we instead had a query the returned a list of objects and
+      took additional parameters then we would use one of the execute methods
+      that takes an array of parameter values passed in as varargs.</para>
+
+      <programlisting language="java"><![CDATA[public List<Actor> searchForActors(int age, String namePattern) {
+    List<Actor> actors = actorSearchMappingQuery.execute(age, namePattern);
+    return actors;
+}]]></programlisting>
     </section>
 
     <section id="jdbc-SqlUpdate">
@@ -2040,10 +2047,11 @@ END;]]></programlisting>In order to call this procedure we need to declare the
       <methodname>update(..)</methodname> methods analogous to the
       <methodname>execute(..)</methodname> methods of query objects. This
       class is concrete. Although it can be subclassed (for example to add a
-      custom update method) it can easily be parameterized by setting SQL and
-      declaring parameters.</para>
+      custom update method - like in this example where we call it execute) it
+      can easily be parameterized by setting SQL and declaring
+      parameters.</para>
 
-      <programlisting language="java">import java.sql.Types;
+      <programlisting language="java"><![CDATA[import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -2055,24 +2063,20 @@ public class UpdateCreditRating extends SqlUpdate {
     public UpdateCreditRating(DataSource ds) {
         setDataSource(ds);
         setSql("update customer set credit_rating = ? where id = ?");
-        declareParameter(new SqlParameter(Types.NUMERIC));
-        declareParameter(new SqlParameter(Types.NUMERIC));
+        declareParameter(new SqlParameter("creditRating", Types.NUMERIC));
+        declareParameter(new SqlParameter("id", Types.NUMERIC));
         compile();
     }
 
-    <lineannotation>/**
+    /**
      * @param id for the Customer to be updated
      * @param rating the new value for credit rating
      * @return number of rows updated
-     */</lineannotation>
-    public int run(int id, int rating) {
-        Object[] params =
-            new Object[] {
-                new Integer(rating),
-                new Integer(id)};
-        return update(params);
+     */
+    public int execute(int id, int rating) {
+        return update(rating, id);
     }
-}</programlisting>
+}]]></programlisting>
     </section>
 
     <section id="jdbc-StoredProcedure">
@@ -2088,7 +2092,7 @@ public class UpdateCreditRating extends SqlUpdate {
       <para>The inherited <literal>sql</literal> property will be the name of
       the stored procedure in the RDBMS.</para>
 
-      <para>To define a parameter to be used for the StoredProcedure classe,
+      <para>To define a parameter to be used for the StoredProcedure class,
       you use an <classname>SqlParameter</classname> or one of its subclasses.
       You must specify the parameter name and SQL type in the constructor. The
       SQL type is specified using the <classname>java.sql.Types</classname>
@@ -2114,7 +2118,7 @@ public class UpdateCreditRating extends SqlUpdate {
           <classname>SqlInOutParameter</classname> will always be used to
           provide input values. In addition to this any parameter declared as
           <classname>SqlOutParameter</classname> where an non-null input value
-          is provided will also be used as an input paraneter.</para>
+          is provided will also be used as an input parameter.</para>
         </note></para>
 
       <para>In addition to the name and the SQL type you can specify
@@ -2125,75 +2129,72 @@ public class UpdateCreditRating extends SqlUpdate {
       an <classname>SqlReturnType</classname> that provides and opportunity to
       define customized handling of the return values.</para>
 
-      <para>Here is an example of a program that calls a function,
+      <para>Here is an example of a simple DAO that uses a
+      <classname>StoredProcedure</classname> to call a function,
       <literal>sysdate()</literal>, that comes with any Oracle database. To
-      use the stored procedure functionality one has to create a class that
-      extends <classname>StoredProcedure</classname>. There are no input
-      parameters, but there is an output parameter that is declared as a date
+      use the stored procedure functionality you have to create a class that
+      extends <classname>StoredProcedure</classname>. In this example the
+      <classname>StoredProcedure</classname> class is an inner class, but if
+      you need to reuse the <classname>StoredProcedure</classname> you would
+      declare it as a top-level class. There are no input parameters in this
+      example, but there is an output parameter that is declared as a date
       type using the class <classname>SqlOutParameter</classname>. The
-      <literal>execute()</literal> method returns a map with an entry for each
-      declared output parameter using the parameter name as the key.</para>
+      <literal>execute()</literal> method executes the procedure and extracts
+      the returned date from the results <classname>Map</classname>. The
+      results <classname>Map</classname> has an entry for each declared output
+      parameter, in this case only one, using the parameter name as the
+      key.</para>
 
-      <programlisting language="java">import java.sql.Types;
+      <programlisting language="java"><![CDATA[import java.sql.Types;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.datasource.*;
 import org.springframework.jdbc.object.StoredProcedure;
 
-public class TestStoredProcedure {
+public class StoredProcedureDao {
 
-    public static void main(String[] args)  {
-        TestStoredProcedure t = new TestStoredProcedure();
-        t.test();
-        System.out.println("Done!");
+    private GetSysdateProcedure getSysdate;
+    
+    @Autowired
+    public void init(DataSource dataSource) {
+        this.getSysdate = new GetSysdateProcedure(dataSource);
     }
     
-    void test() {
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setDriverClassName("oracle.jdbc.OracleDriver");
-        ds.setUrl("jdbc:oracle:thin:@localhost:1521:mydb");
-        ds.setUsername("scott");
-        ds.setPassword("tiger");
-
-        MyStoredProcedure sproc = new MyStoredProcedure(ds);
-        Map results = sproc.execute();
-        printMap(results);
+    public Date getSysdate() {
+        return getSysdate.execute();
     }
 
-    private class MyStoredProcedure extends StoredProcedure {
+    private class GetSysdateProcedure extends StoredProcedure {
         
         private static final String SQL = "sysdate";
 
-        public MyStoredProcedure(DataSource ds) {
-            setDataSource(ds);
+        public GetSysdateProcedure(DataSource dataSource) {
+            setDataSource(dataSource);
             setFunction(true);
             setSql(SQL);
             declareParameter(new SqlOutParameter("date", Types.DATE));
             compile();
         }
 
-        public Map execute() {
-            <lineannotation>// the 'sysdate' sproc has no input parameters, so an empty Map is supplied...</lineannotation>
-            return execute(new HashMap());
+        public Date execute() {
+            // the 'sysdate' sproc has no input parameters, so an empty Map is supplied...
+            Map<String, Object> results = execute(new HashMap<String, Object>());
+            Date sysdate = (Date) results.get("date");
+            return sysdate;    
         }
     }
 
-    private static void printMap(Map results) {
-        for (Iterator it = results.entrySet().iterator(); it.hasNext(); ) {
-            System.out.println(it.next());  
-        }
-    }
-}</programlisting>
+}]]></programlisting>
 
-      <para>Find below an example of a <classname>StoredProcedure</classname>
+      <para>Below is an example of a <classname>StoredProcedure</classname>
       that has two output parameters (in this case Oracle REF cursors).</para>
 
-      <programlisting language="java">import oracle.jdbc.driver.OracleTypes;
+      <programlisting language="java"><![CDATA[import oracle.jdbc.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.object.StoredProcedure;
 
@@ -2212,11 +2213,11 @@ public class TitlesAndGenresStoredProcedure extends StoredProcedure {
         compile();
     }
 
-    public Map execute() {
-        <lineannotation>// again, this sproc has no input parameters, so an empty Map is supplied...</lineannotation>
-        return super.execute(new HashMap());
+    public Map<String, Object> execute() {
+        // again, this sproc has no input parameters, so an empty Map is supplied
+        return super.execute(new HashMap<String, Object>());
     }
-}</programlisting>
+}]]></programlisting>
 
       <para>Notice how the overloaded variants of the
       <literal>declareParameter(..)</literal> method that have been used in
@@ -2227,20 +2228,21 @@ public class TitlesAndGenresStoredProcedure extends StoredProcedure {
       <interfacename>RowMapper</interfacename> implementations is provided
       below in the interest of completeness.)</para>
 
-      <para>Firstly the <classname>TitleMapper</classname> class, which simply
+      <para>First the <classname>TitleMapper</classname> class, which simply
       maps a <interfacename>ResultSet</interfacename> to a
       <classname>Title</classname> domain object for each row in the supplied
       <interfacename>ResultSet</interfacename>.</para>
 
-      <programlisting language="java"><![CDATA[import com.foo.sprocs.domain.Title;
-import org.springframework.jdbc.core.RowMapper;
+      <programlisting language="java"><![CDATA[import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public final class TitleMapper implements RowMapper {
+import com.foo.domain.Title;
+
+public final class TitleMapper implements RowMapper<Title> {
     
-    public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public Title mapRow(ResultSet rs, int rowNum) throws SQLException {
         Title title = new Title();
         title.setId(rs.getLong("id"));
         title.setName(rs.getString("name"));
@@ -2248,8 +2250,8 @@ public final class TitleMapper implements RowMapper {
     }
 }]]></programlisting>
 
-      <para>Secondly, the <classname>GenreMapper</classname> class, which
-      again simply maps a <interfacename>ResultSet</interfacename> to a
+      <para>Second, the <classname>GenreMapper</classname> class, which again
+      simply maps a <interfacename>ResultSet</interfacename> to a
       <classname>Genre</classname> domain object for each row in the supplied
       <interfacename>ResultSet</interfacename>.</para>
 
@@ -2260,25 +2262,29 @@ import java.sql.SQLException;
 
 import com.foo.domain.Genre;
 
-public final class GenreMapper implements RowMapper {
+public final class GenreMapper implements RowMapper<Genre> {
     
-    public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Genre(rs.getString("name"));
     }
 }]]></programlisting>
 
-      <para>If one needs to pass parameters to a stored procedure (that is the
+      <para>If you need to pass parameters to a stored procedure (that is the
       stored procedure has been declared as having one or more input
-      parameters in its definition in the RDBMS), one would code a strongly
+      parameters in its definition in the RDBMS), you should code a strongly
       typed <literal>execute(..)</literal> method which would delegate to the
       superclass' (untyped) <literal>execute(Map parameters)</literal> (which
       has <literal>protected</literal> access); for example:</para>
 
-      <programlisting language="java"><![CDATA[import oracle.jdbc.driver.OracleTypes;
+      <programlisting language="java"><![CDATA[import oracle.jdbc.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.StoredProcedure;
 
 import javax.sql.DataSource;
+
+import java.sql.Types;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -2294,46 +2300,11 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
         compile();
     }
 
-    public Map execute(Date cutoffDate) {
-        Map inputs = new HashMap();
+    public Map<String, Object> execute(Date cutoffDate) {
+        Map<String, Object> inputs = new HashMap<String, Object>();
         inputs.put(CUTOFF_DATE_PARAM, cutoffDate);
         return super.execute(inputs);
     }
-}]]></programlisting>
-    </section>
-
-    <section id="jdbc-SqlFunction">
-      <title><classname>SqlFunction</classname></title>
-
-      <para>The <classname>SqlFunction</classname> RDBMS operation class
-      encapsulates an SQL "function" wrapper for a query that returns a single
-      row of results. The default behavior is to return an
-      <literal>int</literal>, but that can be overridden by using the methods
-      with an extra return type parameter. This is similar to using the
-      <literal>queryForXxx</literal> methods of the
-      <classname>JdbcTemplate</classname>. The advantage with
-      <classname>SqlFunction</classname> is that you don't have to create the
-      <classname>JdbcTemplate</classname>, it is done behind the
-      scenes.</para>
-
-      <para>This class is intended to use to call SQL functions that return a
-      single result using a query like "select user()" or "select sysdate from
-      dual". It is not intended for calling more complex stored functions or
-      for using a <classname>CallableStatement</classname> to invoke a stored
-      procedure or stored function. (Use the
-      <classname>StoredProcedure</classname> or <classname>SqlCall</classname>
-      classes for this type of processing).</para>
-
-      <para><classname>SqlFunction</classname> is a concrete class, and there
-      is typically no need to subclass it. Code using this package can create
-      an object of this type, declaring SQL and parameters, and then invoke
-      the appropriate run method repeatedly to execute the function. Here is
-      an example of retrieving the count of rows from a table:</para>
-
-      <programlisting language="java"><![CDATA[public int countRows() {
-    SqlFunction sf = new SqlFunction(dataSource, "select count(*) from mytable");
-    sf.compile();
-    return sf.run();
 }]]></programlisting>
     </section>
   </section>
@@ -2472,7 +2443,7 @@ final InputStream clobIs = new FileInputStream(clobIn);
 final InputStreamReader clobReader = new InputStreamReader(clobIs);
 jdbcTemplate.execute(
   "INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-  new AbstractLobCreatingPreparedStatementCallback(lobhandler) {
+  new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
       protected void setValues(PreparedStatement ps, LobCreator lobCreator) 
           throws SQLException {
         ps.setLong(1, 1L);
@@ -2514,17 +2485,17 @@ clobReader.close();]]></programlisting>
             <area coords="7" id="jdbc.lobhandler.getBlob" />
           </areaspec>
 
-          <programlisting language="java"><![CDATA[List l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
-    new RowMapper() {
-      public Object mapRow(ResultSet rs, int i) throws SQLException {
-        Map results = new HashMap();
-        String clobText = lobHandler.getClobAsString(rs, "a_clob");
-        results.put("CLOB", clobText);
-        byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");
-        results.put("BLOB", blobBytes);
-        return results;
-      }
-    });
+          <programlisting language="java"><![CDATA[List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
+        new RowMapper<Map<String, Object>>() {
+          public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
+            Map<String, Object> results = new HashMap<String, Object>();
+            String clobText = lobHandler.getClobAsString(rs, "a_clob");
+            results.put("CLOB", clobText);
+            byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");
+            results.put("BLOB", blobBytes);
+            return results;
+          }
+        });
 ]]></programlisting>
 
           <calloutlist>
@@ -2593,7 +2564,10 @@ clobReader.close();]]></programlisting>
       interface is used as part of the declaration of an
       <classname>SqlOutParameter</classname>.</para>
 
-      <para><programlisting language="java"><![CDATA[declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+      <para><programlisting language="java"><![CDATA[final TestItem - new TestItem(123L, "A test item", 
+        new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"););
+
+declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
     new SqlReturnType() {
       public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) 
           throws SQLException {
@@ -2614,7 +2588,10 @@ clobReader.close();]]></programlisting>
       specific objects like <classname>StructDescriptor</classname>s or
       <classname>ArrayDescriptor</classname>s</para>
 
-      <para><programlisting language="java"><![CDATA[SqlTypeValue value = new AbstractSqlTypeValue() {
+      <para><programlisting language="java"><![CDATA[final TestItem - new TestItem(123L, "A test item", 
+        new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"););
+
+SqlTypeValue value = new AbstractSqlTypeValue() {
   protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
     StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
     Struct item = new STRUCT(itemDescriptor, conn,
@@ -2628,6 +2605,23 @@ clobReader.close();]]></programlisting>
 };]]></programlisting>This <classname>SqlTypeValue</classname> can now be
       added to the Map containing the input parameters for the execute call of
       the stored procedure.</para>
+
+      <para>Another use for the <classname>SqlTypeValue</classname> is for
+      passing in an array of values to an Oracle stored procedure. Oracle has
+      its own internal <classname>ARRAY</classname> class that must be used in
+      this case and we can use the <classname>SqlTypeValue</classname> to
+      create an instance of the Oracle <classname>ARRAY</classname> and
+      populate it with values from our Java array.</para>
+
+      <programlisting language="java"><![CDATA[final Long[] ids = new Long[] {1L, 2L};
+
+SqlTypeValue value = new AbstractSqlTypeValue() {
+  protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
+    ArrayDescriptor arrayDescriptor = new ArrayDescriptor(typeName, conn);
+    ARRAY idArray = new ARRAY(arrayDescriptor, conn, ids);
+    return idArray;
+  }
+};]]></programlisting>
     </section>
   </section>
 
@@ -2656,12 +2650,11 @@ clobReader.close();]]></programlisting>
 
       <para>When you wish to expose an embedded database instance as a bean in
       a Spring ApplicationContext, use the embedded-database tag in the
-      spring-jdbc namespace: <programlisting language="xml"><![CDATA[
-    <jdbc:embedded-database id="dataSource">
+      spring-jdbc namespace: <programlisting language="xml"><![CDATA[    <jdbc:embedded-database id="dataSource">
         <jdbc:script location="classpath:schema.sql"/>
         <jdbc:script location="classpath:test-data.sql"/>
     </jdbc:embedded-database>
-  			]]></programlisting></para>
+]]></programlisting></para>
 
       <para>The configuration above creates an embedded HSQL database
       populated with SQL from schema.sql and testdata.sql resources in the
@@ -2678,12 +2671,11 @@ clobReader.close();]]></programlisting>
       a fluent API for constructing an embedded database programmatically. Use
       this when you need to create an embedded database instance in a
       standalone environment, such as a data access object unit test:
-      <programlisting language="java"><![CDATA[
-    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+      <programlisting language="java"><![CDATA[    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
     EmbeddedDatabase db = builder.type(H2).script("schema.sql").script("test-data.sql").build();
     // do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
     db.shutdown()
-  			]]></programlisting></para>
+]]></programlisting></para>
     </section>
 
     <section id="jdbc-embedded-database-extension">
