@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.converter;
+package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.TypeConverter;
+import java.util.Locale;
+
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.util.StringUtils;
 
 /**
- * A meta interface a Converter may implement to describe what types he can convert between.
- * Implementing this interface is required for converters that do not declare their parameterized types S and T and expect to be registered with a {@link TypeConverter}.
- * @see Converter
- * @see SuperConverter
+ * Converts a String to a Locale using {@link StringUtils#parseLocaleString(String)}.
+ * @author Keith Donald
  */
-public interface ConverterInfo {
-
-	/**
-	 * The source type the converter converts from.
-	 */
-	public Class<?> getSourceType();
-
-	/**
-	 * The target type the converter converts to.
-	 */
-	public Class<?> getTargetType();
-
+public class StringToLocale implements Converter<String, Locale> {
+	public Locale convert(String source) {
+		return StringUtils.parseLocaleString(source);
+	}
 }

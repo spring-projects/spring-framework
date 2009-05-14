@@ -16,13 +16,13 @@
 package org.springframework.core.convert.converter;
 
 import org.springframework.core.convert.ConvertException;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeConverter;
 
 /**
  * A converter converts a source object of type S to a target of type T and back.
  * <p>
  * Implementations of this interface are thread-safe and can be shared. Converters are typically registered with and
- * accessed through a {@link ConversionService}.
+ * accessed through a {@link TypeConverter}.
  * </p>
  * @author Keith Donald
  */
@@ -36,6 +36,6 @@ public interface Converter<S, T> {
 	 * system will handle wrapping the failure in a {@link ConvertException} that provides a consistent type
 	 * conversion error context
 	 */
-	public T convert(S source) throws Exception;
+	T convert(S source) throws Exception;
 
 }

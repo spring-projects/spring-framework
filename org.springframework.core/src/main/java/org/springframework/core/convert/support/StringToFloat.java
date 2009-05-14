@@ -13,26 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.converter;
+package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.TypeConverter;
+import org.springframework.core.convert.converter.Converter;
 
 /**
- * A meta interface a Converter may implement to describe what types he can convert between.
- * Implementing this interface is required for converters that do not declare their parameterized types S and T and expect to be registered with a {@link TypeConverter}.
- * @see Converter
- * @see SuperConverter
+ * Converts a String to Float using {@link Float#valueOf(String)}.
+ * 
+ * @author Keith Donald
  */
-public interface ConverterInfo {
-
-	/**
-	 * The source type the converter converts from.
-	 */
-	public Class<?> getSourceType();
-
-	/**
-	 * The target type the converter converts to.
-	 */
-	public Class<?> getTargetType();
-
+public class StringToFloat implements Converter<String, Float> {
+	public Float convert(String source) {
+		return Float.valueOf(source);
+	}
 }
