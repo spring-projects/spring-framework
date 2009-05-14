@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Andy Clement
  */
-public class TypeDescriptor {
+public class TypeDescriptor<T> {
 
 	/**
 	 * Constant value typeDescriptor for the type of a null value

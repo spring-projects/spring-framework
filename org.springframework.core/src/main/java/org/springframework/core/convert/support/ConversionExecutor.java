@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.converter;
+package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.TypeConverter;
+import org.springframework.core.convert.ConversionException;
 
 /**
- * A meta interface a Converter may implement to describe what types he can convert between.
- * Implementing this interface is required for converters that do not declare their parameterized types S and T and expect to be registered with a {@link TypeConverter}.
- * @see Converter
- * @see SuperConverter
+ * A command parameterized with the information necessary to perform a conversion of a source input to a
+ * target output. Encapsulates knowledge about how to convert source objects to a specific target type using a specific
+ * converter.
+ * 
+ * @author Keith Donald
  */
-public interface ConverterInfo {
+public interface ConversionExecutor {
 
 	/**
-	 * The source type the converter converts from.
+	 * Convert the source.
+	 * @param source the source to convert
+	 * @throws ConversionException if an exception occurs during type conversion
 	 */
-	public Class<?> getSourceType();
-
-	/**
-	 * The target type the converter converts to.
-	 */
-	public Class<?> getTargetType();
+	public Object execute(Object source);
 
 }

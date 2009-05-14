@@ -24,7 +24,7 @@ public class ConverterNotFoundException extends ConvertException {
 
 	private Class<?> sourceType;
 
-	private TypeDescriptor targetType;
+	private Class<?> targetType;
 
 	/**
 	 * Creates a new conversion executor not found exception.
@@ -32,7 +32,7 @@ public class ConverterNotFoundException extends ConvertException {
 	 * @param targetType the target type requested to convert to
 	 * @param message a descriptive message
 	 */
-	public ConverterNotFoundException(Class<?> sourceType, TypeDescriptor targetType, String message) {
+	public ConverterNotFoundException(Class<?> sourceType, Class<?> targetType, String message) {
 		super(message);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
@@ -48,7 +48,7 @@ public class ConverterNotFoundException extends ConvertException {
 	/**
 	 * Returns the target type that was requested to convert to.
 	 */
-	public TypeDescriptor getTargetType() {
+	public Class<?> getTargetType() {
 		return targetType;
 	}
 }
