@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.transaction.jta;
 
 import java.util.List;
-
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
@@ -25,16 +24,19 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 /**
- * Adapter for a JTA Synchronization, invoking the <code>afterCompletion</code> of
- * Spring TransactionSynchronizations after the outer JTA transaction has completed.
+ * Adapter for a JTA Synchronization, invoking the <code>afterCommit</code> /
+ * <code>afterCompletion</code> callbacks of Spring {@link TransactionSynchronization}
+ * objects callbacks after the outer JTA transaction has completed.
  * Applied when participating in an existing (non-Spring) JTA transaction.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see TransactionSynchronization#afterCommit
+ * @see TransactionSynchronization#afterCompletion
  */
 public class JtaAfterCompletionSynchronization implements Synchronization {
 
-	private final List synchronizations;
+	private final List<TransactionSynchronization> synchronizations;
 
 
 	/**
@@ -42,7 +44,7 @@ public class JtaAfterCompletionSynchronization implements Synchronization {
 	 * @param synchronizations the List of TransactionSynchronization objects
 	 * @see org.springframework.transaction.support.TransactionSynchronization
 	 */
-	public JtaAfterCompletionSynchronization(List synchronizations) {
+	public JtaAfterCompletionSynchronization(List<TransactionSynchronization> synchronizations) {
 		this.synchronizations = synchronizations;
 	}
 

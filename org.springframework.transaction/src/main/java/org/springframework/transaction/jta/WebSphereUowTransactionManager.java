@@ -35,6 +35,7 @@ import org.springframework.transaction.support.CallbackPreferringPlatformTransac
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ReflectionUtils;
 
@@ -170,7 +171,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	 * Registers the synchronizations as interposed JTA Synchronization on the UOWManager.
 	 */
 	@Override
-	protected void doRegisterAfterCompletionWithJtaTransaction(JtaTransactionObject txObject, List synchronizations) {
+	protected void doRegisterAfterCompletionWithJtaTransaction(
+			JtaTransactionObject txObject, List<TransactionSynchronization> synchronizations) {
+
 		this.uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
 	}
 
@@ -328,7 +331,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				}
 				triggerBeforeCompletion(status);
 				if (status.isNewSynchronization()) {
-					List synchronizations = TransactionSynchronizationManager.getSynchronizations();
+					List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
 					TransactionSynchronizationManager.clear();
 					uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
 				}
