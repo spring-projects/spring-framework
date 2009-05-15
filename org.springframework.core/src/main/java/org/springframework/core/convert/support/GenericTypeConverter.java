@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterInfo;
@@ -80,22 +80,41 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 		List typeInfo = getRequiredTypeInfo(converter);
 		Class sourceType = (Class) typeInfo.get(0);
 		Class targetType = (Class) typeInfo.get(1);
-		// index forward
 		Map sourceMap = getSourceMap(sourceType);
 		sourceMap.put(targetType, converter);
 	}
-	
-	public void addConverterFactory(ConverterFactory<?, ?> converter) {
+
+	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
+		List typeInfo = getRequiredTypeInfo(converterFactory);
+		Class sourceType = (Class) typeInfo.get(0);
+		Class targetType = (Class) typeInfo.get(1);
+		Map sourceMap = getSourceMap(sourceType);
+		sourceMap.put(targetType, converterFactory);
 	}
 
 	public void removeConverter(Converter<?, ?> converter) {
+		List typeInfo = getRequiredTypeInfo(converter);
+		Class sourceType = (Class) typeInfo.get(0);
+		Class targetType = (Class) typeInfo.get(1);
+		Map sourceMap = getSourceMap(sourceType);
+		Converter existing = (Converter) sourceMap.get(targetType);
+		if (converter == existing) {
+			sourceMap.remove(targetType);
+		}
 	}
 
-	public void removeConverterFactory(Converter<?, ?> converter) {
-	}	
+	public void removeConverterFactory(ConverterFactory<?, ?> converter) {
+		List typeInfo = getRequiredTypeInfo(converter);
+		Class sourceType = (Class) typeInfo.get(0);
+		Class targetType = (Class) typeInfo.get(1);
+		Map sourceMap = getSourceMap(sourceType);
+		ConverterFactory existing = (ConverterFactory) sourceMap.get(targetType);
+		if (converter == existing) {
+			sourceMap.remove(targetType);
+		}
+	}
 
 	// implementing ConversionService
-
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		return canConvert(sourceType, ConversionPoint.valueOf(targetType));
@@ -201,7 +220,8 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 			for (Type genericInterface : genericInterfaces) {
 				if (genericInterface instanceof ParameterizedType) {
 					ParameterizedType pInterface = (ParameterizedType) genericInterface;
-					if (Converter.class.isAssignableFrom((Class) pInterface.getRawType())) {
+					if (Converter.class.isAssignableFrom((Class) pInterface.getRawType())
+							|| ConverterFactory.class.isAssignableFrom((Class) pInterface.getRawType())) {
 						Class s = getParameterClass(pInterface.getActualTypeArguments()[0], converter.getClass());
 						Class t = getParameterClass(pInterface.getActualTypeArguments()[1], converter.getClass());
 						typeInfo.add(getParameterClass(s, converter.getClass()));
@@ -246,6 +266,7 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 			while (!classQueue.isEmpty()) {
 				Class currentClass = (Class) classQueue.removeLast();
 				Map converters = getConvertersForSource(currentClass);
+				System.out.println("Source:" + currentClass);
 				Converter converter = getConverter(converters, targetType);
 				if (converter != null) {
 					return converter;
@@ -285,7 +306,52 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 	}
 
 	private Converter getConverter(Map converters, Class targetType) {
-		return (Converter) converters.get(targetType);
+		if (targetType.isInterface()) {
+			LinkedList classQueue = new LinkedList();
+			classQueue.addFirst(targetType);
+			while (!classQueue.isEmpty()) {
+				Class currentClass = (Class) classQueue.removeLast();
+				Converter converter = getConverterImpl(converters, currentClass, targetType);
+				if (converter != null) {
+					return converter;
+				}
+				Class[] interfaces = currentClass.getInterfaces();
+				for (int i = 0; i < interfaces.length; i++) {
+					classQueue.addFirst(interfaces[i]);
+				}
+			}
+			return getConverterImpl(converters, Object.class, targetType);
+		} else {
+			LinkedList classQueue = new LinkedList();
+			classQueue.addFirst(targetType);
+			while (!classQueue.isEmpty()) {
+				Class currentClass = (Class) classQueue.removeLast();
+				Converter converter = getConverterImpl(converters, currentClass, targetType);
+				if (converter != null) {
+					return converter;
+				}
+				if (currentClass.getSuperclass() != null) {
+					classQueue.addFirst(currentClass.getSuperclass());
+				}
+				Class[] interfaces = currentClass.getInterfaces();
+				for (int i = 0; i < interfaces.length; i++) {
+					classQueue.addFirst(interfaces[i]);
+				}
+			}
+			return null;
+		}		
+	}
+	
+	private Converter getConverterImpl(Map converters, Class currentClass, Class targetType) {
+		Object converter = converters.get(currentClass);
+		if (converter == null) {
+			return null;
+		}
+		if (converter instanceof Converter) {
+			return (Converter) converter;
+		} else {
+			return ((ConverterFactory) converter).getConverter(targetType);
+		}
 	}
 
 }
