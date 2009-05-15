@@ -28,9 +28,11 @@ import java.util.Map;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterInfo;
+import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +45,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 @SuppressWarnings("unchecked")
-public class GenericConversionService implements TypeConverter {
+public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 
 	/**
 	 * An indexed map of Converters. Each Map.Entry key is a source class (S) that can be converted from. Each Map.Entry
@@ -82,10 +84,24 @@ public class GenericConversionService implements TypeConverter {
 		Map sourceMap = getSourceMap(sourceType);
 		sourceMap.put(targetType, converter);
 	}
+	
+	public void addConverterFactory(ConverterFactory<?, ?> converter) {
+	}
+
+	public void removeConverter(Converter<?, ?> converter) {
+	}
+
+	public void removeConverterFactory(Converter<?, ?> converter) {
+	}	
 
 	// implementing ConversionService
 
-	public boolean canConvert(Class<?> sourceType, TypeDescriptor<?> targetType) {
+
+	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
+		return canConvert(sourceType, BindingPoint.valueOf(targetType));
+	}
+
+	public boolean canConvert(Class<?> sourceType, BindingPoint<?> targetType) {
 		ConversionExecutor executor = getConversionExecutor(sourceType, targetType);
 		if (executor != null) {
 			return true;
@@ -98,16 +114,20 @@ public class GenericConversionService implements TypeConverter {
 		}
 	}
 
-	public Object convert(Object source, TypeDescriptor targetType) {
+	public <S, T> T convert(S source, Class<T> targetType) {
+		return convert(source, BindingPoint.valueOf(targetType));
+	}
+
+	public <S, T> T convert(S source, BindingPoint<T> targetType) {
 		if (source == null) {
 			return null;
 		}
 		if (source.getClass().isAssignableFrom(targetType.getType())) {
-			return source;
+			return (T) source;
 		}
 		ConversionExecutor executor = getConversionExecutor(source.getClass(), targetType);
 		if (executor != null) {
-			return executor.execute(source);
+			return (T) executor.execute(source);
 		} else {
 			if (parent != null) {
 				return parent.convert(source, targetType);
@@ -119,11 +139,11 @@ public class GenericConversionService implements TypeConverter {
 		}
 	}
 
-	ConversionExecutor getConversionExecutor(Class sourceClass, TypeDescriptor targetType)
+	ConversionExecutor getConversionExecutor(Class sourceClass, BindingPoint targetType)
 			throws ConverterNotFoundException {
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
-		TypeDescriptor sourceType = TypeDescriptor.valueOf(sourceClass);
+		BindingPoint sourceType = BindingPoint.valueOf(sourceClass);
 		if (sourceType.isArray()) {
 			if (targetType.isArray()) {
 				return new ArrayToArray(sourceType, targetType, this);

@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Test;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.core.convert.support.CollectionToArray;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.DefaultTypeConverter;
 
 public class CollectionToArrayTests {
 
 	@Test
 	public void testCollectionToArrayConversion() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToArray c = new CollectionToArray(new TypeDescriptor(getClass().getField("bindTarget")),
-				TypeDescriptor.valueOf(Integer[].class), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToArray c = new CollectionToArray(new BindingPoint(getClass().getField("bindTarget")),
+				BindingPoint.valueOf(Integer[].class), service);
 		bindTarget.add("1");
 		bindTarget.add("2");
 		bindTarget.add("3");
@@ -28,8 +28,8 @@ public class CollectionToArrayTests {
 
 	@Test
 	public void testCollectionToArrayConversionNoGenericInfo() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToArray c = new CollectionToArray(TypeDescriptor.valueOf(Collection.class), TypeDescriptor
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToArray c = new CollectionToArray(BindingPoint.valueOf(Collection.class), BindingPoint
 				.valueOf(Integer[].class), service);
 		bindTarget.add("1");
 		bindTarget.add("2");
@@ -42,8 +42,8 @@ public class CollectionToArrayTests {
 	
 	@Test
 	public void testCollectionToArrayConversionNoGenericInfoNullElement() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToArray c = new CollectionToArray(TypeDescriptor.valueOf(Collection.class), TypeDescriptor
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToArray c = new CollectionToArray(BindingPoint.valueOf(Collection.class), BindingPoint
 				.valueOf(Integer[].class), service);
 		bindTarget.add(null);
 		bindTarget.add("1");

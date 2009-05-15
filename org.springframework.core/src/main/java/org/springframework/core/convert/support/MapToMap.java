@@ -21,20 +21,21 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * Converts from one map to another map, with support for converting individual map elements based on generic type information.
  * @author Keith Donald
  */
+@SuppressWarnings("unchecked")
 class MapToMap implements ConversionExecutor {
 
-	private TypeDescriptor sourceType;
+	private BindingPoint sourceType;
 
-	private TypeDescriptor targetType;
+	private BindingPoint targetType;
 
-	private GenericConversionService conversionService;
+	private GenericTypeConverter conversionService;
 
 	private EntryConverter entryConverter;
 
@@ -44,7 +45,7 @@ class MapToMap implements ConversionExecutor {
 	 * @param targetType the target map type
 	 * @param conversionService the conversion service
 	 */
-	public MapToMap(TypeDescriptor sourceType, TypeDescriptor targetType, GenericConversionService conversionService) {
+	public MapToMap(BindingPoint sourceType, BindingPoint targetType, GenericTypeConverter conversionService) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.conversionService = conversionService;
@@ -54,17 +55,16 @@ class MapToMap implements ConversionExecutor {
 	private EntryConverter createEntryConverter() {
 		if (sourceType.isMapEntryTypeKnown() && targetType.isMapEntryTypeKnown()) {
 			ConversionExecutor keyConverter = conversionService.getConversionExecutor(sourceType.getMapKeyType(),
-					TypeDescriptor.valueOf(targetType.getMapKeyType()));
+					BindingPoint.valueOf(targetType.getMapKeyType()));
 			ConversionExecutor valueConverter = conversionService.getConversionExecutor(sourceType.getMapValueType(),
-					TypeDescriptor.valueOf(targetType.getMapValueType()));
+					BindingPoint.valueOf(targetType.getMapValueType()));
 			return new EntryConverter(keyConverter, valueConverter);
 		} else {
 			return EntryConverter.NO_OP_INSTANCE;
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public Object execute(Object source) throws ConversionException {
+	public Object execute(Object source) throws ConversionFailedException {
 		try {
 			Map map = (Map) source;
 			Map targetMap = (Map) getImpl(targetType.getType()).newInstance();
@@ -76,7 +76,7 @@ class MapToMap implements ConversionExecutor {
 			}
 			return targetMap;
 		} catch (Exception e) {
-			throw new ConversionException(source, sourceType.getType(), targetType.getType(), e);
+			throw new ConversionFailedException(source, sourceType.getType(), targetType.getType(), e);
 		}
 	}
 
@@ -94,11 +94,11 @@ class MapToMap implements ConversionExecutor {
 					Object key = entry.getKey();
 					Object value = entry.getValue();
 					if (keyConverter == null && key != null) {
-						keyConverter = conversionService.getConversionExecutor(key.getClass(), TypeDescriptor
+						keyConverter = conversionService.getConversionExecutor(key.getClass(), BindingPoint
 								.valueOf(targetKeyType));
 					}
 					if (valueConverter == null && value != null) {
-						valueConverter = conversionService.getConversionExecutor(value.getClass(), TypeDescriptor
+						valueConverter = conversionService.getConversionExecutor(value.getClass(), BindingPoint
 								.valueOf(targetValueType));
 					}
 					if (keyConverter != null && valueConverter != null) {

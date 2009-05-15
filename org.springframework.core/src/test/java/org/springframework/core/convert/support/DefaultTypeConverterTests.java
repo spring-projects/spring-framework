@@ -1,4 +1,4 @@
-package org.springframework.core.convert.converters;
+package org.springframework.core.convert.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -28,7 +28,7 @@ import org.springframework.core.convert.support.StringToShort;
 /**
  * Tests for the default converters in the converters package.
 s */
-public class DefaultConverterTests {
+public class DefaultTypeConverterTests {
 
 	@Test
 	public void testStringToByte() throws Exception {

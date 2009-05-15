@@ -19,7 +19,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * Special converter that converts from target collection to a source array.
@@ -28,8 +28,8 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 class CollectionToArray extends AbstractCollectionConverter {
 
-	public CollectionToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetCollectionType,
-			GenericConversionService conversionService) {
+	public CollectionToArray(BindingPoint sourceArrayType, BindingPoint targetCollectionType,
+			GenericTypeConverter conversionService) {
 		super(sourceArrayType, targetCollectionType, conversionService);
 	}
 
@@ -52,7 +52,7 @@ class CollectionToArray extends AbstractCollectionConverter {
 			while (it.hasNext()) {
 				Object value = it.next();
 				if (value != null) {
-					elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(getTargetElementType()));
+					elementConverter = getConversionService().getConversionExecutor(value.getClass(), BindingPoint.valueOf(getTargetElementType()));
 					break;
 				}
 			}
