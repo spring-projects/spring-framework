@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.service.DefaultConversionService;
-import org.springframework.core.convert.service.GenericConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
@@ -64,14 +64,14 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementType();
 		assertEquals(String.class,clazz);
-		List l = (List) tcs.convert(listOfInteger, typeDescriptorForListOfString);
+		List l = (List) tcs.convertValue(listOfInteger, typeDescriptorForListOfString);
 		assertNotNull(l); 
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementType();
 		assertEquals(Integer.class,clazz);
 		
-		l = (List) tcs.convert(listOfString, typeDescriptorForListOfString);
+		l = (List) tcs.convertValue(listOfString, typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
 	
@@ -89,29 +89,29 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	
 
 	/**
-	 * Type convertor that uses the core conversion service.
+	 * Type converter that uses the core conversion service.
 	 */
-	private static class TypeConvertorUsingConversionService extends DefaultConversionService implements TypeConverter {
+	private static class TypeConvertorUsingConversionService implements TypeConverter {
+
+		private final DefaultConversionService service = new DefaultConversionService();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-			return super.canConvert(sourceType, TypeDescriptor.valueOf(targetType));
+			return this.service.canConvert(sourceType, TypeDescriptor.valueOf(targetType));
 		}
 
 		public boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor) {
-			return super.canConvert(sourceType, typeDescriptor);
+			return this.service.canConvert(sourceType, typeDescriptor);
 		}
 
 		@SuppressWarnings("unchecked")
 		public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-			return (T)super.convert(value,TypeDescriptor.valueOf(targetType));
+			return (T) this.service.convert(value,TypeDescriptor.valueOf(targetType));
 		}
 
 		@SuppressWarnings("unchecked")
-		public Object convertValue(Object value, TypeDescriptor typeDescriptor)
-				throws EvaluationException {
-			return super.convert(value, typeDescriptor);
+		public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
+			return this.service.convert(value, typeDescriptor);
 		}
-		
 	}
 
 }

@@ -18,9 +18,8 @@ package org.springframework.expression.spel.support;
 
 import org.springframework.core.convert.ConvertException;
 import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.service.DefaultConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelException;
@@ -34,28 +33,31 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	private ConversionService conversionService;
+	private org.springframework.core.convert.TypeConverter typeConverter;
 	
 	public StandardTypeConverter() {
-		conversionService = new DefaultConversionService();
+		this.typeConverter = new DefaultConversionService();
 	}
 
-	public StandardTypeConverter(ConversionService conversionService) {
-		Assert.notNull(conversionService, "The conversionService must not be null");
-		this.conversionService = conversionService;
+	public StandardTypeConverter(org.springframework.core.convert.TypeConverter typeConverter) {
+		Assert.notNull(typeConverter, "TypeConverter must not be null");
+		this.typeConverter = typeConverter;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-		return (T) convertValue(value,TypeDescriptor.valueOf(targetType));
+		return (T) convertValue(value, TypeDescriptor.valueOf(targetType));
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 		try {
-			return conversionService.convert(value, typeDescriptor);
-		} catch (ConverterNotFoundException cenfe) {
+			return this.typeConverter.convert(value, typeDescriptor);
+		}
+		catch (ConverterNotFoundException cenfe) {
 			throw new SpelException(cenfe, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
-		} catch (ConvertException ce) {
+		}
+		catch (ConvertException ce) {
 			throw new SpelException(ce, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 		}
 	}
@@ -65,7 +67,7 @@ public class StandardTypeConverter implements TypeConverter {
 	}
 
 	public boolean canConvert(Class<?> sourceType, TypeDescriptor targetType) {
-		return conversionService.canConvert(sourceType, targetType);
+		return this.typeConverter.canConvert(sourceType, targetType);
 	}
 
 }
