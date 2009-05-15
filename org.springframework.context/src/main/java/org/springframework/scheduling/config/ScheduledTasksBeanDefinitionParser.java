@@ -17,6 +17,7 @@
 package org.springframework.scheduling.config;
 
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
@@ -105,7 +106,9 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		builder.addPropertyValue("targetMethod", method);
 		// Extract the source of the current task
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(taskElement));
-		return parserContext.getReaderContext().registerWithGeneratedName(builder.getBeanDefinition());
+		String generatedName = parserContext.getReaderContext().generateBeanName(builder.getRawBeanDefinition());
+		parserContext.registerBeanComponent(new BeanComponentDefinition(builder.getBeanDefinition(), generatedName));
+		return generatedName;
 	}
 
 }
