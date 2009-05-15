@@ -18,8 +18,6 @@ package org.springframework.scripting.config;
 
 import java.util.List;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -31,6 +29,7 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
 
 /**
  * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
@@ -173,7 +172,12 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// This is used for Groovy. It's a bean reference to a customizer bean.
 		if (element.hasAttribute(CUSTOMIZER_REF_ATTRIBUTE)) {
 			String customizerBeanName = element.getAttribute(CUSTOMIZER_REF_ATTRIBUTE);
-			cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
+			if (!StringUtils.hasText(customizerBeanName)) {
+				parserContext.getReaderContext().error("Attribute 'customizer-ref' has empty value", element);
+			}
+			else {
+				cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
+			}
 		}
 
 		// Add any property definitions that need adding.
