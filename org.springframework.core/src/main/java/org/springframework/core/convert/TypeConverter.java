@@ -18,8 +18,9 @@ package org.springframework.core.convert;
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
  * <p>
- * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using
- * this system.
+ * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.<br>
+ * Call {@link #convert(Object, ConversionPoint)} to perform a conversion with additional context about the point
+ * where conversion needs to occur.
  * 
  * @author Keith Donald
  */
@@ -34,12 +35,12 @@ public interface TypeConverter {
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 	
 	/**
-	 * Returns true if objects of sourceType can be converted to the type of the binding point.
+	 * Returns true if objects of sourceType can be converted to the type of the conversion point.
 	 * @param source the source to convert from (may be null)
 	 * @param point context about the target type to convert to
 	 * @return true if a conversion can be performed, false if not
 	 */
-	boolean canConvert(Class<?> sourceType, BindingPoint<?> point);
+	boolean canConvert(Class<?> sourceType, ConversionPoint<?> point);
 
 	/**
 	 * Convert the source to targetType.
@@ -51,12 +52,12 @@ public interface TypeConverter {
 	<S, T> T convert(S source, Class<T> targetType);
 	
 	/**
-	 * Convert the source to type T needed by the binding point.
+	 * Convert the source to type T needed by the conversion point.
 	 * @param source the source to convert from (may be null)
 	 * @param point a binding point where a conversion is required
-	 * @return the converted object, an instance of {@link BindingPoint#getType()}</code>, or <code>null</code> if a null source was provided
+	 * @return the converted object, an instance of {@link ConversionPoint#getType()}</code>, or <code>null</code> if a null source was provided
 	 * @throws ConvertException if an exception occurred
 	 */
-	<S, T> T convert(S source, BindingPoint<T> point);
+	<S, T> T convert(S source, ConversionPoint<T> point);
 
 }

@@ -22,7 +22,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 
 /**
  * Converts from one map to another map, with support for converting individual map elements based on generic type information.
@@ -31,9 +31,9 @@ import org.springframework.core.convert.BindingPoint;
 @SuppressWarnings("unchecked")
 class MapToMap implements ConversionExecutor {
 
-	private BindingPoint sourceType;
+	private ConversionPoint sourceType;
 
-	private BindingPoint targetType;
+	private ConversionPoint targetType;
 
 	private GenericTypeConverter conversionService;
 
@@ -45,7 +45,7 @@ class MapToMap implements ConversionExecutor {
 	 * @param targetType the target map type
 	 * @param conversionService the conversion service
 	 */
-	public MapToMap(BindingPoint sourceType, BindingPoint targetType, GenericTypeConverter conversionService) {
+	public MapToMap(ConversionPoint sourceType, ConversionPoint targetType, GenericTypeConverter conversionService) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.conversionService = conversionService;
@@ -55,9 +55,9 @@ class MapToMap implements ConversionExecutor {
 	private EntryConverter createEntryConverter() {
 		if (sourceType.isMapEntryTypeKnown() && targetType.isMapEntryTypeKnown()) {
 			ConversionExecutor keyConverter = conversionService.getConversionExecutor(sourceType.getMapKeyType(),
-					BindingPoint.valueOf(targetType.getMapKeyType()));
+					ConversionPoint.valueOf(targetType.getMapKeyType()));
 			ConversionExecutor valueConverter = conversionService.getConversionExecutor(sourceType.getMapValueType(),
-					BindingPoint.valueOf(targetType.getMapValueType()));
+					ConversionPoint.valueOf(targetType.getMapValueType()));
 			return new EntryConverter(keyConverter, valueConverter);
 		} else {
 			return EntryConverter.NO_OP_INSTANCE;
@@ -94,11 +94,11 @@ class MapToMap implements ConversionExecutor {
 					Object key = entry.getKey();
 					Object value = entry.getValue();
 					if (keyConverter == null && key != null) {
-						keyConverter = conversionService.getConversionExecutor(key.getClass(), BindingPoint
+						keyConverter = conversionService.getConversionExecutor(key.getClass(), ConversionPoint
 								.valueOf(targetKeyType));
 					}
 					if (valueConverter == null && value != null) {
-						valueConverter = conversionService.getConversionExecutor(value.getClass(), BindingPoint
+						valueConverter = conversionService.getConversionExecutor(value.getClass(), ConversionPoint
 								.valueOf(targetValueType));
 					}
 					if (keyConverter != null && valueConverter != null) {

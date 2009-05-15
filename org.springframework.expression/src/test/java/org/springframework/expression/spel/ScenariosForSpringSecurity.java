@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Method;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -214,7 +214,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(new Principal(),BindingPoint.valueOf(Principal.class));
+			return new TypedValue(new Principal(),ConversionPoint.valueOf(Principal.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -244,7 +244,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(activePerson,BindingPoint.valueOf(Person.class));
+			return new TypedValue(activePerson,ConversionPoint.valueOf(Person.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -283,7 +283,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 					if (m.isVarArgs()) {
 						args = ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(), args);
 					}
-					return new TypedValue(m.invoke(null, args), new BindingPoint(new MethodParameter(m,-1)));
+					return new TypedValue(m.invoke(null, args), new ConversionPoint(new MethodParameter(m,-1)));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Problem invoking hasRole", ex);

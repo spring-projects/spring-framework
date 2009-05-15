@@ -18,7 +18,7 @@ package org.springframework.expression.spel.support;
 
 import org.springframework.core.convert.ConvertException;
 import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
@@ -46,11 +46,11 @@ public class StandardTypeConverter implements TypeConverter {
 
 	@SuppressWarnings("unchecked")
 	public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-		return (T) convertValue(value, BindingPoint.valueOf(targetType));
+		return (T) convertValue(value, ConversionPoint.valueOf(targetType));
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object convertValue(Object value, BindingPoint typeDescriptor) throws EvaluationException {
+	public Object convertValue(Object value, ConversionPoint typeDescriptor) throws EvaluationException {
 		try {
 			return this.typeConverter.convert(value, typeDescriptor);
 		}
@@ -63,10 +63,10 @@ public class StandardTypeConverter implements TypeConverter {
 	}
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return canConvert(sourceType, BindingPoint.valueOf(targetType));
+		return canConvert(sourceType, ConversionPoint.valueOf(targetType));
 	}
 
-	public boolean canConvert(Class<?> sourceType, BindingPoint targetType) {
+	public boolean canConvert(Class<?> sourceType, ConversionPoint targetType) {
 		return this.typeConverter.canConvert(sourceType, targetType);
 	}
 

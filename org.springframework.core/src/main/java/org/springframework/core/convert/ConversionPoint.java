@@ -27,17 +27,19 @@ import org.springframework.util.Assert;
 
 // TODO doesn't support more than depth of one (eg. Map<String,List<Foo>> or List<String>[])
 /**
- * Type metadata about a bindable target value.
+ * A point where conversion needs to be performed.  Provides additional context about the point such 
+ * as field or method parameter information.
  * 
  * @author Keith Donald
  * @author Andy Clement
  */
-public class BindingPoint<T> {
+public class ConversionPoint<T> {
 
 	/**
 	 * Constant value typeDescriptor for the type of a null value
 	 */
-	public final static BindingPoint NULL_TYPE_DESCRIPTOR = new BindingPoint((Class<?>) null);
+	@SuppressWarnings("unchecked")
+	public final static ConversionPoint NULL = new ConversionPoint((Class<?>) null);
 
 	private MethodParameter methodParameter;
 
@@ -52,7 +54,7 @@ public class BindingPoint<T> {
 	 * a Map or collection, where no additional binding metadata is available.
 	 * @param type the actual type
 	 */
-	public BindingPoint(Class<?> type) {
+	public ConversionPoint(Class<?> type) {
 		this.type = type;
 	}
 
@@ -61,7 +63,7 @@ public class BindingPoint<T> {
 	 * from a method parameter, such as a setter method argument.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
-	public BindingPoint(MethodParameter methodParameter) {
+	public ConversionPoint(MethodParameter methodParameter) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 	}
@@ -70,7 +72,7 @@ public class BindingPoint<T> {
 	 * Create a new descriptor for a field. Use this constructor when a bound value originates from a field.
 	 * @param field the field to wrap
 	 */
-	public BindingPoint(Field field) {
+	public ConversionPoint(Field field) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 	}
@@ -153,7 +155,6 @@ public class BindingPoint<T> {
 
 	/**
 	 * Determine the generic key type of the wrapped Map parameter/field, if any.
-	 * 
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public Class<?> getMapKeyType() {
@@ -168,7 +169,6 @@ public class BindingPoint<T> {
 
 	/**
 	 * Determine the generic value type of the wrapped Map parameter/field, if any.
-	 * 
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public Class<?> getMapValueType() {
@@ -201,7 +201,6 @@ public class BindingPoint<T> {
 	 * Return the wrapped MethodParameter, if any.
 	 * <p>
 	 * Note: Either MethodParameter or Field is available.
-	 * 
 	 * @return the MethodParameter, or <code>null</code> if none
 	 */
 	public MethodParameter getMethodParameter() {
@@ -212,7 +211,6 @@ public class BindingPoint<T> {
 	 * Return the wrapped Field, if any.
 	 * <p>
 	 * Note: Either MethodParameter or Field is available.
-	 * 
 	 * @return the Field, or <code>null</code> if none
 	 */
 	public Field getField() {
@@ -248,7 +246,8 @@ public class BindingPoint<T> {
 	 * @param targetType the target type
 	 * @return true if this type is assignable to the target
 	 */
-	public boolean isAssignableTo(BindingPoint targetType) {
+	@SuppressWarnings("unchecked")	
+	public boolean isAssignableTo(ConversionPoint targetType) {
 		return targetType.getType().isAssignableFrom(getType());
 	}
 
@@ -257,9 +256,9 @@ public class BindingPoint<T> {
 	 * @param type the class
 	 * @return the type descriptor
 	 */
-	public static <T> BindingPoint<T> valueOf(Class<T> type) {
+	public static <T> ConversionPoint<T> valueOf(Class<T> type) {
 		// TODO needs a cache for common type descriptors
-		return new BindingPoint<T>(type);
+		return new ConversionPoint<T>(type);
 	}
 
 	/**
@@ -267,9 +266,10 @@ public class BindingPoint<T> {
 	 * @param object the object
 	 * @return the type descriptor
 	 */
-	public static BindingPoint forObject(Object object) {
+	@SuppressWarnings("unchecked")	
+	public static ConversionPoint forObject(Object object) {
 		if (object == null) {
-			return NULL_TYPE_DESCRIPTOR;
+			return NULL;
 		} else {
 			return valueOf(object.getClass());
 		}

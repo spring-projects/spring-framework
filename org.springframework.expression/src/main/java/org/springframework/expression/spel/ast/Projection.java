@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -60,13 +60,13 @@ public class Projection extends SpelNodeImpl {
 			List<Object> result = new ArrayList<Object>();
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
-					state.pushActiveContextObject(new TypedValue(entry,BindingPoint.valueOf(Map.Entry.class)));
+					state.pushActiveContextObject(new TypedValue(entry,ConversionPoint.valueOf(Map.Entry.class)));
 					result.add(getChild(0).getValueInternal(state).getValue());
 				} finally {
 					state.popActiveContextObject();
 				}
 			}
-			return new TypedValue(result,BindingPoint.valueOf(List.class)); // TODO unable to build correct type descriptor
+			return new TypedValue(result,ConversionPoint.valueOf(List.class)); // TODO unable to build correct type descriptor
 		} else if (operand instanceof List) {
 			List<Object> data = new ArrayList<Object>();
 			data.addAll((Collection<?>) operand);
@@ -74,7 +74,7 @@ public class Projection extends SpelNodeImpl {
 			int idx = 0;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(new TypedValue(element,BindingPoint.valueOf(op.getTypeDescriptor().getType())));
+					state.pushActiveContextObject(new TypedValue(element,ConversionPoint.valueOf(op.getTypeDescriptor().getType())));
 					state.enterScope("index", idx);
 					result.add(getChild(0).getValueInternal(state).getValue());
 				} finally {

@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * @author Andy Clement
  */
-public class TypeDescriptorTests {
+public class ConversionPointTests {
 
 	List<String> listOfString;
 	int[] intArray;
@@ -34,13 +34,13 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void testWrapperType() {
-		BindingPoint desc = BindingPoint.valueOf(int.class);
+		ConversionPoint desc = ConversionPoint.valueOf(int.class);
 		assertEquals(Integer.class, desc.getType());
 	}
 	
 	@Test
 	public void listDescriptors() throws Exception {
-		BindingPoint typeDescriptor = new BindingPoint(TypeDescriptorTests.class.getDeclaredField("listOfString"));
+		ConversionPoint typeDescriptor = new ConversionPoint(ConversionPointTests.class.getDeclaredField("listOfString"));
 		assertFalse(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getType());
 		assertEquals(String.class,typeDescriptor.getElementType());
@@ -50,7 +50,7 @@ public class TypeDescriptorTests {
 	
 	@Test
 	public void arrayTypeDescriptors() throws Exception {
-		BindingPoint typeDescriptor = new BindingPoint(TypeDescriptorTests.class.getDeclaredField("intArray"));
+		ConversionPoint typeDescriptor = new ConversionPoint(ConversionPointTests.class.getDeclaredField("intArray"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
 		assertEquals("int[]",typeDescriptor.asString());
@@ -58,14 +58,14 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void buildingArrayTypeDescriptors() throws Exception {
-		BindingPoint typeDescriptor = new BindingPoint(new int[0].getClass());
+		ConversionPoint typeDescriptor = new ConversionPoint(new int[0].getClass());
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
 	}
 
 	@Test
 	public void complexTypeDescriptors() throws Exception {
-		BindingPoint typeDescriptor = new BindingPoint(TypeDescriptorTests.class.getDeclaredField("arrayOfListOfString"));
+		ConversionPoint typeDescriptor = new ConversionPoint(ConversionPointTests.class.getDeclaredField("arrayOfListOfString"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementType());
 		// TODO asc notice that the type of the list elements is lost: typeDescriptor.getElementType() should return a TypeDescriptor

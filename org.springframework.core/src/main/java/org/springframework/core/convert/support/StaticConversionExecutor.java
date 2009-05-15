@@ -16,7 +16,7 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;
 
@@ -27,13 +27,13 @@ import org.springframework.core.style.ToStringCreator;
 @SuppressWarnings("unchecked")
 class StaticConversionExecutor implements ConversionExecutor {
 
-	private final BindingPoint sourceType;
+	private final ConversionPoint sourceType;
 
-	private final BindingPoint targetType;
+	private final ConversionPoint targetType;
 
 	private final Converter converter;
 
-	public StaticConversionExecutor(BindingPoint sourceType, BindingPoint targetType, Converter converter) {
+	public StaticConversionExecutor(ConversionPoint sourceType, ConversionPoint targetType, Converter converter) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.converter = converter;

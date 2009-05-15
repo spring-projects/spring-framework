@@ -19,7 +19,7 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
@@ -55,7 +55,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.method);
-			return new TypedValue(this.method.invoke(target, arguments), new BindingPoint(new MethodParameter(method,-1)));
+			return new TypedValue(this.method.invoke(target, arguments), new ConversionPoint(new MethodParameter(method,-1)));
 		} catch (Exception ex) {
 			throw new AccessException("Problem invoking method: " + this.method, ex);
 		}
