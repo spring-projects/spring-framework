@@ -125,10 +125,9 @@
 	</bookinfo>
 	<!-- front matter -->
 	<toc/>
-    <xi:include href="preface.xml"/>
-    <xi:include href="overview.xml"/>
+	<xi:include href="preface.xml"/>
+	<xi:include href="overview.xml"/>
 	<xi:include href="new-in-3.xml"/>
-	<xi:include href="getting-started.xml"/>
 	<part id="spring-core">
 		<title>Core Technologies</title>
 		<partintro id="spring-core-intro">

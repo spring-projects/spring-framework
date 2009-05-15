@@ -64,6 +64,15 @@
     issue</ulink>.</para>
   </section>
 
+  <section id="new-in-3-new-tutorial">
+    <title>New getting started tutorial</title>
+
+    <para>There is now a new getting started tutorial for developing a basic 
+	Spring 3.0 MVC web application. This tutorial is a separate document that can 
+	be found at the <ulink url="http://www.springsource.org/documentation">
+	Spring Documentation</ulink> page.</para>
+  </section>
+
   <section id="new-in-3-modules-build">
     <title>New module organization and build system</title>
 
