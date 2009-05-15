@@ -9,15 +9,15 @@
     <title>Introduction</title>
 
     <para>The Spring Framework provides integration with <emphasis>Hibernate,
-    JDO, Oracle TopLink, iBATIS SQL Maps</emphasis> and
-    <emphasis>JPA</emphasis>: in terms of resource management, DAO
-    implementation support, and transaction strategies. For example for
-    Hibernate, there is first-class support with lots of IoC convenience
-    features, addressing many typical Hibernate integration issues. All of
+    JDO, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>: in terms 
+    of resource management, DAO implementation support, and 
+    transaction strategies. For example for Hibernate, there is 
+    first-class support with lots of IoC convenience features, 
+    addressing many typical Hibernate integration issues. All of
     these support packages for O/R (Object Relational) mappers comply with
     Spring's generic transaction and DAO exception hierarchies. There are
     usually two integration styles: either using Spring's DAO 'templates' or
-    coding DAOs against plain Hibernate/JDO/TopLink/etc APIs. In both cases,
+    coding DAOs against plain Hibernate/JDO/JPA/etc APIs. In both cases,
     DAOs can be configured through Dependency Injection and participate in
     Spring's resource and transaction management.</para>
 
@@ -102,8 +102,8 @@
 
     <para>The PetClinic sample in the Spring distribution offers alternative
     DAO implementations and application context configurations for JDBC,
-    Hibernate, Oracle TopLink, and JPA. PetClinic can therefore serve as
-    working sample app that illustrates the use of Hibernate, TopLink and JPA
+    Hibernate, and JPA. PetClinic can therefore serve as
+    working sample app that illustrates the use of Hibernate and JPA
     in a Spring web application. It also leverages declarative transaction
     demarcation with different transaction strategies.</para>
 
@@ -602,9 +602,12 @@
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
+       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
@@ -1248,9 +1251,12 @@
         xmlns:aop="http://www.springframework.org/schema/aop"
         xmlns:tx="http://www.springframework.org/schema/tx"
         xsi:schemaLocation="
-   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
+   http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+   http://www.springframework.org/schema/tx 
+   http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+   http://www.springframework.org/schema/aop 
+   http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jdo.JdoTransactionManager"&gt;
     &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
@@ -1340,364 +1346,6 @@
 
       <para>See the <classname>JdoDialect</classname> Javadoc for more details
       on its operations and how they are used within Spring's JDO support.</para>
-    </section>
-  </section>
-
-  <section id="orm-toplink">
-    <title>Oracle TopLink</title>
-
-    <para>Since Spring 1.2, Spring supports Oracle TopLink (<ulink
-    url="http://www.oracle.com/technology/products/ias/toplink"></ulink>) as
-    data access strategy, following the same style as the Hibernate support.
-    Both TopLink 9.0.4 (the production version as of Spring 1.2) and 10.1.3
-    (still in beta as of Spring 1.2) are supported. The corresponding
-    integration classes reside in the
-    <literal>org.springframework.orm.toplink</literal> package.</para>
-
-    <para>Spring's TopLink support has been co-developed with the Oracle
-    TopLink team. Many thanks to the TopLink team, in particular to Jim Clark
-    who helped to clarify details in all areas!</para>
-
-    <section id="orm-toplink-abstraction">
-      <title><interfacename>SessionFactory</interfacename> abstraction</title>
-
-      <para>TopLink itself does not ship with a SessionFactory abstraction.
-      Instead, multi-threaded access is based on the concept of a central
-      <literal>ServerSession</literal>, which in turn is able to spawn
-      <literal>ClientSession</literal> instances for single-threaded usage.
-      For flexible setup options, Spring defines a
-      <interfacename>SessionFactory</interfacename> abstraction for TopLink,
-      enabling to switch between different
-      <interfacename>Session</interfacename> creation strategies.</para>
-
-      <para>As a one-stop shop, Spring provides a
-      <classname>LocalSessionFactoryBean</classname> class that allows for
-      defining a TopLink <interfacename>SessionFactory</interfacename> with
-      bean-style configuration. It needs to be configured with the location of
-      the TopLink session configuration file, and usually also receives a
-      Spring-managed JDBC <interfacename>DataSource</interfacename> to
-      use.</para>
-
-      <programlisting language="xml">&lt;beans&gt;
-
-  &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
-    &lt;property name="url" value="${jdbc.url}"/&gt;
-    &lt;property name="username" value="${jdbc.username}"/&gt;
-    &lt;property name="password" value="${jdbc.password}"/&gt;
-  &lt;/bean&gt;
-
-  &lt;bean id="mySessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean"&gt;
-    &lt;property name="configLocation" value="toplink-sessions.xml"/&gt;
-    &lt;property name="dataSource" ref="dataSource"/&gt;
-  &lt;/bean&gt;
-    
-&lt;/beans&gt;</programlisting>
-
-      <programlisting language="xml">&lt;toplink-configuration&gt;
-
-  &lt;session&gt;
-    &lt;name&gt;Session&lt;/name&gt;
-    &lt;project-xml&gt;toplink-mappings.xml&lt;/project-xml&gt;
-    &lt;session-type&gt;
-      &lt;server-session/&gt;
-    &lt;/session-type&gt;
-    &lt;enable-logging&gt;true&lt;/enable-logging&gt;
-    &lt;logging-options/&gt;
-  &lt;/session&gt;
-
-&lt;/toplink-configuration&gt;</programlisting>
-
-      <para>Usually, <classname>LocalSessionFactoryBean</classname> will hold
-      a multi-threaded TopLink <literal>ServerSession</literal> underneath and
-      create appropriate client <interfacename>Session</interfacename>s for
-      it: either a plain <interfacename>Session</interfacename> (typical), a
-      managed <literal>ClientSession</literal>, or a transaction-aware
-      <interfacename>Session</interfacename> (the latter are mainly used
-      internally by Spring's TopLink support). It might also hold a
-      single-threaded TopLink <literal>DatabaseSession</literal>; this is
-      rather unusual, though.</para>
-    </section>
-
-    <section id="orm-toplink-template">
-      <title><classname>TopLinkTemplate</classname> and
-      <classname>TopLinkDaoSupport</classname></title>
-
-      <para>Each TopLink-based DAO will then receive the
-      <interfacename>SessionFactory</interfacename> through dependency
-      injection, i.e. through a bean property setter or through a constructor
-      argument. Such a DAO could be coded against plain TopLink API, fetching
-      a <interfacename>Session</interfacename> from the given
-      <interfacename>SessionFactory</interfacename>, but will usually rather
-      be used with Spring's <literal>TopLinkTemplate</literal>:</para>
-
-      <programlisting language="xml">&lt;beans&gt;
-  
-  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-  &lt;/bean&gt;
-  
-&lt;/beans&gt;</programlisting>
-
-      <programlisting language="java">public class TopLinkProductDao implements ProductDao {
-  
-    private TopLinkTemplate tlTemplate;
-
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.tlTemplate = new TopLinkTemplate(sessionFactory);
-    }
-
-    public Collection loadProductsByCategory(final String category) throws DataAccessException {
-        return (Collection) this.tlTemplate.execute(new TopLinkCallback() {
-            public Object doInTopLink(Session session) throws TopLinkException {
-                ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
-                findOwnersQuery.addArgument("Category");
-                ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
-                findOwnersQuery.setSelectionCriteria(
-                    builder.get("category").like(builder.getParameter("Category")));
-
-                Vector args = new Vector();
-                args.add(category);
-                List result = session.executeQuery(findOwnersQuery, args);
-                <lineannotation>// do some further stuff with the result list</lineannotation>
-                return result;
-            }
-        });
-    }
-}</programlisting>
-
-      <para>A callback implementation can effectively be used for any TopLink
-      data access. <classname>TopLinkTemplate</classname> will ensure that
-      <interfacename>Session</interfacename>s are properly opened and closed,
-      and automatically participate in transactions. The template instances
-      are thread-safe and reusable, they can thus be kept as instance
-      variables of the surrounding class. For simple single-step actions such
-      as a single <literal>executeQuery</literal>, <literal>readAll</literal>,
-      <literal>readById</literal>, or <literal>merge</literal> call,
-      <classname>JdoTemplate</classname> offers alternative convenience
-      methods that can replace such one line callback implementations.
-      Furthermore, Spring provides a convenient
-      <classname>TopLinkDaoSupport</classname> base class that provides a
-      <literal>setSessionFactory(..)</literal> method for receiving a
-      <interfacename>SessionFactory</interfacename>, and
-      <literal>getSessionFactory()</literal> and
-      <literal>getTopLinkTemplate()</literal> for use by subclasses. In
-      combination, this allows for simple DAO implementations for typical
-      requirements:</para>
-
-      <programlisting language="java">public class ProductDaoImpl extends TopLinkDaoSupport implements ProductDao {
-  
-    public Collection loadProductsByCategory(String category) throws DataAccessException {
-        ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
-        findOwnersQuery.addArgument("Category");
-        ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
-        findOwnersQuery.setSelectionCriteria(
-            builder.get("category").like(builder.getParameter("Category")));
-
-        return getTopLinkTemplate().executeQuery(findOwnersQuery, new Object[] {category});
-    }
-}</programlisting>
-
-      <para>Side note: TopLink query objects are thread-safe and can be cached
-      within the DAO, i.e. created on startup and kept in instance
-      variables.</para>
-
-      <para>As alternative to working with Spring's
-      <classname>TopLinkTemplate</classname>, you can also code your TopLink
-      data access based on the raw TopLink API, explicitly opening and closing
-      a <interfacename>Session</interfacename>. As elaborated in the
-      corresponding Hibernate section, the main advantage of this approach is
-      that your data access code is able to throw checked exceptions.
-      <classname>TopLinkDaoSupport</classname> offers a variety of support
-      methods for this scenario, for fetching and releasing a transactional
-      <interfacename>Session</interfacename> as well as for converting
-      exceptions.</para>
-    </section>
-
-    <section id="orm-toplink-straight">
-      <title>Implementing DAOs based on plain TopLink API</title>
-
-      <para>DAOs can also be written against plain TopLink API, without any
-      Spring dependencies, directly using an injected TopLink
-      <interfacename>Session</interfacename>. The latter will usually be based
-      on a <interfacename>SessionFactory</interfacename> defined by a
-      <classname>LocalSessionFactoryBean</classname>, exposed for bean
-      references of type <interfacename>Session</interfacename> through
-      Spring's <literal>TransactionAwareSessionAdapter</literal>.</para>
-
-      <para>The <literal>getActiveSession()</literal> method defined on
-      TopLink's <interfacename>Session</interfacename> interface will return
-      the current transactional <interfacename>Session</interfacename> in such
-      a scenario. If there is no active transaction, it will return the shared
-      TopLink <literal>ServerSession</literal> as-is, which is only supposed
-      to be used directly for read-only access. There is also an analogous
-      <methodname>getActiveUnitOfWork()</methodname> method, returning the
-      TopLink <interfacename>UnitOfWork</interfacename> associated with the
-      current transaction, if any (returning <literal>null</literal>
-      else).</para>
-
-      <para>A corresponding DAO implementation looks like as follows:</para>
-
-      <programlisting language="java">public class ProductDaoImpl implements ProductDao {
-
-    private Session session;
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    public Collection loadProductsByCategory(String category) {
-        ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
-        findOwnersQuery.addArgument("Category");
-        ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
-        findOwnersQuery.setSelectionCriteria(
-            builder.get("category").like(builder.getParameter("Category")));
-
-        Vector args = new Vector();
-        args.add(category);
-        return session.getActiveSession().executeQuery(findOwnersQuery, args);
-    }
-}</programlisting>
-
-      <para>As the above DAO still follows the Dependency Injection pattern,
-      it still fits nicely into a Spring application context, analogous to
-      like it would if coded against Spring's
-      <classname>TopLinkTemplate</classname>. Spring's
-      <literal>TransactionAwareSessionAdapter</literal> is used to expose a
-      bean reference of type <interfacename>Session</interfacename>, to be
-      passed into the DAO:</para>
-
-      <programlisting language="xml">&lt;beans&gt;
-
-  &lt;bean id="mySessionAdapter"
-      class="org.springframework.orm.toplink.support.TransactionAwareSessionAdapter"&gt;
-    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-  &lt;/bean&gt;
-
-  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-    &lt;property name="session" ref="mySessionAdapter"/&gt;
-  &lt;/bean&gt;
-
-&lt;/beans&gt;</programlisting>
-
-      <para>The main advantage of this DAO style is that it depends on TopLink
-      API only; no import of any Spring class is required. This is of course
-      appealing from a non-invasiveness perspective, and might feel more
-      natural to TopLink developers.</para>
-
-      <para>However, the DAO throws plain
-      <exceptionname>TopLinkException</exceptionname> (which is unchecked, so
-      does not have to be declared or caught), which means that callers can
-      only treat exceptions as generally fatal - unless they want to depend on
-      TopLink's own exception structure. Catching specific causes such as an
-      optimistic locking failure is not possible without tying the caller to
-      the implementation strategy. This tradeoff might be acceptable to
-      applications that are strongly TopLink-based and/or do not need any
-      special exception treatment.</para>
-
-      <para>A further disadvantage of that DAO style is that TopLink's
-      standard <methodname>getActiveSession()</methodname> feature just works
-      within JTA transactions. It does <emphasis>not</emphasis> work with any
-      other transaction strategy out-of-the-box, in particular not with local
-      TopLink transactions.</para>
-
-      <para>Fortunately, Spring's
-      <literal>TransactionAwareSessionAdapter</literal> exposes a
-      corresponding proxy for the TopLink <literal>ServerSession</literal>
-      which supports TopLink's <literal>Session.getActiveSession()</literal>
-      and <literal>Session.getActiveUnitOfWork()</literal> methods for any
-      Spring transaction strategy, returning the current Spring-managed
-      transactional <interfacename>Session</interfacename> even with
-      <literal>TopLinkTransactionManager</literal>. Of course, the standard
-      behavior of that method remains: returning the current
-      <interfacename>Session</interfacename> associated with the ongoing JTA
-      transaction, if any (no matter whether driven by Spring's
-      <classname>JtaTransactionManager</classname>, by EJB CMT, or by plain
-      JTA).</para>
-
-      <para>In summary: DAOs can be implemented based on plain TopLink API,
-      while still being able to participate in Spring-managed transactions.
-      This might in particular appeal to people already familiar with TopLink,
-      feeling more natural to them. However, such DAOs will throw plain
-      <exceptionname>TopLinkException</exceptionname>; conversion to Spring's
-      <classname>DataAccessException</classname> would have to happen
-      explicitly (if desired).</para>
-    </section>
-
-    <section id="orm-toplink-tx">
-      <title>Transaction management</title>
-
-      <para>To execute service operations within transactions, you can use
-      Spring's common declarative transaction facilities. For example:</para>
-
-      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans
-        xmlns="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:aop="http://www.springframework.org/schema/aop"
-        xmlns:tx="http://www.springframework.org/schema/tx"
-        xsi:schemaLocation="
-   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
-
-  &lt;bean id="myTxManager" class="org.springframework.orm.toplink.TopLinkTransactionManager"&gt;
-    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-  &lt;/bean&gt;
-
-  &lt;bean id="myProductService" class="product.ProductServiceImpl"&gt;
-    &lt;property name="productDao" ref="myProductDao"/&gt;
-  &lt;/bean&gt;
-  
-  &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
-    &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
-  &lt;/aop:config&gt;
-
-  &lt;tx:advice id="txAdvice" transaction-manager="myTxManager"&gt;
-    &lt;tx:attributes&gt;
-      &lt;tx:method name="increasePrice*" propagation="REQUIRED"/&gt;
-      &lt;tx:method name="someOtherBusinessMethod" propagation="REQUIRES_NEW"/&gt;
-      &lt;tx:method name="*" propagation="SUPPORTS" read-only="true"/&gt;
-    &lt;/tx:attributes&gt;
-  &lt;/tx:advice&gt;
-
-&lt;/beans&gt;</programlisting>
-
-      <para>Note that TopLink requires an active
-      <interfacename>UnitOfWork</interfacename> for modifying a persistent
-      object. (You should never modify objects returned by a plain TopLink
-      <interfacename>Session</interfacename> - those are usually read-only
-      objects, directly taken from the second-level cache!) There is no
-      concept like a non-transactional flush in TopLink, in contrast to
-      Hibernate. For this reason, TopLink needs to be set up for a specific
-      environment: in particular, it needs to be explicitly set up for JTA
-      synchronization, to detect an active JTA transaction itself and expose a
-      corresponding active <interfacename>Session</interfacename> and
-      <interfacename>UnitOfWork</interfacename>. This is not necessary for
-      local transactions as performed by Spring's
-      <literal>TopLinkTransactionManager</literal>, but it is necessary for
-      participating in JTA transactions (whether driven by Spring's
-      <classname>JtaTransactionManager</classname> or by EJB CMT / plain
-      JTA).</para>
-
-      <para>Within your TopLink-based DAO code, use the
-      <literal>Session.getActiveUnitOfWork()</literal> method to access the
-      current <interfacename>UnitOfWork</interfacename> and perform write
-      operations through it. This will only work within an active transaction
-      (both within Spring-managed transactions and plain JTA transactions).
-      For special needs, you can also acquire separate
-      <interfacename>UnitOfWork</interfacename> instances that won't
-      participate in the current transaction; this is hardly needed,
-      though.</para>
-
-      <para><classname>TopLinkTransactionManager</classname> is capable of
-      exposing a TopLink transaction to JDBC access code that accesses the
-      same JDBC <interfacename>DataSource</interfacename>, provided that
-      TopLink works with JDBC in the backend and is thus able to expose the
-      underlying JDBC <interfacename>Connection</interfacename>. The
-      <interfacename>DataSource</interfacename> to expose the transactions for
-      needs to be specified explicitly; it won't be autodetected.</para>
     </section>
   </section>
 
@@ -2244,7 +1892,7 @@
           other.</para>
 
           <note>
-            <para>If TopLink is being used a JPA provider under Tomcat, please
+            <para>If TopLink Essentials is being used a JPA provider under Tomcat, please
             place the toplink-essentials jar under
             <emphasis>$CATALINA_HOME</emphasis>/shared/lib folder instead of
             your war.</para>
@@ -2644,9 +2292,12 @@ public class ProductDaoImpl implements ProductDao {
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
+       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
     &lt;property name="entityManagerFactory" ref="myEmf"/&gt;
