@@ -15,7 +15,7 @@
  */
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 
 /**
  * @author Andy Clement
@@ -23,16 +23,16 @@ import org.springframework.core.convert.BindingPoint;
  */
 public interface CommonTypeDescriptors {
     // TODO push into TypeDescriptor?
-	static BindingPoint BOOLEAN_TYPE_DESCRIPTOR = BindingPoint.valueOf(Boolean.class);
-	static BindingPoint INTEGER_TYPE_DESCRIPTOR = BindingPoint.valueOf(Integer.class);
-	static BindingPoint CHARACTER_TYPE_DESCRIPTOR = BindingPoint.valueOf(Character.class);
-	static BindingPoint LONG_TYPE_DESCRIPTOR = BindingPoint.valueOf(Long.class);
-	static BindingPoint SHORT_TYPE_DESCRIPTOR = BindingPoint.valueOf(Short.class);
-	static BindingPoint BYTE_TYPE_DESCRIPTOR = BindingPoint.valueOf(Byte.class);
-	static BindingPoint FLOAT_TYPE_DESCRIPTOR = BindingPoint.valueOf(Float.class);
-	static BindingPoint DOUBLE_TYPE_DESCRIPTOR = BindingPoint.valueOf(Double.class);
-	static BindingPoint STRING_TYPE_DESCRIPTOR = BindingPoint.valueOf(String.class);
-	static BindingPoint CLASS_TYPE_DESCRIPTOR = BindingPoint.valueOf(Class.class);
-	static BindingPoint OBJECT_TYPE_DESCRIPTOR = BindingPoint.valueOf(Object.class);
+	static ConversionPoint BOOLEAN_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Boolean.class);
+	static ConversionPoint INTEGER_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Integer.class);
+	static ConversionPoint CHARACTER_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Character.class);
+	static ConversionPoint LONG_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Long.class);
+	static ConversionPoint SHORT_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Short.class);
+	static ConversionPoint BYTE_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Byte.class);
+	static ConversionPoint FLOAT_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Float.class);
+	static ConversionPoint DOUBLE_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Double.class);
+	static ConversionPoint STRING_TYPE_DESCRIPTOR = ConversionPoint.valueOf(String.class);
+	static ConversionPoint CLASS_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Class.class);
+	static ConversionPoint OBJECT_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Object.class);
 	
 }

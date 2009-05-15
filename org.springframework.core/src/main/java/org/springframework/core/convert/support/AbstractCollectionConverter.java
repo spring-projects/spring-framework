@@ -16,7 +16,7 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 
 /**
  * Base class for converters that convert to and from collection types (arrays and java.util.Collection types)
@@ -28,18 +28,18 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 
 	private ConversionExecutor elementConverter;
 	
-	private BindingPoint sourceCollectionType;
+	private ConversionPoint sourceCollectionType;
 	
-	private BindingPoint targetCollectionType;
+	private ConversionPoint targetCollectionType;
 	
-	public AbstractCollectionConverter(BindingPoint sourceCollectionType, BindingPoint targetCollectionType, GenericTypeConverter conversionService) {
+	public AbstractCollectionConverter(ConversionPoint sourceCollectionType, ConversionPoint targetCollectionType, GenericTypeConverter conversionService) {
 		this.conversionService = conversionService;
 		this.sourceCollectionType = sourceCollectionType;
 		this.targetCollectionType = targetCollectionType;
 		Class<?> sourceElementType = sourceCollectionType.getElementType();
 		Class<?> targetElementType = targetCollectionType.getElementType();
 		if (sourceElementType != null && targetElementType != null) {
-			elementConverter = conversionService.getConversionExecutor(sourceElementType, BindingPoint.valueOf(targetElementType));
+			elementConverter = conversionService.getConversionExecutor(sourceElementType, ConversionPoint.valueOf(targetElementType));
 		} else {
 			elementConverter = NoOpConversionExecutor.INSTANCE;
 		}

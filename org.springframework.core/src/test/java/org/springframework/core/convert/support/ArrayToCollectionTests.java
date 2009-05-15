@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.junit.Test;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.support.ArrayToCollection;
 import org.springframework.core.convert.support.DefaultTypeConverter;
 
@@ -18,7 +18,7 @@ public class ArrayToCollectionTests {
 	@Test
 	public void testArrayToCollectionConversion() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		ArrayToCollection c = new ArrayToCollection(BindingPoint.valueOf(String[].class), new BindingPoint(getClass().getField("bindTarget")), service);
+		ArrayToCollection c = new ArrayToCollection(ConversionPoint.valueOf(String[].class), new ConversionPoint(getClass().getField("bindTarget")), service);
 		List result = (List) c.execute(new String[] { "1", "2", "3" });
 		assertEquals(new Integer(1), result.get(0));
 		assertEquals(new Integer(2), result.get(1));
@@ -28,7 +28,7 @@ public class ArrayToCollectionTests {
 	@Test
 	public void testArrayToSetConversion() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		ArrayToCollection c = new ArrayToCollection(BindingPoint.valueOf(String[].class), new BindingPoint(getClass().getField("setTarget")), service);
+		ArrayToCollection c = new ArrayToCollection(ConversionPoint.valueOf(String[].class), new ConversionPoint(getClass().getField("setTarget")), service);
 		Set result = (Set) c.execute(new String[] { "1" });
 		assertEquals("1", result.iterator().next());
 	}
@@ -36,7 +36,7 @@ public class ArrayToCollectionTests {
 	@Test
 	public void testArrayToSortedSetConversion() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		ArrayToCollection c = new ArrayToCollection(BindingPoint.valueOf(String[].class), new BindingPoint(getClass().getField("sortedSetTarget")), service);
+		ArrayToCollection c = new ArrayToCollection(ConversionPoint.valueOf(String[].class), new ConversionPoint(getClass().getField("sortedSetTarget")), service);
 		SortedSet result = (SortedSet) c.execute(new String[] { "1" });
 		assertEquals(new Integer(1), result.iterator().next());
 	}
@@ -44,7 +44,7 @@ public class ArrayToCollectionTests {
 	@Test
 	public void testArrayToCollectionImplConversion() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		ArrayToCollection c = new ArrayToCollection(BindingPoint.valueOf(String[].class), new BindingPoint(getClass().getField("implTarget")), service);
+		ArrayToCollection c = new ArrayToCollection(ConversionPoint.valueOf(String[].class), new ConversionPoint(getClass().getField("implTarget")), service);
 		LinkedList result = (LinkedList) c.execute(new String[] { "1" });
 		assertEquals("1", result.iterator().next());
 	}
@@ -52,7 +52,7 @@ public class ArrayToCollectionTests {
 	@Test
 	public void testArrayToNonGenericCollectionConversionNullElement() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		ArrayToCollection c = new ArrayToCollection(BindingPoint.valueOf(String[].class), new BindingPoint(getClass().getField("listTarget")), service);
+		ArrayToCollection c = new ArrayToCollection(ConversionPoint.valueOf(String[].class), new ConversionPoint(getClass().getField("listTarget")), service);
 		List result = (List) c.execute(new Integer[] { null, new Integer(1) });
 		assertEquals(null, result.get(0));
 		assertEquals(new Integer(1), result.get(1));

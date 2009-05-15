@@ -28,7 +28,7 @@ import java.util.Map;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterInfo;
@@ -98,10 +98,10 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return canConvert(sourceType, BindingPoint.valueOf(targetType));
+		return canConvert(sourceType, ConversionPoint.valueOf(targetType));
 	}
 
-	public boolean canConvert(Class<?> sourceType, BindingPoint<?> targetType) {
+	public boolean canConvert(Class<?> sourceType, ConversionPoint<?> targetType) {
 		ConversionExecutor executor = getConversionExecutor(sourceType, targetType);
 		if (executor != null) {
 			return true;
@@ -115,10 +115,10 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 	}
 
 	public <S, T> T convert(S source, Class<T> targetType) {
-		return convert(source, BindingPoint.valueOf(targetType));
+		return convert(source, ConversionPoint.valueOf(targetType));
 	}
 
-	public <S, T> T convert(S source, BindingPoint<T> targetType) {
+	public <S, T> T convert(S source, ConversionPoint<T> targetType) {
 		if (source == null) {
 			return null;
 		}
@@ -139,11 +139,11 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 		}
 	}
 
-	ConversionExecutor getConversionExecutor(Class sourceClass, BindingPoint targetType)
+	ConversionExecutor getConversionExecutor(Class sourceClass, ConversionPoint targetType)
 			throws ConverterNotFoundException {
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
-		BindingPoint sourceType = BindingPoint.valueOf(sourceClass);
+		ConversionPoint sourceType = ConversionPoint.valueOf(sourceClass);
 		if (sourceType.isArray()) {
 			if (targetType.isArray()) {
 				return new ArrayToArray(sourceType, targetType, this);

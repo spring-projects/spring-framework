@@ -18,7 +18,7 @@ package org.springframework.core.convert.support;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 
 /**
  * Special converter that converts from a source array to a target collection. Supports the selection of an
@@ -29,7 +29,7 @@ import org.springframework.core.convert.BindingPoint;
  */
 class ArrayToCollection extends AbstractCollectionConverter {
 
-	public ArrayToCollection(BindingPoint sourceArrayType, BindingPoint targetCollectionType,
+	public ArrayToCollection(ConversionPoint sourceArrayType, ConversionPoint targetCollectionType,
 			GenericTypeConverter conversionService) {
 		super(sourceArrayType, targetCollectionType, conversionService);
 	}

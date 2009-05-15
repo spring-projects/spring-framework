@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodResolver;
@@ -75,10 +75,10 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public void setRootObject(Object rootObject) {
-		this.rootObject = new TypedValue(rootObject,BindingPoint.forObject(rootObject));
+		this.rootObject = new TypedValue(rootObject,ConversionPoint.forObject(rootObject));
 	}
 
-	public void setRootObject(Object rootObject, BindingPoint typeDescriptor) {
+	public void setRootObject(Object rootObject, ConversionPoint typeDescriptor) {
 		this.rootObject = new TypedValue(rootObject,typeDescriptor);
 	}
 

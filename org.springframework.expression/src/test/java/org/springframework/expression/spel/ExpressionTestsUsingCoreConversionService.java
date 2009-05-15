@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.core.convert.support.GenericTypeConverter;
 import org.springframework.expression.EvaluationException;
@@ -35,9 +35,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCase {
 
 	private static List<String> listOfString = new ArrayList<String>();
-	private static BindingPoint typeDescriptorForListOfString = null;
+	private static ConversionPoint typeDescriptorForListOfString = null;
 	private static List<Integer> listOfInteger = new ArrayList<Integer>();
-	private static BindingPoint typeDescriptorForListOfInteger = null;
+	private static ConversionPoint typeDescriptorForListOfInteger = null;
 	
 	static {
 		listOfString.add("1");
@@ -50,8 +50,8 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		typeDescriptorForListOfString = new BindingPoint(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
-		typeDescriptorForListOfInteger = new BindingPoint(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
+		typeDescriptorForListOfString = new ConversionPoint(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
+		typeDescriptorForListOfInteger = new ConversionPoint(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
 	}
 		
 	
@@ -96,20 +96,20 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		private final DefaultTypeConverter service = new DefaultTypeConverter();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-			return this.service.canConvert(sourceType, BindingPoint.valueOf(targetType));
+			return this.service.canConvert(sourceType, ConversionPoint.valueOf(targetType));
 		}
 
-		public boolean canConvert(Class<?> sourceType, BindingPoint typeDescriptor) {
+		public boolean canConvert(Class<?> sourceType, ConversionPoint typeDescriptor) {
 			return this.service.canConvert(sourceType, typeDescriptor);
 		}
 
 		@SuppressWarnings("unchecked")
 		public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-			return (T) this.service.convert(value,BindingPoint.valueOf(targetType));
+			return (T) this.service.convert(value,ConversionPoint.valueOf(targetType));
 		}
 
 		@SuppressWarnings("unchecked")
-		public Object convertValue(Object value, BindingPoint typeDescriptor) throws EvaluationException {
+		public Object convertValue(Object value, ConversionPoint typeDescriptor) throws EvaluationException {
 			return this.service.convert(value, typeDescriptor);
 		}
 	}

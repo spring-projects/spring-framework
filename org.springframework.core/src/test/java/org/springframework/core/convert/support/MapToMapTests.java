@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.core.convert.support.MapToMap;
 
@@ -15,8 +15,8 @@ public class MapToMapTests {
 	@Test
 	public void testMapToMapConversion() throws Exception {
 		DefaultTypeConverter converter = new DefaultTypeConverter();
-		MapToMap c = new MapToMap(new BindingPoint<Map<String, String>>(getClass().getField("source")),
-				new BindingPoint<Map<String, FooEnum>>(getClass().getField("bindTarget")), converter);
+		MapToMap c = new MapToMap(new ConversionPoint<Map<String, String>>(getClass().getField("source")),
+				new ConversionPoint<Map<String, FooEnum>>(getClass().getField("bindTarget")), converter);
 		source.put("1", "BAR");
 		source.put("2", "BAZ");
 		Map<String, FooEnum> result = (Map<String, FooEnum>) c.execute(source);
@@ -27,8 +27,8 @@ public class MapToMapTests {
 	@Test
 	public void testMapToMapConversionNoGenericInfoOnSource() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		MapToMap c = new MapToMap(BindingPoint.valueOf(Map.class),
-				new BindingPoint(getClass().getField("bindTarget")), service);
+		MapToMap c = new MapToMap(ConversionPoint.valueOf(Map.class),
+				new ConversionPoint(getClass().getField("bindTarget")), service);
 		source.put("1", "BAR");
 		source.put("2", "BAZ");
 		Map result = (Map) c.execute(source);
@@ -39,8 +39,8 @@ public class MapToMapTests {
 	@Test
 	public void testMapToMapConversionNoGenericInfo() throws Exception {
 		DefaultTypeConverter service = new DefaultTypeConverter();
-		MapToMap c = new MapToMap(BindingPoint.valueOf(Map.class),
-				BindingPoint.valueOf(Map.class), service);
+		MapToMap c = new MapToMap(ConversionPoint.valueOf(Map.class),
+				ConversionPoint.valueOf(Map.class), service);
 		source.put("1", "BAR");
 		source.put("2", "BAZ");
 		Map result = (Map) c.execute(source);
