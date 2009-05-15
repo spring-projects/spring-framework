@@ -15,7 +15,7 @@
  */
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * @author Andy Clement
@@ -23,16 +23,16 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 public interface CommonTypeDescriptors {
     // TODO push into TypeDescriptor?
-	static TypeDescriptor BOOLEAN_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Boolean.class);
-	static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
-	static TypeDescriptor CHARACTER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Character.class);
-	static TypeDescriptor LONG_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Long.class);
-	static TypeDescriptor SHORT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Short.class);
-	static TypeDescriptor BYTE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Byte.class);
-	static TypeDescriptor FLOAT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Float.class);
-	static TypeDescriptor DOUBLE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Double.class);
-	static TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
-	static TypeDescriptor CLASS_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Class.class);
-	static TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Object.class);
+	static BindingPoint BOOLEAN_TYPE_DESCRIPTOR = BindingPoint.valueOf(Boolean.class);
+	static BindingPoint INTEGER_TYPE_DESCRIPTOR = BindingPoint.valueOf(Integer.class);
+	static BindingPoint CHARACTER_TYPE_DESCRIPTOR = BindingPoint.valueOf(Character.class);
+	static BindingPoint LONG_TYPE_DESCRIPTOR = BindingPoint.valueOf(Long.class);
+	static BindingPoint SHORT_TYPE_DESCRIPTOR = BindingPoint.valueOf(Short.class);
+	static BindingPoint BYTE_TYPE_DESCRIPTOR = BindingPoint.valueOf(Byte.class);
+	static BindingPoint FLOAT_TYPE_DESCRIPTOR = BindingPoint.valueOf(Float.class);
+	static BindingPoint DOUBLE_TYPE_DESCRIPTOR = BindingPoint.valueOf(Double.class);
+	static BindingPoint STRING_TYPE_DESCRIPTOR = BindingPoint.valueOf(String.class);
+	static BindingPoint CLASS_TYPE_DESCRIPTOR = BindingPoint.valueOf(Class.class);
+	static BindingPoint OBJECT_TYPE_DESCRIPTOR = BindingPoint.valueOf(Object.class);
 	
 }

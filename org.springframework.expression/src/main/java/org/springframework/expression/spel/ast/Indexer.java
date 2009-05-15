@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -47,15 +47,15 @@ public class Indexer extends SpelNodeImpl {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
 		Object targetObject = context.getValue();
-		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();
+		BindingPoint targetObjectTypeDescriptor = context.getTypeDescriptor();
 		TypedValue indexValue =  getChild(0).getValueInternal(state);
 		Object index = indexValue.getValue();
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			Object possiblyConvertedKey = state.convertValue(indexValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			Object possiblyConvertedKey = state.convertValue(indexValue,BindingPoint.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
 			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+			return new TypedValue(o,BindingPoint.valueOf(targetObjectTypeDescriptor.getMapValueType()));
 		}
 
 		int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
@@ -65,7 +65,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 		
 		if (targetObject.getClass().isArray()) {
-			return new TypedValue(accessArrayElement(targetObject, idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+			return new TypedValue(accessArrayElement(targetObject, idx),BindingPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
 		} else if (targetObject instanceof Collection) {
 			Collection<?> c = (Collection<?>) targetObject;
 			if (idx >= c.size()) {
@@ -74,7 +74,7 @@ public class Indexer extends SpelNodeImpl {
 			int pos = 0;
 			for (Object o : c) {
 				if (pos == idx) {
-					return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+					return new TypedValue(o,BindingPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
 				}
 				pos++;
 			}
@@ -99,7 +99,7 @@ public class Indexer extends SpelNodeImpl {
 	public void setValue(ExpressionState state, Object newValue) throws EvaluationException {
 		TypedValue contextObject = state.getActiveContextObject();
 		Object targetObject = contextObject.getValue();
-		TypeDescriptor targetObjectTypeDescriptor = contextObject.getTypeDescriptor();
+		BindingPoint targetObjectTypeDescriptor = contextObject.getTypeDescriptor();
 		TypedValue index = getChild(0).getValueInternal(state);
 
 		if (targetObject == null) {
@@ -108,8 +108,8 @@ public class Indexer extends SpelNodeImpl {
 		// Indexing into a Map
 		if (targetObjectTypeDescriptor.isMap()) {
 			Map map = (Map)targetObject;
-			Object possiblyConvertedKey = state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-			Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+			Object possiblyConvertedKey = state.convertValue(index.getValue(),BindingPoint.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			Object possiblyConvertedValue = state.convertValue(newValue,BindingPoint.valueOf(targetObjectTypeDescriptor.getMapValueType()));
 			map.put(possiblyConvertedKey,possiblyConvertedValue);
 			return;
 		}
@@ -125,7 +125,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 			if (targetObject instanceof List) {
 				List list = (List)targetObject;
-				Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+				Object possiblyConvertedValue = state.convertValue(newValue,BindingPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
 				list.set(idx,possiblyConvertedValue);
 			} else {
 				throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
@@ -185,7 +185,7 @@ public class Indexer extends SpelNodeImpl {
 		} else {
 			Object[] array = (Object[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = state.convertValue(newValue, TypeDescriptor.valueOf(clazz));
+			array[idx] = state.convertValue(newValue, BindingPoint.valueOf(clazz));
 		}		
 	}
 	

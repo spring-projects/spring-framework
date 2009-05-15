@@ -18,7 +18,7 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Constructor;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
@@ -56,7 +56,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 			if (!c.isAccessible()) {
 				c.setAccessible(true);
 			}
-			return new TypedValue(c.newInstance(arguments),TypeDescriptor.valueOf(c.getClass()));
+			return new TypedValue(c.newInstance(arguments),BindingPoint.valueOf(c.getClass()));
 		} catch (Exception ex) {
 			throw new AccessException("Problem invoking constructor: " + c, ex);
 		}

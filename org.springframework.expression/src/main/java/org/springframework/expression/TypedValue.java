@@ -15,7 +15,7 @@
  */
 package org.springframework.expression;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * Encapsulates an object and a type descriptor that describes it.
@@ -28,9 +28,9 @@ import org.springframework.core.convert.TypeDescriptor;
 public class TypedValue {
 
 	private Object value;
-	private TypeDescriptor typeDescriptor;
+	private BindingPoint typeDescriptor;
 	
-	public static final TypedValue NULL_TYPED_VALUE = new TypedValue(null, TypeDescriptor.NULL_TYPE_DESCRIPTOR);
+	public static final TypedValue NULL_TYPED_VALUE = new TypedValue(null, BindingPoint.NULL_TYPE_DESCRIPTOR);
 
 	/**
 	 * Create a TypedValue for a simple object.  The type descriptor is inferred 
@@ -39,7 +39,7 @@ public class TypedValue {
 	 */
 	public TypedValue(Object value) {
 		this.value = value;
-		this.typeDescriptor = TypeDescriptor.forObject(value);
+		this.typeDescriptor = BindingPoint.forObject(value);
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class TypedValue {
 	 * @param value the object value
 	 * @param typeDescriptor a type descriptor describing the type of the value
 	 */
-	public TypedValue(Object value, TypeDescriptor typeDescriptor) {
+	public TypedValue(Object value, BindingPoint typeDescriptor) {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
@@ -56,7 +56,7 @@ public class TypedValue {
 		return this.value;
 	}
 	
-	public TypeDescriptor getTypeDescriptor() {
+	public BindingPoint getTypeDescriptor() {
 		return this.typeDescriptor;
 	}
 
