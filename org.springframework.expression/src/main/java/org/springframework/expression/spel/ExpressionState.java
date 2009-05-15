@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -99,7 +99,7 @@ public class ExpressionState {
 		if (value==null) {
 			return TypedValue.NULL_TYPED_VALUE;
 		} else {
-			return new TypedValue(value,TypeDescriptor.forObject(value));
+			return new TypedValue(value,BindingPoint.forObject(value));
 		}
 	}
 
@@ -111,11 +111,11 @@ public class ExpressionState {
 		return this.relatedContext.getTypeLocator().findType(type);
 	}
 
-	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public Object convertValue(Object value, BindingPoint targetTypeDescriptor) throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value, targetTypeDescriptor);
 	}
 	
-	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public Object convertValue(TypedValue value, BindingPoint targetTypeDescriptor) throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value.getValue(), targetTypeDescriptor);
 	}
 
@@ -153,7 +153,7 @@ public class ExpressionState {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
 			Object returnValue = overloader.operate(op, left, right);
-			return new TypedValue(returnValue,TypeDescriptor.forObject(returnValue));
+			return new TypedValue(returnValue,BindingPoint.forObject(returnValue));
 		}
 		else {
 			String leftType = (left==null?"null":left.getClass().getName());

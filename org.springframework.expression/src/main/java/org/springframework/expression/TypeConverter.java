@@ -16,7 +16,7 @@
 
 package org.springframework.expression;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * A type converter can convert values between different types encountered
@@ -48,7 +48,7 @@ public interface TypeConverter {
 	 * @return the converted value
 	 * @throws EvaluationException if conversion is not possible
 	 */
-	Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException;
+	Object convertValue(Object value, BindingPoint typeDescriptor) throws EvaluationException;
 
 	/**
 	 * Return true if the type converter can convert the specified type to the desired target type.
@@ -64,6 +64,6 @@ public interface TypeConverter {
 	 * @param typeDescriptor a type descriptor that supplies extra information about the requested result type
 	 * @return true if that conversion can be performed
 	 */
-	boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor);
+	boolean canConvert(Class<?> sourceType, BindingPoint typeDescriptor);
 
 }

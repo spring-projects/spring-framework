@@ -19,25 +19,25 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.support.DefaultTypeConverter;
+import org.springframework.core.convert.support.GenericTypeConverter;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Expression evaluation where the TypeConverter plugged in is the {@link GenericConversionService}
+ * Expression evaluation where the TypeConverter plugged in is the {@link GenericTypeConverter}
  * 
  * @author Andy Clement
  */
 public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCase {
 
 	private static List<String> listOfString = new ArrayList<String>();
-	private static TypeDescriptor typeDescriptorForListOfString = null;
+	private static BindingPoint typeDescriptorForListOfString = null;
 	private static List<Integer> listOfInteger = new ArrayList<Integer>();
-	private static TypeDescriptor typeDescriptorForListOfInteger = null;
+	private static BindingPoint typeDescriptorForListOfInteger = null;
 	
 	static {
 		listOfString.add("1");
@@ -50,8 +50,8 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		typeDescriptorForListOfString = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
-		typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
+		typeDescriptorForListOfString = new BindingPoint(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
+		typeDescriptorForListOfInteger = new BindingPoint(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
 	}
 		
 	
@@ -93,23 +93,23 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	 */
 	private static class TypeConvertorUsingConversionService implements TypeConverter {
 
-		private final DefaultConversionService service = new DefaultConversionService();
+		private final DefaultTypeConverter service = new DefaultTypeConverter();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-			return this.service.canConvert(sourceType, TypeDescriptor.valueOf(targetType));
+			return this.service.canConvert(sourceType, BindingPoint.valueOf(targetType));
 		}
 
-		public boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor) {
+		public boolean canConvert(Class<?> sourceType, BindingPoint typeDescriptor) {
 			return this.service.canConvert(sourceType, typeDescriptor);
 		}
 
 		@SuppressWarnings("unchecked")
 		public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-			return (T) this.service.convert(value,TypeDescriptor.valueOf(targetType));
+			return (T) this.service.convert(value,BindingPoint.valueOf(targetType));
 		}
 
 		@SuppressWarnings("unchecked")
-		public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
+		public Object convertValue(Object value, BindingPoint typeDescriptor) throws EvaluationException {
 			return this.service.convert(value, typeDescriptor);
 		}
 	}
