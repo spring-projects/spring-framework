@@ -104,6 +104,9 @@
 				<xsd:documentation><![CDATA[
 	Reference to an object that provides a method to be invoked.
 				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref" />
+				</xsd:appinfo>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="method" type="xsd:string" use="required">
@@ -111,6 +114,11 @@
 				<xsd:documentation><![CDATA[
 	The name of the method to be invoked.
 				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation>
+						<tool:expected-method type-ref="@ref"/>
+					</tool:annotation>
+				</xsd:appinfo>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
