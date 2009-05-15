@@ -18,13 +18,12 @@ package org.springframework.jms.config;
 
 import javax.jms.Session;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the JMS <code>&lt;listener-container&gt;</code> element.
@@ -83,8 +82,10 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 						"Listener container 'connection-factory' attribute contains empty value.", containerEle);
 			}
 		}
-		containerDef.getPropertyValues().addPropertyValue("connectionFactory",
-				new RuntimeBeanReference(connectionFactoryBeanName));
+		if (StringUtils.hasText(connectionFactoryBeanName)) {
+			containerDef.getPropertyValues().addPropertyValue("connectionFactory",
+					new RuntimeBeanReference(connectionFactoryBeanName));
+		}
 
 		String taskExecutorBeanName = containerEle.getAttribute(TASK_EXECUTOR_ATTRIBUTE);
 		if (StringUtils.hasText(taskExecutorBeanName)) {

@@ -18,10 +18,6 @@ package org.springframework.jms.config;
 
 import javax.jms.Session;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -30,6 +26,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Abstract parser for JMS listener container elements, providing support for
@@ -116,7 +115,9 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			parserContext.getReaderContext().error(
 					"Listener 'ref' attribute contains empty value.", listenerEle);
 		}
-		listenerDef.getPropertyValues().addPropertyValue("delegate", new RuntimeBeanReference(ref));
+		else {
+			listenerDef.getPropertyValues().addPropertyValue("delegate", new RuntimeBeanReference(ref));
+		}
 
 		String method = null;
 		if (listenerEle.hasAttribute(METHOD_ATTRIBUTE)) {
@@ -130,8 +131,14 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 		if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
 			String messageConverter = containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
-			listenerDef.getPropertyValues().addPropertyValue("messageConverter",
-					new RuntimeBeanReference(messageConverter));
+			if (!StringUtils.hasText(messageConverter)) {
+				parserContext.getReaderContext().error(
+						"Listener container 'message-converter' attribute contains empty value.", containerEle);
+			}
+			else {
+				listenerDef.getPropertyValues().addPropertyValue("messageConverter", 
+						new RuntimeBeanReference(messageConverter));
+			}
 		}
 
 		BeanDefinition containerDef = parseContainer(listenerEle, containerEle, parserContext);
