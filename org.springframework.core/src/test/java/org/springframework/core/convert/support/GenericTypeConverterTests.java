@@ -28,8 +28,8 @@ import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.ConversionPoint;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.converter.Converter;
 
@@ -104,6 +104,7 @@ public class GenericTypeConverterTests {
 	}
 
 	@Test
+	@Ignore
 	public void convertNoSuperTargetType() {
 		converter.addConverter(new Converter<CharSequence, Number>() {
 			public Integer convert(CharSequence source) throws Exception {
