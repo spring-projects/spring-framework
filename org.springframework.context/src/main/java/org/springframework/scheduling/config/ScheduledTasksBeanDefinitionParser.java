@@ -16,16 +16,15 @@
 
 package org.springframework.scheduling.config;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Parser for the 'scheduled-tasks' element of the scheduling namespace.
@@ -59,8 +58,16 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 			Element taskElement = (Element) child;
 			String ref = taskElement.getAttribute("ref");
 			String method = taskElement.getAttribute("method");
+			
+			// Check that 'ref' and 'method' are specified
+			if (!StringUtils.hasText(ref) || !StringUtils.hasText(method)) {
+				parserContext.getReaderContext().error("Both 'ref' and 'method' are required", taskElement);
+				// Continue with the possible next task element
+				continue;
+			}
+			
 			RuntimeBeanReference runnableBeanRef = new RuntimeBeanReference(
-					this.createRunnableBean(ref, method, parserContext));
+					this.createRunnableBean(ref, method, taskElement, parserContext));
 			String cronAttribute = taskElement.getAttribute("cron");
 			if (StringUtils.hasText(cronAttribute)) {
 				cronTaskMap.put(runnableBeanRef, cronAttribute);
@@ -74,8 +81,9 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 					String fixedRateAttribute = taskElement.getAttribute("fixed-rate");
 					if (!StringUtils.hasText(fixedRateAttribute)) {
 						parserContext.getReaderContext().error(
-								"one of 'cron', 'fixed-delay', or 'fixed-rate' is required", taskElement);
-						return;
+								"One of 'cron', 'fixed-delay', or 'fixed-rate' is required", taskElement);
+						// Continue with the possible next task element
+						continue;
 					}
 					fixedRateTaskMap.put(runnableBeanRef, fixedRateAttribute);
 				}
@@ -90,11 +98,13 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		builder.addPropertyValue("fixedRateTasks", fixedRateTaskMap);
 	}
 
-	private String createRunnableBean(String ref, String method, ParserContext parserContext) {
+	private String createRunnableBean(String ref, String method, Element taskElement, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(
 				"org.springframework.scheduling.support.MethodInvokingRunnable");
 		builder.addPropertyReference("targetObject", ref);
 		builder.addPropertyValue("targetMethod", method);
+		// Extract the source of the current task
+		builder.getRawBeanDefinition().setSource(parserContext.extractSource(taskElement));
 		return parserContext.getReaderContext().registerWithGeneratedName(builder.getBeanDefinition());
 	}
 
