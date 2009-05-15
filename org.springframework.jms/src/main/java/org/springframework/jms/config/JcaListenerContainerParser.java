@@ -16,13 +16,12 @@
 
 package org.springframework.jms.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the JMS <code>&lt;jca-listener-container&gt;</code> element.
@@ -49,9 +48,11 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 				parserContext.getReaderContext().error(
 						"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
 			}
+			else {
+				containerDef.getPropertyValues().addPropertyValue("resourceAdapter",
+						new RuntimeBeanReference(resourceAdapterBeanName));
+			}
 		}
-		containerDef.getPropertyValues().addPropertyValue("resourceAdapter",
-				new RuntimeBeanReference(resourceAdapterBeanName));
 
 		String activationSpecFactoryBeanName = containerEle.getAttribute(ACTIVATION_SPEC_FACTORY_ATTRIBUTE);
 		String destinationResolverBeanName = containerEle.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);
