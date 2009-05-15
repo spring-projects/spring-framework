@@ -226,13 +226,20 @@
     way for transactional code to control transaction execution and query
     transaction status. The concepts should be familiar, as they are common to
     all transaction APIs:</para>
-    <programlisting language="java"><![CDATA[public interface TransactionStatus {
+    <programlisting language="java"><![CDATA[public interface TransactionStatus extends SavepointManager {
 
-  boolean isNewTransaction();
+    boolean isNewTransaction();
 
-  void setRollbackOnly();
+    boolean hasSavepoint();
 
-  boolean isRollbackOnly();
+    void setRollbackOnly();
+
+    boolean isRollbackOnly();
+
+    void flush();
+
+    boolean isCompleted();
+
 }]]></programlisting>
     <para>Regardless of whether you opt for declarative or programmatic transaction
     management in Spring, defining the correct
@@ -270,9 +277,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:jee="http://www.springframework.org/schema/jee"
-xsi:schemaLocation="
-     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-     http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd">
+     xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/jee 
+     http://www.springframework.org/schema/jee/spring-jee-2.5.xsd">
 
   <jee:jndi-lookup id="dataSource" jndi-name="jdbc/jpetstore"/> 
 
@@ -604,9 +613,12 @@ public class DefaultFooService implements FooService {
      xmlns:aop="http://www.springframework.org/schema/aop"
      ]]><lineannotation><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis></lineannotation><![CDATA[
      xsi:schemaLocation="
-     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-     ]]><lineannotation><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd</emphasis></lineannotation><![CDATA[
-     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     ]]><lineannotation><emphasis role="bold">http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx-2.5.xsd</emphasis></lineannotation><![CDATA[
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
   
   ]]><lineannotation>&lt;!-- this is the service object that we want to make transactional --&gt;</lineannotation><![CDATA[
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
@@ -831,9 +843,12 @@ Exception in thread "main" java.lang.UnsupportedOperationException
   xmlns:aop="http://www.springframework.org/schema/aop"
   xmlns:tx="http://www.springframework.org/schema/tx"
   xsi:schemaLocation="
-  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-  http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+  http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+  http://www.springframework.org/schema/tx 
+  http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+  http://www.springframework.org/schema/aop 
+  http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
   <aop:config>
 
@@ -872,9 +887,12 @@ Exception in thread "main" java.lang.UnsupportedOperationException
   xmlns:aop="http://www.springframework.org/schema/aop"
   xmlns:tx="http://www.springframework.org/schema/tx"
   xsi:schemaLocation="
-  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-  http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+  http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+  http://www.springframework.org/schema/tx 
+  http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+  http://www.springframework.org/schema/aop 
+  http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
   <aop:config>
 
@@ -1059,9 +1077,12 @@ public class DefaultFooService implements FooService {
      xmlns:aop="http://www.springframework.org/schema/aop"
      xmlns:tx="http://www.springframework.org/schema/tx"
      xsi:schemaLocation="
-     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/tx 
+     http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
   
   ]]><lineannotation>&lt;!-- this is the service object that we want to make transactional --&gt;</lineannotation><![CDATA[
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
@@ -1511,9 +1532,12 @@ public class SimpleProfiler implements Ordered {
      xmlns:aop="http://www.springframework.org/schema/aop"
      xmlns:tx="http://www.springframework.org/schema/tx"
      xsi:schemaLocation="
-   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+   http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+   http://www.springframework.org/schema/tx 
+   http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+   http://www.springframework.org/schema/aop 
+   http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
@@ -1558,9 +1582,12 @@ public class SimpleProfiler implements Ordered {
      xmlns:aop="http://www.springframework.org/schema/aop"
      xmlns:tx="http://www.springframework.org/schema/tx"
      xsi:schemaLocation="
-   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+   http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+   http://www.springframework.org/schema/tx 
+   http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+   http://www.springframework.org/schema/aop 
+   http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
