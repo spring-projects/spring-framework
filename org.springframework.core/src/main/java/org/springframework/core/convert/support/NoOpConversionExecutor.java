@@ -15,7 +15,7 @@
  */
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConversionFailedException;
 
 /**
  * Conversion executor that does nothing.  Access singleton at {@link #INSTANCE}.s
@@ -28,7 +28,7 @@ class NoOpConversionExecutor implements ConversionExecutor {
 		
 	}
 	
-	public Object execute(Object source) throws ConversionException {
+	public Object execute(Object source) throws ConversionFailedException {
 		return source;
 	}
 

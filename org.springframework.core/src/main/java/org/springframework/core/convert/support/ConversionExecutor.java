@@ -15,7 +15,7 @@
  */
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConversionFailedException;
 
 /**
  * A command parameterized with the information necessary to perform a conversion of a source input to a
@@ -29,7 +29,7 @@ public interface ConversionExecutor {
 	/**
 	 * Convert the source.
 	 * @param source the source to convert
-	 * @throws ConversionException if an exception occurs during type conversion
+	 * @throws ConversionFailedException if an exception occurs during type conversion
 	 */
 	public Object execute(Object source);
 

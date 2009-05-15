@@ -18,7 +18,7 @@ package org.springframework.core.convert;
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
  * <p>
- * Call {@link #convert(Object, TypeDescriptor)} to perform a thread-safe type conversion using
+ * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using
  * this system.
  * 
  * @author Keith Donald
@@ -28,19 +28,35 @@ public interface TypeConverter {
 	/**
 	 * Returns true if objects of sourceType can be converted to targetType.
 	 * @param source the source to convert from (may be null)
-	 * @param targetType context about the target type to convert to
+	 * @param targetType the target type to convert to
 	 * @return true if a conversion can be performed, false if not
 	 */
-	boolean canConvert(Class<?> sourceType, TypeDescriptor<?> targetType);
+	boolean canConvert(Class<?> sourceType, Class<?> targetType);
+	
+	/**
+	 * Returns true if objects of sourceType can be converted to the type of the binding point.
+	 * @param source the source to convert from (may be null)
+	 * @param point context about the target type to convert to
+	 * @return true if a conversion can be performed, false if not
+	 */
+	boolean canConvert(Class<?> sourceType, BindingPoint<?> point);
 
 	/**
 	 * Convert the source to targetType.
 	 * @param source the source to convert from (may be null)
-	 * @param targetType context about the target type to convert to
-	 * @return the converted object, an instance of {@link TypeDescriptor#getType()}</code>, or <code>null</code> if a null source
-	 * was provided
+	 * @param targetType the target type to convert to
+	 * @return the converted object, an instance of targetType, or <code>null</code> if a null source was provided
 	 * @throws ConvertException if an exception occurred
 	 */
-	<S, T> T convert(S source, TypeDescriptor<T> targetType);
+	<S, T> T convert(S source, Class<T> targetType);
+	
+	/**
+	 * Convert the source to type T needed by the binding point.
+	 * @param source the source to convert from (may be null)
+	 * @param point a binding point where a conversion is required
+	 * @return the converted object, an instance of {@link BindingPoint#getType()}</code>, or <code>null</code> if a null source was provided
+	 * @throws ConvertException if an exception occurred
+	 */
+	<S, T> T convert(S source, BindingPoint<T> point);
 
 }

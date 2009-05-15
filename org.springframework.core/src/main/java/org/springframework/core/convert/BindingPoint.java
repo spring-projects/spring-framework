@@ -32,12 +32,12 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Andy Clement
  */
-public class TypeDescriptor<T> {
+public class BindingPoint<T> {
 
 	/**
 	 * Constant value typeDescriptor for the type of a null value
 	 */
-	public final static TypeDescriptor NULL_TYPE_DESCRIPTOR = new TypeDescriptor((Class<?>) null);
+	public final static BindingPoint NULL_TYPE_DESCRIPTOR = new BindingPoint((Class<?>) null);
 
 	private MethodParameter methodParameter;
 
@@ -52,7 +52,7 @@ public class TypeDescriptor<T> {
 	 * a Map or collection, where no additional binding metadata is available.
 	 * @param type the actual type
 	 */
-	public TypeDescriptor(Class<?> type) {
+	public BindingPoint(Class<?> type) {
 		this.type = type;
 	}
 
@@ -61,7 +61,7 @@ public class TypeDescriptor<T> {
 	 * from a method parameter, such as a setter method argument.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
-	public TypeDescriptor(MethodParameter methodParameter) {
+	public BindingPoint(MethodParameter methodParameter) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 	}
@@ -70,7 +70,7 @@ public class TypeDescriptor<T> {
 	 * Create a new descriptor for a field. Use this constructor when a bound value originates from a field.
 	 * @param field the field to wrap
 	 */
-	public TypeDescriptor(Field field) {
+	public BindingPoint(Field field) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 	}
@@ -248,7 +248,7 @@ public class TypeDescriptor<T> {
 	 * @param targetType the target type
 	 * @return true if this type is assignable to the target
 	 */
-	public boolean isAssignableTo(TypeDescriptor targetType) {
+	public boolean isAssignableTo(BindingPoint targetType) {
 		return targetType.getType().isAssignableFrom(getType());
 	}
 
@@ -257,9 +257,9 @@ public class TypeDescriptor<T> {
 	 * @param type the class
 	 * @return the type descriptor
 	 */
-	public static TypeDescriptor valueOf(Class<? extends Object> type) {
+	public static <T> BindingPoint<T> valueOf(Class<T> type) {
 		// TODO needs a cache for common type descriptors
-		return new TypeDescriptor(type);
+		return new BindingPoint<T>(type);
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class TypeDescriptor<T> {
 	 * @param object the object
 	 * @return the type descriptor
 	 */
-	public static TypeDescriptor forObject(Object object) {
+	public static BindingPoint forObject(Object object) {
 		if (object == null) {
 			return NULL_TYPE_DESCRIPTOR;
 		} else {

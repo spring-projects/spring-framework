@@ -8,17 +8,17 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.core.convert.support.CollectionToCollection;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.DefaultTypeConverter;
 
 public class CollectionToCollectionTests {
 
 	@Test
 	public void testCollectionToCollectionConversion() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToCollection c = new CollectionToCollection(new TypeDescriptor(getClass().getField("bindTarget")),
-				new TypeDescriptor(getClass().getField("integerTarget")), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToCollection c = new CollectionToCollection(new BindingPoint(getClass().getField("bindTarget")),
+				new BindingPoint(getClass().getField("integerTarget")), service);
 		bindTarget.add("1");
 		bindTarget.add("2");
 		bindTarget.add("3");
@@ -30,9 +30,9 @@ public class CollectionToCollectionTests {
 
 	@Test
 	public void testCollectionToCollectionConversionNoGenericInfo() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToCollection c = new CollectionToCollection(TypeDescriptor.valueOf(Collection.class),
-				TypeDescriptor.valueOf(List.class), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToCollection c = new CollectionToCollection(BindingPoint.valueOf(Collection.class),
+				BindingPoint.valueOf(List.class), service);
 		bindTarget.add("1");
 		bindTarget.add("2");
 		bindTarget.add("3");
@@ -44,9 +44,9 @@ public class CollectionToCollectionTests {
 	
 	@Test
 	public void testCollectionToCollectionConversionNoGenericInfoSource() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToCollection c = new CollectionToCollection(TypeDescriptor.valueOf(Collection.class),
-				new TypeDescriptor(getClass().getField("integerTarget")), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToCollection c = new CollectionToCollection(BindingPoint.valueOf(Collection.class),
+				new BindingPoint(getClass().getField("integerTarget")), service);
 		bindTarget.add("1");
 		bindTarget.add("2");
 		bindTarget.add("3");
@@ -58,9 +58,9 @@ public class CollectionToCollectionTests {
 	
 	@Test
 	public void testCollectionToCollectionConversionNoGenericInfoSourceNullValues() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToCollection c = new CollectionToCollection(TypeDescriptor.valueOf(Collection.class),
-				new TypeDescriptor(getClass().getField("integerTarget")), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToCollection c = new CollectionToCollection(BindingPoint.valueOf(Collection.class),
+				new BindingPoint(getClass().getField("integerTarget")), service);
 		bindTarget.add(null);
 		bindTarget.add("1");
 		bindTarget.add("2");
@@ -76,9 +76,9 @@ public class CollectionToCollectionTests {
 	
 	@Test
 	public void testCollectionToCollectionConversionNoGenericInfoSourceEmpty() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		CollectionToCollection c = new CollectionToCollection(TypeDescriptor.valueOf(Collection.class),
-				new TypeDescriptor(getClass().getField("integerTarget")), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		CollectionToCollection c = new CollectionToCollection(BindingPoint.valueOf(Collection.class),
+				new BindingPoint(getClass().getField("integerTarget")), service);
 		List result = (List) c.execute(bindTarget);
 		assertTrue(result.isEmpty());
 	}

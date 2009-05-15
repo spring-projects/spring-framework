@@ -15,8 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.BindingPoint;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;
 
@@ -27,30 +27,30 @@ import org.springframework.core.style.ToStringCreator;
 @SuppressWarnings("unchecked")
 class StaticConversionExecutor implements ConversionExecutor {
 
-	private final TypeDescriptor sourceType;
+	private final BindingPoint sourceType;
 
-	private final TypeDescriptor targetType;
+	private final BindingPoint targetType;
 
 	private final Converter converter;
 
-	public StaticConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType, Converter converter) {
+	public StaticConversionExecutor(BindingPoint sourceType, BindingPoint targetType, Converter converter) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.converter = converter;
 	}
 
-	public Object execute(Object source) throws ConversionException {
+	public Object execute(Object source) throws ConversionFailedException {
 		if (source == null) {
 			return null;
 		}
 		if (sourceType != null && !sourceType.isInstance(source)) {
-			throw new ConversionException(source, sourceType.getType(), targetType.getType(), "Source object "
+			throw new ConversionFailedException(source, sourceType.getType(), targetType.getType(), "Source object "
 					+ source + " to convert is expected to be an instance of [" + sourceType.getName() + "]");
 		}
 		try {
 			return converter.convert(source);
 		} catch (Exception e) {
-			throw new ConversionException(source, sourceType.getType(), targetType.getType(), e);
+			throw new ConversionFailedException(source, sourceType.getType(), targetType.getType(), e);
 		}
 	}
 

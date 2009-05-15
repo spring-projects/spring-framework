@@ -18,7 +18,7 @@ package org.springframework.core.convert.support;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * A converter that can convert from one collection type to another.
@@ -27,8 +27,8 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 class CollectionToCollection extends AbstractCollectionConverter {
 	
-	public CollectionToCollection(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType,
-			GenericConversionService conversionService) {
+	public CollectionToCollection(BindingPoint sourceCollectionType, BindingPoint targetCollectionType,
+			GenericTypeConverter conversionService) {
 		super(sourceCollectionType, targetCollectionType, conversionService);
 	}
 
@@ -53,7 +53,7 @@ class CollectionToCollection extends AbstractCollectionConverter {
 			while (it.hasNext()) {
 				Object value = it.next();
 				if (value != null) {
-					elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(getTargetElementType()));
+					elementConverter = getConversionService().getConversionExecutor(value.getClass(), BindingPoint.valueOf(getTargetElementType()));
 					break;
 				}
 			}

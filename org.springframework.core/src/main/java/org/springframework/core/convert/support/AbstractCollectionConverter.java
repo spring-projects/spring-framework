@@ -15,8 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.BindingPoint;
 
 /**
  * Base class for converters that convert to and from collection types (arrays and java.util.Collection types)
@@ -24,22 +24,22 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 abstract class AbstractCollectionConverter implements ConversionExecutor {
 
-	private GenericConversionService conversionService;
+	private GenericTypeConverter conversionService;
 
 	private ConversionExecutor elementConverter;
 	
-	private TypeDescriptor sourceCollectionType;
+	private BindingPoint sourceCollectionType;
 	
-	private TypeDescriptor targetCollectionType;
+	private BindingPoint targetCollectionType;
 	
-	public AbstractCollectionConverter(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType, GenericConversionService conversionService) {
+	public AbstractCollectionConverter(BindingPoint sourceCollectionType, BindingPoint targetCollectionType, GenericTypeConverter conversionService) {
 		this.conversionService = conversionService;
 		this.sourceCollectionType = sourceCollectionType;
 		this.targetCollectionType = targetCollectionType;
 		Class<?> sourceElementType = sourceCollectionType.getElementType();
 		Class<?> targetElementType = targetCollectionType.getElementType();
 		if (sourceElementType != null && targetElementType != null) {
-			elementConverter = conversionService.getConversionExecutor(sourceElementType, TypeDescriptor.valueOf(targetElementType));
+			elementConverter = conversionService.getConversionExecutor(sourceElementType, BindingPoint.valueOf(targetElementType));
 		} else {
 			elementConverter = NoOpConversionExecutor.INSTANCE;
 		}
@@ -59,7 +59,7 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		return targetCollectionType.getElementType();
 	}
 
-	protected GenericConversionService getConversionService() {
+	protected GenericTypeConverter getConversionService() {
 		return conversionService;
 	}
 
@@ -75,7 +75,7 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		try {
 			return doExecute(source);
 		} catch (Exception e) {
-			throw new ConversionException(source, sourceCollectionType.getType(), targetCollectionType.getType(), e);
+			throw new ConversionFailedException(source, sourceCollectionType.getType(), targetCollectionType.getType(), e);
 		}
 	}
 

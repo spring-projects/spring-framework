@@ -22,7 +22,7 @@ import org.springframework.core.style.StylerUtils;
  * 
  * @author Keith Donald
  */
-public class ConversionException extends ConvertException {
+public class ConversionFailedException extends ConvertException {
 
 	private transient Object value;
 
@@ -37,7 +37,7 @@ public class ConversionException extends ConvertException {
 	 * @param targetType the value's target type
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionException(Object value, Class<?> sourceType, Class<?> targetType, Throwable cause) {
+	public ConversionFailedException(Object value, Class<?> sourceType, Class<?> targetType, Throwable cause) {
 		super(defaultMessage(value, sourceType, targetType, cause), cause);
 		this.value = value;
 		this.sourceType = sourceType;
@@ -51,7 +51,7 @@ public class ConversionException extends ConvertException {
 	 * @param targetType the value's target type
 	 * @param message a descriptive message of what went wrong.
 	 */
-	public ConversionException(Object value, Class<?> sourceType, Class<?> targetType, String message) {
+	public ConversionFailedException(Object value, Class<?> sourceType, Class<?> targetType, String message) {
 		super(message);
 		this.value = value;
 		this.sourceType = sourceType;

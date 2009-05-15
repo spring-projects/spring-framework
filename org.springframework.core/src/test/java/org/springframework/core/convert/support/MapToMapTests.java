@@ -6,29 +6,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.BindingPoint;
+import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.core.convert.support.MapToMap;
 
 public class MapToMapTests {
 
 	@Test
 	public void testMapToMapConversion() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		MapToMap c = new MapToMap(new TypeDescriptor(getClass().getField("source")),
-				new TypeDescriptor(getClass().getField("bindTarget")), service);
+		DefaultTypeConverter converter = new DefaultTypeConverter();
+		MapToMap c = new MapToMap(new BindingPoint<Map<String, String>>(getClass().getField("source")),
+				new BindingPoint<Map<String, FooEnum>>(getClass().getField("bindTarget")), converter);
 		source.put("1", "BAR");
 		source.put("2", "BAZ");
-		Map result = (Map) c.execute(source);
+		Map<String, FooEnum> result = (Map<String, FooEnum>) c.execute(source);
 		assertEquals(FooEnum.BAR, result.get(1));
 		assertEquals(FooEnum.BAZ, result.get(2));
 	}
 
 	@Test
 	public void testMapToMapConversionNoGenericInfoOnSource() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		MapToMap c = new MapToMap(TypeDescriptor.valueOf(Map.class),
-				new TypeDescriptor(getClass().getField("bindTarget")), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		MapToMap c = new MapToMap(BindingPoint.valueOf(Map.class),
+				new BindingPoint(getClass().getField("bindTarget")), service);
 		source.put("1", "BAR");
 		source.put("2", "BAZ");
 		Map result = (Map) c.execute(source);
@@ -38,9 +38,9 @@ public class MapToMapTests {
 	
 	@Test
 	public void testMapToMapConversionNoGenericInfo() throws Exception {
-		DefaultConversionService service = new DefaultConversionService();
-		MapToMap c = new MapToMap(TypeDescriptor.valueOf(Map.class),
-				TypeDescriptor.valueOf(Map.class), service);
+		DefaultTypeConverter service = new DefaultTypeConverter();
+		MapToMap c = new MapToMap(BindingPoint.valueOf(Map.class),
+				BindingPoint.valueOf(Map.class), service);
 		source.put("1", "BAR");
 		source.put("2", "BAZ");
 		Map result = (Map) c.execute(source);

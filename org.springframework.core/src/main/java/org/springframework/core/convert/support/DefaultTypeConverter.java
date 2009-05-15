@@ -15,7 +15,6 @@
  */
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.support.StringToEnumFactory.StringToEnum;
 
 /**
  * Default implementation of a conversion service. Will automatically register <i>from string</i> converters for
@@ -23,12 +22,12 @@ import org.springframework.core.convert.support.StringToEnumFactory.StringToEnum
  * 
  * @author Keith Donald
  */
-public class DefaultConversionService extends GenericConversionService {
+public class DefaultTypeConverter extends GenericTypeConverter {
 
 	/**
 	 * Creates a new default conversion service, installing the default converters.
 	 */
-	public DefaultConversionService() {
+	public DefaultTypeConverter() {
 		addDefaultConverters();
 	}
 
@@ -49,6 +48,9 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverter(new StringToLocale());
 		addConverter(new NumberToCharacter());
 		addConverter(new ObjectToString());
+		addConverterFactory(new StringToEnumFactory());
+		addConverterFactory(new NumberToNumberFactory());
+		addConverterFactory(new CharacterToNumberFactory());
 	}
 
 }
