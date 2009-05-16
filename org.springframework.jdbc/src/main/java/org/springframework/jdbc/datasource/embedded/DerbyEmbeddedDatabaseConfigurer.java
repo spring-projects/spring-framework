@@ -30,11 +30,11 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link EmbeddedDatabaseConfigurer} for Apache Derby database.
+ * {@link EmbeddedDatabaseConfigurer} for the Apache Derby database.
  * 
  * @author Oliver Gierke
  */
-public class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
+final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 
 	private static final Log logger = LogFactory.getLog(DerbyEmbeddedDatabaseConfigurer.class);
 	
