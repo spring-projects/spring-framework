@@ -67,7 +67,6 @@ public class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigur
 		properties.setPassword("");
 	}
 
-	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {
 		Connection connection = null;
 		try {
