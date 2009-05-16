@@ -37,7 +37,7 @@ public interface TypeConverter {
 	/**
 	 * Returns true if objects of sourceType can be converted to the type of the conversion point.
 	 * @param source the source to convert from (may be null)
-	 * @param point context about the target type to convert to
+	 * @param point context about the point where conversion would occur
 	 * @return true if a conversion can be performed, false if not
 	 */
 	boolean canConvert(Class<?> sourceType, ConversionPoint<?> point);
@@ -54,7 +54,7 @@ public interface TypeConverter {
 	/**
 	 * Convert the source to type T needed by the conversion point.
 	 * @param source the source to convert from (may be null)
-	 * @param point a binding point where a conversion is required
+	 * @param point context about the point where conversion will occur
 	 * @return the converted object, an instance of {@link ConversionPoint#getType()}</code>, or <code>null</code> if a null source was provided
 	 * @throws ConvertException if an exception occurred
 	 */
