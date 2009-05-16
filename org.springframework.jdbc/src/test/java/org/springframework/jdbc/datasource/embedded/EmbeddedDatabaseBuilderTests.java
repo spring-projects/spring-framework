@@ -1,8 +1,11 @@
 package org.springframework.jdbc.datasource.embedded;
 
-import static org.junit.Assert.*;
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -25,6 +28,15 @@ public class EmbeddedDatabaseBuilderTests {
 	public void testBuildH2() {
 		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
 		EmbeddedDatabase db = builder.type(H2).script("db-schema.sql").script("db-test-data.sql").build();
+		assertDatabaseCreatedAndShutdown(db);
+	}
+
+	@Test
+	@Ignore
+	public void testBuildDerby() {
+		// TODO this fails when the whole suite runs b/c tables are not cleaned up
+		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
+		EmbeddedDatabase db = builder.type(DERBY).script("db-schema-derby.sql").script("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 

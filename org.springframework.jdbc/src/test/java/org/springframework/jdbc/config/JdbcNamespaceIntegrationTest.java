@@ -15,7 +15,9 @@ public class JdbcNamespaceIntegrationTest {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config.xml");
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
-		assertCorrectSetup(context.getBean("h2dataSource", DataSource.class));
+		assertCorrectSetup(context.getBean("h2DataSource", DataSource.class));
+		assertCorrectSetup(context.getBean("derbyDataSource", DataSource.class));
+		context.close();
 	}
 
 	private void assertCorrectSetup(DataSource dataSource) {

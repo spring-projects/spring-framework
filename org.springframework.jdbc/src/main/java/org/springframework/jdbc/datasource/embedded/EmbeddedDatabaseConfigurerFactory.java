@@ -33,6 +33,8 @@ final class EmbeddedDatabaseConfigurerFactory {
 				return HsqlEmbeddedDatabaseConfigurer.getInstance();
 			case H2:
 				return H2EmbeddedDatabaseConfigurer.getInstance();
+			case DERBY:
+				return DerbyEmbeddedDatabaseConfigurer.getInstance();
 			default:
 				throw new UnsupportedOperationException("Other embedded database types not yet supported");
 			}
@@ -41,7 +43,7 @@ final class EmbeddedDatabaseConfigurerFactory {
 					+ "] are not available in the classpath", e);
 		}
 	}
-	
+
 	private EmbeddedDatabaseConfigurerFactory() {
 	}
 

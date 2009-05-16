@@ -21,5 +21,5 @@ package org.springframework.jdbc.datasource.embedded;
  * @author Oliver Gierke
  */
 public enum EmbeddedDatabaseType {
-	HSQL, H2;
+	HSQL, H2, DERBY;
 }

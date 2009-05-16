@@ -17,5 +17,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar" sourcepath="/IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-sources-2.3.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-1.8.0.9.jar" sourcepath="/IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-sources-1.8.0.9.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.h2database/com.springsource.org.h2/1.0.71/com.springsource.org.h2-1.0.71.jar" sourcepath="/IVY_CACHE/com.h2database/com.springsource.org.h2/1.0.71/com.springsource.org.h2-sources-1.0.71.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.apache.derby/com.springsource.org.apache.derby/10.5.1000001.764942/com.springsource.org.apache.derby-10.5.1000001.764942.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
