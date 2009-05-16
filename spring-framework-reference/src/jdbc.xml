@@ -2630,8 +2630,8 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
 
     <para>The <literal>org.springframework.jdbc.datasource.embedded</literal>
     package provides support for embedded Java database engines. Support for
-    <ulink url="http://www.hsqldb.org">HSQL</ulink> and <ulink
-    url="http://www.h2database.com">H2</ulink> is provided natively. There is
+    <ulink url="http://www.hsqldb.org">HSQL</ulink>, <ulink
+    url="http://www.h2database.com">H2</ulink>, and <ulink url="http://db.apache.org/derby">Derby</ulink> is provided natively. There is
     also an extensible API for plugging in new embedded database types and
     <classname>DataSource</classname> implementations.</para>
 
@@ -2699,6 +2699,60 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <para>You are encouraged to contribute back extensions to the Spring
       community at <ulink
       url="jira.springframework.org">jira.springframework.org</ulink>.</para>
+    </section>
+    <section id="jdbc-embedded-database-using-HSQL">
+    	<title>Using HSQL</title>
+    	<para>
+    		Support for HSQL 1.0.0 to 2.0.0 is provided.
+    		HSQL is the default database embedded database that will be used if no type is specified explicitly.
+    		To specify HSQL explicitly, set the <literal>type</literal> attribute of the <literal>embedded-database</literal> tag to <literal>HSQL</literal>.
+    		If using the builder API, call the <literal>type(EmbeddedDatabaseType)</literal> method with <literal>EmbeddedDatabaseType.HSQL</literal>.
+    	</para>
+    </section>
+    <section id="jdbc-embedded-database-using-H2">
+    	<title>Using H2</title>
+    	<para>
+    		Support for H2 1.8.0 to 2.0.0 is provided.
+    		To enable H2, set the <literal>type</literal> attribute of the <literal>embedded-database</literal> tag to <literal>H2</literal>.
+    		If using the builder API, call the <literal>type(EmbeddedDatabaseType)</literal> method with <literal>EmbeddedDatabaseType.H2</literal>.
+    	</para>
+    </section>
+    <section id="jdbc-embedded-database-using-Derby">
+    	<title>Using Derby</title>
+    	<para>
+    		Support for Apache Derby 10.5.1.1 to 10.6.0 is provided.
+    		To enable Derby, set the <literal>type</literal> attribute of the <literal>embedded-database</literal> tag to <literal>Derby</literal>.
+    		If using the builder API, call the <literal>type(EmbeddedDatabaseType)</literal> method with <literal>EmbeddedDatabaseType.Derby</literal>.
+    	</para>
+    </section>
+    <section id="jdbc-embedded-database-dao-testing">
+    	<title>Unit testing data access logic with an EmbeddedDatabase</title>
+    	<para>
+    		Embedded databases provide a lightweight way to test data access code.
+    		A basic data access unit test template that uses an embedded database is provided below:
+    	</para>
+      <programlisting language="java"><![CDATA[
+public class DataAccessUnitTestTemplate {
+    private EmbeddedDatabase db;
+    
+    @Before
+    public void setUp() {
+        // creates a HSQL in-memory db populated from classpath:schema.sql and classpath:test-data.sql
+        db = EmbeddedDatabaseBuilder.buildDefault();		
+    }
+	
+    @Test
+    public void testDataAccess() {
+        JdbcTemplate template = new JdbcTemplate(db);
+        template.query(...);
+    }
+	
+    @After
+    public void tearDown() {
+        db.shutdown();
+    }
+}
+]]></programlisting>    	
     </section>
   </section>
 </chapter>
