@@ -10,5 +10,6 @@ Import-Template:
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,
- Export-Package,
  Tool
+Export-Package: META-INF
+
