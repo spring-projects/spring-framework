@@ -32,9 +32,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	@Ignore
 	public void testBuildDerby() {
-		// TODO this fails when the whole suite runs b/c tables are not cleaned up
 		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
 		EmbeddedDatabase db = builder.type(DERBY).script("db-schema-derby.sql").script("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
