@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
