@@ -10,8 +10,13 @@
 		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-test-data.sql"/>
 	</jdbc:embedded-database>
 	
-	<jdbc:embedded-database id="h2dataSource" type="H2">
+	<jdbc:embedded-database id="h2DataSource" type="H2">
 		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-schema.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-test-data.sql"/>
+	</jdbc:embedded-database>
+	
+	<jdbc:embedded-database id="derbyDataSource" type="DERBY">
+		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-schema-derby.sql"/>
 		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-test-data.sql"/>
 	</jdbc:embedded-database>
 	

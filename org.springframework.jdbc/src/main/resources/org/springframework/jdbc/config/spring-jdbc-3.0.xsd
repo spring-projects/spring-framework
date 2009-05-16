@@ -33,10 +33,10 @@
 							</xsd:annotation>	
 						</xsd:element>
 					</xsd:sequence>
-					<xsd:attribute name="type" type="databaseType">
+					<xsd:attribute name="type" type="databaseType" default="HSQL">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-			The type of embedded database to create, such as HSQL or H2.
+			The type of embedded database to create, such as HSQL, H2 or Derby. Defaults to HSQL.
 							]]></xsd:documentation>
 						</xsd:annotation>			
 					</xsd:attribute>
@@ -68,6 +68,13 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 			H2 Java Database Engine
+					]]></xsd:documentation>
+				</xsd:annotation>	
+			</xsd:enumeration>
+			<xsd:enumeration value="DERBY">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			Derby Java Database Engine
 					]]></xsd:documentation>
 				</xsd:annotation>	
 			</xsd:enumeration>
