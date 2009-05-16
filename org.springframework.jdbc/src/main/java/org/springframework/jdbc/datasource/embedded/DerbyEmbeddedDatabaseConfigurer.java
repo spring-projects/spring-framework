@@ -15,14 +15,16 @@
  */
 package org.springframework.jdbc.datasource.embedded;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLNonTransientConnectionException;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.derby.impl.io.VFMemoryStorageFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.util.ClassUtils;
@@ -47,9 +49,9 @@ public class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigur
 	}
 
 	/**
-	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
+	 * Get the singleton {@link DerbyEmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
-	 * @throws ClassNotFoundException if HSQL is not on the classpath
+	 * @throws ClassNotFoundException if Derby is not on the classpath
 	 */
 	public static synchronized DerbyEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
@@ -75,22 +77,29 @@ public class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigur
 			shutdownDataSource.setUrl(String.format(URL_TEMPLATE, databaseName, "shutdown=true"));
 			connection = shutdownDataSource.getConnection();
 		} catch (SQLException e) {
-			if (e instanceof SQLNonTransientConnectionException) {
-				SQLNonTransientConnectionException ex = (SQLNonTransientConnectionException) e;
-				if (!SHUTDOWN_CODE.equals(ex.getSQLState())) {
-					logException(e);
-				}
+			if (SHUTDOWN_CODE.equals(e.getSQLState())) {
+				purgeDatabase(databaseName);
 			} else {
-				logException(e);
+				logger.warn("Could not shutdown in-memory Derby database", e);
 			}
 		} finally {
 			JdbcUtils.closeConnection(connection);
 		}
 	}
 
-	private void logException(SQLException e) {
-		if (logger.isWarnEnabled()) {
-			logger.warn("Could not shutdown in-memory Derby database", e);
+	/**
+	 * Purges the in-memory database, to prevent it from hanging around after
+	 * being shut down
+	 * @param databaseName
+	 */
+	private void purgeDatabase(String databaseName) {
+		// TODO: update this code once Derby adds a proper way to remove an in-memory db
+		// (see http://wiki.apache.org/db-derby/InMemoryBackEndPrimer for details)
+		try {
+			VFMemoryStorageFactory.purgeDatabase(new File(databaseName).getCanonicalPath());
+		} catch (IOException ioe) {
+			logger.warn("Could not purge in-memory Derby database", ioe);
 		}
 	}
+
 }
