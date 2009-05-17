@@ -25,13 +25,13 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,6 +48,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * <ul>
  * <li>{@link ContextConfiguration @ContextConfiguration}</li>
  * <li>{@link Autowired @Autowired}</li>
+ * <li>{@link Qualifier @Qualifier}</li>
  * <li>{@link Resource @Resource}</li>
  * <li>{@link ApplicationContextAware}</li>
  * <li>{@link BeanNameAware}</li>
@@ -60,9 +61,10 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * to the default value of {@link GenericXmlContextLoader}, this test class's
  * dependencies will be injected via {@link Autowired @Autowired} and
  * {@link Resource @Resource} from beans defined in the
- * {@link ApplicationContext} loaded from the default classpath resource: &quot;<code>/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>&quot;.
+ * {@link ApplicationContext} loaded from the default classpath resource:
+ * <code>&quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
@@ -77,6 +79,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * Default resource path for the application context configuration for
 	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
+	 * 
 	 * <code>&quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
 	 */
 	public static final String DEFAULT_CONTEXT_RESOURCE_PATH = "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
@@ -99,6 +102,10 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	protected String foo;
 
 	protected String bar;
+
+	@Autowired
+	@Qualifier("quux")
+	protected String quux;
 
 
 	// ------------------------------------------------------------------------|
@@ -130,24 +137,25 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Test
 	public final void verifyApplicationContextSet() {
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				this.applicationContext);
+			this.applicationContext);
 	}
 
 	@Test
 	public final void verifyBeanInitialized() {
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
+			this.beanInitialized);
 	}
 
 	@Test
 	public final void verifyBeanNameSet() {
 		assertEquals("The bean name of this test instance should have been set due to BeanNameAware semantics.",
-				getClass().getName(), this.beanName);
+			getClass().getName(), this.beanName);
 	}
 
 	@Test
 	public final void verifyAnnotationAutowiredFields() {
 		assertNull("The nonrequiredLong field should NOT have been autowired.", this.nonrequiredLong);
+		assertEquals("The quux field should have been autowired via @Autowired and @Qualifier.", "Quux", this.quux);
 		assertNotNull("The pet field should have been autowired.", this.pet);
 		assertEquals("Fido", this.pet.getName());
 	}
