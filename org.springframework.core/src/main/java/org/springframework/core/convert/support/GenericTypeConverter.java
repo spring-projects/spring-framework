@@ -38,9 +38,8 @@ import org.springframework.util.Assert;
 /**
  * Base implementation of a conversion service. Initially empty, e.g. no converters are registered by default.
  * 
- * TODO - custom converters
  * TODO - object to collection/map converters
- * TODO - allow registration of converters to apply on presence of annotation values on setter or field e.g. String-to-@Mask String to apply a mask
+ * TODO - allow registration of converters to apply on presence of annotation values on setter or field
  * 
  * @author Keith Donald
  */
@@ -141,9 +140,6 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 		if (source == null) {
 			return null;
 		}
-		if (source.getClass().isAssignableFrom(targetType.getType())) {
-			return (T) source;
-		}
 		ConversionExecutor executor = getConversionExecutor(source.getClass(), targetType);
 		if (executor != null) {
 			return (T) executor.execute(source);
@@ -196,7 +192,10 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 				return null;
 			}
 		}
-		Converter converter = findRegisteredConverter(sourceClass, targetType.getType());
+		if (sourceType.isAssignableTo(targetType)) {
+			return NoOpConversionExecutor.INSTANCE;
+		}
+		Converter converter = findRegisteredConverter(sourceType.getType(), targetType.getType());
 		if (converter != null) {
 			return new StaticConversionExecutor(sourceType, targetType, converter);
 		} else {
