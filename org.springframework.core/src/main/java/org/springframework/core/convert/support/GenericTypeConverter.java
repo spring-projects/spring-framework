@@ -158,6 +158,10 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 			throws ConverterNotFoundException {
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
+		if (targetType.getType() == null) {
+			// TODO for Andy - is this correct way to handle the Null TypedValue?
+			return NoOpConversionExecutor.INSTANCE;
+		}
 		ConversionPoint sourceType = ConversionPoint.valueOf(sourceClass);
 		if (sourceType.isArray()) {
 			if (targetType.isArray()) {

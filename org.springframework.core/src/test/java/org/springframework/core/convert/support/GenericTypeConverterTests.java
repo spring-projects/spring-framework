@@ -80,7 +80,18 @@ public class GenericTypeConverterTests {
 	public void convertNull() {
 		assertNull(converter.convert(null, Integer.class));
 	}
+	
+	@Test
+	public void convertNullTargetClass() {
+		assertEquals("3", converter.convert("3", (Class<?>)null));
+	}
 
+	@Test
+	public void convertNullConversionPointType() {
+		assertEquals("3", converter.convert("3", ConversionPoint.NULL));
+	}
+
+	
 	@Test
 	public void convertWrongTypeArgument() {
 		converter.addConverter(new StringToInteger());
