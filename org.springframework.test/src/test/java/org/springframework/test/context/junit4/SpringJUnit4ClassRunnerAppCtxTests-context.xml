@@ -20,4 +20,8 @@
 		<constructor-arg value="Bar" />
 	</bean>
 
+	<bean id="quux" class="java.lang.String">
+		<constructor-arg value="Quux" />
+	</bean>
+
 </beans>
