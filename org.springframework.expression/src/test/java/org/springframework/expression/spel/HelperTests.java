@@ -113,16 +113,16 @@ public class HelperTests extends ExpressionTestCase {
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
 		
 		// Calling foo(String,int) with (String,Integer) requires boxing conversion of argument one
-		//checkMatch(new Class[]{String.class,Integer.TYPE},new Class[]{String.class,Integer.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,1);
+		checkMatch(new Class[]{String.class,Integer.TYPE},new Class[]{String.class,Integer.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,1);
 
 		// Passing (int,String) on call to foo(Integer,String) requires boxing conversion of argument zero
-		//checkMatch(new Class[]{Integer.TYPE,String.class},new Class[]{Integer.class, String.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0);
+		checkMatch(new Class[]{Integer.TYPE,String.class},new Class[]{Integer.class, String.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0);
 		
 		// Passing (int,Sub) on call to foo(Integer,Super) requires boxing conversion of argument zero
-		//checkMatch(new Class[]{Integer.TYPE,Sub.class},new Class[]{Integer.class, Super.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0);
+		checkMatch(new Class[]{Integer.TYPE,Sub.class},new Class[]{Integer.class, Super.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0);
 		
 		// Passing (int,Sub,boolean) on call to foo(Integer,Super,Boolean) requires boxing conversion of arguments zero and two
-		//checkMatch(new Class[]{Integer.TYPE,Sub.class,Boolean.TYPE},new Class[]{Integer.class, Super.class,Boolean.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0,2);
+		checkMatch(new Class[]{Integer.TYPE,Sub.class,Boolean.TYPE},new Class[]{Integer.class, Super.class,Boolean.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0,2);
 	}
 
 	public void testReflectionHelperCompareArguments_NotAMatch() {
