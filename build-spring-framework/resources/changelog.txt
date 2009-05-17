@@ -17,7 +17,7 @@ Changes in version 3.0.0.RC1 (2009-06-10)
 * ReloadableResourceBundleMessageSource correctly calculates filenames for all locales now
 * @Import detects and accepts existing configuration class of the desired type
 * @Transactional supports qualifier value for choosing between multiple transaction managers
-* added spring-jdbc config schema with initial embedded-database tag (supporting HSQL and H2)
+* added spring-jdbc config schema with embedded-database tag (supporting HSQL, H2, and Derby)
 * Velocity/FreeMarker/TilesViewResolver only return a view if the target resource exists now
 
 

@@ -17,6 +17,7 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -55,6 +56,9 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	 */
 	public static synchronized DerbyEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
+			// disable log file
+			System.setProperty("derby.stream.error.method", 
+					DerbyEmbeddedDatabaseConfigurer.class.getName() + ".getNoopOutputStream");
 			ClassUtils.forName("org.apache.derby.jdbc.EmbeddedDriver", DerbyEmbeddedDatabaseConfigurer.class
 					.getClassLoader());
 			INSTANCE = new DerbyEmbeddedDatabaseConfigurer();
@@ -102,4 +106,17 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 		}
 	}
 
+
+	/**
+	 * Returns an {@link OutputStream} that ignores all data given to it.
+	 * Used by {@link #getInstance()} to prevent writing to Derby.log file.
+	 */
+	static OutputStream getNoopOutputStream() {
+		return new OutputStream() {
+			public void write(int b) throws IOException {
+				// ignore the input
+			}
+		};
+	}
+	
 }
