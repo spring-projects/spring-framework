@@ -29,7 +29,7 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.converter.Converter;
 
@@ -39,7 +39,7 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void executeConversion() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		assertEquals(new Integer(3), converter.convert("3", Integer.class));
 	}
 
@@ -65,7 +65,7 @@ public class GenericTypeConverterTests {
 	@Test
 	public void addConverterNoSourceTargetClassInfoAvailable() {
 		try {
-			converter.addConverter(new Converter() {
+			converter.add(new Converter() {
 				public Object convert(Object source) throws Exception {
 					return source;
 				}
@@ -88,13 +88,13 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertNullConversionPointType() {
-		assertEquals("3", converter.convert("3", ConversionPoint.NULL));
+		assertEquals("3", converter.convert("3", ConversionContext.NULL));
 	}
 
 	
 	@Test
 	public void convertWrongTypeArgument() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		try {
 			converter.convert("BOGUS", Integer.class);
 			fail("Should have failed");
@@ -105,7 +105,7 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertSuperSourceType() {
-		converter.addConverter(new Converter<CharSequence, Integer>() {
+		converter.add(new Converter<CharSequence, Integer>() {
 			public Integer convert(CharSequence source) throws Exception {
 				return Integer.valueOf(source.toString());
 			}
@@ -117,7 +117,7 @@ public class GenericTypeConverterTests {
 	@Test
 	@Ignore
 	public void convertNoSuperTargetType() {
-		converter.addConverter(new Converter<CharSequence, Number>() {
+		converter.add(new Converter<CharSequence, Number>() {
 			public Integer convert(CharSequence source) throws Exception {
 				return Integer.valueOf(source.toString());
 			}
@@ -132,14 +132,14 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertObjectToPrimitive() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		Integer three = converter.convert("3", int.class);
 		assertEquals(3, three.intValue());
 	}
 
 	@Test
 	public void convertArrayToArray() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		Integer[] result = converter.convert(new String[] { "1", "2", "3" }, Integer[].class);
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
@@ -148,7 +148,7 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertArrayToPrimitiveArray() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		int[] result = (int[]) converter.convert(new String[] { "1", "2", "3" }, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
@@ -167,8 +167,8 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertArrayToListGenericTypeConversion() throws Exception {
-		converter.addConverter(new StringToInteger());
-		List<Integer> result = converter.convert(new String[] { "1", "2", "3" }, new ConversionPoint<List<Integer>>(getClass().getDeclaredField("genericList")));
+		converter.add(new StringToInteger());
+		List<Integer> result = converter.convert(new String[] { "1", "2", "3" }, new ConversionContext<List<Integer>>(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
@@ -205,7 +205,7 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertListToArrayWithComponentConversion() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		List<String> list = new ArrayList<String>();
 		list.add("1");
 		list.add("2");
@@ -224,9 +224,9 @@ public class GenericTypeConverterTests {
 		Map<String, String> foo = new HashMap<String, String>();
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
-		converter.addConverter(new StringToInteger());
-		converter.addConverter(new StringToEnumFactory().getConverter(FooEnum.class));
-		Map<String, FooEnum> map = converter.convert(foo, new ConversionPoint<Map<String, FooEnum>>(getClass().getField("genericMap")));
+		converter.add(new StringToInteger());
+		converter.add(new StringToEnumFactory().getConverter(FooEnum.class));
+		Map<String, FooEnum> map = converter.convert(foo, new ConversionContext<Map<String, FooEnum>>(getClass().getField("genericMap")));
 		assertEquals(map.get(1), FooEnum.BAR);
 		assertEquals(map.get(2), FooEnum.BAZ);
 	}
@@ -242,7 +242,7 @@ public class GenericTypeConverterTests {
 	@Ignore
 	@Test
 	public void convertObjectToArrayWithElementConversion() {
-		converter.addConverter(new StringToInteger());
+		converter.add(new StringToInteger());
 		Integer[] result = converter.convert("123", Integer[].class);
 		assertEquals(1, result.length);
 		assertEquals(new Integer(123), result[0]);

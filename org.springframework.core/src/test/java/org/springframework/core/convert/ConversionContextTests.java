@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * @author Andy Clement
  */
-public class ConversionPointTests {
+public class ConversionContextTests {
 
 	List<String> listOfString;
 	int[] intArray;
@@ -34,13 +34,13 @@ public class ConversionPointTests {
 
 	@Test
 	public void testWrapperType() {
-		ConversionPoint desc = ConversionPoint.valueOf(int.class);
+		ConversionContext desc = ConversionContext.valueOf(int.class);
 		assertEquals(Integer.class, desc.getType());
 	}
 	
 	@Test
 	public void listDescriptors() throws Exception {
-		ConversionPoint typeDescriptor = new ConversionPoint(ConversionPointTests.class.getDeclaredField("listOfString"));
+		ConversionContext typeDescriptor = new ConversionContext(ConversionContextTests.class.getDeclaredField("listOfString"));
 		assertFalse(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getType());
 		assertEquals(String.class,typeDescriptor.getElementType());
@@ -50,7 +50,7 @@ public class ConversionPointTests {
 	
 	@Test
 	public void arrayTypeDescriptors() throws Exception {
-		ConversionPoint typeDescriptor = new ConversionPoint(ConversionPointTests.class.getDeclaredField("intArray"));
+		ConversionContext typeDescriptor = new ConversionContext(ConversionContextTests.class.getDeclaredField("intArray"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
 		assertEquals("int[]",typeDescriptor.asString());
@@ -58,14 +58,14 @@ public class ConversionPointTests {
 
 	@Test
 	public void buildingArrayTypeDescriptors() throws Exception {
-		ConversionPoint typeDescriptor = new ConversionPoint(new int[0].getClass());
+		ConversionContext typeDescriptor = new ConversionContext(new int[0].getClass());
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
 	}
 
 	@Test
 	public void complexTypeDescriptors() throws Exception {
-		ConversionPoint typeDescriptor = new ConversionPoint(ConversionPointTests.class.getDeclaredField("arrayOfListOfString"));
+		ConversionContext typeDescriptor = new ConversionContext(ConversionContextTests.class.getDeclaredField("arrayOfListOfString"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementType());
 		// TODO asc notice that the type of the list elements is lost: typeDescriptor.getElementType() should return a TypeDescriptor

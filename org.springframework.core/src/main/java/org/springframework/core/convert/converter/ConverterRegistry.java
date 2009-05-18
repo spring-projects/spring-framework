@@ -24,21 +24,17 @@ public interface ConverterRegistry {
 	/**
 	 * Add a converter to this registry.
 	 */
-	void addConverter(Converter<?, ?> converter);
+	void add(Converter<?, ?> converter);
 
 	/**
 	 * Add a converter factory to this registry.
 	 */
-	void addConverterFactory(ConverterFactory<?, ?> converterFactory);
+	void add(ConverterFactory<?, ?> converterFactory);
 
 	/**
-	 * Remove a converter from this registry.
+	 * Remove the conversion logic from the sourceType to the targetType.
+	 * @param sourceType the source type
+	 * @param targetType the target type
 	 */
-	void removeConverter(Converter<?, ?> converter);
-
-	/**
-	 * Remove a converter factory from this registry.
-	 */
-	void removeConverterFactory(ConverterFactory<?, ?> converterFactory);
-
+	void removeConverter(Class<?> sourceType, Class<?> targetType);
 }

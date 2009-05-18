@@ -15,7 +15,7 @@
  */
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 
 /**
  * @author Andy Clement
@@ -23,16 +23,16 @@ import org.springframework.core.convert.ConversionPoint;
  */
 public interface CommonTypeDescriptors {
     // TODO push into TypeDescriptor?
-	static ConversionPoint BOOLEAN_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Boolean.class);
-	static ConversionPoint INTEGER_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Integer.class);
-	static ConversionPoint CHARACTER_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Character.class);
-	static ConversionPoint LONG_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Long.class);
-	static ConversionPoint SHORT_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Short.class);
-	static ConversionPoint BYTE_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Byte.class);
-	static ConversionPoint FLOAT_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Float.class);
-	static ConversionPoint DOUBLE_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Double.class);
-	static ConversionPoint STRING_TYPE_DESCRIPTOR = ConversionPoint.valueOf(String.class);
-	static ConversionPoint CLASS_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Class.class);
-	static ConversionPoint OBJECT_TYPE_DESCRIPTOR = ConversionPoint.valueOf(Object.class);
+	static ConversionContext BOOLEAN_TYPE_DESCRIPTOR = ConversionContext.valueOf(Boolean.class);
+	static ConversionContext INTEGER_TYPE_DESCRIPTOR = ConversionContext.valueOf(Integer.class);
+	static ConversionContext CHARACTER_TYPE_DESCRIPTOR = ConversionContext.valueOf(Character.class);
+	static ConversionContext LONG_TYPE_DESCRIPTOR = ConversionContext.valueOf(Long.class);
+	static ConversionContext SHORT_TYPE_DESCRIPTOR = ConversionContext.valueOf(Short.class);
+	static ConversionContext BYTE_TYPE_DESCRIPTOR = ConversionContext.valueOf(Byte.class);
+	static ConversionContext FLOAT_TYPE_DESCRIPTOR = ConversionContext.valueOf(Float.class);
+	static ConversionContext DOUBLE_TYPE_DESCRIPTOR = ConversionContext.valueOf(Double.class);
+	static ConversionContext STRING_TYPE_DESCRIPTOR = ConversionContext.valueOf(String.class);
+	static ConversionContext CLASS_TYPE_DESCRIPTOR = ConversionContext.valueOf(Class.class);
+	static ConversionContext OBJECT_TYPE_DESCRIPTOR = ConversionContext.valueOf(Object.class);
 	
 }

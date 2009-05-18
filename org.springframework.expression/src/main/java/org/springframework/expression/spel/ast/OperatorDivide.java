@@ -17,7 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.antlr.runtime.Token;
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -56,7 +56,7 @@ public class OperatorDivide extends Operator {
 			}
 		}
 		Object result = state.operate(Operation.DIVIDE, operandOne, operandTwo);
-		return new TypedValue(result,ConversionPoint.forObject(result));
+		return new TypedValue(result,ConversionContext.forObject(result));
 	}
 
 }

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Token;
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -66,7 +66,7 @@ public class Selection extends SpelNodeImpl {
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
 					lastKey = entry.getKey();
-					TypedValue kvpair = new TypedValue(entry,ConversionPoint.valueOf(Map.Entry.class));
+					TypedValue kvpair = new TypedValue(entry,ConversionContext.valueOf(Map.Entry.class));
 					state.pushActiveContextObject(kvpair);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
@@ -86,13 +86,13 @@ public class Selection extends SpelNodeImpl {
 				}
 			}
 			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-				return new TypedValue(null,ConversionPoint.NULL);
+				return new TypedValue(null,ConversionContext.NULL);
 			}
 			if (variant == LAST) {
 				Map resultMap = new HashMap();
 				Object lastValue = result.get(lastKey);
 				resultMap.put(lastKey,lastValue);
-				return new TypedValue(resultMap,ConversionPoint.valueOf(Map.class));
+				return new TypedValue(resultMap,ConversionContext.valueOf(Map.class));
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else if (operand instanceof Collection) {
@@ -102,13 +102,13 @@ public class Selection extends SpelNodeImpl {
 			int idx = 0;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(new TypedValue(element,ConversionPoint.valueOf(op.getTypeDescriptor().getElementType())));
+					state.pushActiveContextObject(new TypedValue(element,ConversionContext.valueOf(op.getTypeDescriptor().getElementType())));
 					state.enterScope("index", idx);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST) {
-								return new TypedValue(element,ConversionPoint.valueOf(op.getTypeDescriptor().getElementType()));
+								return new TypedValue(element,ConversionContext.valueOf(op.getTypeDescriptor().getElementType()));
 							}
 							result.add(element);
 						}
@@ -126,7 +126,7 @@ public class Selection extends SpelNodeImpl {
 				return TypedValue.NULL_TYPED_VALUE;
 			}
 			if (variant == LAST) {
-				return new TypedValue(result.get(result.size() - 1),ConversionPoint.valueOf(op.getTypeDescriptor().getElementType()));
+				return new TypedValue(result.get(result.size() - 1),ConversionContext.valueOf(op.getTypeDescriptor().getElementType()));
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
