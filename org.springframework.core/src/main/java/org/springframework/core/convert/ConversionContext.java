@@ -27,19 +27,19 @@ import org.springframework.util.Assert;
 
 // TODO doesn't support more than depth of one (eg. Map<String,List<Foo>> or List<String>[])
 /**
- * A point where conversion needs to be performed.  Provides additional context about the point such 
+ * Context about a point where conversion needs to be performed.  Provides context about the point such 
  * as field or method parameter information.
  * 
  * @author Keith Donald
  * @author Andy Clement
  */
-public class ConversionPoint<T> {
+public class ConversionContext<T> {
 
 	/**
-	 * Constant value typeDescriptor for the type of a null value
+	 * Constant value for the null object
 	 */
 	@SuppressWarnings("unchecked")
-	public final static ConversionPoint NULL = new ConversionPoint((Class<?>) null);
+	public final static ConversionContext NULL = new ConversionContext((Class<?>) null);
 
 	private MethodParameter methodParameter;
 
@@ -50,36 +50,35 @@ public class ConversionPoint<T> {
 	private Class<?> type;
 
 	/**
-	 * Creates a new descriptor for the given type. Use this constructor when a bound value comes from a source such as
+	 * Creates a new context for the given type. Use this constructor when a conversion point comes from a source such as
 	 * a Map or collection, where no additional binding metadata is available.
 	 * @param type the actual type
 	 */
-	public ConversionPoint(Class<?> type) {
+	public ConversionContext(Class<?> type) {
 		this.type = type;
 	}
 
 	/**
-	 * Create a new descriptor for a method or constructor parameter. Use this constructor when a bound value originates
+	 * Create a new context for a method or constructor parameter. Use this constructor when a conversion point originates
 	 * from a method parameter, such as a setter method argument.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
-	public ConversionPoint(MethodParameter methodParameter) {
+	public ConversionContext(MethodParameter methodParameter) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 	}
 
 	/**
-	 * Create a new descriptor for a field. Use this constructor when a bound value originates from a field.
+	 * Create a new context for a field. Use this constructor when a conversion point originates from a field.
 	 * @param field the field to wrap
 	 */
-	public ConversionPoint(Field field) {
+	public ConversionContext(Field field) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 	}
 
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
-	 * 
 	 * @return the declared type (never <code>null</code>)
 	 */
 	public Class<?> getType() {
@@ -247,7 +246,7 @@ public class ConversionPoint<T> {
 	 * @return true if this type is assignable to the target
 	 */
 	@SuppressWarnings("unchecked")	
-	public boolean isAssignableTo(ConversionPoint targetType) {
+	public boolean isAssignableTo(ConversionContext targetType) {
 		return targetType.getType().isAssignableFrom(getType());
 	}
 
@@ -256,9 +255,9 @@ public class ConversionPoint<T> {
 	 * @param type the class
 	 * @return the type descriptor
 	 */
-	public static <T> ConversionPoint<T> valueOf(Class<T> type) {
+	public static <T> ConversionContext<T> valueOf(Class<T> type) {
 		// TODO needs a cache for common type descriptors
-		return new ConversionPoint<T>(type);
+		return new ConversionContext<T>(type);
 	}
 
 	/**
@@ -267,7 +266,7 @@ public class ConversionPoint<T> {
 	 * @return the type descriptor
 	 */
 	@SuppressWarnings("unchecked")	
-	public static ConversionPoint forObject(Object object) {
+	public static ConversionContext forObject(Object object) {
 		if (object == null) {
 			return NULL;
 		} else {

@@ -19,7 +19,7 @@ package org.springframework.core.convert;
  * A service interface for type conversion. This is the entry point into the convert system.
  * <p>
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.<br>
- * Call {@link #convert(Object, ConversionPoint)} to perform a conversion with additional context about the point
+ * Call {@link #convert(Object, ConversionContext)} to perform a conversion with additional context about the point
  * where conversion needs to occur.
  * 
  * @author Keith Donald
@@ -37,10 +37,10 @@ public interface TypeConverter {
 	/**
 	 * Returns true if objects of sourceType can be converted to the type of the conversion point.
 	 * @param source the source to convert from (may be null)
-	 * @param point context about the point where conversion would occur
+	 * @param context context about the point where conversion would occur
 	 * @return true if a conversion can be performed, false if not
 	 */
-	boolean canConvert(Class<?> sourceType, ConversionPoint<?> point);
+	boolean canConvert(Class<?> sourceType, ConversionContext<?> context);
 
 	/**
 	 * Convert the source to targetType.
@@ -54,10 +54,10 @@ public interface TypeConverter {
 	/**
 	 * Convert the source to type T needed by the conversion point.
 	 * @param source the source to convert from (may be null)
-	 * @param point context about the point where conversion will occur
-	 * @return the converted object, an instance of {@link ConversionPoint#getType()}</code>, or <code>null</code> if a null source was provided
+	 * @param context context about the point where conversion will occur
+	 * @return the converted object, an instance of {@link ConversionContext#getType()}</code>, or <code>null</code> if a null source was provided
 	 * @throws ConvertException if an exception occurred
 	 */
-	<S, T> T convert(S source, ConversionPoint<T> point);
+	<S, T> T convert(S source, ConversionContext<T> context);
 
 }

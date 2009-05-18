@@ -35,22 +35,22 @@ public class DefaultTypeConverter extends GenericTypeConverter {
 	 * Add all default converters to the conversion service.
 	 */
 	protected void addDefaultConverters() {
-		addConverter(new StringToByte());
-		addConverter(new StringToBoolean());
-		addConverter(new StringToCharacter());
-		addConverter(new StringToShort());
-		addConverter(new StringToInteger());
-		addConverter(new StringToLong());
-		addConverter(new StringToFloat());
-		addConverter(new StringToDouble());
-		addConverter(new StringToBigInteger());
-		addConverter(new StringToBigDecimal());
-		addConverter(new StringToLocale());
-		addConverter(new NumberToCharacter());
-		addConverter(new ObjectToString());
-		addConverterFactory(new StringToEnumFactory());
-		addConverterFactory(new NumberToNumberFactory());
-		addConverterFactory(new CharacterToNumberFactory());
+		add(new StringToByte());
+		add(new StringToBoolean());
+		add(new StringToCharacter());
+		add(new StringToShort());
+		add(new StringToInteger());
+		add(new StringToLong());
+		add(new StringToFloat());
+		add(new StringToDouble());
+		add(new StringToBigInteger());
+		add(new StringToBigDecimal());
+		add(new StringToLocale());
+		add(new NumberToCharacter());
+		add(new ObjectToString());
+		add(new StringToEnumFactory());
+		add(new NumberToNumberFactory());
+		add(new CharacterToNumberFactory());
 	}
 
 }

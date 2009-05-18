@@ -22,7 +22,7 @@ import java.lang.reflect.Modifier;
 
 import org.antlr.runtime.Token;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
@@ -104,7 +104,7 @@ public class FunctionReference extends SpelNodeImpl {
 		try {
 			ReflectionUtils.makeAccessible(m);
 			Object result = m.invoke(m.getClass(), functionArgs);
-			return new TypedValue(result, new ConversionPoint(new MethodParameter(m,-1)));
+			return new TypedValue(result, new ConversionContext(new MethodParameter(m,-1)));
 		} catch (IllegalArgumentException e) {
 			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());

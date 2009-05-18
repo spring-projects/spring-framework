@@ -22,7 +22,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 
 /**
  * Converts from one map to another map, with support for converting individual map elements based on generic type information.
@@ -31,9 +31,9 @@ import org.springframework.core.convert.ConversionPoint;
 @SuppressWarnings("unchecked")
 class MapToMap implements ConversionExecutor {
 
-	private ConversionPoint sourceType;
+	private ConversionContext sourceType;
 
-	private ConversionPoint targetType;
+	private ConversionContext targetType;
 
 	private GenericTypeConverter conversionService;
 
@@ -45,7 +45,7 @@ class MapToMap implements ConversionExecutor {
 	 * @param targetType the target map type
 	 * @param conversionService the conversion service
 	 */
-	public MapToMap(ConversionPoint sourceType, ConversionPoint targetType, GenericTypeConverter conversionService) {
+	public MapToMap(ConversionContext sourceType, ConversionContext targetType, GenericTypeConverter conversionService) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.conversionService = conversionService;
@@ -55,9 +55,9 @@ class MapToMap implements ConversionExecutor {
 	private EntryConverter createEntryConverter() {
 		if (sourceType.isMapEntryTypeKnown() && targetType.isMapEntryTypeKnown()) {
 			ConversionExecutor keyConverter = conversionService.getConversionExecutor(sourceType.getMapKeyType(),
-					ConversionPoint.valueOf(targetType.getMapKeyType()));
+					ConversionContext.valueOf(targetType.getMapKeyType()));
 			ConversionExecutor valueConverter = conversionService.getConversionExecutor(sourceType.getMapValueType(),
-					ConversionPoint.valueOf(targetType.getMapValueType()));
+					ConversionContext.valueOf(targetType.getMapValueType()));
 			return new EntryConverter(keyConverter, valueConverter);
 		} else {
 			return EntryConverter.NO_OP_INSTANCE;
@@ -94,11 +94,11 @@ class MapToMap implements ConversionExecutor {
 					Object key = entry.getKey();
 					Object value = entry.getValue();
 					if (keyConverter == null && key != null) {
-						keyConverter = conversionService.getConversionExecutor(key.getClass(), ConversionPoint
+						keyConverter = conversionService.getConversionExecutor(key.getClass(), ConversionContext
 								.valueOf(targetKeyType));
 					}
 					if (valueConverter == null && value != null) {
-						valueConverter = conversionService.getConversionExecutor(value.getClass(), ConversionPoint
+						valueConverter = conversionService.getConversionExecutor(value.getClass(), ConversionContext
 								.valueOf(targetValueType));
 					}
 					if (keyConverter != null && valueConverter != null) {

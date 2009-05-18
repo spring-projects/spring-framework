@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.ConversionPoint;
+import org.springframework.core.convert.ConversionContext;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -236,7 +236,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	private static class FruitColourAccessor implements PropertyAccessor {
 
 		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
-		private static ConversionPoint mapElementTypeDescriptor = ConversionPoint.valueOf(Color.class);
+		private static ConversionContext mapElementTypeDescriptor = ConversionContext.valueOf(Color.class);
 
 		static {
 			propertyMap.put("banana",Color.yellow);
@@ -295,7 +295,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(propertyMap.get(name),ConversionPoint.valueOf(Color.class));
+			return new TypedValue(propertyMap.get(name),ConversionContext.valueOf(Color.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
