@@ -50,9 +50,9 @@ import org.springframework.util.StringUtils;
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
-	public ManagedResource getManagedResource(Class beanClass) throws InvalidMetadataException {
+	public ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedResource ann =
-				((Class<?>) beanClass).getAnnotation(org.springframework.jmx.export.annotation.ManagedResource.class);
+				beanClass.getAnnotation(org.springframework.jmx.export.annotation.ManagedResource.class);
 		if (ann == null) {
 			return null;
 		}
@@ -77,10 +77,8 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		}
 		return managedAttribute;
 	}
-	
-	@Override
-	public ManagedMetric getManagedMetric(Method method)
-			throws InvalidMetadataException {
+
+	public ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedMetric ann =
 			AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
 		if (ann == null) {
@@ -129,8 +127,8 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		return result;
 	}
 
-	public ManagedNotification[] getManagedNotifications(Class clazz) throws InvalidMetadataException {
-		ManagedNotifications notificationsAnn = (ManagedNotifications) clazz.getAnnotation(ManagedNotifications.class);
+	public ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException {
+		ManagedNotifications notificationsAnn = clazz.getAnnotation(ManagedNotifications.class);
 		if(notificationsAnn == null) {
 			return new ManagedNotification[0];
 		}
@@ -138,7 +136,6 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		ManagedNotification[] result = new ManagedNotification[notifications.length];
 		for (int i = 0; i < notifications.length; i++) {
 			Annotation notification = notifications[i];
-
 			ManagedNotification managedNotification = new ManagedNotification();
 			AnnotationBeanUtils.copyPropertiesToBean(notification, managedNotification);
 			result[i] = managedNotification;
