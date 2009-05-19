@@ -179,7 +179,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return doGetBean(name, requiredType, null, false);
 	}
 
-	public Object getBean(String name, Object[] args) throws BeansException {
+	public Object getBean(String name, Object... args) throws BeansException {
 		return doGetBean(name, null, args, false);
 	}
 
