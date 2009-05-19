@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import org.springframework.util.ClassUtils;
@@ -20,12 +21,17 @@ import org.springframework.util.ClassUtils;
 /**
  * Initializes a HSQL embedded database instance.
  * Call {@link #getInstance()} to get the singleton instance of this class.
+ *
  * @author Keith Donald
  * @author Oliver Gierke
+ * @since 3.0
  */
 final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
 	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
+
+	private final Class driverClass;
+
 
 	/**
 	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
@@ -34,20 +40,22 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 	 */
 	public static synchronized HsqlEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
-			ClassUtils.forName("org.hsqldb.jdbcDriver", HsqlEmbeddedDatabaseConfigurer.class.getClassLoader());
-			INSTANCE = new HsqlEmbeddedDatabaseConfigurer();
+			INSTANCE = new HsqlEmbeddedDatabaseConfigurer(
+					ClassUtils.forName("org.hsqldb.jdbcDriver", HsqlEmbeddedDatabaseConfigurer.class.getClassLoader()));
 		}
 		return INSTANCE;
 	}
 
+
+	private HsqlEmbeddedDatabaseConfigurer(Class driverClass) {
+		this.driverClass = driverClass;
+	}
+
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(org.hsqldb.jdbcDriver.class);
+		properties.setDriverClass(this.driverClass);
 		properties.setUrl("jdbc:hsqldb:mem:" + databaseName);
 		properties.setUsername("sa");
 		properties.setPassword("");
-	}
-	
-	private HsqlEmbeddedDatabaseConfigurer() {
 	}
 
 }
