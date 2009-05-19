@@ -30,10 +30,12 @@ import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.JmxMetadataUtils;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
+import org.springframework.jmx.export.metadata.ManagedMetric;
 import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.jmx.support.MetricType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -51,6 +53,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Jennifer Hickey
  * @since 1.2
  * @see #setAttributeSource
  * @see org.springframework.jmx.export.metadata.AttributesJmxAttributeSource
@@ -60,8 +63,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		implements AutodetectCapableMBeanInfoAssembler, InitializingBean {
 
 	private JmxAttributeSource attributeSource;
-
-
+	
+	
 	/**
 	 * Create a new <code>MetadataMBeanInfoAssembler<code> which needs to be
 	 * configured through the {@link #setAttributeSource} method.
@@ -129,7 +132,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 */
 	@Override
 	protected boolean includeReadAttribute(Method method, String beanKey) {
-		return hasManagedAttribute(method);
+		return hasManagedAttribute(method) || hasManagedMetric(method);
 	}
 
 	/**
@@ -165,6 +168,13 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 */
 	private boolean hasManagedAttribute(Method method) {
 		return (this.attributeSource.getManagedAttribute(method) != null);
+	}
+	
+	/**
+	 * Checks to see if the given Method has the <code>ManagedMetric</code> attribute.
+	 */
+	private boolean hasManagedMetric(Method method) {
+		return (this.attributeSource.getManagedMetric(method) != null);
 	}
 
 	/**
@@ -207,6 +217,12 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		else if (setter != null && StringUtils.hasText(setter.getDescription())) {
 			return setter.getDescription();
 		}
+		
+		ManagedMetric metric = (readMethod != null) ? this.attributeSource.getManagedMetric(readMethod) : null;
+		if(metric != null && StringUtils.hasText(metric.getDescription())) {
+			return metric.getDescription();
+		}
+		
 		return propertyDescriptor.getDisplayName();
 	}
 
@@ -221,6 +237,10 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			ManagedAttribute ma = this.attributeSource.getManagedAttribute(method);
 			if (ma != null && StringUtils.hasText(ma.getDescription())) {
 				return ma.getDescription();
+			}
+			ManagedMetric metric = this.attributeSource.getManagedMetric(method);
+			if (metric != null && StringUtils.hasText(metric.getDescription())) {
+				return metric.getDescription();
 			}
 			return method.getName();
 		}
@@ -314,18 +334,24 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	}
 
 	/**
-	 * Adds descriptor fields from the <code>ManagedAttribute</code> attribute
-	 * to the attribute descriptor. Specifically, adds the <code>currencyTimeLimit</code>,
-	 * <code>default</code>, <code>persistPolicy</code> and <code>persistPeriod</code>
-	 * descriptor fields if they are present in the metadata.
+	 * Adds descriptor fields from the <code>ManagedAttribute</code> attribute or the <code>ManagedMetric</code> attribute
+	 * to the attribute descriptor.
 	 */
 	@Override
 	protected void populateAttributeDescriptor(Descriptor desc, Method getter, Method setter, String beanKey) {
-		ManagedAttribute gma =
+		if(getter != null && hasManagedMetric(getter)) {
+			populateMetricDescriptor(desc, this.attributeSource.getManagedMetric(getter));
+		}
+		else {
+			ManagedAttribute gma =
 				(getter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(getter);
-		ManagedAttribute sma =
+			ManagedAttribute sma =
 				(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
-
+			populateAttributeDescriptor(desc,gma,sma);
+		}
+	}
+	
+	private void populateAttributeDescriptor(Descriptor desc, ManagedAttribute gma, ManagedAttribute sma) {
 		applyCurrencyTimeLimit(desc, resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit()));
 
 		Object defaultValue = resolveObjectDescriptor(gma.getDefaultValue(), sma.getDefaultValue());
@@ -339,6 +365,32 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		if (persistPeriod >= 0) {
 			desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(persistPeriod));
 		}
+	}
+	
+	private void populateMetricDescriptor(Descriptor desc, ManagedMetric metric) {
+		applyCurrencyTimeLimit(desc, metric.getCurrencyTimeLimit());
+		
+		if (StringUtils.hasLength(metric.getPersistPolicy())) {
+			desc.setField(FIELD_PERSIST_POLICY, metric.getPersistPolicy());
+		}
+		if (metric.getPersistPeriod() >= 0) {
+			desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(metric.getPersistPeriod()));
+		}
+		
+		if (StringUtils.hasLength(metric.getDisplayName())) {
+			desc.setField(FIELD_DISPLAY_NAME, metric.getDisplayName());
+		}
+		
+		if(StringUtils.hasLength(metric.getUnit())) {
+			desc.setField(FIELD_UNITS, metric.getUnit());
+		}
+		
+		if(StringUtils.hasLength(metric.getCategory())) {
+			desc.setField(FIELD_METRIC_CATEGORY, metric.getCategory());
+		}
+		
+		String metricType = (metric.getMetricType() == null) ? MetricType.GAUGE.toString() : metric.getMetricType().toString();
+		desc.setField(FIELD_METRIC_TYPE, metricType);
 	}
 
 	/**
