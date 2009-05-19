@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 
 /**
- * Convenience subclass of Quartz's {@link org.quartz.SimpleTrigger}
- * class, making bean-style usage easier.
+ * Convenience subclass of Quartz's {@link org.quartz.SimpleTrigger} class,
+ * making bean-style usage easier.
  *
  * <p>SimpleTrigger itself is already a JavaBean but lacks sensible defaults.
  * This class uses the Spring bean name as job name, the Quartz default group
@@ -60,7 +60,7 @@ import org.springframework.core.Constants;
  * @see CronTriggerBean
  */
 public class SimpleTriggerBean extends SimpleTrigger
-	implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
+		implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 
 	/** Constants for the SimpleTrigger class */
 	private static final Constants constants = new Constants(SimpleTrigger.class);
