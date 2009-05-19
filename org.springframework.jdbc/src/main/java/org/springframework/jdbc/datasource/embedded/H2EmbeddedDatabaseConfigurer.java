@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import org.springframework.util.ClassUtils;
 
 /**
  * Initializes a H2 embedded database instance.
- * Call {@link #getInstance()} to get the singleton instance of this class. * 
+ * Call {@link #getInstance()} to get the singleton instance of this class.
+ *
  * @author Oliver Gierke
+ * @since 3.0
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
 	private static H2EmbeddedDatabaseConfigurer INSTANCE;
+
+	private final Class driverClass;
+
 
 	/**
 	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
@@ -33,20 +39,22 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 	 */
 	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
-			ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader());
-			INSTANCE = new H2EmbeddedDatabaseConfigurer();
+			INSTANCE = new H2EmbeddedDatabaseConfigurer(
+					ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
 		}
 		return INSTANCE;
 	}
 
+
+	public H2EmbeddedDatabaseConfigurer(Class driverClass) {
+		this.driverClass = driverClass;
+	}
+
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(org.h2.Driver.class);
+		properties.setDriverClass(this.driverClass);
 		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1", databaseName));
 		properties.setUsername("sa");
 		properties.setPassword("");
-	}
-	
-	private H2EmbeddedDatabaseConfigurer() {
 	}
 
 }
