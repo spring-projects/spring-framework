@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
-	ManagedResource getManagedResource(Class clazz) throws InvalidMetadataException;
+	ManagedResource getManagedResource(Class<?> clazz) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an instance of <code>ManagedAttribute</code>
@@ -88,7 +88,7 @@ public interface JmxAttributeSource {
 	 * @return the notification information
 	 * @throws InvalidMetadataException in the case of invalid metadata
 	 */
-	ManagedNotification[] getManagedNotifications(Class clazz) throws InvalidMetadataException;
+	ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException;
 	
 	
 	
