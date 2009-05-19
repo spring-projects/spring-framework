@@ -73,7 +73,7 @@
           classic Spring JDBC approach and the most widely used. This is the
           "lowest level" approach and all other approaches use a JdbcTemplate
           under the covers. In Spring 3.0 it has been updated with Java 5
-          support like generics and vararg support.</para>
+          support like generics and varargs.</para>
         </listitem>
 
         <listitem>
@@ -82,7 +82,7 @@
           parameters instead of the traditional JDBC "?" place holders. This
           provides better documentation and ease of use when you have multiple
           parameters for an SQL statement. It has also been updated with Java
-          5 support like generics and vararg support for Spring 3.0.</para>
+          5 support like generics and varargs for Spring 3.0.</para>
         </listitem>
 
         <listitem>
@@ -2636,7 +2636,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     <classname>DataSource</classname> implementations.</para>
 
     <section id="jdbc-why-embedded-database">
-      <title>Why use a embedded database?</title>
+      <title>Why use an embedded database?</title>
 
       <para>An embedded database is useful during the development phase of a
       project due to its lightweight nature. Ease of configuration, quick
