@@ -143,7 +143,26 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Constant identifier for the persistName field in a JMX {@link Descriptor}.
 	 */
 	protected static final String FIELD_PERSIST_NAME = "persistName";
+	
+	/**
+	 * Constant identifier for the displayName field in a JMX {@link Descriptor}.
+	 */
+	protected static final String FIELD_DISPLAY_NAME = "displayName";
+	
+	/**
+	 * Constant identifier for the units field in a JMX {@link Descriptor}.
+	 */
+	protected static final String FIELD_UNITS = "units";
 
+	/**
+	 * Constant identifier for the metricType field in a JMX {@link Descriptor}.
+	 */
+	protected static final String FIELD_METRIC_TYPE = "metricType";
+	
+	/**
+	 * Constant identifier for the custom metricCategory field in a JMX {@link Descriptor}.
+	 */
+	protected static final String FIELD_METRIC_CATEGORY = "metricCategory";
 
 	/**
 	 * Default value for the JMX field "currencyTimeLimit".

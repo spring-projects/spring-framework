@@ -17,6 +17,7 @@
 package org.springframework.jmx.export.annotation;
 
 import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.support.MetricType;
 import org.springframework.stereotype.Service;
 
 /**
@@ -65,7 +66,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 	public String getName() {
 		return name;
 	}
-
+	
 	@ManagedAttribute(description = "The Nick Name Attribute")
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
@@ -96,6 +97,17 @@ public class AnnotationTestBean implements IJmxTestBean {
 	 */
 	public void dontExposeMe() {
 		throw new RuntimeException();
+	}
+	
+	@ManagedMetric(description="The QueueSize metric", currencyTimeLimit = 20, persistPolicy="OnUpdate", persistPeriod=300, 
+			category="utilization", metricType = MetricType.COUNTER, displayName="Queue Size", unit="messages")
+	public long getQueueSize() {
+		return 100l;
+	}
+	
+	@ManagedMetric
+	public int getCacheEntries() {
+		return 3;
 	}
 
 }

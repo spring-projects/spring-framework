@@ -26,6 +26,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
+import org.springframework.jmx.export.metadata.ManagedMetric;
 import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
@@ -41,6 +42,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Jennifer Hickey
  * @since 1.2
  * @see org.springframework.jmx.export.annotation.ManagedResource
  * @see org.springframework.jmx.export.annotation.ManagedAttribute
@@ -74,6 +76,19 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			managedAttribute.setDefaultValue(ann.defaultValue());
 		}
 		return managedAttribute;
+	}
+	
+	@Override
+	public ManagedMetric getManagedMetric(Method method)
+			throws InvalidMetadataException {
+		org.springframework.jmx.export.annotation.ManagedMetric ann =
+			AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
+		if (ann == null) {
+			return null;
+		}
+		ManagedMetric managedMetric = new ManagedMetric();
+		AnnotationBeanUtils.copyPropertiesToBean(ann, managedMetric);
+		return managedMetric;
 	}
 
 	public ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {

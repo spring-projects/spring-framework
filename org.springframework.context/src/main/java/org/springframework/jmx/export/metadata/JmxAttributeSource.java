@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
  * read source-level metadata from a managed resource's class.
  *
  * @author Rob Harrop
+ * @author Jennifer Hickey
  * @since 1.2
  * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler#setAttributeSource
  * @see org.springframework.jmx.export.MBeanExporter#setAssembler
@@ -48,6 +49,16 @@ public interface JmxAttributeSource {
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
 	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
+	
+	/**
+	 * Implementations should return an instance of <code>ManagedMetric</code>
+	 * if the supplied <code>Method</code> has the corresponding metadata.
+	 * Otherwise should return <code>null</code>.
+	 * @param method the method to read the attribute data from
+	 * @return the metric, or <code>null</code> if not found
+	 * @throws InvalidMetadataException in case of invalid attributes
+	 */
+	ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an instance of <code>ManagedOperation</code>
@@ -78,4 +89,7 @@ public interface JmxAttributeSource {
 	 * @throws InvalidMetadataException in the case of invalid metadata
 	 */
 	ManagedNotification[] getManagedNotifications(Class clazz) throws InvalidMetadataException;
+	
+	
+	
 }
