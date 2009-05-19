@@ -19,7 +19,7 @@ public class StringToEnumFactory implements ConverterFactory<String, Enum> {
 		}
 		
 		public T convert(String source) throws Exception {
-			return Enum.valueOf(enumType, source);
+			return (T) Enum.valueOf(enumType, source);
 		}
 	}
 
