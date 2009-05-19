@@ -130,8 +130,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			}
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException(
-					"I/O error parsing XML document for application context [" + getDisplayName() + "]", ex);
+			throw new ApplicationContextException("I/O error parsing XML document for " + getDisplayName(), ex);
 		}
 	}
 
