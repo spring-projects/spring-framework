@@ -157,7 +157,7 @@
 			    approach to software development is certainly advocated by
 			    the Spring team, and so coverage of Spring's support for
 			    integration testing is covered (alongside best practices for
-			    unit testing). The Spring team have found that the correct
+			    unit testing). The Spring team has found that the correct
 			    use of IoC certainly does make both unit and integration
 			    testing easier (in that the presence of setter methods and
 			    appropriate constructors on classes makes them

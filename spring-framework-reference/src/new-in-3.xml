@@ -67,10 +67,11 @@
   <section id="new-in-3-new-tutorial">
     <title>New getting started tutorial</title>
 
-    <para>There is now a new getting started tutorial for developing a basic 
-	Spring 3.0 MVC web application. This tutorial is a separate document that can 
-	be found at the <ulink url="http://www.springsource.org/documentation">
-	Spring Documentation</ulink> page.</para>
+    <para>There is now a new getting started tutorial for developing a basic
+    Spring 3.0 MVC web application. This tutorial is a separate document that
+    can be found at the <ulink
+    url="http://www.springsource.org/documentation"> Spring
+    Documentation</ulink> page.</para>
   </section>
 
   <section id="new-in-3-modules-build">
@@ -205,39 +206,36 @@
       <listitem>
         <para>Early support for Java EE 6</para>
       </listitem>
-      
+
       <listitem>
         <para>Embedded database support</para>
       </listitem>
-      
     </itemizedlist>
 
     <section id="new-feature-java5">
       <title>Core APIs updated for Java 5</title>
 
-      <para>BeanFactory interface returns typed bean instances as far as possible:
-	      <itemizedlist>
-	          <listitem>
-	            <para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para>
-	          </listitem>
-	
-	          <listitem>
-	            <para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt; type)</para>
-	          </listitem>
-	      </itemizedlist>
-      </para>
+      <para>BeanFactory interface returns typed bean instances as far as
+      possible: <itemizedlist>
+          <listitem>
+            <para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para>
+          </listitem>
+
+          <listitem>
+            <para>Map&lt;String, T&gt; getBeansOfType(Class&lt;T&gt;
+            type)</para>
+          </listitem>
+        </itemizedlist></para>
 
       <para>Spring's TaskExecutor interface now extends
-      <classname>java.util.concurrent.Executor</classname>:
-      <itemizedlist>
+      <classname>java.util.concurrent.Executor</classname>: <itemizedlist>
           <listitem>
             <para>extended AsyncTaskExecutor supports standard Callables with
             Futures</para>
           </listitem>
         </itemizedlist></para>
 
-      <para>New Java 5 based converter API and SPI:
-      <itemizedlist>
+      <para>New Java 5 based converter API and SPI: <itemizedlist>
           <listitem>
             <para>stateless ConversionService and Converters</para>
           </listitem>
@@ -297,13 +295,10 @@ public class RewardsTestDatabase {
       <section id="new-java-configuration">
         <title>Java based bean metadata</title>
 
-        <para>
-        	Some core features from the
-        	<ulink url="http://www.springsource.org/javaconfig">JavaConfig</ulink>
-        	project have been added to the Spring Framework now. This means
-        	that the following annotations are now directly supported:
-        	
-        	<itemizedlist>
+        <para>Some core features from the <ulink
+        url="http://www.springsource.org/javaconfig">JavaConfig</ulink>
+        project have been added to the Spring Framework now. This means that
+        the following annotations are now directly supported: <itemizedlist>
             <listitem>
               <para>@Configuration</para>
             </listitem>
@@ -327,8 +322,7 @@ public class RewardsTestDatabase {
             <listitem>
               <para>@Value</para>
             </listitem>
-          </itemizedlist>
-        </para>
+          </itemizedlist></para>
 
         <para>Here is an example of a Java class providing basic configuration
         using the new JavaConfig features: <programlisting language="java">@Configuration
@@ -383,8 +377,8 @@ public class AppConfig{
       <para>Object to XML mapping functionality (OXM) from the Spring Web
       Services project has been moved to the core Spring Framework now. The
       functionality is found in the <literal>org.springframework.oxm</literal>
-      package. More information on the use of the <literal>OXM</literal> module
-      can be found in the <link linkend="oxm">Marshalling XML using O/X
+      package. More information on the use of the <literal>OXM</literal>
+      module can be found in the <link linkend="oxm">Marshalling XML using O/X
       Mappers</link> chapter.</para>
     </section>
 
@@ -409,7 +403,7 @@ public class AppConfig{
         conversion between objects and their representation in HTTP request
         and replies.</para>
 
-        <para>The <classname>MarhsallingHttpMessageConverter</classname> uses
+        <para>The <classname>MarshallingHttpMessageConverter</classname> uses
         the <emphasis>Object to XML mapping</emphasis> functionality mentioned
         earlier.</para>
 
@@ -449,13 +443,13 @@ public class AppConfig{
 
       <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
-    
+
     <section id="new-feature-embedded-databases">
-    	<title>Support for embedded databases</title>
-    	<para>
-    		Convenient support for <link linkend="jdbc-embedded-database-support">embedded Java database engines</link>, including HSQL, H2, and Derby, is now provided.
-    	</para>
+      <title>Support for embedded databases</title>
+
+      <para>Convenient support for <link
+      linkend="jdbc-embedded-database-support">embedded Java database
+      engines</link>, including HSQL, H2, and Derby, is now provided.</para>
     </section>
-    
   </section>
 </chapter>
