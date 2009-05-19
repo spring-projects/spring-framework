@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * Convenience subclass of Quartz' JobDetail class that eases bean-style
- * usage.
+ * Convenience subclass of Quartz's {@link org.quartz.JobDetail} class,
+ * making bean-style usage easier.
  *
  * <p><code>JobDetail</code> itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
@@ -43,7 +43,7 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
 public class JobDetailBean extends JobDetail
-	implements BeanNameAware, ApplicationContextAware, InitializingBean {
+		implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
 	private Class actualJobClass;
 
