@@ -37,7 +37,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -721,6 +720,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * {@link org.springframework.context.event.ContextRefreshedEvent}.
 	 */
 	protected void finishRefresh() {
+		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
 	}
 
@@ -877,7 +877,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBean(name, requiredType);
 	}
 
-	public Object getBean(String name, Object[] args) throws BeansException {
+	public Object getBean(String name, Object... args) throws BeansException {
 		return getBeanFactory().getBean(name, args);
 	}
 

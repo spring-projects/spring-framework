@@ -163,7 +163,7 @@ public interface BeanFactory {
 	 * @throws BeansException if the bean could not be created
 	 * @since 2.5
 	 */
-	Object getBean(String name, Object[] args) throws BeansException;
+	Object getBean(String name, Object... args) throws BeansException;
 
 	/**
 	 * Does this bean factory contain a bean with the given name? More specifically,
