@@ -2526,6 +2526,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         method override would look like this:</para>
 
         <programlisting language="xml">&lt;bean id="myValueCalculator class="x.y.z.MyValueCalculator"&gt;
+
   <lineannotation>&lt;!-- arbitrary method replacement --&gt;</lineannotation>
   &lt;replaced-method name="computeValue" replacer="replacementComputeValue"&gt;
     &lt;arg-type&gt;String&lt;/arg-type&gt;
@@ -6545,7 +6546,7 @@ public Service userService() {
     protected abstract Command createCommand(); 
 }                   ]]></programlisting></para>
 
-          <para>Using Java-configurtion support we can easily create a
+          <para>Using Java-configuration support we can easily create a
           subclass of <code>CommandManager</code> where the abstract
           <code>createCommand()</code> is overridden in such a way that it
           'looks up' a brand new (prototype) command object: <programlisting

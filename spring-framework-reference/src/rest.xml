@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="rest">
   <title>REST support</title>
 
@@ -9,7 +8,7 @@
     <title>Introduction</title>
 
     <para>The goal of Spring's REST support is to make the development of
-    RESTful Web services and applications easier. </para>
+    RESTful Web services and applications easier.</para>
 
     <para>Client-side access to RESTful resources is greatly simplified using
     Spring <classname>RestTemplate</classname>.
@@ -18,7 +17,7 @@
     <classname>JmsTemplate</classname>. Instead of dealing with a verbose
     lower level API such as Apache Commons <classname>HttpClient</classname>
     to create RESTful request, RestTemplate provides one liner methods that
-    are purpose built for RESTful programming. </para>
+    are purpose built for RESTful programming.</para>
 
     <para>On the server-side, Spring's REST support is based upon Spring's
     existing annotation based MVC framework. (For those interested in the
@@ -32,12 +31,11 @@
     header.</para>
 
     <para>In this chapter we describe all the features of Spring's REST
-    support. It is divided into two main two chapters, one for the server-side
-    and one for the client-side. For those new to Spring's <link
-    linkend="mvc">MVC framework</link>, you may want to read through the
-    reference documentation on <link linkend="mvc-annotation">annotation-based
-    controller configuration</link> to understand the general programming
-    model.</para>
+    support. It is divided into two main chapters, one for the server-side and
+    one for the client-side. For those new to Spring's <link linkend="mvc">MVC
+    framework</link>, you may want to read through the reference documentation
+    on <link linkend="mvc-annotation">annotation-based controller
+    configuration</link> to understand the general programming model.</para>
   </section>
 
   <section id="rest-creating-services">
@@ -75,7 +73,7 @@
       variable. A Spring controller method to process above example is shown
       below;</para>
 
-      <programlisting language="java">@RequestMapping(value="/users/{userid}", method=RequestMethod.GET)
+      <programlisting language="java">@RequestMapping(value="/users/{userId}", method=RequestMethod.GET)
 public String getUser(@PathVariable String userId) {
   // implementation omitted...
 }</programlisting>
@@ -172,7 +170,7 @@ public class RelativePathUriTemplateController {
 
         <para>The <classname>@RequestBody</classname> method parameter
         annotation is used to indicate that a method parameter should be bound
-        to the value of the HTTP request body. For example, </para>
+        to the value of the HTTP request body. For example,</para>
 
         <programlisting language="java">@RequestMapping(value = "/something", method = RequestMethod.PUT)
 public void handle(@RequestBody String body, Writer writer) throws IOException {
@@ -182,8 +180,8 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <para>The conversion of the request body to the method argument is
         done using a <interfacename>HttpMessageConverter</interfacename>.
         <interfacename>HttpMessageConverter</interfacename> is responsible for
-        converting from the HTTP request message to an object
-        and converting from an object to the HTTP response body.
+        converting from the HTTP request message to an object and converting
+        from an object to the HTTP response body.
         <classname>DispatcherServlet</classname> supports annotation based
         processing using the
         <classname>DefaultAnnotationHandlerMapping</classname> and
@@ -210,20 +208,20 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
           </listitem>
 
           <listitem>
-            <para><classname>SourceHttpMessageConverter</classname> - convert
+            <para><classname>SourceHttpMessageConverter</classname> - converts
             to/from a javax.xml.transform.Source;</para>
           </listitem>
 
           <listitem>
             <para><classname>MarshallingHttpMessageConverter</classname> -
-            convert to/from an object using the
+            converts to/from an object using the
             <classname>org.springframework.oxm</classname> package.</para>
           </listitem>
         </itemizedlist>
 
         <para>More information on these converters can be found in the section
-        <link linkend="rest-message-conversion">Message Converters</link>.
-        </para>
+        <link linkend="rest-message-conversion">Message
+        Converters</link>.</para>
 
         <para>The <classname>MarshallingHttpMessageConverter</classname>
         requires a <interfacename>Marshaller</interfacename> and
@@ -411,7 +409,7 @@ public class ContentController {
 
       <itemizedlist>
         <listitem>
-          <para><classname>AbstractAtomFeedView</classname> - return an Atom
+          <para><classname>AbstractAtomFeedView</classname> - returns an Atom
           feed</para>
         </listitem>
 
@@ -442,7 +440,7 @@ public class ContentController {
         and RSS Feed views respectfully. They are based on java.net's <ulink
         url="https://rome.dev.java.net">ROME</ulink> project and are located
         in the package
-        <literal>org.springframework.web.servlet.view.feed</literal>. </para>
+        <literal>org.springframework.web.servlet.view.feed</literal>.</para>
 
         <para><classname>AbstractAtomFeedView</classname> requires you to
         implement the <methodname>buildFeedEntries</methodname> method and
@@ -488,10 +486,10 @@ public class ContentController {
 
         <para>The <methodname>buildFeedItems</methodname> and
         <methodname>buildFeedEntires</methodname> pass in the HTTP request in
-        case you need to access the Locale. The HTTP response in passed in
+        case you need to access the Locale. The HTTP response is passed in
         only for the setting of cookies or other HTTP headers. The feed will
         automatically be written to the response object after the method
-        returns. </para>
+        returns.</para>
 
         <para>For an example of creating a Atom view please refer to Alef
         Arendsen's SpringSource TeamBlog <ulink
@@ -508,7 +506,11 @@ public class ContentController {
         explicitly using <classname>MarhsallingView</classname>'s
         <property>modelKey</property> bean property. Alternatively, the view
         will iterate over all model properties marhsall only those types that
-        are supported by the <interfacename>Marshaller</interfacename>.</para>
+        are supported by the <interfacename>Marshaller</interfacename>. For
+        more information on the functionality in the
+        <classname>org.springframework.oxm</classname> package refer to the
+        chapter <link linkend="oxm">Marshalling XML using O/X
+        Mappers</link>.</para>
       </section>
     </section>
 
@@ -517,7 +519,7 @@ public class ContentController {
 
       <para>A key principle of REST is the use of the Uniform Interface. This
       means that all resources (URLs) can be manipulated using the same four
-      HTTP method: GET, PUT, POST, and DELETE. For each methods, the HTTP
+      HTTP methods: GET, PUT, POST, and DELETE. For each methods, the HTTP
       specification defines the exact semantics. For instance, a GET should
       always be a safe operation, meaning that is has no side effects, and a
       PUT or DELETE should be idempotent, meaning that you can repeat these
@@ -566,26 +568,26 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
       used to determine change in content at a given URL. It can be considered
       to be the more sophisticated successor to the
       <literal>Last-Modified</literal> header. When a server returns a
-      representation with an ETag header, client can use this header in
-      subsequent GETs, in a <literal>If-None-Match</literal> header. If the
+      representation with an ETag header, the client can use this header in
+      subsequent GETs, in an <literal>If-None-Match</literal> header. If the
       content has not changed, the server will return <literal>304: Not
       Modified</literal>.</para>
 
       <para>Support for ETags is provided by the servlet filter
       <classname>ShallowEtagHeaderFilter</classname>. Since it is a plain
-      Servlet Filter, and thus can be used in combination any web framework.
-      The <classname>ShallowEtagHeaderFilter</classname> filter creates
-      so-called shallow ETags (as opposed to a deep ETags, more about that
-      later). The way it works is quite simple: the filter simply caches the
-      content of the rendered JSP (or other content), generates a MD5 hash
-      over that, and returns that as a ETag header in the response. The next
-      time a client sends a request for the same resource, it use that hash as
-      the <literal>If-None-Match</literal> value. The filter notices this,
-      renders the view again, and compares the two hashes. If they are equal,
-      a <literal>304</literal> is returned. It is important to note that this
-      filter will not save processing power, as the view is still rendered.
-      The only thing it saves is bandwidth, as the rendered response is not
-      sent back over the wire.</para>
+      Servlet Filter, and thus can be used in combination with any web
+      framework. The <classname>ShallowEtagHeaderFilter</classname> filter
+      creates so-called shallow ETags (as opposed to deep ETags, more about
+      that later). The way it works is quite simple: the filter simply caches
+      the content of the rendered JSP (or other content), generates an MD5
+      hash over that, and returns that as an ETag header in the response. The
+      next time a client sends a request for the same resource, it uses that
+      hash as the <literal>If-None-Match</literal> value. The filter notices
+      this, renders the view again, and compares the two hashes. If they are
+      equal, a <literal>304</literal> is returned. It is important to note
+      that this filter will not save processing power, as the view is still
+      rendered. The only thing it saves is bandwidth, as the rendered response
+      is not sent back over the wire.</para>
 
       <para>Deep ETags are a bit more complicated. In this case, the ETag is
       based on the underlying domain objects, RDMBS tables, etc. Using this
@@ -623,18 +625,18 @@ public class SimpleController {
       the types in the list, then the method annotated with the matching
       <classname>@ExceptionHandler</classname> will be invoked. If the
       annotation value is not set then the exception types listed as method
-      arguments are used. </para>
+      arguments are used.</para>
 
       <para>Much like standard controller methods annotated with a
       <classname>@RequestMapping</classname> annotation, the method arguments
       and return values of <classname>@ExceptionHandler</classname> methods
       are very flexible. For example, the
-      <classname>HttpServletRequest</classname> can be access in Servlet
+      <classname>HttpServletRequest</classname> can be accessed in Servlet
       environments and the <classname>PortletRequest</classname> in Portlet
       environments. The return type can be a <classname>String</classname>,
       which is interpreted as a view name or a
       <classname>ModelAndView</classname> object. Please refer to the API
-      documentation for more details. </para>
+      documentation for more details.</para>
     </section>
   </section>
 
@@ -655,7 +657,7 @@ public class SimpleController {
     uses the Object-to-XML framework that is part of the
     <classname>org.springframework.oxm</classname> package. This gives you a
     wide range of choices of XML to Object mapping technologies to choose
-    from. </para>
+    from.</para>
 
     <para>This section describes how to use the
     <classname>RestTemplate</classname> and its associated
@@ -684,9 +686,9 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
   }
 }</programlisting>
 
-      <para> RestTemplate provides higher level methods that correspond to
-      each of the six main HTTP methods that make invoking many RESTful
-      services a one-liner and enforce REST best practices.</para>
+      <para>RestTemplate provides higher level methods that correspond to each
+      of the six main HTTP methods that make invoking many RESTful services a
+      one-liner and enforce REST best practices.</para>
 
       <table>
         <title>Overview of RestTemplate methods</title>
@@ -756,9 +758,9 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       naming convention, the first part indicates what HTTP method is being
       invoked and the second part indicates what is returned. For example, the
       method <methodname>getForObject</methodname> will perform a GET, convert
-      the HTTP response into an object type of your choice, and returns that
+      the HTTP response into an object type of your choice and return that
       object. The method <methodname>postForLocation</methodname> will do a
-      POST, converting the given object into a HTTP request, and returns the
+      POST, converting the given object into a HTTP request and return the
       response HTTP Location header where the newly created object can be
       found In case of an exception processing the HTTP request, an exception
       of the type <classname>RestClientException</classname> will be
@@ -781,20 +783,20 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
 
       <para>Each method takes URI template arguments in two forms, either as a
       <literal>String</literal> variable length argument or a
-      <literal>Map&lt;String,String&gt;</literal>. For example, </para>
+      <literal>Map&lt;String,String&gt;</literal>. For example,</para>
 
       <programlisting language="java">String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", 
                                           String.class,"42", "21");
 </programlisting>
 
-      <para>using variable length arguments and </para>
+      <para>using variable length arguments and</para>
 
-      <programlisting language="java">Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", 42);
+      <programlisting language="java">Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
 String result = 
   restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
 </programlisting>
 
-      <para>using a <literal>Map&lt;String,String&gt;</literal>. </para>
+      <para>using a <literal>Map&lt;String,String&gt;</literal>.</para>
 
       <para>To create an instance of <classname>RestTemplate</classname> you
       can simply call the default constructor. This will use standard Java
@@ -813,7 +815,7 @@ String result =
 
       <para>The previous example using Jakarta Commons
       <classname>HttpClient</classname> directly rewritten to use the
-      <classname>RestTemplate</classname> is shown below </para>
+      <classname>RestTemplate</classname> is shown below</para>
 
       <programlisting>uri = "http://example.com/hotels/{id}/bookings";
 
@@ -836,7 +838,7 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
 // also has an overload with urlVariables as a Map&lt;String, String&gt;.</programlisting>
 
       <para>The <interfacename>RequestCallback</interfacename> interface is
-      defined as </para>
+      defined as</para>
 
       <programlisting language="java">public interface RequestCallback {
  void doWithRequest(ClientHttpRequest request) throws IOException;
@@ -859,7 +861,7 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
       <methodname>put</methodname> are converted to HTTP requests and from
       HTTP responses by <interfacename>HttpMessageConverters</interfacename>.
       The <interfacename>HttpMessageConverter</interfacename> interface is
-      show below to give you a better feel for its functionality</para>
+      shown below to give you a better feel for its functionality</para>
 
       <programlisting language="java">public interface HttpMessageConverter&lt;T&gt; {
 
@@ -883,7 +885,7 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
       provided in the framework and are registered by default with the
       <classname>RestTemplate</classname> on the client-side and with
       <classname>AnnotationMethodHandlerAdapter</classname> on the
-      server-side. </para>
+      server-side.</para>
 
       <para>The implementations of
       <classname>HttpMessageConverter</classname>s are described in the
@@ -894,7 +896,7 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
       <section id="rest-string-converter">
         <title>StringHttpMessageConverter</title>
 
-        <para>A <interfacename>HttpMessageConverter</interfacename>
+        <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write Strings from the HTTP request
         and response. By default, this converter supports all text media types
         (<literal>text/*</literal>), and writes with a
@@ -905,31 +907,31 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
       <section id="rest-form-converter">
         <title>FormHttpMessageConverter</title>
 
-        <para>A <interfacename>HttpMessageConverter</interfacename>
+        <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write form data from the HTTP request
         and response. By default, this converter reads and writes the media
         type (<literal>application/x-www-form-urlencoded</literal>). Form data
         is read from and written into a <literal>MultiValueMap&lt;String,
-        String&gt;</literal>. </para>
+        String&gt;</literal>.</para>
       </section>
 
       <section id="rest-byte-converter">
         <title>ByteArrayMessageConverter</title>
 
-        <para>A <interfacename>HttpMessageConverter</interfacename>
+        <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write byte arrays from the HTTP
         request and response. By default, this converter supports all media
         types (<literal>*/*</literal>), and writes with a
         <literal>Content-Type</literal> of
         <literal>application/octet-stream</literal>. This can be overridden by
         setting the <property>supportedMediaTypes</property> property, and
-        overriding <literal>getContentType(byte[])</literal>. </para>
+        overriding <literal>getContentType(byte[])</literal>.</para>
       </section>
 
       <section id="rest-marhsalling-converter">
         <title>MarshallingHttpMessageConverter</title>
 
-        <para>A <interfacename>HttpMessageConverter</interfacename>
+        <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write XML using Spring's
         <interfacename>Marshaller</interfacename> and
         <interfacename>Unmarshaller</interfacename> abstractions from the
@@ -944,7 +946,7 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
       <section id="rest-source-converter">
         <title>SourceHttpMessageConverter</title>
 
-        <para>A <interfacename>HttpMessageConverter</interfacename>
+        <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write
         <classname>javax.xml.transform.Source</classname> from the HTTP
         request and response. Only <classname>DOMSource</classname>,
