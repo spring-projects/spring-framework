@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.context.access;
 
 import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
@@ -58,11 +58,11 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 		BeanFactory fac = bfr.getFactory();
 		assertTrue(fac instanceof ApplicationContext);
 		assertEquals("a.qualified.name.of.some.sort", ((ApplicationContext) fac).getId());
-		assertEquals("a.qualified.name.of.some.sort", ((ApplicationContext) fac).getDisplayName());
+		assertTrue(((ApplicationContext) fac).getDisplayName().contains("a.qualified.name.of.some.sort"));
 		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
 		BeanFactory fac2 = bfr2.getFactory();
 		assertEquals("another.qualified.name", ((ApplicationContext) fac2).getId());
-		assertEquals("another.qualified.name", ((ApplicationContext) fac2).getDisplayName());
+		assertTrue(((ApplicationContext) fac2).getDisplayName().contains("another.qualified.name"));
 		assertTrue(fac2 instanceof ApplicationContext);
 	}
 
