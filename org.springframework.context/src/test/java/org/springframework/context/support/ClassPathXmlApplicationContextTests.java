@@ -133,8 +133,8 @@ public final class ClassPathXmlApplicationContextTests {
 		}
 		catch (BeanCreationException ex) {
 			assertTrue(ex.contains(TypeMismatchException.class));
-			assertTrue(ex.toString().indexOf("someMessageSource") != -1);
-			assertTrue(ex.toString().indexOf("useCodeAsDefaultMessage") != -1);
+			assertTrue(ex.toString().contains("someMessageSource"));
+			assertTrue(ex.toString().contains("useCodeAsDefaultMessage"));
 			checkExceptionFromInvalidValueType(ex);
 			checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
 			assertFalse(context.isActive());
@@ -146,8 +146,8 @@ public final class ClassPathXmlApplicationContextTests {
 		ex.printStackTrace(new PrintStream(baos));
 		String dump = FileCopyUtils.copyToString(
 				new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
-		assertTrue(dump.indexOf("someMessageSource") != -1);
-		assertTrue(dump.indexOf("useCodeAsDefaultMessage") != -1);
+		assertTrue(dump.contains("someMessageSource"));
+		assertTrue(dump.contains("useCodeAsDefaultMessage"));
 	}
 
 	@Test
@@ -381,13 +381,14 @@ public final class ClassPathXmlApplicationContextTests {
 	public void testGenericApplicationContextWithXmlBeanDefinitionsAndSpecifiedId() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.setId("testContext");
+		ctx.setDisplayName("Test Context");
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ctx);
 		reader.loadBeanDefinitions(new ClassPathResource(CONTEXT_B, getClass()));
 		reader.loadBeanDefinitions(new ClassPathResource(CONTEXT_C, getClass()));
 		reader.loadBeanDefinitions(new ClassPathResource(CONTEXT_A, getClass()));
 		ctx.refresh();
 		assertEquals("testContext", ctx.getId());
-		assertEquals("testContext", ctx.getDisplayName());
+		assertEquals("Test Context", ctx.getDisplayName());
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
