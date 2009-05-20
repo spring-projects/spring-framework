@@ -543,8 +543,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				PersistenceProperty[] pps = pc.properties();
 				if (!ObjectUtils.isEmpty(pps)) {
 					properties = new Properties();
-					for (int i = 0; i < pps.length; i++) {
-						PersistenceProperty pp = pps[i];
+					for (PersistenceProperty pp : pps) {
 						properties.setProperty(pp.name(), pp.value());
 					}
 				}
