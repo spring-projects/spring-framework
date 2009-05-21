@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<xsd:schema xmlns="http://www.springframework.org/schema/scheduling"
+<xsd:schema xmlns="http://www.springframework.org/schema/concurrent"
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 		xmlns:beans="http://www.springframework.org/schema/beans"
 		xmlns:tool="http://www.springframework.org/schema/tool"
-		targetNamespace="http://www.springframework.org/schema/scheduling"
+		targetNamespace="http://www.springframework.org/schema/concurrent"
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Defines the elements used in the Spring Framework's scheduling support.
+	Defines the elements used in the Spring Framework's support for task execution and scheduling.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
