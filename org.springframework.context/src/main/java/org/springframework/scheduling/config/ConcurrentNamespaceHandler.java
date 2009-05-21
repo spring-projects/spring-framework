@@ -19,12 +19,12 @@ package org.springframework.scheduling.config;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
- * <code>NamespaceHandler</code> for the scheduling namespace. 
+ * <code>NamespaceHandler</code> for the 'concurrent' namespace. 
  * 
  * @author Mark Fisher
  * @since 3.0
  */
-public class SchedulingNamespaceHandler extends NamespaceHandlerSupport {
+public class ConcurrentNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
 		this.registerBeanDefinitionParser("scheduled-tasks", new ScheduledTasksBeanDefinitionParser());
