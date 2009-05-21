@@ -1814,7 +1814,7 @@ support=support@example.co.uk]]></programlisting>
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
     
     <bean name="classic" class="com.example.ExampleBean">
-        <property name="email" value="foo@bar.com/>
+        <property name="email" value="foo@bar.com"/>
     </bean>
     
     <bean name="p-namespace" class="com.example.ExampleBean"
