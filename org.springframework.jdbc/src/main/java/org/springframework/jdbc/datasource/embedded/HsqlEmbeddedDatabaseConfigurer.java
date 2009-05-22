@@ -19,7 +19,7 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.ClassUtils;
 
 /**
- * Initializes a HSQL embedded database instance.
+ * Initializes an HSQL embedded database instance.
  * Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Keith Donald
@@ -30,7 +30,7 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 
 	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
 
-	private final Class driverClass;
+	private final Class<?> driverClass;
 
 
 	/**
@@ -47,7 +47,7 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 	}
 
 
-	private HsqlEmbeddedDatabaseConfigurer(Class driverClass) {
+	private HsqlEmbeddedDatabaseConfigurer(Class<?> driverClass) {
 		this.driverClass = driverClass;
 	}
 

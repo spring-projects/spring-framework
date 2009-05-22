@@ -19,7 +19,7 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.ClassUtils;
 
 /**
- * Initializes a H2 embedded database instance.
+ * Initializes an H2 embedded database instance.
  * Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Oliver Gierke
@@ -29,7 +29,7 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 
 	private static H2EmbeddedDatabaseConfigurer INSTANCE;
 
-	private final Class driverClass;
+	private final Class<?> driverClass;
 
 
 	/**
@@ -46,7 +46,7 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 	}
 
 
-	public H2EmbeddedDatabaseConfigurer(Class driverClass) {
+	private H2EmbeddedDatabaseConfigurer(Class<?> driverClass) {
 		this.driverClass = driverClass;
 	}
 
