@@ -330,6 +330,7 @@
 		<xi:include href="metadata.xml"/>
 	</part>
 	<!-- back matter -->
+	<xi:include href="classic-spring.xml"/>
 	<xi:include href="xsd-configuration.xml"/>
 	<xi:include href="xml-custom.xml"/>
 	<xi:include href="dtd.xml"/>
