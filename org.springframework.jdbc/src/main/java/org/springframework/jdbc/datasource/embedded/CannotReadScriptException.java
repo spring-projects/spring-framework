@@ -18,13 +18,18 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.core.io.support.EncodedResource;
 
 /**
- * Thrown by {@link ResourceDatabasePopulator} if one of its SQL scripts could not be read during population.
+ * Thrown by {@link ResourceDatabasePopulator} if one of its SQL scripts could
+ * not be read during population.
+ * 
  * @author Keith Donald
+ * @since 3.0
  */
+@SuppressWarnings("serial")
 public class CannotReadScriptException extends RuntimeException {
 
 	/**
 	 * Creates a new cannot read script exception.
+	 * 
 	 * @param resource the resource that could not be read from
 	 * @param cause the underlying cause of the resource access failure
 	 */
