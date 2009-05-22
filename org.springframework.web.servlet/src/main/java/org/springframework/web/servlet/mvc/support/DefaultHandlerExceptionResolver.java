@@ -29,6 +29,7 @@ import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -187,7 +188,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 		response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
-		if (mediaTypes != null) {
+		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			response.setHeader("Accept", MediaType.toString(mediaTypes));
 		}
 		return new ModelAndView();

@@ -437,7 +437,6 @@ public class HandlerMethodInvoker {
 
 	/**
 	 * Resolves the given {@link RequestBody @RequestBody} annotation.
-	 * Throws an UnsupportedOperationException by default.
 	 */
 	@SuppressWarnings("unchecked")
 	protected Object resolveRequestBody(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
@@ -447,7 +446,7 @@ public class HandlerMethodInvoker {
 		Class paramType = methodParam.getParameterType();
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		if (contentType == null) {
-			throw new IllegalStateException("Cannot extract response: no Content-Type found");
+			throw new HttpMediaTypeNotSupportedException("Cannot extract @RequestBody: no Content-Type found");
 		}
 		List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 		for (HttpMessageConverter<?> messageConverter : messageConverters) {
