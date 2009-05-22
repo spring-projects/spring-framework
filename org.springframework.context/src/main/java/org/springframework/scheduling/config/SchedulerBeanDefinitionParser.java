@@ -23,12 +23,12 @@ import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the 'task-scheduler' element of the scheduling namespace.
+ * Parser for the 'scheduler' element of the 'task' namespace.
  * 
  * @author Mark Fisher
  * @since 3.0
  */
-public class TaskSchedulerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class SchedulerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
 	protected String getBeanClassName(Element element) {

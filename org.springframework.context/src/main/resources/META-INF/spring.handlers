@@ -1,4 +1,4 @@
 http\://www.springframework.org/schema/context=org.springframework.context.config.ContextNamespaceHandler
 http\://www.springframework.org/schema/jee=org.springframework.ejb.config.JeeNamespaceHandler
 http\://www.springframework.org/schema/lang=org.springframework.scripting.config.LangNamespaceHandler
-http\://www.springframework.org/schema/concurrent=org.springframework.scheduling.config.ConcurrentNamespaceHandler
+http\://www.springframework.org/schema/task=org.springframework.scheduling.config.TaskNamespaceHandler
