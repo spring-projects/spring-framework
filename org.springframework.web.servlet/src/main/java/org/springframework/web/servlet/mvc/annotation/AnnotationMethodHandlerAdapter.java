@@ -699,6 +699,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				ExtendedModelMap implicitModel,
 				ServletWebRequest webRequest) {
 
+			if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
+				ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
+				HttpServletResponse response = webRequest.getResponse();
+				response.setStatus(responseStatus.value().value());
+				responseArgumentUsed = true;
+			}
+
 			// Invoke custom resolvers if present...
 			if (customModelAndViewResolvers != null) {
 				for (ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
@@ -708,12 +715,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						return mav;
 					}
 				}
-			}
-			if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
-				ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
-				HttpServletResponse response = webRequest.getResponse();
-				response.setStatus(responseStatus.value().value());
-				responseArgumentUsed = true;
 			}
 
 			if (returnValue instanceof ModelAndView) {
