@@ -15,8 +15,7 @@
 
     <para>This section documents the classic usage patterns that you might
     encounter in a legacy Spring application. For the currently recommended
-    usage patterns, please refer to the <xref linkend="orm" /> chapter.
-    </para>
+    usage patterns, please refer to the <xref linkend="orm" /> chapter.</para>
 
     <section id="classic-spring-hibernate">
       <title>Hibernate</title>
@@ -170,96 +169,6 @@
       </section>
     </section>
 
-    <section id="classic-spring-jpa">
-      <title>JPA</title>
-
-      <para>For the currently recommended usage patterns for JPA see <xref
-      linkend="orm-jpa" /></para>
-
-      <section id="orm-jpa-template">
-        <title><classname>JpaTemplate</classname> and
-        <classname>JpaDaoSupport</classname></title>
-
-        <para>Each JPA-based DAO will then receive a
-        <interfacename>EntityManagerFactory</interfacename> via dependency
-        injection. Such a DAO can be coded against plain JPA and work with the
-        given <interfacename>EntityManagerFactory</interfacename> or through
-        Spring's <classname>JpaTemplate</classname>:</para>
-
-        <programlisting language="xml">&lt;beans&gt;
-
-  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-    &lt;property name="entityManagerFactory" ref="myEmf"/&gt;
-  &lt;/bean&gt;
-
-&lt;/beans&gt;</programlisting>
-
-        <programlisting language="java">public class JpaProductDao implements ProductDao {
-  
-    private JpaTemplate jpaTemplate;
-
-    public void setEntityManagerFactory(EntityManagerFactory emf) {
-        this.jpaTemplate = new JpaTemplate(emf);
-    }
-
-    public Collection loadProductsByCategory(final String category) throws DataAccessException {
-        return (Collection) this.jpaTemplate.execute(new JpaCallback() {
-            public Object doInJpa(EntityManager em) throws PersistenceException {
-                Query query = em.createQuery("from Product as p where p.category = :category");
-                query.setParameter("category", category);
-                List result = query.getResultList(); 
-                <lineannotation>// do some further processing with the result list</lineannotation>
-                return result;
-            }
-        });
-    }
-}</programlisting>
-
-        <para>The <interfacename>JpaCallback</interfacename> implementation
-        allows any type of JPA data access. The
-        <classname>JpaTemplate</classname> will ensure that
-        <interfacename>EntityManager</interfacename>s are properly opened and
-        closed and automatically participate in transactions. Moreover, the
-        <classname>JpaTemplate</classname> properly handles exceptions, making
-        sure resources are cleaned up and the appropriate transactions rolled
-        back. The template instances are thread-safe and reusable and they can
-        be kept as instance variable of the enclosing class. Note that
-        <classname>JpaTemplate</classname> offers single-step actions such as
-        find, load, merge, etc along with alternative convenience methods that
-        can replace one line callback implementations.</para>
-
-        <para>Furthermore, Spring provides a convenient
-        <classname>JpaDaoSupport</classname> base class that provides the
-        <literal>get/setEntityManagerFactory</literal> and
-        <methodname>getJpaTemplate()</methodname> to be used by
-        subclasses:</para>
-
-        <programlisting language="java">public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
-  
-    public Collection loadProductsByCategory(String category) throws DataAccessException {
-        Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
-        params.put("category", category);
-        return getJpaTemplate().findByNamedParams("from Product as p where p.category = :category", params);
-    }
-}</programlisting>
-
-        <para>Besides working with Spring's
-        <classname>JpaTemplate</classname>, one can also code Spring-based
-        DAOs against the JPA, doing one's own explicit
-        <interfacename>EntityManager</interfacename> handling. As also
-        elaborated in the corresponding Hibernate section, the main advantage
-        of this approach is that your data access code is able to throw
-        checked exceptions. <classname>JpaDaoSupport</classname> offers a
-        variety of support methods for this scenario, for retrieving and
-        releasing a transaction <interfacename>EntityManager</interfacename>,
-        as well as for converting exceptions.</para>
-
-        <para><emphasis>JpaTemplate mainly exists as a sibling of JdoTemplate
-        and HibernateTemplate, offering the same style for people used to
-        it.</emphasis></para>
-      </section>
-    </section>
-
     <section id="classic-spring-jdo">
       <title>JDO</title>
 
@@ -347,77 +256,93 @@
       </section>
     </section>
 
-    <section id="classic-spring-ibatis">
-      <title>iBATIS</title>
+    <section id="classic-spring-jpa">
+      <title>JPA</title>
 
-      <para>For the currently recommended usage patterns for iBATIS see <xref
-      linkend="orm-ibatis" /></para>
+      <para>For the currently recommended usage patterns for JPA see <xref
+      linkend="orm-jpa" /></para>
 
-      <section id="orm-ibatis-template">
-        <title>Using <classname>SqlMapClientTemplate</classname> and
-        <classname>SqlMapClientDaoSupport</classname></title>
+      <section id="orm-jpa-template">
+        <title><classname>JpaTemplate</classname> and
+        <classname>JpaDaoSupport</classname></title>
 
-        <para>The <classname>SqlMapClientDaoSupport</classname> class offers a
-        supporting class similar to the
-        <classname>SqlMapDaoSupport</classname>. We extend it to implement our
-        DAO:</para>
-
-        <programlisting language="java">public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
-
-    public Account getAccount(String email) throws DataAccessException {
-        return (Account) getSqlMapClientTemplate().queryForObject("getAccountByEmail", email);
-    }
-
-    public void insertAccount(Account account) throws DataAccessException {
-        getSqlMapClientTemplate().update("insertAccount", account);
-    }
-}</programlisting>
-
-        <para>In the DAO, we use the pre-configured
-        <classname>SqlMapClientTemplate</classname> to execute the queries,
-        after setting up the <literal>SqlMapAccountDao</literal> in the
-        application context and wiring it with our
-        <literal>SqlMapClient</literal> instance:</para>
+        <para>Each JPA-based DAO will then receive a
+        <interfacename>EntityManagerFactory</interfacename> via dependency
+        injection. Such a DAO can be coded against plain JPA and work with the
+        given <interfacename>EntityManagerFactory</interfacename> or through
+        Spring's <classname>JpaTemplate</classname>:</para>
 
         <programlisting language="xml">&lt;beans&gt;
 
-  &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
-    &lt;property name="sqlMapClient" ref="sqlMapClient"/&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="entityManagerFactory" ref="myEmf"/&gt;
   &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
 
-        <para>Note that a <classname>SqlMapTemplate</classname> instance could
-        also be created manually, passing in the
-        <literal>SqlMapClient</literal> as constructor argument. The
-        <literal>SqlMapClientDaoSupport</literal> base class simply
-        pre-initializes a <classname>SqlMapClientTemplate</classname> instance
-        for us.</para>
+        <programlisting language="java">public class JpaProductDao implements ProductDao {
+  
+    private JpaTemplate jpaTemplate;
 
-        <para>The <classname>SqlMapClientTemplate</classname> also offers a
-        generic <literal>execute</literal> method, taking a custom
-        <literal>SqlMapClientCallback</literal> implementation as argument.
-        This can, for example, be used for batching:</para>
+    public void setEntityManagerFactory(EntityManagerFactory emf) {
+        this.jpaTemplate = new JpaTemplate(emf);
+    }
 
-        <programlisting language="java">public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
-
-    public void insertAccount(Account account) throws DataAccessException {
-        getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
-            public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
-                executor.startBatch();
-                executor.update("insertAccount", account);
-                executor.update("insertAddress", account.getAddress());
-                executor.executeBatch();
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
+        return (Collection) this.jpaTemplate.execute(new JpaCallback() {
+            public Object doInJpa(EntityManager em) throws PersistenceException {
+                Query query = em.createQuery("from Product as p where p.category = :category");
+                query.setParameter("category", category);
+                List result = query.getResultList(); 
+                <lineannotation>// do some further processing with the result list</lineannotation>
+                return result;
             }
         });
     }
 }</programlisting>
 
-        <para>In general, any combination of operations offered by the native
-        <literal>SqlMapExecutor</literal> API can be used in such a callback.
-        Any <literal>SQLException</literal> thrown will automatically get
-        converted to Spring's generic
-        <classname>DataAccessException</classname> hierarchy.</para>
+        <para>The <interfacename>JpaCallback</interfacename> implementation
+        allows any type of JPA data access. The
+        <classname>JpaTemplate</classname> will ensure that
+        <interfacename>EntityManager</interfacename>s are properly opened and
+        closed and automatically participate in transactions. Moreover, the
+        <classname>JpaTemplate</classname> properly handles exceptions, making
+        sure resources are cleaned up and the appropriate transactions rolled
+        back. The template instances are thread-safe and reusable and they can
+        be kept as instance variable of the enclosing class. Note that
+        <classname>JpaTemplate</classname> offers single-step actions such as
+        find, load, merge, etc along with alternative convenience methods that
+        can replace one line callback implementations.</para>
+
+        <para>Furthermore, Spring provides a convenient
+        <classname>JpaDaoSupport</classname> base class that provides the
+        <literal>get/setEntityManagerFactory</literal> and
+        <methodname>getJpaTemplate()</methodname> to be used by
+        subclasses:</para>
+
+        <programlisting language="java">public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
+  
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+        Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
+        params.put("category", category);
+        return getJpaTemplate().findByNamedParams("from Product as p where p.category = :category", params);
+    }
+}</programlisting>
+
+        <para>Besides working with Spring's
+        <classname>JpaTemplate</classname>, one can also code Spring-based
+        DAOs against the JPA, doing one's own explicit
+        <interfacename>EntityManager</interfacename> handling. As also
+        elaborated in the corresponding Hibernate section, the main advantage
+        of this approach is that your data access code is able to throw
+        checked exceptions. <classname>JpaDaoSupport</classname> offers a
+        variety of support methods for this scenario, for retrieving and
+        releasing a transaction <interfacename>EntityManager</interfacename>,
+        as well as for converting exceptions.</para>
+
+        <para><emphasis>JpaTemplate mainly exists as a sibling of JdoTemplate
+        and HibernateTemplate, offering the same style for people used to
+        it.</emphasis></para>
       </section>
     </section>
   </section>
