@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="orm">
   <title>Object Relational Mapping (ORM) data access</title>
 
@@ -9,17 +8,17 @@
     <title>Introduction</title>
 
     <para>The Spring Framework provides integration with <emphasis>Hibernate,
-    JDO, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>: in terms 
-    of resource management, DAO implementation support, and 
-    transaction strategies. For example for Hibernate, there is 
-    first-class support with lots of IoC convenience features, 
-    addressing many typical Hibernate integration issues. All of
-    these support packages for O/R (Object Relational) mappers comply with
-    Spring's generic transaction and DAO exception hierarchies. There are
-    usually two integration styles: either using Spring's DAO 'templates' or
-    coding DAOs against plain Hibernate/JDO/JPA/etc APIs. In both cases,
-    DAOs can be configured through Dependency Injection and participate in
-    Spring's resource and transaction management.</para>
+    JDO, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>: in terms of
+    resource management, DAO implementation support, and transaction
+    strategies. For example for Hibernate, there is first-class support with
+    lots of IoC convenience features, addressing many typical Hibernate
+    integration issues. All of these support packages for O/R (Object
+    Relational) mappers comply with Spring's generic transaction and DAO
+    exception hierarchies. There are usually two integration styles: either
+    using Spring's DAO 'templates' or coding DAOs against plain
+    Hibernate/JDO/JPA/etc APIs. In both cases, DAOs can be configured through
+    Dependency Injection and participate in Spring's resource and transaction
+    management.</para>
 
     <para>Spring adds significant support when using the O/R mapping layer of
     your choice to create data access applications. First of all, you should
@@ -102,10 +101,10 @@
 
     <para>The PetClinic sample in the Spring distribution offers alternative
     DAO implementations and application context configurations for JDBC,
-    Hibernate, and JPA. PetClinic can therefore serve as
-    working sample app that illustrates the use of Hibernate and JPA
-    in a Spring web application. It also leverages declarative transaction
-    demarcation with different transaction strategies.</para>
+    Hibernate, and JPA. PetClinic can therefore serve as working sample app
+    that illustrates the use of Hibernate and JPA in a Spring web application.
+    It also leverages declarative transaction demarcation with different
+    transaction strategies.</para>
 
     <para>The JPetStore sample illustrates the use of iBATIS SQL Maps in a
     Spring environment. It also features two web tier versions: one based on
@@ -1297,8 +1296,8 @@
       exposing a JDO transaction to JDBC access code that accesses the same
       JDBC <interfacename>DataSource</interfacename>, provided that the
       registered <classname>JdoDialect</classname> supports retrieval of the
-      underlying JDBC <interfacename>Connection</interfacename>. This is
-      the case for JDBC-based JDO 2.0 implementations by default.</para>
+      underlying JDBC <interfacename>Connection</interfacename>. This is the
+      case for JDBC-based JDO 2.0 implementations by default.</para>
     </section>
 
     <section id="orm-jdo-dialect">
@@ -1345,7 +1344,8 @@
       </itemizedlist>
 
       <para>See the <classname>JdoDialect</classname> Javadoc for more details
-      on its operations and how they are used within Spring's JDO support.</para>
+      on its operations and how they are used within Spring's JDO
+      support.</para>
     </section>
   </section>
 
@@ -1675,27 +1675,29 @@
  
 &lt;/beans&gt;</programlisting>
 
-        <para>A typical <literal>persistence.xml</literal> file looks as follows:</para>
+        <para>A typical <literal>persistence.xml</literal> file looks as
+        follows:</para>
 
         <programlisting language="xml">&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0"&gt;
 
-  &lt;persistence-unit name="myUnit" transaction-type="RESOURCE_LOCAL">
-    &lt;mapping-file>META-INF/orm.xml&lt;/mapping-file&gt;
+  &lt;persistence-unit name="myUnit" transaction-type="RESOURCE_LOCAL"&gt;
+    &lt;mapping-file&gt;META-INF/orm.xml&lt;/mapping-file&gt;
     &lt;exclude-unlisted-classes/&gt;
   &lt;/persistence-unit&gt;
 
-&lt;/persistence></programlisting>
+&lt;/persistence&gt;</programlisting>
 
         <para><emphasis>NOTE: The "exclude-unlisted-classes" element always
-        indicates that NO scanning for annotated entity classes is supposed
-        to happen, in order to support the
-        <literal>&lt;exclude-unlisted-classes/&gt;</literal> shortcut.
-        This is in line with the JPA specification (which suggests that shortcut)
-        but unfortunately in conflict with the JPA XSD (which implies "false"
-        for that shortcut). As a consequence,
-        "<literal>&lt;exclude-unlisted-classes&gt; false &lt;/exclude-unlisted-classes/&gt;</literal>"
-        is not supported! Simply omit the "exclude-unlisted-classes" element if
-        you would like entity class scanning to actually happen.</emphasis></para>
+        indicates that NO scanning for annotated entity classes is supposed to
+        happen, in order to support the
+        <literal>&lt;exclude-unlisted-classes/&gt;</literal> shortcut. This is
+        in line with the JPA specification (which suggests that shortcut) but
+        unfortunately in conflict with the JPA XSD (which implies "false" for
+        that shortcut). As a consequence,
+        "<literal>&lt;exclude-unlisted-classes&gt; false
+        &lt;/exclude-unlisted-classes/&gt;</literal>" is not supported! Simply
+        omit the "exclude-unlisted-classes" element if you would like entity
+        class scanning to actually happen.</emphasis></para>
 
         <para>This is the most powerful JPA setup option, allowing for
         flexible local configuration within the application. It supports links
@@ -1751,22 +1753,22 @@
         <interfacename>LoadTimeWeaver</interfacename> implementations for
         various environments, allowing
         <interfacename>ClassTransformer</interfacename> instances to be
-        applied only <emphasis>per ClassLoader</emphasis> and not per VM.</para>
+        applied only <emphasis>per ClassLoader</emphasis> and not per
+        VM.</para>
 
         <para>The following sections will discuss typical JPA weaving setup on
         Tomcat as well as using Spring's VM agent. See the AOP chapter section
-        entitled <xref linkend="aop-aj-ltw-spring"/> for details on how to set
-        up general load-time weaving, covering Tomcat and the VM agent as well
-        as WebLogic, OC4J, GlassFish and Resin.</para>
+        entitled <xref linkend="aop-aj-ltw-spring" /> for details on how to
+        set up general load-time weaving, covering Tomcat and the VM agent as
+        well as WebLogic, OC4J, GlassFish and Resin.</para>
 
         <section id="orm-jpa-setup-lcemfb-tomcat">
           <title>Tomcat load-time weaving setup (5.0+)</title>
 
-          <para><ulink url="http://tomcat.apache.org/">Apache
-          Tomcat's</ulink> default ClassLoader does not support class
-          transformation but allows custom ClassLoaders to be used. Spring
-          offers the <classname>TomcatInstrumentableClassLoader</classname>
-          (inside the
+          <para><ulink url="http://tomcat.apache.org/">Apache Tomcat's</ulink>
+          default ClassLoader does not support class transformation but allows
+          custom ClassLoaders to be used. Spring offers the
+          <classname>TomcatInstrumentableClassLoader</classname> (inside the
           <literal>org.springframework.instrument.classloading.tomcat</literal>
           package) which extends the Tomcat ClassLoader
           (<classname>WebappClassLoader</classname>) and allows JPA
@@ -1826,7 +1828,8 @@
 
                 <para>If you are using Tomcat 5.5.20+ you can set
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
-                <literal>false</literal> to fix the problem: <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+                <literal>false</literal> to fix the problem: <programlisting
+                language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;</programlisting></para>
@@ -1892,8 +1895,8 @@
           other.</para>
 
           <note>
-            <para>If TopLink Essentials is being used a JPA provider under Tomcat, please
-            place the toplink-essentials jar under
+            <para>If TopLink Essentials is being used a JPA provider under
+            Tomcat, please place the toplink-essentials jar under
             <emphasis>$CATALINA_HOME</emphasis>/shared/lib folder instead of
             your war.</para>
           </note>
@@ -1924,14 +1927,17 @@
         <section id="orm-jpa-setup-lcemfb-weaver">
           <title>Context-wide load-time weaver setup</title>
 
-          <para>Since Spring 2.5, a context-wide <interfacename>LoadTimeWeaver</interfacename>
-          can be configured using the <literal>context:load-time-weaver</literal> configuration
+          <para>Since Spring 2.5, a context-wide
+          <interfacename>LoadTimeWeaver</interfacename> can be configured
+          using the <literal>context:load-time-weaver</literal> configuration
           element. Such a 'global' weaver will be picked up by all JPA
-          <classname>LocalContainerEntityManagerFactoryBeans</classname> automatically.</para>
+          <classname>LocalContainerEntityManagerFactoryBeans</classname>
+          automatically.</para>
 
-          <para>This is the preferred way of setting up a load-time weaver, delivering
-          autodetection of the platform (WebLogic, OC4J, GlassFish, Tomcat, Resin, VM agent)
-          as well as automatic propagation of the weaver to all weaver-aware beans.</para>
+          <para>This is the preferred way of setting up a load-time weaver,
+          delivering autodetection of the platform (WebLogic, OC4J, GlassFish,
+          Tomcat, Resin, VM agent) as well as automatic propagation of the
+          weaver to all weaver-aware beans.</para>
 
           <programlisting language="xml">&lt;context:load-time-weaver/&gt;
 
@@ -1939,11 +1945,11 @@
     ...
 &lt;/bean&gt;</programlisting>
 
-          <para>See the section entitled <xref linkend="aop-aj-ltw-spring"/>
-          for details on how to set up general load-time weaving, covering Tomcat
-          and the VM agent as well as WebLogic, OC4J, GlassFish and Resin.</para>
+          <para>See the section entitled <xref linkend="aop-aj-ltw-spring" />
+          for details on how to set up general load-time weaving, covering
+          Tomcat and the VM agent as well as WebLogic, OC4J, GlassFish and
+          Resin.</para>
         </section>
-
       </section>
 
       <section id="orm-jpa-multiple-pu">
@@ -1984,12 +1990,12 @@
 
         <para>Note that the default implementation allows customization of the
         persistence unit infos before feeding them to the JPA provider
-        declaratively through its properties (which affect <emphasis>all</emphasis>
-        hosted units) or programmatically, through the
-        <interfacename>PersistenceUnitPostProcessor</interfacename>
-        (which allows persistence unit selection). If no
-        <interfacename>PersistenceUnitManager</interfacename> is
-        specified, one will be created and used internally by
+        declaratively through its properties (which affect
+        <emphasis>all</emphasis> hosted units) or programmatically, through
+        the <interfacename>PersistenceUnitPostProcessor</interfacename> (which
+        allows persistence unit selection). If no
+        <interfacename>PersistenceUnitManager</interfacename> is specified,
+        one will be created and used internally by
         <classname>LocalContainerEntityManagerFactoryBean</classname>.</para>
       </section>
     </section>
@@ -2212,8 +2218,8 @@
 
         <para>What about class level annotations?</para>
 
-        <para>On the Java EE 5 platform, they are used for dependency declaration
-        and not for resource injection.</para>
+        <para>On the Java EE 5 platform, they are used for dependency
+        declaration and not for resource injection.</para>
       </sidebar>
 
       <para>The injected <interfacename>EntityManager</interfacename> is
