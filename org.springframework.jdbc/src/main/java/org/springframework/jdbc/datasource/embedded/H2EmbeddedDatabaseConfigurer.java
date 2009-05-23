@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.jdbc.datasource.embedded;
 
 import org.springframework.util.ClassUtils;
@@ -23,14 +22,12 @@ import org.springframework.util.ClassUtils;
  * Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Oliver Gierke
- * @since 3.0
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
 	private static H2EmbeddedDatabaseConfigurer INSTANCE;
 
 	private final Class<?> driverClass;
-
 
 	/**
 	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
@@ -45,16 +42,15 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 		return INSTANCE;
 	}
 
-
-	private H2EmbeddedDatabaseConfigurer(Class<?> driverClass) {
-		this.driverClass = driverClass;
-	}
-
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(this.driverClass);
+		properties.setDriverClass(driverClass);
 		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1", databaseName));
 		properties.setUsername("sa");
 		properties.setPassword("");
+	}
+
+	private H2EmbeddedDatabaseConfigurer(Class<?> driverClass) {
+		this.driverClass = driverClass;
 	}
 
 }

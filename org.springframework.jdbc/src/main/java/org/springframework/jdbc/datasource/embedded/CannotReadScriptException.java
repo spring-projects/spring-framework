@@ -22,7 +22,6 @@ import org.springframework.core.io.support.EncodedResource;
  * not be read during population.
  * 
  * @author Keith Donald
- * @since 3.0
  */
 @SuppressWarnings("serial")
 public class CannotReadScriptException extends RuntimeException {
