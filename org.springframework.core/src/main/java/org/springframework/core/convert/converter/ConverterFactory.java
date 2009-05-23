@@ -16,7 +16,7 @@
 package org.springframework.core.convert.converter;
 
 /**
- * A factory for a "ranged" converters that can convert objects from S to subtypes of R.
+ * A factory for "ranged" converters that can convert objects from S to subtypes of R.
  * @author Keith Donald
  * @param <S> The source type converters created by this factory can convert from
  * @param <R> The target range (or base) type converters created by this factory can convert to;
