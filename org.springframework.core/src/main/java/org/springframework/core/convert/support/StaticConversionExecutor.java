@@ -16,7 +16,7 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.ToStringCreator;
 
@@ -27,13 +27,13 @@ import org.springframework.core.style.ToStringCreator;
 @SuppressWarnings("unchecked")
 class StaticConversionExecutor implements ConversionExecutor {
 
-	private final ConversionContext sourceType;
+	private final TypeDescriptor sourceType;
 
-	private final ConversionContext targetType;
+	private final TypeDescriptor targetType;
 
 	private final Converter converter;
 
-	public StaticConversionExecutor(ConversionContext sourceType, ConversionContext targetType, Converter converter) {
+	public StaticConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType, Converter converter) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.converter = converter;

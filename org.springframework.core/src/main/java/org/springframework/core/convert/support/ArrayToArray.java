@@ -18,7 +18,7 @@ package org.springframework.core.convert.support;
 import java.lang.reflect.Array;
 
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special one-way converter that converts from a source array to a target array. Supports type conversion of the
@@ -29,7 +29,7 @@ import org.springframework.core.convert.ConversionContext;
  */
 class ArrayToArray extends AbstractCollectionConverter {
 
-	public ArrayToArray(ConversionContext sourceArrayType, ConversionContext targetArrayType, GenericTypeConverter conversionService) {
+	public ArrayToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetArrayType, GenericTypeConverter conversionService) {
 		super(sourceArrayType, targetArrayType, conversionService);
 	}
 

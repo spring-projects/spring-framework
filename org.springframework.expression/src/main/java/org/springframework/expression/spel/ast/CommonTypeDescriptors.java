@@ -15,7 +15,7 @@
  */
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * @author Andy Clement
@@ -23,16 +23,16 @@ import org.springframework.core.convert.ConversionContext;
  */
 public interface CommonTypeDescriptors {
     // TODO push into TypeDescriptor?
-	static ConversionContext BOOLEAN_TYPE_DESCRIPTOR = ConversionContext.valueOf(Boolean.class);
-	static ConversionContext INTEGER_TYPE_DESCRIPTOR = ConversionContext.valueOf(Integer.class);
-	static ConversionContext CHARACTER_TYPE_DESCRIPTOR = ConversionContext.valueOf(Character.class);
-	static ConversionContext LONG_TYPE_DESCRIPTOR = ConversionContext.valueOf(Long.class);
-	static ConversionContext SHORT_TYPE_DESCRIPTOR = ConversionContext.valueOf(Short.class);
-	static ConversionContext BYTE_TYPE_DESCRIPTOR = ConversionContext.valueOf(Byte.class);
-	static ConversionContext FLOAT_TYPE_DESCRIPTOR = ConversionContext.valueOf(Float.class);
-	static ConversionContext DOUBLE_TYPE_DESCRIPTOR = ConversionContext.valueOf(Double.class);
-	static ConversionContext STRING_TYPE_DESCRIPTOR = ConversionContext.valueOf(String.class);
-	static ConversionContext CLASS_TYPE_DESCRIPTOR = ConversionContext.valueOf(Class.class);
-	static ConversionContext OBJECT_TYPE_DESCRIPTOR = ConversionContext.valueOf(Object.class);
+	static TypeDescriptor BOOLEAN_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Boolean.class);
+	static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
+	static TypeDescriptor CHARACTER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Character.class);
+	static TypeDescriptor LONG_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Long.class);
+	static TypeDescriptor SHORT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Short.class);
+	static TypeDescriptor BYTE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Byte.class);
+	static TypeDescriptor FLOAT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Float.class);
+	static TypeDescriptor DOUBLE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Double.class);
+	static TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
+	static TypeDescriptor CLASS_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Class.class);
+	static TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Object.class);
 	
 }

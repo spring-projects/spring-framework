@@ -29,7 +29,7 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.converter.Converter;
 
@@ -88,7 +88,7 @@ public class GenericTypeConverterTests {
 
 	@Test
 	public void convertNullConversionPointType() {
-		assertEquals("3", converter.convert("3", ConversionContext.NULL));
+		assertEquals("3", converter.convert("3", TypeDescriptor.NULL));
 	}
 
 	
@@ -168,7 +168,7 @@ public class GenericTypeConverterTests {
 	@Test
 	public void convertArrayToListGenericTypeConversion() throws Exception {
 		converter.add(new StringToInteger());
-		List<Integer> result = converter.convert(new String[] { "1", "2", "3" }, new ConversionContext<List<Integer>>(getClass().getDeclaredField("genericList")));
+		List<Integer> result = converter.convert(new String[] { "1", "2", "3" }, new TypeDescriptor<List<Integer>>(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
@@ -226,7 +226,7 @@ public class GenericTypeConverterTests {
 		foo.put("2", "BAZ");
 		converter.add(new StringToInteger());
 		converter.add(new StringToEnumFactory().getConverter(FooEnum.class));
-		Map<String, FooEnum> map = converter.convert(foo, new ConversionContext<Map<String, FooEnum>>(getClass().getField("genericMap")));
+		Map<String, FooEnum> map = converter.convert(foo, new TypeDescriptor<Map<String, FooEnum>>(getClass().getField("genericMap")));
 		assertEquals(map.get(1), FooEnum.BAR);
 		assertEquals(map.get(2), FooEnum.BAZ);
 	}
