@@ -18,7 +18,7 @@ package org.springframework.expression.spel;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -117,7 +117,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		assertEquals(TypedValue.NULL_TYPED_VALUE,state.getRootContextObject());
 		
 
-		((StandardEvaluationContext)state.getEvaluationContext()).setRootObject(null,ConversionContext.NULL);
+		((StandardEvaluationContext)state.getEvaluationContext()).setRootObject(null,TypeDescriptor.NULL);
 		assertEquals(null,state.getRootContextObject().getValue());
 	}
 	
@@ -222,10 +222,10 @@ public class ExpressionStateTests extends ExpressionTestCase {
 	
 	public void testTypeConversion() throws EvaluationException {
 		ExpressionState state = getState();
-		String s = (String)state.convertValue(34,ConversionContext.valueOf(String.class));
+		String s = (String)state.convertValue(34,TypeDescriptor.valueOf(String.class));
 		assertEquals("34",s);
 
-		s = (String)state.convertValue(new TypedValue(34),ConversionContext.valueOf(String.class));
+		s = (String)state.convertValue(new TypedValue(34),TypeDescriptor.valueOf(String.class));
 		assertEquals("34",s);
 	}
 

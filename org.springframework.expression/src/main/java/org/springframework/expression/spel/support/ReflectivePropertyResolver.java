@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -48,7 +48,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 
 	protected final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>();
 	
-	protected final Map<CacheKey, ConversionContext> typeDescriptorCache = new ConcurrentHashMap<CacheKey,ConversionContext>();
+	protected final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey,TypeDescriptor>();
 
 	/**
 	 * @return null which means this is a general purpose accessor
@@ -72,14 +72,14 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		Method method = findGetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			this.readerCache.put(cacheKey, method);
-			this.typeDescriptorCache.put(cacheKey, new ConversionContext(new MethodParameter(method,-1)));
+			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,-1)));
 			return true;
 		}
 		else {
 			Field field = findField(name, type, target instanceof Class);
 			if (field != null) {
 				this.readerCache.put(cacheKey, field);	
-				this.typeDescriptorCache.put(cacheKey, new ConversionContext(field));
+				this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(field));
 				return true;
 			}
 		}
@@ -96,7 +96,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (target instanceof Class) {
 				throw new AccessException("Cannot access length on array class itself");
 			}
-			return new TypedValue(Array.getLength(target),ConversionContext.valueOf(Integer.TYPE));
+			return new TypedValue(Array.getLength(target),TypeDescriptor.valueOf(Integer.TYPE));
 		}
 
 		CacheKey cacheKey = new CacheKey(type, name);
@@ -114,7 +114,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (method != null) {
 				try {
 					ReflectionUtils.makeAccessible(method);
-					ConversionContext resultTypeDescriptor = new ConversionContext(new MethodParameter(method,-1));
+					TypeDescriptor resultTypeDescriptor = new TypeDescriptor(new MethodParameter(method,-1));
 					return new TypedValue(method.invoke(target),resultTypeDescriptor);
 				}
 				catch (Exception ex) {
@@ -135,7 +135,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 			if (field != null) {
 				try {
 					ReflectionUtils.makeAccessible(field);
-					return new TypedValue(field.get(target),new ConversionContext(field));
+					return new TypedValue(field.get(target),new TypeDescriptor(field));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access field: " + name, ex);
@@ -158,14 +158,14 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		Method method = findSetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			this.writerCache.put(cacheKey, method);
-			this.typeDescriptorCache.put(cacheKey, new ConversionContext(new MethodParameter(method,0)));
+			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,0)));
 			return true;
 		}
 		else {
 			Field field = findField(name, type, target instanceof Class);
 			if (field != null) {
 				this.writerCache.put(cacheKey, field);
-				this.typeDescriptorCache.put(cacheKey, new ConversionContext(field));
+				this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(field));
 				return true;
 			}
 		}
@@ -179,7 +179,7 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
 		Object possiblyConvertedNewValue = newValue;
-		ConversionContext typeDescriptor = getTypeDescriptor(context, target, name);
+		TypeDescriptor typeDescriptor = getTypeDescriptor(context, target, name);
 		if (typeDescriptor != null) {
 			try {
 				possiblyConvertedNewValue = context.getTypeConverter().convertValue(newValue, typeDescriptor);
@@ -236,17 +236,17 @@ public class ReflectivePropertyResolver implements PropertyAccessor {
 		throw new AccessException("Neither setter nor field found for property '" + name + "'");
 	}
 	
-	private ConversionContext getTypeDescriptor(EvaluationContext context, Object target, String name) {
+	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
 		if (target == null) {
 			return null;
 		}
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
 		if (type.isArray() && name.equals("length")) {
-			return ConversionContext.valueOf(Integer.TYPE);
+			return TypeDescriptor.valueOf(Integer.TYPE);
 		}
 		CacheKey cacheKey = new CacheKey(type, name);
-		ConversionContext typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+		TypeDescriptor typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
 		if (typeDescriptor == null) {
 			// attempt to populate the cache entry
 			try {

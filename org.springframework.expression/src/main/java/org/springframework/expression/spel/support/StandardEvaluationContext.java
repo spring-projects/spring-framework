@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodResolver;
@@ -75,10 +75,10 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public void setRootObject(Object rootObject) {
-		this.rootObject = new TypedValue(rootObject,ConversionContext.forObject(rootObject));
+		this.rootObject = new TypedValue(rootObject,TypeDescriptor.forObject(rootObject));
 	}
 
-	public void setRootObject(Object rootObject, ConversionContext typeDescriptor) {
+	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
 		this.rootObject = new TypedValue(rootObject,typeDescriptor);
 	}
 

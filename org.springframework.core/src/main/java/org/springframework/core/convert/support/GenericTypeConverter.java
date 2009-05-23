@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionContext;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.converter.Converter;
@@ -52,9 +52,6 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 	 */
 	private final Map sourceTypeConverters = new HashMap();
 
-	/**
-	 * An optional parent conversion service.
-	 */
 	private TypeConverter parent;
 
 	/**
@@ -108,16 +105,16 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 	// implementing TypeConverter
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return canConvert(sourceType, ConversionContext.valueOf(targetType));
+		return canConvert(sourceType, TypeDescriptor.valueOf(targetType));
 	}
 
-	public boolean canConvert(Class<?> sourceType, ConversionContext<?> context) {
-		ConversionExecutor executor = getConversionExecutor(sourceType, context);
+	public boolean canConvert(Class<?> sourceType, TypeDescriptor<?> targetType) {
+		ConversionExecutor executor = getConversionExecutor(sourceType, targetType);
 		if (executor != null) {
 			return true;
 		} else {
 			if (parent != null) {
-				return parent.canConvert(sourceType, context);
+				return parent.canConvert(sourceType, targetType);
 			} else {
 				return false;
 			}
@@ -125,28 +122,28 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 	}
 
 	public <S, T> T convert(S source, Class<T> targetType) {
-		return convert(source, ConversionContext.valueOf(targetType));
+		return convert(source, TypeDescriptor.valueOf(targetType));
 	}
 
-	public <S, T> T convert(S source, ConversionContext<T> context) {
+	public <S, T> T convert(S source, TypeDescriptor<T> targetType) {
 		if (source == null) {
 			return null;
 		}
-		ConversionExecutor executor = getConversionExecutor(source.getClass(), context);
+		ConversionExecutor executor = getConversionExecutor(source.getClass(), targetType);
 		if (executor != null) {
 			return (T) executor.execute(source);
 		} else {
 			if (parent != null) {
-				return parent.convert(source, context);
+				return parent.convert(source, targetType);
 			} else {
-				throw new ConverterNotFoundException(source.getClass(), context.getType(),
+				throw new ConverterNotFoundException(source.getClass(), targetType.getType(),
 						"No converter found that can convert from sourceType [" + source.getClass().getName()
-								+ "] to targetType [" + context.getName() + "]");
+								+ "] to targetType [" + targetType.getName() + "]");
 			}
 		}
 	}
 
-	ConversionExecutor getConversionExecutor(Class sourceClass, ConversionContext targetType)
+	ConversionExecutor getConversionExecutor(Class sourceClass, TypeDescriptor targetType)
 			throws ConverterNotFoundException {
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
@@ -154,7 +151,7 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 			// TODO for Andy - is this correct way to handle the Null TypedValue?
 			return NoOpConversionExecutor.INSTANCE;
 		}
-		ConversionContext sourceType = ConversionContext.valueOf(sourceClass);
+		TypeDescriptor sourceType = TypeDescriptor.valueOf(sourceClass);
 		if (sourceType.isArray()) {
 			if (targetType.isArray()) {
 				return new ArrayToArray(sourceType, targetType, this);
