@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of the {@link javax.servlet.FilterConfig} interface which
- * simply passes the call through to a given Filter/FilterChain combo
+ * simply passes the call through to a given Filter/FilterChain combination
  * (indicating the next Filter in the chain along with the FilterChain that it is
  * supposed to work on) or to a given Servlet (indicating the end of the chain).
  *
