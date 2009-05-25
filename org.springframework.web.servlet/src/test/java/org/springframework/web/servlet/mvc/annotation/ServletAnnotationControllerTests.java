@@ -873,7 +873,7 @@ public class ServletAnnotationControllerTests {
 		initServlet(RequestBodyController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
-		String requestBody = "HŽll¿ Wšrld";
+		String requestBody = "Hello World";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		MockHttpServletResponse response = new MockHttpServletResponse();
