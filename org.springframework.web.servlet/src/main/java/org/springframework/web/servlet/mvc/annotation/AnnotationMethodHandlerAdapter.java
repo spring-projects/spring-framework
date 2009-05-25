@@ -51,6 +51,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -161,7 +162,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
+					new FormHttpMessageConverter(), new SourceHttpMessageConverter(), 
+					new BufferedImageHttpMessageConverter()};
 
 	public AnnotationMethodHandlerAdapter() {
 		// no restriction of HTTP methods by default
