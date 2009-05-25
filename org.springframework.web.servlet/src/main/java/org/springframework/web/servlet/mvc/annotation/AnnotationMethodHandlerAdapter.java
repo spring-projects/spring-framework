@@ -50,12 +50,14 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
@@ -76,6 +78,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
@@ -697,7 +700,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				Class handlerType,
 				Object returnValue,
 				ExtendedModelMap implicitModel,
-				ServletWebRequest webRequest) {
+				ServletWebRequest webRequest) throws Exception {
 
 			if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
 				ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
@@ -713,6 +716,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 							.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
 					if (mav != ModelAndViewResolver.UNRESOLVED) {
 						return mav;
+					}
+				}
+			}
+
+			if (returnValue != null && handlerMethod.isAnnotationPresent(ResponseBody.class)) {
+				Class returnValueType = returnValue.getClass();
+				HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+				for (HttpMessageConverter messageConverter : messageConverters) {
+					if (messageConverter.supports(returnValueType)) {
+						messageConverter.write(returnValue, outputMessage);
+						responseArgumentUsed = true;
+						return null;
 					}
 				}
 			}

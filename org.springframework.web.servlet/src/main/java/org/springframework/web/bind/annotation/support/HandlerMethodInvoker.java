@@ -446,7 +446,14 @@ public class HandlerMethodInvoker {
 		Class paramType = methodParam.getParameterType();
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		if (contentType == null) {
-			throw new HttpMediaTypeNotSupportedException("Cannot extract @RequestBody: no Content-Type found");
+			StringBuilder builder = new StringBuilder(ClassUtils.getShortName(methodParam.getParameterType()));
+			String paramName = methodParam.getParameterName();
+			if (paramName != null) {
+				builder.append(' ');
+				builder.append(paramName);
+			}
+			throw new HttpMediaTypeNotSupportedException(
+					"Cannot extract @RequestBody parameter (" + builder.toString() + "): no Content-Type found");
 		}
 		List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 		for (HttpMessageConverter<?> messageConverter : messageConverters) {
