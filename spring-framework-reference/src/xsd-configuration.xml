@@ -99,7 +99,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             and suchlike.</para>
             <para>To use the tags in the <literal>util</literal> schema, you need to have
             the following preamble at the top of your Spring XML configuration file;
-            the emboldened text in the snippet below references the correct schema so that
+            the bold text in the snippet below references the correct schema so that
             the tags in the <literal>util</literal> namespace are available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -464,7 +464,7 @@ public class Client {
             configuration issues, such as looking up a JNDI object and defining EJB references.</para>
             <para>To use the tags in the <literal>jee</literal> schema, you need to have
             the following preamble at the top of your Spring XML configuration file;
-            the emboldened text in the following snippet references the correct schema so that
+            the bold text in the following snippet references the correct schema so that
             the tags in the <literal>jee</literal> namespace are available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -622,7 +622,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             themselves.</para>
             <para>In the interest of completeness, to use the tags in the <literal>lang</literal>
             schema, you need to have the following preamble at the top of your Spring XML
-            configuration file; the emboldened text in the following snippet references the
+            configuration file; the bold text in the following snippet references the
             correct schema so that the tags in the <literal>lang</literal> namespace are
             available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -647,7 +647,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             themselves.</para>
             <para>In the interest of completeness, to use the tags in the <literal>jms</literal>
             schema, you need to have the following preamble at the top of your Spring XML
-            configuration file; the emboldened text in the following snippet references the
+            configuration file; the bold text in the following snippet references the
             correct schema so that the tags in the <literal>jms</literal> namespace are
             available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -679,7 +679,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             </tip>
             <para>In the interest of completeness, to use the tags in the <literal>tx</literal>
             schema, you need to have the following preamble at the top of your Spring XML
-            configuration file; the emboldened text in the following snippet references the
+            configuration file; the bold text in the following snippet references the
             correct schema so that the tags in the <literal>tx</literal> namespace are
             available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -710,7 +710,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             comprehensively covered in the chapter entitled <xref linkend="aop"/>.</para>
             <para>In the interest of completeness, to use the tags in the <literal>aop</literal>
             schema, you need to have the following preamble at the top of your Spring XML
-            configuration file; the emboldened text in the following snippet references the
+            configuration file; the bold text in the following snippet references the
             correct schema so that the tags in the <literal>aop</literal> namespace are
             available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
