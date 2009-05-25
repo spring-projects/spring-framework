@@ -86,6 +86,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -868,11 +869,11 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
-	public void requestBody() throws ServletException, IOException {
+	public void requestBodyResponseBody() throws ServletException, IOException {
 		initServlet(RequestBodyController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
-		String requestBody = "Hello World";
+		String requestBody = "HŽll¿ Wšrld";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -1561,8 +1562,9 @@ public class ServletAnnotationControllerTests {
 	public static class RequestBodyController {
 
 		@RequestMapping(value = "/something", method = RequestMethod.PUT)
-		public void handle(@RequestBody String body, Writer writer) throws IOException {
-			writer.write(body);
+		@ResponseBody
+		public String handle(@RequestBody String body) throws IOException {
+			return body;
 		}
 	}
 

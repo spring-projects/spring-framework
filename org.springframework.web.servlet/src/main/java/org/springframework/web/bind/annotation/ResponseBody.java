@@ -23,18 +23,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation which indicates that a method parameter should be bound to the web request body. Supported for annotated
+ * Annotation which indicates that a method return value should be bound to the web response body. Supported for annotated
  * handler methods in Servlet environments.
  *
  * @author Arjen Poutsma
- * @see RequestHeader
- * @see ResponseBody
+ * @see RequestBody
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @since 3.0
  */
-@Target(ElementType.PARAMETER)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequestBody {
+public @interface ResponseBody {
 
 }
