@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 		else {
 			// Create and activate new context builder.
 			SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
-			// The activate() call will cause an assigment to the activated variable.
+			// The activate() call will cause an assignment to the activated variable.
 			builder.activate();
 		}
 		return activated;
@@ -124,7 +124,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private final Hashtable boundObjects = new Hashtable();
+	private final Hashtable<String,Object> boundObjects = new Hashtable<String,Object>();
 
 
 	/**
@@ -156,7 +156,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * Temporarily deactivate this context builder. It will remain registered with
 	 * the JNDI NamingManager but will delegate to the standard JNDI InitialContextFactory
 	 * (if configured) instead of exposing its own bound objects.
-	 * <p>Call <code>activate()</code> again in order to expose this contexz builder's own
+	 * <p>Call <code>activate()</code> again in order to expose this context builder's own
 	 * bound objects again. Such activate/deactivate sequences can be applied any number
 	 * of times (e.g. within a larger integration test suite running in the same VM).
 	 * @see #activate()
@@ -192,13 +192,13 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * creating a new SimpleNamingContext instance.
 	 * @see SimpleNamingContext
 	 */
-	public InitialContextFactory createInitialContextFactory(Hashtable environment) {
+	public InitialContextFactory createInitialContextFactory(Hashtable<?,?> environment) {
 		if (activated == null && environment != null) {
 			Object icf = environment.get(Context.INITIAL_CONTEXT_FACTORY);
 			if (icf != null) {
-				Class icfClass = null;
+				Class<?> icfClass = null;
 				if (icf instanceof Class) {
-					icfClass = (Class) icf;
+					icfClass = (Class<?>) icf;
 				}
 				else if (icf instanceof String) {
 					icfClass = ClassUtils.resolveClassName((String) icf, getClass().getClassLoader());
@@ -225,8 +225,9 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 		// Default case...
 		return new InitialContextFactory() {
-			public Context getInitialContext(Hashtable environment) {
-				return new SimpleNamingContext("", boundObjects, environment);
+			@SuppressWarnings("unchecked")
+			public Context getInitialContext(Hashtable<?,?> environment) {
+				return new SimpleNamingContext("", boundObjects, (Hashtable<String, Object>) environment);
 			}
 		};
 	}
