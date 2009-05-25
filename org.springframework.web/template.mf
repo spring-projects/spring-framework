@@ -7,6 +7,7 @@ Import-Template:
  com.sun.net.*;version="0";resolution:=optional,
  javax.el.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  javax.faces.*;version="[1.1.0, 3.0.0)";resolution:=optional,
+ javax.imageio.*;version="0";resolution:=optional,
  javax.jws.*;version="0";resolution:=optional,
  javax.portlet.*;version="[2.0.0, 3.0.0)";resolution:=optional,
  javax.servlet;version="[2.4.0, 4.0.0)",
