@@ -108,6 +108,7 @@
             <xsd:appinfo>
                 <tool:annotation kind="direct">
                     <tool:expected-type type="java.lang.Class"/>
+					<tool:assignable-to restriction="class-only" />
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
