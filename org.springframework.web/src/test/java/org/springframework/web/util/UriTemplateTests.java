@@ -24,41 +24,34 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class UriTemplateTests {
-
-	private UriTemplate template;
-
-	@Before
-	public void create() {
-		template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-	}
 
 	@Test
 	public void getVariableNames() throws Exception {
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		List<String> variableNames = template.getVariableNames();
 		assertEquals("Invalid variable names", Arrays.asList("hotel", "booking"), variableNames);
 	}
 
 	@Test
 	public void expandVarArgs() throws Exception {
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		URI result = template.expand("1", "42");
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void expandVarArgsInvalidAmountVariables() throws Exception {
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		template.expand("1", "42", "100");
 	}
 
 	@Test
 	public void expandMapDuplicateVariables() throws Exception {
-		template = new UriTemplate("/order/{c}/{c}/{c}");
+		UriTemplate template = new UriTemplate("/order/{c}/{c}/{c}");
 		assertEquals("Invalid variable names", Arrays.asList("c", "c", "c"), template.getVariableNames());
 		URI result = template.expand(Collections.singletonMap("c", "cheeseburger"));
 		assertEquals("Invalid expanded template", new URI("/order/cheeseburger/cheeseburger/cheeseburger"), result);
@@ -69,12 +62,14 @@ public class UriTemplateTests {
 		Map<String, String> uriVariables = new HashMap<String, String>(2);
 		uriVariables.put("booking", "42");
 		uriVariables.put("hotel", "1");
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		URI result = template.expand(uriVariables);
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void expandMapInvalidAmountVariables() throws Exception {
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		template.expand(Collections.singletonMap("hotel", "1"));
 	}
 
@@ -83,12 +78,13 @@ public class UriTemplateTests {
 		Map<String, String> uriVariables = new HashMap<String, String>(2);
 		uriVariables.put("booking", "42");
 		uriVariables.put("bar", "1");
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		template.expand(uriVariables);
 	}
 
 	@Test
 	public void expandEncoded() throws Exception {
-		template = new UriTemplate("http://example.com/hotel list/{hotel}");
+		UriTemplate template = new UriTemplate("http://example.com/hotel list/{hotel}");
 		URI result = template.expand(Collections.singletonMap("hotel", "foo bar \u20AC"));
 		assertEquals("Invalid expanded template", new URI("http", "//example.com/hotel list/foo bar \u20AC", null),
 				result);
@@ -98,6 +94,7 @@ public class UriTemplateTests {
 
 	@Test
 	public void matches() throws Exception {
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		assertTrue("UriTemplate does not match", template.matches("http://example.com/hotels/1/bookings/42"));
 		assertFalse("UriTemplate matches", template.matches("http://example.com/hotels/bookings"));
 		assertFalse("UriTemplate matches", template.matches(""));
@@ -110,13 +107,14 @@ public class UriTemplateTests {
 		expected.put("booking", "42");
 		expected.put("hotel", "1");
 
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		Map<String, String> result = template.match("http://example.com/hotels/1/bookings/42");
 		assertEquals("Invalid match", expected, result);
 	}
 
 	@Test
 	public void matchDuplicate() throws Exception {
-		template = new UriTemplate("/order/{c}/{c}/{c}");
+		UriTemplate template = new UriTemplate("/order/{c}/{c}/{c}");
 		Map<String, String> result = template.match("/order/cheeseburger/cheeseburger/cheeseburger");
 		Map<String, String> expected = Collections.singletonMap("c", "cheeseburger");
 		assertEquals("Invalid match", expected, result);
@@ -124,11 +122,26 @@ public class UriTemplateTests {
 
 	@Test
 	public void matchMultipleInOneSegment() throws Exception {
-		template = new UriTemplate("/{foo}-{bar}");
+		UriTemplate template = new UriTemplate("/{foo}-{bar}");
 		Map<String, String> result = template.match("/12-34");
 		Map<String, String> expected = new HashMap<String, String>(2);
 		expected.put("foo", "12");
 		expected.put("bar", "34");
 		assertEquals("Invalid match", expected, result);
+	}
+
+	@Test
+	public void queryVariables() throws Exception {
+		UriTemplate template = new UriTemplate("/search?q={query}");
+		assertTrue(template.matches("/search?q=foo"));
+	}
+
+	@Test
+	public void fragments() throws Exception {
+		UriTemplate template = new UriTemplate("/search#{fragment}");
+		assertTrue(template.matches("/search#foo"));
+
+		template = new UriTemplate("/search?query={query}#{fragment}");
+		assertTrue(template.matches("/search?query=foo#bar"));
 	}
 }
