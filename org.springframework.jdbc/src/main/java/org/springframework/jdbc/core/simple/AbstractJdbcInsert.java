@@ -339,7 +339,7 @@ public abstract class AbstractJdbcInsert {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for insert " + getInsertString() + " with: " + values);
 		}
-		int updateCount = jdbcTemplate.update(getInsertString(), values.toArray());
+		int updateCount = jdbcTemplate.update(getInsertString(), values.toArray(), getInsertTypes());
 		return updateCount;
 	}
 
@@ -422,7 +422,7 @@ public abstract class AbstractJdbcInsert {
 					new PreparedStatementCreator() {
 						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
-							setParameterValues(ps, values, null);
+							setParameterValues(ps, values, getInsertTypes());
 							return ps;
 						}
 					},
@@ -464,7 +464,7 @@ public abstract class AbstractJdbcInsert {
 						PreparedStatement ps = null;
 						try {
 							ps = con.prepareStatement(getInsertString());
-							setParameterValues(ps, values, null);
+							setParameterValues(ps, values, getInsertTypes());
 							ps.executeUpdate();
 						} finally {
 							JdbcUtils.closeStatement(ps);
@@ -564,14 +564,13 @@ public abstract class AbstractJdbcInsert {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing statement " + getInsertString() + " with batch of size: " + batchValues.length);
 		}
-		final int[] columnTypes = getInsertTypes();
 		int[] updateCounts = jdbcTemplate.batchUpdate(
 				getInsertString(),
 				new BatchPreparedStatementSetter() {
 
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						List<Object> values = batchValues[i];
-						setParameterValues(ps, values, columnTypes);
+						setParameterValues(ps, values, getInsertTypes());
 					}
 
 					public int getBatchSize() {
