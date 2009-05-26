@@ -1,1 +1,1 @@
-http\://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd=/org/springframework/oxm/config/spring-oxm-3.0.xsd
+http\://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd=org/springframework/oxm/config/spring-oxm-3.0.xsd
