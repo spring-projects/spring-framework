@@ -152,7 +152,7 @@ public class DependencyDescriptor {
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
 	 * @return the declared type (never <code>null</code>)
 	 */
-	public Class getDependencyType() {
+	public Class<?> getDependencyType() {
 		return (this.field != null ? this.field.getType() : this.methodParameter.getParameterType());
 	}
 
@@ -160,7 +160,7 @@ public class DependencyDescriptor {
 	 * Determine the generic element type of the wrapped Collection parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public Class getCollectionType() {
+	public Class<?> getCollectionType() {
 		return (this.field != null ?
 				GenericCollectionTypeResolver.getCollectionFieldType(this.field) :
 				GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter));
@@ -170,7 +170,7 @@ public class DependencyDescriptor {
 	 * Determine the generic key type of the wrapped Map parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public Class getMapKeyType() {
+	public Class<?> getMapKeyType() {
 		return (this.field != null ?
 				GenericCollectionTypeResolver.getMapKeyFieldType(this.field) :
 				GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter));
@@ -180,7 +180,7 @@ public class DependencyDescriptor {
 	 * Determine the generic value type of the wrapped Map parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public Class getMapValueType() {
+	public Class<?> getMapValueType() {
 		return (this.field != null ?
 				GenericCollectionTypeResolver.getMapValueFieldType(this.field) :
 				GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter));

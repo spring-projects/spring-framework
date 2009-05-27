@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,8 +139,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	public int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
-		for (int i = 0; i < resources.length; i++) {
-			counter += loadBeanDefinitions(resources[i]);
+		for (Resource resource : resources) {
+			counter += loadBeanDefinitions(resource);
 		}
 		return counter;
 	}
@@ -164,7 +164,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource)
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
 	 */
-	public int loadBeanDefinitions(String location, Set actualResources) throws BeanDefinitionStoreException {
+	public int loadBeanDefinitions(String location, Set<Resource> actualResources) throws BeanDefinitionStoreException {
 		ResourceLoader resourceLoader = getResourceLoader();
 		if (resourceLoader == null) {
 			throw new BeanDefinitionStoreException(
@@ -177,8 +177,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
 				int loadCount = loadBeanDefinitions(resources);
 				if (actualResources != null) {
-					for (int i = 0; i < resources.length; i++) {
-						actualResources.add(resources[i]);
+					for (Resource resource : resources) {
+						actualResources.add(resource);
 					}
 				}
 				if (logger.isDebugEnabled()) {
@@ -208,8 +208,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	public int loadBeanDefinitions(String[] locations) throws BeanDefinitionStoreException {
 		Assert.notNull(locations, "Location array must not be null");
 		int counter = 0;
-		for (int i = 0; i < locations.length; i++) {
-			counter += loadBeanDefinitions(locations[i]);
+		for (String location : locations) {
+			counter += loadBeanDefinitions(location);
 		}
 		return counter;
 	}
