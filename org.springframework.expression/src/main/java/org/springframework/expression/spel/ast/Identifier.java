@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
@@ -28,9 +27,9 @@ public class Identifier extends SpelNodeImpl {
 
 	private final TypedValue id;
 
-	public Identifier(Token payload) {
-		super(payload);
-		this.id = new TypedValue(payload.getText(), STRING_TYPE_DESCRIPTOR);
+	public Identifier(String payload,int pos) {
+		super(pos);
+		this.id = new TypedValue(payload, STRING_TYPE_DESCRIPTOR);
 	}
 
 	@Override

@@ -25,9 +25,6 @@ package org.springframework.expression;
  */
 public interface OperatorOverloader {
 
-	// TODO does type OperatorOverloader need a better name?
-	// TODO Operator overloading needs some testing!
-
 	/**
 	 * Return true if the operator overloader supports the specified operation
 	 * between the two operands and so should be invoked to handle it.

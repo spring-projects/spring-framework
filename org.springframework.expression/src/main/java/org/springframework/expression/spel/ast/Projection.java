@@ -21,12 +21,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.runtime.Token;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
@@ -39,10 +38,14 @@ import org.springframework.expression.spel.SpelMessages;
  */
 public class Projection extends SpelNodeImpl {
 
-	public Projection(Token payload) {
-		super(payload);
+	private final boolean nullSafe;
+	
+	public Projection(boolean nullSafe, int pos,SpelNodeImpl expression) {
+		super(pos,expression);
+		this.nullSafe = nullSafe;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue op = state.getActiveContextObject();
@@ -61,7 +64,7 @@ public class Projection extends SpelNodeImpl {
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class)));
-					result.add(getChild(0).getValueInternal(state).getValue());
+					result.add(children[0].getValueInternal(state).getValue());
 				} finally {
 					state.popActiveContextObject();
 				}
@@ -76,7 +79,7 @@ public class Projection extends SpelNodeImpl {
 				try {
 					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
 					state.enterScope("index", idx);
-					result.add(getChild(0).getValueInternal(state).getValue());
+					result.add(children[0].getValueInternal(state).getValue());
 				} finally {
 					state.exitScope();
 					state.popActiveContextObject();
@@ -85,7 +88,11 @@ public class Projection extends SpelNodeImpl {
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
-			throw new SpelException(SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
+			if (operand==null && nullSafe) {
+				return TypedValue.NULL_TYPED_VALUE;
+			} else {
+				throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
+			}
 		}
 	}
 
@@ -94,5 +101,5 @@ public class Projection extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder();
 		return sb.append("![").append(getChild(0).toStringAST()).append("]").toString();
 	}
-
+	
 }

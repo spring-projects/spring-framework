@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -28,14 +27,14 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class TypeReference extends SpelNodeImpl {
 
-	public TypeReference(Token payload) {
-		super(payload);
+	public TypeReference(int pos,SpelNodeImpl qualifiedId) {
+		super(pos,qualifiedId);
 	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		// TODO possible optimization here if we cache the discovered type reference, but can we do that?
-		String typename = (String) getChild(0).getValueInternal(state).getValue();
+		String typename = (String) children[0].getValueInternal(state).getValue();
 		if (typename.indexOf(".") == -1 && Character.isLowerCase(typename.charAt(0))) {
 			TypeCode tc = TypeCode.valueOf(typename.toUpperCase());
 			if (tc != TypeCode.OBJECT) {
@@ -54,5 +53,5 @@ public class TypeReference extends SpelNodeImpl {
 		sb.append(")");
 		return sb.toString();
 	}
-
+	
 }

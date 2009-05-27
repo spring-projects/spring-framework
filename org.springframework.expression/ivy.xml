@@ -22,7 +22,6 @@
 		<!-- compile dependencies -->
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->runtime" />
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="compile->runtime" />
-		<dependency org="org.antlr" name="com.springsource.org.antlr" rev="3.0.1" conf="compile->runtime"/>
 		<!-- test dependencies -->
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->runtime"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>

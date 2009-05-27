@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 
 /**
  * Common supertype for operators that operate on either one or two operands. In the case of multiply or divide there
@@ -27,19 +26,24 @@ import org.antlr.runtime.Token;
  */
 public abstract class Operator extends SpelNodeImpl {
 
-	public Operator(Token payload) {
-		super(payload);
+	String operatorName;
+	
+	public Operator(String payload,int pos,SpelNodeImpl... operands) {
+		super(pos, operands);
+		this.operatorName = payload;
 	}
 	
 	public SpelNodeImpl getLeftOperand() {
-		return getChild(0);
+		return children[0];
 	}
 
 	public SpelNodeImpl getRightOperand() {
-		return getChild(1);
+		return children[1];
 	}
 
-	public abstract String getOperatorName();
+	public final String getOperatorName() {
+		return operatorName;
+	}
 
 	/**
 	 * String format for all operators is the same '(' [operand] [operator] [operand] ')'

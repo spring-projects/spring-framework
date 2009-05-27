@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.Test;
+
 /**
  * Tests invocation of constructors.
  * 
@@ -23,14 +25,17 @@ package org.springframework.expression.spel;
  */
 public class ConstructorInvocationTests extends ExpressionTestCase {
 
+	@Test
 	public void testTypeConstructors() {
 		evaluate("new String('hello world')", "hello world", String.class);
 	}
 	
+	@Test
 	public void testNonExistentType() {
-		evaluateAndCheckError("new FooBar()",SpelMessages.PROBLEM_LOCATING_CONSTRUCTOR);
+		evaluateAndCheckError("new FooBar()",SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM);
 	}
 	
+	@Test
 	public void testVarargsInvocation01() {
 		// Calling 'Fruit(String... strings)'
 		evaluate("new org.springframework.expression.spel.testresources.Fruit('a','b','c').stringscount()", 3, Integer.class);
@@ -41,6 +46,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(1,'a',3.0d).stringscount()", 3, Integer.class); // first and last need conversion
 	}
 
+	@Test
 	public void testVarargsInvocation02() {
 	    // Calling 'Fruit(int i, String... strings)' - returns int+length_of_strings
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(5,'a','b','c').stringscount()", 8, Integer.class);
@@ -56,6 +62,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	 * These tests are attempting to call constructors where we need to widen or convert the argument in order to
 	 * satisfy a suitable constructor.
 	 */
+	@Test
 	public void testWidening01() {
 		// widening of int 3 to double 3 is OK
 		evaluate("new Double(3)", 3.0d, Double.class);
@@ -63,6 +70,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		evaluate("new Long(3)", 3L, Long.class);
 	}
 
+	@Test
 	public void testArgumentConversion01() {
 		// Closest ctor will be new String(String) and converter supports Double>String
 		evaluate("new String(3.0d)", "3.0", String.class);

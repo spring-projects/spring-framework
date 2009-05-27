@@ -13,28 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Implements greater-than-or-equal operator.
+ * Implements greater-than operator.
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorGreaterThanOrEqual extends Operator {
+public class OpGT extends Operator {
 
-	public OperatorGreaterThanOrEqual(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return ">=";
+	public OpGT(int pos, SpelNodeImpl... operands) {
+		super(">", pos, operands);
 	}
 
 	@Override
@@ -45,14 +40,14 @@ public class OperatorGreaterThanOrEqual extends Operator {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				return BooleanTypedValue.forValue(leftNumber.doubleValue() >= rightNumber.doubleValue());
+				return BooleanTypedValue.forValue(leftNumber.doubleValue() > rightNumber.doubleValue());
 			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				return BooleanTypedValue.forValue( leftNumber.longValue() >= rightNumber.longValue());
+				return BooleanTypedValue.forValue(leftNumber.longValue() > rightNumber.longValue());
 			} else {
-				return BooleanTypedValue.forValue(leftNumber.intValue() >= rightNumber.intValue());
+				return BooleanTypedValue.forValue(leftNumber.intValue() > rightNumber.intValue());
 			}
 		}
-		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) >= 0);
+		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) > 0);
 	}
 
 }

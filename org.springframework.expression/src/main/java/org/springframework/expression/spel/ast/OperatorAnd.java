@@ -16,11 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -31,13 +30,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorAnd extends Operator {
 
-	public OperatorAnd(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "and";
+	public OperatorAnd(int pos, SpelNodeImpl... operands) {
+		super("and", pos, operands);
 	}
 
 	@Override
@@ -48,8 +42,8 @@ public class OperatorAnd extends Operator {
 		try {
 			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		catch (SpelException ee) {
-			ee.setPosition(getLeftOperand().getCharPositionInLine());
+		catch (SpelEvaluationException ee) {
+			ee.setPosition(getLeftOperand().getStartPosition());
 			throw ee;
 		}
 
@@ -60,8 +54,8 @@ public class OperatorAnd extends Operator {
 		try {
 			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		catch (SpelException ee) {
-			ee.setPosition(getRightOperand().getCharPositionInLine());
+		catch (SpelEvaluationException ee) {
+			ee.setPosition(getRightOperand().getStartPosition());
 			throw ee;
 		}
 

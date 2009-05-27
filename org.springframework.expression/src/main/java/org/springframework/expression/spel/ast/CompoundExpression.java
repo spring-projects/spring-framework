@@ -16,11 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 
 /**
  * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
@@ -30,9 +29,13 @@ import org.springframework.expression.spel.SpelException;
  */
 public class CompoundExpression extends SpelNodeImpl {
 
-	public CompoundExpression(Token payload) {
-		super(payload);
+	public CompoundExpression(int pos,SpelNodeImpl... expressionComponents) {
+		super(pos,expressionComponents);
+		if (expressionComponents.length<2) {
+			throw new IllegalStateException("Dont build compound expression less than one entry: "+expressionComponents.length);
+		}
 	}
+	
 
 	/**
 	 * Evalutes a compound expression. This involves evaluating each piece in turn and the return value from each piece
@@ -45,20 +48,20 @@ public class CompoundExpression extends SpelNodeImpl {
 		TypedValue result = null;
 		SpelNodeImpl nextNode = null;
 		try {
-			nextNode = getChild(0);
+			nextNode = children[0];
 			result = nextNode.getValueInternal(state);
 			for (int i = 1; i < getChildCount(); i++) {
 				try {
 					state.pushActiveContextObject(result);
-					nextNode = getChild(i);
+					nextNode = children[i];
 					result = nextNode.getValueInternal(state);
 				} finally {
 					state.popActiveContextObject();
 				}
 			}
-		} catch (SpelException ee) {
+		} catch (SpelEvaluationException ee) {
 			// Correct the position for the error before rethrowing
-			ee.setPosition(nextNode.getCharPositionInLine());
+			ee.setPosition(nextNode.getStartPosition());
 			throw ee;
 		}
 		return result;
@@ -70,11 +73,11 @@ public class CompoundExpression extends SpelNodeImpl {
 			getChild(0).setValue(state, value);
 			return;
 		}
-		TypedValue ctx = getChild(0).getValueInternal(state);
+		TypedValue ctx = children[0].getValueInternal(state);
 		for (int i = 1; i < getChildCount() - 1; i++) {
 			try {
 				state.pushActiveContextObject(ctx);
-				ctx = getChild(i).getValueInternal(state);
+				ctx = children[i].getValueInternal(state);
 			} finally {
 				state.popActiveContextObject();
 			}
@@ -92,11 +95,11 @@ public class CompoundExpression extends SpelNodeImpl {
 		if (getChildCount() == 1) {
 			return getChild(0).isWritable(state);
 		}
-		TypedValue ctx = getChild(0).getValueInternal(state);
+		TypedValue ctx = children[0].getValueInternal(state);
 		for (int i = 1; i < getChildCount() - 1; i++) {
 			try {
 				state.pushActiveContextObject(ctx);
-				ctx = getChild(i).getValueInternal(state);
+				ctx = children[i].getValueInternal(state);
 			} finally {
 				state.popActiveContextObject();
 			}
@@ -113,6 +116,7 @@ public class CompoundExpression extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < getChildCount(); i++) {
+			if (i>0) { sb.append("."); }
 			sb.append(getChild(i).toStringAST());
 		}
 		return sb.toString();

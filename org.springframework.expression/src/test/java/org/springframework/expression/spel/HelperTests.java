@@ -20,11 +20,17 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.support.ReflectionHelper;
+import org.springframework.expression.spel.support.ReflectivePropertyResolver;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKind;
 
@@ -35,20 +41,23 @@ import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKin
  */
 public class HelperTests extends ExpressionTestCase {
 
+	@Test
 	public void testFormatHelperForClassName() {
-		assertEquals("java.lang.String",FormatHelper.formatClassNameForMessage(String.class));
-		assertEquals("java.lang.String[]",FormatHelper.formatClassNameForMessage(new String[1].getClass()));
-		assertEquals("int[]",FormatHelper.formatClassNameForMessage(new int[1].getClass()));
-		assertEquals("int[][]",FormatHelper.formatClassNameForMessage(new int[1][2].getClass()));
-		assertEquals("null",FormatHelper.formatClassNameForMessage(null));
+		Assert.assertEquals("java.lang.String",FormatHelper.formatClassNameForMessage(String.class));
+		Assert.assertEquals("java.lang.String[]",FormatHelper.formatClassNameForMessage(new String[1].getClass()));
+		Assert.assertEquals("int[]",FormatHelper.formatClassNameForMessage(new int[1].getClass()));
+		Assert.assertEquals("int[][]",FormatHelper.formatClassNameForMessage(new int[1][2].getClass()));
+		Assert.assertEquals("null",FormatHelper.formatClassNameForMessage(null));
 	}
 	
+	@Test
 	public void testFormatHelperForMethod() {
-		assertEquals("foo(java.lang.String)",FormatHelper.formatMethodForMessage("foo", String.class));
-		assertEquals("goo(java.lang.String,int[])",FormatHelper.formatMethodForMessage("goo", String.class,new int[1].getClass()));
-		assertEquals("boo()",FormatHelper.formatMethodForMessage("boo"));
+		Assert.assertEquals("foo(java.lang.String)",FormatHelper.formatMethodForMessage("foo", String.class));
+		Assert.assertEquals("goo(java.lang.String,int[])",FormatHelper.formatMethodForMessage("goo", String.class,new int[1].getClass()));
+		Assert.assertEquals("boo()",FormatHelper.formatMethodForMessage("boo"));
 	}
 	
+	@Test
 	public void testUtilities() throws ParseException {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("3+4+5+6+7-2");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -75,16 +84,18 @@ public class HelperTests extends ExpressionTestCase {
 //		  CompoundExpression  value:2
 //		    IntLiteral  value:2
 //		===> Expression '3+4+5+6+7-2' - AST end
-		assertTrue(s.indexOf("===> Expression '3+4+5+6+7-2' - AST start")!=-1);
-		assertTrue(s.indexOf(" OperatorPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2")!=-1);
+		Assert.assertTrue(s.indexOf("===> Expression '3+4+5+6+7-2' - AST start")!=-1);
+		Assert.assertTrue(s.indexOf(" OperatorPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2")!=-1);
 	}
 	
+	@Test
 	public void testTypedValue() {
 		TypedValue tValue = new TypedValue("hello");
-		assertEquals(String.class,tValue.getTypeDescriptor().getType());
-		assertEquals("TypedValue: hello of type java.lang.String",tValue.toString());
+		Assert.assertEquals(String.class,tValue.getTypeDescriptor().getType());
+		Assert.assertEquals("TypedValue: hello of type java.lang.String",tValue.toString());
 	}
 	
+	@Test
 	public void testReflectionHelperCompareArguments_ExactMatching() {
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
 		
@@ -95,6 +106,7 @@ public class HelperTests extends ExpressionTestCase {
 		checkMatch(new Class[]{String.class,Integer.class},new Class[]{String.class,Integer.class},typeConverter,ArgsMatchKind.EXACT);
 	}
 	
+	@Test
 	public void testReflectionHelperCompareArguments_CloseMatching() {
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
 		
@@ -108,6 +120,7 @@ public class HelperTests extends ExpressionTestCase {
 		checkMatch(new Class[]{String.class,Sub.class},new Class[]{String.class,Super.class},typeConverter,ArgsMatchKind.CLOSE);
 	}
 	
+	@Test
 	public void testReflectionHelperCompareArguments_RequiresConversionMatching() {
 		// TODO these are failing - for investigation
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
@@ -125,6 +138,7 @@ public class HelperTests extends ExpressionTestCase {
 		checkMatch(new Class[]{Integer.TYPE,Sub.class,Boolean.TYPE},new Class[]{Integer.class, Super.class,Boolean.class},typeConverter,ArgsMatchKind.REQUIRES_CONVERSION,0,2);
 	}
 
+	@Test
 	public void testReflectionHelperCompareArguments_NotAMatch() {
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
 		
@@ -132,6 +146,7 @@ public class HelperTests extends ExpressionTestCase {
 		checkMatch(new Class[]{Super.class,String.class},new Class[]{Sub.class,String.class},typeConverter,null);
 	}
 
+	@Test
 	public void testReflectionHelperCompareArguments_Varargs_ExactMatching() {
 		StandardTypeConverter tc = new StandardTypeConverter();
 		Class<?> stringArrayClass = new String[0].getClass();
@@ -184,6 +199,7 @@ public class HelperTests extends ExpressionTestCase {
 		// what happens on (Integer,String) passed to (Integer[]) ?
 	}
 	
+	@Test
 	public void testConvertArguments() throws Exception {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
@@ -206,8 +222,9 @@ public class HelperTests extends ExpressionTestCase {
 		args = new Object[]{3,false,3.0d};
 		ReflectionHelper.convertArguments(new Class[]{String.class,String[].class}, true, tc, new int[]{0,1,2}, args);
 		checkArguments(args, "3","false","3.0");
-}
+	}
 
+	@Test
 	public void testConvertArguments2() throws EvaluationException {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
@@ -230,9 +247,9 @@ public class HelperTests extends ExpressionTestCase {
 		args = new Object[]{3,false,3.0f};
 		try {
 			ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class}, true, null, args);
-			fail("Should have failed because no converter supplied");
-		} catch (SpelException se) {
-			assertEquals(SpelMessages.TYPE_CONVERSION_ERROR,se.getMessageUnformatted());
+			Assert.fail("Should have failed because no converter supplied");
+		} catch (SpelEvaluationException se) {
+			Assert.assertEquals(SpelMessages.TYPE_CONVERSION_ERROR,se.getMessageUnformatted());
 		}
 		
 		// null value
@@ -241,21 +258,78 @@ public class HelperTests extends ExpressionTestCase {
 		checkArguments(args,"3",null,"3.0");
 	}
 	
-	
+	@Test
 	public void testSetupArguments() {
 		Object[] newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class[]{new String[0].getClass()},"a","b","c");
 		
-		assertEquals(1,newArray.length);
+		Assert.assertEquals(1,newArray.length);
 		Object firstParam = newArray[0];
-		assertEquals(String.class,firstParam.getClass().getComponentType());
+		Assert.assertEquals(String.class,firstParam.getClass().getComponentType());
 		Object[] firstParamArray = (Object[])firstParam;
-		assertEquals(3,firstParamArray.length);
-		assertEquals("a",firstParamArray[0]);
-		assertEquals("b",firstParamArray[1]);
-		assertEquals("c",firstParamArray[2]);
+		Assert.assertEquals(3,firstParamArray.length);
+		Assert.assertEquals("a",firstParamArray[0]);
+		Assert.assertEquals("b",firstParamArray[1]);
+		Assert.assertEquals("c",firstParamArray[2]);
 	}
+	
+	@Test
+	public void testReflectivePropertyResolver() throws Exception {
+		ReflectivePropertyResolver rpr = new ReflectivePropertyResolver();
+		Tester t = new Tester();
+		t.setProperty("hello");
+		EvaluationContext ctx = new StandardEvaluationContext(t);
+		Assert.assertTrue(rpr.canRead(ctx, t, "property"));
+		Assert.assertEquals("hello",rpr.read(ctx, t, "property").getValue());
+		Assert.assertEquals("hello",rpr.read(ctx, t, "property").getValue()); // cached accessor used
+
+		Assert.assertTrue(rpr.canRead(ctx, t, "field"));
+		Assert.assertEquals(3,rpr.read(ctx, t, "field").getValue());
+		Assert.assertEquals(3,rpr.read(ctx, t, "field").getValue()); // cached accessor used
+		
+		Assert.assertTrue(rpr.canWrite(ctx, t, "property"));
+		rpr.write(ctx, t, "property","goodbye");
+		rpr.write(ctx, t, "property","goodbye"); // cached accessor used
+				
+		Assert.assertTrue(rpr.canWrite(ctx, t, "field"));
+		rpr.write(ctx, t, "field",12);
+		rpr.write(ctx, t, "field",12);
+
+		// Attempted write as first activity on this field and property to drive testing 
+		// of populating type descriptor cache
+		rpr.write(ctx,t,"field2",3);
+		rpr.write(ctx, t, "property2","doodoo");
+		Assert.assertEquals(3,rpr.read(ctx,t,"field2").getValue());
+
+		// Attempted read as first activity on this field and property (no canRead before them)
+		Assert.assertEquals(0,rpr.read(ctx,t,"field3").getValue());
+		Assert.assertEquals("doodoo",rpr.read(ctx,t,"property3").getValue());
+
+		// Access through is method
+//		Assert.assertEquals(0,rpr.read(ctx,t,"field3").getValue());
+		Assert.assertEquals(false,rpr.read(ctx,t,"property4").getValue());
+		Assert.assertTrue(rpr.canRead(ctx,t,"property4"));
+	}
+	
 
 	// test classes
+	static class Tester {
+		String property;
+		public int field = 3;
+		public int field2;
+		public int field3 = 0;
+		String property2;
+		String property3 = "doodoo";
+		boolean property4 = false;
+
+		public String getProperty() { return property; }
+		public void setProperty(String value) { property = value; }
+
+		public void setProperty2(String value) { property2 = value; }
+
+		public String getProperty3() { return property3; }
+		
+		public boolean isProperty4() { return property4; }
+	}
 	
 	static class Super {
 	}
@@ -273,25 +347,25 @@ public class HelperTests extends ExpressionTestCase {
 	private void checkMatch(Class[] inputTypes, Class[] expectedTypes, StandardTypeConverter typeConverter,ArgsMatchKind expectedMatchKind,int... argsForConversion) {
 		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArguments(expectedTypes, inputTypes, typeConverter);
 		if (expectedMatchKind==null) {
-			assertNull("Did not expect them to match in any way", matchInfo);
+			Assert.assertNull("Did not expect them to match in any way", matchInfo);
 		} else {
-			assertNotNull("Should not be a null match", matchInfo);
+			Assert.assertNotNull("Should not be a null match", matchInfo);
 		}
 
 		if (expectedMatchKind==ArgsMatchKind.EXACT) {
-			assertTrue(matchInfo.isExactMatch());
-			assertNull(matchInfo.argsRequiringConversion);		
+			Assert.assertTrue(matchInfo.isExactMatch());
+			Assert.assertNull(matchInfo.argsRequiringConversion);		
 		} else if (expectedMatchKind==ArgsMatchKind.CLOSE) {
-			assertTrue(matchInfo.isCloseMatch());
-			assertNull(matchInfo.argsRequiringConversion);		
+			Assert.assertTrue(matchInfo.isCloseMatch());
+			Assert.assertNull(matchInfo.argsRequiringConversion);		
 		} else if (expectedMatchKind==ArgsMatchKind.REQUIRES_CONVERSION) {
-			assertTrue("expected to be a match requiring conversion, but was "+matchInfo,matchInfo.isMatchRequiringConversion());
+			Assert.assertTrue("expected to be a match requiring conversion, but was "+matchInfo,matchInfo.isMatchRequiringConversion());
 			if (argsForConversion==null) {
-				fail("there are arguments that need conversion");
+				Assert.fail("there are arguments that need conversion");
 			}
-			assertEquals("The array of args that need conversion is different length to that expected",argsForConversion.length, matchInfo.argsRequiringConversion.length);
+			Assert.assertEquals("The array of args that need conversion is different length to that expected",argsForConversion.length, matchInfo.argsRequiringConversion.length);
 			for (int a=0;a<argsForConversion.length;a++) {
-				assertEquals(argsForConversion[a],matchInfo.argsRequiringConversion[a]);
+				Assert.assertEquals(argsForConversion[a],matchInfo.argsRequiringConversion[a]);
 			}
 		}
 	}
@@ -302,37 +376,37 @@ public class HelperTests extends ExpressionTestCase {
 	private void checkMatch2(Class[] inputTypes, Class[] expectedTypes, StandardTypeConverter typeConverter,ArgsMatchKind expectedMatchKind,int... argsForConversion) {
 		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArgumentsVarargs(expectedTypes, inputTypes, typeConverter);
 		if (expectedMatchKind==null) {
-			assertNull("Did not expect them to match in any way: "+matchInfo, matchInfo);
+			Assert.assertNull("Did not expect them to match in any way: "+matchInfo, matchInfo);
 		} else {
-			assertNotNull("Should not be a null match", matchInfo);
+			Assert.assertNotNull("Should not be a null match", matchInfo);
 		}
 
 		if (expectedMatchKind==ArgsMatchKind.EXACT) {
-			assertTrue(matchInfo.isExactMatch());
-			assertNull(matchInfo.argsRequiringConversion);		
+			Assert.assertTrue(matchInfo.isExactMatch());
+			Assert.assertNull(matchInfo.argsRequiringConversion);		
 		} else if (expectedMatchKind==ArgsMatchKind.CLOSE) {
-			assertTrue(matchInfo.isCloseMatch());
-			assertNull(matchInfo.argsRequiringConversion);		
+			Assert.assertTrue(matchInfo.isCloseMatch());
+			Assert.assertNull(matchInfo.argsRequiringConversion);		
 		} else if (expectedMatchKind==ArgsMatchKind.REQUIRES_CONVERSION) {
-			assertTrue("expected to be a match requiring conversion, but was "+matchInfo,matchInfo.isMatchRequiringConversion());
+			Assert.assertTrue("expected to be a match requiring conversion, but was "+matchInfo,matchInfo.isMatchRequiringConversion());
 			if (argsForConversion==null) {
-				fail("there are arguments that need conversion");
+				Assert.fail("there are arguments that need conversion");
 			}
-			assertEquals("The array of args that need conversion is different length to that expected",argsForConversion.length, matchInfo.argsRequiringConversion.length);
+			Assert.assertEquals("The array of args that need conversion is different length to that expected",argsForConversion.length, matchInfo.argsRequiringConversion.length);
 			for (int a=0;a<argsForConversion.length;a++) {
-				assertEquals(argsForConversion[a],matchInfo.argsRequiringConversion[a]);
+				Assert.assertEquals(argsForConversion[a],matchInfo.argsRequiringConversion[a]);
 			}
 		}
 	}
 
 	private void checkArguments(Object[] args, Object... expected) {
-		assertEquals(expected.length,args.length);
+		Assert.assertEquals(expected.length,args.length);
 		for (int i=0;i<expected.length;i++) {
 			checkArgument(expected[i],args[i]);
 		}
 	}
 	
 	private void checkArgument(Object expected, Object actual) {
-		assertEquals(expected,actual);
+		Assert.assertEquals(expected,actual);
 	}
 }

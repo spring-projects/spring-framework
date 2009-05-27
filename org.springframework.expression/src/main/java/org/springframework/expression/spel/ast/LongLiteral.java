@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 
 /**
@@ -29,8 +28,8 @@ public class LongLiteral extends Literal {
 
 	private final TypedValue value;
 
-	LongLiteral(Token payload, long value) {
-		super(payload);
+	LongLiteral(String payload, int pos, long value) {
+		super(payload, pos); 
 		this.value = new TypedValue(value, LONG_TYPE_DESCRIPTOR);
 	}
 

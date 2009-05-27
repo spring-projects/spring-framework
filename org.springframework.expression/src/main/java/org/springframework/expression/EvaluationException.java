@@ -17,66 +17,51 @@
 package org.springframework.expression;
 
 /**
- * Base class for exceptions occurring during expression parsing and evaluation.
+ * Represent an exception that occurs during expression evaluation.
  * 
  * @author Andy Clement
  * @since 3.0
  */
-public class EvaluationException extends Exception {
-
-	private String expressionString;
-
+public class EvaluationException extends ExpressionException {
 
 	/**
-	 * Creates a new expression exception.
-	 * @param cause the underlying cause of this exception
-	 */
-	public EvaluationException(Throwable cause) {
-		super(cause);
+	 * Creates a new expression evaluation exception.
+	 * @param position the position in the expression where the problem occurred
+	 * @param message description of the problem that occurred
+	 */ 
+	public EvaluationException(int position, String message) {
+		super(position, message);
 	}
 
 	/**
-	 * Creates a new expression parsing exception.
-	 * @param expressionString the expression string that could not be parsed
-	 * @param cause the underlying cause of this exception
-	 */
-	public EvaluationException(String expressionString, Throwable cause) {
-		this(expressionString, "Exception occurred whilst handling '" + expressionString + "'", cause);
-	}
-
-	/**
-	 * Creates a new expression exception.
-	 * @param expressionString the expression string
-	 * @param message a descriptive message
-	 * @param cause the underlying cause of this exception
-	 */
-	public EvaluationException(String expressionString, String message, Throwable cause) {
-		super(message, cause);
-		this.expressionString = expressionString;
-	}
-
-	/**
-	 * Creates a new expression exception.
-	 * @param expressionString the expression string
-	 * @param message a descriptive message
-	 */
+	 * Creates a new expression evaluation exception.
+	 * @param expressionString the expression that could not be evaluated
+	 * @param message description of the problem that occurred
+	 */ 
 	public EvaluationException(String expressionString, String message) {
-		super(message);
-		this.expressionString = expressionString;
+		super(expressionString, message);
 	}
 
 	/**
-	 * Creates a new expression exception. The expressionString field should be set by a later call to
-	 * setExpressionString().
-	 * @param message a descriptive message
-	 */
+	 * Creates a new expression evaluation exception.
+	 * @param position the position in the expression where the problem occurred
+	 * @param message description of the problem that occurred
+	 * @param cause the underlying cause of this exception
+	 */ 
+	public EvaluationException(int position, String message, Throwable cause) {
+		super(position, message, cause);
+	}
+
+	/**
+	 * Creates a new expression evaluation exception.
+	 * @param message description of the problem that occurred
+	 */ 
 	public EvaluationException(String message) {
 		super(message);
 	}
 
-
-	public final String getExpressionString() {
-		return this.expressionString;
+	public EvaluationException(String message, Throwable cause) {
+		super(message,cause);
 	}
 
 }

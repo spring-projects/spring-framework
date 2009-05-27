@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -29,8 +28,8 @@ public class BooleanLiteral extends Literal {
 
 	private final BooleanTypedValue value;
 
-	public BooleanLiteral(Token payload, boolean value) {
-		super(payload);
+	public BooleanLiteral(String payload, int pos, boolean value) {
+		super(payload, pos);
 		this.value = BooleanTypedValue.forValue(value);
 	}
 

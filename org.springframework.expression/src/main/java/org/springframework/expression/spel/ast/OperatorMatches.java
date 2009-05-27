@@ -20,10 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
@@ -36,13 +35,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorMatches extends Operator {
 
-	public OperatorMatches(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "matches";
+	public OperatorMatches(int pos, SpelNodeImpl... operands) {
+		super("matches", pos, operands);
 	}
 
 	/**
@@ -59,11 +53,11 @@ public class OperatorMatches extends Operator {
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		try {
 			if (!(left instanceof String)) {
-				throw new SpelException(leftOp.getCharPositionInLine(),
+				throw new SpelEvaluationException(leftOp.getStartPosition(),
 						SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
 			}
 			if (!(right instanceof String)) {
-				throw new SpelException(rightOp.getCharPositionInLine(),
+				throw new SpelEvaluationException(rightOp.getStartPosition(),
 						SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 			}
 			Pattern pattern = Pattern.compile((String) right);
@@ -71,7 +65,7 @@ public class OperatorMatches extends Operator {
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException pse) {
-			throw new SpelException(rightOp.getCharPositionInLine(), pse, SpelMessages.INVALID_PATTERN, right);
+			throw new SpelEvaluationException(rightOp.getStartPosition(), pse, SpelMessages.INVALID_PATTERN, right);
 		}
 	}
 

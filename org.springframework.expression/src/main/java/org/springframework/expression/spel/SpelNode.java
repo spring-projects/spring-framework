@@ -79,4 +79,9 @@ public interface SpelNode {
 	 */
 	int getStartPosition();
 
+	/**
+	 * @return the end position of this Ast node in the expression string
+	 */
+	int getEndPosition();
+
 }

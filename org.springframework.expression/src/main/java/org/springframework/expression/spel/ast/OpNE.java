@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
@@ -27,15 +26,10 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorInequality extends Operator {
+public class OpNE extends Operator {
 
-	public OperatorInequality(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "!=";
+	public OpNE(int pos, SpelNodeImpl... operands) {
+		super("!=", pos, operands);
 	}
 
 	@Override

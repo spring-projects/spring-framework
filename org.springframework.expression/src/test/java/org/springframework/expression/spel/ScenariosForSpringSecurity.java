@@ -18,6 +18,9 @@ package org.springframework.expression.spel;
 
 import java.lang.reflect.Method;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -29,7 +32,7 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -41,28 +44,30 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
+	@Test
 	public void testScenario01_Roles() throws Exception {
 		try {
-			SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+			SpelExpressionParser parser = new SpelExpressionParser();
 			StandardEvaluationContext ctx = new StandardEvaluationContext();
 			Expression expr = parser.parseExpression("hasAnyRole('MANAGER','TELLER')");
 
 			ctx.setRootObject(new Person("Ben"));
 			Boolean value = expr.getValue(ctx,Boolean.class);
-			assertFalse(value);
+			Assert.assertFalse(value);
 			
 			ctx.setRootObject(new Manager("Luke"));
 			value = expr.getValue(ctx,Boolean.class);
-			assertTrue(value);
+			Assert.assertTrue(value);
 
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected SpelException: " + ee.getMessage());
+			Assert.fail("Unexpected SpelException: " + ee.getMessage());
 		}
 	}
 
+	@Test
 	public void testScenario02_ComparingNames() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		ctx.addPropertyAccessor(new SecurityPrincipalAccessor());
@@ -73,11 +78,11 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 		ctx.setRootObject(new Person("Andy"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		Assert.assertTrue(value);
 		
 		ctx.setRootObject(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		Assert.assertFalse(value);
 
 		// (2) Or register an accessor that can understand 'p' and return the right person
 		expr = parser.parseExpression("p.name == principal.name");
@@ -88,15 +93,16 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		
 		pAccessor.setPerson(new Person("Andy"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		Assert.assertTrue(value);
 		
 		pAccessor.setPerson(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		Assert.assertFalse(value);
 	}
 
+	@Test
 	public void testScenario03_Arithmetic() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		
 		// Might be better with a as a variable although it would work as a property too...
@@ -108,17 +114,18 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		Assert.assertTrue(value);
 		
 		ctx.setRootObject(new Manager("Luke"));
 		ctx.setVariable("a",1.043d);
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		Assert.assertFalse(value);
 	}
 
 	// Here i'm going to change which hasRole() executes and make it one of my own Java methods
+	@Test
 	public void testScenario04_ControllingWhichMethodsRun() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it);
@@ -133,7 +140,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		Assert.assertTrue(value);
 		
 //			ctx.setRootObject(new Manager("Luke"));
 //			ctx.setVariable("a",1.043d);

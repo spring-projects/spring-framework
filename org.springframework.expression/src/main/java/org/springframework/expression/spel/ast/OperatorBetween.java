@@ -18,11 +18,10 @@ package org.springframework.expression.spel.ast;
 
 import java.util.List;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
@@ -36,13 +35,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorBetween extends Operator {
 
-	public OperatorBetween(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "between";
+	public OperatorBetween(int pos, SpelNodeImpl... operands) {
+		super("between", pos, operands);
 	}
 
 	/**
@@ -57,7 +51,7 @@ public class OperatorBetween extends Operator {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		if (!(right instanceof List) || ((List<?>) right).size() != 2) {
-			throw new SpelException(getRightOperand().getCharPositionInLine(),
+			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);
 		}
 		List<?> l = (List<?>) right;
@@ -66,8 +60,8 @@ public class OperatorBetween extends Operator {
 		TypeComparator comparator = state.getTypeComparator();
 		try {
 			return BooleanTypedValue.forValue((comparator.compare(left, low) >= 0 && comparator.compare(left, high) <= 0));
-		} catch (SpelException ex) {
-			ex.setPosition(getCharPositionInLine());
+		} catch (SpelEvaluationException ex) {
+			ex.setPosition(getStartPosition());
 			throw ex;
 		}
 	}

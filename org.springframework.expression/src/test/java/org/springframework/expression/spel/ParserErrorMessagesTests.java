@@ -16,15 +16,16 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.Test;
+
 /**
  * Tests the messages and exceptions that come out for badly formed expressions
  * 
  * @author Andy Clement
  */
 public class ParserErrorMessagesTests extends ExpressionTestCase {
-	// TODO extract expected insert messages into constants (just in case of changes)?
-	// TODO review poor messages, marked // POOR below
 
+	@Test
 	public void testBrokenExpression01() {
 		// will not fit into an int, needs L suffix
 		parseAndCheckError("0xCAFEBABE", SpelMessages.NOT_AN_INTEGER);
@@ -32,26 +33,30 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		parseAndCheckError("0xCAFEBABECAFEBABEL", SpelMessages.NOT_A_LONG);
 	}
 
+	@Test
 	public void testBrokenExpression02() {
 		// rogue 'G' on the end
-		parseAndCheckError("0xB0BG", SpelMessages.PARSE_PROBLEM, 5, "mismatched input 'G' expecting EOF");
+		parseAndCheckError("0xB0BG", SpelMessages.MORE_INPUT, 5, "G");
 	}
 
+	@Test
 	public void testBrokenExpression04() {
 		// missing right operand
-		parseAndCheckError("true or ", SpelMessages.PARSE_PROBLEM, -1, "no viable alternative at input '<EOF>'"); // POOR
+		parseAndCheckError("true or ", SpelMessages.RIGHT_OPERAND_PROBLEM, 5);
 	}
 
+	@Test
 	public void testBrokenExpression05() {
 		// missing right operand
-		parseAndCheckError("1 + ", SpelMessages.PARSE_PROBLEM, -1, "no viable alternative at input '<EOF>'"); // POOR
+		parseAndCheckError("1 + ", SpelMessages.RIGHT_OPERAND_PROBLEM, 2);
 	}
 
+	@Test
 	public void testBrokenExpression07() {
 		// T() can only take an identifier (possibly qualified), not a literal
 		// message ought to say identifier rather than ID
-		parseAndCheckError("null instanceof T('a')", SpelMessages.PARSE_PROBLEM, 18,
-				"mismatched input ''a'' expecting ID"); // POOR
+		parseAndCheckError("null instanceof T('a')", SpelMessages.NOT_EXPECTED_TOKEN, 18,
+				"identifier","literal_string");
 	}
 
 }

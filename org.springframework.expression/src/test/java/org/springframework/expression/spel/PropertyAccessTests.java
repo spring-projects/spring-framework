@@ -16,15 +16,20 @@
 
 package org.springframework.expression.spel;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.ast.CommonTypeDescriptors;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+///CLOVER:OFF
 
 /**
  * Tests accessing of properties.
@@ -33,18 +38,22 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class PropertyAccessTests extends ExpressionTestCase {
 
+	@Test
 	public void testSimpleAccess01() {
 		evaluate("name", "Nikola Tesla", String.class);
 	}
 
+	@Test
 	public void testSimpleAccess02() {
 		evaluate("placeOfBirth.city", "SmilJan", String.class);
 	}
 
+	@Test
 	public void testSimpleAccess03() {
 		evaluate("stringArrayOfThreeItems.length", "3", Integer.class);
 	}
 
+	@Test
 	public void testNonExistentPropertiesAndMethods() {
 		// madeup does not exist as a property
 		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 0);
@@ -57,36 +66,38 @@ public class PropertyAccessTests extends ExpressionTestCase {
 	 * The standard reflection resolver cannot find properties on null objects but some 
 	 * supplied resolver might be able to - so null shouldn't crash the reflection resolver.
 	 */
+	@Test
 	public void testAccessingOnNullObject() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("madeup");
 		EvaluationContext context = new StandardEvaluationContext(null);
 		try {
 			expr.getValue(context);
-			fail("Should have failed - default property resolver cannot resolve on null");
+			Assert.fail("Should have failed - default property resolver cannot resolve on null");
 		} catch (Exception e) {
 			checkException(e,SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
 		}
-			assertFalse(expr.isWritable(context));
+		Assert.assertFalse(expr.isWritable(context));
 		try {
 			expr.setValue(context,"abc");
-			fail("Should have failed - default property resolver cannot resolve on null");
+			Assert.fail("Should have failed - default property resolver cannot resolve on null");
 		} catch (Exception e) {
 			checkException(e,SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 
 	private void checkException(Exception e, SpelMessages expectedMessage) {
-		if (e instanceof SpelException) {
-			SpelMessages sm = ((SpelException)e).getMessageUnformatted();
-			assertEquals("Expected exception type did not occur",expectedMessage,sm);
+		if (e instanceof SpelEvaluationException) {
+			SpelMessages sm = ((SpelEvaluationException)e).getMessageUnformatted();
+			Assert.assertEquals("Expected exception type did not occur",expectedMessage,sm);
 		} else {
-			fail("Should be a SpelException "+e);
+			Assert.fail("Should be a SpelException "+e);
 		}
 	}
 
+	@Test
 	// Adding a new property accessor just for a particular type
 	public void testAddingSpecificPropertyAccessor() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		// Even though this property accessor is added after the reflection one, it specifically
@@ -95,22 +106,22 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		ctx.addPropertyAccessor(new StringyPropertyAccessor());
 		Expression expr = parser.parseExpression("new String('hello').flibbles");
 		Integer i = expr.getValue(ctx, Integer.class);
-		assertEquals((int) i, 7);
+		Assert.assertEquals((int) i, 7);
 
 		// The reflection one will be used for other properties...
 		expr = parser.parseExpression("new String('hello').CASE_INSENSITIVE_ORDER");
 		Object o = expr.getValue(ctx);
-		assertNotNull(o);
+		Assert.assertNotNull(o);
 
 		expr = parser.parseExpression("new String('hello').flibbles");
 		expr.setValue(ctx, 99);
 		i = expr.getValue(ctx, Integer.class);
-		assertEquals((int) i, 99);
+		Assert.assertEquals((int) i, 99);
 
 		// Cannot set it to a string value
 		try {
 			expr.setValue(ctx, "not allowed");
-			fail("Should not have been allowed");
+			Assert.fail("Should not have been allowed");
 		} catch (EvaluationException e) {
 			// success - message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
 			// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''

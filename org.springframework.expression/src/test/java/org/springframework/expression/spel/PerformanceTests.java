@@ -16,27 +16,31 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
+import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.ExpressionParser;
+
+///CLOVER:OFF
 
 /**
  * Tests the evaluation of real expressions in a real context.
  * 
  * @author Andy Clement
  */
-public class PerformanceTests extends TestCase {
+public class PerformanceTests {
 
 	public static final int ITERATIONS = 10000;
 	public static final boolean report = true;
 
-	private static SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+	private static ExpressionParser parser = SpelExpressionParserFactory.getParser();
 	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	private static final boolean DEBUG = false;
 	
+	@Test
 	public void testPerformanceOfPropertyAccess() throws Exception {
 		long starttime = 0;
 		long endtime = 0;
@@ -45,18 +49,18 @@ public class PerformanceTests extends TestCase {
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
-			Object value = expr.getValue(eContext);
+			expr.getValue(eContext);
 		}
 		
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
-			Object value = expr.getValue(eContext);
+			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
 		long freshParseTime = endtime - starttime;
@@ -66,11 +70,11 @@ public class PerformanceTests extends TestCase {
 
 		Expression expr = parser.parseExpression("placeOfBirth.city");
 		if (expr == null) {
-			fail("Parser returned null for expression");
+			Assert.fail("Parser returned null for expression");
 		}
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
-			Object value = expr.getValue(eContext);
+			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
 		long reuseTime = endtime - starttime;
@@ -80,7 +84,7 @@ public class PerformanceTests extends TestCase {
 		if (reuseTime > freshParseTime) {
 			System.out.println("Fresh parse every time, ITERATIONS iterations = " + freshParseTime + "ms");
 			System.out.println("Reuse SpelExpression, ITERATIONS iterations = " + reuseTime + "ms");
-			fail("Should have been quicker to reuse!");
+			Assert.fail("Should have been quicker to reuse!");
 		}
 	}
 
@@ -92,18 +96,18 @@ public class PerformanceTests extends TestCase {
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
-			Object value = expr.getValue(eContext);
+			expr.getValue(eContext);
 		}
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
-			Object value = expr.getValue(eContext);
+			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
 		long freshParseTime = endtime - starttime;
@@ -113,11 +117,11 @@ public class PerformanceTests extends TestCase {
 
 		Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 		if (expr == null) {
-			fail("Parser returned null for expression");
+			Assert.fail("Parser returned null for expression");
 		}
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
-			Object value = expr.getValue(eContext);
+			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
 		long reuseTime = endtime - starttime;
@@ -128,7 +132,7 @@ public class PerformanceTests extends TestCase {
 		if (reuseTime > freshParseTime) {
 			System.out.println("Fresh parse every time, ITERATIONS iterations = " + freshParseTime + "ms");
 			System.out.println("Reuse SpelExpression, ITERATIONS iterations = " + reuseTime + "ms");
-			fail("Should have been quicker to reuse!");
+			Assert.fail("Should have been quicker to reuse!");
 		}
 	}
 

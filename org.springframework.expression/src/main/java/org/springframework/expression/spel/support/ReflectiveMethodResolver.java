@@ -24,7 +24,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeConverter;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
@@ -88,7 +88,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 			else if (matchRequiringConversion != null) {
 				if (multipleOptions) {
-					throw new SpelException(SpelMessages.MULTIPLE_POSSIBLE_METHODS, name);
+					throw new SpelEvaluationException(SpelMessages.MULTIPLE_POSSIBLE_METHODS, name);
 				}
 				return new ReflectiveMethodExecutor(matchRequiringConversion, argsToConvert);
 			}

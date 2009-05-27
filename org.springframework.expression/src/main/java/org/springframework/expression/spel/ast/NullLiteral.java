@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 
 /**
@@ -25,8 +24,8 @@ import org.springframework.expression.TypedValue;
  */
 public class NullLiteral extends Literal {
 
-	public NullLiteral(Token payload) {
-		super(payload);
+	public NullLiteral(int pos) {
+		super(null,pos);
 	}
 
 	@Override

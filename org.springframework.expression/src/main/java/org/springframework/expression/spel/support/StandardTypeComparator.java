@@ -17,7 +17,7 @@
 package org.springframework.expression.spel.support;
 
 import org.springframework.expression.TypeComparator;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.expression.spel.SpelMessages;
 public class StandardTypeComparator implements TypeComparator {
 
 	@SuppressWarnings("unchecked")
-	public int compare(Object left, Object right) throws SpelException {
+	public int compare(Object left, Object right) throws SpelEvaluationException {
 		// If one is null, check if the other is
 		if (left == null) {
 			return right == null ? 0 : 1;
@@ -65,7 +65,7 @@ public class StandardTypeComparator implements TypeComparator {
 			return ((Comparable) left).compareTo(right);
 		}
 		
-		throw new SpelException(SpelMessages.NOT_COMPARABLE, left.getClass(), right.getClass());
+		throw new SpelEvaluationException(SpelMessages.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 
 	public boolean canCompare(Object left, Object right) {

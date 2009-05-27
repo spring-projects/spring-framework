@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -38,8 +37,8 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class OperatorPlus extends Operator {
 
-	public OperatorPlus(Token payload) {
-		super(payload);
+	public OperatorPlus(int pos, SpelNodeImpl... operands) {
+		super("+", pos, operands);
 	}
 
 	@Override
@@ -80,16 +79,17 @@ public class OperatorPlus extends Operator {
 	}
 
 	@Override
-	public String getOperatorName() {
-		return "+";
-	}
-
-	@Override
 	public String toStringAST() {
-		if (getRightOperand() == null) {  // unary plus
+		if (children.length<2) {  // unary plus
 			return new StringBuilder().append("+").append(getLeftOperand().toStringAST()).toString();
 		}
 		return super.toStringAST();
 	}
+
+	public SpelNodeImpl getRightOperand() {
+		if (children.length<2) {return null;}
+		return children[1];
+	}
+
 
 }

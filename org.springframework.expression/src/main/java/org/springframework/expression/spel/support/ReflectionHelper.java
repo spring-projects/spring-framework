@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -112,7 +112,7 @@ public class ReflectionHelper {
 		int argCountUpToVarargs = expectedArgTypes.length-1;
 		for (int i = 0; i < argCountUpToVarargs && match != null; i++) {
 			Class suppliedArg = suppliedArgTypes[i];
-			Class expectedArg = expectedArgTypes[i];
+			Class<?> expectedArg = expectedArgTypes[i];
 			if (expectedArg != suppliedArg) {
 				if (expectedArg.isAssignableFrom(suppliedArg) || ClassUtils.isAssignableValue(expectedArg, suppliedArg)) {
 					if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
@@ -226,10 +226,10 @@ public class ReflectionHelper {
 	 * @param isVarargs whether parameterTypes relates to a varargs method
 	 * @param converter the converter to use for type conversions
 	 * @param arguments the arguments to convert to the requested parameter types
-	 * @throws SpelException if there is a problem with conversion
+	 * @throws SpelEvaluationException if there is a problem with conversion
 	 */
 	public static void convertAllArguments(Class[] parameterTypes, boolean isVarargs, TypeConverter converter,
-			Object[] arguments) throws SpelException {
+			Object[] arguments) throws SpelEvaluationException {
 
 		Assert.notNull(arguments,"should not be called if nothing to convert");
 		
@@ -248,16 +248,16 @@ public class ReflectionHelper {
 			try {
 				if (arguments[i] != null && arguments[i].getClass() != targetType) {
 					if (converter == null) {
-						throw new SpelException(SpelMessages.TYPE_CONVERSION_ERROR, arguments[i].getClass().getName(),targetType);
+						throw new SpelEvaluationException(SpelMessages.TYPE_CONVERSION_ERROR, arguments[i].getClass().getName(),targetType);
 					}
 					arguments[i] = converter.convertValue(arguments[i], targetType);
 				}
 			} catch (EvaluationException ex) {
 				// allows for another type converter throwing a different kind of EvaluationException
-				if (ex instanceof SpelException) {
-					throw (SpelException)ex;
+				if (ex instanceof SpelEvaluationException) {
+					throw (SpelEvaluationException)ex;
 				} else {
-					throw new SpelException(ex, SpelMessages.TYPE_CONVERSION_ERROR,arguments[i].getClass().getName(),targetType);
+					throw new SpelEvaluationException(ex, SpelMessages.TYPE_CONVERSION_ERROR,arguments[i].getClass().getName(),targetType);
 				}
 			}
 		}

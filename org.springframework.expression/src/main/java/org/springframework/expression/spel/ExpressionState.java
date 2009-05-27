@@ -43,7 +43,7 @@ import org.springframework.expression.TypedValue;
 public class ExpressionState {
 
 	private final EvaluationContext relatedContext;
-
+	
 	private final Stack<VariableScope> variableScopes = new Stack<VariableScope>();
 
 	private final Stack<TypedValue> contextObjects = new Stack<TypedValue>();
@@ -158,7 +158,7 @@ public class ExpressionState {
 		else {
 			String leftType = (left==null?"null":left.getClass().getName());
 			String rightType = (right==null?"null":right.getClass().getName());
-			throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
+			throw new SpelEvaluationException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
 		}
 	}
 
@@ -169,8 +169,7 @@ public class ExpressionState {
 	public EvaluationContext getEvaluationContext() {
 		return this.relatedContext;
 	}
-
-
+	
 	/**
 	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
 	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst

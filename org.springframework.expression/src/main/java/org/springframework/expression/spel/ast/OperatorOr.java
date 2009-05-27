@@ -16,10 +16,9 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -30,13 +29,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorOr extends Operator {
 
-	public OperatorOr(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "or";
+	public OperatorOr(int pos, SpelNodeImpl... operands) {
+		super("or", pos, operands);
 	}
 
 	@Override
@@ -46,8 +40,8 @@ public class OperatorOr extends Operator {
 		try { 
 			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		catch (SpelException see) {
-			see.setPosition(getLeftOperand().getCharPositionInLine());
+		catch (SpelEvaluationException see) {
+			see.setPosition(getLeftOperand().getStartPosition());
 			throw see;
 		}
 
@@ -58,8 +52,8 @@ public class OperatorOr extends Operator {
 		try {
 			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		catch (SpelException see) {
-			see.setPosition(getRightOperand().getCharPositionInLine());
+		catch (SpelEvaluationException see) {
+			see.setPosition(getRightOperand().getStartPosition()); // TODO end positions here and in similar situations
 			throw see;
 		}
 

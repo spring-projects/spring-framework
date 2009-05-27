@@ -19,13 +19,12 @@ package org.springframework.expression.spel.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
@@ -43,24 +42,26 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	private volatile PropertyAccessor cachedWriteAccessor;
 	
-	public PropertyOrFieldReference(Token payload) {
-		super(payload);
-		this.name = payload.getText();
+	private final boolean nullSafe;
+
+	public PropertyOrFieldReference(boolean nullSafe, String propertyOrFieldName, int pos) {
+		super(pos);
+		name = propertyOrFieldName;
+		this.nullSafe = nullSafe;
 	}
 
-
 	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
+	public TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {
 		return readProperty(state, this.name);
 	}
 
 	@Override
-	public void setValue(ExpressionState state, Object newValue) throws SpelException {
+	public void setValue(ExpressionState state, Object newValue) throws SpelEvaluationException {
 		writeProperty(state, this.name, newValue);
 	}
 
 	@Override
-	public boolean isWritable(ExpressionState state) throws SpelException {
+	public boolean isWritable(ExpressionState state) throws SpelEvaluationException {
 		return isWritableProperty(this.name, state);
 	}
 
@@ -74,11 +75,15 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	 * @param state the evaluation state
 	 * @param name the name of the property
 	 * @return the value of the property
-	 * @throws SpelException if any problem accessing the property or it cannot be found
+	 * @throws SpelEvaluationException if any problem accessing the property or it cannot be found
 	 */
-	private TypedValue readProperty(ExpressionState state, String name) throws SpelException {
+	private TypedValue readProperty(ExpressionState state, String name) throws SpelEvaluationException {
 		TypedValue contextObject = state.getActiveContextObject();
 		EvaluationContext eContext = state.getEvaluationContext();
+
+		if (contextObject.getValue() == null && nullSafe) {
+			return TypedValue.NULL_TYPED_VALUE;
+		}
 
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse != null) {
@@ -108,20 +113,24 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 			}
 			catch (AccessException ae) {
-				throw new SpelException(ae, SpelMessages.EXCEPTION_DURING_PROPERTY_READ, name, ae.getMessage());
+				throw new SpelEvaluationException(ae, SpelMessages.EXCEPTION_DURING_PROPERTY_READ, name, ae.getMessage());
 			}
 		}
 		if (contextObject.getValue() == null) {
-			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
+			throw new SpelEvaluationException(SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
 		} else {
-			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, name,
+			throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, name,
 					FormatHelper.formatClassNameForMessage(contextObjectClass));
 		}
 	}
 
-	private void writeProperty(ExpressionState state, String name, Object newValue) throws SpelException {
+	private void writeProperty(ExpressionState state, String name, Object newValue) throws SpelEvaluationException {
 		TypedValue contextObject = state.getActiveContextObject();
 		EvaluationContext eContext = state.getEvaluationContext();
+		
+		if (contextObject.getValue() == null && nullSafe) {
+			return;
+		}
 
 		PropertyAccessor accessorToUse = this.cachedWriteAccessor;
 		if (accessorToUse != null) {
@@ -149,19 +158,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					}
 				}
 			} catch (AccessException ae) {
-				throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,
+				throw new SpelEvaluationException(getStartPosition(), ae, SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,
 						name, ae.getMessage());
 			}
 		}
 		if (contextObject.getValue()==null) {
-			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
+			throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
 		} else {
-			throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE, name, FormatHelper
+			throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE, name, FormatHelper
 					.formatClassNameForMessage(contextObjectClass));
 		}
 	}
 
-	public boolean isWritableProperty(String name, ExpressionState state) throws SpelException {
+	public boolean isWritableProperty(String name, ExpressionState state) throws SpelEvaluationException {
 		Object contextObject = state.getActiveContextObject().getValue();
 		EvaluationContext eContext = state.getEvaluationContext();
 

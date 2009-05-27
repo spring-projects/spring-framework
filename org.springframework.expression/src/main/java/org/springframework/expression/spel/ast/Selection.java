@@ -22,12 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.runtime.Token;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
@@ -46,18 +45,21 @@ public class Selection extends SpelNodeImpl {
 	public final static int LAST = 2; // $[]
 
 	private final int variant;
+	private final boolean nullSafe;
 
-	public Selection(Token payload, int variant) {
-		super(payload);
+	public Selection(boolean nullSafe, int variant,int pos,SpelNodeImpl expression) {
+		super(pos,expression); 
+		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue op = state.getActiveContextObject();
 		Object operand = op.getValue();
 		
-		SpelNodeImpl selectionCriteria = getChild(0);
+		SpelNodeImpl selectionCriteria = children[0];
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			// TODO don't lose generic info for the new map
@@ -78,7 +80,7 @@ public class Selection extends SpelNodeImpl {
 							result.put(entry.getKey(),entry.getValue());
 						}
 					} else {
-						throw new SpelException(selectionCriteria.getCharPositionInLine(),
+						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
 					}
 				} finally {
@@ -113,7 +115,7 @@ public class Selection extends SpelNodeImpl {
 							result.add(element);
 						}
 					} else {
-						throw new SpelException(selectionCriteria.getCharPositionInLine(),
+						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
 					}
 					idx++;
@@ -130,8 +132,12 @@ public class Selection extends SpelNodeImpl {
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
-					(operand == null ? "null" : operand.getClass().getName()));
+			if (operand==null && nullSafe) {
+				return TypedValue.NULL_TYPED_VALUE;
+			} else {
+				throw new SpelEvaluationException(getStartPosition(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
+						(operand == null ? "null" : operand.getClass().getName()));
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2004-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,41 +25,32 @@ import org.springframework.expression.EvaluationException;
  * @author Andy Clement
  * @since 3.0
  */
-public class SpelException extends EvaluationException {
+public class SpelEvaluationException extends EvaluationException {
 
 	private SpelMessages message;
-	private int position = -1;
 	private Object[] inserts;
 
-	public SpelException(int position, Throwable cause, SpelMessages message, Object... inserts) {
-		super(cause);
-		this.position = position;
+	public SpelEvaluationException(SpelMessages message, Object... inserts) {
+		super(message.formatMessage(0, inserts)); // TODO poor position information, can the callers not really supply something?
 		this.message = message;
 		this.inserts = inserts;
 	}
 
-	public SpelException(Throwable cause, SpelMessages message, Object... inserts) {
-		super(cause);
+	public SpelEvaluationException(int position, SpelMessages message, Object... inserts) {
+		super(position, message.formatMessage(position, inserts)); 
 		this.message = message;
 		this.inserts = inserts;
 	}
 
-	public SpelException(int position, SpelMessages message, Object... inserts) {
-		super((Throwable)null);
-		this.position = position;
+	public SpelEvaluationException(int position, Throwable cause,
+			SpelMessages message, Object... inserts) {
+		super(position,message.formatMessage(position,inserts),cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
 
-	public SpelException(SpelMessages message, Object... inserts) {
-		super((Throwable)null);
-		this.message = message;
-		this.inserts = inserts;
-	}
-
-	public SpelException(String expressionString, int position, Throwable cause, SpelMessages message, Object... inserts) {
-		super(expressionString, cause);
-		this.position = position;
+	public SpelEvaluationException(Throwable cause, SpelMessages message, Object... inserts) {
+		super(message.formatMessage(0,inserts),cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
@@ -73,13 +64,6 @@ public class SpelException extends EvaluationException {
 			return message.formatMessage(position, inserts);
 		else
 			return super.getMessage();
-	}
-
-	/**
-	 * @return the position within the expression that gave rise to the exception (or -1 if unknown)
-	 */
-	public int getPosition() {
-		return this.position;
 	}
 
 	/**

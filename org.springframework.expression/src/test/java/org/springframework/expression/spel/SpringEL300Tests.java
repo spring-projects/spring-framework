@@ -16,12 +16,15 @@
 
 package org.springframework.expression.spel;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectivePropertyResolver;
 
 /**
@@ -31,10 +34,12 @@ import org.springframework.expression.spel.support.ReflectivePropertyResolver;
  */
 public class SpringEL300Tests extends ExpressionTestCase {
 
+	@Test
 	public void testNPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
 	
+	@Test
 	public void testNPE_SPR5673() throws Exception {
 		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
 		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
@@ -69,20 +74,21 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		checkTemplateParsingError("Hello ${","No ending suffix '}' for expression starting at character 6: ${");
 	}
 	
+	@Test
 	public void testAccessingNullPropertyViaReflection_SPR5663() throws AccessException {
 		PropertyAccessor propertyAccessor = new ReflectivePropertyResolver();
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
-		assertFalse(propertyAccessor.canRead(context, null, "abc"));
-		assertFalse(propertyAccessor.canWrite(context, null, "abc"));
+		Assert.assertFalse(propertyAccessor.canRead(context, null, "abc"));
+		Assert.assertFalse(propertyAccessor.canWrite(context, null, "abc"));
 		try {
 			propertyAccessor.read(context, null, "abc");
-			fail("Should have failed with an AccessException");
+			Assert.fail("Should have failed with an AccessException");
 		} catch (AccessException ae) {
 			// success
 		}
 		try {
 			propertyAccessor.write(context, null, "abc","foo");
-			fail("Should have failed with an AccessException");
+			Assert.fail("Should have failed with an AccessException");
 		} catch (AccessException ae) {
 			// success
 		}
@@ -96,9 +102,9 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 	
 	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression(expression,context);
-		assertEquals(expectedValue,expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
+		Assert.assertEquals(expectedValue,expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
 	}
 
 	private void checkTemplateParsingError(String expression,String expectedMessage) throws Exception {
@@ -106,15 +112,15 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 	
 	private void checkTemplateParsingError(String expression,ParserContext context, String expectedMessage) throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
 			parser.parseExpression(expression,context);
-			fail("Should have failed");
+			Assert.fail("Should have failed");
 		} catch (Exception e) {
 			if (!e.getMessage().equals(expectedMessage)) {
 				e.printStackTrace();
 			}
-			assertEquals(expectedMessage,e.getMessage());
+			Assert.assertEquals(expectedMessage,e.getMessage());
 		}
 	}
 	

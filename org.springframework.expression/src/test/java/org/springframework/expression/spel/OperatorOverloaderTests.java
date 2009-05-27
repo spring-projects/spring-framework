@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
@@ -49,6 +52,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 		
 	}
 	
+	@Test
 	public void testSimpleOperations() throws Exception {
 		// no built in support for this:
 		evaluateAndCheckError("'abc'+true",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
@@ -57,9 +61,9 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 		eContext.setOperatorOverloader(new StringAndBooleanAddition());
 
 		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'+true");
-		assertEquals("abctrue",expr.getValue(eContext));
+		Assert.assertEquals("abctrue",expr.getValue(eContext));
 
 		expr = (SpelExpression)parser.parseExpression("'abc'-true");
-		assertEquals("abc",expr.getValue(eContext));
+		Assert.assertEquals("abc",expr.getValue(eContext));
 	}
 }
