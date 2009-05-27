@@ -2,7 +2,7 @@
 <project name="org.springframework.spring-parent" xmlns:maven="antlib:org.apache.maven.artifact.ant">
 	<property file="${basedir}/../build.properties"/>
 	<import file="${basedir}/../build-spring-framework/package-library.xml"/>
-	<import file="${basedir}/../spring-build/library/default.xml"/>
+	<import file="${basedir}/../spring-build/resource/default.xml"/>
 
 
 </project>
