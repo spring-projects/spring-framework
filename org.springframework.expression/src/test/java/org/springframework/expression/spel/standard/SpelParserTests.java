@@ -17,6 +17,7 @@
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ParseException;
@@ -26,6 +27,7 @@ import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.expression.spel.ast.OpOr;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 
 public class SpelParserTests {
@@ -38,6 +40,23 @@ public class SpelParserTests {
 		Assert.assertNotNull(expr.getAST());
 		Assert.assertEquals(2,expr.getValue());
 		Assert.assertEquals(Integer.class,expr.getValueType());
+		Assert.assertEquals(2,expr.getAST().getValue(null));
+	}
+	
+	@Test
+	public void valueType() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		EvaluationContext ctx = new StandardEvaluationContext();
+		Class c = parser.parse("2").getValueType();
+		Assert.assertEquals(Integer.class,c);
+		c = parser.parse("12").getValueType(ctx);
+		Assert.assertEquals(Integer.class,c);
+		c = parser.parse("null").getValueType();
+		Assert.assertNull(c);
+		c = parser.parse("null").getValueType(ctx);
+		Assert.assertNull(c);
+		Object o = parser.parse("null").getValue(ctx,Integer.class);
+		Assert.assertNull(o);
 	}
 
 	@Test
