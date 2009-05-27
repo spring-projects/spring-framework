@@ -40,10 +40,8 @@ public abstract class SpelNodeImpl implements SpelNode, CommonTypeDescriptors {
 	
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
-		if (pos==0) {
-			// pos embodies start and end so can never be zero because tokens cannot be zero length
-			throw new IllegalStateException("Node cannot have zero position: "+this.getClass());
-		}
+		// pos combines start and end so can never be zero because tokens cannot be zero length
+		assert pos!=0;
 		if (operands!=null && operands.length>0) {
 			this.children = operands;
 		}

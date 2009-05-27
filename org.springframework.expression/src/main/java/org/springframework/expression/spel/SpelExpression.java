@@ -119,8 +119,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Class getValueType(EvaluationContext context) throws EvaluationException {
-		// TODO is this a legal implementation? The null return value could be very unhelpful. See other getValueType()
-		// also.
+		// TODO both getValueType() methods could use getValueInternal and return a type descriptor from the resultant TypedValue
 		Object value = getValue(context);
 		return (value != null ? value.getClass() : null);
 	}
