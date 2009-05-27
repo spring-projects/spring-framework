@@ -88,8 +88,12 @@ public class Projection extends SpelNodeImpl {
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
-			if (operand==null && nullSafe) {
-				return TypedValue.NULL_TYPED_VALUE;
+			if (operand==null) {
+				if (nullSafe) {
+					return TypedValue.NULL_TYPED_VALUE;
+				} else {					
+					throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
+				}
 			} else {
 				throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
 			}
