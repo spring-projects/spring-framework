@@ -65,6 +65,8 @@ public class InProgressTests extends ExpressionTestCase {
 	@Test
 	public void testProjection05() {
 		evaluateAndCheckError("'abc'.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
+		evaluateAndCheckError("null.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
+		evaluate("null?.![true]", null, null);
 	}
 	
 	@Test
@@ -95,9 +97,20 @@ public class InProgressTests extends ExpressionTestCase {
 //		evaluate("listOfNumbersUpToTen.?{#this>5}", "5", ArrayList.class);
 	}
 
+
 	@Test
 	public void testSelection04() {
 		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	}
+
+	@Test
+	public void testSelection05() {
+		evaluate("mapOfNumbersUpToTen.?[key>11].size()", "0", Integer.class);
+		evaluate("mapOfNumbersUpToTen.^[key>11]", null, null);
+		evaluate("mapOfNumbersUpToTen.$[key>11]", null, null);
+		evaluate("null?.$[key>11]", null, null);
+		evaluateAndCheckError("null.?[key>11]", SpelMessages.INVALID_TYPE_FOR_SELECTION);
+		evaluateAndCheckError("'abc'.?[key>11]", SpelMessages.INVALID_TYPE_FOR_SELECTION);
 	}
 
 	@Test
