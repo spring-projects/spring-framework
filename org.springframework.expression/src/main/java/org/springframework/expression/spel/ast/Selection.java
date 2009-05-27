@@ -132,12 +132,17 @@ public class Selection extends SpelNodeImpl {
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
-			if (operand==null && nullSafe) {
-				return TypedValue.NULL_TYPED_VALUE;
+			if (operand==null) {
+				if (nullSafe) { 
+					return TypedValue.NULL_TYPED_VALUE;
+				} else {
+					throw new SpelEvaluationException(getStartPosition(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
+							"null");
+				}
 			} else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
-						(operand == null ? "null" : operand.getClass().getName()));
-			}
+						operand.getClass().getName());
+			}				
 		}
 	}
 

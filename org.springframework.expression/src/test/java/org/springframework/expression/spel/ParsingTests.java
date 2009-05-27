@@ -155,6 +155,11 @@ public class ParsingTests {
 		parseCheck("3>=3", "(3 >= 3)");
 	}
 
+	@Test
+	public void testElvis() {
+		parseCheck("3?:1", "3 ?: 1");
+	}
+	
 	// public void testRelOperatorsIn01() {
 	// parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
 	// }
