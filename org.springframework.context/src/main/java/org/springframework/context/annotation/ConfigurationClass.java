@@ -144,7 +144,7 @@ final class ConfigurationClass {
 
 		public FinalConfigurationProblem() {
 			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
-					getSimpleName()), new Location(getResource()));
+					getSimpleName()), new Location(getResource(), ConfigurationClass.this));
 		}
 	}
 
@@ -155,7 +155,7 @@ final class ConfigurationClass {
 		public OverloadedMethodProblem(String methodName, int count) {
 			super(String.format("@Configuration class '%s' has %s overloaded factory methods of name '%s'. " +
 					"Only one factory method of the same name allowed.",
-					getSimpleName(), count, methodName), new Location(getResource()));
+					getSimpleName(), count, methodName), new Location(getResource(), ConfigurationClass.this));
 		}
 	}
 

@@ -53,7 +53,7 @@ final class ConfigurationClassMethod {
 	}
 
 	public Location getResourceLocation() {
-		return new Location(this.declaringClass.getResource(), this.metadata.getMethodName());
+		return new Location(this.declaringClass.getResource(), metadata);
 	}
 
 	public void validate(ProblemReporter problemReporter) {
