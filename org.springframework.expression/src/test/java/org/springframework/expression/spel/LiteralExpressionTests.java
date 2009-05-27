@@ -16,8 +16,9 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
+import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.common.LiteralExpression;
@@ -26,8 +27,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 /**
  * @author Andy Clement
  */
-public class LiteralExpressionTests extends TestCase {
+public class LiteralExpressionTests {
 
+	@Test
 	public void testGetValue() throws Exception {
 		LiteralExpression lEx = new LiteralExpression("somevalue");
 		checkString("somevalue", lEx.getValue());
@@ -35,34 +37,36 @@ public class LiteralExpressionTests extends TestCase {
 		EvaluationContext ctx = new StandardEvaluationContext();
 		checkString("somevalue", lEx.getValue(ctx));
 		checkString("somevalue", lEx.getValue(ctx, String.class));
-		assertEquals("somevalue", lEx.getExpressionString());
-		assertFalse(lEx.isWritable(new StandardEvaluationContext()));
+		Assert.assertEquals("somevalue", lEx.getExpressionString());
+		Assert.assertFalse(lEx.isWritable(new StandardEvaluationContext()));
 	}
 
+	@Test
 	public void testSetValue() {
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
 			lEx.setValue(new StandardEvaluationContext(), "flibble");
-			fail("Should have got an exception that the value cannot be set");
+			Assert.fail("Should have got an exception that the value cannot be set");
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			assertEquals(ee.getExpressionString(), "somevalue");
+			Assert.assertEquals(ee.getExpressionString(), "somevalue");
 		}
 	}
 
+	@Test
 	public void testGetValueType() throws Exception {
 		LiteralExpression lEx = new LiteralExpression("somevalue");
-		assertEquals(String.class, lEx.getValueType());
-		assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext()));
+		Assert.assertEquals(String.class, lEx.getValueType());
+		Assert.assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext()));
 	}
 
 	private void checkString(String expectedString, Object value) {
 		if (!(value instanceof String)) {
-			fail("Result was not a string, it was of type " + value.getClass() + "  (value=" + value + ")");
+			Assert.fail("Result was not a string, it was of type " + value.getClass() + "  (value=" + value + ")");
 		}
 		if (!((String) value).equals(expectedString)) {
-			fail("Did not get expected result.  Should have been '" + expectedString + "' but was '" + value + "'");
+			Assert.fail("Did not get expected result.  Should have been '" + expectedString + "' but was '" + value + "'");
 		}
 	}
 

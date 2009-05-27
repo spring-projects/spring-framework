@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -31,11 +30,11 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class QualifiedIdentifier extends SpelNodeImpl {
 
+	// TODO safe to cache? dont think so
 	private TypedValue value;
 
-	public QualifiedIdentifier(Token payload) {
-		super(payload);
-		// value = payload.getText();
+	public QualifiedIdentifier(int pos,SpelNodeImpl... operands) {
+		super(pos,operands);
 	}
 
 	@Override
@@ -47,7 +46,7 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 				if (i > 0) {
 					sb.append(".");
 				}
-				sb.append(getChild(i).getValueInternal(state).getValue());
+				sb.append(children[i].getValueInternal(state).getValue());
 			}
 			this.value = new TypedValue(sb.toString(),STRING_TYPE_DESCRIPTOR);
 		}

@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -31,8 +34,10 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+///CLOVER:OFF
 
 /**
  * Testcases showing the common scenarios/use-cases for picking up the expression language support.
@@ -60,10 +65,11 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	/**
 	 * Scenario: using the standard infrastructure and running simple expression evaluation.
 	 */
+	@Test
 	public void testScenario_UsingStandardInfrastructure() {
 		try {
 			// Create a parser
-			SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+			SpelExpressionParser parser = new SpelExpressionParser();
 			// Parse an expression
 			Expression expr = parser.parseExpression("new String('hello world')");
 			// Evaluate it using a 'standard' context
@@ -71,23 +77,24 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			// They are reusable
 			value = expr.getValue();
 				
-			assertEquals("hello world", value);
-			assertEquals(String.class, value.getClass());
+			Assert.assertEquals("hello world", value);
+			Assert.assertEquals(String.class, value.getClass());
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
 	/**
 	 * Scenario: using the standard context but adding your own variables
 	 */
+	@Test
 	public void testScenario_DefiningVariablesThatWillBeAccessibleInExpressions() throws Exception {
 		// Create a parser
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("favouriteColour","blue");
@@ -97,16 +104,16 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		
 		Expression expr = parser.parseExpression("#favouriteColour");
 		Object value = expr.getValue(ctx);
-		assertEquals("blue", value);
+		Assert.assertEquals("blue", value);
 
 		expr = parser.parseExpression("#primes.get(1)");
 		value = expr.getValue(ctx);
-		assertEquals(3, value);
+		Assert.assertEquals(3, value);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
 		expr = parser.parseExpression("#primes.?[#this>10]");
 		value = expr.getValue(ctx);
-		assertEquals("[11, 13, 17]", value.toString());			
+		Assert.assertEquals("[11, 13, 17]", value.toString());			
 	}
 
 	
@@ -120,9 +127,10 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	/**
 	 * Scenario: using your own root context object
 	 */
+	@Test
 	public void testScenario_UsingADifferentRootContextObject() throws Exception {
 		// Create a parser
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
@@ -134,30 +142,30 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		// read it, set it, read it again
 		Expression expr = parser.parseExpression("str");
 		Object value = expr.getValue(ctx);
-		assertEquals("wibble", value);			
+		Assert.assertEquals("wibble", value);			
 		expr = parser.parseExpression("str");
 		expr.setValue(ctx, "wobble");
 		expr = parser.parseExpression("str");
 		value = expr.getValue(ctx);
-		assertEquals("wobble", value);
+		Assert.assertEquals("wobble", value);
 		// or using assignment within the expression
 		expr = parser.parseExpression("str='wabble'");
 		value = expr.getValue(ctx);
 		expr = parser.parseExpression("str");
 		value = expr.getValue(ctx);
-		assertEquals("wabble", value);
+		Assert.assertEquals("wabble", value);
 		
 		// private property will be accessed through getter()
 		expr = parser.parseExpression("property");
 		value = expr.getValue(ctx);
-		assertEquals(42, value);
+		Assert.assertEquals(42, value);
 
 		// ... and set through setter
 		expr = parser.parseExpression("property=4");
 		value = expr.getValue(ctx);
 		expr = parser.parseExpression("property");
 		value = expr.getValue(ctx);
-		assertEquals(4,value);
+		Assert.assertEquals(4,value);
 	}
 	
 	public static String repeat(String s) { return s+s; }
@@ -165,66 +173,69 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	/**
 	 * Scenario: using your own java methods and calling them from the expression
 	 */
+	@Test
 	public void testScenario_RegisteringJavaMethodsAsFunctionsAndCallingThem() throws SecurityException, NoSuchMethodException {
 		try {
 			// Create a parser
-			SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+			SpelExpressionParser parser = new SpelExpressionParser();
 			// Use the standard evaluation context
 			StandardEvaluationContext ctx = new StandardEvaluationContext();
 			ctx.registerFunction("repeat",ExpressionLanguageScenarioTests.class.getDeclaredMethod("repeat",String.class));
 			
 			Expression expr = parser.parseExpression("#repeat('hello')");
 			Object value = expr.getValue(ctx);
-			assertEquals("hellohello", value);
+			Assert.assertEquals("hellohello", value);
 
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 	
 	/**
 	 * Scenario: add a property resolver that will get called in the resolver chain, this one only supports reading.
 	 */
+	@Test
 	public void testScenario_AddingYourOwnPropertyResolvers_1() throws Exception {
 		// Create a parser
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		ctx.addPropertyAccessor(new FruitColourAccessor());
 		Expression expr = parser.parseExpression("orange");
 		Object value = expr.getValue(ctx);
-		assertEquals(Color.orange, value);
+		Assert.assertEquals(Color.orange, value);
 
 		try {
 			expr.setValue(ctx, Color.blue);
-			fail("Should not be allowed to set oranges to be blue !");
-		} catch (SpelException ee) {
-			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			Assert.fail("Should not be allowed to set oranges to be blue !");
+		} catch (SpelEvaluationException ee) {
+			Assert.assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 
+	@Test
 	public void testScenario_AddingYourOwnPropertyResolvers_2() throws Exception {
 		// Create a parser
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		ctx.addPropertyAccessor(new VegetableColourAccessor());
 		Expression expr = parser.parseExpression("pea");
 		Object value = expr.getValue(ctx);
-		assertEquals(Color.green, value);
+		Assert.assertEquals(Color.green, value);
 
 		try {
 			expr.setValue(ctx, Color.blue);
-			fail("Should not be allowed to set peas to be blue !");
+			Assert.fail("Should not be allowed to set peas to be blue !");
 		}
-		catch (SpelException ee) {
-			assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+		catch (SpelEvaluationException ee) {
+			Assert.assertEquals(ee.getMessageUnformatted(), SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 

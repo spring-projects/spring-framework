@@ -16,7 +16,7 @@
 package org.springframework.expression.spel.support;
 
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.SpelNodeImpl;
+import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 
 /**
  * @author Andy Clement
@@ -28,7 +28,7 @@ public class BooleanTypedValue extends TypedValue {
 	public static final BooleanTypedValue False = new BooleanTypedValue(false);
 	
 	private BooleanTypedValue(boolean b) {
-		super(b,SpelNodeImpl.BOOLEAN_TYPE_DESCRIPTOR);
+		super(b,CommonTypeDescriptors.BOOLEAN_TYPE_DESCRIPTOR);
 	}
 	
 	public static BooleanTypedValue forValue(boolean b) {

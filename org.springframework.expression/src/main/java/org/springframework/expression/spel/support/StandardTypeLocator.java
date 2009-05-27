@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeLocator;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.util.ClassUtils;
 
@@ -76,7 +76,7 @@ public class StandardTypeLocator implements TypeLocator {
 				// might be a different prefix
 			}
 		}
-		throw new SpelException(SpelMessages.TYPE_NOT_FOUND, typename);
+		throw new SpelEvaluationException(SpelMessages.TYPE_NOT_FOUND, typename);
 	}
 
 	/**

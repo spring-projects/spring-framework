@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -30,8 +29,9 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class Ternary extends SpelNodeImpl {
 
-	public Ternary(Token payload) {
-		super(payload);
+
+	public Ternary(int pos, SpelNodeImpl... args) {
+		super(pos,args);
 	}
 
 	/**
@@ -42,11 +42,11 @@ public class Ternary extends SpelNodeImpl {
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Boolean value = getChild(0).getValue(state, Boolean.class);
+		Boolean value = children[0].getValue(state, Boolean.class);
 		if (value.booleanValue()) {
-			return getChild(1).getValueInternal(state);
+			return children[1].getValueInternal(state);
 		} else {
-			return getChild(2).getValueInternal(state);
+			return children[2].getValueInternal(state);
 		}
 	}
 

@@ -20,14 +20,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.antlr.runtime.Token;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.util.ReflectionUtils;
@@ -48,26 +47,28 @@ public class FunctionReference extends SpelNodeImpl {
 
 	private final String name;
 
-
-	public FunctionReference(Token payload) {
-		super(payload);
-		this.name = payload.getText();
+	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
+		super(pos,arguments);
+		name = functionName;
 	}
-
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue o = state.lookupVariable(name);
 		if (o == null) {
-			throw new SpelException(SpelMessages.FUNCTION_NOT_DEFINED, name);
+			throw new SpelEvaluationException(getStartPosition(), SpelMessages.FUNCTION_NOT_DEFINED, name);
 		}
 
 		// Two possibilities: a lambda function or a Java static method registered as a function
 		if (!(o.getValue() instanceof Method)) {
-			throw new SpelException(SpelMessages.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, name, o.getClass());
+			throw new SpelEvaluationException(SpelMessages.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, name, o.getClass());
 		}
-
-		return executeFunctionJLRMethod(state, (Method) o.getValue());
+		try {
+			return executeFunctionJLRMethod(state, (Method) o.getValue());
+		} catch (SpelEvaluationException se) {
+			se.setPosition(getStartPosition());
+			throw se;
+		}
 	}
 
 	/**
@@ -82,12 +83,12 @@ public class FunctionReference extends SpelNodeImpl {
 		Object[] functionArgs = getArguments(state);
 
 		if (!m.isVarArgs() && m.getParameterTypes().length != functionArgs.length) {
-			throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m
+			throw new SpelEvaluationException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m
 					.getParameterTypes().length);
 		}
 		// Only static methods can be called in this way
 		if (!Modifier.isStatic(m.getModifiers())) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.FUNCTION_MUST_BE_STATIC, m
+			throw new SpelEvaluationException(getStartPosition(), SpelMessages.FUNCTION_MUST_BE_STATIC, m
 					.getDeclaringClass().getName()
 					+ "." + m.getName(), name);
 		}
@@ -106,13 +107,13 @@ public class FunctionReference extends SpelNodeImpl {
 			Object result = m.invoke(m.getClass(), functionArgs);
 			return new TypedValue(result, new TypeDescriptor(new MethodParameter(m,-1)));
 		} catch (IllegalArgumentException e) {
-			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
+			throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());
 		} catch (IllegalAccessException e) {
-			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
+			throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());
 		} catch (InvocationTargetException e) {
-			throw new SpelException(getCharPositionInLine(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
+			throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.EXCEPTION_DURING_FUNCTION_CALL, name, e
 					.getMessage());
 		}
 	}
@@ -140,7 +141,7 @@ public class FunctionReference extends SpelNodeImpl {
 		// Compute arguments to the function
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = getChild(i).getValueInternal(state).getValue();
+			arguments[i] = children[i].getValueInternal(state).getValue();
 		}
 		return arguments;
 	}

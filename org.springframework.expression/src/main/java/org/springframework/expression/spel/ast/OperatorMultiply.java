@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -39,8 +38,9 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class OperatorMultiply extends Operator {
 
-	public OperatorMultiply(Token payload) {
-		super(payload);
+
+	public OperatorMultiply(int pos, SpelNodeImpl... operands) {
+		super("*", pos, operands);
 	}
 
 	/**
@@ -75,11 +75,6 @@ public class OperatorMultiply extends Operator {
 			return new TypedValue(result.toString(), STRING_TYPE_DESCRIPTOR);
 		}
 		return state.operate(Operation.MULTIPLY, operandOne, operandTwo);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "*";
 	}
 
 }

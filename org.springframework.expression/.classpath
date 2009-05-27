@@ -7,7 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-4.5.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.junit/3.8.2/com.springsource.junit-sources-3.8.2.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.antlr/com.springsource.org.antlr/3.0.1/com.springsource.org.antlr-3.0.1.jar" sourcepath="/IVY_CACHE/org.antlr/com.springsource.org.antlr/3.0.1/com.springsource.org.antlr-sources-3.0.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

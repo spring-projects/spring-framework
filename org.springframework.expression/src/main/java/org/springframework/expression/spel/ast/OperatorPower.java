@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -30,8 +29,8 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class OperatorPower extends Operator {
 
-	public OperatorPower(Token payload) {
-		super(payload);
+	public OperatorPower(int pos, SpelNodeImpl... operands) {
+		super("^", pos, operands);
 	}
 
 	@Override
@@ -59,11 +58,6 @@ public class OperatorPower extends Operator {
 			}
 		}
 		return state.operate(Operation.POWER, operandOne, operandTwo);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "^";
 	}
 
 }

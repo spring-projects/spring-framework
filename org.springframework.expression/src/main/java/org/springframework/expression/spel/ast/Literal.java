@@ -16,29 +16,31 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.WrappedSpelException;
+import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.standard.InternalParseException;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).
  * 
  * @author Andy Clement
- * 
  */
 public abstract class Literal extends SpelNodeImpl {
 
-	public Literal(Token payload) {
-		super(payload);
+	protected String literalValue;
+	
+	public Literal(String payload, int pos) {
+		super(pos);
+		this.literalValue = payload;
 	}
 
 	public abstract TypedValue getLiteralValue();
 
 	@Override
-	public final TypedValue getValueInternal(ExpressionState state) throws SpelException {
+	public final TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {
 		return getLiteralValue();
 	}
 
@@ -60,37 +62,38 @@ public abstract class Literal extends SpelNodeImpl {
 	 * @param radix the base of number
 	 * @return a subtype of Literal that can represent it
 	 */
-	public static Literal getIntLiteral(Token numberToken, int radix) {
-		String numberString = numberToken.getText();
-
-		boolean isLong = false;
-		boolean isHex = (radix == 16);
-
-		isLong = numberString.endsWith("L") || numberString.endsWith("l");
-
-		if (isLong || isHex) { // needs to be chopped up a little
-			int len = numberString.length();
-			// assert: if hex then startsWith 0x or 0X
-			numberString = numberString.substring((isHex ? 2 : 0), isLong ? len - 1 : len);
+	public static Literal getIntLiteral(String numberToken, int pos, int radix) {
+		try {
+			int value = Integer.parseInt(numberToken, radix);
+			return new IntLiteral(numberToken, pos, value);
+		} catch (NumberFormatException nfe) {
+			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessages.NOT_AN_INTEGER, numberToken));
 		}
+	}
 
-		if (isLong) {
-			try {
-				long value = Long.parseLong(numberString, radix);
-				return new LongLiteral(numberToken, value);
-			} catch (NumberFormatException nfe) {
-				throw new WrappedSpelException(new SpelException(numberToken.getCharPositionInLine(), nfe,
-						SpelMessages.NOT_A_LONG, numberToken.getText()));
+	public static Literal getLongLiteral(String numberToken, int pos, int radix) {
+		try {
+			long value = Long.parseLong(numberToken, radix);
+			return new LongLiteral(numberToken, pos, value);
+		} catch (NumberFormatException nfe) {
+			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessages.NOT_A_LONG, numberToken));
+		}
+	}
+
+	// TODO should allow for 'f' for float, not just double
+	public static Literal getRealLiteral(String numberToken, int pos, boolean isFloat) {
+		try {
+			if (isFloat) {
+				float value = Float.parseFloat(numberToken);
+				return new RealLiteral(numberToken, pos, value);
+			} else {
+				double value = Double.parseDouble(numberToken);
+				return new RealLiteral(numberToken, pos, value);				
 			}
-		} else {
-			try {
-				int value = Integer.parseInt(numberString, radix);
-				return new IntLiteral(numberToken, value);
-			} catch (NumberFormatException nfe) {
-				throw new WrappedSpelException(new SpelException(numberToken.getCharPositionInLine(), nfe,
-						SpelMessages.NOT_AN_INTEGER, numberToken.getText()));
-			}
+		} catch (NumberFormatException nfe) {
+			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessages.NOT_A_REAL, numberToken));
 		}
 	}
 
 }
+

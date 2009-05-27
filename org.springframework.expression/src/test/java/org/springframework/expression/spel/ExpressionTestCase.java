@@ -19,28 +19,27 @@ package org.springframework.expression.spel;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-///CLOVER:OFF
 /**
  * Common superclass for expression tests.
  *
  * @author Andy Clement
  */
-public abstract class ExpressionTestCase extends TestCase {
+public abstract class ExpressionTestCase {
 
 	private final static boolean DEBUG = false;
 
 	protected final static boolean SHOULD_BE_WRITABLE = true;
 	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
 
-	protected final static SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+	protected final static ExpressionParser parser = SpelExpressionParserFactory.getParser();
 	protected final static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	/**
@@ -54,13 +53,13 @@ public abstract class ExpressionTestCase extends TestCase {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			}
 			// Class<?> expressionType = expr.getValueType();
-			// assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
+			// Assert.assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
 			// '"+expressionType+"'",
 			// expectedResultType,expressionType);
 
@@ -71,12 +70,12 @@ public abstract class ExpressionTestCase extends TestCase {
 				if (expectedValue == null) {
 					return; // no point doing other checks
 				}
-				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
+				Assert.assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
 						null);
 			}
 
 			Class<?> resultType = value.getClass();
-			assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType
+			Assert.assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType
 					+ "' but result was of type '" + resultType + "'", expectedResultType, resultType);
 			// .equals/* isAssignableFrom */(resultType), truers);
 
@@ -84,17 +83,17 @@ public abstract class ExpressionTestCase extends TestCase {
 			// in the above expression...
 
 			if (expectedValue instanceof String) {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+				Assert.assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
 						ExpressionTestCase.stringValueOf(value));
 			} else {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+				Assert.assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 			}
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
@@ -102,13 +101,13 @@ public abstract class ExpressionTestCase extends TestCase {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			}
 			// Class<?> expressionType = expr.getValueType();
-			// assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
+			// Assert.assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
 			// '"+expressionType+"'",
 			// expectedResultType,expressionType);
 
@@ -116,23 +115,23 @@ public abstract class ExpressionTestCase extends TestCase {
 			if (value == null) {
 				if (expectedValue == null)
 					return; // no point doing other checks
-				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
+				Assert.assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
 						null);
 			}
 
 			Class<?> resultType = value.getClass();
-			assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType
+			Assert.assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType
 					+ "' but result was of type '" + resultType + "'", expectedResultType, resultType);
 			// .equals/* isAssignableFrom */(resultType), truers);
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+			Assert.assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 			// isAssignableFrom would allow some room for compatibility
 			// in the above expression...
 		} catch (EvaluationException ee) {
-			SpelException ex = (SpelException) ee;
+			SpelEvaluationException ex = (SpelEvaluationException) ee;
 			ex.printStackTrace();
-			fail("Unexpected EvaluationException: " + ex.getMessage());
+			Assert.fail("Unexpected EvaluationException: " + ex.getMessage());
 		} catch (ParseException pe) {
-			fail("Unexpected ParseException: " + pe.getMessage());
+			Assert.fail("Unexpected ParseException: " + pe.getMessage());
 		}
 	}
 
@@ -151,7 +150,7 @@ public abstract class ExpressionTestCase extends TestCase {
 		try {
 			Expression e = parser.parseExpression(expression);
 			if (e == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
@@ -161,19 +160,19 @@ public abstract class ExpressionTestCase extends TestCase {
 				if (expectedValue == null)
 					return; // no point doing other
 				// checks
-				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
+				Assert.assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
 						null);
 			}
 			Class<? extends Object> resultType = value.getClass();
 			if (expectedValue instanceof String) {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+				Assert.assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
 						ExpressionTestCase.stringValueOf(value));
 			} else {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+				Assert.assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 			}
-//			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+//			Assert.assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
 //					ExpressionTestCase.stringValueOf(value));
-			assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult
+			Assert.assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult
 					+ "' but result was of type '" + resultType + "'", expectedClassOfResult
 					.equals/* isAssignableFrom */(resultType), true);
 			// TODO isAssignableFrom would allow some room for compatibility
@@ -182,16 +181,16 @@ public abstract class ExpressionTestCase extends TestCase {
 			boolean isWritable = e.isWritable(eContext);
 			if (isWritable != shouldBeWritable) {
 				if (shouldBeWritable)
-					fail("Expected the expression to be writable but it is not");
+					Assert.fail("Expected the expression to be writable but it is not");
 				else
-					fail("Expected the expression to be readonly but it is not");
+					Assert.fail("Expected the expression to be readonly but it is not");
 			}
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
@@ -222,7 +221,7 @@ public abstract class ExpressionTestCase extends TestCase {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			if (expr == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (expectedReturnType != null) {
 				@SuppressWarnings("unused")
@@ -231,18 +230,18 @@ public abstract class ExpressionTestCase extends TestCase {
 				@SuppressWarnings("unused")
 				Object value = expr.getValue(eContext);
 			}
-			fail("Should have failed with message " + expectedMessage);
+			Assert.fail("Should have failed with message " + expectedMessage);
 		} catch (EvaluationException ee) {
-			SpelException ex = (SpelException) ee;
+			SpelEvaluationException ex = (SpelEvaluationException) ee;
 			if (ex.getMessageUnformatted() != expectedMessage) {
-				System.out.println(ex.getMessage());
+//				System.out.println(ex.getMessage());
 				ex.printStackTrace();
-				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
+				Assert.assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
 			}
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
 				int pos = ((Integer) otherProperties[0]).intValue();
-				assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
+				Assert.assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
 				if (otherProperties.length > 1) {
 					// Check inserts match
 					Object[] inserts = ex.getInserts();
@@ -251,25 +250,25 @@ public abstract class ExpressionTestCase extends TestCase {
 					}
 					if (inserts.length < otherProperties.length - 1) {
 						ex.printStackTrace();
-						fail("Cannot check " + (otherProperties.length - 1)
+						Assert.fail("Cannot check " + (otherProperties.length - 1)
 								+ " properties of the exception, it only has " + inserts.length + " inserts");
 					}
 					for (int i = 1; i < otherProperties.length; i++) {
 						if (otherProperties[i] == null) {
 							if (inserts[i - 1] != null) {
 								ex.printStackTrace();
-								fail("Insert does not match, expected 'null' but insert value was '" + inserts[i - 1]
+								Assert.fail("Insert does not match, expected 'null' but insert value was '" + inserts[i - 1]
 										+ "'");
 							}
 						} else if (inserts[i - 1] == null) {
 							if (otherProperties[i] != null) {
 								ex.printStackTrace();
-								fail("Insert does not match, expected '" + otherProperties[i]
+								Assert.fail("Insert does not match, expected '" + otherProperties[i]
 										+ "' but insert value was 'null'");
 							}
 						} else if (!inserts[i - 1].equals(otherProperties[i])) {
 							ex.printStackTrace();
-							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
+							Assert.fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
 									+ inserts[i - 1] + "'");
 						}
 					}
@@ -277,7 +276,7 @@ public abstract class ExpressionTestCase extends TestCase {
 			}
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
@@ -293,26 +292,29 @@ public abstract class ExpressionTestCase extends TestCase {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
-			fail("Parsing should have failed!");
+			Assert.fail("Parsing should have failed!");
 		} catch (ParseException pe) {
-			Throwable t = pe.getCause();
-			if (t == null) {
-				fail("ParseException caught with no defined cause");
-			}
-			if (!(t instanceof SpelException)) {
-				t.printStackTrace();
-				fail("Cause of parse exception is not a SpelException");
-			}
-			SpelException ex = (SpelException) t;
+//			pe.printStackTrace();
+//			Throwable t = pe.getCause();
+//			if (t == null) {
+//				Assert.fail("ParseException caught with no defined cause");
+//			}
+//			if (!(t instanceof SpelEvaluationException)) {
+//				t.printStackTrace();
+//				Assert.fail("Cause of parse exception is not a SpelException");
+//			}
+//			SpelEvaluationException ex = (SpelEvaluationException) t;
+//			pe.printStackTrace();
+			SpelParseException ex = (SpelParseException)pe;
 			if (ex.getMessageUnformatted() != expectedMessage) {
-				System.out.println(ex.getMessage());
+//				System.out.println(ex.getMessage());
 				ex.printStackTrace();
-				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
+				Assert.assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
 			}
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
 				int pos = ((Integer) otherProperties[0]).intValue();
-				assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
+				Assert.assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
 				if (otherProperties.length > 1) {
 					// Check inserts match
 					Object[] inserts = ex.getInserts();
@@ -321,13 +323,13 @@ public abstract class ExpressionTestCase extends TestCase {
 					}
 					if (inserts.length < otherProperties.length - 1) {
 						ex.printStackTrace();
-						fail("Cannot check " + (otherProperties.length - 1)
+						Assert.fail("Cannot check " + (otherProperties.length - 1)
 								+ " properties of the exception, it only has " + inserts.length + " inserts");
 					}
 					for (int i = 1; i < otherProperties.length; i++) {
 						if (!inserts[i - 1].equals(otherProperties[i])) {
 							ex.printStackTrace();
-							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
+							Assert.fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
 									+ inserts[i - 1] + "'");
 						}
 					}

@@ -13,32 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ package org.springframework.expression.spel;
 
-package org.springframework.expression.spel.ast;
-
-import org.antlr.runtime.Token;
-import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * @author Andy Clement
  * @since 3.0
  */
-public class EmptySpelNode extends SpelNodeImpl {
+public class SpelExpressionParserFactory {
 
-	public EmptySpelNode(Token payload) {
-		super(payload);
+	public static ExpressionParser getParser() {
+		return new SpelExpressionParser();
 	}
-
-	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
-		throw new RuntimeException("?");
-	}
-
-	@Override
-	public String toStringAST() {
-		return "<no string form node '" + getTokenName() + "'>";
-	}
-
+	
 }

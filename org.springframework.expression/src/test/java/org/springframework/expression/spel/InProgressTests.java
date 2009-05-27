@@ -17,6 +17,9 @@ package org.springframework.expression.spel;
 
 import java.util.ArrayList;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -28,90 +31,106 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class InProgressTests extends ExpressionTestCase {
 
+	@Test
 	public void testRelOperatorsBetween01() {
 		evaluate("1 between listOneFive", "true", Boolean.class);
 		// evaluate("1 between {1, 5}", "true", Boolean.class); // no inline list building at the moment
 	}
 	
+	@Test
 	public void testRelOperatorsBetweenErrors01() {
-		 evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 12);
+		 evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 	}
 	
+	@Test
 	public void testRelOperatorsBetweenErrors03() {
 		 evaluateAndCheckError("1 between listOfNumbersUpToTen", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 	}
 	
 	// PROJECTION 
+	@Test
 	public void testProjection01() {
 		evaluate("listOfNumbersUpToTen.![#this<5?'y':'n']","[y, y, y, y, n, n, n, n, n, n]",ArrayList.class);
 		// inline list creation not supported at the moment
         // evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
 	}
 	
+	@Test
 	public void testProjection02() {
 		// inline map creation not supported at the moment
 		// evaluate("#{'a':'y','b':'n','c':'y'}.![value=='y'?key:null].nonnull().sort()", "[a, c]", ArrayList.class);
 		evaluate("mapOfNumbersUpToTen.![key>5?value:null]", "[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
 	}
 	
+	@Test
 	public void testProjection05() {
 		evaluateAndCheckError("'abc'.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
 	}
 	
+	@Test
 	public void testProjection06() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.![true]");
-		assertEquals("'abc'.![true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		Assert.assertEquals("'abc'.![true]",expr.toStringAST());
+		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 
 	// SELECTION
 	
+	@Test
 	public void testSelection02() {
 		 evaluate("testMap.keySet().?[#this matches '.*o.*']", "[monday]", ArrayList.class);
 		 evaluate("testMap.keySet().?[#this matches '.*r.*'].contains('saturday')", "true", Boolean.class);
 		 evaluate("testMap.keySet().?[#this matches '.*r.*'].size()", "3", Integer.class);
 	}
 	 
+	@Test
 	 public void testSelectionError_NonBooleanSelectionCriteria() {
 		 evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']",
 				 SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	 }
 	 
+	@Test
 	public void testSelection03() {
 		evaluate("mapOfNumbersUpToTen.?[key>5].size()", "5", Integer.class);
 //		evaluate("listOfNumbersUpToTen.?{#this>5}", "5", ArrayList.class);
 	}
 
+	@Test
 	public void testSelection04() {
 		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	}
 
+	@Test
 	public void testSelectionFirst01() {
 		evaluate("listOfNumbersUpToTen.^[#isEven(#this) == 'y']", "2", Integer.class);
 	}
 
+	@Test
 	public void testSelectionFirst02() {
 		evaluate("mapOfNumbersUpToTen.^[key>5].size()", "1", Integer.class);
 	}
 
+	@Test
 	public void testSelectionLast01() {
 		evaluate("listOfNumbersUpToTen.$[#isEven(#this) == 'y']", "10", Integer.class);
 	}
 
+	@Test
 	public void testSelectionLast02() {
 		evaluate("mapOfNumbersUpToTen.$[key>5].size()", "1", Integer.class);
 	}
 
+	@Test
 	public void testSelectionAST() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'.^[true]");
-		assertEquals("'abc'.^[true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		Assert.assertEquals("'abc'.^[true]",expr.toStringAST());
+		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
 		expr = (SpelExpression)parser.parseExpression("'abc'.?[true]");
-		assertEquals("'abc'.?[true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		Assert.assertEquals("'abc'.?[true]",expr.toStringAST());
+		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
 		expr = (SpelExpression)parser.parseExpression("'abc'.$[true]");
-		assertEquals("'abc'.$[true]",expr.toStringAST());
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		Assert.assertEquals("'abc'.$[true]",expr.toStringAST());
+		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 	// Constructor invocation
 	

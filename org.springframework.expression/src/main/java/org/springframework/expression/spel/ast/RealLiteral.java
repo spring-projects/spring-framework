@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 
 /**
@@ -27,9 +26,9 @@ public class RealLiteral extends Literal {
 
 	private final TypedValue value;
 
-	public RealLiteral(Token payload) {
-		super(payload);
-		value = new TypedValue(Double.parseDouble(payload.getText()),DOUBLE_TYPE_DESCRIPTOR);
+	public RealLiteral(String payload, int pos, double value) {
+		super(payload, pos); 
+		this.value = new TypedValue(value,DOUBLE_TYPE_DESCRIPTOR);
 	}
 
 	@Override

@@ -17,8 +17,9 @@ package org.springframework.expression.spel;
 
 import java.util.List;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
+import org.junit.Test;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
@@ -27,31 +28,32 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
  * 
  * @author Andy Clement
  */
-public class StandardTypeLocatorTests extends TestCase {
+public class StandardTypeLocatorTests {
 
+	@Test
 	public void testImports() throws EvaluationException {
 		StandardTypeLocator locator = new StandardTypeLocator();
-		assertEquals(Integer.class,locator.findType("java.lang.Integer"));
-		assertEquals(String.class,locator.findType("java.lang.String"));
+		Assert.assertEquals(Integer.class,locator.findType("java.lang.Integer"));
+		Assert.assertEquals(String.class,locator.findType("java.lang.String"));
 		
 		List<String> prefixes = locator.getImportPrefixes();
-		assertEquals(1,prefixes.size());
-		assertTrue(prefixes.contains("java.lang"));
-		assertFalse(prefixes.contains("java.util"));
+		Assert.assertEquals(1,prefixes.size());
+		Assert.assertTrue(prefixes.contains("java.lang"));
+		Assert.assertFalse(prefixes.contains("java.util"));
 
-		assertEquals(Boolean.class,locator.findType("Boolean"));
+		Assert.assertEquals(Boolean.class,locator.findType("Boolean"));
 		// currently does not know about java.util by default
 //		assertEquals(java.util.List.class,locator.findType("List"));
 		
 		try {
 			locator.findType("URL");
-			fail("Should have failed");
+			Assert.fail("Should have failed");
 		} catch (EvaluationException ee) {
-			SpelException sEx = (SpelException)ee;
-			assertEquals(SpelMessages.TYPE_NOT_FOUND,sEx.getMessageUnformatted());
+			SpelEvaluationException sEx = (SpelEvaluationException)ee;
+			Assert.assertEquals(SpelMessages.TYPE_NOT_FOUND,sEx.getMessageUnformatted());
 		}
 		locator.registerImport("java.net");
-		assertEquals(java.net.URL.class,locator.findType("URL"));
+		Assert.assertEquals(java.net.URL.class,locator.findType("URL"));
 		
 	}
 

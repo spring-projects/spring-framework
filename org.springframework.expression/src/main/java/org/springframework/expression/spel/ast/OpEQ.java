@@ -16,21 +16,20 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Implements the less-than-or-equal operator.
+ * Implements equality operator.
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorLessThanOrEqual extends Operator {
+public class OpEQ extends Operator {
 
-	public OperatorLessThanOrEqual(Token payload) {
-		super(payload);
+	public OpEQ(int pos, SpelNodeImpl... operands) {
+		super("==", pos, operands);
 	}
 
 	@Override
@@ -38,22 +37,21 @@ public class OperatorLessThanOrEqual extends Operator {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		if (left instanceof Number && right instanceof Number) {
-			Number leftNumber = (Number) left;
-			Number rightNumber = (Number) right;
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				return BooleanTypedValue.forValue(leftNumber.doubleValue() <= rightNumber.doubleValue());
-			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				return BooleanTypedValue.forValue(leftNumber.longValue() <= rightNumber.longValue());
+			Number op1 = (Number) left;
+			Number op2 = (Number) right;
+			if (op1 instanceof Double || op2 instanceof Double) {
+				return BooleanTypedValue.forValue(op1.doubleValue() == op2.doubleValue());
+			} else if (op1 instanceof Long || op2 instanceof Long) {
+				return BooleanTypedValue.forValue(op1.longValue() == op2.longValue());
 			} else {
-				return BooleanTypedValue.forValue(leftNumber.intValue() <= rightNumber.intValue());
+				return BooleanTypedValue.forValue(op1.intValue() == op2.intValue());
 			}
 		}
-		return BooleanTypedValue.forValue( state.getTypeComparator().compare(left, right) <= 0);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "<=";
+		if (left!=null && (left instanceof Comparable)) {
+			return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) == 0);
+		} else {
+			return BooleanTypedValue.forValue(left==right);
+		}
 	}
 
 }

@@ -16,7 +16,10 @@
 
 package org.springframework.expression.spel;
 
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import junit.framework.Assert;
+
+import org.junit.Test;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 
@@ -27,27 +30,32 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class VariableAndFunctionTests extends ExpressionTestCase {
 
+	@Test
 	public void testVariableAccess01() {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
 	}
 	
+	@Test
 	public void testVariableAccess_WellKnownVariables() {
 		evaluate("#this.getName()","Nikola Tesla",String.class);
 		evaluate("#root.getName()","Nikola Tesla",String.class);
 	}
 
+	@Test
 	public void testFunctionAccess01() {
 		evaluate("#reverseInt(1,2,3)", "int[3]{3,2,1}", int[].class);
 		evaluate("#reverseInt('1',2,3)", "int[3]{3,2,1}", int[].class); // requires type conversion of '1' to 1
-		evaluateAndCheckError("#reverseInt(1)", SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 1, 1, 3);
+		evaluateAndCheckError("#reverseInt(1)", SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 3);
 	}
 
+	@Test
 	public void testFunctionAccess02() {
 		evaluate("#reverseString('hello')", "olleh", String.class);
 		evaluate("#reverseString(37)", "73", String.class); // requires type conversion of 37 to '37'
 	}
 
+	@Test
 	public void testCallVarargsFunction() {
 		evaluate("#varargsFunctionReverseStringsAndMerge('a','b','c')", "cba", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge('a')", "a", String.class);
@@ -61,18 +69,19 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		evaluate("#varargsFunctionReverseStringsAndMerge2(5,25)", "525", String.class);
 	}
 
+	@Test
 	public void testCallingIllegalFunctions() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
 		try {
 			@SuppressWarnings("unused")
 			Object v = parser.parseExpression("#notStatic()").getValue(ctx);
-			fail("Should have failed with exception - cannot call non static method that way");
-		} catch (SpelException se) {
+			Assert.fail("Should have failed with exception - cannot call non static method that way");
+		} catch (SpelEvaluationException se) {
 			if (se.getMessageUnformatted() != SpelMessages.FUNCTION_MUST_BE_STATIC) {
 				se.printStackTrace();
-				fail("Should have failed a message about the function needing to be static, not: "
+				Assert.fail("Should have failed a message about the function needing to be static, not: "
 						+ se.getMessageUnformatted());
 			}
 		}

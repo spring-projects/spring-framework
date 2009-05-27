@@ -18,7 +18,6 @@ package org.springframework.expression.spel.ast;
 
 import java.util.List;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.ConstructorResolver;
@@ -26,10 +25,11 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 // TODO asc array constructor call logic has been removed for now
+// TODO make this like the method referencing one
 /**
  * Represents the invocation of a constructor. Either a constructor on a regular type or construction of an array. When
  * an array is constructed, an initializer can be specified.
@@ -42,7 +42,7 @@ import org.springframework.expression.spel.SpelMessages;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
- */
+ */ 
 public class ConstructorReference extends SpelNodeImpl {
 
 	// TODO is this caching safe - passing the expression around will mean this executor is also being passed around
@@ -51,8 +51,13 @@ public class ConstructorReference extends SpelNodeImpl {
 	 */
 	private volatile ConstructorExecutor cachedExecutor;
 
-	public ConstructorReference(Token payload) {
-		super(payload);
+	
+	/**
+	 * Create a constructor reference.  The first argument is the type, the rest are the parameters to the
+	 * constructor call
+	 */
+	public ConstructorReference(int pos, SpelNodeImpl... arguments) {
+		super(pos,arguments);
 	}
 
 	/**
@@ -73,7 +78,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		Object[] arguments = new Object[getChildCount() - 1];
 		Class<?>[] argumentTypes = new Class[getChildCount() - 1];
 		for (int i = 0; i < arguments.length; i++) {
-			TypedValue childValue = getChild(i + 1).getValueInternal(state);
+			TypedValue childValue = children[i + 1].getValueInternal(state);
 			Object value = childValue.getValue();
 			arguments[i] = value;
 			argumentTypes[i] = (value==null?Object.class:value.getClass());
@@ -92,14 +97,16 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 
 		// either there was no accessor or it no longer exists
-		String typename = (String) getChild(0).getValueInternal(state).getValue();
+		String typename = (String) children[0].getValueInternal(state).getValue();
 		executorToUse = findExecutorForConstructor(typename, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
 			TypedValue result = executorToUse.execute(state.getEvaluationContext(), arguments);
 			return result;
 		} catch (AccessException ae) {
-			throw new SpelException(ae, SpelMessages.EXCEPTION_DURING_CONSTRUCTOR_INVOCATION, typename, ae.getMessage());
+			throw new SpelEvaluationException(getStartPosition(), ae, SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+					FormatHelper.formatMethodForMessage("", argumentTypes));
+
 		}
 	}
 
@@ -110,10 +117,10 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @param argumentTypes the types of the arguments supplied that the constructor must take
 	 * @param state the current state of the expression
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
-	 * @throws SpelException if there is a problem locating the constructor
+	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
 	private ConstructorExecutor findExecutorForConstructor(
-			String typename, Class<?>[] argumentTypes, ExpressionState state) throws SpelException {
+			String typename, Class<?>[] argumentTypes, ExpressionState state) throws SpelEvaluationException {
 
 		EvaluationContext eContext = state.getEvaluationContext();
 		List<ConstructorResolver> cResolvers = eContext.getConstructorResolvers();
@@ -125,14 +132,13 @@ public class ConstructorReference extends SpelNodeImpl {
 					if (cEx != null) {
 						return cEx;
 					}
-				}
-				catch (AccessException ex) {
-					throw new SpelException(ex, SpelMessages.PROBLEM_LOCATING_CONSTRUCTOR, typename,
+				} catch (AccessException ex) {
+					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
 							FormatHelper.formatMethodForMessage("", argumentTypes));
 				}
 			}
 		}
-		throw new SpelException(SpelMessages.CONSTRUCTOR_NOT_FOUND, typename, FormatHelper.formatMethodForMessage("",
+		throw new SpelEvaluationException(getStartPosition(),SpelMessages.CONSTRUCTOR_NOT_FOUND, typename, FormatHelper.formatMethodForMessage("",
 				argumentTypes));
 	}
 

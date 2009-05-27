@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
@@ -37,22 +40,27 @@ public class SetValueTests extends ExpressionTestCase {
 
 	private final static boolean DEBUG = false;
 
+	@Test
 	public void testSetProperty() {
 		setValue("wonNobelPrize", true);
 	}
 	
+	@Test
 	public void testSetNestedProperty() {
 		setValue("placeOfBirth.city", "Wien");
 	}
 
+	@Test
 	public void testSetArrayElementValue() {
 		setValue("inventions[0]", "Just the telephone");
 	}
 
+	@Test
 	public void testSetElementOfNull() {
 		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
+	@Test
 	public void testSetArrayElementValueAllPrimitiveTypes() {
 		setValue("arrayContainer.ints[1]", 3);
 		setValue("arrayContainer.floats[1]", 3.0f);
@@ -64,6 +72,7 @@ public class SetValueTests extends ExpressionTestCase {
 		setValue("arrayContainer.chars[1]", (char) 3);
 	}
 
+	@Test
 	public void testSetArrayElementValueAllPrimitiveTypesErrors() {
 		// none of these sets are possible due to (expected) conversion problems
 		setValueExpectError("arrayContainer.ints[1]", "wibble");
@@ -76,62 +85,74 @@ public class SetValueTests extends ExpressionTestCase {
 		setValueExpectError("arrayContainer.chars[1]", "NaC");
 	}
 	
+	@Test
 	public void testSetArrayElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
 	}
 	
+	@Test
 	public void testSetListElementValue() {
 		setValue("placesLivedList[0]", new PlaceOfBirth("Wien"));
 	}
 	
-	public void testSetGenericListElementValueTypeCoersionFail() {
+	@Test
+	public void testSetGenericListElementValueTypeCoersionfail() {
 		// no type converter registered for String > PlaceOfBirth
 		setValueExpectError("placesLivedList[0]", "Wien");
 	}
 
+	@Test
 	public void testSetGenericListElementValueTypeCoersionOK() {
 		setValue("booleanList[0]", "true", Boolean.TRUE);
 	}
 	
+	@Test
 	public void testSetListElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
 	}
 
+	@Test
 	public void testSetArrayElementInvalidIndex() {
 		setValueExpectError("placesLived[23]", "Wien");
 		setValueExpectError("placesLivedList[23]", "Wien");
 	}
 	
+	@Test
 	public void testSetMapElements() {
 		setValue("testMap['montag']","lundi");
 	}
 	
+	@Test
 	public void testIndexingIntoUnsupportedType() {
 		setValueExpectError("'hello'[3]", 'p');
 	}
 	
+	@Test
 	public void testSetPropertyTypeCoersion() {
 		setValue("publicBoolean", "true", Boolean.TRUE);
 	}
 
+	@Test
 	public void testSetPropertyTypeCoersionThroughSetter() {
 		setValue("SomeProperty", "true", Boolean.TRUE);
 	}
 	
+	@Test
 	public void testAssign() throws Exception {	
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("publicName='Andy'");
-		assertFalse(e.isWritable(eContext));
-		assertEquals("Andy",e.getValue(eContext));
+		Assert.assertFalse(e.isWritable(eContext));
+		Assert.assertEquals("Andy",e.getValue(eContext));
 	}
 
 	/*
 	 * Testing the coercion of both the keys and the values to the correct type
 	 */
+	@Test
 	public void testSetGenericMapElementRequiresCoercion() throws Exception {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("mapOfStringToBoolean[42]");
-		assertNull(e.getValue(eContext));
+		Assert.assertNull(e.getValue(eContext));
 		
 		// Key should be coerced to string representation of 42
 		e.setValue(eContext, "true");
@@ -139,18 +160,18 @@ public class SetValueTests extends ExpressionTestCase {
 		// All keys should be strings
 		Set ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext,Set.class);
 		for (Object o: ks) {
-			assertEquals(String.class,o.getClass());
+			Assert.assertEquals(String.class,o.getClass());
 		}
 		
 		// All values should be booleans
 		Collection vs = parse("mapOfStringToBoolean.values()").getValue(eContext,Collection.class);
 		for (Object o: vs) {
-			assertEquals(Boolean.class,o.getClass());
+			Assert.assertEquals(Boolean.class,o.getClass());
 		}
 		
 		// One final test check coercion on the key for a map lookup
 		Object o = e.getValue(eContext);
-		assertEquals(Boolean.TRUE,o);
+		Assert.assertEquals(Boolean.TRUE,o);
 	}
 	
 
@@ -165,17 +186,17 @@ public class SetValueTests extends ExpressionTestCase {
 		try {
 			Expression e = parser.parseExpression(expression);
 			if (e == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 			e.setValue(lContext, value);
-			fail("expected an error");
+			Assert.fail("expected an error");
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		} catch (EvaluationException ee) {
 			// success!
 		}
@@ -185,21 +206,21 @@ public class SetValueTests extends ExpressionTestCase {
 		try {
 			Expression e = parser.parseExpression(expression);
 			if (e == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
+			Assert.assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
-			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext));
+			Assert.assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext));
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
@@ -211,26 +232,26 @@ public class SetValueTests extends ExpressionTestCase {
 		try {
 			Expression e = parser.parseExpression(expression);
 			if (e == null) {
-				fail("Parser returned null for expression");
+				Assert.fail("Parser returned null for expression");
 			}
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
+			Assert.assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
 			Object a = expectedValue;
 			Object b = e.getValue(lContext);
 			if (!a.equals(b)) {
-				fail("Not the same: ["+a+"] type="+a.getClass()+"  ["+b+"] type="+b.getClass());
-//				assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
+				Assert.fail("Not the same: ["+a+"] type="+a.getClass()+"  ["+b+"] type="+b.getClass());
+//				Assert.assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
 			}
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+			Assert.fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 }

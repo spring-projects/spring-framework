@@ -16,10 +16,9 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -30,18 +29,18 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do not extend BinaryOperator
 
-	public OperatorNot(Token payload) {
-		super(payload);
+	public OperatorNot(int pos, SpelNodeImpl operand) {
+		super(pos, operand);
 	}
-
+	
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			boolean value = (Boolean)state.convertValue(getChild(0).getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			boolean value = (Boolean)state.convertValue(children[0].getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 			return BooleanTypedValue.forValue(!value);
 		}
-		catch (SpelException see) {
-			see.setPosition(getChild(0).getCharPositionInLine());
+		catch (SpelEvaluationException see) {
+			see.setPosition(getChild(0).getStartPosition());
 			throw see;
 		}
 	}

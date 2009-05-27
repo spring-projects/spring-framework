@@ -17,38 +17,41 @@
 package org.springframework.expression.spel.ast;
 
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
- * Implements the modulus operator.
+ * Represents the elvis operator ?:.  For an expression "a?:b" if a is not null, the value of the expression
+ * is "a", if a is null then the value of the expression is "b".
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorModulus extends Operator {
+public class Elvis extends SpelNodeImpl {
 
-	public OperatorModulus(int pos, SpelNodeImpl... operands) {
-		super("%", pos, operands);
+	public Elvis(int pos, SpelNodeImpl... args) {
+		super(pos,args);
+	}
+
+	/**
+	 * Evaluate the condition and if not null, return it.  If it is null return the other value.
+	 * @param state the expression state
+	 * @throws EvaluationException if the condition does not evaluate correctly to a boolean or there is a problem
+	 * executing the chosen alternative
+	 */
+	@Override
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		TypedValue value = children[0].getValueInternal(state);
+		if (value.getValue()!=null) {
+			return value;
+		} else {
+			return children[1].getValueInternal(state);
+		}
 	}
 
 	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Object operandOne = getLeftOperand().getValueInternal(state).getValue();
-		Object operandTwo = getRightOperand().getValueInternal(state).getValue();
-		if (operandOne instanceof Number && operandTwo instanceof Number) {
-			Number op1 = (Number) operandOne;
-			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(op1.doubleValue() % op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
-			} else if (op1 instanceof Long || op2 instanceof Long) {
-				return new TypedValue(op1.longValue() % op2.longValue(),LONG_TYPE_DESCRIPTOR);
-			} else {
-				return new TypedValue(op1.intValue() % op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
-			}
-		}
-		return state.operate(Operation.MODULUS, operandOne, operandTwo);
+	public String toStringAST() {
+		return new StringBuilder().append(getChild(0).toStringAST()).append(" ?: ").append(getChild(1).toStringAST()).toString();
 	}
 
 }

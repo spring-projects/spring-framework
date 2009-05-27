@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -31,13 +30,8 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class OperatorDivide extends Operator {
 
-	public OperatorDivide(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "/";
+	public OperatorDivide(int pos, SpelNodeImpl... operands) {
+		super("/", pos, operands);
 	}
 
 	@Override

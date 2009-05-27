@@ -16,10 +16,11 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
+import org.junit.Test;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
@@ -27,105 +28,129 @@ import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
  * 
  * @author Andy Clement
  */
-public class ParsingTests extends TestCase {
+public class ParsingTests {
 
-	private SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+	private SpelExpressionParser parser = new SpelExpressionParser();
 
 	// literals
+	@Test
 	public void testLiteralBoolean01() {
 		parseCheck("false");
 	}
 
+	@Test
 	public void testLiteralLong01() {
 		parseCheck("37L", "37");
 	}
 
+	@Test
 	public void testLiteralBoolean02() {
 		parseCheck("true");
 	}
 
+	@Test
 	public void testLiteralBoolean03() {
 		parseCheck("!true");
 	}
 
+	@Test
 	public void testLiteralInteger01() {
 		parseCheck("1");
 	}
 
+	@Test
 	public void testLiteralInteger02() {
 		parseCheck("1415");
 	}
 
+	@Test
 	public void testLiteralString01() {
 		parseCheck("'hello'");
 	}
 
+	@Test
 	public void testLiteralString02() {
 		parseCheck("'joe bloggs'");
 	}
 
+	@Test
 	public void testLiteralString03() {
 		parseCheck("'Tony''s Pizza'", "'Tony's Pizza'");
 	}
 
+	@Test
 	public void testLiteralReal01() {
 		parseCheck("6.0221415E+23", "6.0221415E23");
 	}
 
+	@Test
 	public void testLiteralHex01() {
 		parseCheck("0x7FFFFFFF", "2147483647");
 	}
 
+	@Test
 	public void testLiteralDate01() {
 		parseCheck("date('1974/08/24')");
 	}
 
+	@Test
 	public void testLiteralDate02() {
 		parseCheck("date('19740824T131030','yyyyMMddTHHmmss')");
 	}
 
+	@Test
 	public void testLiteralNull01() {
 		parseCheck("null");
 	}
 
 	// boolean operators
+	@Test
 	public void testBooleanOperatorsOr01() {
 		parseCheck("false or false", "(false or false)");
 	}
 
+	@Test
 	public void testBooleanOperatorsOr02() {
 		parseCheck("false or true", "(false or true)");
 	}
 
+	@Test
 	public void testBooleanOperatorsOr03() {
 		parseCheck("true or false", "(true or false)");
 	}
 
+	@Test
 	public void testBooleanOperatorsOr04() {
 		parseCheck("true or false", "(true or false)");
 	}
 
+	@Test
 	public void testBooleanOperatorsMix01() {
 		parseCheck("false or true and false", "(false or (true and false))");
 	}
 
 	// relational operators
+	@Test
 	public void testRelOperatorsGT01() {
 		parseCheck("3>6", "(3 > 6)");
 	}
 
+	@Test
 	public void testRelOperatorsLT01() {
 		parseCheck("3<6", "(3 < 6)");
 	}
 
+	@Test
 	public void testRelOperatorsLE01() {
 		parseCheck("3<=6", "(3 <= 6)");
 	}
 
+	@Test
 	public void testRelOperatorsGE01() {
 		parseCheck("3>=6", "(3 >= 6)");
 	}
 
+	@Test
 	public void testRelOperatorsGE02() {
 		parseCheck("3>=3", "(3 >= 3)");
 	}
@@ -142,6 +167,7 @@ public class ParsingTests extends TestCase {
 	// parseCheck("'efg' between {'abc', 'xyz'}", "('efg' between {'abc','xyz'})");
 	// }// true
 
+	@Test
 	public void testRelOperatorsIs01() {
 		parseCheck("'xyz' instanceof int", "('xyz' instanceof int)");
 	}// false
@@ -150,44 +176,54 @@ public class ParsingTests extends TestCase {
 	// parseCheck("{1, 2, 3, 4, 5} instanceof List", "({1,2,3,4,5} instanceof List)");
 	// }// true
 
+	@Test
 	public void testRelOperatorsMatches01() {
 		parseCheck("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "('5.0067' matches '^-?\\d+(\\.\\d{2})?$')");
 	}// false
 
+	@Test
 	public void testRelOperatorsMatches02() {
 		parseCheck("'5.00' matches '^-?\\d+(\\.\\d{2})?$'", "('5.00' matches '^-?\\d+(\\.\\d{2})?$')");
 	}// true
 
 	// mathematical operators
+	@Test
 	public void testMathOperatorsAdd01() {
 		parseCheck("2+4", "(2 + 4)");
 	}
 
+	@Test
 	public void testMathOperatorsAdd02() {
 		parseCheck("'a'+'b'", "('a' + 'b')");
 	}
 
+	@Test
 	public void testMathOperatorsAdd03() {
 		parseCheck("'hello'+' '+'world'", "(('hello' + ' ') + 'world')");
 	}
 
+	@Test
 	public void testMathOperatorsSubtract01() {
 		parseCheck("5-4", "(5 - 4)");
 	}
 
+	@Test
 	public void testMathOperatorsMultiply01() {
 		parseCheck("7*4", "(7 * 4)");
 	}
 
+	@Test
 	public void testMathOperatorsDivide01() {
 		parseCheck("8/4", "(8 / 4)");
 	}
 
+	@Test
 	public void testMathOperatorModulus01() {
 		parseCheck("7 % 4", "(7 % 4)");
 	}
 
 	// mixed operators
+	@Test
 	public void testMixedOperators01() {
 		parseCheck("true and 5>3", "(true and (5 > 3))");
 	}
@@ -239,14 +275,17 @@ public class ParsingTests extends TestCase {
 	// }// normalized to '.' for separator in QualifiedIdentifier
 
 	// properties
+	@Test
 	public void testProperties01() {
 		parseCheck("name");
 	}
 
+	@Test
 	public void testProperties02() {
 		parseCheck("placeofbirth.CitY");
 	}
 
+	@Test
 	public void testProperties03() {
 		parseCheck("a.b.c.d.e");
 	}
@@ -278,19 +317,23 @@ public class ParsingTests extends TestCase {
 	// }
 
 	// methods
+	@Test
 	public void testMethods01() {
 		parseCheck("echo(12)");
 	}
 
+	@Test
 	public void testMethods02() {
 		parseCheck("echo(name)");
 	}
 
+	@Test
 	public void testMethods03() {
 		parseCheck("age.doubleItAndAdd(12)");
 	}
 
 	// constructors
+	@Test
 	public void testConstructors01() {
 		parseCheck("new String('hello')");
 	}
@@ -309,14 +352,17 @@ public class ParsingTests extends TestCase {
 	// }
 
 	// variables and functions
+	@Test
 	public void testVariables01() {
 		parseCheck("#foo");
 	}
 
+	@Test
 	public void testFunctions01() {
 		parseCheck("#fn(1,2,3)");
 	}
 
+	@Test
 	public void testFunctions02() {
 		parseCheck("#fn('hello')");
 	}
@@ -342,6 +388,7 @@ public class ParsingTests extends TestCase {
 	// }
 
 	// assignment
+	@Test
 	public void testAssignmentToVariables01() {
 		parseCheck("#var1='value1'");
 	}
@@ -349,6 +396,7 @@ public class ParsingTests extends TestCase {
 	
 	// ternary operator
 	
+	@Test
 	public void testTernaryOperator01() {
 		parseCheck("1>2?3:4","(1 > 2) ? 3 : 4");
 	}
@@ -369,10 +417,12 @@ public class ParsingTests extends TestCase {
 	// } // 120
 
 	// Type references
+	@Test
 	public void testTypeReferences01() {
 		parseCheck("T(java.lang.String)");
 	}
 
+	@Test
 	public void testTypeReferences02() {
 		parseCheck("T(String)");
 	}
@@ -401,12 +451,12 @@ public class ParsingTests extends TestCase {
 				SpelUtilities.printAbstractSyntaxTree(System.err, e);
 			}
 			if (e == null) {
-				fail("Parsed exception was null");
+				Assert.fail("Parsed exception was null");
 			}
-			assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
+			Assert.assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
 		} catch (ParseException ee) {
 			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
+			Assert.fail("Unexpected Exception: " + ee.getMessage());
 		}
 	}
 

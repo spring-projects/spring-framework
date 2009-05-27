@@ -16,11 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
@@ -33,13 +32,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorInstanceof extends Operator {
 
-	public OperatorInstanceof(Token payload) {
-		super(payload);
-	}
-
-	@Override
-	public String getOperatorName() {
-		return "instanceof";
+	public OperatorInstanceof(int pos, SpelNodeImpl... operands) {
+		super("instanceof", pos, operands);
 	}
 
 	/**
@@ -59,7 +53,7 @@ public class OperatorInstanceof extends Operator {
 			return BooleanTypedValue.False;  // null is not an instanceof anything
 		}
 		if (rightValue == null || !(rightValue instanceof Class<?>)) {
-			throw new SpelException(getRightOperand().getCharPositionInLine(),
+			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
 					(rightValue == null ? "null" : rightValue.getClass().getName()));
 		}

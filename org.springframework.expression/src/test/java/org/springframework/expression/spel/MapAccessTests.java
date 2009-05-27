@@ -18,13 +18,17 @@ package org.springframework.expression.spel;
 
 import java.util.Map;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
 import org.springframework.expression.spel.ast.CommonTypeDescriptors;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -34,32 +38,36 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class MapAccessTests extends ExpressionTestCase {
 
+	@Test
 	public void testSimpleMapAccess01() {
 		evaluate("testMap.get('monday')", "montag", String.class);
 	}
 
+	@Test
 	public void testMapAccessThroughIndexer() {
 		evaluate("testMap['monday']", "montag", String.class);
 	}
 
+	@Test
 	public void testCustomMapAccessor() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		ctx.addPropertyAccessor(new MapAccessor());
 
 		Expression expr = parser.parseExpression("testMap.monday");
 		Object value = expr.getValue(ctx, String.class);
-		assertEquals("montag", value);
+		Assert.assertEquals("montag", value);
 	}
 
+	@Test
 	public void testVariableMapAccess() throws Exception {
-		SpelAntlrExpressionParser parser = new SpelAntlrExpressionParser();
+		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		ctx.setVariable("day", "saturday");
 
 		Expression expr = parser.parseExpression("testMap[#day]");
 		Object value = expr.getValue(ctx, String.class);
-		assertEquals("samstag", value);
+		Assert.assertEquals("samstag", value);
 	}
 
 

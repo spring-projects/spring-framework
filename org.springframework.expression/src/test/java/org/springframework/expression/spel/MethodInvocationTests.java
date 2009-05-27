@@ -16,14 +16,16 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.Test;
+
 /**
  * Tests invocation of methods.
  * 
  * @author Andy Clement
  */
-@SuppressWarnings("unused")
 public class MethodInvocationTests extends ExpressionTestCase {
 
+	@Test
 	public void testSimpleAccess01() {
 		evaluate("getPlaceOfBirth().getCity()", "SmilJan", String.class);
 	}
@@ -39,6 +41,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 	// evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
 	// }
 
+	@Test
 	public void testStringClass() {
 		evaluate("new java.lang.String('hello').charAt(2)", 'l', Character.class);
 		evaluate("new java.lang.String('hello').charAt(2).equals('l'.charAt(0))", true, Boolean.class);
@@ -46,11 +49,13 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluate("'   abcba '.trim()", "abcba", String.class);
 	}
 
+	@Test
 	public void testNonExistentMethods() {
 		// name is ok but madeup() does not exist
 		evaluateAndCheckError("name.madeup()", SpelMessages.METHOD_NOT_FOUND, 5);
 	}
 
+	@Test
 	public void testWidening01() {
 		// widening of int 3 to double 3 is OK
 		evaluate("new Double(3.0d).compareTo(8)", -1, Integer.class);
@@ -58,12 +63,14 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluate("new Double(3.0d).compareTo(2)", 1, Integer.class);
 	}
 
+	@Test
 	public void testArgumentConversion01() {
 		// Rely on Double>String conversion for calling startsWith()
 		evaluate("new String('hello 2.0 to you').startsWith(7.0d)", false, Boolean.class);
 		evaluate("new String('7.0 foobar').startsWith(7.0d)", true, Boolean.class);
 	}
 
+	@Test
 	public void testVarargsInvocation01() {
 		// Calling 'public int aVarargsMethod(String... strings)'
 		evaluate("aVarargsMethod('a','b','c')", 3, Integer.class);
@@ -75,6 +82,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		// evaluate("aVarargsMethod(new String[]{'a','b','c'})", 3, Integer.class);
 	}
 
+	@Test
 	public void testVarargsInvocation02() {
 		// Calling 'public int aVarargsMethod2(int i, String... strings)' - returns int+length_of_strings
 		evaluate("aVarargsMethod2(5,'a','b','c')", 8, Integer.class);
@@ -86,6 +94,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		// evaluate("aVarargsMethod2(8,new String[]{'a','b','c'})", 11, Integer.class);
 	}
 	
+	@Test
 	public void testInvocationOnNullContextObject() {
 		evaluateAndCheckError("null.toString()",SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
 	}

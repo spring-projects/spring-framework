@@ -20,12 +20,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.runtime.Token;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 // TODO support multidimensional arrays
@@ -39,16 +38,17 @@ import org.springframework.expression.spel.SpelMessages;
  */
 public class Indexer extends SpelNodeImpl {
 
-	public Indexer(Token payload) {
-		super(payload);
+	public Indexer(int pos,SpelNodeImpl expr) {
+		super(pos,expr);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
 		Object targetObject = context.getValue();
 		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();
-		TypedValue indexValue =  getChild(0).getValueInternal(state);
+		TypedValue indexValue =  children[0].getValueInternal(state);
 		Object index = indexValue.getValue();
 
 		// Indexing into a Map
@@ -61,7 +61,7 @@ public class Indexer extends SpelNodeImpl {
 		int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
 		if (targetObject == null) {
-			throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+			throw new SpelEvaluationException(getStartPosition(),SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 		
 		if (targetObject.getClass().isArray()) {
@@ -69,7 +69,7 @@ public class Indexer extends SpelNodeImpl {
 		} else if (targetObject instanceof Collection) {
 			Collection<?> c = (Collection<?>) targetObject;
 			if (idx >= c.size()) {
-				throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+				throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 			}
 			int pos = 0;
 			for (Object o : c) {
@@ -81,16 +81,16 @@ public class Indexer extends SpelNodeImpl {
 		} else if (targetObject instanceof String) {
 			String ctxString = (String) targetObject;
 			if (idx >= ctxString.length()) {
-				throw new SpelException(SpelMessages.STRING_INDEX_OUT_OF_BOUNDS, ctxString.length(), idx);
+				throw new SpelEvaluationException(getStartPosition(),SpelMessages.STRING_INDEX_OUT_OF_BOUNDS, ctxString.length(), idx);
 			}
 			return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
 		}
-		throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
+		throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
 	}
 
 
 	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
+	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
 		return true;
 	}
 	
@@ -100,10 +100,10 @@ public class Indexer extends SpelNodeImpl {
 		TypedValue contextObject = state.getActiveContextObject();
 		Object targetObject = contextObject.getValue();
 		TypeDescriptor targetObjectTypeDescriptor = contextObject.getTypeDescriptor();
-		TypedValue index = getChild(0).getValueInternal(state);
+		TypedValue index = children[0].getValueInternal(state);
 
 		if (targetObject == null) {
-			throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+			throw new SpelEvaluationException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 		// Indexing into a Map
 		if (targetObjectTypeDescriptor.isMap()) {
@@ -121,17 +121,17 @@ public class Indexer extends SpelNodeImpl {
 			int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
-				throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+				throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 			}
 			if (targetObject instanceof List) {
 				List list = (List)targetObject;
 				Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
 				list.set(idx,possiblyConvertedValue);
 			} else {
-				throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
+				throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
 			}
 		} else {
-			throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
+			throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
 		}
 	}
 	
@@ -148,6 +148,7 @@ public class Indexer extends SpelNodeImpl {
 		return sb.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void setArrayElement(ExpressionState state, Object ctx, int idx, Object newValue, Class clazz) throws EvaluationException {
 		Class<?> arrayComponentType = clazz;
 		if (arrayComponentType == Integer.TYPE) {
@@ -190,7 +191,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 	
 	
-	private Object accessArrayElement(Object ctx, int idx) throws SpelException {
+	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
 		Class<?> arrayComponentType = ctx.getClass().getComponentType();
 		if (arrayComponentType == Integer.TYPE) {
 			int[] array = (int[]) ctx;
@@ -232,9 +233,9 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	private void checkAccess(int arrayLength, int index) throws SpelException {
+	private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
 		if (index > arrayLength) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.ARRAY_INDEX_OUT_OF_BOUNDS, arrayLength, index);
+			throw new SpelEvaluationException(getStartPosition(), SpelMessages.ARRAY_INDEX_OUT_OF_BOUNDS, arrayLength, index);
 		}
 	}
 

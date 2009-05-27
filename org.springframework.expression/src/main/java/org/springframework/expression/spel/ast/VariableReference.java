@@ -16,10 +16,9 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 
 /**
  * Represents a variable reference, eg. #someVar. Note this is different to a *local* variable like $someVar
@@ -36,14 +35,14 @@ public class VariableReference extends SpelNodeImpl {
 	private final String name;
 
 
-	public VariableReference(Token payload) {
-		super(payload);
-		this.name = payload.getText();
+	public VariableReference(String variableName, int pos) {
+		super(pos);
+		name = variableName;
 	}
 
 
 	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws SpelException {
+	public TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {
 		if (this.name.equals(THIS)) {
 			return state.getActiveContextObject();
 		}
@@ -56,7 +55,7 @@ public class VariableReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public void setValue(ExpressionState state, Object value) throws SpelException {
+	public void setValue(ExpressionState state, Object value) throws SpelEvaluationException {
 		state.setVariable(this.name, value);
 	}
 
@@ -66,7 +65,7 @@ public class VariableReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelException {
+	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
 		return !(this.name.equals(THIS) || this.name.equals(ROOT));
 	}
 

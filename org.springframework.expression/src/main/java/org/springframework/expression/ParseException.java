@@ -17,57 +17,40 @@
 package org.springframework.expression;
 
 /**
- * Base class for exceptions occurring during expression parsing and evaluation.
+ * Represent an exception that occurs during expression parsing.
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class ParseException extends Exception {
-
-	private String expressionString;
-
-
-	/**
-	 * Creates a new expression exception.
-	 * @param cause the underlying cause of this exception
-	 */
-	public ParseException(Throwable cause) {
-		super(cause);
-	}
+public class ParseException extends ExpressionException {
 
 	/**
 	 * Creates a new expression parsing exception.
 	 * @param expressionString the expression string that could not be parsed
-	 * @param cause the underlying cause of this exception
-	 */
-	public ParseException(String expressionString, Throwable cause) {
-		this(expressionString, "Exception occurred whilst handling '" + expressionString + "'", cause);
+	 * @param position the position in the expression string where the problem occurred
+	 * @param message description of the problem that occurred
+	 */ 
+	public ParseException(String expressionString, int position, String message) {
+		super(expressionString, position, message);
 	}
 
 	/**
-	 * Creates a new expression exception.
-	 * @param expressionString the expression string
-	 * @param message a descriptive message
+	 * Creates a new expression parsing exception.
+	 * @param position the position in the expression string where the problem occurred
+	 * @param message description of the problem that occurred
 	 * @param cause the underlying cause of this exception
-	 */
-	public ParseException(String expressionString, String message, Throwable cause) {
-		super(message, cause);
-		this.expressionString = expressionString;
-	}
-
-	/**
-	 * Creates a new expression exception.
-	 * @param expressionString the expression string
-	 * @param message a descriptive message
-	 */
-	public ParseException(String expressionString, String message) {
+	 */ 
+	public ParseException(int position, String message, Throwable cause) {
 		super(message);
-		this.expressionString = expressionString;
 	}
-
-
-	public final String getExpressionString() {
-		return this.expressionString;
+	
+	/**
+	 * Creates a new expression parsing exception.
+	 * @param position the position in the expression string where the problem occurred
+	 * @param message description of the problem that occurred
+	 */ 
+	public ParseException(int position, String message) {
+		super(message);
 	}
 
 }

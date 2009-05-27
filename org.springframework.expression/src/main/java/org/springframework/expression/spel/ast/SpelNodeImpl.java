@@ -16,18 +16,13 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.io.Serializable;
-
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.generated.SpringExpressionsParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -36,14 +31,22 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  * @author Andy Clement
  * @since 3.0
  */
-public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Serializable, CommonTypeDescriptors {
+public abstract class SpelNodeImpl implements SpelNode, CommonTypeDescriptors {
 	
-	/**
-	 * The Antlr parser uses this constructor to build SpelNodes.
-	 * @param payload the token for the node that has been parsed
-	 */
-	protected SpelNodeImpl(Token payload) {
-		super(payload);
+	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
+	
+	protected int pos; // start = top 16bits, end = bottom 16bits
+	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
+	
+	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
+		this.pos = pos;
+		if (pos==0) {
+			// pos embodies start and end so can never be zero because tokens cannot be zero length
+			throw new IllegalStateException("Node cannot have zero position: "+this.getClass());
+		}
+		if (operands!=null && operands.length>0) {
+			this.children = operands;
+		}
 	}
 
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
@@ -60,20 +63,15 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 	}
 
 	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelException(
-				getCharPositionInLine(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass(), getTokenName());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
-	protected String getTokenName() {
-		if (getToken() == null) {
-			return "UNKNOWN";
-		}
-		return SpringExpressionsParser.tokenNames[getToken().getType()];
+	public SpelNode getChild(int index) {
+		return children[index];
 	}
-
-	@Override
-	public SpelNodeImpl getChild(int index) {
-		return (SpelNodeImpl) super.getChild(index);
+	
+	public int getChildCount() {
+		return children.length;
 	}
 
 	public Class<?> getObjectClass(Object obj) {
@@ -97,13 +95,16 @@ public abstract class SpelNodeImpl extends CommonTree implements SpelNode, Seria
 		return (T) result;
 	}
 
-	public int getStartPosition() {
-		return getCharPositionInLine();
-	}
-
-
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
 	public abstract String toStringAST();
+
+	public int getStartPosition() {
+		return (pos>>16);
+	}
+
+	public int getEndPosition() {
+		return (pos&0xffff);
+	} 
 
 }

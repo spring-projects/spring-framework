@@ -18,7 +18,6 @@ package org.springframework.expression.spel.ast;
 
 import java.util.List;
 
-import org.antlr.runtime.Token;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -26,7 +25,7 @@ import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelException;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessages;
 
 /**
@@ -39,11 +38,12 @@ public class MethodReference extends SpelNodeImpl {
 	private final String name;
 
 	private volatile MethodExecutor cachedExecutor;
+	private final boolean nullSafe;
 
-
-	public MethodReference(Token payload) {
-		super(payload);
-		name = payload.getText();
+	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
+		super(pos,arguments);
+		name = methodName;
+		this.nullSafe = nullSafe;
 	}
 
 
@@ -52,11 +52,16 @@ public class MethodReference extends SpelNodeImpl {
 		TypedValue currentContext = state.getActiveContextObject();
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = getChild(i).getValueInternal(state).getValue();
+//			System.out.println(i);
+			arguments[i] = children[i].getValueInternal(state).getValue();
 		}
 		if (currentContext.getValue() == null) {
-			throw new SpelException(getCharPositionInLine(), SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-					FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
+			if (nullSafe) {
+				return TypedValue.NULL_TYPED_VALUE;
+			} else {
+				throw new SpelEvaluationException(getStartPosition(), SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
+						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
+			}
 		}
 
 		MethodExecutor executorToUse = this.cachedExecutor;
@@ -79,7 +84,7 @@ public class MethodReference extends SpelNodeImpl {
 			return executorToUse.execute(
 					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
 		} catch (AccessException ae) {
-			throw new SpelException(getCharPositionInLine(), ae, SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,
+			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,
 					this.name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
 		}
 	}
@@ -106,7 +111,7 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 	private MethodExecutor findAccessorForMethod(String name, Class<?>[] argumentTypes, ExpressionState state)
-			throws SpelException {
+			throws SpelEvaluationException {
 
 		TypedValue context = state.getActiveContextObject();
 		Object contextObject = context.getValue();
@@ -123,11 +128,11 @@ public class MethodReference extends SpelNodeImpl {
 					}
 				}
 				catch (AccessException ex) {
-					throw new SpelException(ex, SpelMessages.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
+					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessages.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
 				}
 			}
 		}
-		throw new SpelException(SpelMessages.METHOD_NOT_FOUND, FormatHelper.formatMethodForMessage(name, argumentTypes),
+		throw new SpelEvaluationException(getStartPosition(),SpelMessages.METHOD_NOT_FOUND, FormatHelper.formatMethodForMessage(name, argumentTypes),
 				FormatHelper.formatClassNameForMessage(contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
 	}
 
