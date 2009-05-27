@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
-import org.springframework.expression.spel.antlr.SpelAntlrExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
@@ -34,11 +34,11 @@ import org.springframework.util.Assert;
  * Standard implementation of the
  * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
  * interface, parsing and evaluating Spring EL using Spring's expression module.
- *
+ * 
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.expression.ExpressionParser
- * @see org.springframework.expression.spel.antlr.SpelAntlrExpressionParser
+ * @see org.springframework.expression.spel.standard.SpelExpressionParser
  * @see org.springframework.expression.spel.support.StandardEvaluationContext
  */
 public class StandardBeanExpressionResolver implements BeanExpressionResolver {
@@ -54,7 +54,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	private String expressionSuffix = DEFAULT_EXPRESSION_SUFFIX;
 
-	private ExpressionParser expressionParser = new SpelAntlrExpressionParser();
+	private ExpressionParser expressionParser = new SpelExpressionParser();
 
 	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<String, Expression>();
 
