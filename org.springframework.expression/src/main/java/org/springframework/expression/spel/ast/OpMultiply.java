@@ -36,10 +36,10 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorMultiply extends Operator {
+public class OpMultiply extends Operator {
 
 
-	public OperatorMultiply(int pos, SpelNodeImpl... operands) {
+	public OpMultiply(int pos, SpelNodeImpl... operands) {
 		super("*", pos, operands);
 	}
 

@@ -64,30 +64,6 @@ class Token {
 		return kind==TokenKind.IDENTIFIER;
 	}
 
-	public boolean isGreaterThan() {
-		return kind==TokenKind.GT;
-	}
-	
-	public boolean isLessThan() {
-		return kind==TokenKind.LT;
-	}
-
-	public boolean isGreaterThanOrEqual() {
-		return kind==TokenKind.GE;
-	}
-
-	public boolean isEquality() {
-		return kind==TokenKind.EQ;
-	}
-
-	public boolean isLessThanOrEqual() {
-		return kind==TokenKind.LE;
-	}
-
-	public boolean isInstanceOf() {
-		return kind==TokenKind.INSTANCEOF;
-	}
-
 	public boolean isNumericRelationalOperator() {
 		return kind==TokenKind.GT || kind==TokenKind.GE || kind==TokenKind.LT || kind==TokenKind.LE || kind==TokenKind.EQ || kind==TokenKind.NE;
 	}

@@ -85,7 +85,7 @@ public class HelperTests extends ExpressionTestCase {
 //		    IntLiteral  value:2
 //		===> Expression '3+4+5+6+7-2' - AST end
 		Assert.assertTrue(s.indexOf("===> Expression '3+4+5+6+7-2' - AST start")!=-1);
-		Assert.assertTrue(s.indexOf(" OperatorPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2")!=-1);
+		Assert.assertTrue(s.indexOf(" OpPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2")!=-1);
 	}
 	
 	@Test

@@ -217,6 +217,7 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("2>4?1:2",2,Integer.class);
 	}
 
+	
 	@Test
 	public void testTernaryOperator02() {
 		evaluate("'abc'=='abc'?1:2",1,Integer.class);
@@ -231,6 +232,14 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testTernaryOperator04() throws Exception {
 		Expression expr = parser.parseExpression("1>2?3:4");
 		Assert.assertFalse(expr.isWritable(eContext));
+	}
+
+	@Test
+	public void testTernaryOperator05() {
+		evaluate("1>2?#var=4:#var=5",5,Integer.class);
+		evaluate("3?:#var=5",3,Integer.class);
+		evaluate("null?:#var=5",5,Integer.class);
+		evaluate("2>4?(3>2?true:false):(5<3?true:false)",false,Boolean.class);
 	}
 
 	@Test

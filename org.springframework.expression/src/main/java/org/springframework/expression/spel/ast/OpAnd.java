@@ -17,38 +17,49 @@
 package org.springframework.expression.spel.ast;
 
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Implements the modulus operator.
+ * Represents the boolean AND operation.
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorModulus extends Operator {
+public class OpAnd extends Operator {
 
-	public OperatorModulus(int pos, SpelNodeImpl... operands) {
-		super("%", pos, operands);
+	public OpAnd(int pos, SpelNodeImpl... operands) {
+		super("and", pos, operands);
 	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Object operandOne = getLeftOperand().getValueInternal(state).getValue();
-		Object operandTwo = getRightOperand().getValueInternal(state).getValue();
-		if (operandOne instanceof Number && operandTwo instanceof Number) {
-			Number op1 = (Number) operandOne;
-			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(op1.doubleValue() % op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
-			} else if (op1 instanceof Long || op2 instanceof Long) {
-				return new TypedValue(op1.longValue() % op2.longValue(),LONG_TYPE_DESCRIPTOR);
-			} else {
-				return new TypedValue(op1.intValue() % op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
-			}
+		boolean leftValue;
+		boolean rightValue;
+
+		try {
+			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		return state.operate(Operation.MODULUS, operandOne, operandTwo);
+		catch (SpelEvaluationException ee) {
+			ee.setPosition(getLeftOperand().getStartPosition());
+			throw ee;
+		}
+
+		if (leftValue == false) {
+			return BooleanTypedValue.forValue(false); // no need to evaluate right operand
+		}
+
+		try {
+			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+		}
+		catch (SpelEvaluationException ee) {
+			ee.setPosition(getRightOperand().getStartPosition());
+			throw ee;
+		}
+
+		return /* leftValue && */BooleanTypedValue.forValue(rightValue);
 	}
 
 }
