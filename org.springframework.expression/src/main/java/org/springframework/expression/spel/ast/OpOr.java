@@ -17,49 +17,47 @@
 package org.springframework.expression.spel.ast;
 
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Represents the boolean AND operation.
+ * Represents the boolean OR operation.
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorAnd extends Operator {
+public class OpOr extends Operator {
 
-	public OperatorAnd(int pos, SpelNodeImpl... operands) {
-		super("and", pos, operands);
+	public OpOr(int pos, SpelNodeImpl... operands) {
+		super("or", pos, operands);
 	}
 
 	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
-
-		try {
+		try { 
 			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		catch (SpelEvaluationException ee) {
-			ee.setPosition(getLeftOperand().getStartPosition());
-			throw ee;
+		catch (SpelEvaluationException see) {
+			see.setPosition(getLeftOperand().getStartPosition());
+			throw see;
 		}
 
-		if (leftValue == false) {
-			return BooleanTypedValue.forValue(false); // no need to evaluate right operand
+		if (leftValue == true) {
+			return BooleanTypedValue.True; // no need to evaluate right operand
 		}
 
 		try {
 			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
 		}
-		catch (SpelEvaluationException ee) {
-			ee.setPosition(getRightOperand().getStartPosition());
-			throw ee;
+		catch (SpelEvaluationException see) {
+			see.setPosition(getRightOperand().getStartPosition()); // TODO end positions here and in similar situations
+			throw see;
 		}
 
-		return /* leftValue && */BooleanTypedValue.forValue(rightValue);
+		return BooleanTypedValue.forValue(leftValue || rightValue);
 	}
 
 }

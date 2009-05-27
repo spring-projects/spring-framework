@@ -36,9 +36,9 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorMinus extends Operator {
+public class OpMinus extends Operator {
 
-	public OperatorMinus(int pos, SpelNodeImpl... operands) {
+	public OpMinus(int pos, SpelNodeImpl... operands) {
 		super("-", pos, operands);
 	}
 

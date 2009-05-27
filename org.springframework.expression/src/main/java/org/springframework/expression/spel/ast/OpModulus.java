@@ -16,22 +16,21 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
- * Implements division operator.
+ * Implements the modulus operator.
  *
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorDivide extends Operator {
+public class OpModulus extends Operator {
 
-	public OperatorDivide(int pos, SpelNodeImpl... operands) {
-		super("/", pos, operands);
+	public OpModulus(int pos, SpelNodeImpl... operands) {
+		super("%", pos, operands);
 	}
 
 	@Override
@@ -42,15 +41,14 @@ public class OperatorDivide extends Operator {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(op1.doubleValue() / op2.doubleValue(), DOUBLE_TYPE_DESCRIPTOR);
+				return new TypedValue(op1.doubleValue() % op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
 			} else if (op1 instanceof Long || op2 instanceof Long) {
-				return new TypedValue(op1.longValue() / op2.longValue(), LONG_TYPE_DESCRIPTOR);
-			} else { // TODO what about non-int result of the division?
-				return new TypedValue(op1.intValue() / op2.intValue(), INTEGER_TYPE_DESCRIPTOR);
+				return new TypedValue(op1.longValue() % op2.longValue(),LONG_TYPE_DESCRIPTOR);
+			} else {
+				return new TypedValue(op1.intValue() % op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
 			}
 		}
-		Object result = state.operate(Operation.DIVIDE, operandOne, operandTwo);
-		return new TypedValue(result,TypeDescriptor.forObject(result));
+		return state.operate(Operation.MODULUS, operandOne, operandTwo);
 	}
 
 }

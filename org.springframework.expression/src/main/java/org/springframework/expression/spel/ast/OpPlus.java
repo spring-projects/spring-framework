@@ -35,9 +35,9 @@ import org.springframework.expression.spel.ExpressionState;
  * @author Andy Clement
  * @since 3.0
  */
-public class OperatorPlus extends Operator {
+public class OpPlus extends Operator {
 
-	public OperatorPlus(int pos, SpelNodeImpl... operands) {
+	public OpPlus(int pos, SpelNodeImpl... operands) {
 		super("+", pos, operands);
 	}
 

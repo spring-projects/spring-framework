@@ -24,8 +24,8 @@ import org.springframework.expression.spel.SpelExpression;
 import org.springframework.expression.spel.SpelMessages;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
-import org.springframework.expression.spel.ast.OperatorAnd;
-import org.springframework.expression.spel.ast.OperatorOr;
+import org.springframework.expression.spel.ast.OpAnd;
+import org.springframework.expression.spel.ast.OpOr;
 
 
 public class SpelParserTests {
@@ -228,8 +228,8 @@ public class SpelParserTests {
 	public void testPositionalInformation() throws EvaluationException, ParseException {
 		SpelExpression expr = new SpelExpressionParser().parse("true and true or false");
 		SpelNode rootAst = expr.getAST();
-		OperatorOr operatorOr = (OperatorOr)rootAst;
-		OperatorAnd operatorAnd = (OperatorAnd)operatorOr.getLeftOperand();
+		OpOr operatorOr = (OpOr)rootAst;
+		OpAnd operatorAnd = (OpAnd)operatorOr.getLeftOperand();
 		SpelNode rightOrOperand = operatorOr.getRightOperand();
 		
 		// check position for final 'false'
