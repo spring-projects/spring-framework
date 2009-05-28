@@ -5,6 +5,8 @@
 	<import file="${basedir}/../spring-build/library/default.xml"/>
 
 
+	<target name="publish-maven-central"/>
+
 	<target name="publish-maven-central-pom-only" depends="maven.init">
 		<maven:deploy>
 			<remoteRepository url="${maven.central.repository}"/>

@@ -12,8 +12,8 @@
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
-  <artifactId>spring</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>spring-library</artifactId>
+  <packaging>libd</packaging>
   <version>3.0.0.BUILD-SNAPSHOT</version>
   <name>Spring Framework</name>
   <description>Spring is a layered Java/J2EE application platform, based on code published in Expert
@@ -52,30 +52,6 @@
       <archive>http://forum.springframework.org</archive>
     </mailingList>
   </mailingLists>
-  
-  <modules>
-    <module>../org.springframework.spring-parent</module>
-    <module>../org.springframework.instrument</module>
-    <module>../org.springframework.instrument.classloading</module>
-    <module>../org.springframework.asm</module>
-    <module>../org.springframework.core</module>
-    <module>../org.springframework.expression</module>
-    <module>../org.springframework.core</module>
-    <module>../org.springframework.beans</module>
-    <module>../org.springframework.aop</module>
-    <module>../org.springframework.context</module>
-    <module>../org.springframework.transaction</module>
-    <module>../org.springframework.oxm</module>
-    <module>../org.springframework.jms</module>
-    <module>../org.springframework.aspects</module>
-    <module>../org.springframework.jdbc</module>
-    <module>../org.springframework.web</module>
-    <module>../org.springframework.orm</module>
-    <module>../org.springframework.context.support</module>
-    <module>../org.springframework.web.portlet</module>
-    <module>../org.springframework.web.servlet</module>
-    <module>../org.springframework.test</module>
-  </modules>
 
   <profiles>
     <profile>
@@ -97,5 +73,92 @@
     </profile>
   </profiles>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-asm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jms</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc-portlet</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>aopalliance</groupId>
+			<artifactId>aopalliance</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
 
 </project>
