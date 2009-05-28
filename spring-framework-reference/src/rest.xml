@@ -823,7 +823,7 @@ RestTemplate template = new RestTemplate();
 
 Booking booking = // create booking object
 
-URI location = template.postForLocation(uri, booking, String.class, "1");
+URI location = template.postForLocation(uri, booking, "1");
 </programlisting>
 
       <para>The general callback interface is
@@ -910,7 +910,7 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
         <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write form data from the HTTP request
         and response. By default, this converter reads and writes the media
-        type (<literal>application/x-www-form-urlencoded</literal>). Form data
+        type <literal>application/x-www-form-urlencoded</literal>. Form data
         is read from and written into a <literal>MultiValueMap&lt;String,
         String&gt;</literal>.</para>
       </section>
@@ -954,6 +954,16 @@ URI location = template.postForLocation(uri, booking, String.class, "1");
         <classname>StreamSource</classname> are supported. By default, this
         converter supports (<literal>text/xml</literal>) and
         (<literal>application/xml</literal>).</para>
+      </section>
+
+      <section id="rest-source-converter">
+        <title>BufferedImageHttpMessageConverter</title>
+
+        <para>An <interfacename>HttpMessageConverter</interfacename>
+        implementation that can read and write
+        <classname>java.awt.image.BufferedImage</classname> from the HTTP
+        request and response. This converter reads and writes the media type
+        supported by the Java I/O API.</para>
       </section>
     </section>
   </section>
