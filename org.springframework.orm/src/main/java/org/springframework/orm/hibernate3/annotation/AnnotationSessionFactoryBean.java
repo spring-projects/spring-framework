@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	private TypeFilter[] entityTypeFilters = new TypeFilter[] {
 			new AnnotationTypeFilter(Entity.class, false),
 			new AnnotationTypeFilter(Embeddable.class, false),
-			new AnnotationTypeFilter(MappedSuperclass.class, false)};
+			new AnnotationTypeFilter(MappedSuperclass.class, false),
+			new AnnotationTypeFilter(org.hibernate.annotations.Entity.class, false)};
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -141,7 +142,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
 	 * <code>@javax.persistence.Entity</code>, <code>@javax.persistence.Embeddable</code>
-	 * or <code>@javax.persistence.MappedSuperclass</code>.
+	 * or <code>@javax.persistence.MappedSuperclass</code>, as well as for
+	 * Hibernate's special <code>@org.hibernate.annotations.Entity</code>.
 	 * @see #setPackagesToScan
 	 */
 	public void setEntityTypeFilters(TypeFilter[] entityTypeFilters) {
