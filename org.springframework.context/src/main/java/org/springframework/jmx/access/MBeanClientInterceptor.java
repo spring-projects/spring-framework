@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
@@ -258,7 +257,7 @@ public class MBeanClientInterceptor
 			if (this.useStrictCasing) {
 				// Use the JDK's own MBeanServerInvocationHandler,
 				// in particular for native MXBean support on Java 6.
-				if (JdkVersion.isAtLeastJava16()) {
+				if (JmxUtils.isMXBeanSupportAvailable()) {
 					this.invocationHandler =
 							new MBeanServerInvocationHandler(this.serverToUse, this.objectName,
 									(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
