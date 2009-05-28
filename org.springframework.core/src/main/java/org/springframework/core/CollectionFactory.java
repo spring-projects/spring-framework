@@ -26,8 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -36,6 +34,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -53,21 +52,34 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  */
 public abstract class CollectionFactory {
 
+	private static final String NAVIGABLE_SET_CLASS_NAME = "java.util.NavigableSet";
+
+	private static final String NAVIGABLE_MAP_CLASS_NAME = "java.util.NavigableMap";
+
 	private static final Set<Class> approximableCollectionTypes = new HashSet<Class>(10);
 
 	private static final Set<Class> approximableMapTypes = new HashSet<Class>(6);
 
+
 	static {
+		// Standard collection interfaces
 		approximableCollectionTypes.add(Collection.class);
 		approximableCollectionTypes.add(List.class);
 		approximableCollectionTypes.add(Set.class);
 		approximableCollectionTypes.add(SortedSet.class);
 		approximableMapTypes.add(Map.class);
 		approximableMapTypes.add(SortedMap.class);
-		if (JdkVersion.isAtLeastJava16()) {
-			approximableCollectionTypes.add(NavigableSet.class);
-			approximableMapTypes.add(NavigableMap.class);
+
+		// New Java 6 collection interfaces
+		try {
+			approximableCollectionTypes.add(ClassUtils.forName(NAVIGABLE_SET_CLASS_NAME, CollectionFactory.class.getClassLoader()));
+			approximableMapTypes.add(ClassUtils.forName(NAVIGABLE_MAP_CLASS_NAME, CollectionFactory.class.getClassLoader()));
 		}
+		catch (ClassNotFoundException ex) {
+			// not running on Java 6 or above...
+		}
+
+		// Common concrete collection classes
 		approximableCollectionTypes.add(ArrayList.class);
 		approximableCollectionTypes.add(LinkedList.class);
 		approximableCollectionTypes.add(HashSet.class);
@@ -77,6 +89,7 @@ public abstract class CollectionFactory {
 		approximableMapTypes.add(LinkedHashMap.class);
 		approximableMapTypes.add(TreeMap.class);
 	}
+
 
 	/**
 	 * Create a linked Set if possible: This implementation always

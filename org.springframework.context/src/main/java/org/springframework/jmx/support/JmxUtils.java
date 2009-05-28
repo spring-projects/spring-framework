@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ public abstract class JmxUtils {
 		for (Class iface : implementedInterfaces) {
 			boolean isMxBean = iface.getName().endsWith(MXBEAN_SUFFIX);
 			if (mxBeanAnnotationAvailable) {
-				Boolean checkResult = MXBeanChecker.hasMXBeanAnnotation(iface);
+				Boolean checkResult = MXBeanChecker.evaluateMXBeanAnnotation(iface);
 				if (checkResult != null) {
 					isMxBean = checkResult;
 				}
@@ -315,13 +315,22 @@ public abstract class JmxUtils {
 		return getMXBeanInterface(clazz.getSuperclass());
 	}
 
+	/**
+	 * Check whether MXBean support is available, i.e. whether we're running
+	 * on Java 6 or above.
+	 * @return <code>true</code> if available; <code>false</code> otherwise
+	 */
+	public static boolean isMXBeanSupportAvailable() {
+		return mxBeanAnnotationAvailable;
+	}
+
 
 	/**
 	 * Inner class to avoid a Java 6 dependency.
 	 */
 	private static class MXBeanChecker {
 
-		public static Boolean hasMXBeanAnnotation(Class<?> iface) {
+		public static Boolean evaluateMXBeanAnnotation(Class<?> iface) {
 			MXBean mxBean = iface.getAnnotation(MXBean.class);
 			return (mxBean != null ? mxBean.value() : null);
 		}
