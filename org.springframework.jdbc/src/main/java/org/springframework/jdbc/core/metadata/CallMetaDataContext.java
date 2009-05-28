@@ -64,8 +64,11 @@ public class CallMetaDataContext {
 	/** List of SqlParameter objects to be used in call execution */
 	private List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
 
-	/** name to use for the return value in the output map */
-	private String functionReturnName = "return";
+	/** Default name to use for the return value in the output map */
+	private String defaultFunctionReturnName = "return";
+
+	/** Actual name to use for the return value in the output map */
+	private String actualFunctionReturnName = null;
 
 	/** Set of in parameter names to exclude use for any not listed */
 	private Set<String> limitedInParameterNames = new HashSet<String>();
@@ -90,14 +93,14 @@ public class CallMetaDataContext {
 	 * Specify the name used for the return value of the function.
 	 */
 	public void setFunctionReturnName(String functionReturnName) {
-		this.functionReturnName = functionReturnName;
+		this.actualFunctionReturnName = functionReturnName;
 	}
 
 	/**
 	 * Get the name used for the return value of the function.
 	 */
 	public String getFunctionReturnName() {
-		return this.functionReturnName;
+		return this.actualFunctionReturnName != null ? this.actualFunctionReturnName : this.defaultFunctionReturnName;
 	}
 
 	/**
@@ -240,7 +243,7 @@ public class CallMetaDataContext {
 	 */
 	public String getScalarOutParameterName() {
 		if (isFunction()) {
-			return this.functionReturnName;
+			return getFunctionReturnName();
 		}
 		else {
 			if (this.outParameterNames.size() > 1) {
@@ -377,8 +380,10 @@ public class CallMetaDataContext {
 								( meta.getParameterName() == null || meta.getParameterName().length() < 1 ) ? 
 										this.getFunctionReturnName() : parNameToUse;
 						workParameters.add(new SqlOutParameter(returnNameToUse, meta.getSqlType()));
-						if (this.isFunction())
+						if (this.isFunction()) {
+							this.setFunctionReturnName(returnNameToUse);
 							outParameterNames.add(returnNameToUse);
+						}
 						if (logger.isDebugEnabled()) {
 							logger.debug("Added metadata return parameter for: " + returnNameToUse);
 						}
