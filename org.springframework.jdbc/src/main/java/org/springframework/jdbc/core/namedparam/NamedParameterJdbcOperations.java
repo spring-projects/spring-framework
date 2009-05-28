@@ -493,4 +493,20 @@ public interface NamedParameterJdbcOperations {
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
 			throws DataAccessException;
 
+	/**
+	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * @param sql the SQL statement to execute
+	 * @param batchValues the array of Maps containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 */
+	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues);
+
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 */
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
+
 }
