@@ -261,6 +261,19 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().update(pscf.newPreparedStatementCreator(params), generatedKeyHolder);
 	}
 
+	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues) {
+		SqlParameterSource[] batchArgs = new SqlParameterSource[batchValues.length];
+		int i = 0;
+		for (Map<String, Object> values : batchValues) {
+			batchArgs[i] = new MapSqlParameterSource(values);
+			i++;
+		}
+		return batchUpdate(sql, batchArgs);
+	}
+
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
+		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(sql, batchArgs, getJdbcOperations());
+	}
 
 	/**
 	 * Build a PreparedStatementCreator based on the given SQL and named parameters.

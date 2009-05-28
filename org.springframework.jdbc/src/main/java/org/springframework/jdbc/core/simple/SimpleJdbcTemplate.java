@@ -16,26 +16,20 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.SqlParameterValue;
-import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.BatchUpdateUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
-import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterBatchUpdateUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -241,11 +235,11 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
-		return doExecuteBatchUpdate(sql, batchArgs, new int[0]);
+		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, new int[0], getJdbcOperations());
 	}
 
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
-		return doExecuteBatchUpdate(sql, batchArgs, argTypes);
+		return batchUpdate(sql, batchArgs, argTypes);
 	}
 
 	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues) {
@@ -255,71 +249,11 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 			batchArgs[i] = new MapSqlParameterSource(values);
 			i++;
 		}
-		return doExecuteBatchUpdateWithNamedParameters(sql, batchArgs);
+		return batchUpdate(sql, batchArgs);
 	}
 
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
-		return doExecuteBatchUpdateWithNamedParameters(sql, batchArgs);
-	}
-
-
-	private int[] doExecuteBatchUpdate(String sql, final List<Object[]> batchValues, final int[] columnTypes) {
-		return getJdbcOperations().batchUpdate(
-				sql,
-				new BatchPreparedStatementSetter() {
-
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						Object[] values = batchValues.get(i);
-						doSetStatementParameters(values, ps, columnTypes);
-					}
-
-					public int getBatchSize() {
-						return batchValues.size();
-					}
-				});
-	}
-
-	private int[] doExecuteBatchUpdateWithNamedParameters(String sql, final SqlParameterSource[] batchArgs) {
-		if (batchArgs.length <= 0) {
-			return new int[] {0};
-		}
-		final ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, batchArgs[0]);
-		return getJdbcOperations().batchUpdate(
-				sqlToUse,
-				new BatchPreparedStatementSetter() {
-
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
-						int[] columnTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, batchArgs[i]);
-						doSetStatementParameters(values, ps, columnTypes);
-					}
-
-					public int getBatchSize() {
-						return batchArgs.length;
-					}
-				});
-	}
-
-	private void doSetStatementParameters(Object[] values, PreparedStatement ps, int[] columnTypes) throws SQLException {
-		int colIndex = 0;
-		for (Object value : values) {
-			colIndex++;
-			if (value instanceof SqlParameterValue) {
-				SqlParameterValue paramValue = (SqlParameterValue) value;
-				StatementCreatorUtils.setParameterValue(ps, colIndex, paramValue, paramValue.getValue());
-			}
-			else {
-				int colType;
-				if (columnTypes == null || columnTypes.length < colIndex) {
-					colType = SqlTypeValue.TYPE_UNKNOWN;
-				}
-				else {
-					colType = columnTypes[colIndex - 1];
-				}
-				StatementCreatorUtils.setParameterValue(ps, colIndex, colType, value);
-			}
-		}
+		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(sql, batchArgs, getJdbcOperations());
 	}
 
 
