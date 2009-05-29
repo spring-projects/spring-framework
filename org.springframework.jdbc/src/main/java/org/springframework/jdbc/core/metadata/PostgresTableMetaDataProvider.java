@@ -4,8 +4,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * The HSQL specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}. Suports a feature for
- * retreiving generated keys without the JDBC 3.0 getGeneratedKeys support.
+ * The PostgreSQL specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
+ * Suports a feature for retreiving generated keys without the JDBC 3.0 getGeneratedKeys support.
  *
  * @author Thomas Risberg
  * @since 2.5
