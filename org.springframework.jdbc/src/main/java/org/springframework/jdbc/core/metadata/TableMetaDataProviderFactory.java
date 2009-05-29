@@ -63,6 +63,9 @@ public class TableMetaDataProviderFactory {
 					else if ("PostgreSQL".equals(databaseProductName)) {
 						provider = new PostgresTableMetaDataProvider(databaseMetaData);
 					}
+					else if ("Apache Derby".equals(databaseProductName)) {
+						provider = new DerbyTableMetaDataProvider(databaseMetaData);
+					}
 					else {
 						provider = new GenericTableMetaDataProvider(databaseMetaData);
 					}
