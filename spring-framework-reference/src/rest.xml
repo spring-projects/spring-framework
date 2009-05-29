@@ -956,7 +956,7 @@ URI location = template.postForLocation(uri, booking, "1");
         (<literal>application/xml</literal>).</para>
       </section>
 
-      <section id="rest-source-converter">
+      <section id="rest-buffered-image-converter">
         <title>BufferedImageHttpMessageConverter</title>
 
         <para>An <interfacename>HttpMessageConverter</interfacename>
