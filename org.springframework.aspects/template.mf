@@ -11,5 +11,3 @@ Ignored-Existing-Headers:
  Bnd-LastModified,
  Import-Package,
  Tool
-Export-Package: META-INF
-
