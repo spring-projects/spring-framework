@@ -18,8 +18,6 @@ package org.springframework.jdbc.object;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
