@@ -137,7 +137,7 @@ public class Binder<T> {
 			required = config.isRequired();
 		}
 
-		public String getFormattedValue() {
+		public String getValue() {
 			try {
 				return format(property.getValue(createEvaluationContext()));
 			} catch (ExpressionException e) {
@@ -146,15 +146,13 @@ public class Binder<T> {
 		}
 
 		public void setValue(String formatted) {
-			Object value = parse(formatted);
-			assertRequired(value);
-			setValue(value);
+			setValue(parse(formatted));
 		}
 
-		public String format(Object possibleValue) {
+		public String format(Object selectableValue) {
 			Formatter formatter = getFormatter();
-			possibleValue = typeConverter.convert(possibleValue, formatter.getFormattedObjectType());
-			return formatter.format(possibleValue, LocaleContextHolder.getLocale());
+			selectableValue = typeConverter.convert(selectableValue, formatter.getFormattedObjectType());
+			return formatter.format(selectableValue, LocaleContextHolder.getLocale());
 		}
 
 		public boolean isCollection() {
@@ -162,7 +160,7 @@ public class Binder<T> {
 			return type.isCollection() || type.isArray();
 		}
 
-		public String[] getFormattedValues() {
+		public String[] getValues() {
 			Object multiValue;
 			try {
 				multiValue = property.getValue(createEvaluationContext());
@@ -199,17 +197,11 @@ public class Binder<T> {
 			return required;
 		}
 
-		public Messages getMessages() {
+		public BindingFailures getFailures() {
 			return null;
 		}
 
 		// internal helpers
-		
-		private void assertRequired(Object value) {
-			if (required && value == null) {
-				throw new IllegalArgumentException("Value required");
-			}
-		}
 		
 		private Object parse(String formatted) {
 			try {
@@ -254,7 +246,7 @@ public class Binder<T> {
 			return new Annotation[0];
 		}
 
-		private void copy(Iterable values, String[] formattedValues) {
+		private void copy(Iterable<?> values, String[] formattedValues) {
 			int i = 0;
 			for (Object value : values) {
 				formattedValues[i] = format(value);
