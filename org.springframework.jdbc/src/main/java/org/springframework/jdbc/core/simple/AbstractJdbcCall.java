@@ -342,6 +342,17 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
+	 * Method that provides execution of the call using the passed in array of parameters
+	 * @param args array of parameter values; order must match the order declared for the stored procedure
+	 * @return Map of out parameters
+	 */
+	protected Map<String, Object> doExecute(Object[] args) {
+		checkCompiled();
+		Map<String, ?> params = matchInParameterValuesWithCallParameters(args);
+		return executeCallInternal(params);
+	}
+
+	/**
 	 * Method that provides execution of the call using the passed in Map of parameters
 	 * @param args Map of parameter name and values
 	 * @return Map of out parameters
@@ -383,6 +394,16 @@ public abstract class AbstractJdbcCall {
 	 */
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(parameterSource);
+	}
+
+	/**
+	 * Match the provided in parameter values with registered parameters and
+	 * parameters defined via metadata processing.
+	 * @param args the parameter values provided as an array
+	 * @return Map with parameter names and values
+	 */
+	private Map<String,?> matchInParameterValuesWithCallParameters(Object[] args) {
+		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);
 	}
 
 	/**
