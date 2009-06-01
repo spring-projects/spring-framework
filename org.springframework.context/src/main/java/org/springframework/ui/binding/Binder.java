@@ -41,7 +41,7 @@ public class Binder<T> {
 	
 	private boolean optimisticBinding = true;
 
-	private static Formatter<?> defaultFormatter = new Formatter<?>() {
+	private static Formatter defaultFormatter = new Formatter() {
 		
 		public Class<?> getFormattedObjectType() {
 			return String.class;
