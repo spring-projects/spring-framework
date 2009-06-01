@@ -17,6 +17,9 @@
 package org.springframework.jdbc.object;
 
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -98,6 +101,31 @@ public abstract class StoredProcedure extends SqlCall {
 		super.declareParameter(param);
 	}
 
+	/**
+	 * Execute the stored procedure with the provided parameter values. This is
+	 * a convenience method where the order of the passed in parameter values
+	 * must match the order that the parameters where declared in.
+	 * @param inParams variable number of input parameters. Output parameters should
+	 * not be included in this map.
+	 * It is legal for values to be <code>null</code>, and this will produce the
+	 * correct behavior using a NULL argument to the stored procedure.
+	 * @return map of output params, keyed by name as in parameter declarations.
+	 * Output parameters will appear here, with their values after the
+	 * stored procedure has been called.
+	 */
+	public Map<String, Object> execute(Object... inParams) {
+		Map<String, Object> paramsToUse = new HashMap<String, Object>();
+		validateParameters(inParams);
+		int i = 0;
+		for (SqlParameter sqlParameter : getDeclaredParameters()) {
+			if (sqlParameter.isInputValueProvided()) {
+				if (i < inParams.length) {
+					paramsToUse.put(sqlParameter.getName(), inParams[i++]);
+				}
+			}
+		}
+		return getJdbcTemplate().call(newCallableStatementCreator(paramsToUse), getDeclaredParameters());
+	}
 
 	/**
 	 * Execute the stored procedure. Subclasses should define a strongly typed
@@ -106,7 +134,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * execute methods will often take domain objects as arguments and return values.
 	 * Alternatively, they can return void.
 	 * @param inParams map of input parameters, keyed by name as in parameter
-	 * declarations. Output parameters need not (but can be) included in this map.
+	 * declarations. Output parameters need not (but can) be included in this map.
 	 * It is legal for map entries to be <code>null</code>, and this will produce the
 	 * correct behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.
@@ -127,7 +155,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Subclass execute methods will often take domain objects as arguments and return values.
 	 * Alternatively, they can return void.
 	 * @param inParamMapper map of input parameters, keyed by name as in parameter
-	 * declarations. Output parameters need not (but can be) included in this map.
+	 * declarations. Output parameters need not (but can) be included in this map.
 	 * It is legal for map entries to be <code>null</code>, and this will produce the correct
 	 * behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.

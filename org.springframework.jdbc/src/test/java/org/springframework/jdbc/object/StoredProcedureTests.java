@@ -113,6 +113,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		assertEquals(4, id);
 	}
 
+	private void testAddInvoiceUsingObjectArray(final int amount, final int custid)
+		throws Exception {
+		AddInvoiceUsingObjectArray adder = new AddInvoiceUsingObjectArray(mockDataSource);
+		int id = adder.execute(amount, custid);
+		assertEquals(5, id);
+	}
+
 	public void testAddInvoices() throws Exception {
 		mockCallable.setObject(1, new Integer(1106), Types.INTEGER);
 		ctrlCallable.setVoidCallable();
@@ -137,8 +144,36 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlConnection.setReturnValue(mockCallable);
 
 		replay();
-
 		testAddInvoice(1106, 3);
+
+	}
+
+	public void testAddInvoicesUsingObjectArray() throws Exception {
+		mockCallable.setObject(1, new Integer(1106), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(2, new Integer(4), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.registerOutParameter(3, Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getObject(3);
+		ctrlCallable.setReturnValue(new Integer(5));
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + AddInvoice.SQL + "(?, ?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		testAddInvoiceUsingObjectArray(1106, 4);
+
 	}
 
 	public void testAddInvoicesWithinTransaction() throws Exception {
@@ -757,6 +792,27 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			in.put("amount", new Integer(amount));
 			in.put("custid", new Integer(custid));
 			Map out = execute(in);
+			Number id = (Number) out.get("newid");
+			return id.intValue();
+		}
+	}
+
+	private static class AddInvoiceUsingObjectArray extends StoredProcedure {
+
+		public static final String SQL = "add_invoice";
+
+		public AddInvoiceUsingObjectArray(DataSource ds) {
+			setDataSource(ds);
+			setSql(SQL);
+			declareParameter(new SqlParameter("amount", Types.INTEGER));
+			declareParameter(new SqlParameter("custid", Types.INTEGER));
+			declareParameter(new SqlOutParameter("newid", Types.INTEGER));
+			compile();
+		}
+
+		public int execute(int amount, int custid) {
+			Map out = execute(new Object[] {amount, custid});
+			System.out.println("####### " + out);
 			Number id = (Number) out.get("newid");
 			return id.intValue();
 		}
