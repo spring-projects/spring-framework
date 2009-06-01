@@ -26,6 +26,14 @@ class FormattingConverter<T> implements Converter<T, String> {
 		this.formatter = formatter;
 	}
 	
+	public Class<T> getSourceType() {
+		return formatter.getFormattedObjectType();
+	}
+	
+	public Class<String> getTargetType() {
+		return String.class;
+	}
+	
 	public String convert(T source) {
 		return formatter.format(source, LocaleContextHolder.getLocale());
 	}

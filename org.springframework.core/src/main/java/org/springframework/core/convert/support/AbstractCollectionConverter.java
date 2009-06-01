@@ -39,7 +39,12 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 		Class<?> sourceElementType = sourceCollectionType.getElementType();
 		Class<?> targetElementType = targetCollectionType.getElementType();
 		if (sourceElementType != null && targetElementType != null) {
-			elementConverter = conversionService.getConversionExecutor(sourceElementType, TypeDescriptor.valueOf(targetElementType));
+			ConversionExecutor executor = conversionService.getConversionExecutor(sourceElementType, TypeDescriptor.valueOf(targetElementType));
+			if (executor != null) {
+				elementConverter = executor;
+			} else {
+				elementConverter = NoOpConversionExecutor.INSTANCE;
+			}
 		} else {
 			elementConverter = NoOpConversionExecutor.INSTANCE;
 		}
