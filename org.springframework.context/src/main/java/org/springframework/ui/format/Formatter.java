@@ -41,6 +41,7 @@ public interface Formatter<T> {
 	
 	/**
 	 * Parse an object from its formatted representation.
+	 * TODO - remove dependency on java.text by replacing ParseException?
 	 * @param formatted a formatted representation
 	 * @param locale the user's locale
 	 * @return the parsed object

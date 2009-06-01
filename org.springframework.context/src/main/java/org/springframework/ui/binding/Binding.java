@@ -4,24 +4,22 @@ public interface Binding {
 
 	// single-value properties
 	
-	String getFormattedValue();
+	String getValue();
 	
 	void setValue(String formatted);
 
-	String format(Object possibleValue);
+	String format(Object selectableValue);
 
 	// multi-value properties
 	
 	boolean isCollection();
 
-	String[] getFormattedValues();
+	String[] getValues();
 
 	void setValues(String[] formattedValues);
 
 	// validation metadata
 	
-	boolean isRequired();
-	
-	Messages getMessages();	
+	BindingFailures getFailures();	
 	
 }
