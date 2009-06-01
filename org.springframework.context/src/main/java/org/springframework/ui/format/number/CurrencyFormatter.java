@@ -38,6 +38,10 @@ public class CurrencyFormatter implements Formatter<BigDecimal> {
 
 	private boolean lenient;
 
+	public Class<BigDecimal> getFormattedObjectType() {
+		return BigDecimal.class;
+	}
+	
 	public String format(BigDecimal decimal, Locale locale) {
 		if (decimal == null) {
 			return "";
@@ -66,5 +70,5 @@ public class CurrencyFormatter implements Formatter<BigDecimal> {
 		decimal = decimal.setScale(format.getMaximumFractionDigits(), format.getRoundingMode());
 		return decimal;
 	}
-
+	
 }
