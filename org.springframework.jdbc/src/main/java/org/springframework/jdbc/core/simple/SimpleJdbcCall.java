@@ -131,6 +131,10 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> T executeFunction(Class<T> returnType, Object... args) {
+		return (T) doExecute(args).get(getScalarOutParameterName());
+	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, Map<String, Object> args) {
@@ -139,6 +143,11 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
+		return (T) doExecute(args).get(getScalarOutParameterName());
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T executeObject(Class<T> returnType, Object... args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
@@ -152,8 +161,8 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
-	public Map<String, Object> execute() {
-		return doExecute(new HashMap<String, Object>());
+	public Map<String, Object> execute(Object... args) {
+		return doExecute(args);
 	}
 
 	public Map<String, Object> execute(Map<String, Object> args) {

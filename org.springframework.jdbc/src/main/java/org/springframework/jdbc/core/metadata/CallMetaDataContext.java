@@ -540,6 +540,18 @@ public class CallMetaDataContext {
 		return matchedParameters;
 	}
 
+	public Map<String,?> matchInParameterValuesWithCallParameters(Object[] parameterValues) {
+		Map<String, Object> matchedParameters = new HashMap<String, Object>(parameterValues.length);
+		int i = 0;
+		for (SqlParameter parameter : this.callParameters) {
+			if (parameter.isInputValueProvided()) {
+				String parameterName =  parameter.getName();
+				matchedParameters.put(parameterName, parameterValues[i++]);
+			}
+		}
+		return matchedParameters;
+	}
+
 	/**
 	 * Build the call string based on configuration and metadata information.
 	 * @return the call string to be used
