@@ -236,8 +236,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<String>() : null);
 
 		for (int index = 1; index <= columnCount; index++) {
-			String column = JdbcUtils.lookupColumnName(rsmd, index).toLowerCase();
-			PropertyDescriptor pd = this.mappedFields.get(column);
+			String column = JdbcUtils.lookupColumnName(rsmd, index);
+			PropertyDescriptor pd = this.mappedFields.get(column.replaceAll(" ", "").toLowerCase());
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);

@@ -23,6 +23,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
+import org.springframework.jdbc.core.test.SpacePerson;
 import org.springframework.beans.TypeMismatchException;
 
 /**
@@ -106,6 +107,14 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		assertEquals(1, result2.size());
 		Person bean = (Person) result2.get(0);
 		verifyPersonWithZeroAge(bean);
+	}
+
+	public void testQueryWithSpaceInColumnName() throws SQLException {
+		List result = jdbcTemplate3.query("select last_name as \"Last Name\", age, birth_date, balance from people",
+				new BeanPropertyRowMapper(SpacePerson.class));
+		assertEquals(1, result.size());
+		SpacePerson bean = (SpacePerson) result.get(0);
+		verifySpacePerson(bean);
 	}
 
 }
