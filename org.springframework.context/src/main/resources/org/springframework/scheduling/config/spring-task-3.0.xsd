@@ -17,6 +17,26 @@
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
+	<xsd:element name="annotation-driven">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Enables the detection of @Async annotations on any Spring-managed object. If present,
+	a proxy will be generated for executing the annotated methods asynchronously.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="executor" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Specifies the java.util.Executor instance to use when invoking asynchronous methods.
+	If not provided, an instance of org.springframework.core.task.SimpleAsyncTaskExecutor
+	will be used by default
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
 	<xsd:element name="scheduler">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
