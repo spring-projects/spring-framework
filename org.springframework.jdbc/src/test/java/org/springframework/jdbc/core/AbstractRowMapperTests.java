@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.Person;
+import org.springframework.jdbc.core.test.SpacePerson;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
@@ -48,6 +49,9 @@ public abstract class AbstractRowMapperTests extends TestCase {
 	protected Connection con;
 	protected MockControl conControl2;
 	protected Connection con2;
+	protected MockControl conControl3;
+	protected Connection con3;
+
 	protected MockControl rsmdControl;
 	protected ResultSetMetaData rsmd;
 	protected MockControl rsControl;
@@ -55,6 +59,7 @@ public abstract class AbstractRowMapperTests extends TestCase {
 	protected MockControl stmtControl;
 	protected Statement stmt;
 	protected JdbcTemplate jdbcTemplate;
+
 	protected MockControl rsmdControl2;
 	protected ResultSetMetaData rsmd2;
 	protected MockControl rsControl2;
@@ -62,6 +67,14 @@ public abstract class AbstractRowMapperTests extends TestCase {
 	protected MockControl stmtControl2;
 	protected Statement stmt2;
 	protected JdbcTemplate jdbcTemplate2;
+
+	protected MockControl rsmdControl3;
+	protected ResultSetMetaData rsmd3;
+	protected MockControl rsControl3;
+	protected ResultSet rs3;
+	protected MockControl stmtControl3;
+	protected Statement stmt3;
+	protected JdbcTemplate jdbcTemplate3;
 
 	protected void setUp() throws SQLException {
 		conControl = MockControl.createControl(Connection.class);
@@ -119,6 +132,9 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		stmt.close();
 		stmtControl.setVoidCallable(1);
 
+		conControl.replay();
+		stmtControl.replay();
+
 		conControl2 = MockControl.createControl(Connection.class);
 		con2 = (Connection) conControl2.getMock();
 		con2.isClosed();
@@ -174,10 +190,66 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		stmt2.close();
 		stmtControl2.setVoidCallable(2);
 
-		conControl.replay();
-		stmtControl.replay();
 		conControl2.replay();
 		stmtControl2.replay();
+
+		conControl3 = MockControl.createControl(Connection.class);
+		con3 = (Connection) conControl3.getMock();
+		con3.isClosed();
+		conControl3.setDefaultReturnValue(false);
+
+		rsmdControl3 = MockControl.createControl(ResultSetMetaData.class);
+		rsmd3 = (ResultSetMetaData)rsmdControl3.getMock();
+		rsmd3.getColumnCount();
+		rsmdControl3.setReturnValue(4, 1);
+		rsmd3.getColumnLabel(1);
+		rsmdControl3.setReturnValue("Last Name", 1);
+		rsmd3.getColumnLabel(2);
+		rsmdControl3.setReturnValue("age", 1);
+		rsmd3.getColumnLabel(3);
+		rsmdControl3.setReturnValue("birth_date", 1);
+		rsmd3.getColumnLabel(4);
+		rsmdControl3.setReturnValue("balance", 1);
+		rsmdControl3.replay();
+
+		rsControl3 = MockControl.createControl(ResultSet.class);
+		rs3 = (ResultSet) rsControl3.getMock();
+		rs3.getMetaData();
+		rsControl3.setReturnValue(rsmd3, 1);
+		rs3.next();
+		rsControl3.setReturnValue(true, 1);
+		rs3.getString(1);
+		rsControl3.setReturnValue("Gagarin", 1);
+		rs3.wasNull();
+		rsControl3.setReturnValue(false, 1);
+		rs3.getLong(2);
+		rsControl3.setReturnValue(22, 1);
+		rs3.getTimestamp(3);
+		rsControl3.setReturnValue(new Timestamp(1221222L), 1);
+		rs3.getBigDecimal(4);
+		rsControl3.setReturnValue(new BigDecimal("1234.56"), 1);
+		rs3.next();
+		rsControl3.setReturnValue(false, 1);
+		rs3.close();
+		rsControl3.setVoidCallable(1);
+		rsControl3.replay();
+
+		stmtControl3 = MockControl.createControl(Statement.class);
+		stmt3 = (Statement) stmtControl3.getMock();
+
+		con3.createStatement();
+		conControl3.setReturnValue(stmt3, 1);
+		stmt3.executeQuery("select last_name as \"Last Name\", age, birth_date, balance from people");
+		stmtControl3.setReturnValue(rs3, 1);
+		if (debugEnabled) {
+			stmt3.getWarnings();
+			stmtControl3.setReturnValue(null, 1);
+		}
+		stmt3.close();
+		stmtControl3.setVoidCallable(1);
+
+		conControl3.replay();
+		stmtControl3.replay();
 
 		jdbcTemplate = new JdbcTemplate();
 		jdbcTemplate.setDataSource(new SingleConnectionDataSource(con, false));
@@ -188,6 +260,11 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		jdbcTemplate2.setDataSource(new SingleConnectionDataSource(con2, false));
 		jdbcTemplate2.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		jdbcTemplate2.afterPropertiesSet();
+
+		jdbcTemplate3 = new JdbcTemplate();
+		jdbcTemplate3.setDataSource(new SingleConnectionDataSource(con3, false));
+		jdbcTemplate3.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		jdbcTemplate3.afterPropertiesSet();
 	}
 
 	protected void verifyPerson(Person bean) {
@@ -214,6 +291,17 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		assertEquals("Bubba", bean.getName());
 		assertEquals(22L, bean.getAge());
 		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	}
+
+	protected void verifySpacePerson(SpacePerson bean) {
+		conControl3.verify();
+		rsControl3.verify();
+		rsmdControl3.verify();
+		stmtControl3.verify();
+		assertEquals("Gagarin", bean.getLastName());
+		assertEquals(22L, bean.getAge());
+		assertEquals(new java.util.Date(1221222L), bean.getBirthDate());
 		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
