@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
@@ -77,29 +79,21 @@ public class BinderTests {
 	}
 
 	@Test
-	@Ignore
 	public void bindSingleValueTypeFormatterParsing() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new DateFormatter(), Date.class);
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("date", "2009-06-01");
-		// TODO presently fails because Spring EL does not obtain property valueType using property metadata
-		// instead it relies on value itself being not null
-		// talk to andy about this
 		binder.bind(propertyValues);
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
 	}
 	
 	@Test
-	@Ignore
 	public void bindSingleValueAnnotationFormatterParsing() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.add(new CurrencyFormatter(), Currency.class);
+		binder.addAnnotationBasedFormatter(new CurrencyFormatter(), Currency.class);
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("currency", "$23.56");
-		// TODO presently fails because Spring EL does not obtain property valueType using property metadata
-		// instead it relies on value itself being not null
-		// talk to andy about this
 		binder.bind(propertyValues);
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
 	}
@@ -259,6 +253,7 @@ public class BinderTests {
 	
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Currency {
 
 	}

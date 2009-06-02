@@ -32,17 +32,17 @@ public class Binder<T> {
 	private Map<String, Binding> bindings;
 
 	private Map<Class<?>, Formatter<?>> typeFormatters = new HashMap<Class<?>, Formatter<?>>();
-	
-	private Map<Annotation, Formatter<?>> annotationFormatters = new HashMap<Annotation, Formatter<?>>();
-	
+
+	private Map<Class<?>, Formatter<?>> annotationFormatters = new HashMap<Class<?>, Formatter<?>>();
+
 	private ExpressionParser expressionParser;
 
 	private TypeConverter typeConverter;
-	
+
 	private boolean optimisticBinding = true;
 
 	private static Formatter defaultFormatter = new Formatter() {
-		
+
 		public Class<?> getFormattedObjectType() {
 			return String.class;
 		}
@@ -90,8 +90,9 @@ public class Binder<T> {
 		typeFormatters.put(propertyType, formatter);
 	}
 
-	public void add(Formatter<?> formatter, Annotation propertyAnnotation) {
-		annotationFormatters.put(propertyAnnotation, formatter);
+	public void addAnnotationBasedFormatter(Formatter<?> formatter,
+			Class<?> propertyAnnotationClass) {
+		annotationFormatters.put(propertyAnnotationClass, formatter);
 	}
 
 	public T getModel() {
@@ -222,7 +223,7 @@ public class Binder<T> {
 				} else {
 					Annotation[] annotations = getAnnotations();
 					for (Annotation a : annotations) {
-						formatter = annotationFormatters.get(a);
+						formatter = annotationFormatters.get(a.annotationType());
 						if (formatter != null) {
 							return formatter;
 						}
@@ -234,7 +235,6 @@ public class Binder<T> {
 
 		private Class<?> getValueType() {
 			try {
-				// TODO Spring EL currently returns null here when value is null - not correct
 				return property.getValueType(createEvaluationContext());
 			} catch (EvaluationException e) {
 				throw new IllegalStateException(e);
@@ -242,8 +242,12 @@ public class Binder<T> {
 		}
 
 		private Annotation[] getAnnotations() {
-			// TODO Spring EL presently gives us no way to get this information
-			return new Annotation[0];
+			try {
+				return property.getValueTypeDescriptor(
+						createEvaluationContext()).getAnnotations();
+			} catch (EvaluationException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 
 		private void copy(Iterable<?> values, String[] formattedValues) {
