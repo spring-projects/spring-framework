@@ -37,6 +37,7 @@ public abstract class SpelNodeImpl implements SpelNode, CommonTypeDescriptors {
 	
 	protected int pos; // start = top 16bits, end = bottom 16bits
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
+	private SpelNodeImpl parent;
 	
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
@@ -44,13 +45,40 @@ public abstract class SpelNodeImpl implements SpelNode, CommonTypeDescriptors {
 		assert pos!=0;
 		if (operands!=null && operands.length>0) {
 			this.children = operands;
+			for (SpelNodeImpl childnode: operands) {
+				childnode.parent = this;
+			}
 		}
+	}
+	
+	protected SpelNodeImpl getPreviousChild() {
+		SpelNodeImpl result = null;
+		if (parent!=null) {
+			for (SpelNodeImpl child: parent.children) {
+				if (this==child) break;
+				result = child;
+			}
+		}
+		return result;
+	}
+	
+	protected boolean nextChildIs(Class clazz) {
+		if (parent!=null) {
+			SpelNodeImpl[] peers = parent.children;
+			for (int i=0,max=peers.length;i<max;i++) {
+				if (peers[i]==this) {
+					return (i+1)<max && peers[i+1].getClass().equals(clazz);
+				}
+			}
+		}
+		return false;
 	}
 
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState).getValue();
 		} else {
+			// configuration not set - does that matter?
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
 	}

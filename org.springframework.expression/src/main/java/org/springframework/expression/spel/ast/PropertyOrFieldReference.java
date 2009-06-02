@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
@@ -52,7 +53,22 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {
-		return readProperty(state, this.name);
+		TypedValue result = readProperty(state, this.name);
+		if (result.getValue()==null && state.configuredToCreateCollection() && result.getTypeDescriptor().getType().equals(List.class) && nextChildIs(Indexer.class)) {
+			// Create a new list ready for the indexer
+			try {
+				if (isWritable(state)) {
+					List newList = ArrayList.class.newInstance();
+					writeProperty(state, name, newList);
+					result = readProperty(state, this.name);
+				}
+			} catch (InstantiationException e) {
+				throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+			} catch (IllegalAccessException e) {
+				throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -172,6 +188,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	public boolean isWritableProperty(String name, ExpressionState state) throws SpelEvaluationException {
 		Object contextObject = state.getActiveContextObject().getValue();
+		TypeDescriptor td = state.getActiveContextObject().getTypeDescriptor();
 		EvaluationContext eContext = state.getEvaluationContext();
 
 		List<PropertyAccessor> resolversToTry = getPropertyAccessorsToTry(getObjectClass(contextObject),state);

@@ -16,14 +16,18 @@
 
 package org.springframework.expression.spel;
 
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
@@ -34,6 +38,38 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
  */
 public class EvaluationTests extends ExpressionTestCase {
 
+	@Test
+	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
+		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		Expression expression = parser.parseExpression("list[0]");
+		TestClass testClass = new TestClass();
+		Object o = null;
+		o = expression.getValue(new StandardEvaluationContext(testClass));
+		Assert.assertEquals("",o);
+		o = parser.parseExpression("list[3]").getValue(new StandardEvaluationContext(testClass));
+		Assert.assertEquals("",o);
+		Assert.assertEquals(4, testClass.list.size());
+		try {
+			o = parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass));
+			Assert.fail();
+		} catch (EvaluationException ee) {
+			// success!
+		}
+		o = parser.parseExpression("foo[3]").getValue(new StandardEvaluationContext(testClass));
+		Assert.assertEquals("",o);
+		Assert.assertEquals(4, testClass.getFoo().size());
+	}
+	
+	static class TestClass {
+		public List<String> list;
+		public List list2;
+		
+		private List<String> foo;
+		public List<String> getFoo() { return this.foo; }
+		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
+	}
+	
+	
 	@Test
 	public void testElvis01() {
 		evaluate("'Andy'?:'Dave'","Andy",String.class);

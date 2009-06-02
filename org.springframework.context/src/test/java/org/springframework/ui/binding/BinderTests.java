@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -146,21 +148,39 @@ public class BinderTests {
 	}
 
 	@Test
-	@Ignore
 	public void bindHandleNullValueInNestedPath() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		TestBean testbean = new TestBean();
+		Binder<TestBean> binder = new Binder<TestBean>(testbean);
 		Map<String, String> propertyValues = new HashMap<String, String>();
-		// TODO should auto add(new Address) at 0
+		
+		// EL configured with some options from SpelExpressionParserConfiguration:
+		// (see where Binder creates the parser)
+		// - new addresses List is created if null
+		// - new entries automatically built if List is currently too short - all new entries
+		//   are new instances of the type of the list entry, they are not null.
+		// not currently doing anything for maps or arrays
+		
 		propertyValues.put("addresses[0].street", "4655 Macy Lane");
 		propertyValues.put("addresses[0].city", "Melbourne");
 		propertyValues.put("addresses[0].state", "FL");
 		propertyValues.put("addresses[0].state", "35452");
-		// TODO should auto add(new Address) at 1
+
+		// Auto adds new Address at 1
 		propertyValues.put("addresses[1].street", "1234 Rostock Circle");
 		propertyValues.put("addresses[1].city", "Palm Bay");
 		propertyValues.put("addresses[1].state", "FL");
 		propertyValues.put("addresses[1].state", "32901");
+
+		// Auto adds new Address at 5 (plus intermediates 2,3,4)
+		propertyValues.put("addresses[5].street", "1234 Rostock Circle");
+		propertyValues.put("addresses[5].city", "Palm Bay");
+		propertyValues.put("addresses[5].state", "FL");
+		propertyValues.put("addresses[5].state", "32901");
+
 		binder.bind(propertyValues);
+		Assert.assertEquals(6,testbean.addresses.size());
+		Assert.assertEquals("Palm Bay",testbean.addresses.get(1).city);
+		Assert.assertNotNull(testbean.addresses.get(2));
 	}
 
 	@Test

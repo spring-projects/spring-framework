@@ -19,6 +19,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.ui.format.Formatter;
@@ -68,7 +69,10 @@ public class Binder<T> {
 	public Binder(T model) {
 		this.model = model;
 		bindings = new HashMap<String, Binding>();
-		expressionParser = new SpelExpressionParser();
+		int parserConfig =
+		  SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull | 
+		  SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize;
+		expressionParser = new SpelExpressionParser(parserConfig);
 		typeConverter = new DefaultTypeConverter();
 	}
 

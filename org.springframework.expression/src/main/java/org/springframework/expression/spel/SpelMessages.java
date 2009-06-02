@@ -88,6 +88,9 @@ public enum SpelMessages {
 	UNEXPECTED_DATA_AFTER_DOT(Kind.ERROR,1049,"Unexpected data after ''.'': ''{0}''"),//
 	MISSING_CONSTRUCTOR_ARGS(Kind.ERROR,1050,"The arguments '(...)' for the constructor call are missing"),//
 	RUN_OUT_OF_ARGUMENTS(Kind.ERROR,1051,"Unexpected ran out of arguments"),//
+	UNABLE_TO_GROW_COLLECTION(Kind.ERROR,1052,"Unable to grow collection"),//
+	UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE(Kind.ERROR,1053,"Unable to grow collection: unable to determine list element type"),//
+	UNABLE_TO_CREATE_LIST_FOR_INDEXING(Kind.ERROR,1054,"Unable to create a List for the following indexer"),//
 	;
 
 	private Kind kind;

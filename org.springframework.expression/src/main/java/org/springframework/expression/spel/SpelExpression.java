@@ -37,13 +37,15 @@ public class SpelExpression implements Expression {
 
 	public final SpelNodeImpl ast;
 
+	public final int configuration;
 
 	/**
 	 * Construct an expression, only used by the parser.
 	 */
-	public SpelExpression(String expression, SpelNodeImpl ast) {
+	public SpelExpression(String expression, SpelNodeImpl ast, int configuration) {
 		this.expression = expression;
 		this.ast = ast;
+		this.configuration = configuration;
 	}
 
 	/**
@@ -57,7 +59,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Object getValue() throws EvaluationException {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext(),configuration);
 		return this.ast.getValue(expressionState);
 	}
 
@@ -65,7 +67,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Object getValue(EvaluationContext context) throws EvaluationException {
-		return this.ast.getValue(new ExpressionState(context));
+		return this.ast.getValue(new ExpressionState(context,configuration));
 	}
 
 	/**
@@ -73,7 +75,7 @@ public class SpelExpression implements Expression {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
-		Object result = ast.getValue(new ExpressionState(context));
+		Object result = ast.getValue(new ExpressionState(context,configuration));
 
 		if (result != null && expectedResultType != null) {
 			Class<?> resultType = result.getClass();
@@ -89,14 +91,14 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
-		this.ast.setValue(new ExpressionState(context), value);
+		this.ast.setValue(new ExpressionState(context,configuration), value);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isWritable(EvaluationContext context) throws EvaluationException {
-		return this.ast.isWritable(new ExpressionState(context));
+		return this.ast.isWritable(new ExpressionState(context,configuration));
 	}
 
 	/**
@@ -121,7 +123,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Class getValueType(EvaluationContext context) throws EvaluationException {
-		ExpressionState eState = new ExpressionState(context);
+		ExpressionState eState = new ExpressionState(context,configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(eState).getTypeDescriptor();
 		return typeDescriptor.getType();
 	}
@@ -130,7 +132,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
-		ExpressionState eState = new ExpressionState(context);
+		ExpressionState eState = new ExpressionState(context,configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(eState).getTypeDescriptor();
 		return typeDescriptor;
 	}
@@ -139,14 +141,14 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Class getValueType() throws EvaluationException {
-		return this.ast.getValueInternal(new ExpressionState(new StandardEvaluationContext())).getTypeDescriptor().getType();
+		return this.ast.getValueInternal(new ExpressionState(new StandardEvaluationContext(),configuration)).getTypeDescriptor().getType();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
-		return this.ast.getValueInternal(new ExpressionState(new StandardEvaluationContext())).getTypeDescriptor();
+		return this.ast.getValueInternal(new ExpressionState(new StandardEvaluationContext(),configuration)).getTypeDescriptor();
 	}
 
 	
@@ -154,7 +156,7 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext(),configuration);
 		Object result = this.ast.getValue(expressionState);
 		return ExpressionUtils.convert(expressionState.getEvaluationContext(), result, expectedResultType);
 	}
