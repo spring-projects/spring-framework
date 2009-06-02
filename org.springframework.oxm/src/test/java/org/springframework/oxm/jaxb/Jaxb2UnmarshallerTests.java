@@ -33,6 +33,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.jaxb.test.FlightType;
+import org.springframework.oxm.jaxb.test.Flights;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.xml.StaxUtils;
 
@@ -46,7 +48,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests {
 	@Override
 	public Unmarshaller createUnmarshaller() throws Exception {
 		unmarshaller = new Jaxb2Marshaller();
-		unmarshaller.setContextPath("org.springframework.oxm.jaxb");
+		unmarshaller.setContextPath("org.springframework.oxm.jaxb.test");
 		unmarshaller.setSchema(new ClassPathResource("org/springframework/oxm/flight.xsd"));
 		unmarshaller.afterPropertiesSet();
 		return unmarshaller;

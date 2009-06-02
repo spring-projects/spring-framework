@@ -38,12 +38,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.jaxb.test.FlightType;
+import org.springframework.oxm.jaxb.test.Flights;
+import org.springframework.oxm.jaxb.test.ObjectFactory;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.FileCopyUtils;
 
 public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
-	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb";
+	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb.test";
 
 	private Jaxb2Marshaller marshaller;
 

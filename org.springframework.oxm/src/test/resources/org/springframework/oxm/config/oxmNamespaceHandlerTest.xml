@@ -14,10 +14,10 @@
         </property>
     </bean>
 
-	<oxm:jaxb2-marshaller id="contextPathMarshaller" contextPath="org.springframework.oxm.jaxb"/>
+	<oxm:jaxb2-marshaller id="contextPathMarshaller" contextPath="org.springframework.oxm.jaxb.test"/>
 	<oxm:jaxb2-marshaller id="classesMarshaller">
-		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.Flights"/>
-		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.FlightType"/>
+		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.test.Flights"/>
+		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.test.FlightType"/>
 	</oxm:jaxb2-marshaller>
 
 </beans>
