@@ -24,7 +24,6 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
 import org.springframework.expression.spel.SpelExpression;
 import org.springframework.expression.spel.SpelMessages;
-import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.ast.BooleanLiteral;
@@ -104,7 +103,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 			tokenStreamLength = tokenStream.size();
 			tokenStreamPointer = 0;
 			constructedNodes.clear();
-			SpelNode ast = eatExpression();
+			SpelNodeImpl ast = eatExpression();
 			if (moreTokens()) {
 				throw new SpelParseException(peekToken().startpos,SpelMessages.MORE_INPUT,toString(nextToken()));
 			}

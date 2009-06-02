@@ -16,6 +16,7 @@
 
 package org.springframework.expression.common;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -76,6 +77,14 @@ public class CompositeStringExpression implements Expression {
 
 	public Class getValueType() {
 		return String.class;
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public TypeDescriptor getValueTypeDescriptor() {
+		return TypeDescriptor.valueOf(String.class);
 	}
 
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {

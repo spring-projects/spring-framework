@@ -15,10 +15,12 @@
  */
 package org.springframework.expression.spel;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.common.ExpressionUtils;
+import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -33,13 +35,13 @@ public class SpelExpression implements Expression {
 	
 	private final String expression;
 
-	public final SpelNode ast;
+	public final SpelNodeImpl ast;
 
 
 	/**
 	 * Construct an expression, only used by the parser.
 	 */
-	public SpelExpression(String expression, SpelNode ast) {
+	public SpelExpression(String expression, SpelNodeImpl ast) {
 		this.expression = expression;
 		this.ast = ast;
 	}
@@ -119,19 +121,35 @@ public class SpelExpression implements Expression {
 	 * {@inheritDoc}
 	 */
 	public Class getValueType(EvaluationContext context) throws EvaluationException {
-		// TODO both getValueType() methods could use getValueInternal and return a type descriptor from the resultant TypedValue
-		Object value = getValue(context);
-		return (value != null ? value.getClass() : null);
+		ExpressionState eState = new ExpressionState(context);
+		TypeDescriptor typeDescriptor = this.ast.getValueInternal(eState).getTypeDescriptor();
+		return typeDescriptor.getType();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
+		ExpressionState eState = new ExpressionState(context);
+		TypeDescriptor typeDescriptor = this.ast.getValueInternal(eState).getTypeDescriptor();
+		return typeDescriptor;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public Class getValueType() throws EvaluationException {
-		Object value = getValue();
-		return (value != null ? value.getClass() : null);
+		return this.ast.getValueInternal(new ExpressionState(new StandardEvaluationContext())).getTypeDescriptor().getType();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
+		return this.ast.getValueInternal(new ExpressionState(new StandardEvaluationContext())).getTypeDescriptor();
+	}
+
+	
 	/**
 	 * {@inheritDoc}
 	 */
