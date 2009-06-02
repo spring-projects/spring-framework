@@ -40,7 +40,7 @@
 			<delete quiet="true" dir="${test.jaxb.dir}" />
 			<mkdir dir="${test.jaxb.dir}" />
 
-			<xjc destdir="${test.jaxb.dir}" package="org.springframework.oxm.jaxb" schema="${schema}">
+			<xjc destdir="${test.jaxb.dir}" package="org.springframework.oxm.jaxb.test" schema="${schema}">
 				<produces dir="${test.jaxb.dir}" includes="**/*.java"/>
 			</xjc>
 			<do-compile classpath.id="@{classpath.id}" input.dir="${test.jaxb.dir}" output.dir="@{output.dir}"
