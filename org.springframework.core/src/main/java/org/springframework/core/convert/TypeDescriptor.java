@@ -189,7 +189,7 @@ public class TypeDescriptor<T> {
 			}
 			return cachedFieldAnnotations;
 		} else if (methodParameter != null) {
-			return methodParameter.getParameterAnnotations();
+			return methodParameter.getMethod().getAnnotations();
 		} else {
 			return null;
 		}
