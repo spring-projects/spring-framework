@@ -120,10 +120,11 @@ public class Binder<T> {
 				.entrySet()) {
 			Binding binding = getBinding(entry.getKey());
 			Object value = entry.getValue();
-			if (value instanceof String[]) {
-				binding.setValues((String[])value);
-			} else if (value instanceof String) {
+			if (value instanceof String) {
 				binding.setValue((String)entry.getValue());
+			}
+			else if (value instanceof String[]) {
+				binding.setValues((String[])value);
 			} else {
 				throw new IllegalArgumentException("Illegal argument " + value);
 			}
