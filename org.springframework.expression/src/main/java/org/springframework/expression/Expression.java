@@ -16,6 +16,8 @@
 
 package org.springframework.expression;
 
+import org.springframework.core.convert.TypeDescriptor;
+
 /**
  * An expression capable of evaluating itself against context objects. Encapsulates the details of a previously parsed
  * expression string. Provides a common abstraction for expression evaluation independent of any language like OGNL or
@@ -94,6 +96,26 @@ public interface Expression {
 	 */
 	public Class getValueType() throws EvaluationException;
 
+	/**
+	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
+	 * the given context.
+	 * 
+	 * @param context the context in which to evaluate the expression
+	 * @return a type descriptor for the most general type of value that can be set on this context
+	 * @throws EvaluationException if there is a problem determining the type
+	 */
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException;
+
+	/**
+	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method using
+	 * the default context.
+	 * 
+	 * @return a type descriptor for the most general type of value that can be set on this context
+	 * @throws EvaluationException if there is a problem determining the type
+	 */
+	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException;
+
+	
 	/**
 	 * Returns the original string used to create this expression, unmodified.
 	 * 
