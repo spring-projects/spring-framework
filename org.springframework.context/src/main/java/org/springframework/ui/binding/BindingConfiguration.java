@@ -8,12 +8,9 @@ public class BindingConfiguration {
 	
 	private Formatter<?> formatter;
 	
-	private boolean required;
-	
-	public BindingConfiguration(String property, Formatter<?> formatter, boolean required) {
+	public BindingConfiguration(String property, Formatter<?> formatter) {
 		this.property = property;
 		this.formatter = formatter;
-		this.required = required;
 	}
 
 	public String getProperty() {
@@ -24,8 +21,4 @@ public class BindingConfiguration {
 		return formatter;
 	}
 
-	public boolean isRequired() {
-		return required;
-	}
-	
 }

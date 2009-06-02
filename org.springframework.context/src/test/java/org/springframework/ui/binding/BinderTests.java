@@ -2,6 +2,7 @@ package org.springframework.ui.binding;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Retention;
@@ -18,7 +19,6 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.format.DateFormatter;
@@ -63,7 +63,7 @@ public class BinderTests {
 	@Test
 	public void bindSingleValuePropertyFormatterParsing() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.add(new BindingConfiguration("date", new DateFormatter(), false));
+		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("date", "2009-06-01");
 		binder.bind(propertyValues);
@@ -74,7 +74,7 @@ public class BinderTests {
 	@Test(expected=IllegalArgumentException.class)	
 	public void bindSingleValuePropertyFormatterParseException() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.add(new BindingConfiguration("date", new DateFormatter(), false));
+		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("date", "bogus");
 		binder.bind(propertyValues);
@@ -93,7 +93,7 @@ public class BinderTests {
 	@Test
 	public void bindSingleValueAnnotationFormatterParsing() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.addAnnotationBasedFormatter(new CurrencyFormatter(), Currency.class);
+		binder.add(new CurrencyFormatter(), Currency.class);
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("currency", "$23.56");
 		binder.bind(propertyValues);
@@ -111,9 +111,23 @@ public class BinderTests {
 	}
 
 	@Test
+	public void getBindingStrict() {
+		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		binder.setStrict(true);
+		Binding b = binder.getBinding("integer");
+		assertNull(b);
+		binder.add(new BindingConfiguration("integer", null));
+		b = binder.getBinding("integer");
+		assertFalse(b.isCollection());
+		assertEquals("0", b.getValue());
+		b.setValue("5");
+		assertEquals("5", b.getValue());
+	}
+
+	@Test
 	public void getBindingCustomFormatter() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.add(new BindingConfiguration("currency", new CurrencyFormatter(), false));
+		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
 		assertFalse(b.isCollection());
 		assertEquals("", b.getValue());
@@ -125,7 +139,7 @@ public class BinderTests {
 	public void getBindingMultiValued() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
-		// TODO should work - assertTrue(b.isCollection());
+		assertTrue(b.isCollection());
 		assertEquals(0, b.getValues().length);
 		b.setValues(new String[] { "BAR", "BAZ", "BOOP" });
 		assertEquals(FooEnum.BAR, binder.getModel().getFoos().get(0));
@@ -142,7 +156,7 @@ public class BinderTests {
 	public void getBindingMultiValuedTypeConversionError() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
-		// TODO should work -- assertTrue(b.isCollection());
+		assertTrue(b.isCollection());
 		assertEquals(0, b.getValues().length);
 		b.setValues(new String[] { "BAR", "BOGUS", "BOOP" });
 	}
@@ -186,19 +200,9 @@ public class BinderTests {
 	@Test
 	public void formatPossibleValue() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.add(new BindingConfiguration("currency", new CurrencyFormatter(), false));
+		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
 		assertEquals("$5.00", b.format(new BigDecimal("5")));
-	}
-	
-	@Test
-	public void getBindingRequiredConstraint() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		// TODO add constraint API
-		binder.add(new BindingConfiguration("string", null, true));
-		Binding b = binder.getBinding("string");
-		assertEquals("", b.getValue());
-		b.setValue("");
 	}
 	
 	public static enum FooEnum {
