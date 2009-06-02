@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.format.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormatter;
+import org.springframework.ui.format.number.IntegerFormatter;
 
 public class BinderTests {
 
@@ -136,6 +137,16 @@ public class BinderTests {
 	}
 	
 	@Test
+	public void getBindingCustomFormatterRequiringTypeCoersion() {
+		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		// IntegerFormatter formats Longs, so conversion from Integer -> Long is performed
+		binder.add(new BindingConfiguration("integer", new IntegerFormatter()));
+		Binding b = binder.getBinding("integer");
+		b.setValue("2,300");
+		assertEquals("2,300", b.getValue());
+	}
+	
+	@Test
 	public void getBindingMultiValued() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
@@ -204,7 +215,7 @@ public class BinderTests {
 		Binding b = binder.getBinding("currency");
 		assertEquals("$5.00", b.format(new BigDecimal("5")));
 	}
-	
+
 	public static enum FooEnum {
 		BAR, BAZ, BOOP;
 	}
