@@ -40,7 +40,7 @@ public class Binder<T> {
 
 	private TypeConverter typeConverter;
 
-	private boolean optimisticBinding = true;
+	private boolean strict = false;
 
 	private static Formatter defaultFormatter = new Formatter() {
 
@@ -75,6 +75,10 @@ public class Binder<T> {
 		expressionParser = new SpelExpressionParser(parserConfig);
 		typeConverter = new DefaultTypeConverter();
 	}
+	
+	public void setStrict(boolean strict) {
+		this.strict = strict;
+	}
 
 	public Binding add(BindingConfiguration binding) {
 		Binding newBinding;
@@ -91,12 +95,11 @@ public class Binder<T> {
 		if (propertyType == null) {
 			propertyType = formatter.getFormattedObjectType();
 		}
-		typeFormatters.put(propertyType, formatter);
-	}
-
-	public void addAnnotationBasedFormatter(Formatter<?> formatter,
-			Class<?> propertyAnnotationClass) {
-		annotationFormatters.put(propertyAnnotationClass, formatter);
+		if (propertyType.isAnnotation()) {
+			annotationFormatters.put(propertyType, formatter);
+		} else {
+			typeFormatters.put(propertyType, formatter);			
+		}
 	}
 
 	public T getModel() {
@@ -105,8 +108,8 @@ public class Binder<T> {
 
 	public Binding getBinding(String property) {
 		Binding binding = bindings.get(property);
-		if (binding == null && optimisticBinding) {
-			return add(new BindingConfiguration(property, null, false));
+		if (binding == null && !strict) {
+			return add(new BindingConfiguration(property, null));
 		} else {
 			return binding;
 		}
@@ -133,13 +136,10 @@ public class Binder<T> {
 
 		private Formatter formatter;
 
-		private boolean required;
-
 		public BindingImpl(BindingConfiguration config)
 				throws org.springframework.expression.ParseException {
 			property = expressionParser.parseExpression(config.getProperty());
 			formatter = config.getFormatter();
-			required = config.isRequired();
 		}
 
 		public String getValue() {
@@ -196,10 +196,6 @@ public class Binder<T> {
 				Array.set(values, i, parse(formattedValues[i]));
 			}
 			setValue(values);			
-		}
-
-		public boolean isRequired() {
-			return required;
 		}
 
 		public BindingFailures getFailures() {
