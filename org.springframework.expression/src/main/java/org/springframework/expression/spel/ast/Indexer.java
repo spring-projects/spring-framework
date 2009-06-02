@@ -67,9 +67,32 @@ public class Indexer extends SpelNodeImpl {
 		if (targetObject.getClass().isArray()) {
 			return new TypedValue(accessArrayElement(targetObject, idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
 		} else if (targetObject instanceof Collection) {
-			Collection<?> c = (Collection<?>) targetObject;
+			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+				if (state.configuredToGrowCollection()) {
+					// Grow the collection
+					Object newCollectionElement = null;
+					try {
+						int newElements = idx-c.size();
+						Class elementClass = targetObjectTypeDescriptor.getElementType();
+						if (elementClass == null) {
+							throw new SpelEvaluationException(getStartPosition(), SpelMessages.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);	
+						}
+						while (newElements>0) {
+							c.add(elementClass.newInstance());
+							newElements--;
+						}
+						newCollectionElement = targetObjectTypeDescriptor.getElementType().newInstance();
+					} catch (InstantiationException e) {
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_GROW_COLLECTION);
+					} catch (IllegalAccessException e) {
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_GROW_COLLECTION);
+					}
+					c.add(newCollectionElement);
+					return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+				} else {
+					throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+				}
 			}
 			int pos = 0;
 			for (Object o : c) {

@@ -28,6 +28,7 @@ import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
@@ -47,9 +48,17 @@ public class ExpressionState {
 	private final Stack<VariableScope> variableScopes = new Stack<VariableScope>();
 
 	private final Stack<TypedValue> contextObjects = new Stack<TypedValue>();
+	
+	private int configuration = 0;
 
 	public ExpressionState(EvaluationContext context) {
 		this.relatedContext = context;
+		createVariableScope();
+	}
+	
+	public ExpressionState(EvaluationContext context, int configuration) {
+		this.relatedContext = context;
+		this.configuration = configuration;
 		createVariableScope();
 	}
 	
@@ -202,6 +211,14 @@ public class ExpressionState {
 		public boolean definesVariable(String name) {
 			return this.vars.containsKey(name);
 		}
+	}
+
+	public boolean configuredToGrowCollection() {
+		return (configuration & SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize)!=0;
+	}
+
+	public boolean configuredToCreateCollection() {
+		return (configuration & SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull)!=0;
 	}
 
 }

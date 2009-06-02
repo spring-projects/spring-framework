@@ -86,8 +86,20 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	
 	// For rules that build nodes, they are stacked here for return
 	private Stack<SpelNodeImpl> constructedNodes = new Stack<SpelNodeImpl>();
+	
+	private int configuration;
 
 	public SpelExpressionParser() {
+		this(0);
+	}
+
+	/**
+	 * Create a parser with some configured behaviour.  Supported configuration
+	 * bit flags can be seen in @see {@link SpelExpressionParserConfiguration}
+	 * @param configuration bitflags for configuration options
+	 */
+	public SpelExpressionParser(int configuration) {
+		this.configuration = configuration;
 	}
 
 	public SpelExpression parse(String expressionString) throws ParseException {
@@ -108,7 +120,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 				throw new SpelParseException(peekToken().startpos,SpelMessages.MORE_INPUT,toString(nextToken()));
 			}
 			assert constructedNodes.isEmpty();
-			return new SpelExpression(expressionString,ast);	
+			return new SpelExpression(expressionString, ast, configuration);	
 		} catch (InternalParseException ipe) {
 			throw ipe.getCause();
 		}
