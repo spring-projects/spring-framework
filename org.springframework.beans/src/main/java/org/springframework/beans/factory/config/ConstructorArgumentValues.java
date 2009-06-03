@@ -244,30 +244,20 @@ public class ConstructorArgumentValues {
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
-			if (usedValueHolders == null || !usedValueHolders.contains(valueHolder)) {
-				if (requiredType != null) {
-					// Check matching type.
-					if (valueHolder.getName() != null) {
-						if (valueHolder.getName().equals(requiredName)) {
-							return valueHolder;
-						}
-					}
-					else if (valueHolder.getType() != null) {
-						if (valueHolder.getType().equals(requiredType.getName())) {
-							return valueHolder;
-						}
-					}
-					else if (ClassUtils.isAssignableValue(requiredType, valueHolder.getValue())) {
-						return valueHolder;
-					}
-				}
-				else {
-					// No required type specified -> consider untyped values only.
-					if (valueHolder.getType() == null) {
-						return valueHolder;
-					}
-				}
+			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
+				continue;
 			}
+			if (valueHolder.getName() != null && (requiredName == null || !valueHolder.getName().equals(requiredName))) {
+				continue;
+			}
+			if (valueHolder.getType() != null && (requiredType == null || !valueHolder.getType().equals(requiredType.getName()))) {
+				continue;
+			}
+			if (requiredType != null && valueHolder.getType() == null && valueHolder.getName() == null &&
+					!ClassUtils.isAssignableValue(requiredType, valueHolder.getValue())) {
+				continue;
+			}
+			return valueHolder;
 		}
 		return null;
 	}
