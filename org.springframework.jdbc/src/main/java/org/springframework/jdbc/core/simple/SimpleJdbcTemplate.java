@@ -25,11 +25,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.BatchUpdateUtils;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterBatchUpdateUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -235,29 +233,23 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
-		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, new int[0], getJdbcOperations());
+		return batchUpdate(sql, batchArgs, new int[0]);
 	}
 
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
-		return batchUpdate(sql, batchArgs, argTypes);
+		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, getJdbcOperations());
 	}
 
 	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues) {
-		SqlParameterSource[] batchArgs = new SqlParameterSource[batchValues.length];
-		int i = 0;
-		for (Map<String, Object> values : batchValues) {
-			batchArgs[i] = new MapSqlParameterSource(values);
-			i++;
-		}
-		return batchUpdate(sql, batchArgs);
+		return getNamedParameterJdbcOperations().batchUpdate(sql, batchValues);
 	}
 
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
-		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(sql, batchArgs, getJdbcOperations());
+		return getNamedParameterJdbcOperations().batchUpdate(sql, batchArgs);
 	}
 
 
-	/**
+	/*
 	 * Considers an Object array passed into a varargs parameter as
 	 * collection of arguments rather than as single argument.
 	 */

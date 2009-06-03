@@ -8,18 +8,18 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 /**
- * Generic utility methods for working with JDBC batch statements. Mainly for internal use
+ * Generic utility methods for working with JDBC batch statements using named parameters. Mainly for internal use
  * within the framework.
  *
  * @author Thomas Risberg
  */
 public class NamedParameterBatchUpdateUtils extends BatchUpdateUtils {
 
-	public static int[] executeBatchUpdateWithNamedParameters(String sql, final SqlParameterSource[] batchArgs, JdbcOperations jdbcOperations) {
+	public static int[] executeBatchUpdateWithNamedParameters(final ParsedSql parsedSql,
+			final SqlParameterSource[] batchArgs, JdbcOperations jdbcOperations) {
 		if (batchArgs.length <= 0) {
 			return new int[] {0};
 		}
-		final ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, batchArgs[0]);
 		return jdbcOperations.batchUpdate(
 				sqlToUse,
