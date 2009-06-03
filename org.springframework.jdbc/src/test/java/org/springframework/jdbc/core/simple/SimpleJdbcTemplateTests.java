@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -540,7 +541,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
 				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
 				mockDatabaseMetaData);
 
@@ -575,7 +576,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
 				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
 				mockDatabaseMetaData);
 
@@ -585,6 +586,42 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(template);
 
 		int[] actualRowsAffected = simpleJdbcTemplate.batchUpdate(sql, ids);
+
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+
+		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+	}
+
+	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
+
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final List<Object[]> ids = new ArrayList<Object[]>();
+		ids.add(new Object[] {100});
+		ids.add(new Object[] {200});
+		final int[] sqlTypes = new int[] {Types.NUMERIC};
+		final int[] rowsAffected = new int[] { 1, 2 };
+
+		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		MockControl ctrlConnection = MockControl.createControl(Connection.class);
+		Connection mockConnection = (Connection) ctrlConnection.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, sqlTypes, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
+				mockDatabaseMetaData);
+
+		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(template);
+
+		int[] actualRowsAffected = simpleJdbcTemplate.batchUpdate(sql, ids, sqlTypes);
 
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);

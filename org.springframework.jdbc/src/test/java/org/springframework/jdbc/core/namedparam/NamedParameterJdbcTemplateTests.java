@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import javax.sql.DataSource;
 
@@ -413,6 +414,43 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
 
+	public void testBatchUpdateWithPlainMap() throws Exception {
+
+		final String sqlToUse = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id";
+		final Map[] ids = new Map[2];
+		ids[0] = Collections.singletonMap("id", 100);
+		ids[1] = Collections.singletonMap("id", 200);
+		final int[] rowsAffected = new int[] { 1, 2 };
+
+		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		MockControl ctrlConnection = MockControl.createControl(Connection.class);
+		Connection mockConnection = (Connection) ctrlConnection.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
+				mockDatabaseMetaData);
+
+		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(template);
+
+		int[] actualRowsAffected = namedParameterJdbcTemplate.batchUpdate(sql, ids);
+
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+
+		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+	}
+
 	public void testBatchUpdateWithSqlParameterSource() throws Exception {
 
 		final String sqlToUse = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
@@ -431,7 +469,45 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
+				mockDatabaseMetaData);
+
+		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(template);
+
+		int[] actualRowsAffected = namedParameterJdbcTemplate.batchUpdate(sql, ids);
+
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+
+		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+	}
+
+	public void testBatchUpdateWithSqlParameterSourcePlusTypeInfo() throws Exception {
+
+		final String sqlToUse = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id";
+		final SqlParameterSource[] ids = new SqlParameterSource[2];
+		ids[0] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);
+		ids[1] = new MapSqlParameterSource().addValue("id", 200, Types.NUMERIC);
+		final int[] sqlTypes = new int[] {Types.NUMERIC};
+		final int[] rowsAffected = new int[] { 1, 2 };
+
+		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		MockControl ctrlConnection = MockControl.createControl(Connection.class);
+		Connection mockConnection = (Connection) ctrlConnection.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, sqlTypes, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
 				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
 				mockDatabaseMetaData);
 

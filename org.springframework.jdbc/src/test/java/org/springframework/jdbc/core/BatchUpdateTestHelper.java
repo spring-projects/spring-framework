@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
@@ -17,7 +18,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  */
 public abstract class BatchUpdateTestHelper {
 
-	public static void prepareBatchUpdateMocks(String sqlToUse, Object ids,
+	public static void prepareBatchUpdateMocks(String sqlToUse, Object ids, int[] sqlTypes,
 			int[] rowsAffected,
 			MockControl ctrlDataSource, DataSource mockDataSource, MockControl ctrlConnection, Connection mockConnection,
 			MockControl ctrlPreparedStatement,
@@ -37,16 +38,37 @@ public abstract class BatchUpdateTestHelper {
 		if (ids instanceof SqlParameterSource[]) {
 			idLength = ((SqlParameterSource[])ids).length;
 		}
+		else if (ids instanceof Map[]) {
+			idLength = ((Map[])ids).length;
+		}
 		else {
 			idLength = ((List)ids).size();
 		}
 
 		for (int i = 0; i < idLength; i++) {
 			if (ids instanceof SqlParameterSource[]) {
-				mockPreparedStatement.setObject(1, ((SqlParameterSource[])ids)[i].getValue("id"));
+				if (sqlTypes != null) {
+					mockPreparedStatement.setObject(1, ((SqlParameterSource[])ids)[i].getValue("id"), sqlTypes[0]);
+				}
+				else {
+					mockPreparedStatement.setObject(1, ((SqlParameterSource[])ids)[i].getValue("id"));
+				}
+			}
+			else if (ids instanceof Map[]) {
+				if (sqlTypes != null) {
+					mockPreparedStatement.setObject(1, ((Map[])ids)[i].get("id"), sqlTypes[0]);
+				}
+				else {
+					mockPreparedStatement.setObject(1, ((Map[])ids)[i].get("id"));
+				}
 			}
 			else {
-				mockPreparedStatement.setObject(1, ((Object[])((List)ids).get(i))[0]);
+				if (sqlTypes != null) {
+					mockPreparedStatement.setObject(1, ((Object[])((List)ids).get(i))[0], sqlTypes[0]);
+				}
+				else {
+					mockPreparedStatement.setObject(1, ((Object[])((List)ids).get(i))[0]);
+				}
 			}
 			ctrlPreparedStatement.setVoidCallable();
 			mockPreparedStatement.addBatch();
