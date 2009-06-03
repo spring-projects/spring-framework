@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -23,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.BeansException;
@@ -38,7 +38,6 @@ import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.MethodReplacer;
-
 
 /**
  * Types used by {@link XmlBeanFactoryTests} and its attendant XML config files.
@@ -55,11 +54,11 @@ final class XmlBeanFactoryTestTypes { }
  */
 @SuppressWarnings("serial")
 class ConstructorDependenciesBean implements Serializable {
-	
+
 	private int age;
-	
+
 	private String name;
-	
+
 	private TestBean spouse1;
 
 	private TestBean spouse2;
@@ -83,6 +82,7 @@ class ConstructorDependenciesBean implements Serializable {
 		this.spouse2 = spouse2;
 	}
 
+	@ConstructorProperties({"spouse", "otherSpouse", "myAge"})
 	public ConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, int age) {
 		this.spouse1 = spouse1;
 		this.spouse2 = spouse2;
@@ -122,7 +122,33 @@ class ConstructorDependenciesBean implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
+}
 
+
+class SimpleConstructorArgBean {
+
+	private int age;
+
+	private String name;
+
+	public SimpleConstructorArgBean() {
+	}
+
+	public SimpleConstructorArgBean(int age) {
+		this.age = age;
+	}
+
+	public SimpleConstructorArgBean(String name) {
+		this.name = name;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public String getName() {
+		return name;
+	}
 }
 
 

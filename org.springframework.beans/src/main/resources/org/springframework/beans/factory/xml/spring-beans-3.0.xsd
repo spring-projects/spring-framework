@@ -556,6 +556,16 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="name" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The exact name of the argument in the constructor argument list.
+	Only needed to avoid ambiguities, e.g. in case of 2 arguments of
+	the exact same type. Note: This requires debug symbols to be
+	stored in the class file in order to introspect argument names!
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="ref" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

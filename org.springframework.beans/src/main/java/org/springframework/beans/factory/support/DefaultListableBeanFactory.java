@@ -48,7 +48,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -99,9 +98,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Whether to allow eager class loading even for lazy-init beans */
 	private boolean allowEagerClassLoading = true;
-
-	/** Resolver strategy for method parameter names */
-	private ParameterNameDiscoverer parameterNameDiscoverer;
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
@@ -175,17 +171,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public void setAllowEagerClassLoading(boolean allowEagerClassLoading) {
 		this.allowEagerClassLoading = allowEagerClassLoading;
-	}
-
-	/**
-	 * Set the ParameterNameDiscoverer to use for resolving method parameter
-	 * names if needed (e.g. for default qualifier values on autowired methods).
-	 * <p>Default is none. A typical candidate is
-	 * {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer},
-	 * which implies an ASM dependency and hence isn't set as the default.
-	 */
-	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
 	/**
@@ -452,7 +437,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
 		resolveBeanClass(mbd, beanName);
 		if (mbd.isFactoryMethodUnique && mbd.resolvedConstructorOrFactoryMethod == null) {
-			new ConstructorResolver(this, null, null, null).resolveFactoryMethodIfPossible(mbd);
+			new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
 		}
 		return getAutowireCandidateResolver().isAutowireCandidate(
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
@@ -622,8 +607,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
-		descriptor.initParameterNameDiscovery(this.parameterNameDiscoverer);
-		Class type = descriptor.getDependencyType();
+		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
+		Class<?> type = descriptor.getDependencyType();
 
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 		if (value != null) {

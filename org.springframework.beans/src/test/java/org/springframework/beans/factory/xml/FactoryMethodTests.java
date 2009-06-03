@@ -28,6 +28,7 @@ import test.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -106,6 +107,7 @@ public class FactoryMethodTests {
 	@Test
 	public void testFactoryMethodsWithNullValue() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		xbf.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
@@ -115,6 +117,11 @@ public class FactoryMethodTests {
 		assertEquals("Juergen", fm.getTestBean().getName());
 
 		fm = (FactoryMethods) xbf.getBean("fullWithGenericNull");
+		assertEquals(27, fm.getNum());
+		assertEquals(null, fm.getName());
+		assertEquals("Juergen", fm.getTestBean().getName());
+
+		fm = (FactoryMethods) xbf.getBean("fullWithNamedNull");
 		assertEquals(27, fm.getNum());
 		assertEquals(null, fm.getName());
 		assertEquals("Juergen", fm.getTestBean().getName());
@@ -264,13 +271,13 @@ public class FactoryMethodTests {
 		TestBean tbArg2 = new TestBean();
 		tbArg2.setName("arg2");
 
-		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] {tbArg});
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", tbArg);
 		assertEquals(0, fm1.getNum());
 		assertEquals("default", fm1.getName());
 		// This comes from the test bean
 		assertEquals("arg1", fm1.getTestBean().getName());
 
-		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] {tbArg2});
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", tbArg2);
 		assertEquals("arg2", fm2.getTestBean().getName());
 		assertEquals(fm1.getNum(), fm2.getNum());
 		assertEquals(fm2.getStringValue(), "testBeanOnlyPrototypeDISetterString");
@@ -279,12 +286,12 @@ public class FactoryMethodTests {
 		assertSame(fm2.getTestBean(), fm2.getTestBean());
 		assertNotSame(fm1, fm2);
 
-		FactoryMethods fm3 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] {tbArg2, new Integer(1), "myName"});
+		FactoryMethods fm3 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", tbArg2, new Integer(1), "myName");
 		assertEquals(1, fm3.getNum());
 		assertEquals("myName", fm3.getName());
 		assertEquals("arg2", fm3.getTestBean().getName());
 
-		FactoryMethods fm4 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] {tbArg});
+		FactoryMethods fm4 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", tbArg);
 		assertEquals(0, fm4.getNum());
 		assertEquals("default", fm4.getName());
 		assertEquals("arg1", fm4.getTestBean().getName());
@@ -296,7 +303,7 @@ public class FactoryMethodTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		try {
-			xbf.getBean("testBeanOnly", new Object[] {new TestBean()});
+			xbf.getBean("testBeanOnly", new TestBean());
 			fail("Shouldn't allow args to be passed to a singleton");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -311,7 +318,7 @@ public class FactoryMethodTests {
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		xbf.getBean("testBeanOnly");
 		try {
-			xbf.getBean("testBeanOnly", new Object[] {new TestBean()});
+			xbf.getBean("testBeanOnly", new TestBean());
 			fail("Shouldn't allow args to be passed to a singleton");
 		}
 		catch (BeanDefinitionStoreException ex) {

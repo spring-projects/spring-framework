@@ -28,6 +28,7 @@
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->runtime"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="compile->compile"/>
 	</dependencies>
 
 </ivy-module>

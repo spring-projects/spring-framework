@@ -322,7 +322,7 @@ public final class ClassPathXmlApplicationContextTests {
 		ClassPathXmlApplicationContext ctx =
 		    new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {
 			public Resource getResource(String location) {
-				if (FQ_TEST_PROPERTIES.equals(location)) {
+				if (TEST_PROPERTIES.equals(location)) {
 					return new ClassPathResource(TEST_PROPERTIES, ClassPathXmlApplicationContextTests.class);
 				}
 				return super.getResource(location);
@@ -336,13 +336,13 @@ public final class ClassPathXmlApplicationContextTests {
 		assertEquals("contexttest", writer.toString());
 		writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource1.getInputStream()), writer);
-		assertEquals("contexttest", writer.toString());
+		assertEquals("test", writer.toString());
 		writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource2.getResource().getInputStream()), writer);
 		assertEquals("contexttest", writer.toString());
 		writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
-		assertEquals("contexttest", writer.toString());
+		assertEquals("test", writer.toString());
 		ctx.close();
 	}
 

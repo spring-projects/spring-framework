@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +26,11 @@ import java.net.URL;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import org.junit.Test;
+import org.xml.sax.InputSource;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -62,7 +63,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -920,11 +920,11 @@ public final class XmlBeanFactoryTests {
 
 		ConstructorDependenciesBean rod9 = (ConstructorDependenciesBean) xbf.getBean("rod9");
 		assertEquals(99, rod9.getAge());
-		ConstructorDependenciesBean rod9a = (ConstructorDependenciesBean) xbf.getBean("rod9", new Object[] {new Integer(98)});
+		ConstructorDependenciesBean rod9a = (ConstructorDependenciesBean) xbf.getBean("rod9", 98);
 		assertEquals(98, rod9a.getAge());
-		ConstructorDependenciesBean rod9b = (ConstructorDependenciesBean) xbf.getBean("rod9", new Object[] {"myName"});
+		ConstructorDependenciesBean rod9b = (ConstructorDependenciesBean) xbf.getBean("rod9", "myName");
 		assertEquals("myName", rod9b.getName());
-		ConstructorDependenciesBean rod9c = (ConstructorDependenciesBean) xbf.getBean("rod9", new Object[] {new Integer(97)});
+		ConstructorDependenciesBean rod9c = (ConstructorDependenciesBean) xbf.getBean("rod9", 97);
 		assertEquals(97, rod9c.getAge());
 
 		ConstructorDependenciesBean rod10 = (ConstructorDependenciesBean) xbf.getBean("rod10");
@@ -953,6 +953,20 @@ public final class XmlBeanFactoryTests {
 		assertEquals(kerry2, rod16.getSpouse1());
 		assertEquals(kerry1, rod16.getSpouse2());
 		assertEquals(29, rod16.getAge());
+	}
+
+	public @Test void testPrototypeWithExplicitArguments() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		SimpleConstructorArgBean cd1 = (SimpleConstructorArgBean) xbf.getBean("rod17");
+		assertEquals(0, cd1.getAge());
+		SimpleConstructorArgBean cd2 = (SimpleConstructorArgBean) xbf.getBean("rod17", 98);
+		assertEquals(98, cd2.getAge());
+		SimpleConstructorArgBean cd3 = (SimpleConstructorArgBean) xbf.getBean("rod17", "myName");
+		assertEquals("myName", cd3.getName());
+		SimpleConstructorArgBean cd4 = (SimpleConstructorArgBean) xbf.getBean("rod17");
+		assertEquals(0, cd4.getAge());
+		SimpleConstructorArgBean cd5 = (SimpleConstructorArgBean) xbf.getBean("rod17", 97);
+		assertEquals(97, cd5.getAge());
 	}
 
 	public @Test void testConstructorArgWithSingleMatch() {

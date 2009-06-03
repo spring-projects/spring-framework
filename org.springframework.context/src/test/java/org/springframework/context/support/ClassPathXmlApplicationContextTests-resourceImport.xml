@@ -5,7 +5,7 @@
 
 	<bean id="resource1" class="org.springframework.beans.ResourceTestBean">
 		<property name="resource">
-			<value>classpath:org/springframework/beans/factory/xml/test.properties</value>
+			<value>test.properties</value>
 		</property>
 		<property name="inputStream">
 			<value>classpath:org/springframework/beans/factory/xml/test.properties</value>
