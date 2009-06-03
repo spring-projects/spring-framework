@@ -272,7 +272,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
-		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(sql, batchArgs, getJdbcOperations());
+		ParsedSql parsedSql = this.getParsedSql(sql);
+		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(parsedSql, batchArgs, getJdbcOperations());
 	}
 
 	/**
