@@ -67,6 +67,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -108,7 +109,11 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
 		implements AutowireCapableBeanFactory {
 
+	/** Strategy for creating bean instances */
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+
+	/** Resolver strategy for method parameter names */
+	private ParameterNameDiscoverer parameterNameDiscoverer;
 
 	/** Whether to automatically try to resolve circular references between beans */
 	private boolean allowCircularReferences = true;
@@ -174,6 +179,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected InstantiationStrategy getInstantiationStrategy() {
 		return this.instantiationStrategy;
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed (e.g. for constructor names).
+	 * <p>Default is none. A typical candidate is
+	 * {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer},
+	 * which implies an ASM dependency and hence isn't set as the default.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
+	/**
+	 * Return the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed.
+	 */
+	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
 	}
 
 	/**
@@ -822,9 +846,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Shortcut when re-creating the same bean...
-		if (mbd.resolvedConstructorOrFactoryMethod != null) {
+		if (mbd.resolvedConstructorOrFactoryMethod != null && args == null) {
 			if (mbd.constructorArgumentsResolved) {
-				return autowireConstructor(beanName, mbd, null, args);
+				return autowireConstructor(beanName, mbd, null, null);
 			}
 			else {
 				return instantiateBean(beanName, mbd);
@@ -901,9 +925,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected BeanWrapper instantiateUsingFactoryMethod(
 			String beanName, RootBeanDefinition mbd, Object[] explicitArgs) {
 
-		ConstructorResolver constructorResolver =
-				new ConstructorResolver(this, this, getInstantiationStrategy(), getCustomTypeConverter());
-		return constructorResolver.instantiateUsingFactoryMethod(beanName, mbd, explicitArgs);
+		return new ConstructorResolver(this).instantiateUsingFactoryMethod(beanName, mbd, explicitArgs);
 	}
 
 	/**
@@ -923,9 +945,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, Constructor[] ctors, Object[] explicitArgs) {
 
-		ConstructorResolver constructorResolver =
-				new ConstructorResolver(this, this, getInstantiationStrategy(), getCustomTypeConverter());
-		return constructorResolver.autowireConstructor(beanName, mbd, ctors, explicitArgs);
+		return new ConstructorResolver(this).autowireConstructor(beanName, mbd, ctors, explicitArgs);
 	}
 
 	/**

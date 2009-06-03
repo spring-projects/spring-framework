@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="default" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="defaultInstance">
@@ -42,17 +42,24 @@
 	</bean>
 	
 	<bean id="fullWithNull" class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance">
+			factory-method="newInstance" lazy-init="true">
+		<constructor-arg index="2" type="java.lang.Integer"><null/></constructor-arg>
 		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
 		<constructor-arg index="1"><value>27</value></constructor-arg>
-		<constructor-arg index="2" type="java.lang.Integer"><null/></constructor-arg>
 	</bean>
 
 	<bean id="fullWithGenericNull" class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance">
+			factory-method="newInstance" lazy-init="true">
+		<constructor-arg type="java.lang.Integer"><null/></constructor-arg>
 		<constructor-arg><ref local="juergen"/></constructor-arg>
 		<constructor-arg type="int"><value>27</value></constructor-arg>
-		<constructor-arg type="java.lang.Integer"><null/></constructor-arg>
+	</bean>
+
+	<bean id="fullWithNamedNull" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance" lazy-init="true">
+		<constructor-arg name="something"><null/></constructor-arg>
+		<constructor-arg name="tb"><ref local="juergen"/></constructor-arg>
+		<constructor-arg name="num"><value>27</value></constructor-arg>
 	</bean>
 
 	<bean id="fullWithAutowire" class="org.springframework.beans.factory.xml.FactoryMethods"
