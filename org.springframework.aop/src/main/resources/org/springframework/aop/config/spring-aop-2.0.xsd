@@ -91,11 +91,11 @@
 		<xsd:complexType>
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.aop.scope.ScopedProxyFactoryBean"><![CDATA[
-		Marks a bean definition as being a scoped proxy.
+	Marks a bean definition as being a scoped proxy.
 
-		A bean marked as such will be exposed via a proxy, with the 'real'
-		bean instance being retrieved from some other source (such as a
-		HttpSession) as and when required.
+	A bean marked as such will be exposed via a proxy, with the 'real'
+	bean instance being retrieved from some other source (such as a
+	HttpSession) as and when required.
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="true">
