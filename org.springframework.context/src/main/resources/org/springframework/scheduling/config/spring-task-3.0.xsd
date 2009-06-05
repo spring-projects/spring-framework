@@ -62,6 +62,80 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="executor">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Defines a ThreadPoolTaskExecutor instance with configurable pool size,
+	queue-capacity, keep-alive, and rejection-policy values.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name for the generated ThreadPoolTaskExecutor instance.
+	It will also be used as the default thread name prefix.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="size" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The size of the executor's thread pool as either a single value or a range
+	(e.g. 5-10). If no bounded queue-capacity value is provided, then a max value
+	has no effect unless the range is specified as 0-n. In that case, the core pool
+	will have a size of n, but the 'allowCoreThreadTimeout' flag will be set to true.
+	If a queue-capacity is provided, then the lower bound of a range will map to the
+	core size and the upper bound will map to the max size. If this attribute is not
+	provided, the default core size will be 1, and the default max size will be
+	Integer.MAX_VALUE (i.e. unbounded).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="queue-capacity" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Queue capacity for the ThreadPoolTaskExecutor. If not specified, the default will
+	be Integer.MAX_VALUE (i.e. unbounded).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="keep-alive" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Keep-alive time in seconds. Inactive threads that have been created beyond the
+	core size will timeout after the specified number of seconds elapse. If the
+	executor has an unbounded queue capacity and a size range represented as 0-n,
+	then the core threads will also be configured to timeout when inactive.
+	Otherwise, core threads will not ever timeout.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="rejection-policy" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The RejectedExecutionHandler type. When a bounded queue cannot accept any
+	additional tasks, this determines the behavior. While the default is ABORT,
+	consider using CALLER_RUNS to throttle inbound tasks. In other words, by forcing
+	the caller to run the task itself, it will not be able to provide another task
+	until after it completes the task at hand. In the meantime, one or more tasks
+	may be removed from the queue. Alternatively, if it is not critical to run every
+	task, consider using DISCARD to drop the current task or DISCARD_OLDEST to drop
+	the task at the head of the queue.
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="ABORT"/>
+						<xsd:enumeration value="CALLER_RUNS"/>
+						<xsd:enumeration value="DISCARD"/>
+						<xsd:enumeration value="DISCARD_OLDEST"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
 	<xsd:element name="scheduled-tasks">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
