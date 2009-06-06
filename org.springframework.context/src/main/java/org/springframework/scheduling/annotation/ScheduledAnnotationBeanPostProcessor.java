@@ -82,7 +82,6 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			return bean;
 		}
 		ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
-			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Scheduled annotation = AnnotationUtils.getAnnotation(method, Scheduled.class);
 				if (annotation != null) {
@@ -126,7 +125,6 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 		return bean;
 	}
 
-	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (scheduler != null) {
 			this.registrar.setScheduler(scheduler);
@@ -137,7 +135,6 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 		this.registrar.afterPropertiesSet();
 	}
 
-	@Override
 	public void destroy() throws Exception {
 		if (this.registrar != null) {
 			this.registrar.destroy();
