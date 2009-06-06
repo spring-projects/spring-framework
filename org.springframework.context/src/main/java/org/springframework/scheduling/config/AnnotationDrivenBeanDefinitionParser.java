@@ -42,6 +42,12 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 	public static final String ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.scheduling.annotation.internalAsyncAnnotationProcessor";
 
+	/**
+	 * The bean name of the internally managed scheduled annotation processor.
+	 */
+	public static final String SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.scheduling.annotation.internalScheduledAnnotationProcessor";
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
@@ -64,8 +70,21 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 			if (StringUtils.hasText(executor)) {
 				builder.addPropertyReference("executor", executor);
 			}
-			BeanDefinitionHolder holder = registerPostProcessor(registry, builder, ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
-			parserContext.registerComponent(new BeanComponentDefinition(holder));
+			registerPostProcessor(parserContext, builder, ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
+		}
+		if (registry.containsBeanDefinition(SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			parserContext.getReaderContext().error(
+					"Only one ScheduledAnnotationBeanPostProcessor may exist within the context.", source);
+		}
+		else {
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(
+					"org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor");
+			builder.getRawBeanDefinition().setSource(source);
+			String scheduler = element.getAttribute("scheduler");
+			if (StringUtils.hasText(scheduler)) {
+				builder.addPropertyReference("scheduler", scheduler);
+			}
+			registerPostProcessor(parserContext, builder, SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
 		}
 
 		// Finally register the composite component.
@@ -74,12 +93,13 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		return null;
 	}
 
-	private static BeanDefinitionHolder registerPostProcessor(
-			BeanDefinitionRegistry registry, BeanDefinitionBuilder builder, String beanName) {
+	private static void registerPostProcessor(
+			ParserContext parserContext, BeanDefinitionBuilder builder, String beanName) {
 
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		registry.registerBeanDefinition(beanName, builder.getBeanDefinition());
-		return new BeanDefinitionHolder(builder.getBeanDefinition(), beanName);
+		parserContext.getRegistry().registerBeanDefinition(beanName, builder.getBeanDefinition());
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(builder.getBeanDefinition(), beanName);
+		parserContext.registerComponent(new BeanComponentDefinition(holder));
 	}
 
 }
