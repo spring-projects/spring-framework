@@ -25,8 +25,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.task.TaskExecutor;
@@ -55,7 +54,7 @@ import java.util.concurrent.Executor;
  * @see AsyncAnnotationAdvisor
  */
 public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
-		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
+		implements BeanPostProcessor, BeanClassLoaderAware, InitializingBean, Ordered {
 
 	private Class<? extends Annotation> asyncAnnotationType;
 
@@ -91,7 +90,7 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 		this.beanClassLoader = classLoader;
 	}
 
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void afterPropertiesSet() {
 		this.asyncAnnotationAdvisor = (this.executor != null) ?
 				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor();
 		if (this.asyncAnnotationType != null) {
@@ -121,7 +120,7 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 			// Can't do much here.
 			return bean;
 		}
-		
+
 		if (AopUtils.canApply(this.asyncAnnotationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
 				((Advised) bean).addAdvisor(this.asyncAnnotationAdvisor);
