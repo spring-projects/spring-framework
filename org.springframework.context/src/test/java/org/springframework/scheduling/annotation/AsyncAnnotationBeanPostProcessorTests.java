@@ -45,6 +45,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		context.refresh();
 		Object target = context.getBean("target");
 		assertTrue(AopUtils.isAopProxy(target));
+		context.close();
 	}
 
 	@Test
@@ -58,9 +59,10 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		ITestBean testBean = (ITestBean) context.getBean("target");
 		testBean.test();
 		Thread mainThread = Thread.currentThread();
-		testBean.await(1000);
+		testBean.await(3000);
 		Thread asyncThread = testBean.getThread();
 		assertNotSame(mainThread, asyncThread);
+		context.close();
 	}
 
 	@Test
@@ -77,9 +79,10 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		context.refresh();
 		ITestBean testBean = (ITestBean) context.getBean("target");
 		testBean.test();
-		testBean.await(1000);
+		testBean.await(3000);
 		Thread asyncThread = testBean.getThread();
 		assertTrue(asyncThread.getName().startsWith("testExecutor"));
+		context.close();
 	}
 
 
