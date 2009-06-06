@@ -34,6 +34,16 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="scheduler" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Specifies the org.springframework.scheduling.TaskScheduler or
+	java.util.ScheduledExecutorService instance to use when invoking scheduled
+	methods. If no reference is provided, a TaskScheduler backed by a single
+	thread scheduled executor will be used.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
