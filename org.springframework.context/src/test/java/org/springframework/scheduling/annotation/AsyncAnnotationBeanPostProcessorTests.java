@@ -100,7 +100,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 
 		private Thread thread;
 
-		private CountDownLatch latch;
+		private final CountDownLatch latch = new CountDownLatch(1);
 
 		public Thread getThread() {
 			return this.thread;
