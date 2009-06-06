@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   			http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/task
+				http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<task:executor id="default"/>
+
+	<task:executor id="singleSize" size="42"/>
+
+	<task:executor id="rangeWithBoundedQueue" size="7-42" queue-capacity="11"/>
+
+	<task:executor id="rangeWithUnboundedQueue" size="0-9" keep-alive="37"/>
+
+</beans>
