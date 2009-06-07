@@ -22,7 +22,6 @@ import java.util.Locale;
 
 /**
  * Produces NumberFormat instances that format currency values.
- * 
  * @author Keith Donald
  * @see NumberFormat
  */

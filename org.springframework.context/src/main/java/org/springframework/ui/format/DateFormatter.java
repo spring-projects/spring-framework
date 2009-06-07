@@ -50,10 +50,6 @@ public class DateFormatter implements Formatter<Date> {
 		this.pattern = pattern;
 	}
 
-	public Class<Date> getFormattedObjectType() {
-		return Date.class;
-	}
-
 	public String format(Date date, Locale locale) {
 		if (date == null) {
 			return "";

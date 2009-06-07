@@ -26,12 +26,6 @@ import java.util.Locale;
 public interface Formatter<T> {
 	
 	/**
-	 * Returns the type of object this formatter can format.
-	 * @return the formatted object type
-	 */
-	Class<T> getFormattedObjectType();
-	
-	/**
 	 * Format the object of type T for display.
 	 * @param object the object to format
 	 * @param locale the user's locale

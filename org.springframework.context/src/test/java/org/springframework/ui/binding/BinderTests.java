@@ -5,8 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
@@ -22,6 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.format.DateFormatter;
+import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
+import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
 
@@ -52,7 +52,7 @@ public class BinderTests {
 
 	// TODO should update error context, not throw exception
 	@Test(expected=IllegalArgumentException.class)
-	public void bindSingleValuesWithDefaultTypeCoversionFailures() {
+	public void bindSingleValuesWithDefaultTypeCoversionFailure() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("string", "test");
@@ -62,7 +62,7 @@ public class BinderTests {
 	}
 
 	@Test
-	public void bindSingleValuePropertyFormatterParsing() throws ParseException {
+	public void bindSingleValuePropertyFormatter() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> propertyValues = new HashMap<String, String>();
@@ -82,7 +82,7 @@ public class BinderTests {
 	}
 
 	@Test
-	public void bindSingleValueTypeFormatterParsing() throws ParseException {
+	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new DateFormatter(), Date.class);
 		Map<String, String> propertyValues = new HashMap<String, String>();
@@ -92,9 +92,19 @@ public class BinderTests {
 	}
 	
 	@Test
-	public void bindSingleValueAnnotationFormatterParsing() throws ParseException {
+	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		binder.add(new CurrencyFormatter(), Currency.class);
+		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
+		Map<String, String> propertyValues = new HashMap<String, String>();
+		propertyValues.put("currency", "$23.56");
+		binder.bind(propertyValues);
+		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
+	}
+	
+	@Test
+	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
+		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		binder.add(new CurrencyAnnotationFormatterFactory());
 		Map<String, String> propertyValues = new HashMap<String, String>();
 		propertyValues.put("currency", "$23.56");
 		binder.bind(propertyValues);
@@ -261,7 +271,7 @@ public class BinderTests {
 			this.foo = foo;
 		}
 
-		@Currency
+		@CurrencyFormat
 		public BigDecimal getCurrency() {
 			return currency;
 		}
@@ -288,11 +298,6 @@ public class BinderTests {
 	
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface Currency {
-
-	}
-	
 	public static class Address {
 		private String street;
 		private String city;

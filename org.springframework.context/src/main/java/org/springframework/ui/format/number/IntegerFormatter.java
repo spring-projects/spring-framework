@@ -33,10 +33,6 @@ public class IntegerFormatter implements Formatter<Long> {
 
 	private boolean lenient;
 
-	public Class<Long> getFormattedObjectType() {
-		return Long.class;
-	}
-
 	public String format(Long integer, Locale locale) {
 		if (integer == null) {
 			return "";

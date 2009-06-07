@@ -40,10 +40,6 @@ public class DecimalFormatter implements Formatter<BigDecimal> {
 		initDefaults();
 	}
 	
-	public Class<BigDecimal> getFormattedObjectType() {
-		return BigDecimal.class;
-	}
-
 	public DecimalFormatter(String pattern) {
 		initDefaults();
 		formatFactory.setPattern(pattern);

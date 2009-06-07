@@ -35,10 +35,6 @@ public class PercentFormatter implements Formatter<BigDecimal> {
 
 	private boolean lenient;
 
-	public Class<BigDecimal> getFormattedObjectType() {
-		return BigDecimal.class;
-	}
-
 	public String format(BigDecimal decimal, Locale locale) {
 		if (decimal == null) {
 			return "";
