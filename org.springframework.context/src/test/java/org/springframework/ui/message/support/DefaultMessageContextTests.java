@@ -1,13 +1,15 @@
 package org.springframework.ui.message.support;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.ui.message.Message;
 import org.springframework.ui.message.MessageBuilder;
@@ -24,6 +26,12 @@ public class DefaultMessageContextTests {
 		messageSource.addMessage("invalidFormat", Locale.US, "{0} must be in format {1}");
 		messageSource.addMessage("mathForm.decimalField", Locale.US, "Decimal Field");
 		context = new DefaultMessageContext(messageSource);
+		LocaleContextHolder.setLocale(Locale.US);
+	}
+	
+	@After
+	public void tearDown() {
+		LocaleContextHolder.setLocale(null);
 	}
 
 	@Test
