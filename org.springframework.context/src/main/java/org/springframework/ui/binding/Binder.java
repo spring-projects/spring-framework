@@ -16,8 +16,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -31,6 +29,7 @@ import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 
+@SuppressWarnings("unchecked")
 public class Binder<T> {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -224,7 +223,6 @@ public class Binder<T> {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		private Formatter getFormatter() {
 			if (formatter != null) {
 				return formatter;
@@ -336,7 +334,6 @@ public class Binder<T> {
 				+ "] on Formatter [" + converterClass.getName() + "]");
 	}
 
-	@SuppressWarnings("unchecked")
 	static class SimpleAnnotationFormatterFactory implements AnnotationFormatterFactory {
 
 		private Formatter formatter;
