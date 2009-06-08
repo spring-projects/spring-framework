@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.naming;
 
 import java.util.Hashtable;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -38,16 +37,14 @@ import org.springframework.util.StringUtils;
  *
  * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
  * metadata can be read using any supported implementation. Out of the box,
- * two strategies are included:
- * <ul>
- * <li><code>AttributesJmxAttributeSource</code>, for Commons Attributes
- * <li><code>AnnotationJmxAttributeSource</code>, for JDK 1.5+ annotations
- * </ul>
+ * {@link org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource}
+ * introspects a well-defined set of Java 5 annotations that come with Spring.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
  * @see ObjectNamingStrategy
+ * @see org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource
  */
 public class MetadataNamingStrategy implements ObjectNamingStrategy, InitializingBean {
 
@@ -125,7 +122,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 				if (domain == null) {
 					domain = ClassUtils.getPackageName(managedClass);
 				}
-				Hashtable properties = new Hashtable();
+				Hashtable<String, String> properties = new Hashtable<String, String>();
 				properties.put("type", ClassUtils.getShortName(managedClass));
 				properties.put("name", beanKey);
 				return ObjectNameManager.getInstance(domain, properties);
