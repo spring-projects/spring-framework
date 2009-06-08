@@ -44,6 +44,14 @@ import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 
+/**
+ * Binds user-entered values to properties of a model object.
+ * @author Keith Donald
+ *
+ * @param <T> The type of model object this binder binds to
+ * @see #add(BindingConfiguration)
+ * @see #bind(Map)
+ */
 @SuppressWarnings("unchecked")
 public class Binder<T> {
 
@@ -83,6 +91,10 @@ public class Binder<T> {
 		}		
 	};
 	
+	/**
+	 * Creates a new binder for the model object.
+	 * @param model the model object containing properties this binder will bind to
+	 */
 	public Binder(T model) {
 		this.model = model;
 		bindings = new HashMap<String, Binding>();
@@ -93,10 +105,21 @@ public class Binder<T> {
 		typeConverter = new DefaultTypeConverter();
 	}
 	
+	/**
+	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #add(BindingConfiguration)}.
+	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(Map)} operations.
+	 * Default is optimistic.
+	 * @param strict strict binder status
+	 */
 	public void setStrict(boolean strict) {
 		this.strict = strict;
 	}
 
+	/**
+	 * Adds new binding.
+	 * @param binding the binding configuration
+	 * @return the new binding created from the configuration provided
+	 */
 	public Binding add(BindingConfiguration binding) {
 		Binding newBinding;
 		try {
@@ -108,6 +131,11 @@ public class Binder<T> {
 		return newBinding;
 	}
 
+	/**
+	 * Adds a Formatter that will format property values of type <code>propertyType</coe>.
+	 * @param formatter the formatter
+	 * @param propertyType the property type
+	 */
 	public void add(Formatter<?> formatter, Class<?> propertyType) {
 		if (propertyType.isAnnotation()) {
 			annotationFormatters.put(propertyType, new SimpleAnnotationFormatterFactory(formatter));
@@ -116,14 +144,27 @@ public class Binder<T> {
 		}
 	}
 	
+	/**
+	 * Adds a AnnotationFormatterFactory that will format values of properties annotated with a specific annotation.
+	 * @param factory the annotation formatter factory
+	 */
 	public void add(AnnotationFormatterFactory<?, ?> factory) {
 		annotationFormatters.put(getAnnotationType(factory), factory);
 	}
 
+	/**
+	 * The model object this binder binds to.
+	 * @return the model object
+	 */
 	public T getModel() {
 		return model;
 	}
 
+	/**
+	 * Returns the binding for the property.
+	 * @param property the property path
+	 * @return the binding
+	 */
 	public Binding getBinding(String property) {
 		Binding binding = bindings.get(property);
 		if (binding == null && !strict) {
@@ -133,6 +174,10 @@ public class Binder<T> {
 		}
 	}
 
+	/**
+	 * Bind values in the map to the properties of the model object.
+	 * @param propertyValues the property values map
+	 */
 	public void bind(Map<String, ? extends Object> propertyValues) {
 		for (Map.Entry<String, ? extends Object> entry : propertyValues
 				.entrySet()) {
