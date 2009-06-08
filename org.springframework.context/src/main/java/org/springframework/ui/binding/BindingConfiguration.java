@@ -17,21 +17,37 @@ package org.springframework.ui.binding;
 
 import org.springframework.ui.format.Formatter;
 
+/**
+ * Configuration used to create a new {@link Binding} registered with a {@link Binder}.
+ * @author Keith Donald
+ * @see Binder#add(BindingConfiguration)
+ */
 public class BindingConfiguration {
 	
 	private String property;
 	
 	private Formatter<?> formatter;
 	
+	/**
+	 * Creates a new Binding configuration.
+	 * @param property the property to bind to
+	 * @param formatter the formatter to use to format property values
+	 */
 	public BindingConfiguration(String property, Formatter<?> formatter) {
 		this.property = property;
 		this.formatter = formatter;
 	}
 
+	/**
+	 * The name of the model property to bind to.
+	 */
 	public String getProperty() {
 		return property;
 	}
 
+	/**
+	 * THe Formatter to use to format bound property values.
+	 */
 	public Formatter<?> getFormatter() {
 		return formatter;
 	}
