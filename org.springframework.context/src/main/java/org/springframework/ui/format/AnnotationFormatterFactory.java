@@ -18,8 +18,8 @@ package org.springframework.ui.format;
 import java.lang.annotation.Annotation;
 
 /**
- * A factory that creates Formatters to format property values on properties annotated with a particular format {@link Annotation}.
- * For example, a <code>CurrencyAnnotationFormatterFactory</code> might create a {@link Formatter} that formats a <code>BigDecimal</code> value set on a property annotated with <code>@CurrencyFormat</code>.
+ * A factory that creates {@link Formatter formatters} to format property values on properties annotated with a particular format {@link Annotation}.
+ * For example, a <code>CurrencyAnnotationFormatterFactory</code> might create a <code>Formatter</code> that formats a <code>BigDecimal</code> value set on a property annotated with <code>@CurrencyFormat</code>.
  * @author Keith Donald
  * @param <A> The type of Annotation this factory uses to create Formatter instances
  * @param <T> The type of Object Formatters created by this factory format

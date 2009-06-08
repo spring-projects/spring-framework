@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.format.DateFormatter;
+import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
