@@ -37,9 +37,6 @@ import org.springframework.util.StringUtils;
  * Implementation of the <code>JmxAttributeSource</code> interface that
  * reads JDK 1.5+ annotations and exposes the corresponding attributes.
  *
- * <p>This is a direct alternative to <code>AttributesJmxAttributeSource</code>,
- * which is able to read in source-level attributes via Commons Attributes.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Jennifer Hickey
@@ -66,7 +63,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedAttribute ann =
-						AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedAttribute.class);
+				AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedAttribute.class);
 		if (ann == null) {
 			return null;
 		}
@@ -80,7 +77,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
 	public ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedMetric ann =
-			AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
+				AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
 		if (ann == null) {
 			return null;
 		}
@@ -95,12 +92,10 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			throw new InvalidMetadataException(
 					"The ManagedOperation attribute is not valid for JavaBean properties. Use ManagedAttribute instead.");
 		}
-
 		Annotation ann = AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedOperation.class);
 		if (ann == null) {
 			return null;
 		}
-
 		ManagedOperation op = new ManagedOperation();
 		AnnotationBeanUtils.copyPropertiesToBean(ann, op);
 		return op;

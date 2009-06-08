@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,19 @@ package org.springframework.jmx.export.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * JDK 1.5+ class-level annotation that indicates to register
- * instances of a class with a JMX server, corresponding to
- * the ManagedResource attribute.
+ * JDK 1.5+ class-level annotation that indicates to register instances of a
+ * class with a JMX server, corresponding to the ManagedResource attribute.
+ *
+ * <p><b>Note:</b> This annotation is marked as inherited, allowing for generic
+ * management-aware base classes. In such a scenario, it is recommended to
+ * <i>not</i> specify an object name value since this would lead to naming
+ * collisions in case of multiple subclasses getting registered.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -34,6 +39,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 @Documented
 public @interface ManagedResource {
 
