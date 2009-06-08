@@ -20,11 +20,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>javax.transaction</groupId>
-      <artifactId>jta</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
       <groupId>quartz</groupId>
       <artifactId>quartz</artifactId>
       <version>1.6.2</version>
