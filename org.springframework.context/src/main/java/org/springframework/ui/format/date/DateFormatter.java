@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.format;
+package org.springframework.ui.format.date;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.ui.format.Formatter;
 
 /**
  * A formatter for {@link Date} types.
