@@ -38,10 +38,10 @@ public interface MessageContext {
 	public List<Message> getMessages(String element);
 
 	/**
-	 * Add a new message to this context.
+	 * Add a new message to an element.
+	 * @param message the resolver that will resolve the message to be added; typically constructed by a {@link MessageBuilder}.
 	 * @param element the id of the UI element the message should be associated with
-	 * @param messageResolver the resolver that will resolve the message to be added
 	 */
-	public void addMessage(String element, MessageResolver messageResolver);
+	public void add(MessageResolver message, String element);
 
 }
