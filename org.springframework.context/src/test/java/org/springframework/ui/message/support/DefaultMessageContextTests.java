@@ -39,7 +39,7 @@ public class DefaultMessageContextTests {
 		MessageBuilder builder = new MessageBuilder();
 		MessageResolver message = builder.severity(Severity.ERROR).code("invalidFormat").resolvableArg(
 				"mathForm.decimalField").arg("#,###.##").defaultText("Field must be in format #,###.##").build();
-		context.addMessage("mathForm.decimalField", message);
+		context.add(message, "mathForm.decimalField");
 		Map<String, List<Message>> messages = context.getMessages();
 		assertEquals(1, messages.size());
 		assertEquals("Decimal Field must be in format #,###.##", messages.get("mathForm.decimalField").get(0).getText());

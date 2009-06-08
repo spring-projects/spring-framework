@@ -91,7 +91,7 @@ public class DefaultMessageContext implements MessageContext {
 		return Collections.unmodifiableList(messages);
 	}
 
-	public void addMessage(String element, MessageResolver messageResolver) {
+	public void add(MessageResolver messageResolver, String element) {
 		List<Message> messages = messagesByElement.get(element);
 		messages.add(new ResolvableMessage(messageResolver));
 	}
