@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,17 +151,11 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 			Throwable rootCause = ex.getMostSpecificCause();
 			if (rootCause instanceof BeanCurrentlyInCreationException) {
 				BeanCreationException bce = (BeanCreationException) rootCause;
-				if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
-					String msg = ClassUtils.getShortName(getClass()) + " failed to create target bean '" +
-							bce.getBeanName() + "' while configuring object of type [" +
-							beanInstance.getClass().getName() + "] (probably due to a circular reference). " +
-							"Proceeding without injection.";
-					if (logger.isDebugEnabled()) {
-						logger.debug(msg, ex);
-					}
-					else if (logger.isInfoEnabled()) {
-						logger.info(msg);
-					}
+				if (logger.isDebugEnabled() && this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+					logger.debug("Failed to create target bean '" + bce.getBeanName() +
+							"' while configuring object of type [" + beanInstance.getClass().getName() +
+							"] - probably due to a circular reference. This is a common startup situation " +
+							"and usually not fatal. Proceeding without injection. Original exception: " + ex);
 					return;
 				}
 			}
