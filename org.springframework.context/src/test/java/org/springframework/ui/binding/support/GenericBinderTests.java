@@ -1,4 +1,4 @@
-package org.springframework.ui.binding;
+package org.springframework.ui.binding.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,13 +19,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.expression.EvaluationException;
+import org.springframework.ui.binding.Binder;
+import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.BindingConfiguration;
+import org.springframework.ui.binding.BindingResult;
+import org.springframework.ui.binding.UserValue;
+import org.springframework.ui.binding.support.GenericBinder;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
 
-public class BinderTests {
+public class GenericBinderTests {
 
 	@Before
 	public void setUp() {
@@ -39,7 +45,7 @@ public class BinderTests {
 	
 	@Test
 	public void bindSingleValuesWithDefaultTypeConverterConversion() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		List<UserValue> values = new ArrayList<UserValue>();
 		values.add(new UserValue("string", "test"));
 		values.add(new UserValue("integer", "3"));
@@ -69,7 +75,7 @@ public class BinderTests {
 
 	@Test
 	public void bindSingleValuesWithDefaultTypeCoversionFailure() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		List<UserValue> values = new ArrayList<UserValue>();
 		values.add(new UserValue("string", "test"));
 		// bad value
@@ -83,7 +89,7 @@ public class BinderTests {
 
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		binder.bind(UserValue.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
@@ -91,14 +97,14 @@ public class BinderTests {
 
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		binder.bind(UserValue.single("date", "bogus"));
 	}
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new DateFormatter(), Date.class);
 		binder.bind(UserValue.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
@@ -106,7 +112,7 @@ public class BinderTests {
 	
 	@Test
 	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
 		binder.bind(UserValue.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
@@ -114,7 +120,7 @@ public class BinderTests {
 	
 	@Test
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new CurrencyAnnotationFormatterFactory());
 		binder.bind(UserValue.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
@@ -122,7 +128,7 @@ public class BinderTests {
 	
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		List<BindingResult> results = binder.bind(UserValue.single("bogus", "2009-06-01"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isError());
@@ -131,7 +137,7 @@ public class BinderTests {
 	
 	@Test
 	public void getBindingOptimistic() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("integer");
 		assertFalse(b.isCollection());
 		assertEquals("0", b.getValue());
@@ -142,7 +148,7 @@ public class BinderTests {
 
 	@Test
 	public void getBindingStrict() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.setStrict(true);
 		Binding b = binder.getBinding("integer");
 		assertNull(b);
@@ -157,7 +163,7 @@ public class BinderTests {
 
 	@Test
 	public void getBindingCustomFormatter() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
 		assertFalse(b.isCollection());
@@ -168,7 +174,7 @@ public class BinderTests {
 	
 	@Test
 	public void getBindingCustomFormatterRequiringTypeCoersion() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		// IntegerFormatter formats Longs, so conversion from Integer -> Long is performed
 		binder.add(new BindingConfiguration("integer", new IntegerFormatter()));
 		Binding b = binder.getBinding("integer");
@@ -178,7 +184,7 @@ public class BinderTests {
 	
 	@Test
 	public void getBindingMultiValued() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
 		assertTrue(b.isCollection());
 		assertEquals(0, b.getCollectionValues().length);
@@ -195,7 +201,7 @@ public class BinderTests {
 
 	@Test
 	public void getBindingMultiValuedTypeConversionFailure() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
 		assertTrue(b.isCollection());
 		assertEquals(0, b.getCollectionValues().length);
@@ -208,7 +214,7 @@ public class BinderTests {
 	@Test
 	public void bindHandleNullValueInNestedPath() {
 		TestBean testbean = new TestBean();
-		Binder<TestBean> binder = new Binder<TestBean>(testbean);
+		Binder<TestBean> binder = new GenericBinder<TestBean>(testbean);
 		List<UserValue> values = new ArrayList<UserValue>();
 		
 		// EL configured with some options from SpelExpressionParserConfiguration:
@@ -244,7 +250,7 @@ public class BinderTests {
 
 	@Test
 	public void formatPossibleValue() {
-		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
 		assertEquals("$5.00", b.format(new BigDecimal("5")));
