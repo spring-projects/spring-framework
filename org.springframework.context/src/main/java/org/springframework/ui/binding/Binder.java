@@ -21,8 +21,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -72,7 +74,7 @@ public class Binder<T> {
 	private boolean strict = false;
 
 	private static Formatter defaultFormatter = new Formatter() {
-		
+
 		public String format(Object object, Locale locale) {
 			if (object == null) {
 				return "";
@@ -81,16 +83,15 @@ public class Binder<T> {
 			}
 		}
 
-		public Object parse(String formatted, Locale locale)
-				throws ParseException {
+		public Object parse(String formatted, Locale locale) throws ParseException {
 			if (formatted == "") {
 				return null;
 			} else {
 				return formatted;
 			}
-		}		
+		}
 	};
-	
+
 	/**
 	 * Creates a new binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
@@ -98,13 +99,12 @@ public class Binder<T> {
 	public Binder(T model) {
 		this.model = model;
 		bindings = new HashMap<String, Binding>();
-		int parserConfig =
-		  SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull | 
-		  SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize;
+		int parserConfig = SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull
+				| SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize;
 		expressionParser = new SpelExpressionParser(parserConfig);
 		typeConverter = new DefaultTypeConverter();
 	}
-	
+
 	/**
 	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #add(BindingConfiguration)}.
 	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(Map)} operations.
@@ -140,10 +140,10 @@ public class Binder<T> {
 		if (propertyType.isAnnotation()) {
 			annotationFormatters.put(propertyType, new SimpleAnnotationFormatterFactory(formatter));
 		} else {
-			typeFormatters.put(propertyType, formatter);			
+			typeFormatters.put(propertyType, formatter);
 		}
 	}
-	
+
 	/**
 	 * Adds a AnnotationFormatterFactory that will format values of properties annotated with a specific annotation.
 	 * @param factory the annotation formatter factory
@@ -176,22 +176,22 @@ public class Binder<T> {
 
 	/**
 	 * Bind values in the map to the properties of the model object.
+	 * TODO return BindingResults with getSuccesses()/getErrors()/etc?
 	 * @param propertyValues the property values map
 	 */
-	public void bind(Map<String, ? extends Object> propertyValues) {
-		for (Map.Entry<String, ? extends Object> entry : propertyValues
-				.entrySet()) {
-			Binding binding = getBinding(entry.getKey());
-			Object value = entry.getValue();
-			if (value instanceof String) {
-				binding.setValue((String)entry.getValue());
-			}
-			else if (value instanceof String[]) {
-				binding.setValues((String[])value);
+	public List<BindingResult> bind(List<UserValue> userValues) {
+		List<BindingResult> results = new ArrayList<BindingResult>(userValues.size());
+		for (UserValue value : userValues) {
+			Binding binding = getBinding(value.getProperty());
+			if (value.isString()) {
+				results.add(binding.setValue((String) value.getValue()));
+			} else if (value.isStringArray()) {
+				results.add(binding.setValues((String[]) value.getValue()));
 			} else {
 				throw new IllegalArgumentException("Illegal argument " + value);
 			}
 		}
+		return results;
 	}
 
 	class BindingImpl implements Binding {
@@ -200,34 +200,60 @@ public class Binder<T> {
 
 		private Formatter formatter;
 
-		public BindingImpl(BindingConfiguration config)
-				throws org.springframework.expression.ParseException {
+		public BindingImpl(BindingConfiguration config) throws org.springframework.expression.ParseException {
 			property = expressionParser.parseExpression(config.getProperty());
 			formatter = config.getFormatter();
 		}
 
 		public String getValue() {
+			Object value;
 			try {
-				return format(property.getValue(createEvaluationContext()));
+				value = property.getValue(createEvaluationContext());
 			} catch (ExpressionException e) {
-				throw new IllegalArgumentException(e);
+				throw new IllegalStateException("Failed to get property expression value - this should not happen", e);
 			}
+			return format(value);
 		}
 
-		public void setValue(String formatted) {
-			setValue(parse(formatted, getFormatter()));
+		public BindingResult setValue(String formatted) {
+			Formatter formatter;
+			try {
+				formatter = getFormatter();
+			} catch (EvaluationException e) {
+				// could occur the property was not found or is not readable
+				// TODO probably should not handle all EL failures, only type conversion & property not found?
+				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
+			}
+			Object parsed;
+			try {
+				parsed = formatter.parse(formatted, LocaleContextHolder.getLocale());
+			} catch (ParseException e) {
+				return new InvalidFormatResult(property.getExpressionString(), formatted, e);
+			}
+			return setValue(parsed, formatted);
 		}
 
 		public String format(Object selectableValue) {
-			Formatter formatter = getFormatter();
+			Formatter formatter;
+			try {
+				formatter = getFormatter();
+			} catch (EvaluationException e) {
+				throw new IllegalStateException("Failed to get property expression value type - this should not happen", e);
+			}
 			Class<?> formattedType = getFormattedObjectType(formatter);
 			selectableValue = typeConverter.convert(selectableValue, formattedType);
 			return formatter.format(selectableValue, LocaleContextHolder.getLocale());
 		}
 
 		public boolean isCollection() {
-			TypeDescriptor<?> type = TypeDescriptor.valueOf(getValueType());
-			return type.isCollection() || type.isArray();
+			Class type;
+			try { 
+				type = getValueType();
+			} catch (EvaluationException e) {
+				throw new IllegalArgumentException("Failed to get property expression value type - this should not happen", e);
+			}
+			TypeDescriptor<?> typeDesc = TypeDescriptor.valueOf(type);
+			return typeDesc.isCollection() || typeDesc.isArray();
 		}
 
 		public String[] getValues() {
@@ -235,7 +261,7 @@ public class Binder<T> {
 			try {
 				multiValue = property.getValue(createEvaluationContext());
 			} catch (EvaluationException e) {
-				throw new IllegalStateException(e);
+				throw new IllegalStateException("Failed to get property expression value - this should not happen", e);
 			}
 			if (multiValue == null) {
 				return EMPTY_STRING_ARRAY;
@@ -243,42 +269,47 @@ public class Binder<T> {
 			TypeDescriptor<?> type = TypeDescriptor.valueOf(multiValue.getClass());
 			String[] formattedValues;
 			if (type.isCollection()) {
-				Collection<?> values = ((Collection<?>)multiValue);
+				Collection<?> values = ((Collection<?>) multiValue);
 				formattedValues = (String[]) Array.newInstance(String.class, values.size());
 				copy(values, formattedValues);
 			} else if (type.isArray()) {
 				formattedValues = (String[]) Array.newInstance(String.class, Array.getLength(multiValue));
-				copy((Iterable<?>) multiValue, formattedValues);			
+				copy((Iterable<?>) multiValue, formattedValues);
 			} else {
 				throw new IllegalStateException();
 			}
 			return formattedValues;
 		}
 
-		public void setValues(String[] formattedValues) {
-			Formatter formatter = getFormatter();
+		public BindingResult setValues(String[] formatted) {
+			Formatter formatter;
+			try {
+				formatter = getFormatter();
+			} catch (EvaluationException e) {
+				// could occur the property was not found or is not readable
+				// TODO probably should not handle all EL failures, only type conversion & property not found?
+				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
+			}			
 			Class parsedType = getFormattedObjectType(formatter);
 			if (parsedType == null) {
 				parsedType = String.class;
 			}
-			Object values = Array.newInstance(parsedType, formattedValues.length);
-			for (int i = 0; i < formattedValues.length; i++) {
-				Array.set(values, i, parse(formattedValues[i], formatter));
+			Object parsed = Array.newInstance(parsedType, formatted.length);
+			for (int i = 0; i < formatted.length; i++) {
+				Object parsedValue;
+				try {
+					parsedValue = formatter.parse(formatted[i], LocaleContextHolder.getLocale());
+				} catch (ParseException e) {
+					return new InvalidFormatResult(property.getExpressionString(), formatted, e);
+				}
+				Array.set(parsed, i, parsedValue);
 			}
-			setValue(values);			
+			return setValue(parsed, formatted);
 		}
 
 		// internal helpers
-		
-		private Object parse(String formatted, Formatter formatter) {
-			try {
-				return formatter.parse(formatted, LocaleContextHolder.getLocale());
-			} catch (ParseException e) {
-				throw new IllegalArgumentException("Invalid format " + formatted, e);
-			}
-		}
 
-		private Formatter getFormatter() {
+		private Formatter getFormatter() throws EvaluationException {
 			if (formatter != null) {
 				return formatter;
 			} else {
@@ -299,21 +330,12 @@ public class Binder<T> {
 			}
 		}
 
-		private Class<?> getValueType() {
-			try {
-				return property.getValueType(createEvaluationContext());
-			} catch (EvaluationException e) {
-				throw new IllegalStateException(e);
-			}
+		private Class<?> getValueType() throws EvaluationException {
+			return property.getValueType(createEvaluationContext());
 		}
 
-		private Annotation[] getAnnotations() {
-			try {
-				return property.getValueTypeDescriptor(
-						createEvaluationContext()).getAnnotations();
-			} catch (EvaluationException e) {
-				throw new IllegalStateException(e);
-			}
+		private Annotation[] getAnnotations() throws EvaluationException {
+			return property.getValueTypeDescriptor(createEvaluationContext()).getAnnotations();
 		}
 
 		private void copy(Iterable<?> values, String[] formattedValues) {
@@ -323,15 +345,16 @@ public class Binder<T> {
 				i++;
 			}
 		}
-		
-		private void setValue(Object values) {
+
+		private BindingResult setValue(Object parsed, Object formatted) {
 			try {
-				property.setValue(createEvaluationContext(), values);
-			} catch (ExpressionException e) {
-				throw new IllegalArgumentException(e);
+				property.setValue(createEvaluationContext(), parsed);
+				return new SuccessResult(property.getExpressionString(), formatted);
+			} catch (EvaluationException e) {
+				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
 			}
 		}
-		
+
 	}
 
 	private EvaluationContext createEvaluationContext() {
@@ -341,7 +364,7 @@ public class Binder<T> {
 		context.setTypeConverter(new StandardTypeConverter(typeConverter));
 		return context;
 	}
-	
+
 	private Class getAnnotationType(AnnotationFormatterFactory factory) {
 		Class classToIntrospect = factory.getClass();
 		while (classToIntrospect != null) {
@@ -356,10 +379,11 @@ public class Binder<T> {
 			}
 			classToIntrospect = classToIntrospect.getSuperclass();
 		}
-		throw new IllegalArgumentException("Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
-				+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
+		throw new IllegalArgumentException(
+				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
+						+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
 	}
-	
+
 	private Class getFormattedObjectType(Formatter formatter) {
 		// TODO consider caching this info
 		Class classToIntrospect = formatter.getClass();
@@ -377,7 +401,7 @@ public class Binder<T> {
 		}
 		return null;
 	}
-	
+
 	private Class getParameterClass(Type parameterType, Class converterClass) {
 		if (parameterType instanceof TypeVariable) {
 			parameterType = GenericTypeResolver.resolveTypeVariable((TypeVariable) parameterType, converterClass);
@@ -392,7 +416,7 @@ public class Binder<T> {
 	static class SimpleAnnotationFormatterFactory implements AnnotationFormatterFactory {
 
 		private Formatter formatter;
-		
+
 		public SimpleAnnotationFormatterFactory(Formatter formatter) {
 			this.formatter = formatter;
 		}
@@ -400,6 +424,115 @@ public class Binder<T> {
 		public Formatter getFormatter(Annotation annotation) {
 			return formatter;
 		}
-		
+
+	}
+
+	static class InvalidFormatResult implements BindingResult {
+
+		private String property;
+
+		private Object formatted;
+
+		private ParseException e;
+
+		public InvalidFormatResult(String property, Object formatted, ParseException e) {
+			this.property = property;
+			this.formatted = formatted;
+			this.e = e;
+		}
+
+		public String getProperty() {
+			return property;
+		}
+
+		public boolean isError() {
+			return true;
+		}
+
+		public String getErrorCode() {
+			return "invalidFormat";
+		}
+
+		public Throwable getErrorCause() {
+			return e;
+		}
+
+		public Object getUserValue() {
+			return formatted;
+		}
+	}
+
+	static class ExpressionEvaluationErrorResult implements BindingResult {
+
+		private String property;
+
+		private Object formatted;
+
+		private EvaluationException e;
+
+		public ExpressionEvaluationErrorResult(String property, Object formatted, EvaluationException e) {
+			this.property = property;
+			this.formatted = formatted;
+			this.e = e;
+		}
+
+		public String getProperty() {
+			return property;
+		}
+
+		public boolean isError() {
+			return true;
+		}
+
+		public String getErrorCode() {
+			if (e.getMessage().startsWith("EL1034E")) {
+				return "typeConversionFailure";
+			} else if (e.getMessage().startsWith("EL1008E")) {
+				return "propertyNotFound";
+			} else {
+				// TODO return more specific code based on underlying EvaluationException error code
+				return "couldNotSetValue";
+			}
+		}
+
+		public Throwable getErrorCause() {
+			return e;
+		}
+
+		public Object getUserValue() {
+			return formatted;
+		}
+	}
+
+	static class SuccessResult implements BindingResult {
+
+		private String property;
+
+		private Object formatted;
+
+		public SuccessResult(String property, Object formatted) {
+			this.property = property;
+			this.formatted = formatted;
+		}
+
+		public String getProperty() {
+			return property;
+		}
+
+		public boolean isError() {
+			return false;
+		}
+
+		public String getErrorCode() {
+			return null;
+		}
+
+		public Throwable getErrorCause() {
+			return null;
+		}
+
+		public Object getUserValue() {
+			return formatted;
+		}
 	}
 }
