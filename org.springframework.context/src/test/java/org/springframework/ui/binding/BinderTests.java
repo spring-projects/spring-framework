@@ -85,7 +85,7 @@ public class BinderTests {
 	public void bindSingleValuePropertyFormatter() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
-		binder.bind(UserValue.singleton("date", "2009-06-01"));
+		binder.bind(UserValue.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
 	}
 
@@ -93,14 +93,14 @@ public class BinderTests {
 	public void bindSingleValuePropertyFormatterParseException() {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
-		binder.bind(UserValue.singleton("date", "bogus"));
+		binder.bind(UserValue.single("date", "bogus"));
 	}
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new DateFormatter(), Date.class);
-		binder.bind(UserValue.singleton("date", "2009-06-01"));
+		binder.bind(UserValue.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
 	}
 	
@@ -108,7 +108,7 @@ public class BinderTests {
 	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
-		binder.bind(UserValue.singleton("currency", "$23.56"));
+		binder.bind(UserValue.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
 	}
 	
@@ -116,14 +116,14 @@ public class BinderTests {
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		binder.add(new CurrencyAnnotationFormatterFactory());
-		binder.bind(UserValue.singleton("currency", "$23.56"));
+		binder.bind(UserValue.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
 	}
 	
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
-		List<BindingResult> results = binder.bind(UserValue.singleton("bogus", "2009-06-01"));
+		List<BindingResult> results = binder.bind(UserValue.single("bogus", "2009-06-01"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isError());
 		assertEquals("propertyNotFound", results.get(0).getErrorCode());
@@ -181,12 +181,12 @@ public class BinderTests {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
 		assertTrue(b.isCollection());
-		assertEquals(0, b.getValues().length);
-		b.setValues(new String[] { "BAR", "BAZ", "BOOP" });
+		assertEquals(0, b.getCollectionValues().length);
+		b.setValue(new String[] { "BAR", "BAZ", "BOOP" });
 		assertEquals(FooEnum.BAR, binder.getModel().getFoos().get(0));
 		assertEquals(FooEnum.BAZ, binder.getModel().getFoos().get(1));
 		assertEquals(FooEnum.BOOP, binder.getModel().getFoos().get(2));
-		String[] values = b.getValues();
+		String[] values = b.getCollectionValues();
 		assertEquals(3, values.length);
 		assertEquals("BAR", values[0]);
 		assertEquals("BAZ", values[1]);
@@ -198,8 +198,8 @@ public class BinderTests {
 		Binder<TestBean> binder = new Binder<TestBean>(new TestBean());
 		Binding b = binder.getBinding("foos");
 		assertTrue(b.isCollection());
-		assertEquals(0, b.getValues().length);
-		BindingResult result = b.setValues(new String[] { "BAR", "BOGUS", "BOOP" });
+		assertEquals(0, b.getCollectionValues().length);
+		BindingResult result = b.setValue(new String[] { "BAR", "BOGUS", "BOOP" });
 		assertTrue(result.isError());
 		assertTrue(result.getErrorCause() instanceof EvaluationException);
 		assertEquals("typeConversionFailure", result.getErrorCode());
