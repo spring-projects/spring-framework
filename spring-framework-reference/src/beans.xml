@@ -209,7 +209,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
   <bean id="..." class="...">
     <!-- collaborators and configuration for this bean go here -->
@@ -2815,7 +2815,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         file</emphasis>. If you are using the "<literal>scope</literal>"
         attribute then you <emphasis>must</emphasis> be referencing either the
         <filename>'spring-beans-2.0.dtd'</filename> DTD or the
-        <filename>'spring-beans-2.5.xsd'</filename> XSD <emphasis>in that
+        <filename>'spring-beans-3.0.xsd'</filename> XSD <emphasis>in that
         file</emphasis>.</para>
       </note>
     </section>
