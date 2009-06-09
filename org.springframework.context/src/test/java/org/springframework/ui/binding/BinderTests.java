@@ -221,19 +221,19 @@ public class BinderTests {
 		values.add(new UserValue("addresses[0].street", "4655 Macy Lane"));
 		values.add(new UserValue("addresses[0].city", "Melbourne"));
 		values.add(new UserValue("addresses[0].state", "FL"));
-		values.add(new UserValue("addresses[0].state", "35452"));
+		values.add(new UserValue("addresses[0].zip", "35452"));
 
 		// Auto adds new Address at 1
 		values.add(new UserValue("addresses[1].street", "1234 Rostock Circle"));
 		values.add(new UserValue("addresses[1].city", "Palm Bay"));
 		values.add(new UserValue("addresses[1].state", "FL"));
-		values.add(new UserValue("addresses[1].state", "32901"));
+		values.add(new UserValue("addresses[1].zip", "32901"));
 
 		// Auto adds new Address at 5 (plus intermediates 2,3,4)
 		values.add(new UserValue("addresses[5].street", "1234 Rostock Circle"));
 		values.add(new UserValue("addresses[5].city", "Palm Bay"));
 		values.add(new UserValue("addresses[5].state", "FL"));
-		values.add(new UserValue("addresses[5].state", "32901"));
+		values.add(new UserValue("addresses[5].zip", "32901"));
 
 		List<BindingResult> results = binder.bind(values);
 		Assert.assertEquals(6,testbean.addresses.size());
