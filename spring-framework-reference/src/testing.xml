@@ -1185,7 +1185,7 @@ public final class HibernateTitleDaoTests {
 &lt;beans xmlns="http://www.springframework.org/schema/beans" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean will be injected into the <classname>HibernateTitleDaoTests</classname> class --&gt;</lineannotation>
     &lt;bean id="<emphasis role="bold">titleDao</emphasis>" class="<emphasis
