@@ -89,7 +89,7 @@ public class SomeMovieFinder implements MovieFinder {
     <interfacename>@PersistenceContext</interfacename> annotations. Here is an
     example for a JPA repository:</para>
 
-    <programlisting language="java"><![CDATA[@Repository
+    <programlisting language="java">@Repository
 public class JpaMovieFinder implements MovieFinder {
 
     @PersistenceContext
@@ -97,12 +97,12 @@ public class JpaMovieFinder implements MovieFinder {
     
     // ...
 
-}]]></programlisting>
+}</programlisting>
 
     <para>If you are using the classic Hibernate APIs than you can inject the
     SessionFactory:</para>
 
-    <programlisting language="java"><![CDATA[@Repository
+    <programlisting language="java">@Repository
 public class HibernateMovieFinder implements MovieFinder {
 
     private SessionFactory sessionFactory;
@@ -114,7 +114,7 @@ public class HibernateMovieFinder implements MovieFinder {
     
     // ...
 
-}]]></programlisting>
+}</programlisting>
 
     <para>Last example we will show here is for typical JDBC support. You
     would have the <classname>DataSource</classname> injected into an
@@ -123,7 +123,7 @@ public class HibernateMovieFinder implements MovieFinder {
     like <classname>SimpleJdbcCall</classname> etc using this
     <classname>DataSource</classname>.</para>
 
-    <programlisting language="java"><![CDATA[@Repository
+    <programlisting language="java">@Repository
 public class JdbcMovieFinder implements MovieFinder {
 
     private JdbcTemplate jdbcTemplate;
@@ -135,6 +135,14 @@ public class JdbcMovieFinder implements MovieFinder {
     
     // ...
 
-}]]></programlisting>
+}</programlisting>
+
+    <note>
+      <para>Please see the specific coverage of each persistence technology
+      for details on how to configure the application context to take
+      advantage of these annotations.</para>
+    </note>
+
+    <para></para>
   </section>
 </chapter>
