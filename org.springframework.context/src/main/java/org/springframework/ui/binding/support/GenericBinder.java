@@ -157,6 +157,8 @@ public class GenericBinder<M> implements Binder<M> {
 		}
 		return results;
 	}
+	
+	// internal helpers
 
 	class BindingImpl implements Binding {
 
@@ -334,15 +336,16 @@ public class GenericBinder<M> implements Binder<M> {
 				return new ExpressionEvaluationErrorResult(property.getExpressionString(), userValue, e);
 			}
 		}
+		
 
-	}
+		private EvaluationContext createEvaluationContext() {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			context.setRootObject(model);
+			context.addPropertyAccessor(new MapAccessor());
+			context.setTypeConverter(new StandardTypeConverter(typeConverter));
+			return context;
+		}
 
-	private EvaluationContext createEvaluationContext() {
-		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.setRootObject(model);
-		context.addPropertyAccessor(new MapAccessor());
-		context.setTypeConverter(new StandardTypeConverter(typeConverter));
-		return context;
 	}
 
 	private Class getAnnotationType(AnnotationFormatterFactory factory) {
