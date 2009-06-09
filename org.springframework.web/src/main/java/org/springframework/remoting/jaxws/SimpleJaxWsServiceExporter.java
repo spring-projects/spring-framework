@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,10 @@ public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 	@Override
 	protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
 		String fullAddress = this.baseAddress + annotation.serviceName();
+		if (endpoint.getClass().getName().startsWith("weblogic.")) {
+			// Workaround for WebLogic 10.3 
+			fullAddress = fullAddress + "/";
+		}
 		endpoint.publish(fullAddress);
 	}
 
