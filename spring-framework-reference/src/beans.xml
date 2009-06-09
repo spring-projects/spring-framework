@@ -2525,7 +2525,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         <para>The bean definition to deploy the original class and specify the
         method override would look like this:</para>
 
-        <programlisting language="xml">&lt;bean id="myValueCalculator class="x.y.z.MyValueCalculator"&gt;
+        <programlisting language="xml">&lt;bean id="myValueCalculator" class="x.y.z.MyValueCalculator"&gt;
 
   <lineannotation>&lt;!-- arbitrary method replacement --&gt;</lineannotation>
   &lt;replaced-method name="computeValue" replacer="replacementComputeValue"&gt;

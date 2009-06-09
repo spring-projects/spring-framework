@@ -352,4 +352,102 @@
 
     <para>...</para>
   </section>
+
+  <section>
+    <title>JMS Usage</title>
+
+    <para>One of the benefits of Spring's JMS support is to shield the user
+    from differences between the JMS 1.0.2 and 1.1 APIs. (For a description of
+    the differences between the two APIs see sidebar on Domain Unification).
+    Since it is now common to encounter only the JMS 1.1 API the use of
+    classes that are based on the JMS 1.0.2 API has been deprecated in Spring
+    3.0. This section describes Spring JMS support for the JMS 1.0.2
+    deprecated classes. </para>
+
+    <sidebar>
+      <title>Domain Unification</title>
+
+      <para>There are two major releases of the JMS specification, 1.0.2 and
+      1.1.</para>
+
+      <para>JMS 1.0.2 defined two types of messaging domains, point-to-point
+      (Queues) and publish/subscribe (Topics). The 1.0.2 API reflected these
+      two messaging domains by providing a parallel class hierarchy for each
+      domain. As a result, a client application became domain specific in its
+      use of the JMS API. JMS 1.1 introduced the concept of domain unification
+      that minimized both the functional differences and client API
+      differences between the two domains. As an example of a functional
+      difference that was removed, if you use a JMS 1.1 provider you can
+      transactionally consume a message from one domain and produce a message
+      on the other using the same
+      <interfacename>Session</interfacename>.</para>
+
+      <note>
+        <para>The JMS 1.1 specification was released in April 2002 and
+        incorporated as part of J2EE 1.4 in November 2003. As a result, common
+        J2EE 1.3 application servers which are still in widespread use (such
+        as BEA WebLogic 8.1 and IBM WebSphere 5.1) are based on JMS
+        1.0.2.</para>
+      </note>
+    </sidebar>
+
+    <section>
+      <title>JmsTemplate</title>
+
+      <para>Located in the package
+      <literal>org.springframework.jms.core</literal> the class
+      <classname>JmsTemplate102</classname> provides all of the features of
+      the <classname>JmsTemplate</classname> described the JMS chapter, but is
+      based on the JMS 1.0.2 API instead of the JMS 1.1 API. As a consequence,
+      if you are using JmsTemplate102 you need to set the boolean property
+      <property>pubSubDomain</property> to configure the
+      <classname>JmsTemplate</classname> with knowledge of what JMS domain is
+      being used. By default the value of this property is false, indicating
+      that the point-to-point domain, Queues, will be used.</para>
+    </section>
+
+    <section>
+      <title>Asynchronous Message Reception </title>
+
+      <para><link
+      linkend="jms-receiving-async-message-listener-adapter">MessageListenerAdapter's</link>
+      are used in conjunction with Spring's <link linkend="jms-mdp">message
+      listener containers</link> to support asynchronous message reception by
+      exposing almost any class as a Message-driven POJO. If you are using the
+      JMS 1.0.2 API, you will want to use the 1.0.2 specific classes such as
+      <classname>MessageListenerAdapter102</classname>,
+      <classname>SimpleMessageListenerContainer102</classname>, and
+      <classname>DefaultMessageListenerContainer102</classname>. These classes
+      provide the same functionality as the JMS 1.1 based counterparts but
+      rely only on the JMS 1.0.2 API. </para>
+    </section>
+
+    <section>
+      <title>Connections</title>
+
+      <para>The <classname>ConnectionFactory</classname> interface is part of
+      the JMS specification and serves as the entry point for working with
+      JMS. Spring provides an implementation of the
+      <classname>ConnectionFactory</classname> interface,
+      <classname>SingleConnectionFactory102</classname>, based on the JMS
+      1.0.2 API that will return the same <classname>Connection</classname> on
+      all <methodname>createConnection</methodname> calls and ignore calls to
+      <methodname>close</methodname>. You will need to set the boolean
+      property <property>pubSubDomain</property> to indicate which messaging
+      domain is used as <classname>SingleConnectionFactory102</classname> will
+      always explicitly differentiate between a
+      <classname>javax.jms.QueueConnection</classname> and a
+      <classname>javax.jmsTopicConnection</classname>.</para>
+    </section>
+
+    <section>
+      <title>Transaction Management</title>
+
+      <para>In a JMS 1.0.2 environment the class
+      <classname>JmsTransactionManager102</classname> provides support for
+      managing JMS transactions for a single Connection Factory. Please refer
+      to the reference documentation on <link linkend="jms-tx">JMS Transaction
+      Management</link> for more information on this functionality.</para>
+    </section>
+  </section>
 </appendix>
