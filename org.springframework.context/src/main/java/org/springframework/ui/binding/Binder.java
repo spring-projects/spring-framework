@@ -74,7 +74,6 @@ public class Binder<T> {
 	private boolean strict = false;
 
 	private static Formatter defaultFormatter = new Formatter() {
-
 		public String format(Object object, Locale locale) {
 			if (object == null) {
 				return "";
@@ -182,14 +181,8 @@ public class Binder<T> {
 	public List<BindingResult> bind(List<UserValue> userValues) {
 		List<BindingResult> results = new ArrayList<BindingResult>(userValues.size());
 		for (UserValue value : userValues) {
-			Binding binding = getBinding(value.getProperty());
-			if (value.isString()) {
-				results.add(binding.setValue((String) value.getValue()));
-			} else if (value.isStringArray()) {
-				results.add(binding.setValues((String[]) value.getValue()));
-			} else {
-				throw new IllegalArgumentException("Illegal argument " + value);
-			}
+			BindingImpl binding = (BindingImpl) getBinding(value.getProperty());
+			results.add(binding.setValue(value.getValue()));
 		}
 		return results;
 	}
@@ -205,6 +198,8 @@ public class Binder<T> {
 			formatter = config.getFormatter();
 		}
 
+		// implementing Binding
+		
 		public String getValue() {
 			Object value;
 			try {
@@ -215,24 +210,16 @@ public class Binder<T> {
 			return format(value);
 		}
 
-		public BindingResult setValue(String formatted) {
-			Formatter formatter;
-			try {
-				formatter = getFormatter();
-			} catch (EvaluationException e) {
-				// could occur the property was not found or is not readable
-				// TODO probably should not handle all EL failures, only type conversion & property not found?
-				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
+		public BindingResult setValue(Object value) {
+			if (value instanceof String) {
+				return setStringValue((String) value);
+			} else if (value instanceof String[]) {
+				return setStringValues((String[]) value);
+			} else {
+				return setObjectValue(value);
 			}
-			Object parsed;
-			try {
-				parsed = formatter.parse(formatted, LocaleContextHolder.getLocale());
-			} catch (ParseException e) {
-				return new InvalidFormatResult(property.getExpressionString(), formatted, e);
-			}
-			return setValue(parsed, formatted);
 		}
-
+		
 		public String format(Object selectableValue) {
 			Formatter formatter;
 			try {
@@ -256,7 +243,7 @@ public class Binder<T> {
 			return typeDesc.isCollection() || typeDesc.isArray();
 		}
 
-		public String[] getValues() {
+		public String[] getCollectionValues() {
 			Object multiValue;
 			try {
 				multiValue = property.getValue(createEvaluationContext());
@@ -281,7 +268,27 @@ public class Binder<T> {
 			return formattedValues;
 		}
 
-		public BindingResult setValues(String[] formatted) {
+		// internal helpers
+		
+		private BindingResult setStringValue(String formatted) {
+			Formatter formatter;
+			try {
+				formatter = getFormatter();
+			} catch (EvaluationException e) {
+				// could occur the property was not found or is not readable
+				// TODO probably should not handle all EL failures, only type conversion & property not found?
+				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
+			}
+			Object parsed;
+			try {
+				parsed = formatter.parse(formatted, LocaleContextHolder.getLocale());
+			} catch (ParseException e) {
+				return new InvalidFormatResult(property.getExpressionString(), formatted, e);
+			}
+			return setValue(parsed, formatted);
+		}
+		
+		private BindingResult setStringValues(String[] formatted) {
 			Formatter formatter;
 			try {
 				formatter = getFormatter();
@@ -306,8 +313,10 @@ public class Binder<T> {
 			}
 			return setValue(parsed, formatted);
 		}
-
-		// internal helpers
+		
+		private BindingResult setObjectValue(Object value) {
+			return setValue(value, value);
+		}
 
 		private Formatter getFormatter() throws EvaluationException {
 			if (formatter != null) {
@@ -346,12 +355,12 @@ public class Binder<T> {
 			}
 		}
 
-		private BindingResult setValue(Object parsed, Object formatted) {
+		private BindingResult setValue(Object parsedValue, Object userValue) {
 			try {
-				property.setValue(createEvaluationContext(), parsed);
-				return new SuccessResult(property.getExpressionString(), formatted);
+				property.setValue(createEvaluationContext(), parsedValue);
+				return new SuccessResult(property.getExpressionString(), userValue);
 			} catch (EvaluationException e) {
-				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
+				return new ExpressionEvaluationErrorResult(property.getExpressionString(), userValue, e);
 			}
 		}
 

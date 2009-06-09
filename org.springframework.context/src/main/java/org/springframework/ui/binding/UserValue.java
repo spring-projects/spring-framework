@@ -73,7 +73,7 @@ public class UserValue {
 	 * @param value the actual user-entered value
 	 * @return the singleton user value list
 	 */
-	public static List<UserValue> singleton(String property, Object value) {
+	public static List<UserValue> single(String property, Object value) {
 		List<UserValue> values = new ArrayList<UserValue>(1);
 		values.add(new UserValue(property, value));
 		return values;
