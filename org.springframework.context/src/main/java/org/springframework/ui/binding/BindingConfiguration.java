@@ -15,12 +15,13 @@
  */
 package org.springframework.ui.binding;
 
+import org.springframework.ui.binding.support.GenericBinder;
 import org.springframework.ui.format.Formatter;
 
 /**
- * Configuration used to create a new {@link Binding} registered with a {@link Binder}.
+ * Configuration used to create a new {@link Binding} registered with a {@link GenericBinder}.
  * @author Keith Donald
- * @see Binder#add(BindingConfiguration)
+ * @see GenericBinder#add(BindingConfiguration)
  */
 public class BindingConfiguration {
 	
