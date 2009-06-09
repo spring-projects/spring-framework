@@ -15,9 +15,9 @@
  */
 package org.springframework.ui.binding;
 
-
 /**
  * A binding between a user interface element and a model property.
+ * TODO - consider having setValue accept Object to allow for binding special objects like arrays & multi-part files
  * @author Keith Donald
  */
 public interface Binding {
