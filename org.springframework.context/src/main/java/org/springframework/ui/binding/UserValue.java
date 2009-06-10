@@ -54,20 +54,6 @@ public class UserValue {
 	}
 	
 	/**
-	 * Is the user-entered value a String?
-	 */
-	public boolean isString() {
-		return value instanceof String;
-	}
-
-	/**
-	 * Is the user-entered value a String[]?
-	 */
-	public boolean isStringArray() {
-		return value instanceof String[];
-	}
-
-	/**
 	 * Creates a new UserValue list with a single element.
 	 * @param property the property
 	 * @param value the actual user-entered value
