@@ -16,9 +16,10 @@
 package org.springframework.ui.binding;
 
 /**
- * A data binding result.
- * 
+ * The result of a bind operation.
  * @author Keith Donald
+ * @see Binder#bind(java.util.List)
+ * @see Binding#setValue(Object)
  */
 public interface BindingResult {
 
