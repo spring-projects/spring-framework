@@ -55,17 +55,15 @@ import org.springframework.ui.format.Formatter;
 /**
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
- *
- * @param <M> The type of model object this binder binds to - TODO is this worth it?
  * @see #add(BindingConfiguration)
  * @see #bind(UserValues)
  */
 @SuppressWarnings("unchecked")
-public class GenericBinder<M> implements Binder<M> {
+public class GenericBinder implements Binder {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-	private M model;
+	private Object model;
 
 	private Map<String, Binding> bindings;
 
@@ -101,7 +99,7 @@ public class GenericBinder<M> implements Binder<M> {
 	 * Creates a new binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
 	 */
-	public GenericBinder(M model) {
+	public GenericBinder(Object model) {
 		this.model = model;
 		bindings = new HashMap<String, Binding>();
 		int parserConfig = SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull
@@ -110,7 +108,7 @@ public class GenericBinder<M> implements Binder<M> {
 		typeConverter = new DefaultTypeConverter();
 	}
 
-	public M getModel() {
+	public Object getModel() {
 		return model;
 	}
 

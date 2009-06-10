@@ -23,11 +23,10 @@ import org.springframework.ui.binding.UserValues;
  * A binder designed for use in HTTP (web) environments.
  * Suited for binding user-provided HTTP query parameters to model properties.
  * @author Keith Donald
- * @param <M> The type of model object this binder binds to
  * @see #setFieldDefaultPrefix(String)
  * @see #setFieldMarkerPrefix(String)
  */
-public class WebBinder<M> extends GenericBinder<M> {
+public class WebBinder extends GenericBinder {
 
 	private String fieldMarkerPrefix = "_";
 
@@ -37,7 +36,7 @@ public class WebBinder<M> extends GenericBinder<M> {
 	 * Creates a new web binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
 	 */
-	public WebBinder(M model) {
+	public WebBinder(Object model) {
 		super(model);
 	}
 
