@@ -9,8 +9,10 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -24,7 +26,6 @@ import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.UserValue;
-import org.springframework.ui.binding.support.GenericBinder;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
@@ -133,6 +134,21 @@ public class GenericBinderTests {
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isError());
 		assertEquals("propertyNotFound", results.get(0).getErrorCode());
+	}
+	
+	@Test
+	public void bindUserValuesCreatedFromUserMap() {
+		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
+		Map<String, String> userMap = new LinkedHashMap<String, String>();
+		userMap.put("string", "test");
+		userMap.put("integer", "3");
+		List<UserValue> values = binder.createUserValues(userMap);
+		List<BindingResult> results = binder.bind(values);
+		assertEquals(2, results.size());
+		assertEquals("test", results.get(0).getUserValue());
+		assertEquals("3", results.get(1).getUserValue());
+		assertEquals("test", binder.getModel().getString());
+		assertEquals(3, binder.getModel().getInteger());		
 	}
 	
 	@Test
