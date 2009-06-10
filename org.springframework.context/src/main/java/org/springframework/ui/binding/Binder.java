@@ -74,8 +74,19 @@ public interface Binder<M> {
 
 	/**
 	 * Bind values in the map to the properties of the model object.
+	 * TODO consider returning BindingResults object that makes it easier to query/introspect results
 	 * @param userValues user-entered values to bind
 	 */
 	List<BindingResult> bind(List<UserValue> userValues);
+	
+	/**
+	 * Creates a {@link UserValue} list from a Map of user-submitted fields.
+	 * The Binder may apply transformations as part of the creation process.
+	 * For example, a Binder might insert empty or default values for fields that are not present.
+	 * As another example, a Binder might collapse multiple fields into a single {@link UserValue} object.
+	 * @param userMap the map of user-submitted fields
+	 * @return the UserValue list that can be passed to {@link #bind(List)}.
+	 */
+	List<UserValue> createUserValues(Map<String, ? extends Object> userMap);
 
 }

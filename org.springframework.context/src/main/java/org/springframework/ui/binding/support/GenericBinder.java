@@ -109,6 +109,10 @@ public class GenericBinder<M> implements Binder<M> {
 		typeConverter = new DefaultTypeConverter();
 	}
 
+	public M getModel() {
+		return model;
+	}
+
 	public void setStrict(boolean strict) {
 		this.strict = strict;
 	}
@@ -136,10 +140,6 @@ public class GenericBinder<M> implements Binder<M> {
 		annotationFormatters.put(getAnnotationType(factory), factory);
 	}
 
-	public M getModel() {
-		return model;
-	}
-
 	public Binding getBinding(String property) {
 		Binding binding = bindings.get(property);
 		if (binding == null && !strict) {
@@ -158,6 +158,14 @@ public class GenericBinder<M> implements Binder<M> {
 		return results;
 	}
 	
+	public List<UserValue> createUserValues(Map<String, ? extends Object> userMap) {
+		List<UserValue> values = new ArrayList<UserValue>();
+		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
+			values.add(new UserValue(entry.getKey(), entry.getValue()));
+		}
+		return values;
+	}
+
 	// internal helpers
 
 	class BindingImpl implements Binding {
