@@ -25,7 +25,7 @@ public interface Binding {
 	 * The formatted value to display in the user interface.
 	 */
 	String getValue();
-	
+
 	/**
 	 * Set the property associated with this binding to the value provided.
 	 * The value may be a formatted String, a formatted String[] if a collection binding, or an Object of a type that can be coersed to the underlying property type.
@@ -51,5 +51,6 @@ public interface Binding {
 	 * When a collection binding, the formatted values to display in the user interface.
 	 */
 	String[] getCollectionValues();
-	
+
+
 }

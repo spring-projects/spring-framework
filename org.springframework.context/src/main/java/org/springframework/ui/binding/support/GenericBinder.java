@@ -55,7 +55,7 @@ import org.springframework.ui.format.Formatter;
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
  *
- * @param <T> The type of model object this binder binds to
+ * @param <M> The type of model object this binder binds to
  * @see #add(BindingConfiguration)
  * @see #bind(Map)
  */
@@ -214,12 +214,7 @@ public class GenericBinder<M> implements Binder<M> {
 		}
 
 		public boolean isCollection() {
-			Class type;
-			try { 
-				type = getValueType();
-			} catch (EvaluationException e) {
-				throw new IllegalArgumentException("Failed to get property expression value type - this should not happen", e);
-			}
+			Class type = getValueType();
 			TypeDescriptor<?> typeDesc = TypeDescriptor.valueOf(type);
 			return typeDesc.isCollection() || typeDesc.isArray();
 		}
@@ -248,7 +243,19 @@ public class GenericBinder<M> implements Binder<M> {
 			}
 			return formattedValues;
 		}
-
+		
+		// public impl only
+		
+		public Class getValueType() {
+			Class type;
+			try { 
+				type = property.getValueType(createEvaluationContext());
+			} catch (EvaluationException e) {
+				throw new IllegalArgumentException("Failed to get property expression value type - this should not happen", e);
+			}
+			return type;
+		}
+		
 		// internal helpers
 		
 		private BindingResult setStringValue(String formatted) {
@@ -303,7 +310,7 @@ public class GenericBinder<M> implements Binder<M> {
 			if (formatter != null) {
 				return formatter;
 			} else {
-				Class<?> type = getValueType();
+				Class<?> type = property.getValueType(createEvaluationContext());
 				Formatter<?> formatter = typeFormatters.get(type);
 				if (formatter != null) {
 					return formatter;
@@ -320,9 +327,6 @@ public class GenericBinder<M> implements Binder<M> {
 			}
 		}
 
-		private Class<?> getValueType() throws EvaluationException {
-			return property.getValueType(createEvaluationContext());
-		}
 
 		private Annotation[] getAnnotations() throws EvaluationException {
 			return property.getValueTypeDescriptor(createEvaluationContext()).getAnnotations();
