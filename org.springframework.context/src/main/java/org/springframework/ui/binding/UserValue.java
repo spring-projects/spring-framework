@@ -15,9 +15,6 @@
  */
 package org.springframework.ui.binding;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Holds a user-entered value to bind to a model property.
  * @author Keith Donald
@@ -51,18 +48,6 @@ public class UserValue {
 	 */
 	public Object getValue() {
 		return value;
-	}
-	
-	/**
-	 * Creates a new UserValue list with a single element.
-	 * @param property the property
-	 * @param value the actual user-entered value
-	 * @return the singleton user value list
-	 */
-	public static List<UserValue> single(String property, Object value) {
-		List<UserValue> values = new ArrayList<UserValue>(1);
-		values.add(new UserValue(property, value));
-		return values;
 	}
 	
 }

@@ -48,6 +48,7 @@ import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.UserValue;
+import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 
@@ -55,9 +56,9 @@ import org.springframework.ui.format.Formatter;
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
  *
- * @param <M> The type of model object this binder binds to
+ * @param <M> The type of model object this binder binds to - TODO is this worth it?
  * @see #add(BindingConfiguration)
- * @see #bind(Map)
+ * @see #bind(UserValues)
  */
 @SuppressWarnings("unchecked")
 public class GenericBinder<M> implements Binder<M> {
@@ -149,19 +150,19 @@ public class GenericBinder<M> implements Binder<M> {
 		}
 	}
 
-	public List<BindingResult> bind(List<UserValue> userValues) {
-		List<BindingResult> results = new ArrayList<BindingResult>(userValues.size());
-		for (UserValue value : userValues) {
+	public List<BindingResult> bind(UserValues values) {
+		List<BindingResult> results = new ArrayList<BindingResult>(values.size());
+		for (UserValue value : values) {
 			BindingImpl binding = (BindingImpl) getBinding(value.getProperty());
 			results.add(binding.setValue(value.getValue()));
 		}
 		return results;
 	}
 	
-	public List<UserValue> createUserValues(Map<String, ? extends Object> userMap) {
-		List<UserValue> values = new ArrayList<UserValue>();
+	public UserValues createUserValues(Map<String, ? extends Object> userMap) {
+		UserValues values = new UserValues(userMap.size());
 		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
-			values.add(new UserValue(entry.getKey(), entry.getValue()));
+			values.add(entry.getKey(), entry.getValue());
 		}
 		return values;
 	}

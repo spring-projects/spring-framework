@@ -17,7 +17,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
-import org.springframework.ui.binding.UserValue;
+import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
@@ -47,7 +47,7 @@ public class WebBinderTests {
 		userMap.put("!currency", "$5.00");
 		userMap.put("_currency", "doesn't matter");
 		userMap.put("_addresses", "doesn't matter");
-		List<UserValue> values = binder.createUserValues(userMap);
+		UserValues values = binder.createUserValues(userMap);
 		List<BindingResult> results = binder.bind(values);
 		assertEquals(6, results.size());
 		assertEquals("test", results.get(0).getUserValue());

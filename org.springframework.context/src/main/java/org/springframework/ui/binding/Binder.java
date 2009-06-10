@@ -27,7 +27,7 @@ import org.springframework.ui.format.Formatter;
  *
  * @param <M> The kind of model object this binder binds to
  * @see #add(BindingConfiguration)
- * @see #bind(Map)
+ * @see #bind(UserValues)
  */
 public interface Binder<M> {
 
@@ -39,7 +39,7 @@ public interface Binder<M> {
 	
 	/**
 	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #add(BindingConfiguration)}.
-	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(Map)} operations.
+	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(UserValues)} operations.
 	 * Default is optimistic.
 	 * @param strict strict binder status
 	 */
@@ -75,9 +75,9 @@ public interface Binder<M> {
 	/**
 	 * Bind values in the map to the properties of the model object.
 	 * TODO consider returning BindingResults object that makes it easier to query/introspect results
-	 * @param userValues user-entered values to bind
+	 * @param values user-entered values to bind
 	 */
-	List<BindingResult> bind(List<UserValue> userValues);
+	List<BindingResult> bind(UserValues values);
 	
 	/**
 	 * Creates a {@link UserValue} list from a Map of user-submitted fields.
@@ -85,8 +85,8 @@ public interface Binder<M> {
 	 * For example, a Binder might insert empty or default values for fields that are not present.
 	 * As another example, a Binder might collapse multiple fields into a single {@link UserValue} object.
 	 * @param userMap the map of user-submitted fields
-	 * @return the UserValue list that can be passed to {@link #bind(List)}.
+	 * @return the UserValue list that can be passed to {@link #bind(UserValues)}.
 	 */
-	List<UserValue> createUserValues(Map<String, ? extends Object> userMap);
+	UserValues createUserValues(Map<String, ? extends Object> userMap);
 
 }

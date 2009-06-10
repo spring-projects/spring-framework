@@ -15,11 +15,9 @@
  */
 package org.springframework.ui.binding.support;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.ui.binding.UserValue;
+import org.springframework.ui.binding.UserValues;
 
 /**
  * A binder designed for use in HTTP (web) environments.
@@ -60,24 +58,24 @@ public class WebBinder<M> extends GenericBinder<M> {
 	}
 
 	@Override
-	public List<UserValue> createUserValues(Map<String, ? extends Object> userMap) {
-		List<UserValue> values = new ArrayList<UserValue>();
+	public UserValues createUserValues(Map<String, ? extends Object> userMap) {
+		UserValues values = new UserValues();
 		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
 			String field = entry.getKey();
 			Object value = entry.getValue();
 			if (field.startsWith(fieldDefaultPrefix)) {
 				field = field.substring(fieldDefaultPrefix.length());
 				if (!userMap.containsKey(field)) {
-					values.add(new UserValue(field, value));
+					values.add(field, value);
 				}
 			} else if (field.startsWith(fieldMarkerPrefix)) {
 				field = field.substring(fieldMarkerPrefix.length());
 				if (!userMap.containsKey(field) && !userMap.containsKey(fieldDefaultPrefix + field)) {
 					value = getEmptyValue((BindingImpl) getBinding(field));
-					values.add(new UserValue(field, value));
+					values.add(field, value);
 				}
 			} else {
-				values.add(new UserValue(entry.getKey(), entry.getValue()));
+				values.add(entry.getKey(), entry.getValue());
 			}
 		}
 		return values;
