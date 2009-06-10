@@ -24,6 +24,9 @@ import org.springframework.ui.format.number.CurrencyFormat;
 
 public class WebBinderTests {
 
+	TestBean bean = new TestBean();
+	Binder binder = new WebBinder(bean);
+
 	@Before
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
@@ -36,7 +39,6 @@ public class WebBinderTests {
 	
 	@Test
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
-		Binder<TestBean> binder = new WebBinder<TestBean>(new TestBean());
 		binder.add(new CurrencyAnnotationFormatterFactory());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
@@ -57,12 +59,12 @@ public class WebBinderTests {
 		assertEquals("$5.00", results.get(4).getUserValue());
 		assertEquals(null, results.get(5).getUserValue());
 		
-		assertEquals("test", binder.getModel().getString());
-		assertEquals(0, binder.getModel().getInteger());
-		assertEquals(new DateFormatter().parse("2009-06-10", Locale.US), binder.getModel().getDate());
-		assertEquals(false, binder.getModel().isBool());
-		assertEquals(new BigDecimal("5.00"), binder.getModel().getCurrency());
-		assertEquals(null, binder.getModel().getAddresses());
+		assertEquals("test", bean.getString());
+		assertEquals(0, bean.getInteger());
+		assertEquals(new DateFormatter().parse("2009-06-10", Locale.US), bean.getDate());
+		assertEquals(false, bean.isBool());
+		assertEquals(new BigDecimal("5.00"), bean.getCurrency());
+		assertEquals(null, bean.getAddresses());
 	}
 	
 	public static enum FooEnum {

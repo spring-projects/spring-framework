@@ -29,13 +29,13 @@ import org.springframework.ui.format.Formatter;
  * @see #add(BindingConfiguration)
  * @see #bind(UserValues)
  */
-public interface Binder<M> {
+public interface Binder {
 
 	/**
 	 * The model object this binder binds to.
 	 * @return the model object
 	 */
-	M getModel();
+	Object getModel();
 	
 	/**
 	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #add(BindingConfiguration)}.
