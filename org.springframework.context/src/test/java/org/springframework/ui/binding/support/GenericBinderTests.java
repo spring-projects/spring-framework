@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,7 +24,7 @@ import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
-import org.springframework.ui.binding.UserValue;
+import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
@@ -47,10 +46,10 @@ public class GenericBinderTests {
 	@Test
 	public void bindSingleValuesWithDefaultTypeConverterConversion() {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
-		List<UserValue> values = new ArrayList<UserValue>();
-		values.add(new UserValue("string", "test"));
-		values.add(new UserValue("integer", "3"));
-		values.add(new UserValue("foo", "BAR"));
+		UserValues values = new UserValues();
+		values.add("string", "test");
+		values.add("integer", "3");
+		values.add("foo", "BAR");
 		List<BindingResult> results = binder.bind(values);
 		assertEquals(3, results.size());
 		
@@ -77,11 +76,11 @@ public class GenericBinderTests {
 	@Test
 	public void bindSingleValuesWithDefaultTypeCoversionFailure() {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
-		List<UserValue> values = new ArrayList<UserValue>();
-		values.add(new UserValue("string", "test"));
+		UserValues values = new UserValues();
+		values.add("string", "test");
 		// bad value
-		values.add(new UserValue("integer", "bogus"));
-		values.add(new UserValue("foo", "BAR"));
+		values.add("integer", "bogus");
+		values.add("foo", "BAR");
 		List<BindingResult> results = binder.bind(values);
 		assertEquals(3, results.size());
 		assertTrue(results.get(1).isError());
@@ -92,7 +91,7 @@ public class GenericBinderTests {
 	public void bindSingleValuePropertyFormatter() throws ParseException {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
-		binder.bind(UserValue.single("date", "2009-06-01"));
+		binder.bind(UserValues.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
 	}
 
@@ -100,14 +99,14 @@ public class GenericBinderTests {
 	public void bindSingleValuePropertyFormatterParseException() {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
-		binder.bind(UserValue.single("date", "bogus"));
+		binder.bind(UserValues.single("date", "bogus"));
 	}
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new DateFormatter(), Date.class);
-		binder.bind(UserValue.single("date", "2009-06-01"));
+		binder.bind(UserValues.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), binder.getModel().getDate());
 	}
 	
@@ -115,7 +114,7 @@ public class GenericBinderTests {
 	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
-		binder.bind(UserValue.single("currency", "$23.56"));
+		binder.bind(UserValues.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
 	}
 	
@@ -123,14 +122,14 @@ public class GenericBinderTests {
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
 		binder.add(new CurrencyAnnotationFormatterFactory());
-		binder.bind(UserValue.single("currency", "$23.56"));
+		binder.bind(UserValues.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), binder.getModel().getCurrency());
 	}
 	
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
 		Binder<TestBean> binder = new GenericBinder<TestBean>(new TestBean());
-		List<BindingResult> results = binder.bind(UserValue.single("bogus", "2009-06-01"));
+		List<BindingResult> results = binder.bind(UserValues.single("bogus", "2009-06-01"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isError());
 		assertEquals("propertyNotFound", results.get(0).getErrorCode());
@@ -142,7 +141,7 @@ public class GenericBinderTests {
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
 		userMap.put("integer", "3");
-		List<UserValue> values = binder.createUserValues(userMap);
+		UserValues values = binder.createUserValues(userMap);
 		List<BindingResult> results = binder.bind(values);
 		assertEquals(2, results.size());
 		assertEquals("test", results.get(0).getUserValue());
@@ -231,7 +230,7 @@ public class GenericBinderTests {
 	public void bindHandleNullValueInNestedPath() {
 		TestBean testbean = new TestBean();
 		Binder<TestBean> binder = new GenericBinder<TestBean>(testbean);
-		List<UserValue> values = new ArrayList<UserValue>();
+		UserValues values = new UserValues();
 		
 		// EL configured with some options from SpelExpressionParserConfiguration:
 		// (see where Binder creates the parser)
@@ -240,22 +239,22 @@ public class GenericBinderTests {
 		//   are new instances of the type of the list entry, they are not null.
 		// not currently doing anything for maps or arrays
 		
-		values.add(new UserValue("addresses[0].street", "4655 Macy Lane"));
-		values.add(new UserValue("addresses[0].city", "Melbourne"));
-		values.add(new UserValue("addresses[0].state", "FL"));
-		values.add(new UserValue("addresses[0].zip", "35452"));
+		values.add("addresses[0].street", "4655 Macy Lane");
+		values.add("addresses[0].city", "Melbourne");
+		values.add("addresses[0].state", "FL");
+		values.add("addresses[0].zip", "35452");
 
 		// Auto adds new Address at 1
-		values.add(new UserValue("addresses[1].street", "1234 Rostock Circle"));
-		values.add(new UserValue("addresses[1].city", "Palm Bay"));
-		values.add(new UserValue("addresses[1].state", "FL"));
-		values.add(new UserValue("addresses[1].zip", "32901"));
+		values.add("addresses[1].street", "1234 Rostock Circle");
+		values.add("addresses[1].city", "Palm Bay");
+		values.add("addresses[1].state", "FL");
+		values.add("addresses[1].zip", "32901");
 
 		// Auto adds new Address at 5 (plus intermediates 2,3,4)
-		values.add(new UserValue("addresses[5].street", "1234 Rostock Circle"));
-		values.add(new UserValue("addresses[5].city", "Palm Bay"));
-		values.add(new UserValue("addresses[5].state", "FL"));
-		values.add(new UserValue("addresses[5].zip", "32901"));
+		values.add("addresses[5].street", "1234 Rostock Circle");
+		values.add("addresses[5].city", "Palm Bay");
+		values.add("addresses[5].state", "FL");
+		values.add("addresses[5].zip", "32901");
 
 		List<BindingResult> results = binder.bind(values);
 		Assert.assertEquals(6,testbean.addresses.size());
