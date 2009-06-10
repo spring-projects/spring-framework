@@ -69,12 +69,20 @@ import java.lang.annotation.Target;
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet/Portlet API.
- * <li>{@link RequestParam @RequestParam} annotated parameters for access to
- * specific Servlet/Portlet request parameters. Parameter values will be
- * converted to the declared method argument type.
  * <li>{@link PathVariable @PathVariable} annotated parameters for acces to
  * URI template values (i.e. /hotels/{hotel}). Variable values will be
  * converted to the declared method argument type.
+ * <li>{@link RequestParam @RequestParam} annotated parameters for access to
+ * specific Servlet/Portlet request parameters. Parameter values will be
+ * converted to the declared method argument type.
+ * <li>{@link RequestHeader @RequestHeader} annotated parameters for access to
+ * specific Servlet/Portlet request HTTP headers. Parameter values will be
+ * converted to the declared method argument type.
+ * <li>{@link RequestBody @RequestBody} annotated parameters for access to
+ * the Servlet request HTTP contents. Parameter values will be
+ * converted to the declared method argument type using 
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message
+ * converters}.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
  * {@link org.springframework.ui.ModelMap} for enriching the implicit model
  * that will be exposed to the web view.
