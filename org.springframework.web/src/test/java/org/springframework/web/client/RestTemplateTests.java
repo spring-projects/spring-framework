@@ -136,7 +136,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void getForObject() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(3);
+		expect(converter.supports(String.class)).andReturn(true).times(2);
 		MediaType textPlain = new MediaType("text", "plain");
 		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.GET)).andReturn(request);
@@ -155,6 +155,7 @@ public class RestTemplateTests {
 
 		String result = template.getForObject("http://example.com", String.class);
 		assertEquals("Invalid GET result", expected, result);
+		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
 
 		verifyMocks();
 	}
@@ -178,7 +179,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void getUnsupportedMediaType() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(3);
+		expect(converter.supports(String.class)).andReturn(true).times(2);
 		MediaType supportedMediaType = new MediaType("foo", "bar");
 		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(supportedMediaType)).times(2);
 		expect(requestFactory.createRequest(new URI("http://example.com/resource"), HttpMethod.GET)).andReturn(request);

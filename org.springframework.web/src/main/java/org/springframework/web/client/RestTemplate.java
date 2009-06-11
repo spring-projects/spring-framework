@@ -167,7 +167,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		checkForSupportedMessageConverter(responseType);
 		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
-		return execute(url, HttpMethod.GET, new GetCallback<T>(responseType),
+		return execute(url, HttpMethod.GET, new GetCallback<T>(supportedMessageConverters),
 				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
@@ -176,7 +176,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		checkForSupportedMessageConverter(responseType);
 		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
-		return execute(url, HttpMethod.GET, new GetCallback<T>(responseType),
+		return execute(url, HttpMethod.GET, new GetCallback<T>(supportedMessageConverters),
 				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
@@ -339,15 +339,15 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	/** Request callback implementation that prepares the request's accept headers. */
 	private class GetCallback<T> implements RequestCallback {
 
-		private final Class<T> responseType;
+		private final List<HttpMessageConverter<T>> messageConverters;
 
-		private GetCallback(Class<T> responseType) {
-			this.responseType = responseType;
+		private GetCallback(List<HttpMessageConverter<T>> messageConverters) {
+			this.messageConverters = messageConverters;
 		}
 
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-			for (HttpMessageConverter<?> entityConverter : getSupportedMessageConverters(this.responseType)) {
+			for (HttpMessageConverter<?> entityConverter : messageConverters) {
 				List<MediaType> supportedMediaTypes = entityConverter.getSupportedMediaTypes();
 				for (MediaType supportedMediaType : supportedMediaTypes) {
 					if (supportedMediaType.getCharSet() != null) {
