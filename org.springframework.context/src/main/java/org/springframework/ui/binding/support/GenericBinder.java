@@ -23,6 +23,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
+import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.FormatterRegistry;
 import org.springframework.ui.binding.UserValue;
 import org.springframework.ui.binding.UserValues;
@@ -128,8 +130,8 @@ public class GenericBinder implements Binder {
 		}
 	}
 
-	public List<BindingResult> bind(UserValues values) {
-		List<BindingResult> results = new ArrayList<BindingResult>(values.size());
+	public BindingResults bind(UserValues values) {
+		ArrayListBindingResults results = new ArrayListBindingResults(values.size());
 		for (UserValue value : values) {
 			BindingImpl binding = (BindingImpl) getBinding(value.getProperty());
 			results.add(binding.setValue(value.getValue()));
@@ -147,6 +149,54 @@ public class GenericBinder implements Binder {
 
 	// internal helpers
 
+	static class ArrayListBindingResults implements BindingResults {
+
+		private List<BindingResult> results;
+		
+		public ArrayListBindingResults(int size) {
+			results = new ArrayList<BindingResult>(size);
+		}
+
+		public void add(BindingResult result) {
+			results.add(result);
+		}
+
+		// implementing Iterable
+		
+		public Iterator<BindingResult> iterator() {
+			return results.iterator();
+		}
+
+		// implementing BindingResults
+		
+		public BindingResults successes() {
+			// TODO
+			return this;
+		}
+		
+		public BindingResults failures() {
+			// TODO
+			return this;
+		}
+
+		public BindingResult get(int index) {
+			return results.get(index);
+		}
+
+		public List<String> properties() {
+			List<String> properties = new ArrayList<String>(results.size());
+			for (BindingResult result : this) {
+				properties.add(result.getProperty());
+			}
+			return properties;
+		}
+
+		public int size() {
+			return results.size();
+		}
+		
+	}
+	
 	class BindingImpl implements Binding {
 
 		private Expression property;
