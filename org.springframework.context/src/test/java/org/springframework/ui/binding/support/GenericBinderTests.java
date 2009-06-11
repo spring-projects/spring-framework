@@ -24,6 +24,7 @@ import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
+import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
@@ -55,7 +56,7 @@ public class GenericBinderTests {
 		values.add("string", "test");
 		values.add("integer", "3");
 		values.add("foo", "BAR");
-		List<BindingResult> results = binder.bind(values);
+		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 		
 		assertEquals("string", results.get(0).getProperty());
@@ -85,7 +86,7 @@ public class GenericBinderTests {
 		// bad value
 		values.add("integer", "bogus");
 		values.add("foo", "BAR");
-		List<BindingResult> results = binder.bind(values);
+		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 		assertTrue(results.get(1).isError());
 		assertEquals("typeConversionFailure", results.get(1).getErrorCode());
@@ -127,7 +128,7 @@ public class GenericBinderTests {
 	
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
-		List<BindingResult> results = binder.bind(UserValues.single("bogus", "2009-06-01"));
+		BindingResults results = binder.bind(UserValues.single("bogus", "2009-06-01"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isError());
 		assertEquals("propertyNotFound", results.get(0).getErrorCode());
@@ -139,7 +140,7 @@ public class GenericBinderTests {
 		userMap.put("string", "test");
 		userMap.put("integer", "3");
 		UserValues values = binder.createUserValues(userMap);
-		List<BindingResult> results = binder.bind(values);
+		BindingResults results = binder.bind(values);
 		assertEquals(2, results.size());
 		assertEquals("test", results.get(0).getUserValue());
 		assertEquals("3", results.get(1).getUserValue());
@@ -245,7 +246,7 @@ public class GenericBinderTests {
 		values.add("addresses[5].state", "FL");
 		values.add("addresses[5].zip", "32901");
 
-		List<BindingResult> results = binder.bind(values);
+		BindingResults results = binder.bind(values);
 		Assert.assertEquals(6, bean.addresses.size());
 		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 		Assert.assertNotNull(bean.addresses.get(2));

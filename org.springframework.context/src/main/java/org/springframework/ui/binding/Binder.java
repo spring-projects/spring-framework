@@ -15,7 +15,6 @@
  */
 package org.springframework.ui.binding;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.ui.format.AnnotationFormatterFactory;
@@ -74,10 +73,10 @@ public interface Binder {
 
 	/**
 	 * Bind values in the map to the properties of the model object.
-	 * TODO consider returning BindingResults object that makes it easier to query/introspect results
 	 * @param values user-entered values to bind
+	 * @return the results of the binding operation
 	 */
-	List<BindingResult> bind(UserValues values);
+	BindingResults bind(UserValues values);
 	
 	/**
 	 * Creates a {@link UserValue} list from a Map of user-submitted fields.
