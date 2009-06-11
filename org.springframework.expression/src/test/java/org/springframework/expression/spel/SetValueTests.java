@@ -62,7 +62,7 @@ public class SetValueTests extends ExpressionTestCase {
 
 	@Test
 	public void testSetElementOfNull() {
-		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	@Test

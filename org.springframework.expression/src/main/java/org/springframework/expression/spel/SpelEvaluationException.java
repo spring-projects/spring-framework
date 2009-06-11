@@ -19,7 +19,7 @@ import org.springframework.expression.EvaluationException;
 
 /**
  * Root exception for Spring EL related exceptions. Rather than holding a hard coded string indicating the problem, it
- * records a message key and the inserts for the message. See {@link SpelMessages} for the list of all possible messages
+ * records a message key and the inserts for the message. See {@link SpelMessage} for the list of all possible messages
  * that can occur.
  * 
  * @author Andy Clement
@@ -27,29 +27,29 @@ import org.springframework.expression.EvaluationException;
  */
 public class SpelEvaluationException extends EvaluationException {
 
-	private SpelMessages message;
+	private SpelMessage message;
 	private Object[] inserts;
 
-	public SpelEvaluationException(SpelMessages message, Object... inserts) {
+	public SpelEvaluationException(SpelMessage message, Object... inserts) {
 		super(message.formatMessage(0, inserts)); // TODO poor position information, can the callers not really supply something?
 		this.message = message;
 		this.inserts = inserts;
 	}
 
-	public SpelEvaluationException(int position, SpelMessages message, Object... inserts) {
+	public SpelEvaluationException(int position, SpelMessage message, Object... inserts) {
 		super(position, message.formatMessage(position, inserts)); 
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelEvaluationException(int position, Throwable cause,
-			SpelMessages message, Object... inserts) {
+			SpelMessage message, Object... inserts) {
 		super(position,message.formatMessage(position,inserts),cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
 
-	public SpelEvaluationException(Throwable cause, SpelMessages message, Object... inserts) {
+	public SpelEvaluationException(Throwable cause, SpelMessage message, Object... inserts) {
 		super(message.formatMessage(0,inserts),cause);
 		this.message = message;
 		this.inserts = inserts;
@@ -67,9 +67,9 @@ public class SpelEvaluationException extends EvaluationException {
 	}
 
 	/**
-	 * @return the unformatted message
+	 * @return the message code
 	 */
-	public SpelMessages getMessageUnformatted() {
+	public SpelMessage getMessageCode() {
 		return this.message;
 	}
 

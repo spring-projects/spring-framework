@@ -19,7 +19,7 @@ package org.springframework.expression.spel.ast;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.standard.InternalParseException;
 
@@ -67,7 +67,7 @@ public abstract class Literal extends SpelNodeImpl {
 			int value = Integer.parseInt(numberToken, radix);
 			return new IntLiteral(numberToken, pos, value);
 		} catch (NumberFormatException nfe) {
-			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessages.NOT_AN_INTEGER, numberToken));
+			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessage.NOT_AN_INTEGER, numberToken));
 		}
 	}
 
@@ -76,7 +76,7 @@ public abstract class Literal extends SpelNodeImpl {
 			long value = Long.parseLong(numberToken, radix);
 			return new LongLiteral(numberToken, pos, value);
 		} catch (NumberFormatException nfe) {
-			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessages.NOT_A_LONG, numberToken));
+			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessage.NOT_A_LONG, numberToken));
 		}
 	}
 
@@ -91,7 +91,7 @@ public abstract class Literal extends SpelNodeImpl {
 				return new RealLiteral(numberToken, pos, value);				
 			}
 		} catch (NumberFormatException nfe) {
-			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessages.NOT_A_REAL, numberToken));
+			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessage.NOT_A_REAL, numberToken));
 		}
 	}
 

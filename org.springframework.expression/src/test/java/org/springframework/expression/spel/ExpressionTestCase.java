@@ -202,7 +202,7 @@ public abstract class ExpressionTestCase {
 	 * @param expectedMessage The expected message
 	 * @param otherProperties The expected inserts within the message
 	 */
-	protected void evaluateAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
+	protected void evaluateAndCheckError(String expression, SpelMessage expectedMessage, Object... otherProperties) {
 		evaluateAndCheckError(expression, null, expectedMessage, otherProperties);
 	}
 
@@ -216,7 +216,7 @@ public abstract class ExpressionTestCase {
 	 * @param expectedMessage The expected message
 	 * @param otherProperties The expected inserts within the message
 	 */
-	protected void evaluateAndCheckError(String expression, Class<?> expectedReturnType, SpelMessages expectedMessage,
+	protected void evaluateAndCheckError(String expression, Class<?> expectedReturnType, SpelMessage expectedMessage,
 			Object... otherProperties) {
 		try {
 			Expression expr = parser.parseExpression(expression);
@@ -233,10 +233,10 @@ public abstract class ExpressionTestCase {
 			Assert.fail("Should have failed with message " + expectedMessage);
 		} catch (EvaluationException ee) {
 			SpelEvaluationException ex = (SpelEvaluationException) ee;
-			if (ex.getMessageUnformatted() != expectedMessage) {
+			if (ex.getMessageCode() != expectedMessage) {
 //				System.out.println(ex.getMessage());
 				ex.printStackTrace();
-				Assert.assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
+				Assert.assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
 			}
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
@@ -288,7 +288,7 @@ public abstract class ExpressionTestCase {
 	 * @param expectedMessage The expected message
 	 * @param otherProperties The expected inserts within the message
 	 */
-	protected void parseAndCheckError(String expression, SpelMessages expectedMessage, Object... otherProperties) {
+	protected void parseAndCheckError(String expression, SpelMessage expectedMessage, Object... otherProperties) {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
@@ -306,10 +306,10 @@ public abstract class ExpressionTestCase {
 //			SpelEvaluationException ex = (SpelEvaluationException) t;
 //			pe.printStackTrace();
 			SpelParseException ex = (SpelParseException)pe;
-			if (ex.getMessageUnformatted() != expectedMessage) {
+			if (ex.getMessageCode() != expectedMessage) {
 //				System.out.println(ex.getMessage());
 				ex.printStackTrace();
-				Assert.assertEquals("Failed to get expected message", expectedMessage, ex.getMessageUnformatted());
+				Assert.assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
 			}
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string

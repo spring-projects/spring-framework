@@ -153,9 +153,9 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0f + 5.0f", 8.0d, Double.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
 
-		evaluateAndCheckError("'ab' + 2", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("2+'a' ", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("2+'ab'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'ab' + 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("2+'a' ", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("2+'ab'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		
 		// AST:
 		SpelExpression expr = (SpelExpression)parser.parseExpression("+3");
@@ -167,7 +167,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("+5d",5d,Double.class);
 		evaluate("+5L",5L,Long.class);
 		evaluate("+5",5,Integer.class);
-		evaluateAndCheckError("+'abc'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("+'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		
 		// string concatenation
 		evaluate("'abc'+'def'","abcdef",String.class);
@@ -180,8 +180,8 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testMinus() throws Exception {
 		evaluate("'c' - 2", "a", String.class);
 		evaluate("3.0f - 5.0f", -2.0d, Double.class);
-		evaluateAndCheckError("'ab' - 2", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("2-'ab'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'ab' - 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("2-'ab'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
 		Assert.assertEquals("-3",expr.toStringAST());
 		expr = (SpelExpression)parser.parseExpression("2-3");
@@ -190,7 +190,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("-5d",-5d,Double.class);
 		evaluate("-5L",-5L,Long.class);
 		evaluate("-5",-5,Integer.class);
-		evaluateAndCheckError("-'abc'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("-'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 	
 	@Test
@@ -199,14 +199,14 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L%2L",1L,Long.class);
 		evaluate("3.0f%2.0f",1d,Double.class);
 		evaluate("5.0d % 3.1d", 1.9d, Double.class);
-		evaluateAndCheckError("'abc'%'def'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'abc'%'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
 	public void testDivide() {
 		evaluate("3.0f / 5.0f", 0.6d, Double.class);
 		evaluate("4L/2L",2L,Long.class);
-		evaluateAndCheckError("'abc'/'def'",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'abc'/'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 	
 	@Test
@@ -273,8 +273,8 @@ public class OperatorTests extends ExpressionTestCase {
 	
 	@Test
 	public void testOperatorOverloading() {
-		evaluateAndCheckError("'a' * '2'", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("'a' ^ '2'", SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'a' * '2'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'a' ^ '2'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 	
 	@Test

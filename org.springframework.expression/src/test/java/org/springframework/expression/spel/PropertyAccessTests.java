@@ -56,10 +56,10 @@ public class PropertyAccessTests extends ExpressionTestCase {
 	@Test
 	public void testNonExistentPropertiesAndMethods() {
 		// madeup does not exist as a property
-		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 0);
+		evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0);
 
 		// name is ok but foobar does not exist:
-		evaluateAndCheckError("name.foobar", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 5);
+		evaluateAndCheckError("name.foobar", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 5);
 	}
 	
 	/**
@@ -74,20 +74,20 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			expr.getValue(context);
 			Assert.fail("Should have failed - default property resolver cannot resolve on null");
 		} catch (Exception e) {
-			checkException(e,SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
+			checkException(e,SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
 		}
 		Assert.assertFalse(expr.isWritable(context));
 		try {
 			expr.setValue(context,"abc");
 			Assert.fail("Should have failed - default property resolver cannot resolve on null");
 		} catch (Exception e) {
-			checkException(e,SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			checkException(e,SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 
-	private void checkException(Exception e, SpelMessages expectedMessage) {
+	private void checkException(Exception e, SpelMessage expectedMessage) {
 		if (e instanceof SpelEvaluationException) {
-			SpelMessages sm = ((SpelEvaluationException)e).getMessageUnformatted();
+			SpelMessage sm = ((SpelEvaluationException)e).getMessageCode();
 			Assert.assertEquals("Expected exception type did not occur",expectedMessage,sm);
 		} else {
 			Assert.fail("Should be a SpelException "+e);

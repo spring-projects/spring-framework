@@ -20,7 +20,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -54,7 +54,7 @@ public class OperatorInstanceof extends Operator {
 		}
 		if (rightValue == null || !(rightValue instanceof Class<?>)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
-					SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
+					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
 					(rightValue == null ? "null" : rightValue.getClass().getName()));
 		}
 		Class<?> rightClass = (Class<?>) rightValue;

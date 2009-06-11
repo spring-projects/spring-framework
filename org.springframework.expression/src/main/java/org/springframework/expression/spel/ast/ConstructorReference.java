@@ -26,7 +26,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 // TODO asc array constructor call logic has been removed for now
 // TODO make this like the method referencing one
@@ -104,7 +104,7 @@ public class ConstructorReference extends SpelNodeImpl {
 			TypedValue result = executorToUse.execute(state.getEvaluationContext(), arguments);
 			return result;
 		} catch (AccessException ae) {
-			throw new SpelEvaluationException(getStartPosition(), ae, SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+			throw new SpelEvaluationException(getStartPosition(), ae, SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
 					FormatHelper.formatMethodForMessage("", argumentTypes));
 
 		}
@@ -133,12 +133,12 @@ public class ConstructorReference extends SpelNodeImpl {
 						return cEx;
 					}
 				} catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
 							FormatHelper.formatMethodForMessage("", argumentTypes));
 				}
 			}
 		}
-		throw new SpelEvaluationException(getStartPosition(),SpelMessages.CONSTRUCTOR_NOT_FOUND, typename, FormatHelper.formatMethodForMessage("",
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.CONSTRUCTOR_NOT_FOUND, typename, FormatHelper.formatMethodForMessage("",
 				argumentTypes));
 	}
 

@@ -27,7 +27,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 /**
  * Represents selection over a map or collection. For example: {1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'} returns
@@ -81,7 +81,7 @@ public class Selection extends SpelNodeImpl {
 						}
 					} else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
-								SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
+								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
 					}
 				} finally {
 					state.popActiveContextObject();
@@ -116,7 +116,7 @@ public class Selection extends SpelNodeImpl {
 						}
 					} else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
-								SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
+								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
 					}
 					idx++;
 				} finally {
@@ -136,11 +136,11 @@ public class Selection extends SpelNodeImpl {
 				if (nullSafe) { 
 					return TypedValue.NULL_TYPED_VALUE;
 				} else {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
+					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 							"null");
 				}
 			} else {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessages.INVALID_TYPE_FOR_SELECTION,
+				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 						operand.getClass().getName());
 			}				
 		}

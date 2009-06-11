@@ -203,7 +203,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 			Assert.fail("should have failed");
 		} catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			Assert.assertEquals(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageCode());
 		}
 
 		try {
@@ -211,7 +211,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 			Assert.fail("should have failed");
 		} catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			Assert.assertEquals(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageCode());
 		}
 	}
 	
@@ -231,7 +231,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 			Assert.fail("Should have failed to find it");
 		} catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			Assert.assertEquals(SpelMessages.TYPE_NOT_FOUND,sEx.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.TYPE_NOT_FOUND,sEx.getMessageCode());
 		}
 	}
 	

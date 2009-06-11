@@ -39,12 +39,12 @@ public class InProgressTests extends ExpressionTestCase {
 	
 	@Test
 	public void testRelOperatorsBetweenErrors01() {
-		 evaluateAndCheckError("1 between T(String)", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+		 evaluateAndCheckError("1 between T(String)", SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 	}
 	
 	@Test
 	public void testRelOperatorsBetweenErrors03() {
-		 evaluateAndCheckError("1 between listOfNumbersUpToTen", SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+		 evaluateAndCheckError("1 between listOfNumbersUpToTen", SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 	}
 	
 	// PROJECTION 
@@ -64,8 +64,8 @@ public class InProgressTests extends ExpressionTestCase {
 	
 	@Test
 	public void testProjection05() {
-		evaluateAndCheckError("'abc'.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
-		evaluateAndCheckError("null.![true]", SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE);
+		evaluateAndCheckError("'abc'.![true]", SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE);
+		evaluateAndCheckError("null.![true]", SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE);
 		evaluate("null?.![true]", null, null);
 	}
 	
@@ -88,7 +88,7 @@ public class InProgressTests extends ExpressionTestCase {
 	@Test
 	 public void testSelectionError_NonBooleanSelectionCriteria() {
 		 evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']",
-				 SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+				 SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	 }
 	 
 	@Test
@@ -100,7 +100,7 @@ public class InProgressTests extends ExpressionTestCase {
 
 	@Test
 	public void testSelection04() {
-		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 	}
 
 	@Test
@@ -109,8 +109,8 @@ public class InProgressTests extends ExpressionTestCase {
 		evaluate("mapOfNumbersUpToTen.^[key>11]", null, null);
 		evaluate("mapOfNumbersUpToTen.$[key>11]", null, null);
 		evaluate("null?.$[key>11]", null, null);
-		evaluateAndCheckError("null.?[key>11]", SpelMessages.INVALID_TYPE_FOR_SELECTION);
-		evaluateAndCheckError("'abc'.?[key>11]", SpelMessages.INVALID_TYPE_FOR_SELECTION);
+		evaluateAndCheckError("null.?[key>11]", SpelMessage.INVALID_TYPE_FOR_SELECTION);
+		evaluateAndCheckError("'abc'.?[key>11]", SpelMessage.INVALID_TYPE_FOR_SELECTION);
 	}
 
 	@Test

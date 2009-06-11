@@ -50,7 +50,7 @@ public class StandardTypeLocatorTests {
 			Assert.fail("Should have failed");
 		} catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			Assert.assertEquals(SpelMessages.TYPE_NOT_FOUND,sEx.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.TYPE_NOT_FOUND,sEx.getMessageCode());
 		}
 		locator.registerImport("java.net");
 		Assert.assertEquals(java.net.URL.class,locator.findType("URL"));

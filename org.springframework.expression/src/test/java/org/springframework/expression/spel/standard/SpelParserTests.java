@@ -22,7 +22,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.SpelExpression;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.ast.OpAnd;
@@ -114,7 +114,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.MISSING_CONSTRUCTOR_ARGS,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.MISSING_CONSTRUCTOR_ARGS,spe.getMessageCode());
 			Assert.assertEquals(10,spe.getPosition());
 		}
 		try {
@@ -124,7 +124,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.MISSING_CONSTRUCTOR_ARGS,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.MISSING_CONSTRUCTOR_ARGS,spe.getMessageCode());
 			Assert.assertEquals(10,spe.getPosition());
 		}
 		try {
@@ -134,7 +134,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.RUN_OUT_OF_ARGUMENTS,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS,spe.getMessageCode());
 			Assert.assertEquals(10,spe.getPosition());
 		}
 		try {
@@ -144,7 +144,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.RUN_OUT_OF_ARGUMENTS,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS,spe.getMessageCode());
 			Assert.assertEquals(10,spe.getPosition());
 		}
 		try {
@@ -154,7 +154,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.RUN_OUT_OF_ARGUMENTS,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS,spe.getMessageCode());
 			Assert.assertEquals(10,spe.getPosition());
 		}
 		try {
@@ -164,7 +164,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.NON_TERMINATING_DOUBLE_QUOTED_STRING,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING,spe.getMessageCode());
 			Assert.assertEquals(0,spe.getPosition());
 		}
 		try {
@@ -174,7 +174,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessages.NON_TERMINATING_QUOTED_STRING,spe.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.NON_TERMINATING_QUOTED_STRING,spe.getMessageCode());
 			Assert.assertEquals(0,spe.getPosition());
 		}
 
@@ -332,12 +332,12 @@ public class SpelParserTests {
 		checkNumber("0xa",10,Integer.class);
 		checkNumber("0xAL",10L,Long.class);
 
-		checkNumberError("0x",SpelMessages.NOT_AN_INTEGER);
-		checkNumberError("0xL",SpelMessages.NOT_A_LONG);
+		checkNumberError("0x",SpelMessage.NOT_AN_INTEGER);
+		checkNumberError("0xL",SpelMessage.NOT_A_LONG);
 
-		checkNumberError(".324",SpelMessages.UNEXPECTED_DATA_AFTER_DOT);
+		checkNumberError(".324",SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
 
-		checkNumberError("3.4L",SpelMessages.REAL_CANNOT_BE_LONG);
+		checkNumberError("3.4L",SpelMessage.REAL_CANNOT_BE_LONG);
 
 		// Number is parsed as a float, but immediately promoted to a double
 		checkNumber("3.5f",3.5d,Double.class);
@@ -363,7 +363,7 @@ public class SpelParserTests {
 		}
 	}
 
-	private void checkNumberError(String expression, SpelMessages expectedMessage) {
+	private void checkNumberError(String expression, SpelMessage expectedMessage) {
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parse(expression);
@@ -371,7 +371,7 @@ public class SpelParserTests {
 		} catch (ParseException e) {
 			Assert.assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(expectedMessage,spe.getMessageUnformatted());
+			Assert.assertEquals(expectedMessage,spe.getMessageCode());
 		}
 	}
 }

@@ -52,7 +52,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 	@Test
 	public void testNonExistentMethods() {
 		// name is ok but madeup() does not exist
-		evaluateAndCheckError("name.madeup()", SpelMessages.METHOD_NOT_FOUND, 5);
+		evaluateAndCheckError("name.madeup()", SpelMessage.METHOD_NOT_FOUND, 5);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 	
 	@Test
 	public void testInvocationOnNullContextObject() {
-		evaluateAndCheckError("null.toString()",SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
+		evaluateAndCheckError("null.toString()",SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
 	}
 
 }

@@ -32,7 +32,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	
 	@Test
 	public void testNonExistentType() {
-		evaluateAndCheckError("new FooBar()",SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM);
+		evaluateAndCheckError("new FooBar()",SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
 	}
 	
 	@Test

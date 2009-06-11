@@ -25,7 +25,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 // TODO support multidimensional arrays
 // TODO support correct syntax for multidimensional [][][] and not [,,,]
@@ -61,7 +61,7 @@ public class Indexer extends SpelNodeImpl {
 		int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 
 		if (targetObject == null) {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+			throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 		
 		if (targetObject.getClass().isArray()) {
@@ -76,7 +76,7 @@ public class Indexer extends SpelNodeImpl {
 						int newElements = idx-c.size();
 						Class elementClass = targetObjectTypeDescriptor.getElementType();
 						if (elementClass == null) {
-							throw new SpelEvaluationException(getStartPosition(), SpelMessages.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);	
+							throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);	
 						}
 						while (newElements>0) {
 							c.add(elementClass.newInstance());
@@ -84,14 +84,14 @@ public class Indexer extends SpelNodeImpl {
 						}
 						newCollectionElement = targetObjectTypeDescriptor.getElementType().newInstance();
 					} catch (InstantiationException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_GROW_COLLECTION);
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_GROW_COLLECTION);
 					} catch (IllegalAccessException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_GROW_COLLECTION);
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_GROW_COLLECTION);
 					}
 					c.add(newCollectionElement);
 					return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
 				} else {
-					throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+					throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 				}
 			}
 			int pos = 0;
@@ -104,11 +104,11 @@ public class Indexer extends SpelNodeImpl {
 		} else if (targetObject instanceof String) {
 			String ctxString = (String) targetObject;
 			if (idx >= ctxString.length()) {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessages.STRING_INDEX_OUT_OF_BOUNDS, ctxString.length(), idx);
+				throw new SpelEvaluationException(getStartPosition(),SpelMessage.STRING_INDEX_OUT_OF_BOUNDS, ctxString.length(), idx);
 			}
 			return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
 		}
-		throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
 	}
 
 
@@ -126,7 +126,7 @@ public class Indexer extends SpelNodeImpl {
 		TypedValue index = children[0].getValueInternal(state);
 
 		if (targetObject == null) {
-			throw new SpelEvaluationException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+			throw new SpelEvaluationException(SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 		// Indexing into a Map
 		if (targetObjectTypeDescriptor.isMap()) {
@@ -144,17 +144,17 @@ public class Indexer extends SpelNodeImpl {
 			int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+				throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 			}
 			if (targetObject instanceof List) {
 				List list = (List)targetObject;
 				Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
 				list.set(idx,possiblyConvertedValue);
 			} else {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
+				throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
 			}
 		} else {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
+			throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
 		}
 	}
 	
@@ -258,7 +258,7 @@ public class Indexer extends SpelNodeImpl {
 
 	private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
 		if (index > arrayLength) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessages.ARRAY_INDEX_OUT_OF_BOUNDS, arrayLength, index);
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS, arrayLength, index);
 		}
 	}
 

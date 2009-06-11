@@ -23,7 +23,7 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
 import org.springframework.expression.spel.SpelExpression;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.ast.BooleanLiteral;
@@ -117,7 +117,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 			constructedNodes.clear();
 			SpelNodeImpl ast = eatExpression();
 			if (moreTokens()) {
-				throw new SpelParseException(peekToken().startpos,SpelMessages.MORE_INPUT,toString(nextToken()));
+				throw new SpelParseException(peekToken().startpos,SpelMessage.MORE_INPUT,toString(nextToken()));
 			}
 			assert constructedNodes.isEmpty();
 			return new SpelExpression(expressionString, ast, configuration);	
@@ -339,7 +339,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 		if (maybeEatMethodOrProperty(nullSafeNavigation) || maybeEatFunctionOrVar() || maybeEatProjection(nullSafeNavigation) || maybeEatSelection(nullSafeNavigation)) {
 			return pop();
 		}
-		raiseInternalException(t.startpos,SpelMessages.UNEXPECTED_DATA_AFTER_DOT,toString(peekToken()));
+		raiseInternalException(t.startpos,SpelMessage.UNEXPECTED_DATA_AFTER_DOT,toString(peekToken()));
 		return null;
 	}
 	
@@ -378,7 +378,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	
 	private void eatConstructorArgs(List<SpelNodeImpl> accumulatedArguments) {
 		if (!peekToken(TokenKind.LPAREN)) {
-			throw new InternalParseException(new SpelParseException(expressionString,positionOf(peekToken()),SpelMessages.MISSING_CONSTRUCTOR_ARGS));
+			throw new InternalParseException(new SpelParseException(expressionString,positionOf(peekToken()),SpelMessage.MISSING_CONSTRUCTOR_ARGS));
 		}
 		consumeArguments(accumulatedArguments);
 		eatToken(TokenKind.RPAREN);
@@ -394,7 +394,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 			nextToken();// consume ( (first time through) or comma (subsequent times)
 			Token t = peekToken();
 			if (t==null) {
-				raiseInternalException(pos,SpelMessages.RUN_OUT_OF_ARGUMENTS);
+				raiseInternalException(pos,SpelMessage.RUN_OUT_OF_ARGUMENTS);
 			}
 			if (t.kind!=TokenKind.RPAREN) {
 				accumulatedArguments.add(eatExpression());
@@ -402,7 +402,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 			next = peekToken();
 		} while (next!=null && next.kind==TokenKind.COMMA);
 		if (next==null) {
-			raiseInternalException(pos,SpelMessages.RUN_OUT_OF_ARGUMENTS);
+			raiseInternalException(pos,SpelMessage.RUN_OUT_OF_ARGUMENTS);
 		}
 	}
 	
@@ -647,10 +647,10 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 		assert moreTokens();
 		Token t = nextToken();
 		if (t==null) {
-			raiseInternalException( expressionString.length(), SpelMessages.OOD);
+			raiseInternalException( expressionString.length(), SpelMessage.OOD);
 		}
 		if (t.kind!=expectedKind) { 
-			raiseInternalException(t.startpos,SpelMessages.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(),t.getKind().toString().toLowerCase());
+			raiseInternalException(t.startpos,SpelMessage.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(),t.getKind().toString().toLowerCase());
 		}
 		return t;
 	}
@@ -719,7 +719,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 		return tokenStream.get(tokenStreamPointer);
 	}
 
-	private void raiseInternalException(int pos, SpelMessages message,Object... inserts) {
+	private void raiseInternalException(int pos, SpelMessage message,Object... inserts) {
 		throw new InternalParseException(new SpelParseException(expressionString,pos,message,inserts));		
 	}
 	
@@ -733,7 +733,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	
 	private void checkRightOperand(Token token, SpelNodeImpl operandExpression) {
 		if (operandExpression==null) {
-			raiseInternalException(token.startpos,SpelMessages.RIGHT_OPERAND_PROBLEM);
+			raiseInternalException(token.startpos,SpelMessage.RIGHT_OPERAND_PROBLEM);
 		}
 	}
 
