@@ -19,8 +19,8 @@ import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.date.DateFormatter;
-import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
+import org.springframework.ui.format.number.CurrencyFormatter;
 
 public class WebBinderTests {
 
@@ -39,7 +39,7 @@ public class WebBinderTests {
 	
 	@Test
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
-		binder.add(new CurrencyAnnotationFormatterFactory());
+		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
 		binder.add(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
