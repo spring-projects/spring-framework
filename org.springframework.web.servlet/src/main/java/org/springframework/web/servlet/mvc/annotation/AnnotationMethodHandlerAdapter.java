@@ -638,8 +638,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			if (Cookie.class.isAssignableFrom(paramType)) {
 				return cookieValue;
 			}
-			else {
+			else if (cookieValue != null) {
 				return cookieValue.getValue();
+			}
+			else {
+				return null;
 			}
 		}
 
