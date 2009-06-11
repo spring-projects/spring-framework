@@ -94,6 +94,16 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 		return this;
 	}
 
+	public SimpleJdbcInsertOperations withoutTableColumnMetaDataAccess() {
+		setAccessTableColumnMetaData(false);
+		return this;
+	}
+
+	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
+		setOverrideIncludeSynonymsDefault(true);
+		return this;
+	}
+
 	public int execute(Map<String, Object> args) {
 		return doExecute(args);
 	}

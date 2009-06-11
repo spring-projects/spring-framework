@@ -193,6 +193,20 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
+	 * Specify whether the parameter metadata for the call should be used.  The default is true.
+	 */
+	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
+		this.tableMetaDataContext.setAccessTableColumnMetaData(accessTableColumnMetaData);
+	}
+
+	/**
+	 * Specify whether the default for including synonyms should be changed.  The default is false.
+	 */
+	public void setOverrideIncludeSynonymsDefault(boolean override) {
+		this.tableMetaDataContext.setOverrideIncludeSynonymsDefault(override);
+	}
+
+	/**
 	 * Get the insert string to be used
 	 */
 	public String getInsertString() {
