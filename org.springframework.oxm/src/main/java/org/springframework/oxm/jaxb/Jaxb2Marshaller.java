@@ -140,6 +140,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 
 	private Schema schema;
 
+	private boolean lazyInit = false;
+
 
 	/**
 	 * Set a JAXB context path.
@@ -259,31 +261,53 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 		this.mtomEnabled = mtomEnabled;
 	}
 
+	/**
+	 * Set whether to lazily initialize the {@link JAXBContext} for this marshaller.
+	 * Default is {@code false} to initialize on startup; can be switched to
+	 * {@code true}.
+	 * <p>Early initialization just applies if <code>afterPropertiesSet()</code> is called.
+	 * @see #afterPropertiesSet()
+	 */
+	public void setLazyInit(boolean lazyInit) {
+		this.lazyInit = lazyInit;
+	}
+
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
 	public final void afterPropertiesSet() throws Exception {
-		this.jaxbContext = createJaxbContext();
+		if (StringUtils.hasLength(this.contextPath) && !ObjectUtils.isEmpty(this.classesToBeBound)) {
+			throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
+		}
+		else if (!StringUtils.hasLength(this.contextPath) && ObjectUtils.isEmpty(this.classesToBeBound)) {
+			throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
+		}
+		if (!lazyInit) {
+			getJaxbContext();
+		}
 		if (!ObjectUtils.isEmpty(this.schemaResources)) {
 			this.schema = loadSchema(this.schemaResources, this.schemaLanguage);
 		}
 	}
 
-	protected JAXBContext createJaxbContext() throws Exception {
-		if (StringUtils.hasLength(this.contextPath) && !ObjectUtils.isEmpty(this.classesToBeBound)) {
-			throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
+	protected synchronized JAXBContext getJaxbContext() {
+		if (this.jaxbContext == null) {
+			try {
+				if (StringUtils.hasLength(this.contextPath)) {
+					this.jaxbContext = createJaxbContextFromContextPath();
+				}
+				else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
+					this.jaxbContext = createJaxbContextFromClasses();
+				}
+			}
+			catch (JAXBException ex) {
+				throw convertJaxbException(ex);
+			}
 		}
-		if (StringUtils.hasLength(this.contextPath)) {
-			return createJaxbContextFromContextPath();
-		}
-		else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
-			return createJaxbContextFromClasses();
-		}
-		else {
-			throw new IllegalArgumentException("setting either contextPath or classesToBeBound is required");
-		}
+		return jaxbContext;
 	}
 
 	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
@@ -364,7 +388,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 		return false;
 	}
 
-
 	// Marshalling
 
 	public void marshal(Object graph, Result result) throws XmlMappingException {
@@ -410,7 +433,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	 */
 	protected Marshaller createMarshaller() {
 		try {
-			Marshaller marshaller = this.jaxbContext.createMarshaller();
+			Marshaller marshaller = getJaxbContext().createMarshaller();
 			initJaxbMarshaller(marshaller);
 			return marshaller;
 		}
@@ -495,7 +518,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	 */
 	protected Unmarshaller createUnmarshaller() {
 		try {
-			Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
+			Unmarshaller unmarshaller = getJaxbContext().createUnmarshaller();
 			initJaxbUnmarshaller(unmarshaller);
 			return unmarshaller;
 		}
@@ -556,7 +579,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 			return new UncategorizedMappingException("Unknown JAXB exception", ex);
 		}
 	}
-
 
 	private static class Jaxb2AttachmentMarshaller extends AttachmentMarshaller {
 

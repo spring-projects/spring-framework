@@ -21,13 +21,13 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.Result;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
+import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -37,6 +37,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.jaxb.test.FlightType;
 import org.springframework.oxm.jaxb.test.Flights;
@@ -95,6 +96,18 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
+	public void laxyInit() throws Exception {
+		marshaller = new Jaxb2Marshaller();
+		marshaller.setContextPath(CONTEXT_PATH);
+		marshaller.setLazyInit(true);
+		marshaller.afterPropertiesSet();
+		StringWriter writer = new StringWriter();
+		StreamResult result = new StreamResult(writer);
+		marshaller.marshal(flights, result);
+		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+	}
+
+	@Test
 	public void properties() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath(CONTEXT_PATH);
@@ -110,7 +123,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.afterPropertiesSet();
 	}
 
-	@Test(expected = JAXBException.class)
+	@Test(expected = UncategorizedMappingException.class)
 	public void testInvalidContextPath() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath("ab");
