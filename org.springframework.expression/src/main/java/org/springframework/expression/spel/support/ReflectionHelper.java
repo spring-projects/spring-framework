@@ -23,7 +23,7 @@ import java.util.List;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -248,7 +248,7 @@ public class ReflectionHelper {
 			try {
 				if (arguments[i] != null && arguments[i].getClass() != targetType) {
 					if (converter == null) {
-						throw new SpelEvaluationException(SpelMessages.TYPE_CONVERSION_ERROR, arguments[i].getClass().getName(),targetType);
+						throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, arguments[i].getClass().getName(),targetType);
 					}
 					arguments[i] = converter.convertValue(arguments[i], targetType);
 				}
@@ -257,7 +257,7 @@ public class ReflectionHelper {
 				if (ex instanceof SpelEvaluationException) {
 					throw (SpelEvaluationException)ex;
 				} else {
-					throw new SpelEvaluationException(ex, SpelMessages.TYPE_CONVERSION_ERROR,arguments[i].getClass().getName(),targetType);
+					throw new SpelEvaluationException(ex, SpelMessage.TYPE_CONVERSION_ERROR,arguments[i].getClass().getName(),targetType);
 				}
 			}
 		}

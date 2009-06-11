@@ -18,7 +18,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 
 /**
@@ -201,7 +201,7 @@ public class Tokenizer {
 				}
 			}
 			if (ch==0) {
-				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessages.NON_TERMINATING_QUOTED_STRING));
+				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NON_TERMINATING_QUOTED_STRING));
 			}
 		}
 		pos++;
@@ -219,7 +219,7 @@ public class Tokenizer {
 				terminated = true; 
 			}
 			if (ch==0) {
-				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessages.NON_TERMINATING_DOUBLE_QUOTED_STRING));
+				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING));
 			}
 		}
 		pos++;
@@ -286,7 +286,7 @@ public class Tokenizer {
 		// is it a long ?
 		if (isChar('L','l')) {
 			if (isReal) { // 3.4L - not allowed
-				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessages.REAL_CANNOT_BE_LONG));
+				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.REAL_CANNOT_BE_LONG));
 			}
 			pushIntToken(subarray(start, endOfNumber), true, start, endOfNumber);
 			pos++;
@@ -349,9 +349,9 @@ public class Tokenizer {
 	private void pushHexIntToken(char[] data,boolean isLong, int start, int end) {
 		if (data.length==0) {
 			if (isLong) {				
-				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessages.NOT_A_LONG,expressionString.substring(start,end+1)));
+				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NOT_A_LONG,expressionString.substring(start,end+1)));
 			} else {
-				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessages.NOT_AN_INTEGER,expressionString.substring(start,end)));
+				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NOT_AN_INTEGER,expressionString.substring(start,end)));
 			}
 		}
 		if (isLong) {

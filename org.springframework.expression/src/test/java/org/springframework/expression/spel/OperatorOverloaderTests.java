@@ -55,7 +55,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 	@Test
 	public void testSimpleOperations() throws Exception {
 		// no built in support for this:
-		evaluateAndCheckError("'abc'+true",SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("'abc'+true",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		eContext.setOperatorOverloader(new StringAndBooleanAddition());

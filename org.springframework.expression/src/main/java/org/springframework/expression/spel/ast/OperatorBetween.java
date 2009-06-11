@@ -22,7 +22,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -52,7 +52,7 @@ public class OperatorBetween extends Operator {
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		if (!(right instanceof List) || ((List<?>) right).size() != 2) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
-					SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);
+					SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);
 		}
 		List<?> l = (List<?>) right;
 		Object low = l.get(0);

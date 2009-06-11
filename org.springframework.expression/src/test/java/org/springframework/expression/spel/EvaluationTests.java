@@ -123,7 +123,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void testRelOperatorsInstanceof06() {
-		evaluateAndCheckError("'A' instanceof null", SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND, 15, "null");
+		evaluateAndCheckError("'A' instanceof null", SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND, 15, "null");
 	}
 
 	@Test
@@ -138,12 +138,12 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void testRelOperatorsMatches03() {
-		evaluateAndCheckError("null matches '^.*$'", SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, 0, null);
+		evaluateAndCheckError("null matches '^.*$'", SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, 0, null);
 	}
 
 	@Test
 	public void testRelOperatorsMatches04() {
-		evaluateAndCheckError("'abc' matches null", SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, 14, null);
+		evaluateAndCheckError("'abc' matches null", SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, 14, null);
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testPropertyField01() {
 		evaluate("name", "Nikola Tesla", String.class, false); 
 		// not writable because (1) name is private (2) there is no setter, only a getter
-		evaluateAndCheckError("madeup", SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
+		evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
 				"org.springframework.expression.spel.testresources.Inventor");
 	}
 
@@ -183,7 +183,7 @@ public class EvaluationTests extends ExpressionTestCase {
 			new SpelExpressionParser().parse("placeOfBirth.23");
 			Assert.fail();
 		} catch (SpelParseException spe) {
-			Assert.assertEquals(spe.getMessageUnformatted(), SpelMessages.UNEXPECTED_DATA_AFTER_DOT);
+			Assert.assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
 			Assert.assertEquals("23", spe.getInserts()[0]);
 		}
 	}
@@ -261,7 +261,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	
 	@Test
 	public void testTernaryOperator03() {
-		evaluateAndCheckError("'hello'?1:2", SpelMessages.TYPE_CONVERSION_ERROR); // cannot convert String to boolean
+		evaluateAndCheckError("'hello'?1:2", SpelMessage.TYPE_CONVERSION_ERROR); // cannot convert String to boolean
 	}
 
 	@Test
@@ -285,7 +285,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	
 	@Test
 	public void testIndexerError() {
-		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	@Test

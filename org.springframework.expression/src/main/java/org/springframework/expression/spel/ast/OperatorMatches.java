@@ -23,7 +23,7 @@ import java.util.regex.PatternSyntaxException;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
@@ -54,18 +54,18 @@ public class OperatorMatches extends Operator {
 		try {
 			if (!(left instanceof String)) {
 				throw new SpelEvaluationException(leftOp.getStartPosition(),
-						SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
+						SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
 			}
 			if (!(right instanceof String)) {
 				throw new SpelEvaluationException(rightOp.getStartPosition(),
-						SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
+						SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 			}
 			Pattern pattern = Pattern.compile((String) right);
 			Matcher matcher = pattern.matcher((String) left);
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException pse) {
-			throw new SpelEvaluationException(rightOp.getStartPosition(), pse, SpelMessages.INVALID_PATTERN, right);
+			throw new SpelEvaluationException(rightOp.getStartPosition(), pse, SpelMessage.INVALID_PATTERN, right);
 		}
 	}
 

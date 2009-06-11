@@ -26,7 +26,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 /**
  * Represents a simple property or field reference.
@@ -63,9 +63,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					result = readProperty(state, this.name);
 				}
 			} catch (InstantiationException e) {
-				throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+				throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
 			} catch (IllegalAccessException e) {
-				throw new SpelEvaluationException(getStartPosition(), e, SpelMessages.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+				throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
 			}
 		}
 		return result;
@@ -129,13 +129,13 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 			}
 			catch (AccessException ae) {
-				throw new SpelEvaluationException(ae, SpelMessages.EXCEPTION_DURING_PROPERTY_READ, name, ae.getMessage());
+				throw new SpelEvaluationException(ae, SpelMessage.EXCEPTION_DURING_PROPERTY_READ, name, ae.getMessage());
 			}
 		}
 		if (contextObject.getValue() == null) {
-			throw new SpelEvaluationException(SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
+			throw new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
 		} else {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_READABLE, name,
+			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, name,
 					FormatHelper.formatClassNameForMessage(contextObjectClass));
 		}
 	}
@@ -174,14 +174,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					}
 				}
 			} catch (AccessException ae) {
-				throw new SpelEvaluationException(getStartPosition(), ae, SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,
+				throw new SpelEvaluationException(getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,
 						name, ae.getMessage());
 			}
 		}
 		if (contextObject.getValue()==null) {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
+			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
 		} else {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE, name, FormatHelper
+			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE, name, FormatHelper
 					.formatClassNameForMessage(contextObjectClass));
 		}
 	}

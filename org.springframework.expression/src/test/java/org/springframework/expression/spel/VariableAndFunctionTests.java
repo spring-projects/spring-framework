@@ -46,7 +46,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 	public void testFunctionAccess01() {
 		evaluate("#reverseInt(1,2,3)", "int[3]{3,2,1}", int[].class);
 		evaluate("#reverseInt('1',2,3)", "int[3]{3,2,1}", int[].class); // requires type conversion of '1' to 1
-		evaluateAndCheckError("#reverseInt(1)", SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 3);
+		evaluateAndCheckError("#reverseInt(1)", SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 3);
 	}
 
 	@Test
@@ -79,10 +79,10 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 			Object v = parser.parseExpression("#notStatic()").getValue(ctx);
 			Assert.fail("Should have failed with exception - cannot call non static method that way");
 		} catch (SpelEvaluationException se) {
-			if (se.getMessageUnformatted() != SpelMessages.FUNCTION_MUST_BE_STATIC) {
+			if (se.getMessageCode() != SpelMessage.FUNCTION_MUST_BE_STATIC) {
 				se.printStackTrace();
 				Assert.fail("Should have failed a message about the function needing to be static, not: "
-						+ se.getMessageUnformatted());
+						+ se.getMessageCode());
 			}
 		}
 	}

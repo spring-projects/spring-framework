@@ -35,7 +35,7 @@ import java.text.MessageFormat;
  * @author Andy Clement
  * @since 3.0
  */
-public enum SpelMessages {
+public enum SpelMessage {
 
 	TYPE_CONVERSION_ERROR(Kind.ERROR, 1001, "Type conversion problem, cannot convert from {0} to {1}"), //
 	CONSTRUCTOR_NOT_FOUND(Kind.ERROR, 1002, "Constructor call: No suitable constructor found on type {0} for arguments {1}"), //
@@ -98,7 +98,7 @@ public enum SpelMessages {
 	private String message;
 
 
-	private SpelMessages(Kind kind, int code, String message) {
+	private SpelMessage(Kind kind, int code, String message) {
 		this.kind = kind;
 		this.code = code;
 		this.message = message;

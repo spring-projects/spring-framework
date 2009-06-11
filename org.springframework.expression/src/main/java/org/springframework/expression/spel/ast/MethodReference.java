@@ -26,7 +26,7 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 /**
  * @author Andy Clement
@@ -59,7 +59,7 @@ public class MethodReference extends SpelNodeImpl {
 			if (nullSafe) {
 				return TypedValue.NULL_TYPED_VALUE;
 			} else {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
+				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
 						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
 			}
 		}
@@ -84,7 +84,7 @@ public class MethodReference extends SpelNodeImpl {
 			return executorToUse.execute(
 					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
 		} catch (AccessException ae) {
-			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,
+			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
 					this.name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
 		}
 	}
@@ -128,11 +128,11 @@ public class MethodReference extends SpelNodeImpl {
 					}
 				}
 				catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessages.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
+					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessage.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
 				}
 			}
 		}
-		throw new SpelEvaluationException(getStartPosition(),SpelMessages.METHOD_NOT_FOUND, FormatHelper.formatMethodForMessage(name, argumentTypes),
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_NOT_FOUND, FormatHelper.formatMethodForMessage(name, argumentTypes),
 				FormatHelper.formatClassNameForMessage(contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
 	}
 

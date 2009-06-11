@@ -98,7 +98,7 @@ public class LiteralTests extends ExpressionTestCase {
 		// ask for the result to be made into an Integer
 		evaluateAndAskForReturnType("0x20 * 2L", 64, Integer.class);
 		// ask for the result to be made into an Integer knowing that it will not fit
-		evaluateAndCheckError("0x1220 * 0xffffffffL", Integer.class, SpelMessages.TYPE_CONVERSION_ERROR, 0);
+		evaluateAndCheckError("0x1220 * 0xffffffffL", Integer.class, SpelMessage.TYPE_CONVERSION_ERROR, 0);
 	}
 
 	@Test
@@ -144,8 +144,8 @@ public class LiteralTests extends ExpressionTestCase {
 
 	@Test
 	public void testLiteralReal04_BadExpressions() {
-		parseAndCheckError("6.1e23e22", SpelMessages.MORE_INPUT, 6, "e22");
-		parseAndCheckError("6.1f23e22", SpelMessages.MORE_INPUT, 4, "23e22");
+		parseAndCheckError("6.1e23e22", SpelMessage.MORE_INPUT, 6, "e22");
+		parseAndCheckError("6.1f23e22", SpelMessage.MORE_INPUT, 4, "23e22");
 	}
 
 	@Test

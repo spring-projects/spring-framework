@@ -25,7 +25,7 @@ import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 /**
  * A method resolver that uses reflection to locate the method that should be invoked
@@ -88,7 +88,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 			else if (matchRequiringConversion != null) {
 				if (multipleOptions) {
-					throw new SpelEvaluationException(SpelMessages.MULTIPLE_POSSIBLE_METHODS, name);
+					throw new SpelEvaluationException(SpelMessage.MULTIPLE_POSSIBLE_METHODS, name);
 				}
 				return new ReflectiveMethodExecutor(matchRequiringConversion, argsToConvert);
 			}

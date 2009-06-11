@@ -21,7 +21,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -89,7 +89,7 @@ public abstract class SpelNodeImpl implements SpelNode, CommonTypeDescriptors {
 	}
 
 	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelEvaluationException(getStartPosition(), SpelMessages.SETVALUE_NOT_SUPPORTED, getClass());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
 	public SpelNode getChild(int index) {

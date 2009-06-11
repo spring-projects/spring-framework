@@ -23,7 +23,7 @@ import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 
 /**
@@ -55,10 +55,10 @@ public class StandardTypeConverter implements TypeConverter {
 			return this.typeConverter.convert(value, typeDescriptor);
 		}
 		catch (ConverterNotFoundException cenfe) {
-			throw new SpelEvaluationException(cenfe, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
+			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 		}
 		catch (ConvertException ce) {
-			throw new SpelEvaluationException(ce, SpelMessages.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
+			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
 		}
 	}
 

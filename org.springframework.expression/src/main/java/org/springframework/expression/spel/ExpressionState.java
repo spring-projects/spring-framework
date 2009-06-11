@@ -167,7 +167,7 @@ public class ExpressionState {
 		else {
 			String leftType = (left==null?"null":left.getClass().getName());
 			String rightType = (right==null?"null":right.getClass().getName());
-			throw new SpelEvaluationException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
+			throw new SpelEvaluationException(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
 		}
 	}
 

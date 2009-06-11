@@ -249,7 +249,7 @@ public class HelperTests extends ExpressionTestCase {
 			ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class}, true, null, args);
 			Assert.fail("Should have failed because no converter supplied");
 		} catch (SpelEvaluationException se) {
-			Assert.assertEquals(SpelMessages.TYPE_CONVERSION_ERROR,se.getMessageUnformatted());
+			Assert.assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,se.getMessageCode());
 		}
 		
 		// null value

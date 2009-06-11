@@ -26,7 +26,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessages;
+import org.springframework.expression.spel.SpelMessage;
 
 /**
  * Represents projection, where a given operation is performed on all elements in some input sequence, returning 
@@ -92,10 +92,10 @@ public class Projection extends SpelNodeImpl {
 				if (nullSafe) {
 					return TypedValue.NULL_TYPED_VALUE;
 				} else {					
-					throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
+					throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
 				}
 			} else {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
+				throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
 			}
 		}
 	}
