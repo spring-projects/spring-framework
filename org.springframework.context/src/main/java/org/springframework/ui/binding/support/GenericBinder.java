@@ -197,6 +197,7 @@ public class GenericBinder implements Binder {
 		
 	}
 	
+	
 	class BindingImpl implements Binding {
 
 		private Expression property;

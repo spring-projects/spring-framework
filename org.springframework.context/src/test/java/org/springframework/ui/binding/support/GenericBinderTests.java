@@ -36,6 +36,7 @@ import org.springframework.ui.format.number.IntegerFormatter;
 public class GenericBinderTests {
 
 	private TestBean bean;
+	
 	private Binder binder;
 	
 	@Before

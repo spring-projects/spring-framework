@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface Validator {
 
-	void validate(Object model, List<String> properties);
+	ValidateResults validate(Object model, List<String> properties);
 
 }

@@ -46,7 +46,7 @@ public interface BindingResults extends Iterable<BindingResult> {
 	BindingResult get(int index);
 
 	/**
-	 * The list of properties for which binding was attempted.
+	 * The ordered list of properties for which a {@link BindingResult} was returned.
 	 */
 	List<String> properties();
 	
