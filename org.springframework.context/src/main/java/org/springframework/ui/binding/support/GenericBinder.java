@@ -39,6 +39,8 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -479,14 +481,15 @@ public class GenericBinder implements Binder {
 		}
 
 		public String getErrorCode() {
-			if (e.getMessage().startsWith("EL1034E")) {
-				return "typeConversionFailure";
-			} else if (e.getMessage().startsWith("EL1008E")) {
-				return "propertyNotFound";
-			} else {
-				// TODO return more specific code based on underlying EvaluationException error code
-				return "couldNotSetValue";
-			}
+		    SpelMessage spelCode = ((SpelEvaluationException)e).getMessageCode();
+		    if (spelCode==SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+		    	return "typeConversionFailure";                                 
+		    } else if (spelCode==SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+		    	return "propertyNotFound";                              
+		    } else {
+		    	// TODO return more specific code based on underlying EvaluationException error code
+				return "couldNotSetValue";		    	 
+		    }
 		}
 
 		public Throwable getErrorCause() {
