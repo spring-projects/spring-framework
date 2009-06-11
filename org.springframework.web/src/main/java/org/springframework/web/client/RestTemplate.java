@@ -166,16 +166,18 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public <T> T getForObject(String url, Class<T> responseType, String... urlVariables) throws RestClientException {
 
 		checkForSupportedMessageConverter(responseType);
+		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
 		return execute(url, HttpMethod.GET, new GetCallback<T>(responseType),
-				new HttpMessageConverterExtractor<T>(responseType), urlVariables);
+				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
 	public <T> T getForObject(String url, Class<T> responseType, Map<String, String> urlVariables)
 			throws RestClientException {
 
 		checkForSupportedMessageConverter(responseType);
+		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
 		return execute(url, HttpMethod.GET, new GetCallback<T>(responseType),
-				new HttpMessageConverterExtractor<T>(responseType), urlVariables);
+				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
 	// HEAD
@@ -379,37 +381,6 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				httpRequest.getHeaders().setContentLength(0L);
 			}
 		}
-	}
-
-	/**
-	 * Response extractor that uses the registered {@linkplain HttpMessageConverter entity converters}
-	 * to convert the response into a type <code>T</code>.
-	 */
-	private class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
-
-		private final Class<T> responseType;
-
-		private HttpMessageConverterExtractor(Class<T> responseType) {
-			this.responseType = responseType;
-		}
-
-		public T extractData(ClientHttpResponse response) throws IOException {
-			MediaType contentType = response.getHeaders().getContentType();
-			if (contentType == null) {
-				throw new RestClientException("Cannot extract response: no Content-Type found");
-			}
-			for (HttpMessageConverter<T> messageConverter : getSupportedMessageConverters(this.responseType)) {
-				for (MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
-					if (supportedMediaType.includes(contentType)) {
-						return messageConverter.read(this.responseType, response);
-					}
-				}
-			}
-			throw new RestClientException(
-					"Could not extract response: no suitable HttpMessageConverter found for response type [" +
-							this.responseType.getName() + "] and content type [" + contentType + "]");
-		}
-
 	}
 
 	/** Response extractor that extracts the response {@link HttpHeaders}. */
