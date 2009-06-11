@@ -30,8 +30,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -61,14 +59,16 @@ public class TableMetaDataContext {
 	private List<String> tableColumns = new ArrayList<String>();
 
 	/** should we access insert parameter meta data info or not */
-	private boolean accessTableParameterMetaData = true;
+	private boolean accessTableColumnMetaData = true;
 
-	/** the provider of call meta data */
+	/** should we override default for including synonyms for meta data lookups */
+	private boolean overrideIncludeSynonymsDefault = false;
+
+	/** the provider of table meta data */
 	private TableMetaDataProvider metaDataProvider;
 
 	/** are we using generated key columns */
 	private boolean generatedKeyColumnsUsed = false;
-
 
 	/**
 	 * Set the name of the table for this context.
@@ -115,17 +115,31 @@ public class TableMetaDataContext {
 	/**
 	 * Specify whether we should access table column meta data.
 	 */
-	public void setAccessTableParameterMetaData(boolean accessTableParameterMetaData) {
-		this.accessTableParameterMetaData = accessTableParameterMetaData;
+	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
+		this.accessTableColumnMetaData = accessTableColumnMetaData;
 	}
 
 	/**
 	 * Are we accessing table meta data?
 	 */
-	public boolean isAccessTableParameterMetaData() {
-		return this.accessTableParameterMetaData;
+	public boolean isAccessTableColumnMetaData() {
+		return this.accessTableColumnMetaData;
 	}
 
+
+	/**
+	 * Specify whether we should override default for accessing synonyms.
+	 */
+	public void setOverrideIncludeSynonymsDefault(boolean override) {
+		this.overrideIncludeSynonymsDefault = override;
+	}
+
+	/**
+	 * Are we overrding include synonyms default?
+	 */
+	public boolean isOverrideIncludeSynonymsDefault() {
+		return this.overrideIncludeSynonymsDefault;
+	}
 
 	/**
 	 * Get a List of the table column names.

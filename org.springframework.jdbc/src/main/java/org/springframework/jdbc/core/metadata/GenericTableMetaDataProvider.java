@@ -361,7 +361,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			}
 		}
 		catch (SQLException se) {
-			logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
+			logger.warn("Error while retreiving metadata for table columns: " + se.getMessage());
 		}
 		finally {
 			try {
@@ -369,7 +369,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 					tableColumns.close();
 			}
 			catch (SQLException se) {
-				logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
+				logger.warn("Problem closing resultset for table column metadata " + se.getMessage());
 			}
 		}
 

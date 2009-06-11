@@ -54,10 +54,15 @@ public class TableMetaDataProviderFactory {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
-					String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
-					boolean accessTableColumnMetaData = context.isAccessTableParameterMetaData();
+					String databaseProductName =
+							JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
+					boolean accessTableColumnMetaData = context.isAccessTableColumnMetaData();
 					TableMetaDataProvider provider;
-					if ("HSQL Database Engine".equals(databaseProductName)) {
+					if ("Oracle".equals(databaseProductName)) {
+						provider = new OracleTableMetaDataProvider(databaseMetaData,
+								context.isOverrideIncludeSynonymsDefault());
+					}
+					else if ("HSQL Database Engine".equals(databaseProductName)) {
 						provider = new HsqlTableMetaDataProvider(databaseMetaData);
 					}
 					else if ("PostgreSQL".equals(databaseProductName)) {
@@ -74,7 +79,8 @@ public class TableMetaDataProviderFactory {
 					}
 					provider.initializeWithMetaData(databaseMetaData);
 					if (accessTableColumnMetaData) {
-						provider.initializeWithTableColumnMetaData(databaseMetaData, context.getCatalogName(), context.getSchemaName(), context.getTableName());
+						provider.initializeWithTableColumnMetaData(databaseMetaData, context.getCatalogName(),
+								context.getSchemaName(), context.getTableName());
 					}
 					return provider;
 				}
