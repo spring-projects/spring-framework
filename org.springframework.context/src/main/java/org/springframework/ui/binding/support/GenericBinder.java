@@ -153,6 +153,10 @@ public class GenericBinder implements Binder {
 
 		private List<BindingResult> results;
 		
+		public ArrayListBindingResults() {
+			results = new ArrayList<BindingResult>();
+		}
+		
 		public ArrayListBindingResults(int size) {
 			results = new ArrayList<BindingResult>(size);
 		}
@@ -170,13 +174,23 @@ public class GenericBinder implements Binder {
 		// implementing BindingResults
 		
 		public BindingResults successes() {
-			// TODO
-			return this;
+			ArrayListBindingResults results = new ArrayListBindingResults();
+			for (BindingResult result : this) {
+				if (!result.isError()) {
+					results.add(result);
+				}
+			}
+			return results;
 		}
 		
 		public BindingResults failures() {
-			// TODO
-			return this;
+			ArrayListBindingResults results = new ArrayListBindingResults();
+			for (BindingResult result : this) {
+				if (result.isError()) {
+					results.add(result);
+				}
+			}
+			return results;
 		}
 
 		public BindingResult get(int index) {
