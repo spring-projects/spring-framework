@@ -21,6 +21,7 @@ import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.binding.support.WebBinder;
 import org.springframework.ui.message.MessageContext;
+import org.springframework.ui.validation.ValidateResults;
 import org.springframework.ui.validation.Validator;
 
 public class WebBindAndValidateLifecycle {
@@ -40,10 +41,11 @@ public class WebBindAndValidateLifecycle {
 	
 	public void execute(Map<String, ? extends Object> userMap) {
 		UserValues values = binder.createUserValues(userMap);
-		BindingResults results = binder.bind(values);
-		if (validationDecider.shouldValidateAfter(results)) {
-			validator.validate(binder.getModel(), results.successes().properties());
+		BindingResults bindingResults = binder.bind(values);
+		if (validationDecider.shouldValidateAfter(bindingResults)) {
+			ValidateResults validationResults = validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
+		// TODO translate binding and validation results into messages
 	}
 	
 	public interface ValidationDecider {
