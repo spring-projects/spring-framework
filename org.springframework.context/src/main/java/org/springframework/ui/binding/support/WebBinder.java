@@ -17,20 +17,21 @@ package org.springframework.ui.binding.support;
 
 import java.util.Map;
 
+import org.springframework.ui.binding.UserValue;
 import org.springframework.ui.binding.UserValues;
 
 /**
  * A binder designed for use in HTTP (web) environments.
  * Suited for binding user-provided HTTP query parameters to model properties.
  * @author Keith Donald
- * @see #setFieldDefaultPrefix(String)
- * @see #setFieldMarkerPrefix(String)
+ * @see #setDefaultPrefix(String)
+ * @see #setPresentPrefix(String)
  */
 public class WebBinder extends GenericBinder {
 
-	private String fieldMarkerPrefix = "_";
+	private String defaultPrefix = "!";
 
-	private String fieldDefaultPrefix = "!";
+	private String presentPrefix = "_";
 
 	/**
 	 * Creates a new web binder for the model object.
@@ -41,19 +42,21 @@ public class WebBinder extends GenericBinder {
 	}
 
 	/**
-	 * Configure the prefix for determining default field values.
+	 * Configure the prefix to detect the default user value for a property when no value was submitted.
+	 * This is used to configure a <i>default</i> {@link UserValue} for binding when no value is submitted by the client.
 	 * Default is '!'.
 	 */
-	public void setFieldDefaultPrefix(String fieldDefaultPrefix) {
-		this.fieldDefaultPrefix = fieldDefaultPrefix;
+	public void setDefaultPrefix(String defaultPrefix) {
+		this.defaultPrefix = defaultPrefix;
 	}
 
 	/**
-	 * Configure the prefix for determining empty fields.
+	 * Configure the prefix to detect the presence of a property on the web UI when no user value for the property was actually submitted.
+	 * This is used to configure a <i>empty</i> {@link UserValue} for binding when no other {@link #setDefaultPrefix(String) default value} is specified by the client.
 	 * Default is '_'.
 	 */
-	public void setFieldMarkerPrefix(String fieldMarkerPrefix) {
-		this.fieldMarkerPrefix = fieldMarkerPrefix;
+	public void setPresentPrefix(String presentPrefix) {
+		this.presentPrefix = presentPrefix;
 	}
 
 	@Override
@@ -62,14 +65,14 @@ public class WebBinder extends GenericBinder {
 		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
 			String field = entry.getKey();
 			Object value = entry.getValue();
-			if (field.startsWith(fieldDefaultPrefix)) {
-				field = field.substring(fieldDefaultPrefix.length());
+			if (field.startsWith(defaultPrefix)) {
+				field = field.substring(defaultPrefix.length());
 				if (!userMap.containsKey(field)) {
 					values.add(field, value);
 				}
-			} else if (field.startsWith(fieldMarkerPrefix)) {
-				field = field.substring(fieldMarkerPrefix.length());
-				if (!userMap.containsKey(field) && !userMap.containsKey(fieldDefaultPrefix + field)) {
+			} else if (field.startsWith(presentPrefix)) {
+				field = field.substring(presentPrefix.length());
+				if (!userMap.containsKey(field) && !userMap.containsKey(defaultPrefix + field)) {
 					value = getEmptyValue((BindingImpl) getBinding(field));
 					values.add(field, value);
 				}
