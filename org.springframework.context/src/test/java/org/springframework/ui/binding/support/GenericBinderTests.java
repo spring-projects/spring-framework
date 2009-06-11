@@ -25,8 +25,9 @@ import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.UserValues;
+import org.springframework.ui.format.AnnotationFormatterFactory;
+import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.date.DateFormatter;
-import org.springframework.ui.format.number.CurrencyAnnotationFormatterFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
@@ -378,4 +379,11 @@ public class GenericBinderTests {
 		}
 		
 	}
+	
+	public static class CurrencyAnnotationFormatterFactory implements AnnotationFormatterFactory<CurrencyFormat, BigDecimal> {
+		public Formatter<BigDecimal> getFormatter(CurrencyFormat annotation) {
+			return new CurrencyFormatter();
+		}
+	}
+
 }
