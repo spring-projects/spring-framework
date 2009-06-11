@@ -15,7 +15,6 @@
  */
 package org.springframework.ui.binding.support;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -49,13 +48,14 @@ import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
+import org.springframework.ui.binding.FormatterRegistry;
 import org.springframework.ui.binding.UserValue;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 
 /**
- * Binds user-entered values to properties of a model object.
+ * A generic {@link Binder binder} suitable for use in most binding environments.
  * @author Keith Donald
  * @see #add(BindingConfiguration)
  * @see #bind(UserValues)
@@ -69,9 +69,7 @@ public class GenericBinder implements Binder {
 
 	private Map<String, Binding> bindings;
 
-	private Map<Class, Formatter> typeFormatters = new HashMap<Class, Formatter>();
-
-	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
+	private FormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 
 	private ExpressionParser expressionParser;
 
@@ -79,23 +77,7 @@ public class GenericBinder implements Binder {
 
 	private boolean strict = false;
 
-	private static Formatter defaultFormatter = new Formatter() {
-		public String format(Object object, Locale locale) {
-			if (object == null) {
-				return "";
-			} else {
-				return object.toString();
-			}
-		}
-
-		public Object parse(String formatted, Locale locale) throws ParseException {
-			if (formatted == "") {
-				return null;
-			} else {
-				return formatted;
-			}
-		}
-	};
+	private static Formatter defaultFormatter = new DefaultFormatter();
 
 	/**
 	 * Creates a new binder for the model object.
@@ -130,15 +112,11 @@ public class GenericBinder implements Binder {
 	}
 
 	public void add(Formatter<?> formatter, Class<?> propertyType) {
-		if (propertyType.isAnnotation()) {
-			annotationFormatters.put(propertyType, new SimpleAnnotationFormatterFactory(formatter));
-		} else {
-			typeFormatters.put(propertyType, formatter);
-		}
+		formatterRegistry.add(formatter, propertyType);
 	}
 
 	public void add(AnnotationFormatterFactory<?, ?> factory) {
-		annotationFormatters.put(getAnnotationType(factory), factory);
+		formatterRegistry.add(factory);
 	}
 
 	public Binding getBinding(String property) {
@@ -158,7 +136,7 @@ public class GenericBinder implements Binder {
 		}
 		return results;
 	}
-	
+
 	public UserValues createUserValues(Map<String, ? extends Object> userMap) {
 		UserValues values = new UserValues(userMap.size());
 		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
@@ -181,7 +159,7 @@ public class GenericBinder implements Binder {
 		}
 
 		// implementing Binding
-		
+
 		public String getValue() {
 			Object value;
 			try {
@@ -201,13 +179,14 @@ public class GenericBinder implements Binder {
 				return setObjectValue(value);
 			}
 		}
-		
+
 		public String format(Object selectableValue) {
 			Formatter formatter;
 			try {
 				formatter = getFormatter();
 			} catch (EvaluationException e) {
-				throw new IllegalStateException("Failed to get property expression value type - this should not happen", e);
+				throw new IllegalStateException(
+						"Failed to get property expression value type - this should not happen", e);
 			}
 			Class<?> formattedType = getFormattedObjectType(formatter);
 			selectableValue = typeConverter.convert(selectableValue, formattedType);
@@ -244,21 +223,22 @@ public class GenericBinder implements Binder {
 			}
 			return formattedValues;
 		}
-		
+
 		// public impl only
-		
+
 		public Class getValueType() {
 			Class type;
-			try { 
+			try {
 				type = property.getValueType(createEvaluationContext());
 			} catch (EvaluationException e) {
-				throw new IllegalArgumentException("Failed to get property expression value type - this should not happen", e);
+				throw new IllegalArgumentException(
+						"Failed to get property expression value type - this should not happen", e);
 			}
 			return type;
 		}
-		
+
 		// internal helpers
-		
+
 		private BindingResult setStringValue(String formatted) {
 			Formatter formatter;
 			try {
@@ -276,7 +256,7 @@ public class GenericBinder implements Binder {
 			}
 			return setValue(parsed, formatted);
 		}
-		
+
 		private BindingResult setStringValues(String[] formatted) {
 			Formatter formatter;
 			try {
@@ -285,7 +265,7 @@ public class GenericBinder implements Binder {
 				// could occur the property was not found or is not readable
 				// TODO probably should not handle all EL failures, only type conversion & property not found?
 				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
-			}			
+			}
 			Class parsedType = getFormattedObjectType(formatter);
 			if (parsedType == null) {
 				parsedType = String.class;
@@ -302,7 +282,7 @@ public class GenericBinder implements Binder {
 			}
 			return setValue(parsed, formatted);
 		}
-		
+
 		private BindingResult setObjectValue(Object value) {
 			return setValue(value, value);
 		}
@@ -311,26 +291,10 @@ public class GenericBinder implements Binder {
 			if (formatter != null) {
 				return formatter;
 			} else {
-				Class<?> type = property.getValueType(createEvaluationContext());
-				Formatter<?> formatter = typeFormatters.get(type);
-				if (formatter != null) {
-					return formatter;
-				} else {
-					Annotation[] annotations = getAnnotations();
-					for (Annotation a : annotations) {
-						AnnotationFormatterFactory factory = annotationFormatters.get(a.annotationType());
-						if (factory != null) {
-							return factory.getFormatter(a);
-						}
-					}
-					return defaultFormatter;
-				}
+				Formatter<?> formatter = formatterRegistry.getFormatter(property
+						.getValueTypeDescriptor(createEvaluationContext()));
+				return formatter != null ? formatter : defaultFormatter;
 			}
-		}
-
-
-		private Annotation[] getAnnotations() throws EvaluationException {
-			return property.getValueTypeDescriptor(createEvaluationContext()).getAnnotations();
 		}
 
 		private void copy(Iterable<?> values, String[] formattedValues) {
@@ -349,7 +313,6 @@ public class GenericBinder implements Binder {
 				return new ExpressionEvaluationErrorResult(property.getExpressionString(), userValue, e);
 			}
 		}
-		
 
 		private EvaluationContext createEvaluationContext() {
 			StandardEvaluationContext context = new StandardEvaluationContext();
@@ -359,25 +322,6 @@ public class GenericBinder implements Binder {
 			return context;
 		}
 
-	}
-
-	private Class getAnnotationType(AnnotationFormatterFactory factory) {
-		Class classToIntrospect = factory.getClass();
-		while (classToIntrospect != null) {
-			Type[] genericInterfaces = classToIntrospect.getGenericInterfaces();
-			for (Type genericInterface : genericInterfaces) {
-				if (genericInterface instanceof ParameterizedType) {
-					ParameterizedType pInterface = (ParameterizedType) genericInterface;
-					if (AnnotationFormatterFactory.class.isAssignableFrom((Class) pInterface.getRawType())) {
-						return getParameterClass(pInterface.getActualTypeArguments()[0], factory.getClass());
-					}
-				}
-			}
-			classToIntrospect = classToIntrospect.getSuperclass();
-		}
-		throw new IllegalArgumentException(
-				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
-						+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
 	}
 
 	private Class getFormattedObjectType(Formatter formatter) {
@@ -409,18 +353,22 @@ public class GenericBinder implements Binder {
 				+ "] on Formatter [" + converterClass.getName() + "]");
 	}
 
-	static class SimpleAnnotationFormatterFactory implements AnnotationFormatterFactory {
-
-		private Formatter formatter;
-
-		public SimpleAnnotationFormatterFactory(Formatter formatter) {
-			this.formatter = formatter;
+	static class DefaultFormatter implements Formatter {
+		public String format(Object object, Locale locale) {
+			if (object == null) {
+				return "";
+			} else {
+				return object.toString();
+			}
 		}
 
-		public Formatter getFormatter(Annotation annotation) {
-			return formatter;
+		public Object parse(String formatted, Locale locale) throws ParseException {
+			if (formatted == "") {
+				return null;
+			} else {
+				return formatted;
+			}
 		}
-
 	}
 
 	static class InvalidFormatResult implements BindingResult {
@@ -481,7 +429,7 @@ public class GenericBinder implements Binder {
 		}
 
 		public String getErrorCode() {
-		    SpelMessage spelCode = ((SpelEvaluationException)e).getMessageCode();
+		    SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
 		    if (spelCode==SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
 		    	return "typeConversionFailure";                                 
 		    } else if (spelCode==SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
