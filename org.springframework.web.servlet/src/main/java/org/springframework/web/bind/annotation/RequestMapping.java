@@ -69,7 +69,7 @@ import java.lang.annotation.Target;
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet/Portlet API.
- * <li>{@link PathVariable @PathVariable} annotated parameters for acces to
+ * <li>{@link PathVariable @PathVariable} annotated parameters for access to
  * URI template values (i.e. /hotels/{hotel}). Variable values will be
  * converted to the declared method argument type.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
