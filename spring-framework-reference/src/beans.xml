@@ -2626,10 +2626,10 @@ public class ReplacementComputeValue implements MethodReplacer {
 
           <row>
             <entry><para> <link
-            linkend="beans-factory-scopes-global-session">session</link>
+            linkend="beans-factory-scopes-session">session</link>
             </para></entry>
 
-            <entry><para>Scopes a single bean definition to the lifecycle of a
+            <entry><para>Scopes a single bean definition to the lifecycle of an
             HTTP <interfacename>Session</interfacename>. Only valid in the
             context of a web-aware Spring
             <interfacename>ApplicationContext</interfacename>.</para></entry>
@@ -2991,18 +2991,18 @@ public class ReplacementComputeValue implements MethodReplacer {
       <section id="beans-factory-scopes-other-injection">
         <title>Scoped beans as dependencies</title>
 
-        <para>Being able to define a bean scoped to a HTTP request or
+        <para>Being able to define a bean scoped to an HTTP request or
         <interfacename>Session</interfacename> (or indeed <link
         linkend="beans-factory-scopes-custom">a custom scope</link> of your
         own devising) is all very well, but one of the main value-adds of the
         Spring IoC container is that it manages not only the instantiation of
         your objects (beans), but also the wiring up of collaborators (or
-        dependencies). If you want to inject a (for example) HTTP request
+        dependencies). If you want to inject (for example) an HTTP request
         scoped bean into another bean, you will need to inject an AOP proxy in
         place of the scoped bean. That is, you need to inject a proxy object
-        that exposes the same public interface as the scoped object, but that
+        that exposes the same public interface as the scoped object but that
         is smart enough to be able to retrieve the real, target object from
-        the relevant scope (for example a HTTP request) and delegate method
+        the relevant scope (for example an HTTP request) and delegate method
         calls onto the real object.</para>
 
         <note>
@@ -3029,7 +3029,7 @@ public class ReplacementComputeValue implements MethodReplacer {
            http://www.springframework.org/schema/aop 
            http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
-    <lineannotation>&lt;!-- a HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation>
+    <lineannotation>&lt;!-- an HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation>
     &lt;bean id="userPreferences" class="com.foo.UserPreferences" <emphasis
             role="bold">scope="session"</emphasis>&gt;
           
@@ -3079,12 +3079,12 @@ public class ReplacementComputeValue implements MethodReplacer {
         (conceptually) only ever operate on the exact same
         <literal>'userPreferences'</literal> object, that is the one that it
         was originally injected with. This is <emphasis>not</emphasis> what
-        you want when you inject a HTTP
+        you want when you inject an HTTP
         <interfacename>Session</interfacename>-scoped bean as a dependency
         into a collaborating object (typically). Rather, what we
         <emphasis>do</emphasis> want is a single
         <literal>'userManager'</literal> object, and then, for the lifetime of
-        a HTTP <interfacename>Session</interfacename>, we want to see and use
+        an HTTP <interfacename>Session</interfacename>, we want to see and use
         a <literal>'userPreferences'</literal> object that is specific to said
         HTTP <interfacename>Session</interfacename>.</para>
 
@@ -3200,7 +3200,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         allowing them to be 'destroyed' if needed.</para>
 
         <para>The first method should return the object from the underlying
-        scope. The session scope implementation for example will return the
+        scope. The session scope implementation, for example, will return the
         session-scoped bean (and if it does not exist, return a new instance
         of the bean, after having bound it to the session for future
         reference).</para>
@@ -6321,11 +6321,10 @@ public class AppConfig {
       <code><link
       linkend="beans-factory-lifecycle-disposablebean">destroy-method</link></code>,
       <code><link linkend="beans-factory-autowire">autowiring</link></code>
-      and <code><link
-      linkend="beans-factory-scopes">name</link></code>.</para>
+      and <code>name</code>.</para>
 
-      <para>You can use the @Bean annotation in a Configuraton-class or in a
-      Component-class.</para>
+      <para>You can use the <interfacename>@Bean</interfacename> annotation in
+      a Configuration-class or in a Component-class.</para>
 
       <section id="beans-javaconfig-declaring-a-bean">
         <title>Declaring a bean</title>
@@ -6346,7 +6345,7 @@ public class AppConfig {
         return new TransferServiceImpl();
     }
 
-}                </programlisting></para>
+}</programlisting></para>
 
         <para>For comparison sake, the configuration above is exactly
         equivalent to the following Spring XML: <programlisting
@@ -6467,8 +6466,7 @@ public class AppConfig {
         <title>Specifying bean scope</title>
 
         <section id="beans-javaconfig-available-scopes">
-          <title>Using the <interfacename>@Scope</interfacename>
-          annotation</title>
+          <title>Using the <interfacename>@Scope</interfacename> annotation</title>
 
           <para>You can specify that your beans defined with the
           <interfacename>@Bean</interfacename> annotation should have a
@@ -6476,18 +6474,18 @@ public class AppConfig {
           the <link linkend="beans-factory-scopes">Bean Scopes</link>
           section.</para>
 
-          <para>The <code>StandardScopes</code> class provides string
-          constants for each of these four scopes. SINGLETON is the default,
-          and can be overridden by using the
-          <interfacename>@Scope</interfacename> annotation: <programlisting
+          <para>The default scope is <literal>"singleton"</literal>, but
+          this can be overridden by using the
+          <interfacename>@Scope</interfacename> annotation:
+<programlisting
           language="java">@Configuration
 public class MyConfiguration {
     @Bean
-    @Scope(StandardScopes.PROTOTYPE)
+    <emphasis role="bold">@Scope("prototype")</emphasis>
     public Encryptor encryptor() {
         // ...
     }
-}                 </programlisting></para>
+}</programlisting></para>
         </section>
 
         <section id="beans-javaconfig-scoped-proxy">
@@ -6507,9 +6505,9 @@ public class MyConfiguration {
           <para>If we were to port the the XML reference documentation scoped
           proxy example (see link above) to our
           <interfacename>@Bean</interfacename> using Java, it would look like
-          the following: <programlisting language="java">// a HTTP Session-scoped bean exposed as a proxy
+          the following: <programlisting language="java">// an HTTP Session-scoped bean exposed as a proxy
 @Bean
-@Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+<emphasis role="bold">@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)</emphasis>
 public UserPreferences userPreferences() {
    return new UserPreferences();
 }
@@ -6548,10 +6546,10 @@ public Service userService() {
 
           <para>Using Java-configuration support we can easily create a
           subclass of <code>CommandManager</code> where the abstract
-          <code>createCommand()</code> is overridden in such a way that it
+          <code>createCommand()</code> method is overridden in such a way that it
           'looks up' a brand new (prototype) command object: <programlisting
           language="java">@Bean
-@Scope(StandardScopes.PROTOTYPE)
+@Scope("prototype")
 public AsyncCommand asyncCommand() {
     AsyncCommand command = new AsyncCommand();
     // inject dependencies here as required
@@ -6644,12 +6642,12 @@ public class FactoryMethodComponent {
   return tb;
  }
 
- @Bean @Scope(StandardScopes.PROTOTYPE)
+ @Bean @Scope("prototype")
  private TestBean privateInstance() {
   return new TestBean("privateInstance", i++);
  }
 
- @Bean @Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+ @Bean @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
  public TestBean requestScopedInstance() {
   return new TestBean("requestScopedInstance", 3);
  }
@@ -6736,14 +6734,14 @@ public class MovieFinderImpl implements MovieFinder {
 
       <para>As with Spring-managed components in general, the default and by
       far most common scope is 'singleton'. However, there are times when
-      other scopes are needed. Therefore Spring 2.5 introduces a new
+      other scopes are needed. Therefore Spring 2.5 introduced a new
       <interfacename>@Scope</interfacename> annotation as well. Simply provide
       the name of the scope within the annotation, such as:</para>
 
-      <programlisting language="java">@Scope(StandardScopes.PROTOTYPE)
+      <programlisting language="java"><emphasis role="bold">@Scope("prototype")</emphasis>
 @Repository
 public class MovieFinderImpl implements MovieFinder {
-    <lineannotation>// ...</lineannotation>
+  <lineannotation>// ...</lineannotation>
 }</programlisting>
 
       <note>
