@@ -18,6 +18,9 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -28,17 +31,22 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
 /** @author Arjen Poutsma */
-public class JacksonHttpMessageConverterTest {
+public class BindingJacksonHttpMessageConverterTest {
 
-	private JacksonHttpMessageConverter<MyBean> converter;
+	private BindingJacksonHttpMessageConverter<MyBean> converter;
 
 	@Before
 	public void setUp() {
-		converter = new JacksonHttpMessageConverter<MyBean>();
+		converter = new BindingJacksonHttpMessageConverter<MyBean>();
+	}
+	
+	@Test
+	public void supports() {
+		assertTrue(converter.supports(MyBean.class));
 	}
 
 	@Test
-	public void read() throws IOException {
+	public void readTyped() throws IOException {
 		String body =
 				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
@@ -50,6 +58,26 @@ public class JacksonHttpMessageConverterTest {
 		assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
 		assertTrue(result.isBool());
 		assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
+	}
+
+	@Test
+	@SuppressWarnings({"unchecked"})
+	public void readUntyped() throws IOException {
+		BindingJacksonHttpMessageConverter<HashMap> converter = new BindingJacksonHttpMessageConverter<HashMap>();
+		String body =
+				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		HashMap<String,Object> result = converter.read(HashMap.class, inputMessage);
+		assertEquals("Foo", result.get("string"));
+		assertEquals(42, result.get("number"));
+		assertEquals(42D, (Double)result.get("fraction"), 0D);
+		List array = new ArrayList();
+		array.add("Foo");
+		array.add("Bar");
+		assertEquals(array, result.get("array"));
+		assertEquals(Boolean.TRUE, result.get("bool"));
+		assertEquals("AQI=", result.get("bytes"));
 	}
 
 	@Test

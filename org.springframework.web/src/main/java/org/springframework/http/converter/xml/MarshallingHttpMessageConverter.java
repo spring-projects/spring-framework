@@ -44,7 +44,6 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.0
  */
-
 public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConverter<Object>
 		implements InitializingBean {
 
