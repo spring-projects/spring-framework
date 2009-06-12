@@ -38,7 +38,7 @@ import org.springframework.core.style.ToStringCreator;
  *     code(&quot;invalidFormat&quot;).
  *     arg("mathForm.decimalField").
  *     arg("#,###.##").
- *     defaultText(&quot;The decimal field must be in format #,####.##&quot;).
+ *     defaultText(&quot;The decimal field must be in format #,###.##&quot;).
  *     build();
  * </pre>
  * </p>
