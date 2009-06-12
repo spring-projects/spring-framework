@@ -113,7 +113,7 @@
     <title>Modules</title>
 
     <para>The Spring Framework contains a lot of features, which are
-    well-organized in ab out twenty modules. These modules can be grouped
+    well-organized in about twenty modules. These modules can be grouped
     together based on their primary features into Core Container, Data
     Access/Integration, Web, AOP (Aspect Oriented Programming),
     Instrumentation and Test. These groups are shown in the diagram
