@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,35 +24,47 @@ import org.springframework.ui.message.MessageContext;
 import org.springframework.ui.validation.ValidateResults;
 import org.springframework.ui.validation.Validator;
 
+/**
+ * TODO Document WebBindAndValidateLifecycle.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
 public class WebBindAndValidateLifecycle {
 
-	private WebBinder binder;
-	
-	@SuppressWarnings("unused")
-	private MessageContext messages;
-	
+	private final WebBinder binder;
+
+	private final MessageContext messageContext;
+
 	private ValidationDecider validationDecider = ValidationDecider.ALWAYS_VALIDATE;
-	
-	private Validator validator;
-	
-	public WebBindAndValidateLifecycle(Object model, MessageContext messages) {
+
+	private Validator validator = null;
+
+	public WebBindAndValidateLifecycle(Object model, MessageContext messageContext) {
 		this.binder = new WebBinder(model);
+		this.messageContext = messageContext;
 	}
-	
+
+	/**
+	 * TODO Document execute().
+	 *
+	 * @param userMap
+	 */
 	public void execute(Map<String, ? extends Object> userMap) {
 		UserValues values = binder.createUserValues(userMap);
 		BindingResults bindingResults = binder.bind(values);
 		if (validationDecider.shouldValidateAfter(bindingResults)) {
-			ValidateResults validationResults = validator.validate(binder.getModel(), bindingResults.successes().properties());
+			ValidateResults validationResults = validator.validate(binder.getModel(), bindingResults.successes()
+					.properties());
 		}
 		// TODO translate binding and validation results into messages
 	}
-	
-	public interface ValidationDecider {
-		
+
+	interface ValidationDecider {
+
 		boolean shouldValidateAfter(BindingResults results);
 
-		public static ValidationDecider ALWAYS_VALIDATE = new ValidationDecider() {
+		static final ValidationDecider ALWAYS_VALIDATE = new ValidationDecider() {
 			public boolean shouldValidateAfter(BindingResults results) {
 				return true;
 			}
