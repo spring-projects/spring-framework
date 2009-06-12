@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * @author Arjen Poutsma
  * @since 3.0
  */
-class AntPatchStringMatcher {
+class AntPathStringMatcher {
 
 	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
 
@@ -47,7 +47,7 @@ class AntPatchStringMatcher {
 	private final Map<String, String> uriTemplateVariables;
 
 	/** Construct a new instance of the <code>AntPatchStringMatcher</code>. */
-	AntPatchStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
+	AntPathStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
 		this.str = str;
 		this.uriTemplateVariables = uriTemplateVariables;
 		this.pattern = createPattern(pattern);
