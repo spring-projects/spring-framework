@@ -23,11 +23,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Package-protected helper class for {@link AntPathMatcher}.
- * Tests whether or not a string matches against a pattern using a regular expression.
+ * Package-protected helper class for {@link AntPathMatcher}. Tests whether or not a string matches against a pattern
+ * using a regular expression.
  *
- * <p>The pattern may contain special characters: '*' means zero or more characters;
- * '?' means one and only one character; '{' and '}' indicate a URI template pattern.
+ * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and only one
+ * character; '{' and '}' indicate a URI template pattern.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 class AntPatchStringMatcher {
 
 	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
+
+	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
 	private final Pattern pattern;
 
@@ -65,13 +67,24 @@ class AntPatchStringMatcher {
 				patternBuilder.append(".*");
 			}
 			else if (match.startsWith("{") && match.endsWith("}")) {
-				patternBuilder.append("(.*)");
-				variableNames.add(m.group(1));
+				int colonIdx = match.indexOf(':');
+				if (colonIdx == -1) {
+					patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
+					variableNames.add(m.group(1));
+				}
+				else {
+					String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
+					patternBuilder.append('(');
+					patternBuilder.append(variablePattern);
+					patternBuilder.append(')');
+					String variableName = match.substring(1, colonIdx);
+					variableNames.add(variableName);
+				}
 			}
 			end = m.end();
 		}
 		patternBuilder.append(quote(pattern, end, pattern.length()));
-		return  Pattern.compile(patternBuilder.toString());
+		return Pattern.compile(patternBuilder.toString());
 	}
 
 	private String quote(String s, int start, int end) {

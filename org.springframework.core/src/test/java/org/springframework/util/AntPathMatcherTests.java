@@ -335,6 +335,20 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
+	public void extractUriTemplateVariablesCustomRegex() {
+		Map<String, String> result = pathMatcher
+				.extractUriTemplateVariables("{symbolicName:[\\w\\.]+}-{version:[\\w\\.]+}.jar",
+						"com.example-1.0.0.jar");
+		assertEquals("com.example", result.get("symbolicName"));
+		assertEquals("1.0.0", result.get("version"));
+
+		result = pathMatcher.extractUriTemplateVariables("{symbolicName:[\\w\\.]+}-sources-{version:[\\w\\.]+}.jar",
+				"com.example-sources-1.0.0.jar");
+		assertEquals("com.example", result.get("symbolicName"));
+		assertEquals("1.0.0", result.get("version"));
+	}
+
+	@Test
 	public void combine() {
 		assertEquals("", pathMatcher.combine(null, null));
 		assertEquals("/hotels", pathMatcher.combine("/hotels", null));
