@@ -24,6 +24,7 @@
     (it is a sub-interface) and adds other functionality such as easier
     integration with Spring's AOP features, message resource handling (for use
     in internationalization), event propagation, and application-layer
+    in internationalization), event publication, and application-layer
     specific contexts such as the
     <interfacename>WebApplicationContext</interfacename> for use in web
     applications.</para>
@@ -33,40 +34,17 @@
     <interfacename>ApplicationContext</interfacename> adds more
     enterprise-centric functionality to it. The
     <interfacename>ApplicationContext</interfacename> is a complete superset
-    of the <interfacename>BeanFactory</interfacename>, and any description of
-    <interfacename>BeanFactory</interfacename> capabilities and behavior is to
-    be considered to apply to the
-    <interfacename>ApplicationContext</interfacename> as well.</para>
-
-    <sidebar>
-      <title><interfacename>BeanFactory</interfacename> or
-      <interfacename>ApplicationContext</interfacename>?</title>
-
-      <para>Users are sometimes unsure whether a
-      <interfacename>BeanFactory</interfacename> or an
-      <interfacename>ApplicationContext</interfacename> is best suited for use
-      in a particular situation. A <interfacename>BeanFactory</interfacename>
-      pretty much just instantiates and configures beans. An
-      <interfacename>ApplicationContext</interfacename> also does that,
-      <emphasis>and</emphasis> it provides the supporting infrastructure to
-      enable <emphasis>lots</emphasis> of enterprise-specific features such as
-      transactions and AOP.</para>
-
-      <para><emphasis role="bold">In short, favor the use of an
-      <interfacename>ApplicationContext</interfacename>.</emphasis></para>
-
-      <para>(For the specific details behind this recommendation, see <link
-      linkend="context-introduction-ctx-vs-beanfactory">this
-      section</link>.)</para>
-    </sidebar>
+    of the <interfacename>BeanFactory</interfacename>, and is used exclusively
+    in this chapter when describing Spring's IoC container. For more
+    information on using the <classname>BeanFactory</classname> instead of an
+    <classname>ApplicationContext</classname> refer to the section <xref
+    linkend="beans-beanfactory" />.</para>
 
     <para>This chapter is divided into two parts, with the <link
-    linkend="beans-basics">first part</link> covering the basic principles
-    that apply to both the <interfacename>BeanFactory</interfacename> and
-    <interfacename>ApplicationContext</interfacename>, and with the <link
-    linkend="context-introduction">second part</link> covering those features
-    that apply only to the <interfacename>ApplicationContext</interfacename>
-    interface.</para>
+    linkend="beans-basics">first part</link> covering Inversion of Control
+    features and the <link linkend="context-introduction">second part</link>
+    covering additional application framework features such as event
+    publication and internationalization.</para>
   </section>
 
   <section id="beans-basics">
@@ -95,27 +73,42 @@
     <section id="beans-factory">
       <title>The container</title>
 
-      <para>The
-      <interfacename>org.springframework.beans.factory.BeanFactory</interfacename>
-      is the actual representation of the Spring IoC
-      <emphasis>container</emphasis> that is responsible for containing and
-      otherwise managing the aforementioned beans.</para>
-
-      <para>The <interfacename>BeanFactory</interfacename> interface is the
-      central IoC container interface in Spring. Its responsibilities include
-      instantiating or sourcing application objects, configuring such objects,
-      and assembling the dependencies between these objects.</para>
+      <para>The interface
+      <classname>org.springframework.context.ApplicationContext</classname>
+      represents the Spring IoC container and is responsible for
+      instantiating, configuring, and assembling the aforementioned beans. The
+      container gets its instructions on what objects to instantiate,
+      configure and assemble by reading configuration metadata. The
+      configuration metadata can be represented in either XML, Java
+      annotations, or Java code and allows you to express the objects that
+      compose your application and the rich interdependencies between such
+      objects.</para>
 
       <para>There are a number of implementations of the
-      <interfacename>BeanFactory</interfacename> interface that come supplied
-      straight out-of-the-box with Spring. The most commonly used
-      <interfacename>BeanFactory</interfacename> implementation is the
-      <classname>XmlBeanFactory</classname> class. This implementation allows
-      you to express the objects that compose your application, and the
-      doubtless rich interdependencies between such objects, in terms of XML.
-      The <classname>XmlBeanFactory</classname> takes this XML
-      <firstterm>configuration metadata</firstterm> and uses it to create a
-      fully configured system or application.</para>
+      <classname>ApplicationContext</classname> interface that come supplied
+      straight out-of-the-box with Spring. In standalone applications it has
+      traditionally been common to pragmatically create an instance of <ulink
+      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/ClassPathXmlApplicationContext.html"><classname>ClassPathXmlApplicationContext</classname></ulink>
+      or <ulink
+      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/FileSystemXmlApplicationContext.html"><classname>FileSystemXmlApplicationContext</classname></ulink>.
+      This is because XML has been the traditional format for defining the
+      configuration metadata. To support the mixing of different configuration
+      metadata formats use the <ulink
+      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/GenericApplicationContext.html"><classname>GenericApplicationContext</classname></ulink>
+      implementation.</para>
+
+      <para>In the vast majority of application scenarios, explicit user code
+      is not required to instantiate one or more instances of a Spring IoC
+      container. For example, in a web application scenario, a simple eight
+      (or so) lines of boilerplate J2EE web descriptor XML in the
+      <literal>web.xml</literal> file of the application will typically
+      suffice (see <xref linkend="context-create" />).</para>
+
+      <para>The high level view of how the Spring works is shown below. Your
+      application classes are combined with configuration metadata so that
+      once the <classname>ApplicationContext</classname> is created and
+      initialized you have a fully configured and executable system or
+      application.</para>
 
       <para><mediaobject>
           <imageobject role="fo">
@@ -139,49 +132,46 @@
         this configuration metadata is nothing more than how you (as an
         application developer) inform the Spring container as to how to
         <emphasis><quote>instantiate, configure, and assemble [the objects in
-        your application]</quote>.</emphasis> This configuration metadata is
-        typically supplied in a simple and intuitive XML format. When using
-        XML-based configuration metadata, you write <emphasis>bean
-        definitions</emphasis> for those beans that you want the Spring IoC
-        container to manage, and then let the container do its stuff.</para>
+        your application]</quote>.</emphasis></para>
+
+        <para>This configuration metadata has historically been supplied in a
+        simple and intuitive XML format and so the majority of this chapter
+        will use the XML format to convey key concepts and features of the
+        Spring IoC container.</para>
 
         <note>
-          <para>XML-based metadata is by far the most commonly used form of
-          configuration metadata. It is <emphasis>not</emphasis> however the
-          only form of configuration metadata that is allowed. The Spring IoC
-          container itself is <emphasis>totally</emphasis> decoupled from the
-          format in which this configuration metadata is actually written. The
-          XML-based configuration metadata format really is simple though, and
-          so the majority of this chapter will use the XML format to convey
-          key concepts and features of the Spring IoC container.</para>
-
-          <para>You can find details of another form of metadata that the
-          Spring container can consume in the section entitled <xref
-          linkend="beans-annotation-config" /></para>
+          <para>While XML-based metadata has been by far the most commonly
+          used form of configuration metadata. It is <emphasis>not</emphasis>
+          however the only form of configuration metadata that is allowed. The
+          Spring IoC container itself is <emphasis>totally</emphasis>
+          decoupled from the format in which this configuration metadata is
+          actually written.</para>
         </note>
 
-        <sidebar>
-          <title>Resources</title>
+        <para>You can find details of other forms of metadata that the Spring
+        container can consume in the following sections</para>
 
-          <para>The location path or paths supplied to an
-          <interfacename>ApplicationContext</interfacename> constructor are
-          actually resource strings that allow the container to load
-          configuration metadata from a variety of external resources such as
-          the local file system, from the Java <literal>CLASSPATH</literal>,
-          etc.</para>
+        <itemizedlist>
+          <listitem>
+            <para><link linkend="beans-annotation-config">Annotation-based
+            configuration</link>: Spring 2.5 introduced support for annotation
+            based configuration metadata.</para>
+          </listitem>
 
-          <para>Once you have learned about Spring's IoC container, you may
-          wish to learn a little more about Spring's
-          <interfacename>Resource</interfacename> abstraction, as described in
-          the chapter entitled <xref linkend="resources" />.</para>
-        </sidebar>
-
-        <para>In the vast majority of application scenarios, explicit user
-        code is not required to instantiate one or more instances of a Spring
-        IoC container. For example, in a web application scenario, a simple
-        eight (or so) lines of boilerplate J2EE web descriptor XML in the
-        <literal>web.xml</literal> file of the application will typically
-        suffice (see <xref linkend="context-create" />).</para>
+          <listitem>
+            <para><link linkend="beans-javaconfig">Java-based
+            configuration</link>: Starting with Spring 3.0 many of the
+            features provided by the <ulink
+            url="http://www.springsource.org/javaconfig">Spring JavaConfig
+            project</ulink> have been added to the core Spring Framework. This
+            allows you to define beans external to your application classes
+            using Java rather than XML files. Take a look at the
+            <interfacename>@Configuration</interfacename>,
+            <interfacename>@Bean, @Import</interfacename> and
+            <interfacename>@DependsOn</interfacename> annotations for how to
+            use these new features.</para>
+          </listitem>
+        </itemizedlist>
 
         <para>Spring configuration consists of at least one bean definition
         that the container must manage, but typically there will be more than
@@ -200,7 +190,11 @@
         <interfacename>Queues</interfacename>, and so forth. Typically one
         does not configure fine-grained domain objects in the container,
         because it is usually the responsibility of DAOs and business logic to
-        create/load domain objects.</para>
+        create/load domain objects. However, one can use Spring's integration
+        with AspectJ to configure objects that have been created outside the
+        control of an IoC container. See the section <link
+        linkend="aop-atconfigurable">Using AspectJ to dependency inject domain
+        objects</link> with Spring for more information.</para>
 
         <para>Find below an example of the basic structure of XML-based
         configuration metadata.</para>
@@ -222,6 +216,15 @@
   &lt;!-- more bean definitions go here --&gt;
 
 &lt;/beans&gt;</programlisting>
+
+        <para>The <literal>id</literal> attribute is a string that you use to
+        identify the individual bean definition. The <literal>class</literal>
+        attribute defines the type of the bean and uses the fully qualified
+        classname. The value of the id attribute is used as a means to refer
+        to collaborating objects. Note the XML for referring to collaborating
+        objects is not shown in this example, see the section on <link
+        linkend="beans-dependencies">Dependencies</link> for more
+        information.</para>
       </section>
     </section>
 
@@ -230,29 +233,90 @@
 
       <para>Instantiating a Spring IoC container is straightforward.</para>
 
-      <programlisting language="java">ApplicationContext context = new ClassPathXmlApplicationContext(
-        new String[] {"services.xml", "daos.xml"});
+      <programlisting language="java">ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});</programlisting>
 
-<lineannotation>// an <interfacename>ApplicationContext</interfacename> is also a <interfacename>BeanFactory</interfacename> (via inheritance)</lineannotation>
-BeanFactory factory = context;</programlisting>
+      <note>
+        <para>The location path or paths supplied to an
+        <interfacename>ApplicationContext</interfacename> constructor are
+        actually resource strings that allow the container to load
+        configuration metadata from a variety of external resources such as
+        the local file system, from the Java <literal>CLASSPATH</literal>,
+        etc.</para>
+
+        <para>Once you have learned about Spring's IoC container, you may wish
+        to learn a little more about Spring's
+        <interfacename>Resource</interfacename> abstraction, as described in
+        the chapter entitled <xref linkend="resources" />.</para>
+      </note>
+
+      <para>The <literal>services.xml</literal> configuration file is </para>
+
+      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+  &lt;!-- services --&gt;
+
+  &lt;bean id="petStore" class="org.springframework.samples.jpetstore.services.PetStoreServiceImpl"&gt;
+    &lt;property name="accountDao" ref="accountDao"/&gt;
+    &lt;property name="itemDao" ref="itemDao"/&gt;
+    &lt;!-- additional collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;!-- more bean definitions for services go here --&gt;
+
+&lt;/beans&gt;
+</programlisting>
+
+      <para>and <literal>daos.xml</literal> is</para>
+
+      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+  &lt;bean id="accountDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;
+    &lt;!-- additional collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="itemDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapItemDao"&gt;
+    &lt;!-- additional collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;!-- more bean definitions for data access objects go here --&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>In this example, the service layer consists of the class
+      <classname>PetStoreServiceImpl</classname> and there are two data access
+      objects of the type <classname>SqlMapAccountDao</classname> and
+      SqlMapItemDao which are based on the <ulink
+      url="http://ibatis.apache.org/">iBatis</ulink> Object/Relational mapping
+      framework. While the details of configuring an object's dependencies is
+      discussed in the chapter, <link
+      linkend="beans-dependencies">Dependencies</link>, it is intuitive to see
+      that the <literal>property</literal> element refers to the name of
+      JavaBean property and the <literal>ref</literal> element refers to the
+      name of another bean definition. This linkage between id and ref
+      elements expresses the dependency between collaborating objects. </para>
 
       <section id="beans-factory-xml-import">
         <title>Composing XML-based configuration metadata</title>
 
-        <para>It can often be useful to split up container definitions into
-        multiple XML files. One way to then load an application context which
-        is configured from all these XML fragments is to use the application
-        context constructor which takes multiple
-        <interfacename>Resource</interfacename> locations. With a bean
-        factory, a bean definition reader can be used multiple times to read
-        definitions from each file in turn.</para>
+        <para>It can often be useful to split up bean definitions into
+        multiple XML files. Often each individual XML configuration file
+        represents a logical layer or module in your architecture. One way to
+        then load an application context which is configured from all these
+        XML fragments is to use the application context constructor which
+        takes multiple <interfacename>Resource</interfacename> locations as
+        was shown in the previous section.</para>
 
-        <para>Generally, the Spring team prefers the above approach, since it
-        keeps container configuration files unaware of the fact that they are
-        being combined with others. An alternate approach is to use one or
-        more occurrences of the <literal>&lt;import/&gt;</literal> element to
-        load bean definitions from another file (or files). Let's look at a
-        sample:</para>
+        <para>An alternate approach is to use one or more occurrences of the
+        <literal>&lt;import/&gt;</literal> element to load bean definitions
+        from another file (or files). Let's look at a sample:</para>
 
         <programlisting language="xml">&lt;beans&gt;
 
@@ -302,6 +366,42 @@ BeanFactory factory = context;</programlisting>
           properties at runtime.</para>
         </note>
       </section>
+    </section>
+
+    <section id="beans-factory-client">
+      <title>Using the container</title>
+
+      <para>An <interfacename>ApplicationContext</interfacename> is
+      essentially nothing more than the interface for an advanced factory
+      capable of maintaining a registry of different beans and their
+      dependencies. Using the method <methodname>T getBean(Stringname,
+      Class&lt;T&gt; requiredType)</methodname> you can retrieve instances of
+      your beans;</para>
+
+      <para>The <interfacename>ApplicationContext</interfacename> enables you
+      to read bean definitions and access them as shown below.</para>
+
+      <programlisting language="java">// create and configure beans
+ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});
+
+// retrieve configured instance
+PetStoreServiceImpl service = context.getBean("petStore", PetStoreServiceImpl.class);
+
+// use configured instance
+List userList service.getUsernameList();
+</programlisting>
+
+      <para>Basically that is all there is to it. Using
+      <methodname>getBean</methodname> you can retrieve instances of your
+      beans; the client-side view of the
+      <interfacename>ApplicationContext</interfacename> is simple. The
+      <interfacename>ApplicationContext</interfacename> interface has just a
+      few other methods for retrieving beans, but ideally your application
+      code should never use them... indeed, your application code should have
+      no calls to the <methodname>getBean</methodname> method at all, and thus
+      no dependency on Spring APIs at all. For example, Spring's integration
+      with web frameworks provides for dependency injection for various web
+      framework classes such as controllers and JSF-managed beans.</para>
     </section>
 
     <section id="beans-definition">
@@ -712,31 +812,6 @@ BeanFactory factory = context;</programlisting>
         </section>
       </section>
     </section>
-
-    <section id="beans-factory-client">
-      <title>Using the container</title>
-
-      <para>A <interfacename>BeanFactory</interfacename> is essentially
-      nothing more than the interface for an advanced factory capable of
-      maintaining a registry of different beans and their dependencies. The
-      <interfacename>BeanFactory</interfacename> enables you to read bean
-      definitions and access them using the bean factory. When using just the
-      <interfacename>BeanFactory</interfacename> you would create one and read
-      in some bean definitions in the XML format as follows:</para>
-
-      <programlisting language="java">Resource res = new FileSystemResource("beans.xml");
-BeanFactory factory = new XmlBeanFactory(res);</programlisting>
-
-      <para>Basically that is all there is to it. Using
-      <methodname>getBean(String)</methodname> you can retrieve instances of
-      your beans; the client-side view of the
-      <interfacename>BeanFactory</interfacename> is simple. The
-      <interfacename>BeanFactory</interfacename> interface has just a few
-      other methods, but ideally your application code should never use
-      them... indeed, your application code should have no calls to the
-      <methodname>getBean(String)</methodname> method at all, and thus no
-      dependency on Spring APIs at all.</para>
-    </section>
   </section>
 
   <section id="beans-dependencies">
@@ -937,10 +1012,9 @@ public class ExampleBean {
 
           <para>Constructor-injection is favored by some purists though (and
           with good reason). Supplying all of an object's dependencies means
-          that that object is never returned to client (calling) code in a
-          less than totally initialized state. The flip side is that the
-          object becomes less amenable to re-configuration (or
-          re-injection).</para>
+          that object is never returned to client (calling) code in a less
+          than totally initialized state. The flip side is that the object
+          becomes less amenable to re-configuration (or re-injection).</para>
 
           <para>There is no hard and fast rule here. Use whatever type of DI
           makes the most sense for a particular class; sometimes, when dealing
@@ -950,29 +1024,29 @@ public class ExampleBean {
           only type of DI available to you.</para>
         </sidebar>
 
-        <para>The <interfacename>BeanFactory</interfacename> supports both of
-        these variants for injecting dependencies into beans it manages. (It
-        in fact also supports injecting setter-based dependencies after some
-        dependencies have already been supplied via the constructor approach.)
-        The configuration for the dependencies comes in the form of a
-        <interfacename>BeanDefinition</interfacename>, which is used together
-        with <interfacename>PropertyEditor</interfacename> instances to know
-        how to convert properties from one format to another. However, most
-        users of Spring will not be dealing with these classes directly (that
-        is programmatically), but rather with an XML definition file which
-        will be converted internally into instances of these classes, and used
-        to load an entire Spring IoC container instance.</para>
+        <para>The <interfacename>ApplicationContext</interfacename> supports
+        both of these variants for injecting dependencies into beans it
+        manages. (It in fact also supports injecting setter-based dependencies
+        after some dependencies have already been supplied via the constructor
+        approach.) The configuration for the dependencies comes in the form of
+        a <interfacename>BeanDefinition</interfacename>, which is used
+        together with <interfacename>PropertyEditor</interfacename> instances
+        to know how to convert properties from one format to another. However,
+        most users of Spring will not be dealing with these classes directly
+        (that is programmatically), but rather with an XML definition file
+        which will be converted internally into instances of these classes,
+        and used to load an entire Spring IoC container instance.</para>
 
         <para>Bean dependency resolution generally happens as follows:</para>
 
         <orderedlist>
           <listitem>
-            <para>The <interfacename>BeanFactory</interfacename> is created
-            and initialized with a configuration which describes all the
-            beans. (Most Spring users use a
-            <interfacename>BeanFactory</interfacename> or
+            <para>The <interfacename>ApplicationContext</interfacename> is
+            created and initialized with a configuration which describes all
+            the beans. (Many Spring users use a an
             <interfacename>ApplicationContext</interfacename> implementation
-            that supports XML format configuration files.)</para>
+            that supports XML format configuration files but Java code and
+            annotation based configurations are also supported.)</para>
           </listitem>
 
           <listitem>
@@ -1231,7 +1305,7 @@ public class ExampleBean {
   
   <lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation>
   &lt;property name="driverClassName"&gt;
-    &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
+     &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
   &lt;/property&gt;
   &lt;property name="url"&gt;
     &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
@@ -2023,12 +2097,13 @@ support=support@example.co.uk</programlisting>
       relationships between collaborating beans. This means that it is
       possible to automatically let Spring resolve collaborators (other beans)
       for your bean by inspecting the contents of the
-      <interfacename>BeanFactory</interfacename>. The autowiring functionality
-      has five modes. Autowiring is specified <emphasis>per</emphasis> bean
-      and can thus be enabled for some beans, while other beans will not be
-      autowired. Using autowiring, it is possible to reduce or eliminate the
-      need to specify properties or constructor arguments, thus saving a
-      significant amount of typing. <footnote>
+      <interfacename>ApplicationContext</interfacename>. The autowiring
+      functionality has five modes. Autowiring is specified
+      <emphasis>per</emphasis> bean and can thus be enabled for some beans,
+      while other beans will not be autowired. Using autowiring, it is
+      possible to reduce or eliminate the need to specify properties or
+      constructor arguments, thus saving a significant amount of typing.
+      <footnote>
           <para>See the section entitled <xref
           linkend="beans-factory-collaborators" /></para>
         </footnote> When using XML-based configuration metadata, the autowire
@@ -2331,23 +2406,23 @@ support=support@example.co.uk</programlisting>
       <para>One solution to this issue is to forego some inversion of control.
       Bean A can be <link linkend="beans-factory-aware-beanfactoryaware">made
       aware of the container</link> by implementing the
-      <interfacename>BeanFactoryAware</interfacename> interface, and <link
-      linkend="beans-factory-client">use programmatic means</link> to ask the
-      container via a <methodname>getBean("B")</methodname> call for (a
-      typically new) bean B instance every time it needs it. Find below an
-      admittedly somewhat contrived example of this approach:</para>
+      <interfacename>ApplicationContextFactoryAware</interfacename> interface,
+      and <link linkend="beans-factory-client">use programmatic means</link>
+      to ask the container via a <methodname>getBean("B")</methodname> call
+      for (a typically new) bean B instance every time it needs it. Find below
+      an admittedly somewhat contrived example of this approach:</para>
 
       <programlisting language="java"><lineannotation>// a class that uses a stateful Command-style class to perform some processing</lineannotation>
 package fiona.apple;
 
-<lineannotation>// lots of Spring-API imports</lineannotation>
+<lineannotation>// Spring-API imports</lineannotation>
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.context.Applicationcontext;
+import org.springframework.context.ApplicationContextAware;
 
-public class CommandManager implements BeanFactoryAware {
+public class CommandManager implements ApplicationContextAware {
 
-   private BeanFactory beanFactory;
+   private ApplicationContext applicationContext;
 
    public Object process(Map commandState) {
       <lineannotation>// grab a new instance of the appropriate <interfacename>Command</interfacename></lineannotation>
@@ -2359,11 +2434,11 @@ public class CommandManager implements BeanFactoryAware {
 
    <lineannotation>// the <interfacename>Command</interfacename> returned here could be an implementation that executes asynchronously, or whatever</lineannotation>
    protected Command createCommand() {
-      return (Command) this.beanFactory.getBean("command"); <lineannotation>// notice the Spring API dependency</lineannotation>
+      return this.applicationContext.getBean("command", Command.class); <lineannotation>// notice the Spring API dependency</lineannotation>
    }
 
-   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-      this.beanFactory = beanFactory;
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.applicationContext = applicationContext;
    }
 }</programlisting>
 
@@ -2469,14 +2544,15 @@ public abstract class CommandManager {
           <para>The interested reader may also find the
           <classname>ServiceLocatorFactoryBean</classname> (in the
           <literal>org.springframework.beans.factory.config</literal> package)
-          to be of use; the approach is similar to that of the
+          to be of use. The approach used in ServiceLocatorFactoryBean is
+          similar to that of another utility class,
           <classname>ObjectFactoryCreatingFactoryBean</classname>, but it
           allows you to specify your own lookup interface as opposed to having
-          to use a Spring-specific lookup interface such as the
-          <interfacename>ObjectFactory</interfacename>. Consult the (copious)
-          Javadoc for the <classname>ServiceLocatorFactoryBean</classname> for
-          a full treatment of this alternative approach (that
-          <emphasis>does</emphasis> reduce the coupling to Spring).</para>
+          to use a Spring-specific lookup interface. Consult the JavaDocs for
+          these classes as well as this <ulink
+          url="http://blog.arendsen.net/index.php/2006/10/05/on-the-servicelocatorfactorybean-dlas-and-the-sustainability-of-code-and-design/">blog
+          entry</ulink> for a additional information
+          ServiceLocatorFactoryBean.</para>
         </tip>
       </section>
 
@@ -2837,7 +2913,6 @@ public class ReplacementComputeValue implements MethodReplacer {
         implementation (such as
         <classname>XmlWebApplicationContext</classname>). If you try using
         these next scopes with regular Spring IoC containers such as the
-        <classname>XmlBeanFactory</classname> or
         <classname>ClassPathXmlApplicationContext</classname>, you
         <emphasis>will</emphasis> get an
         <classname>IllegalStateException</classname> complaining about an
@@ -3659,159 +3734,53 @@ public final class Boot {
       <title>Knowing who you are</title>
 
       <section id="beans-factory-aware-beanfactoryaware">
-        <title><interfacename>BeanFactoryAware</interfacename></title>
+        <title><interfacename>ApplicationContextAware</interfacename></title>
 
         <para>A class which implements the
-        <interfacename>org.springframework.beans.factory.BeanFactoryAware</interfacename>
+        <interfacename>org.springframework.contxt.ApplicationContextAware</interfacename>
         interface is provided with a reference to the
-        <interfacename>BeanFactory</interfacename> that created it, when it is
-        created by that <interfacename>BeanFactory</interfacename>.</para>
+        <interfacename>ApplicationContext</interfacename> that created it,
+        when it is created by that
+        <interfacename>ApplicationContext</interfacename>.</para>
 
-        <programlisting language="java">public interface BeanFactoryAware {
+        <programlisting language="java">public interface ApplicationContextAware {
 
-    void setBeanFactory(BeanFactory beanFactory) throws BeansException;
+    void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
 }</programlisting>
 
         <para>This allows beans to manipulate the
-        <interfacename>BeanFactory</interfacename> that created them
+        <interfacename>ApplicationContext</interfacename> that created them
         programmatically, through the
-        <interfacename>BeanFactory</interfacename> interface, or by casting
-        the reference to a known subclass of this which exposes additional
-        functionality. Primarily this would consist of programmatic retrieval
-        of other beans. While there are cases when this capability is useful,
-        it should generally be avoided, since it couples the code to Spring
-        and does not follow the Inversion of Control style, where
-        collaborators are provided to beans as properties.</para>
-
-        <para>An alternative option that is equivalent in effect to the
-        <interfacename>BeanFactoryAware</interfacename>-based approach is to
-        use the
-        <classname>org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean</classname>.
-        (It should be noted that this approach still does not reduce the
-        coupling to Spring, but it does not violate the central principle of
-        IoC as much as the
-        <interfacename>BeanFactoryAware</interfacename>-based
-        approach.)</para>
-
-        <para>The <classname>ObjectFactoryCreatingFactoryBean</classname> is a
-        <link
-        linkend="beans-factory-extension-factorybean"><interfacename>FactoryBean</interfacename></link>
-        implementation that returns a reference to an object (factory) that
-        can in turn be used to effect a bean lookup. The
-        <classname>ObjectFactoryCreatingFactoryBean</classname> class does
-        itself implement the <interfacename>BeanFactoryAware</interfacename>
-        interface; what client beans are actually injected with is an instance
-        of the <interfacename>ObjectFactory</interfacename> interface. This is
-        a Spring-specific interface (and hence there is still no total
-        decoupling from Spring), but clients can then use the
-        <interfacename>ObjectFactory</interfacename>'s
-        <methodname>getObject()</methodname> method to effect the bean lookup
-        (under the hood the <interfacename>ObjectFactory</interfacename>
-        implementation instance that is returned simply delegates down to a
-        <interfacename>BeanFactory</interfacename> to actually lookup a bean
-        by name). All that you need to do is supply the
-        <classname>ObjectFactoryCreatingFactoryBean</classname> with the name
-        of the bean that is to be looked up. Let's look at an example:</para>
-
-        <programlisting language="java">package x.y;
-
-public class NewsFeed {
-    
-    private String news;
-
-    public void setNews(String news) {
-        this.news = news;
-    }
-
-    public String getNews() {
-        return this.toString() + ": '" + news + "'";
-    }
-}</programlisting>
-
-        <programlisting language="java">package x.y;
-
-import org.springframework.beans.factory.ObjectFactory;
-
-public class NewsFeedManager {
-
-    private ObjectFactory factory;
-
-    public void setFactory(ObjectFactory factory) {
-        this.factory = factory;
-    }
-
-    public void printNews() {
-        // here is where the lookup is performed; note that there is no
-        // need to hard code the name of the bean that is being looked up...
-        NewsFeed news = (NewsFeed) factory.getObject();
-        System.out.println(news.getNews());
-    }
-}</programlisting>
-
-        <para>Find below the XML configuration to wire together the above
-        classes using the
-        <classname>ObjectFactoryCreatingFactoryBean</classname>
-        approach.</para>
-
-        <programlisting language="xml">&lt;beans&gt;
-    &lt;bean id="newsFeedManager" class="x.y.NewsFeedManager"&gt;
-        &lt;property name="factory"&gt;
-            &lt;bean
-class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean"&gt;
-                &lt;property name="targetBeanName"&gt;
-                    &lt;idref local="newsFeed" /&gt;
-                &lt;/property&gt;
-            &lt;/bean&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-    &lt;bean id="newsFeed" class="x.y.NewsFeed" scope="prototype"&gt;
-        &lt;property name="news" value="... that's fit to print!" /&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting>
-
-        <para>And here is a small driver program to test the fact that new
-        (prototype) instances of the <literal>newsFeed</literal> bean are
-        actually being returned for each call to the injected
-        <interfacename>ObjectFactory</interfacename> inside the
-        <classname>NewsFeedManager</classname>'s
-        <methodname>printNews()</methodname> method.</para>
-
-        <programlisting language="java">import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import x.y.NewsFeedManager;
-
-public class Main {
-
-    public static void main(String[] args) throws Exception {
-
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
-        NewsFeedManager manager = (NewsFeedManager) ctx.getBean("newsFeedManager");
-        manager.printNews();
-        manager.printNews();
-    }
-}</programlisting>
-
-        <para>The output from running the above program will look like so
-        (results will of course vary on your machine).</para>
-
-        <programlisting language="java">x.y.NewsFeed@1292d26: '... that's fit to print!'
-x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
+        <interfacename>ApplicationContext</interfacename> interface, or by
+        casting the reference to a known subclass of this which exposes
+        additional functionality, for example
+        <classname>ConfigurableApplicationContext</classname>. One use would
+        be the programmatic retrieval of other beans. While there are cases
+        when this capability is useful, it should generally be avoided, since
+        it couples the code to Spring and does not follow the Inversion of
+        Control style, where collaborators are provided to beans as
+        properties. Other methods on the ApplicationContext provide access to
+        file resources, publishing application events, or accessing a
+        MessageSource. These additional features are described in the section
+        <xref linkend="context-introduction" /></para>
 
         <para>As of Spring 2.5, you can rely upon autowiring of the
-        <interfacename>BeanFactory</interfacename> as yet another alternative
-        to implementing the <interfacename>BeanFactoryAware</interfacename>
-        interface. The "traditional" <literal>constructor</literal> and
+        <interfacename>ApplicationContext</interfacename> as yet another
+        alternative to implementing the
+        <interfacename>ApplicationContextAware</interfacename> interface. The
+        "traditional" <literal>constructor</literal> and
         <literal>byType</literal> autowiring modes (as described in the
         section entitled <xref linkend="beans-factory-autowire" />) are now
         capable of providing a dependency of type
-        <interfacename>BeanFactory</interfacename> for either a constructor
-        argument or setter method parameter respectively. For more flexibility
-        (including the ability to autowire fields and multiple parameter
-        methods), consider using the new annotation-based autowiring features.
-        In that case, the <interfacename>BeanFactory</interfacename> will be
-        autowired into a field, constructor argument, or method parameter that
-        is expecting the <interfacename>BeanFactory</interfacename> type as
-        long as the field, constructor, or method in question carries the
+        <interfacename>ApplicationContext</interfacename> for either a
+        constructor argument or setter method parameter respectively. For more
+        flexibility (including the ability to autowire fields and multiple
+        parameter methods), consider using the new annotation-based autowiring
+        features. In that case, the
+        <interfacename>ApplicationFactory</interfacename> will be autowired
+        into a field, constructor argument, or method parameter that is
+        expecting the <interfacename>BeanFactory</interfacename> type as long
+        as the field, constructor, or method in question carries the
         <interfacename>@Autowired</interfacename> annotation. For more
         information, see the section entitled <xref
         linkend="beans-autowired-annotation" />.</para>
@@ -3822,12 +3791,12 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
 
         <para>If a bean implements the
         <interfacename>org.springframework.beans.factory.BeanNameAware</interfacename>
-        interface and is deployed in a
-        <interfacename>BeanFactory</interfacename>, the
-        <interfacename>BeanFactory</interfacename> will call the bean through
-        this interface to inform the bean of the <emphasis>name</emphasis> it
-        was deployed under. The callback will be invoked after population of
-        normal bean properties but before an initialization callback like
+        interface the and is deployed in a
+        <interfacename>ApplicationContext</interfacename> will call the bean
+        through this interface to inform the bean of the
+        <emphasis>name</emphasis> it was deployed under. The callback will be
+        invoked after population of normal bean properties but before an
+        initialization callback like
         <interfacename>InitializingBean</interfacename>'s
         <emphasis>afterPropertiesSet</emphasis> or a custom
         init-method.</para>
@@ -3847,14 +3816,16 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
     needed. Using parent and child bean definitions can potentially save a lot
     of typing. Effectively, this is a form of templating.</para>
 
-    <para>When working with a <interfacename>BeanFactory</interfacename>
-    programmatically, child bean definitions are represented by the
+    <para>When working with a
+    <interfacename>ApplicationContext</interfacename> programmatically, child
+    bean definitions are represented by the
     <classname>ChildBeanDefinition</classname> class. Most users will never
     work with them on this level, instead configuring bean definitions
-    declaratively in something like the <classname>XmlBeanFactory</classname>.
-    When using XML-based configuration metadata a child bean definition is
-    indicated simply by using the <literal>'parent'</literal> attribute,
-    specifying the parent bean as the value of this attribute.</para>
+    declaratively in something like the
+    <classname>ClassPathXmlApplicationContext</classname>. When using
+    XML-based configuration metadata a child bean definition is indicated
+    simply by using the <literal>'parent'</literal> attribute, specifying the
+    parent bean as the value of this attribute.</para>
 
     <programlisting language="xml">&lt;bean id="inheritedTestBean" abstract="true"
     class="org.springframework.beans.TestBean"&gt;
@@ -3918,14 +3889,12 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
     ignore bean definitions which are defined as abstract.</para>
 
     <note>
-      <para><literal>ApplicationContexts</literal> (but
-      <emphasis>not</emphasis> <literal>BeanFactories</literal>) will by
-      default pre-instantiate all singletons. Therefore it is important (at
-      least for singleton beans) that if you have a (parent) bean definition
-      which you intend to use only as a template, and this definition
-      specifies a class, you must make sure to set the
-      <emphasis>'abstract'</emphasis> attribute to
-      <emphasis>'true'</emphasis>, otherwise the application context will
+      <para><literal>ApplicationContexts</literal> will by default
+      pre-instantiate all singletons. Therefore it is important (at least for
+      singleton beans) that if you have a (parent) bean definition which you
+      intend to use only as a template, and this definition specifies a class,
+      you must make sure to set the <emphasis>'abstract'</emphasis> attribute
+      to <emphasis>'true'</emphasis>, otherwise the application context will
       actually (attempt to) pre-instantiate the <literal>abstract</literal>
       bean.</para>
     </note>
@@ -3936,7 +3905,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
 
     <para>The IoC component of the Spring Framework has been designed for
     extension. There is typically no need for an application developer to
-    subclass any of the various <interfacename>BeanFactory</interfacename> or
+    subclass any of the various
     <interfacename>ApplicationContext</interfacename> implementation classes.
     The Spring IoC container can be infinitely extended by plugging in
     implementations of special integration interfaces. The next few sections
@@ -4010,35 +3979,15 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
       implemented as bean post-processors and they do this proxy-wrapping
       logic.</para>
 
-      <para>It is important to know that a
-      <interfacename>BeanFactory</interfacename> treats bean post-processors
-      slightly differently than an
-      <interfacename>ApplicationContext</interfacename>. An
+      <para>It is important to note that an
       <interfacename>ApplicationContext</interfacename> will
       <emphasis>automatically detect</emphasis> any beans which are defined in
       the configuration metadata which is supplied to it that implement the
       <interfacename>BeanPostProcessor</interfacename> interface, and register
       them as post-processors, to be then called appropriately by the
       container on bean creation. Nothing else needs to be done other than
-      deploying the post-processors in a similar fashion to any other bean. On
-      the other hand, when using a <interfacename>BeanFactory</interfacename>
-      implementation, bean post-processors explicitly have to be registered,
-      with code like this:</para>
-
-      <programlisting language="java">ConfigurableBeanFactory factory = new XmlBeanFactory(...);
-            
-<lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation>
-MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
-factory.addBeanPostProcessor(postProcessor);
-
-<lineannotation>// now start using the factory</lineannotation></programlisting>
-
-      <para>This explicit registration step is not convenient, and this is one
-      of the reasons why the various
-      <interfacename>ApplicationContext</interfacename> implementations are
-      preferred above plain <interfacename>BeanFactory</interfacename>
-      implementations in the vast majority of Spring-backed applications,
-      especially when using <literal>BeanPostProcessors</literal>.</para>
+      deploying the post-processors in a similar fashion to any other bean.
+      </para>
 
       <note>
         <title><interfacename>BeanPostProcessors</interfacename> and AOP
@@ -4223,38 +4172,15 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         even if both containers are part of the same hierarchy.</para>
       </note>
 
-      <para>A bean factory post-processor is executed manually (in the case of
-      a <interfacename>BeanFactory</interfacename>) or automatically (in the
-      case of an <interfacename>ApplicationContext</interfacename>) to apply
-      changes of some sort to the configuration metadata that defines a
-      container. Spring includes a number of pre-existing bean factory
+      <para>A bean factory post-processor is executed automatically when
+      declared inside of an <interfacename>ApplicationContext</interfacename>
+      to apply changes of some sort to the configuration metadata that defines
+      a container. Spring includes a number of pre-existing bean factory
       post-processors, such as
       <classname>PropertyOverrideConfigurer</classname> and
-      <classname>PropertyPlaceholderConfigurer</classname>, both described
-      below. A custom <interfacename>BeanFactoryPostProcessor</interfacename>
-      can also be used to register custom property editors, for
-      example.</para>
-
-      <para>In a <interfacename>BeanFactory</interfacename>, the process of
-      applying a <interfacename>BeanFactoryPostProcessor</interfacename> is
-      manual, and will be similar to this:</para>
-
-      <programlisting language="java">XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
-
-<lineannotation>// bring in some property values from a <classname>Properties</classname> file</lineannotation>
-PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
-cfg.setLocation(new FileSystemResource("jdbc.properties"));
-
-<lineannotation>// now actually do the replacement</lineannotation>
-cfg.postProcessBeanFactory(factory);</programlisting>
-
-      <para>This explicit registration step is not convenient, and this is one
-      of the reasons why the various
-      <interfacename>ApplicationContext</interfacename> implementations are
-      preferred above plain <interfacename>BeanFactory</interfacename>
-      implementations in the vast majority of Spring-backed applications,
-      especially when using
-      <literal>BeanFactoryPostProcessors</literal>.</para>
+      <classname>PropertyPlaceholderConfigurer. </classname>A custom
+      <interfacename>BeanFactoryPostProcessor</interfacename> can also be used
+      to register custom property editors, for example.</para>
 
       <anchor id="beans-factory-autodetect-beanfactorypostprocessors" />
 
@@ -4283,13 +4209,13 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         <interfacename>PropertyPlaceholderConfigurer</interfacename></title>
 
         <para>The <interfacename>PropertyPlaceholderConfigurer</interfacename>
-        is used to externalize property values from a
-        <interfacename>BeanFactory</interfacename> definition, into another
-        separate file in the standard Java <classname>Properties</classname>
-        format. This is useful to allow the person deploying an application to
-        customize environment-specific properties (for example database URLs,
-        usernames and passwords), without the complexity or risk of modifying
-        the main XML definition file or files for the container.</para>
+        is used to externalize property values from a bean definition into
+        another separate file in the standard Java
+        <classname>Properties</classname> format. This is useful to allow the
+        person deploying an application to customize environment-specific
+        properties (for example database URLs, usernames and passwords),
+        without the complexity or risk of modifying the main XML definition
+        file or files for the container.</para>
 
         <para>Consider the following XML-based configuration metadata
         fragment, where a <interfacename>DataSource</interfacename> with
@@ -4485,8 +4411,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       the bean it produces. This may be achieved by prepending the bean id
       with <literal>'&amp;'</literal> (sans quotes) when calling the
       <methodname>getBean</methodname> method of the
-      <interfacename>BeanFactory</interfacename> (including
-      <interfacename>ApplicationContext</interfacename>). So for a given
+      <interfacename>ApplicationContext</interfacename>. So for a given
       <interfacename>FactoryBean</interfacename> with an id of
       <literal>myBean</literal>, invoking <literal>getBean("myBean")</literal>
       on the container will return the product of the
@@ -4506,13 +4431,11 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     interface, which enhances <interfacename>BeanFactory</interfacename>
     functionality in a more <emphasis>framework-oriented style</emphasis>.
     Many users will use <interfacename>ApplicationContext</interfacename> in a
-    completely declarative fashion, not even having to create it manually, but
-    instead relying on support classes such as
+    completely declarative fashion, not even having to create it
+    programmatically, but instead relying on support classes such as
     <classname>ContextLoader</classname> to automatically instantiate an
     <interfacename>ApplicationContext</interfacename> as part of the normal
-    startup process of a J2EE web-app. (Of course, it is still possible to
-    create an <interfacename>ApplicationContext</interfacename>
-    programmatically.)</para>
+    startup process of a J2EE web-app.</para>
 
     <para>The basis for the context package is the
     <interfacename>ApplicationContext</interfacename> interface, located in
@@ -4545,113 +4468,6 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         layer, for example the web layer of an application.</para>
       </listitem>
     </itemizedlist>
-
-    <section id="context-introduction-ctx-vs-beanfactory">
-      <title><interfacename>BeanFactory</interfacename> or
-      <interfacename>ApplicationContext</interfacename>?</title>
-
-      <para>Short version: <emphasis>use an
-      <interfacename>ApplicationContext</interfacename> unless you have a
-      really good reason for not doing so. For those of you that are looking
-      for slightly more depth as to the 'but why' of the above recommendation,
-      keep reading.</emphasis></para>
-
-      <para>As the <interfacename>ApplicationContext</interfacename> includes
-      all functionality of the <interfacename>BeanFactory</interfacename>, it
-      is generally recommended that it be used in preference to the
-      <interfacename>BeanFactory</interfacename>, except for a few limited
-      situations such as in an <classname>Applet</classname>, where memory
-      consumption might be critical and a few extra kilobytes might make a
-      difference. However, for most 'typical' enterprise applications and
-      systems, the <interfacename>ApplicationContext</interfacename> is what
-      you will want to use. Versions of Spring 2.0 and above make
-      <emphasis>heavy</emphasis> use of the <link
-      linkend="beans-factory-extension-bpp"><interfacename>BeanPostProcessor</interfacename>
-      extension point</link> (to effect proxying and suchlike), and if you are
-      using just a plain <interfacename>BeanFactory</interfacename> then a
-      fair amount of support such as transactions and AOP will not take effect
-      (at least not without some extra steps on your part), which could be
-      confusing because nothing will actually be wrong with the
-      configuration.</para>
-
-      <para>Find below a feature matrix that lists what features are provided
-      by the <interfacename>BeanFactory</interfacename> and
-      <interfacename>ApplicationContext</interfacename> interfaces (and
-      attendant implementations). (The following sections describe
-      functionality that <interfacename>ApplicationContext</interfacename>
-      adds to the basic <interfacename>BeanFactory</interfacename>
-      capabilities in a lot more depth than the said feature matrix.)</para>
-
-      <table id="context-introduction-ctx-vs-beanfactory-feature-matrix"
-             pgwide="1">
-        <title>Feature Matrix</title>
-
-        <tgroup cols="3">
-          <colspec align="left" />
-
-          <thead>
-            <row>
-              <entry align="center">Feature</entry>
-
-              <entry
-              align="center"><interfacename>BeanFactory</interfacename></entry>
-
-              <entry
-              align="center"><interfacename>ApplicationContext</interfacename></entry>
-            </row>
-          </thead>
-
-          <tbody>
-            <row>
-              <entry><para>Bean instantiation/wiring</para></entry>
-
-              <entry align="center"><para>Yes</para></entry>
-
-              <entry align="center"><para>Yes</para></entry>
-            </row>
-
-            <row>
-              <entry><para>Automatic
-              <interfacename>BeanPostProcessor</interfacename>
-              registration</para></entry>
-
-              <entry align="center"><para>No</para></entry>
-
-              <entry align="center"><para>Yes</para></entry>
-            </row>
-
-            <row>
-              <entry><para>Automatic
-              <interfacename>BeanFactoryPostProcessor</interfacename>
-              registration</para></entry>
-
-              <entry align="center"><para>No</para></entry>
-
-              <entry align="center"><para>Yes</para></entry>
-            </row>
-
-            <row>
-              <entry><para>Convenient
-              <interfacename>MessageSource</interfacename> access (for
-              i18n)</para></entry>
-
-              <entry align="center"><para>No</para></entry>
-
-              <entry align="center"><para>Yes</para></entry>
-            </row>
-
-            <row>
-              <entry><para><interfacename>ApplicationEvent</interfacename>
-              publication</para></entry>
-
-              <entry align="center"><para>No</para></entry>
-
-              <entry align="center"><para>Yes</para></entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
-    </section>
 
     <section id="context-functionality-messagesource">
       <title>Internationalization using
@@ -5098,9 +4914,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <title>Convenient <interfacename>ApplicationContext</interfacename>
       instantiation for web applications</title>
 
-      <para>As opposed to the <interfacename>BeanFactory</interfacename>,
-      which will often be created programmatically,
-      <interfacename>ApplicationContext</interfacename> instances can be
+      <para><interfacename>ApplicationContext</interfacename> instances can be
       created declaratively using for example a
       <classname>ContextLoader</classname>. Of course you can also create
       <interfacename>ApplicationContext</interfacename> instances
@@ -5164,123 +4978,61 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       will use the <literal>'contextConfigLocation'</literal> parameter just
       as the listener does.</para>
     </section>
-  </section>
 
-  <section id="beans-glue-code-and-singletons">
-    <title>Glue code and the evil singleton</title>
+    <section>
+      <title>Deploying a Spring ApplicationContext as a J2EE RAR file</title>
 
-    <para>The majority of the code inside an application is best written in a
-    DI style, where that code is served out of a Spring IoC container, has its
-    own dependencies supplied by the container when it is created, and is
-    completely unaware of the container. However, for the small glue layers of
-    code that are sometimes needed to tie other code together, there is
-    sometimes a need for singleton (or quasi-singleton) style access to a
-    Spring IoC container. For example, third party code may try to construct
-    new objects directly (<literal>Class.forName()</literal> style), without
-    the ability to force it to get these objects out of a Spring IoC
-    container. If the object constructed by the third party code is just a
-    small stub or proxy, which then uses a singleton style access to a Spring
-    IoC container to get a real object to delegate to, then inversion of
-    control has still been achieved for the majority of the code (the object
-    coming out of the container); thus most code is still unaware of the
-    container or how it is accessed, and remains decoupled from other code,
-    with all ensuing benefits. EJBs may also use this stub/proxy approach to
-    delegate to a plain Java implementation object, coming out of a Spring IoC
-    container. While the Spring IoC container itself ideally does not have to
-    be a singleton, it may be unrealistic in terms of memory usage or
-    initialization times (when using beans in the Spring IoC container such as
-    a Hibernate <interfacename>SessionFactory</interfacename>) for each bean
-    to use its own, non-singleton Spring IoC container.</para>
+      <para>Since Spring 2.5, it is possible to deploy a Spring
+      ApplicationContext as a RAR file, encapsulating the context and all of
+      its required bean classes and library JARs in a J2EE RAR deployment
+      unit. This is the equivalent of bootstrapping a standalone
+      ApplicationContext, just hosted in J2EE environment, being able to
+      access the J2EE server's facilities. RAR deployment is intended as a
+      more 'natural' alternative to the not uncommon scenario of deploying a
+      headless WAR file - i.e. a WAR file without any HTTP entry points, just
+      used for bootstrapping a Spring ApplicationContext in a J2EE
+      environment.</para>
 
-    <para>As another example, in complex J2EE applications with multiple
-    layers (various JAR files, EJBs, and WAR files packaged as an EAR), with
-    each layer having its own Spring IoC container definition (effectively
-    forming a hierarchy), the preferred approach when there is only one
-    web-app (WAR) in the top hierarchy is to simply create one composite
-    Spring IoC container from the multiple XML definition files from each
-    layer. All of the various Spring IoC container implementations may be
-    constructed from multiple definition files in this fashion. However, if
-    there are multiple sibling web-applications at the root of the hierarchy,
-    it is problematic to create a Spring IoC container for each
-    web-application which consists of mostly identical bean definitions from
-    lower layers, as there may be issues due to increased memory usage, issues
-    with creating multiple copies of beans which take a long time to
-    initialize (for example a Hibernate
-    <interfacename>SessionFactory</interfacename>), and possible issues due to
-    side-effects. As an alternative, classes such as <literal><ulink
-    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
-    or <literal><ulink
-    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
-    may be used to demand-load multiple hierarchical (that is one container is
-    the parent of another) Spring IoC container instances in a singleton
-    fashion, which may then be used as the parents of the web-application
-    Spring IoC container instances. The result is that bean definitions for
-    lower layers are loaded only as needed, and loaded only once.</para>
+      <para>RAR deployment is ideal for application contexts that do not need
+      any HTTP entry points but rather just consist of message endpoints and
+      scheduled jobs etc. Beans in such a context may use application server
+      resources such as the JTA transaction manager and JNDI-bound JDBC
+      DataSources and JMS ConnectionFactory instances, and may also register
+      with the platform's JMX server - all through Spring's standard
+      transaction management and JNDI and JMX support facilities. Application
+      components may also interact with the application's server JCA
+      WorkManager through Spring's <interfacename>TaskExecutor</interfacename>
+      abstraction.</para>
 
-    <para>You can see a detailed example of the usage of these classes by
-    viewing the Javadoc for the <ulink
-    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
-    and <ulink
-    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
-    classes. As mentioned in the <link linkend="ejb">chapter on EJBs</link>,
-    the Spring convenience base classes for EJBs normally use a non-singleton
-    <interfacename>BeanFactoryLocator</interfacename> implementation, which is
-    easily replaced by the use of
-    <classname>SingletonBeanFactoryLocator</classname> and
-    <classname>ContextSingletonBeanFactoryLocator</classname>.</para>
-  </section>
+      <para>Check out the JavaDoc of the <ulink
+      url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/jca/context/SpringContextResourceAdapter.html">SpringContextResourceAdapter</ulink>
+      class for the configuration details involved in RAR deployment.</para>
 
-  <section id="beans-rar-deployment">
-    <title>Deploying a Spring ApplicationContext as a J2EE RAR file</title>
+      <para><emphasis>For simple deployment needs, all you need to do is the
+      following:</emphasis> Package all application classes into a RAR file
+      (which is just a standard JAR file with a different file extension), add
+      all required library jars into the root of the RAR archive, add a
+      "META-INF/ra.xml" deployment descriptor (as shown in
+      <classname>SpringContextResourceAdapter</classname>'s JavaDoc) as well
+      as the corresponding Spring XML bean definition file(s) (typically
+      "META-INF/applicationContext.xml"), and drop the resulting RAR file into
+      your application server's deployment directory!</para>
 
-    <para>Since Spring 2.5, it is possible to deploy a Spring
-    ApplicationContext as a RAR file, encapsulating the context and all of its
-    required bean classes and library JARs in a J2EE RAR deployment unit. This
-    is the equivalent of bootstrapping a standalone ApplicationContext, just
-    hosted in J2EE environment, being able to access the J2EE server's
-    facilities. RAR deployment is intended as a more 'natural' alternative to
-    the not uncommon scenario of deploying a headless WAR file - i.e. a WAR
-    file without any HTTP entry points, just used for bootstrapping a Spring
-    ApplicationContext in a J2EE environment.</para>
-
-    <para>RAR deployment is ideal for application contexts that do not need
-    any HTTP entry points but rather just consist of message endpoints and
-    scheduled jobs etc. Beans in such a context may use application server
-    resources such as the JTA transaction manager and JNDI-bound JDBC
-    DataSources and JMS ConnectionFactory instances, and may also register
-    with the platform's JMX server - all through Spring's standard transaction
-    management and JNDI and JMX support facilities. Application components may
-    also interact with the application's server JCA WorkManager through
-    Spring's <interfacename>TaskExecutor</interfacename> abstraction.</para>
-
-    <para>Check out the JavaDoc of the <ulink
-    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/jca/context/SpringContextResourceAdapter.html">SpringContextResourceAdapter</ulink>
-    class for the configuration details involved in RAR deployment.</para>
-
-    <para><emphasis>For simple deployment needs, all you need to do is the
-    following:</emphasis> Package all application classes into a RAR file
-    (which is just a standard JAR file with a different file extension), add
-    all required library jars into the root of the RAR archive, add a
-    "META-INF/ra.xml" deployment descriptor (as shown in
-    <classname>SpringContextResourceAdapter</classname>'s JavaDoc) as well as
-    the corresponding Spring XML bean definition file(s) (typically
-    "META-INF/applicationContext.xml"), and drop the resulting RAR file into
-    your application server's deployment directory!</para>
-
-    <para><emphasis>NOTE:</emphasis> Such RAR deployment units are usually
-    self-contained; they do not expose components to the 'outside' world, not
-    even to other modules of the same application. Interaction with a
-    RAR-based ApplicationContext usually happens through JMS destinations that
-    it shares with other modules. A RAR-based ApplicationContext may also -
-    for example - schedule some jobs, reacting to new files in the file system
-    (or the like). If it actually needs to allow for synchronous access from
-    the outside, it could for example export RMI endpoints, which of course
-    may be used by other application modules on the same machine as
-    well.</para>
+      <para><emphasis>NOTE:</emphasis> Such RAR deployment units are usually
+      self-contained; they do not expose components to the 'outside' world,
+      not even to other modules of the same application. Interaction with a
+      RAR-based ApplicationContext usually happens through JMS destinations
+      that it shares with other modules. A RAR-based ApplicationContext may
+      also - for example - schedule some jobs, reacting to new files in the
+      file system (or the like). If it actually needs to allow for synchronous
+      access from the outside, it could for example export RMI endpoints,
+      which of course may be used by other application modules on the same
+      machine as well.</para>
+    </section>
   </section>
 
   <section id="beans-annotation-config">
-    <title>Annotation-based configuration</title>
+    <title>Annotation-based container configuration</title>
 
     <para>As mentioned in the section entitled <xref
     linkend="beans-factory-extension-bpp-examples-rabpp" />, using a
@@ -5941,8 +5693,8 @@ public @interface MovieQualifier {
 
       <note>
         <para>The name provided with the annotation will be resolved as a bean
-        name by the <interfacename>BeanFactory</interfacename> of which the
-        <classname>CommonAnnotationBeanPostProcessor</classname> is aware.
+        name by the <interfacename>ApplicationContext</interfacename> of which
+        the <classname>CommonAnnotationBeanPostProcessor</classname> is aware.
         Note that the names may be resolved via JNDI if Spring's <ulink
         url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"><classname>SimpleJndiBeanFactory</classname></ulink>
         is configured explicitly. However, it is recommended to rely on the
@@ -6028,8 +5780,7 @@ public @interface MovieQualifier {
   </section>
 
   <section id="beans-classpath-scanning">
-    <title>Classpath scanning, managed components and writing configurations
-    using Java</title>
+    <title>Classpath scanning and managed components</title>
 
     <para>Thus far most of the examples within this chapter have used XML for
     specifying the configuration metadata that produces each
@@ -6278,6 +6029,247 @@ public class JpaMovieFinder implements MovieFinder {
       </note>
     </section>
 
+    <section id="beans-factorybeans-annotations">
+      <title>Defining bean metadata within components</title>
+
+      <para>Spring components can also contribute bean definition metadata to
+      the container. This is done with the same <literal>@Bean</literal>
+      annotation used to define bean metadata within
+      <literal>@Configuration</literal> annotated classes. Here is a simple
+      example</para>
+
+      <programlisting>@Component
+public class FactoryMethodComponent {
+
+  @Bean @Qualifier("public")
+  public TestBean publicInstance() {
+    return new TestBean("publicInstance");
+  }
+
+  public void DoWork() 
+  {
+    // Component method implementation omitted
+  }
+}</programlisting>
+
+      <para>This class is a Spring component and has application specific code
+      contained in its <methodname>DoWork</methodname> method. However, it
+      also contributes a bean definition that has a factory method referring
+      to the method <methodname>publicInstance</methodname>. The
+      <literal>@Bean</literal> annotation identifies the factory method and
+      also other bean definition properties, such as a qualifier value via the
+      <classname>@Qualifier</classname> annotation. Other method level
+      annotations that can be specified are <literal>@Scope</literal>,
+      <literal>@Lazy</literal>, and custom qualifier annotations. Autowired
+      fields and methods are supported as before with the additional support
+      for autowiring of @Bean methods, as shown in the example below</para>
+
+      <programlisting language="java">@Component
+public class FactoryMethodComponent {
+
+ private static int i;
+
+ @Bean @Qualifier("public")
+ public TestBean publicInstance() { 
+  return new TestBean("publicInstance");
+ }
+
+ // use of a custom qualifier and autowiring of method parameters
+
+ @Bean @BeanAge(1)
+ protected TestBean protectedInstance(@Qualifier("public") TestBean spouse, @Value("#{privateInstance.age}") String country) {
+  TestBean tb = new TestBean("protectedInstance", 1);
+  tb.setSpouse(tb);
+  tb.setCountry(country);
+  return tb;
+ }
+
+ @Bean @Scope(StandardScopes.PROTOTYPE)
+ private TestBean privateInstance() {
+  return new TestBean("privateInstance", i++);
+ }
+
+ @Bean @Scope(value = StandardScopes.SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+ public TestBean requestScopedInstance() {
+  return new TestBean("requestScopedInstance", 3);
+ }
+}
+</programlisting>
+
+      <para>Note the use of autowiring of the <classname>String</classname>
+      method parameter <literal>country</literal> to the value of the
+      <literal>Age</literal> property on another bean named
+      <literal>privateInstance</literal>. A Spring Expression Language element
+      is used to define the value of the property via the notation <literal>#{
+      &lt;expression&gt; }</literal>. For <literal>@Value</literal>
+      annotations, an expression resolver is preconfigured to look for bean
+      names when resolving expression text.</para>
+
+      <para>The <literal>@Bean</literal> methods in a Spring component are
+      processed differently than their counterparts inside a Spring
+      <literal>@Configuration</literal> class. The difference is that
+      <literal>@Component</literal> classes are not enhanced with CGLIB to
+      intercept the invocation of methods and fields. CGLIB proxying is the
+      means by which invoking methods or fields within
+      <literal>@Configuration</literal> classes' <literal>@Bean</literal>
+      methods create bean metadata references to collaborating objects and do
+      <emphasis>not</emphasis> invoke the method with normal Java semantics.
+      In contrast, calling a method or field within a
+      <literal>@Component</literal> classes' <literal>@Bean</literal> method
+      <emphasis>has</emphasis> standard Java semantics.</para>
+    </section>
+
+    <section id="beans-scanning-name-generator">
+      <title>Naming autodetected components</title>
+
+      <para>When a component is autodetected as part of the scanning process,
+      its bean name will be generated by the
+      <interfacename>BeanNameGenerator</interfacename> strategy known to that
+      scanner. By default, any Spring 'stereotype' annotation
+      (<interfacename>@Component</interfacename>,
+      <interfacename>@Repository</interfacename>,
+      <interfacename>@Service</interfacename>, and
+      <interfacename>@Controller</interfacename>) that contains a
+      <literal>name</literal> value will thereby provide that name to the
+      corresponding bean definition. If such an annotation contains no
+      <literal>name</literal> value or for any other detected component (such
+      as those discovered due to custom filters), the default bean name
+      generator will return the uncapitalized non-qualified class name. For
+      example, if the following two components were detected, the names would
+      be 'myMovieLister' and 'movieFinderImpl':</para>
+
+      <programlisting language="java">@Service("myMovieLister")
+public class SimpleMovieLister {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <programlisting language="java">@Repository
+public class MovieFinderImpl implements MovieFinder {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <note>
+        <para>If you don't want to rely on the default bean-naming strategy,
+        you may provide a custom bean-naming strategy. First, implement the
+        <ulink
+        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html"><interfacename>BeanNameGenerator</interfacename></ulink>
+        interface, and be sure to include a default no-arg constructor. Then,
+        provide the fully-qualified class name when configuring the
+        scanner:</para>
+      </note>
+
+      <programlisting language="xml">&lt;beans ...&gt;
+               
+     &lt;context:component-scan base-package="org.example"
+                             name-generator="org.example.MyNameGenerator" /&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>As a general rule, consider specifying the name with the
+      annotation whenever other components may be making explicit references
+      to it. On the other hand, the auto-generated names are adequate whenever
+      the container is responsible for wiring.</para>
+    </section>
+
+    <section id="beans-scanning-scope-resolver">
+      <title>Providing a scope for autodetected components</title>
+
+      <para>As with Spring-managed components in general, the default and by
+      far most common scope is 'singleton'. However, there are times when
+      other scopes are needed. Therefore Spring 2.5 introduces a new
+      <interfacename>@Scope</interfacename> annotation as well. Simply provide
+      the name of the scope within the annotation, such as:</para>
+
+      <programlisting language="java">@Scope(StandardScopes.PROTOTYPE)
+@Repository
+public class MovieFinderImpl implements MovieFinder {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <note>
+        <para>If you would like to provide a custom strategy for scope
+        resolution rather than relying on the annotation-based approach,
+        implement the <ulink
+        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html"><interfacename>ScopeMetadataResolver</interfacename></ulink>
+        interface, and be sure to include a default no-arg constructor. Then,
+        provide the fully-qualified class name when configuring the
+        scanner:</para>
+      </note>
+
+      <programlisting language="xml">&lt;beans ...&gt;
+               
+     &lt;context:component-scan base-package="org.example"
+                             scope-resolver="org.example.MyScopeResolver" /&gt;
+     
+&lt;/beans&gt;</programlisting>
+
+      <para>When using certain non-singleton scopes, it may be necessary to
+      generate proxies for the scoped objects. The reasoning is described in
+      detail within the section entitled <xref
+      linkend="beans-factory-scopes-other-injection" />. For this purpose, a
+      <emphasis>scoped-proxy</emphasis> attribute is available on the
+      'component-scan' element. The three possible values are: 'no',
+      'interfaces', and 'targetClass'. For example, the following
+      configuration will result in standard JDK dynamic proxies:</para>
+
+      <programlisting language="xml">&lt;beans ...&gt;
+               
+     &lt;context:component-scan base-package="org.example"
+                             scoped-proxy="interfaces" /&gt;
+     
+&lt;/beans&gt;</programlisting>
+    </section>
+
+    <section id="beans-scanning-qualifiers">
+      <title>Providing qualifier metadata with annotations</title>
+
+      <para>The <interfacename>@Qualifier</interfacename> annotation was
+      introduced in the section above entitled <xref
+      linkend="beans-autowired-annotation-qualifiers" />. The examples in that
+      section demonstrated use of the
+      <interfacename>@Qualifier</interfacename> annotation as well as custom
+      qualifier annotations to provide fine-grained control when resolving
+      autowire candidates. Since those examples were based on XML bean
+      definitions, the qualifier metadata was provided on the candidate bean
+      definitions using the '<literal>qualifier</literal>' or
+      '<literal>meta</literal>' sub-elements of the '<literal>bean</literal>'
+      element in the XML. When relying upon classpath scanning for
+      autodetection of components, then the qualifier metadata may be provided
+      with type-level annotations on the candidate class. The following three
+      examples demonstrate this technique.</para>
+
+      <programlisting language="java">@Component
+<emphasis role="bold">@Qualifier("Action")</emphasis>
+public class ActionMovieCatalog implements MovieCatalog {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <programlisting language="java">@Component
+<emphasis role="bold">@Genre("Action")</emphasis>
+public class ActionMovieCatalog implements MovieCatalog {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <programlisting language="java">@Component
+<emphasis role="bold">@Offline</emphasis>
+public class CachingMovieCatalog implements MovieCatalog {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <note>
+        <para>As with most of the annotation-based alternatives, keep in mind
+        that the annotation metadata is bound to the class definition itself,
+        while the use of XML allows for multiple beans <emphasis>of the same
+        type</emphasis> to provide variations in their qualifier metadata
+        since that metadata is provided per-instance rather than
+        per-class.</para>
+      </note>
+    </section>
+  </section>
+
+  <section id="beans-javaconfig">
+    <title>Java-based container configuration</title>
+
     <section id="beans-javaconfig-configuration-annotation">
       <title>Using the <interfacename>@Configuration</interfacename>
       annotation</title>
@@ -6331,12 +6323,12 @@ public class AppConfig {
 
         <para>To declare a bean, simply annotate a method with the
         <interfacename>@Bean</interfacename> annotation. Such a method will be
-        used to register a bean definition within a <code>BeanFactory</code>
-        of the type specified as the methods return value. By default, the
-        bean name will be the same as the method name (see <link
-        linkend="bean-naming"> bean naming</link> for details on how to
-        customize this behavior). The following is a simple example of a
-        <interfacename>@Bean</interfacename> method declaration:
+        used to register a bean definition within a
+        <code>ApplicationContext</code> of the type specified as the methods
+        return value. By default, the bean name will be the same as the method
+        name (see <link linkend="bean-naming"> bean naming</link> for details
+        on how to customize this behavior). The following is a simple example
+        of a <interfacename>@Bean</interfacename> method declaration:
         <programlisting language="java">@Configuration
 public class AppConfig {
 
@@ -6354,9 +6346,9 @@ public class AppConfig {
 &lt;/beans&gt;                </programlisting></para>
 
         <para>Both will result in a bean named <code>transferService</code>
-        being available in the <code>BeanFactory</code> or
-        <code>ApplicationContext</code>, bound to an object instance of type
-        <code>TransferServiceImpl</code>: <programlisting>
+        being available in the <code>ApplicationContext</code>, bound to an
+        object instance of type <code>TransferServiceImpl</code>:
+        <programlisting>
 transferService -&gt; com.acme.TransferServiceImpl
                 </programlisting></para>
       </section>
@@ -6502,7 +6494,7 @@ public class MyConfiguration {
           specify <classname>ScopedProxyMode.TARGET_CLASS</classname> or
           <classname>ScopedProxyMode.INTERFACES</classname>.</para>
 
-          <para>If we were to port the the XML reference documentation scoped
+          <para>If we were to port the XML reference documentation scoped
           proxy example (see link above) to our
           <interfacename>@Bean</interfacename> using Java, it would look like
           the following: <programlisting language="java">// an HTTP Session-scoped bean exposed as a proxy
@@ -6586,242 +6578,211 @@ public class AppConfig {
 }        </programlisting></para>
       </section>
     </section>
+  </section>
 
-    <section id="beans-factorybeans-annotations">
-      <title>Defining bean metadata within components</title>
+  <section id="beans-beanfactory">
+    <title>The BeanFactory</title>
 
-      <para>Spring components can also contribute bean definition metadata to
-      the container. This is done with the same <literal>@Bean</literal>
-      annotation used to define bean metadata within
-      <literal>@Configuration</literal> annotated classes. Here is a simple
-      example</para>
+    <para>The <classname>BeanFactory</classname> provides the underlying basis
+    for Spring's IoC functionality but it is only used directly in integration
+    with other third-party frameworks and is now largely historical in nature
+    for most users of Spring. The <classname>BeanFactory</classname> and
+    related interfaces, such as <classname>BeanFactoryAware</classname>,
+    <classname>InitializingBean</classname>,
+    <classname>DisposableBean</classname>, are still present in Spring for the
+    purposes of backward compatibility with the large number of third-party
+    frameworks that integrate with Spring. Often third-party components that
+    can not use more modern equivalents such as @PostConstruct or @PreDestroy
+    in order to remain compatible with JDK 1.4 or avoid a dependency on
+    JSR-250. </para>
 
-      <programlisting>@Component
-public class FactoryMethodComponent {
+    <para>This section provides some additional background into the
+    differences between the BeanFactory and ApplicationContext and how one
+    might access the IoC container directly via a 'classic' singleton
+    lookup.</para>
 
-  @Bean @Qualifier("public")
-  public TestBean publicInstance() {
-    return new TestBean("publicInstance");
-  }
+    <section id="context-introduction-ctx-vs-beanfactory">
+      <title><interfacename>BeanFactory</interfacename> or
+      <interfacename>ApplicationContext</interfacename>?</title>
 
-  public void DoWork() 
-  {
-    // Component method implementation omitted
-  }
-}</programlisting>
+      <para>Short version: <emphasis>use an
+      <interfacename>ApplicationContext</interfacename> unless you have a
+      really good reason for not doing so. For those of you that are looking
+      for slightly more depth as to the 'but why' of the above recommendation,
+      keep reading.</emphasis></para>
 
-      <para>This class is a Spring component and has application specific code
-      contained in its <methodname>DoWork</methodname> method. However, it
-      also contributes a bean definition that has a factory method referring
-      to the method <methodname>publicInstance</methodname>. The
-      <literal>@Bean</literal> annotation identifies the factory method and
-      also other bean definition properties, such as a qualifier value via the
-      <classname>@Qualifier</classname> annotation. Other method level
-      annotations that can be specified are <literal>@Scope</literal>,
-      <literal>@Lazy</literal>, and custom qualifier annotations. Autowired
-      fields and methods are supported as before with the additional support
-      for autowiring of @Bean methods, as shown in the example below</para>
+      <para>As the <interfacename>ApplicationContext</interfacename> includes
+      all functionality of the <interfacename>BeanFactory</interfacename>, it
+      is generally recommended that it be used in preference to the
+      <interfacename>BeanFactory</interfacename>, except for a few limited
+      situations such as in an <classname>Applet</classname>, where memory
+      consumption might be critical and a few extra kilobytes might make a
+      difference. However, for most 'typical' enterprise applications and
+      systems, the <interfacename>ApplicationContext</interfacename> is what
+      you will want to use. Versions of Spring 2.0 and above make
+      <emphasis>heavy</emphasis> use of the <link
+      linkend="beans-factory-extension-bpp"><interfacename>BeanPostProcessor</interfacename>
+      extension point</link> (to effect proxying and suchlike), and if you are
+      using just a plain <interfacename>BeanFactory</interfacename> then a
+      fair amount of support such as transactions and AOP will not take effect
+      (at least not without some extra steps on your part), which could be
+      confusing because nothing will actually be wrong with the
+      configuration.</para>
 
-      <programlisting language="java">@Component
-public class FactoryMethodComponent {
+      <para>Find below a feature matrix that lists what features are provided
+      by the <interfacename>BeanFactory</interfacename> and
+      <interfacename>ApplicationContext</interfacename> interfaces and
+      implementations.</para>
 
- private static int i;
+      <table id="context-introduction-ctx-vs-beanfactory-feature-matrix"
+             pgwide="1">
+        <title>Feature Matrix</title>
 
- @Bean @Qualifier("public")
- public TestBean publicInstance() { 
-  return new TestBean("publicInstance");
- }
+        <tgroup cols="3">
+          <colspec align="left" />
 
- // use of a custom qualifier and autowiring of method parameters
+          <thead>
+            <row>
+              <entry align="center">Feature</entry>
 
- @Bean @BeanAge(1)
- protected TestBean protectedInstance(@Qualifier("public") TestBean spouse, @Value("#{privateInstance.age}") String country) {
-  TestBean tb = new TestBean("protectedInstance", 1);
-  tb.setSpouse(tb);
-  tb.setCountry(country);
-  return tb;
- }
+              <entry
+              align="center"><interfacename>BeanFactory</interfacename></entry>
 
- @Bean @Scope("prototype")
- private TestBean privateInstance() {
-  return new TestBean("privateInstance", i++);
- }
+              <entry
+              align="center"><interfacename>ApplicationContext</interfacename></entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><para>Bean instantiation/wiring</para></entry>
 
- @Bean @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
- public TestBean requestScopedInstance() {
-  return new TestBean("requestScopedInstance", 3);
- }
-}
-</programlisting>
+              <entry align="center"><para>Yes</para></entry>
 
-      <para>Note the use of autowiring of the <classname>String</classname>
-      method parameter <literal>country</literal> to the value of the
-      <literal>Age</literal> property on another bean named
-      <literal>privateInstance</literal>. A Spring Expression Language element
-      is used to define the value of the property via the notation <literal>#{
-      &lt;expression&gt; }</literal>. For <literal>@Value</literal>
-      annotations, an expression resolver is preconfigured to look for bean
-      names when resolving expression text.</para>
+              <entry align="center"><para>Yes</para></entry>
+            </row>
 
-      <para>The <literal>@Bean</literal> methods in a Spring component are
-      processed differently than their counterparts inside a Spring
-      <literal>@Configuration</literal> class. The difference is that
-      <literal>@Component</literal> classes are not enhanced with CGLIB to
-      intercept the invocation of methods and fields. CGLIB proxying is the
-      means by which invoking methods or fields within
-      <literal>@Configuration</literal> classes' <literal>@Bean</literal>
-      methods create bean metadata references to collaborating objects and do
-      <emphasis>not</emphasis> invoke the method with normal Java semantics.
-      In contrast, calling a method or field within a
-      <literal>@Component</literal> classes' <literal>@Bean</literal> method
-      <emphasis>has</emphasis> standard Java semantics.</para>
+            <row>
+              <entry><para>Automatic
+              <interfacename>BeanPostProcessor</interfacename>
+              registration</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Automatic
+              <interfacename>BeanFactoryPostProcessor</interfacename>
+              registration</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Convenient
+              <interfacename>MessageSource</interfacename> access (for
+              i18n)</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+            <row>
+              <entry><para><interfacename>ApplicationEvent</interfacename>
+              publication</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>To explicitly register a bean post-processor when using a
+      <interfacename>BeanFactory</interfacename> implementation you will need
+      to write code like this:</para>
+
+      <programlisting language="java">ConfigurableBeanFactory factory = new XmlBeanFactory(...);
+            
+<lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation>
+MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
+factory.addBeanPostProcessor(postProcessor);
+
+<lineannotation>// now start using the factory</lineannotation></programlisting>
+
+      <para>This explicit registration step is not convenient, and this is one
+      of the reasons why the various
+      <interfacename>ApplicationContext</interfacename> implementations are
+      preferred above plain <interfacename>BeanFactory</interfacename>
+      implementations in the vast majority of Spring-backed applications,
+      especially when using <literal>BeanPostProcessors</literal>.</para>
+
+      <para>To explicitly register a
+      <classname>BeanFactoryPostProcessor</classname> when using a
+      <interfacename>BeanFactory</interfacename> implementation you will need
+      to write code like this:</para>
+
+      <programlisting language="java">XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+
+<lineannotation>// bring in some property values from a <classname>Properties</classname> file</lineannotation>
+PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+cfg.setLocation(new FileSystemResource("jdbc.properties"));
+
+<lineannotation>// now actually do the replacement</lineannotation>
+cfg.postProcessBeanFactory(factory);</programlisting>
+
+      <para>In both cases, the explicit registration step is not convenient,
+      and this is one of the reasons why the various
+      <interfacename>ApplicationContext</interfacename> implementations are
+      preferred above plain <interfacename>BeanFactory</interfacename>
+      implementations in the vast majority of Spring-backed applications,
+      especially when using <literal>BeanFactoryPostProcessors</literal> and
+      <classname>BeanPostProcessors</classname>, which are the mechanisms by
+      which important functionality such as property placeholder replacement
+      and AOP are implemented.</para>
     </section>
 
-    <section id="beans-scanning-name-generator">
-      <title>Naming autodetected components</title>
+    <section>
+      <title>Glue code and the evil singleton</title>
 
-      <para>When a component is autodetected as part of the scanning process,
-      its bean name will be generated by the
-      <interfacename>BeanNameGenerator</interfacename> strategy known to that
-      scanner. By default, any Spring 'stereotype' annotation
-      (<interfacename>@Component</interfacename>,
-      <interfacename>@Repository</interfacename>,
-      <interfacename>@Service</interfacename>, and
-      <interfacename>@Controller</interfacename>) that contains a
-      <literal>name</literal> value will thereby provide that name to the
-      corresponding bean definition. If such an annotation contains no
-      <literal>name</literal> value or for any other detected component (such
-      as those discovered due to custom filters), the default bean name
-      generator will return the uncapitalized non-qualified class name. For
-      example, if the following two components were detected, the names would
-      be 'myMovieLister' and 'movieFinderImpl':</para>
+      <para>The majority of the code inside an application is best written in
+      a DI style, where that code is served out of a Spring IoC container, has
+      its own dependencies supplied by the container when it is created, and
+      is completely unaware of the container. However, for the small glue
+      layers of code that are sometimes needed to tie other code together,
+      there is sometimes a need for singleton (or quasi-singleton) style
+      access to a Spring IoC container. For example, third party code may try
+      to construct new objects directly (<literal>Class.forName()</literal>
+      style), without the ability to force it to get these objects out of a
+      Spring IoC container. If the object constructed by the third party code
+      is just a small stub or proxy, which then uses a singleton style access
+      to a Spring IoC container to get a real object to delegate to, then
+      inversion of control has still been achieved for the majority of the
+      code (the object coming out of the container); thus most code is still
+      unaware of the container or how it is accessed, and remains decoupled
+      from other code, with all ensuing benefits. EJBs may also use this
+      stub/proxy approach to delegate to a plain Java implementation object,
+      coming out of a Spring IoC container. While the Spring IoC container
+      itself ideally does not have to be a singleton, it may be unrealistic in
+      terms of memory usage or initialization times (when using beans in the
+      Spring IoC container such as a Hibernate
+      <interfacename>SessionFactory</interfacename>) for each bean to use its
+      own, non-singleton Spring IoC container.</para>
 
-      <programlisting language="java">@Service("myMovieLister")
-public class SimpleMovieLister {
-    <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-      <programlisting language="java">@Repository
-public class MovieFinderImpl implements MovieFinder {
-    <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-      <note>
-        <para>If you don't want to rely on the default bean-naming strategy,
-        you may provide a custom bean-naming strategy. First, implement the
-        <ulink
-        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html"><interfacename>BeanNameGenerator</interfacename></ulink>
-        interface, and be sure to include a default no-arg constructor. Then,
-        provide the fully-qualified class name when configuring the
-        scanner:</para>
-      </note>
-
-      <programlisting language="xml">&lt;beans ...&gt;
-               
-     &lt;context:component-scan base-package="org.example"
-                             name-generator="org.example.MyNameGenerator" /&gt;
-
-&lt;/beans&gt;</programlisting>
-
-      <para>As a general rule, consider specifying the name with the
-      annotation whenever other components may be making explicit references
-      to it. On the other hand, the auto-generated names are adequate whenever
-      the container is responsible for wiring.</para>
-    </section>
-
-    <section id="beans-scanning-scope-resolver">
-      <title>Providing a scope for autodetected components</title>
-
-      <para>As with Spring-managed components in general, the default and by
-      far most common scope is 'singleton'. However, there are times when
-      other scopes are needed. Therefore Spring 2.5 introduced a new
-      <interfacename>@Scope</interfacename> annotation as well. Simply provide
-      the name of the scope within the annotation, such as:</para>
-
-      <programlisting language="java"><emphasis role="bold">@Scope("prototype")</emphasis>
-@Repository
-public class MovieFinderImpl implements MovieFinder {
-  <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-      <note>
-        <para>If you would like to provide a custom strategy for scope
-        resolution rather than relying on the annotation-based approach,
-        implement the <ulink
-        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html"><interfacename>ScopeMetadataResolver</interfacename></ulink>
-        interface, and be sure to include a default no-arg constructor. Then,
-        provide the fully-qualified class name when configuring the
-        scanner:</para>
-      </note>
-
-      <programlisting language="xml">&lt;beans ...&gt;
-               
-     &lt;context:component-scan base-package="org.example"
-                             scope-resolver="org.example.MyScopeResolver" /&gt;
-     
-&lt;/beans&gt;</programlisting>
-
-      <para>When using certain non-singleton scopes, it may be necessary to
-      generate proxies for the scoped objects. The reasoning is described in
-      detail within the section entitled <xref
-      linkend="beans-factory-scopes-other-injection" />. For this purpose, a
-      <emphasis>scoped-proxy</emphasis> attribute is available on the
-      'component-scan' element. The three possible values are: 'no',
-      'interfaces', and 'targetClass'. For example, the following
-      configuration will result in standard JDK dynamic proxies:</para>
-
-      <programlisting language="xml">&lt;beans ...&gt;
-               
-     &lt;context:component-scan base-package="org.example"
-                             scoped-proxy="interfaces" /&gt;
-     
-&lt;/beans&gt;</programlisting>
-    </section>
-
-    <section id="beans-scanning-qualifiers">
-      <title>Providing qualifier metadata with annotations</title>
-
-      <para>The <interfacename>@Qualifier</interfacename> annotation was
-      introduced in the section above entitled <xref
-      linkend="beans-autowired-annotation-qualifiers" />. The examples in that
-      section demonstrated use of the
-      <interfacename>@Qualifier</interfacename> annotation as well as custom
-      qualifier annotations to provide fine-grained control when resolving
-      autowire candidates. Since those examples were based on XML bean
-      definitions, the qualifier metadata was provided on the candidate bean
-      definitions using the '<literal>qualifier</literal>' or
-      '<literal>meta</literal>' sub-elements of the '<literal>bean</literal>'
-      element in the XML. When relying upon classpath scanning for
-      autodetection of components, then the qualifier metadata may be provided
-      with type-level annotations on the candidate class. The following three
-      examples demonstrate this technique.</para>
-
-      <programlisting language="java">@Component
-<emphasis role="bold">@Qualifier("Action")</emphasis>
-public class ActionMovieCatalog implements MovieCatalog {
-    <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-      <programlisting language="java">@Component
-<emphasis role="bold">@Genre("Action")</emphasis>
-public class ActionMovieCatalog implements MovieCatalog {
-    <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-      <programlisting language="java">@Component
-<emphasis role="bold">@Offline</emphasis>
-public class CachingMovieCatalog implements MovieCatalog {
-    <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-      <note>
-        <para>As with most of the annotation-based alternatives, keep in mind
-        that the annotation metadata is bound to the class definition itself,
-        while the use of XML allows for multiple beans <emphasis>of the same
-        type</emphasis> to provide variations in their qualifier metadata
-        since that metadata is provided per-instance rather than
-        per-class.</para>
-      </note>
+      <para>Looking up the application context in a service locator style is
+      sometimes the only option you have to access shared Spring managed
+      components, such as in an EJB 2.1 environment, or you want to share a
+      single ApplicationContext as a parent to WebApplicationContexts across
+      war files. In this case you should look into using the utility class
+      <ulink
+      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"><classname>ContextSingletonBeanFactoryLocator</classname></ulink>
+      locator that is described in this <ulink
+      url="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/">SpringSource
+      team blog entry</ulink>.</para>
     </section>
   </section>
 
