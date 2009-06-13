@@ -30,6 +30,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  * Note there is some duplication here with JdbcUtils in jdbc.support package.
  * We may want to consider simply using that at some point.
  * @author Keith Donald
+ * @since 3.0
  */
 final class JdbcUtils {
 

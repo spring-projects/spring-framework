@@ -31,6 +31,7 @@ import org.springframework.ui.format.Formatter;
 /**
  * A generic implementation of {@link FormatterRegistry} suitable for use in most binding environments.
  * @author Keith Donald
+ * @since 3.0
  * @see #add(Formatter, Class)
  * @see #add(AnnotationFormatterFactory)
  */

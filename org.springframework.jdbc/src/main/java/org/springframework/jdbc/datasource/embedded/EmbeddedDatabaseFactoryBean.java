@@ -26,8 +26,8 @@ import org.springframework.beans.factory.InitializingBean;
  * Returns the actual {@link DataSource} that provides connectivity to the embedded database to Spring.
  * The target DataSource is returned instead of a {@link EmbeddedDatabase} proxy since the FactoryBean will manage the initialization and destruction lifecycle of the database instance.
  * Implements DisposableBean to shutdown the embedded database when the managing Spring container is shutdown.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
 

@@ -33,7 +33,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-class DefaultMessageResolver implements MessageResolver, MessageSourceResolvable {
+final class DefaultMessageResolver implements MessageResolver, MessageSourceResolvable {
 
 	private Severity severity;
 

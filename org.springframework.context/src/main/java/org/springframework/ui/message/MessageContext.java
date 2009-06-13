@@ -20,6 +20,8 @@ import java.util.Map;
 
 /**
  * A context for recording and retrieving messages for display in a user interface.
+ * @author Keith Donald
+ * @since 3.0
  */
 public interface MessageContext {
 

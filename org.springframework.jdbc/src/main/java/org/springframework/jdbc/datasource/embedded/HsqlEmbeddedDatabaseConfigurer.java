@@ -20,9 +20,9 @@ import org.springframework.util.ClassUtils;
 /**
  * Initializes an HSQL embedded database instance.
  * Call {@link #getInstance()} to get the singleton instance of this class.
- *
  * @author Keith Donald
  * @author Oliver Gierke
+ * @since 3.0
  */
 final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 

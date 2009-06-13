@@ -21,6 +21,7 @@ import java.util.Locale;
 /**
  * Formats objects of type T for display.
  * @author Keith Donald
+ * @since 3.0 
  * @param <T> the type of object this formatter can format
  */
 public interface Formatter<T> {

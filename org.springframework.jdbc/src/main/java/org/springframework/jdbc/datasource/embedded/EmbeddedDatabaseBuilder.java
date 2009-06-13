@@ -29,6 +29,7 @@ import org.springframework.core.io.ResourceLoader;
  * db.shutdown();
  * </pre>
  * @author Keith Donald
+ * @since 3.0
  */
 public class EmbeddedDatabaseBuilder {
 

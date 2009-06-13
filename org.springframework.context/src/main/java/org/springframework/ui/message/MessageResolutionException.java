@@ -18,6 +18,7 @@ package org.springframework.ui.message;
 /**
  * Runtime exception thrown by a {@link MessageResolver} if a message resolution fails.
  * @author Keith Donald
+ * @since 3.0
  */
 @SuppressWarnings("serial")
 public class MessageResolutionException extends RuntimeException {

@@ -18,6 +18,7 @@ package org.springframework.ui.binding;
 /**
  * The result of a bind operation.
  * @author Keith Donald
+ * @since 3.0
  * @see Binder#bind(UserValues)
  * @see Binding#setValue(Object)
  */

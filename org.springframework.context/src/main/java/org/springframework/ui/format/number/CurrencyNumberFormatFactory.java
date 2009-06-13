@@ -23,6 +23,7 @@ import java.util.Locale;
 /**
  * Produces NumberFormat instances that format currency values.
  * @author Keith Donald
+ * @since 3.0
  * @see NumberFormat
  */
 final class CurrencyNumberFormatFactory extends NumberFormatFactory {

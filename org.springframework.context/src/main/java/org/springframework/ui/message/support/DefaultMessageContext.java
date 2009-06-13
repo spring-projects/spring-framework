@@ -15,56 +15,46 @@
  */
 package org.springframework.ui.message.support;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.ui.message.Message;
 import org.springframework.ui.message.MessageContext;
 import org.springframework.ui.message.MessageResolver;
 import org.springframework.ui.message.Severity;
+import org.springframework.util.Assert;
 import org.springframework.util.CachingMapDecorator;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * The default message context implementation.
  * Uses a {@link MessageSource} to resolve messages that are added by callers.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class DefaultMessageContext implements MessageContext {
 
-	private MessageSource messageSource;
+	private final MessageSource messageSource;
 
 	@SuppressWarnings("serial")
-	private Map<String, ArrayList<Message>> messagesByElement = new CachingMapDecorator<String, ArrayList<Message>>(new LinkedHashMap<String, ArrayList<Message>>()) {
-		protected ArrayList<Message> create(String element) {
+	private Map<String, List<Message>> messagesByElement = new CachingMapDecorator<String, List<Message>>(new LinkedHashMap<String, List<Message>>()) {
+		protected List<Message> create(String element) {
 			return new ArrayList<Message>();
 		}
 	};
 
 	/**
 	 * Creates a new default message context.
-	 * Defaults to a message source that simply resolves default text and cannot resolve localized message codes.
-	 */
-	public DefaultMessageContext() {
-		init(null);
-	}
-
-	/**
-	 * Creates a new default message context.
 	 * @param messageSource the message source to resolve messages added to this context
 	 */
 	public DefaultMessageContext(MessageSource messageSource) {
-		init(messageSource);
+		Assert.notNull(messageSource, "The MessageSource is required");
+		this.messageSource = messageSource;
 	}
 
 	/**
@@ -77,12 +67,10 @@ public class DefaultMessageContext implements MessageContext {
 
 	// implementing message context
 
-	@SuppressWarnings("unchecked")
 	public Map<String, List<Message>> getMessages() {
 		return Collections.unmodifiableMap(messagesByElement);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Message> getMessages(String element) {
 		List<Message> messages = messagesByElement.get(element);
 		if (messages.isEmpty()) {
@@ -102,23 +90,6 @@ public class DefaultMessageContext implements MessageContext {
 
 	// internal helpers
 
-	private void init(MessageSource messageSource) {
-		setMessageSource(messageSource);
-	}
-
-	private void setMessageSource(MessageSource messageSource) {
-		if (messageSource == null) {
-			messageSource = new DefaultTextFallbackMessageSource();
-		}
-		this.messageSource = messageSource;
-	}
-
-	private static class DefaultTextFallbackMessageSource extends AbstractMessageSource {
-		protected MessageFormat resolveCode(String code, Locale locale) {
-			return null;
-		}
-	}
-	
 	class ResolvableMessage implements Message {
 
 		private MessageResolver resolver;

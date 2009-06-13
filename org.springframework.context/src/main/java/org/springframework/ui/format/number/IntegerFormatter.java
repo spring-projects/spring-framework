@@ -26,6 +26,7 @@ import org.springframework.ui.format.Formatter;
  * A Long formatter for whole integer values.
  * Delegates to {@link NumberFormat#getIntegerInstance(Locale)}.
  * @author Keith Donald
+ * @since 3.0
  */
 public class IntegerFormatter implements Formatter<Long> {
 

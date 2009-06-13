@@ -20,7 +20,6 @@ import java.util.List;
 
 /**
  * TODO Document Validator.
- *
  * @author Keith Donald
  * @since 3.0
  */

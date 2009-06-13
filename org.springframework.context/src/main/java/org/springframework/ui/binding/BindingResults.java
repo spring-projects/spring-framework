@@ -20,6 +20,7 @@ import java.util.List;
 /**
  * The results of a bind operation.
  * @author Keith Donald
+ * @since 3.0
  * @see Binder#bind(UserValues)
  */
 public interface BindingResults extends Iterable<BindingResult> {

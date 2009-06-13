@@ -28,6 +28,7 @@ import org.springframework.ui.format.Formatter;
  * Delegates to {@link NumberFormat#getPercentInstance(Locale)}.
  * Configures BigDecimal parsing so there is no loss in precision.
  * @author Keith Donald
+ * @since 3.0
  */
 public class PercentFormatter implements Formatter<BigDecimal> {
 

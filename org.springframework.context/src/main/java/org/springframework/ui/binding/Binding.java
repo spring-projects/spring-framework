@@ -18,6 +18,7 @@ package org.springframework.ui.binding;
 /**
  * A binding between a user interface element and a model property.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface Binding {
 

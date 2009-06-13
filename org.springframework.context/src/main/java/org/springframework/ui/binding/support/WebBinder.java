@@ -24,6 +24,7 @@ import org.springframework.ui.binding.UserValues;
  * A binder designed for use in HTTP (web) environments.
  * Suited for binding user-provided HTTP query parameters to model properties.
  * @author Keith Donald
+ * @since 3.0
  * @see #setDefaultPrefix(String)
  * @see #setPresentPrefix(String)
  */

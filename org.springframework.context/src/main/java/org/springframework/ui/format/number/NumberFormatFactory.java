@@ -23,6 +23,7 @@ import java.util.Locale;
  * caching number format instances.
  * 
  * @author Keith Donald
+ * @since 3.0
  */
 abstract class NumberFormatFactory {
 
