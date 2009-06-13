@@ -31,7 +31,13 @@ public class TemplateParserContext implements ParserContext {
 
 	private final String expressionSuffix;
 
-
+	/**
+	 * Creates a new TemplateParserContext with the default #{ prefix and } suffix.
+	 */
+	public TemplateParserContext() {
+		this("#{", "}");
+	}
+	
 	/**
 	 * Create a new TemplateParserContext for the given prefix and suffix.
 	 * @param expressionPrefix the expression prefix to use

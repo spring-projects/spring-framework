@@ -15,14 +15,18 @@
  */
 package org.springframework.ui.message;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.expression.MapAccessor;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * A convenient builder for building {@link MessageResolver} objects programmatically.
@@ -46,16 +50,18 @@ import org.springframework.core.style.ToStringCreator;
  */
 public class MessageBuilder {
 
+	private Severity severity;
+	
 	private Set<String> codes = new LinkedHashSet<String>();
 
-	private Severity severity;
-
-	private List<Object> args = new ArrayList<Object>();
+	private Map<String, Object> args = new LinkedHashMap<String, Object>();
 
 	private String defaultText;
 
+	private ExpressionParser expressionParser = new SpelExpressionParser();
+	
 	/**
-	 * Records the severity of the message.
+	 * Set the severity of the message.
 	 * @return this, for fluent API usage
 	 */
 	public MessageBuilder severity(Severity severity) {
@@ -64,8 +70,8 @@ public class MessageBuilder {
 	}
 	
 	/**
-	 * Records that the message being built should try and resolve its text using the code provided.
-	 * Adds the code to the codes list. Successive calls to this method add additional codes.
+	 * Add a message code to use to resolve the message text.
+     * Successive calls to this method add additional codes.
 	 * Codes are applied in the order they are added.
 	 * @param code the message code
 	 * @return this, for fluent API usage
@@ -76,31 +82,31 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Records that the message being built has a variable argument.
-	 * Adds the arg to the args list. Successive calls to this method add additional args.
-	 * Args are applied in the order they are added.
-	 * @param arg the message argument value
+	 * Add a message argument.
+	 * Successive calls to this method add additional args.
+	 * @param name the argument name
+	 * @param value the argument value
 	 * @return this, for fluent API usage
 	 */
-	public MessageBuilder arg(Object arg) {
-		args.add(arg);
+	public MessageBuilder arg(String name, Object value) {
+		args.put(name, value);
 		return this;
 	}
 
 	/**
-	 * Records that the message being built has a variable argument, whose display value is also {@link MessageSourceResolvable}.
-	 * Adds the arg to the args list. Successive calls to this method add additional resolvable args.
-	 * Args are applied in the order they are added.
-	 * @param arg the resolvable message argument
+	 * Add a message argument whose value is a resolvable message code.
+	 * Successive calls to this method add additional resolvable arguements.
+	 * @param name the argument name
+	 * @param value the argument value
 	 * @return this, for fluent API usage
 	 */
-	public MessageBuilder resolvableArg(Object arg) {
-		args.add(new ResolvableArgument(arg));
+	public MessageBuilder resolvableArg(String name, Object value) {
+		args.put(name, new ResolvableArgumentValue(value));
 		return this;
 	}
 
 	/**
-	 * Records the fallback text of the message being built.
+	 * Set the fallback text for the message.
 	 * If the message has no codes, this will always be used as the text.
 	 * If the message has codes but none can be resolved, this will always be used as the text.
 	 * @param text the default text
@@ -113,28 +119,28 @@ public class MessageBuilder {
 
 	/**
 	 * Builds the message that will be resolved.
-	 * Call after recording builder instructions.
+	 * Call after recording all builder instructions.
 	 * @return the built message resolver
+	 * @throws Illegal
 	 */
 	public MessageResolver build() {
 		if (severity == null) {
 			severity = Severity.INFO;
 		}
 		if (codes == null && defaultText == null) {
-			throw new IllegalArgumentException(
+			throw new IllegalStateException(
 					"A message code or the message text is required to build this message resolver");
 		}
 		String[] codesArray = (String[]) codes.toArray(new String[codes.size()]);
-		Object[] argsArray = args.toArray(new Object[args.size()]);
-		return new DefaultMessageResolver(severity, codesArray, argsArray, defaultText);
+		return new DefaultMessageResolver(severity, codesArray, args, defaultText, expressionParser);
 	}
 
-	private static class ResolvableArgument implements MessageSourceResolvable {
+	static class ResolvableArgumentValue implements MessageSourceResolvable {
 
-		private Object arg;
+		private Object value;
 
-		public ResolvableArgument(Object arg) {
-			this.arg = arg;
+		public ResolvableArgumentValue(Object value) {
+			this.value = value;
 		}
 
 		public Object[] getArguments() {
@@ -142,15 +148,15 @@ public class MessageBuilder {
 		}
 
 		public String[] getCodes() {
-			return new String[] { arg.toString() };
+			return new String[] { value.toString() };
 		}
 
 		public String getDefaultMessage() {
-			return arg.toString();
+			return String.valueOf(value);
 		}
 
 		public String toString() {
-			return new ToStringCreator(this).append("arg", arg).toString();
+			return new ToStringCreator(this).append("value", value).toString();
 		}
 
 	}

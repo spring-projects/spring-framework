@@ -31,8 +31,8 @@ public interface ParserContext {
 	 * 
 	 * <pre>
 	 * 	   Some literal text
-	 *     Hello ${name.firstName}!
-	 *     ${3 + 4}
+	 *     Hello #{name.firstName}!
+	 *     #{3 + 4}
 	 * </pre>
 	 * 
 	 * @return true if the expression is a template, false otherwise
@@ -54,5 +54,26 @@ public interface ParserContext {
 	 * @return the suffix that identifies the end of an expression
 	 */
 	String getExpressionSuffix();
+	
+	/**
+	 * The default ParserContext implementation that enables template expression parsing mode.
+	 * The expression prefix is #{ and the expression suffix is }.
+	 * @see #isTemplate()
+	 */
+	public static final ParserContext TEMPLATE_EXPRESSION = new ParserContext() {
+
+		public String getExpressionPrefix() {
+			return "#{";
+		}
+
+		public String getExpressionSuffix() {
+			return "}";
+		}
+
+		public boolean isTemplate() {
+			return true;
+		}
+		
+	};
 
 }
